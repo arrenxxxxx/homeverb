@@ -8,6 +8,7 @@
 | App | The user opens and operates it in the foreground | Release networking after each task; cancel on backgrounding | UI/cache may remain; no periodic control |
 | MCP stdio | A local host starts its child process | EOF, host shutdown, or termination | May await tools; must not scan devices proactively |
 | Auth callback | The user explicitly starts login | One callback or authorization timeout | No retained listener |
+| Authorization sharing | The user starts Send Authorization or Receive Authorization | Completion, cancellation, deadline, or backgrounding | No idle discovery, advertising, or receiver |
 
 No-daemon MCP means no independently deployed service. It does not mean restarting the MCP process for every tool call. A host session may be long-lived and its MCP process may remain idle, but it must not detach into a device gateway. See the stdio reference in [R1](references.md).
 
@@ -16,6 +17,8 @@ No-daemon MCP means no independently deployed service. It does not mean restarti
 Connections, discovery sockets, subscriptions, retries, and file locks belong to an `OperationScope`. Normal completion and cancellation release them. Forced termination cannot rely on `finally` or cleanup callbacks. On the next startup, recover persisted unresolved write phases without replaying the physical action.
 
 Authentication callbacks may bind a temporary loopback port with a short deadline; never bind `0.0.0.0`. A protocol may require a temporary UDP socket. It must not expose a general control API or remain open after the operation.
+
+The [foreground sharing decision](adr/0008-foreground-authorization-sharing.md) additionally permits bounded local-network discovery and transfer listeners within an explicit sharing operation. These expose only the reviewed transfer protocol on the selected local network, never a device-control API or relay. Merely opening Settings does not start them. Closing a sharing operation cannot retract credentials already imported by another installation.
 
 ## Mobile foreground and background
 

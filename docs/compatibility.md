@@ -14,6 +14,8 @@ Brand names express user interest, not protocol boundaries. `midea-local` and Sm
 
 ## Status definitions
 
+Foreground authorization sharing is also planned and unverified for every candidate. Login support alone does not establish transferability. Before enabling sharing, record provider-specific evidence for permission scope, device binding, refresh-token behavior across installations, expiry, and revocation under [ADR-0008](adr/0008-foreground-authorization-sharing.md).
+
 | Status | Meaning |
 |---|---|
 | planned | Candidate requirement only |

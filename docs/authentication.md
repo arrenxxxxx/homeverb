@@ -2,6 +2,8 @@
 
 ## Unify the flow, not every login mechanism
 
+HomeVerb itself has no account or sign-in requirement. Authentication applies only to third-party platform accounts and device pairing; see the [mobile app design](mobile-app.md).
+
 State machine: `created -> challenge_required -> awaiting_user -> authenticated`. Any applicable stage may become `expired`, `cancelled`, or `failed`. Challenges may involve a browser, verification code, local pairing approval, or another vendor-approved interaction. Adapters declare only methods they actually support; universal QR login is not promised.
 
 CLI uses trusted interactive input, not password arguments. The app uses trusted platform interactions. MCP defaults to `AUTH_REQUIRED` with user-side login guidance; the model must not collect passwords, one-time codes, or refresh tokens.
@@ -18,7 +20,7 @@ Cloud login may be needed only to retrieve a LAN pairing key. Therefore "local o
 
 The business database stores `credential_ref`, not credentials. Implement the system secret-store abstraction separately for each operating system and verify it there. When secure storage is unavailable, do not fall back to plaintext JSON. The first release may reject persistence and offer a bounded interactive in-memory session or instructions to configure secure storage.
 
-Exports contain configuration, aliases, and redacted metadata by default. Credential migration is outside the first release; do not include tokens in backup ZIPs. Redact logs, errors, and MCP output. Use local `account_id` selectors rather than repeatedly exposing emails or phone numbers.
+Exports contain configuration, aliases, and redacted metadata by default; do not include tokens in backup ZIPs. The owner-approved [foreground authorization-sharing flow](adr/0008-foreground-authorization-sharing.md) is a separate planned operation requiring peer verification, encrypted transfer, receiver consent, secure storage, and provider-specific eligibility evidence. Ordinary login support does not establish that a session is transferable. Redact logs, errors, and MCP output. Use local `account_id` selectors rather than repeatedly exposing emails or phone numbers.
 
 ## Logout
 

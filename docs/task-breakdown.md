@@ -15,10 +15,13 @@ Each task should fit a small pull request. T00 is delivered as a documentation b
 | T08 | Local MCP stdio reads and allowlisted writes | T04,T05 | Protocol-only stdout; EOF exit; default denial of writes |
 | T09 | First adapter authentication feasibility | T00 | Evidence of no-project-backend authentication, or blocked |
 | T10 | First real-device discovery/read/authorized write | T04,T05,T09 | Model-specific hardware and verification evidence |
-| T11 | App dynamic device controls | T07,T10 | Independent control without any project service |
+| T11 | Flutter room/card UI, platform management, and dynamic device controls | T07,T10 | Approved screen inventory; no HomeVerb login; custom rooms preserve device identity; independent control without any project service |
 | T12 | Second heterogeneous adapter | T10 | Same capability calls; no brand branches in UI |
 | T13 | Credentials, policy, diagnostics, supply-chain review | T06,T08,T11 | Security cases and documented residual risks |
 | T14 | Packages and public release readiness | T12,T13 | Platform matrix, license decision, actual CI success |
+| T15 | Foreground local-network authorization sharing in Settings | T05,T07,T09 | ADR-0008 contract/security review; peer verification and bilateral consent; secure import; provider eligibility evidence; honest scope and revocation; lifecycle cleanup and interruption tests |
+
+T15 is planned and does not establish real-platform sharing support. Its security and compatibility evidence is required before packaging any enabled sharing path. It does not change the T01-T03 and minimal T07 starting sequence.
 
 ## First implementation tasks
 

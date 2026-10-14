@@ -49,12 +49,14 @@ Use short transactions, account-refresh locks, and per-device write coordination
 
 ## Proposed technology
 
-Rust is the proposed Domain/Core/Adapter/CLI implementation language. Flutter is the proposed app framework, using in-process FFI. MCP is another host adapter. `flutter_rust_bridge` is a possible binding mechanism, but packaging, network permissions, cancellation, and secure storage require project-specific prototypes; the library's existence does not make this project runnable. [R4](references.md)
+Rust is the proposed Domain/Core/Adapter/CLI implementation language. Flutter is the owner-selected app framework, using in-process FFI. MCP is another host adapter. `flutter_rust_bridge` is a possible binding mechanism, but packaging, network permissions, cancellation, and secure storage require project-specific prototypes; the library's existence does not make this project runnable. [R4](references.md)
 
-This is a proposal pending a prototype, not an irrevocable user-selected stack. Validate Android core loading and cancellation, at least one desktop CLI, and restricted credential access early. Existing Python device libraries can inform protocols and test comparisons; they must not become mandatory remote services for the phone app.
+Flutter is selected; the proposed Core toolchain and binding mechanism still require prototype evidence. Validate Android core loading and cancellation, at least one desktop CLI, and restricted credential access early. Existing Python device libraries can inform protocols and test comparisons; they must not become mandatory remote services for the phone app.
 
 ## Decisions
 
 [No daemon](adr/0001-no-daemon.md) | [Embedded core](adr/0002-embedded-core.md) | [Capability first](adr/0003-capability-first.md) | [Uncertain writes](adr/0004-uncertain-writes.md) | [Native authentication gate](adr/0005-native-auth.md)
 
 Project and public identifier naming are defined in [ADR-0006](adr/0006-project-name.md).
+
+[ADR-0008](adr/0008-foreground-authorization-sharing.md) permits explicit foreground local-network authorization transfer. The receiving installation subsequently operates independently; no shared control service or automatic synchronization is introduced.

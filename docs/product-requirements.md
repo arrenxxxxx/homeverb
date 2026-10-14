@@ -11,12 +11,14 @@ Provide independent cross-brand appliance-control tools for users, developers, a
 | User | Journey | Acceptance criterion |
 |---|---|---|
 | CLI user | Install binary -> authenticate/pair -> discover -> control | No pre-existing daemon; scriptable JSON; exit after the command |
-| Mobile user | Install app -> native authorization -> discover -> control | The app itself controls devices without a computer or NAS |
+| Mobile user | Open app without a HomeVerb login -> authorize a platform or receive eligible authorization -> discover -> organize rooms -> control | The app itself controls devices without a computer or NAS |
 | AI user | Configure a local executable -> call read or authorized write tools | Host-owned stdio session; no public network listener |
 
 ## Required functionality
 
 Multiple platforms and accounts; viable native authentication; LAN/cloud discovery and deduplication; stable local IDs and aliases; dynamic capability descriptions; cached snapshots and on-demand refresh; common actions; explicit route policies; execution verification; structured errors; protected credentials; access control; and redacted diagnostics. CLI, App, and MCP use the same Core API.
+
+The owner-selected Flutter app uses custom local rooms and device cards, with Devices, Platforms, and Settings as its primary destinations. Platform management uses consumer-facing appliance-platform terminology. Explicit nearby authorization sharing belongs in Settings and follows [ADR-0008](adr/0008-foreground-authorization-sharing.md), with no app account, background receiver, or sender relay. See the [screen inventory](mobile-app.md) for the planned functions; sharing eligibility requires separate provider evidence.
 
 ## Out of scope
 

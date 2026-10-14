@@ -14,7 +14,7 @@ Design baseline v0.1.1-docs, October 14, 2026. Application features remain plann
 | [routing-and-execution.md](routing-and-execution.md) | Route policy, retries, verification, uncertain writes |
 | [errors.md](errors.md) | Structured errors and outcome invariants |
 | [cli.md](cli.md) | Commands, JSON, exit codes |
-| [mobile-app.md](mobile-app.md) | Independent app, dynamic controls, lifecycle |
+| [mobile-app.md](mobile-app.md) | Flutter screens, custom rooms and cards, appliance platforms, Settings sharing, lifecycle |
 | [mcp.md](mcp.md) | Local stdio tools, permissions, lifecycle |
 | [sdk.md](sdk.md) | Embedded Core interfaces and FFI |
 | [storage.md](storage.md) | SQLite, secret stores, concurrency, recovery |
@@ -22,7 +22,7 @@ Design baseline v0.1.1-docs, October 14, 2026. Application features remain plann
 | [compatibility.md](compatibility.md) | Candidate platforms and model-specific evidence |
 | [testing.md](testing.md) | Current checks, future tests, release gates |
 | [roadmap.md](roadmap.md) | M0-M4 milestones |
-| [task-breakdown.md](task-breakdown.md) | T00-T14 tasks and acceptance criteria |
+| [task-breakdown.md](task-breakdown.md) | T00-T15 tasks and acceptance criteria |
 | [repository.md](repository.md) | Layout and Git workflow |
 | [commit-conventions.md](commit-conventions.md) | English commit types, scopes, labels, and checks |
 | [publishing.md](publishing.md) | Private GitHub creation and safe upload procedure |
@@ -41,6 +41,7 @@ Design baseline v0.1.1-docs, October 14, 2026. Application features remain plann
 - [ADR-0004: Represent uncertainty in physical writes](adr/0004-uncertain-writes.md)
 - [ADR-0005: Native-client authentication is an admission gate](adr/0005-native-auth.md)
 - [ADR-0006: Adopt HomeVerb as the project name](adr/0006-project-name.md)
+- [ADR-0008: Allow explicit foreground authorization sharing on a local network](adr/0008-foreground-authorization-sharing.md)
 
 ## Repository entry points
 

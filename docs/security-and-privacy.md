@@ -18,6 +18,8 @@ Verify vendor-cloud TLS; never globally disable certificate checking to fix conn
 
 Use viable native OAuth flows. Shared secrets embedded in a public application are not confidential backend credentials. [R3](references.md) Do not build an account relay or extract another app's private data to impersonate legitimate authorization.
 
+The planned [foreground authorization-sharing flow](adr/0008-foreground-authorization-sharing.md) requires authenticated encrypted peer transfer, explicit consent on both devices, provider-specific eligibility, and receiver secure storage. A discovered peer name is untrusted. Its temporary local-network listener exposes no appliance-control API, and clearing a transfer record does not revoke the recipient's authorization.
+
 ## Data minimization
 
 No default telemetry. Diagnostic exports use redacted allowlists. Remove tokens, Authorization, cookies, phone numbers, emails, device serials, MACs, LAN IPs, and secrets embedded in user input. Debug mode does not authorize credential disclosure. Users can preview diagnostics before voluntarily sharing them.
