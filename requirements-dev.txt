@@ -1,0 +1,2 @@
+# Only for validating documentation contracts; not an application dependency.
+jsonschema>=4.18,<5

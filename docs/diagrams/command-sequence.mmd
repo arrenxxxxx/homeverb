@@ -1,0 +1,34 @@
+sequenceDiagram
+  autonumber
+  actor User as User or authorized host
+  participant Entry as CLI / App / MCP
+  participant Core as In-process Core
+  participant Secret as Local secret store
+  participant Adapter as In-process adapter
+  participant Target as Appliance LAN or vendor cloud
+  User->>Entry: Explicit operation
+  Entry->>Core: Command + trusted principal + deadline
+  Core->>Core: Resolve identity and validate capability, arguments, policy
+  Core->>Secret: Request session access on demand
+  Secret-->>Core: Restricted credential access
+  Core->>Core: Select one write route and persist pending phase
+  Core->>Adapter: execute(validated command)
+  Adapter->>Target: Protocol request
+  alt Explicit acceptance
+    Target-->>Adapter: ACK
+    Adapter-->>Core: accepted
+    Core->>Adapter: Verify within remaining budget
+    Adapter->>Target: read
+    Target-->>Adapter: Observations, timestamps, sources
+    Adapter-->>Core: Normalized observations
+    Core-->>Entry: verified or accepted
+  else Possibly sent but acknowledgement lost
+    Adapter-->>Core: possibly_sent
+    Core-->>Entry: unknown; no blind cross-route replay
+  else Explicit rejection or proven-unsent failure
+    Adapter-->>Core: rejected / not_sent
+    Core-->>Entry: failed
+  end
+  Entry-->>User: Structured outcome
+  Core->>Core: Save redacted result and release operation resources
+  Note over Entry,Core: CLI exits; App retains UI; MCP awaits its host. No background polling.

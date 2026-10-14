@@ -1,0 +1,77 @@
+[
+  {
+    "name": "feat",
+    "color": "0e8a16",
+    "description": "New functionality or a feature request"
+  },
+  {
+    "name": "fix",
+    "color": "d73a4a",
+    "description": "Reproducible defect or bug fix"
+  },
+  {
+    "name": "docs",
+    "color": "0075ca",
+    "description": "Documentation or diagram updates"
+  },
+  {
+    "name": "test",
+    "color": "bfd4f2",
+    "description": "Tests, fixtures, or verification"
+  },
+  {
+    "name": "refactor",
+    "color": "d4c5f9",
+    "description": "Internal restructuring without intended behavior changes"
+  },
+  {
+    "name": "perf",
+    "color": "fbca04",
+    "description": "Measured performance improvement"
+  },
+  {
+    "name": "ci",
+    "color": "5319e7",
+    "description": "Continuous integration configuration"
+  },
+  {
+    "name": "build",
+    "color": "c5def5",
+    "description": "Build tooling and dependency changes"
+  },
+  {
+    "name": "chore",
+    "color": "ededed",
+    "description": "Repository maintenance and ancillary tooling"
+  },
+  {
+    "name": "style",
+    "color": "fef2c0",
+    "description": "Formatting-only changes"
+  },
+  {
+    "name": "revert",
+    "color": "e4e669",
+    "description": "Reversal of an earlier change"
+  },
+  {
+    "name": "adapter",
+    "color": "1d76db",
+    "description": "Platform or protocol adapter work"
+  },
+  {
+    "name": "security",
+    "color": "b60205",
+    "description": "Security or privacy concern"
+  },
+  {
+    "name": "blocked",
+    "color": "000000",
+    "description": "Waiting on a documented external requirement"
+  },
+  {
+    "name": "breaking-change",
+    "color": "b60205",
+    "description": "Backward-incompatible API or behavior change"
+  }
+]

@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "id": "example.mock",
+  "version": "0.0.0-design",
+  "providers": [
+    "example"
+  ],
+  "transports": [
+    "lan",
+    "cloud"
+  ],
+  "auth_methods": [
+    "interactive_mock"
+  ],
+  "requires_daemon": false,
+  "requires_project_backend": false,
+  "onboarding_cloud_required": false,
+  "operation_cloud_required": false,
+  "support_status": "planned"
+}

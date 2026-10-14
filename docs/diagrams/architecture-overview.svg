@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="1390" viewBox="0 0 1320 1390" role="img" aria-labelledby="title desc">
+<title id="title">HomeVerb architecture without a persistent service</title>
+<desc id="desc">CLI, App, and MCP each embed the same control library and directly access appliance LAN interfaces or vendor clouds. No HA, NAS gateway, project backend, or background automation.</desc>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#8a9bb1"/></marker></defs>
+<rect width="1320" height="1390" fill="#f5f7fc"/>
+<g font-family="DejaVu Sans, sans-serif">
+<text x="48" y="44" font-size="15" fill="#52709a" font-weight="700">HOMEVERB / ARCHITECTURE BASELINE</text>
+<text x="48" y="91" font-size="32" fill="#152d4a" font-weight="700">Cross-brand control. No persistent service.</text>
+<text x="48" y="126" font-size="21" fill="#607594" font-weight="400">One embedded library. Three independent hosts. No central server.</text>
+<rect x="48" y="159" width="392" height="170" rx="16" fill="#e9efff" stroke="#e9efff" stroke-width="1.2"/>
+<text x="70" y="199" font-size="25" fill="#315db5" font-weight="700">CLI process</text>
+<text x="70" y="242" font-size="17" fill="#344f6d" font-weight="400">Command parsing / structured JSON</text>
+<text x="70" y="282" font-size="17" fill="#315db5" font-weight="700">Embedded Core / exit on completion</text>
+<line x1="244" y1="329" x2="244" y2="349" stroke="#8a9bb1" stroke-width="1.8" stroke-dasharray="6 5"/>
+<rect x="464" y="159" width="392" height="170" rx="16" fill="#e6f3ef" stroke="#e6f3ef" stroke-width="1.2"/>
+<text x="486" y="199" font-size="25" fill="#147760" font-weight="700">Mobile app process</text>
+<text x="486" y="242" font-size="17" fill="#344f6d" font-weight="400">Flutter UI / in-process FFI</text>
+<text x="486" y="282" font-size="17" fill="#147760" font-weight="700">Embedded Core / foreground only</text>
+<line x1="660" y1="329" x2="660" y2="349" stroke="#8a9bb1" stroke-width="1.8" stroke-dasharray="6 5"/>
+<rect x="880" y="159" width="392" height="170" rx="16" fill="#f0eafd" stroke="#f0eafd" stroke-width="1.2"/>
+<text x="902" y="199" font-size="25" fill="#7150a4" font-weight="700">MCP session process</text>
+<text x="902" y="242" font-size="17" fill="#344f6d" font-weight="400">AI host / stdio tool calls</text>
+<text x="902" y="282" font-size="17" fill="#7150a4" font-weight="700">Embedded Core / host-owned lifetime</text>
+<line x1="1076" y1="329" x2="1076" y2="349" stroke="#8a9bb1" stroke-width="1.8" stroke-dasharray="6 5"/>
+<text x="212" y="369" font-size="19" fill="#607594" font-weight="400">Shared code loaded by each host below - not a network service</text>
+<rect x="48" y="397" width="920" height="330" rx="16" fill="#ffffff" stroke="#cbd7e8" stroke-width="1.2"/>
+<text x="68" y="438" font-size="27" fill="#152d4a" font-weight="700">Unified control Core</text>
+<text x="744" y="438" font-size="17" fill="#7184a0" font-weight="400">In-process library</text>
+<rect x="68" y="465" width="280" height="98" rx="11" fill="#f5f8fe" stroke="#dfe7f4" stroke-width="1.2"/>
+<text x="84" y="500" font-size="23" fill="#254d76" font-weight="700">Accounts and auth</text>
+<text x="84" y="537" font-size="15" fill="#607594" font-weight="400">Login / pairing / refresh</text>
+<rect x="366" y="465" width="280" height="98" rx="11" fill="#f5f8fe" stroke="#dfe7f4" stroke-width="1.2"/>
+<text x="382" y="500" font-size="23" fill="#254d76" font-weight="700">Device registry</text>
+<text x="382" y="537" font-size="15" fill="#607594" font-weight="400">Stable IDs / parts / routes</text>
+<rect x="664" y="465" width="280" height="98" rx="11" fill="#f5f8fe" stroke="#dfe7f4" stroke-width="1.2"/>
+<text x="680" y="500" font-size="23" fill="#254d76" font-weight="700">Capability model</text>
+<text x="680" y="537" font-size="15" fill="#607594" font-weight="400">Properties / actions / schemas</text>
+<rect x="68" y="585" width="280" height="98" rx="11" fill="#f5f8fe" stroke="#dfe7f4" stroke-width="1.2"/>
+<text x="84" y="620" font-size="23" fill="#254d76" font-weight="700">Policy and routing</text>
+<text x="84" y="657" font-size="15" fill="#607594" font-weight="400">Permissions / LAN or cloud</text>
+<rect x="366" y="585" width="280" height="98" rx="11" fill="#f5f8fe" stroke="#dfe7f4" stroke-width="1.2"/>
+<text x="382" y="620" font-size="23" fill="#254d76" font-weight="700">Execute and verify</text>
+<text x="382" y="657" font-size="15" fill="#607594" font-weight="400">Deadlines / cancel / safe retries</text>
+<rect x="664" y="585" width="280" height="98" rx="11" fill="#f5f8fe" stroke="#dfe7f4" stroke-width="1.2"/>
+<text x="680" y="620" font-size="23" fill="#254d76" font-weight="700">State and results</text>
+<text x="680" y="657" font-size="15" fill="#607594" font-weight="400">Timestamps / source / unknown</text>
+<rect x="994" y="397" width="278" height="330" rx="16" fill="#fffdf7" stroke="#e8ddbf" stroke-width="1.2"/>
+<text x="1014" y="438" font-size="24" fill="#82662c" font-weight="700">Local persistence</text>
+<text x="1014" y="484" font-size="23" fill="#505449" font-weight="700">SQLite</text>
+<text x="1014" y="520" font-size="17" fill="#777767" font-weight="400">Devices / config / snapshots</text>
+<line x1="1014" y1="543" x2="1252" y2="543" stroke="#8a9bb1" stroke-width="1.8"/>
+<text x="1014" y="583" font-size="21" fill="#505449" font-weight="700">System secret store</text>
+<text x="1014" y="619" font-size="17" fill="#777767" font-weight="400">Tokens / passwords / keys</text>
+<text x="1014" y="681" font-size="16" fill="#927b4c" font-weight="400">Per installation; no auto-sync</text>
+<line x1="968" y1="562" x2="991" y2="562" stroke="#8a9bb1" stroke-width="1.8" marker-end="url(#arrow)"/>
+<line x1="508" y1="730" x2="508" y2="774" stroke="#8a9bb1" stroke-width="1.8" marker-end="url(#arrow)"/>
+<text x="532" y="759" font-size="18" fill="#607594" font-weight="400">Common Adapter contract</text>
+<rect x="48" y="789" width="1224" height="188" rx="16" fill="#ffffff" stroke="#cbd7e8" stroke-width="1.2"/>
+<text x="68" y="833" font-size="27" fill="#152d4a" font-weight="700">Platform / protocol adapters</text>
+<text x="726" y="833" font-size="17" fill="#ac6b43" font-weight="400">Candidates only; no verified drivers</text>
+<rect x="68" y="861" width="284" height="91" rx="10" fill="#f5f8fe" stroke="#dfe7f4" stroke-width="1.2"/>
+<text x="80" y="897" font-size="21" fill="#31577f" font-weight="700">Midea protocols</text>
+<text x="80" y="932" font-size="16" fill="#6c819e" font-weight="400">Hualing: verify exact models</text>
+<rect x="368" y="861" width="284" height="91" rx="10" fill="#f5f8fe" stroke="#dfe7f4" stroke-width="1.2"/>
+<text x="380" y="897" font-size="21" fill="#31577f" font-weight="700">Samsung TV LAN</text>
+<text x="380" y="932" font-size="16" fill="#6c819e" font-weight="400">Pairing / protocol / wake: TBD</text>
+<rect x="668" y="861" width="284" height="91" rx="10" fill="#f5f8fe" stroke="#dfe7f4" stroke-width="1.2"/>
+<text x="680" y="897" font-size="21" fill="#31577f" font-weight="700">SmartThings cloud</text>
+<text x="680" y="932" font-size="16" fill="#6c819e" font-weight="400">Native authorization: TBD</text>
+<rect x="968" y="861" width="284" height="91" rx="10" fill="#f5f8fe" stroke="#dfe7f4" stroke-width="1.2"/>
+<text x="980" y="897" font-size="21" fill="#31577f" font-weight="700">Hisense platforms</text>
+<text x="980" y="932" font-size="16" fill="#6c819e" font-weight="400">Region / account / auth: TBD</text>
+<line x1="660" y1="978" x2="660" y2="997" stroke="#8a9bb1" stroke-width="1.8"/>
+<line x1="346" y1="997" x2="973" y2="997" stroke="#8a9bb1" stroke-width="1.8"/>
+<line x1="346" y1="997" x2="346" y2="1022" stroke="#8a9bb1" stroke-width="1.8" marker-end="url(#arrow)"/>
+<line x1="973" y1="997" x2="973" y2="1022" stroke="#8a9bb1" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="48" y="1035" width="596" height="159" rx="16" fill="#e9f4f5" stroke="#cce3e6" stroke-width="1.2"/>
+<text x="70" y="1077" font-size="26" fill="#226471" font-weight="700">Appliance LAN interfaces</text>
+<text x="70" y="1120" font-size="20" fill="#427484" font-weight="400">Direct access by the current client process</text>
+<text x="70" y="1158" font-size="17" fill="#61868d" font-weight="400">LAN-only targets must be reachable from that client.</text>
+<rect x="676" y="1035" width="596" height="159" rx="16" fill="#ecf1fb" stroke="#d4dff0" stroke-width="1.2"/>
+<text x="698" y="1077" font-size="26" fill="#3b5e91" font-weight="700">Vendor cloud APIs</text>
+<text x="698" y="1120" font-size="20" fill="#526f9d" font-weight="400">Direct authorized access; not a project backend</text>
+<text x="698" y="1158" font-size="17" fill="#7188ad" font-weight="400">Backend-only confidential auth flows are excluded.</text>
+<rect x="48" y="1230" width="1224" height="100" rx="16" fill="#182f4a" stroke="#182f4a" stroke-width="1.2"/>
+<text x="70" y="1268" font-size="21" fill="#ffffff" font-weight="700">Explicitly excluded</text>
+<text x="70" y="1307" font-size="21" fill="#dce6f5" font-weight="400">HA / NAS gateways / daemons / project backend / HTTP MCP / background automation</text>
+<text x="48" y="1365" font-size="16" fill="#7184a0" font-weight="400">Baseline v0.1.1-docs | MCP may await calls during its host session; no device polling or background jobs.</text>
+</g></svg>

@@ -1,0 +1,67 @@
+# AGENTS.md - Instructions for AI contributors
+
+Scope: every file in this repository. Project: **HomeVerb**. Repository and CLI: `homeverb`. Design baseline: v0.1.1-docs, October 14, 2026.
+
+## Read first
+
+Read `README.md`, `docs/product-requirements.md`, `docs/architecture.md`, `docs/process-lifecycle.md`, `docs/domain-model.md`, `docs/capabilities.md`, `docs/adapter-contract.md`, and `docs/routing-and-execution.md`, in that order. Before starting a task, inspect `docs/task-breakdown.md` and `docs/compatibility.md`. Never present a planned feature as implemented.
+
+## Non-negotiable product constraints
+
+1. Do not require HA, a NAS, a project backend, a daemon, a startup service, background keep-alive, or periodic polling.
+2. Core is an embeddable library. CLI, App, and MCP call Core directly. Do not make App or MCP shell out to the CLI and parse its output as the production architecture.
+3. CLI commands release resources and exit. MCP supports only a host-managed local stdio process, ending with its host session. An idle session must not scan appliances or refresh every account.
+4. The app performs foreground, on-demand work only. Leaving the foreground cancels networking and closes subscriptions. Unconfirmed writes are recorded as `unknown`. Do not promise a callback after a forced termination.
+5. Do not implement remote HTTP MCP, public control APIs, device relays, cloud sync, or background automation. Changing this boundary requires an explicit owner decision and a new ADR. Do not reintroduce these features under an "optional" label.
+6. Local SQLite and system secret stores do not require a self-hosted service. Temporary loopback authentication callbacks and short-lived protocol UDP sockets are allowed only within a bounded operation.
+7. A platform requiring a confidential shared client secret, private server callback, or persistent relay is incompatible unless it has a viable native-client alternative. Never embed a backend secret in an app to claim support.
+
+## Layering rules
+
+Upper layers use Device, Component, Capability, Property, Action, and Event. They must not branch on brand to choose business semantics. Platform/protocol adapters own encoding, pairing, login flows, capability mapping, and protocol evidence, not UI.
+
+Unify only equivalent semantics. Use `vendor.<provider>.*` for vendor-specific features. Never hardcode universal temperature ranges, fan-speed enums, or brand-wide support. A device's LAN and cloud routes are connections to one physical device, not duplicate devices. Ambiguous identity matches require user confirmation.
+
+## Write safety and outcomes
+
+Validate identity, permissions, arguments, routing, and risk before sending anything. A network timeout does not prove that an operation was not executed. Read retries are bounded. Writes distinguish proven-not-sent, possibly-sent, accepted, and explicitly rejected phases. Never replay a non-idempotent uncertain write on another route.
+
+Use `accepted`, `verified`, `failed`, and `unknown`; use per-item results and `partial` for batches. `verified` requires timestamped evidence and does not establish physical causality by itself. HTTP 200, stale cache entries, and optimistic state are not verification.
+
+When changing execution semantics, update `docs/routing-and-execution.md`, `docs/errors.md`, the corresponding schemas, and positive/negative fixtures. Cancelling an already-sent request is not a physical rollback.
+
+## Security
+
+Never put passwords, tokens, pairing keys, or live device identifiers into the repository, ordinary configuration, plaintext SQLite fields, command-line arguments, stdout, or logs. Use credential references and system secret stores. Fail closed when secure storage is unavailable, or use a separately reviewed interactive encrypted store; never silently fall back to plaintext.
+
+MCP principals come from trusted host configuration. Tool parameters must not select a more privileged identity. High-risk operations require trusted user-side approval; `confirmed=true` is not approval evidence. In-process plugins are not sandboxed. Version one uses reviewed, compile-time adapter registration rather than downloading executable plugins.
+
+## Language and commit policy
+
+Use the owner-approved name **HomeVerb** in prose and app branding, `homeverb` for the repository and executable, and `homeverb-` for proposed module names. Follow `docs/adr/0006-project-name.md`. Do not mark the name as provisional.
+
+Write all documentation, code comments, diagram labels, example messages, issue/PR text, commit subjects, and commit bodies in English. Keep public identifiers stable and English. Do not add translated copies unless the owner changes this policy explicitly.
+
+Use `<type>(<optional-scope>): <English imperative summary>`. Allowed types: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `ci`, `build`, `chore`, `style`, and `revert`. Use `feat`, not `feature` or `fateture`. Documentation-only work is `docs`, not a claim that a product feature now works. See `docs/commit-conventions.md`.
+
+## Implementation status and test honesty
+
+This is a documentation and contract baseline, not a compilable appliance-control application. Establish T01-T03 and a minimal mock end-to-end flow before extensive vendor code. A real adapter is `verified` only after model-specific physical-device testing.
+
+Current checks:
+
+```bash
+python3 scripts/validate_docs.py
+python3 -m pip install -r requirements-dev.txt
+python3 scripts/validate_contracts.py
+python3 scripts/validate_repository.py
+python3 scripts/validate_commits.py --all
+```
+
+Add actual build/lint/test commands after Rust and Flutter projects exist. Never report unexecuted `cargo test`, mobile builds, physical-device tests, or remote CI as successful. Record a specific `blocked` reason when hardware, accounts, authentication evidence, or licensing is missing.
+
+## Delivery workflow
+
+Choose a small task with acceptance criteria. Update contracts and tests, then Core/Adapter logic, then entry points. Keep documentation, fixtures, errors, and compatibility records synchronized. Write an ADR before a breaking public API change.
+
+A completion report identifies changed files, commands actually run, results, unverified work, compatibility effects, and external actions. Creating or pushing repositories, publishing packages, performing real-device writes, and uploading diagnostics require explicit user authorization. Never claim a remote action succeeded without checking the resulting remote state.

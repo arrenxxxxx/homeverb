@@ -1,0 +1,27 @@
+flowchart TB
+  subgraph CLI["CLI: exit when the command completes"]
+    CUI["Command parsing / JSON"] --> CCORE["In-process Core"]
+  end
+  subgraph APP["App: foreground, on-demand work only"]
+    AUI["Flutter UI / FFI"] --> ACORE["In-process Core"]
+  end
+  subgraph MCP["MCP: host-owned stdio session process"]
+    MUI["Tool schemas / trusted fixed principal"] --> MCORE["In-process Core"]
+  end
+  CCORE -. "Shared code, not a network service" .-> CODE
+  ACORE -. "Shared code, not a network service" .-> CODE
+  MCORE -. "Shared code, not a network service" .-> CODE
+  subgraph CODE["Code structure loaded separately in each process"]
+    DOMAIN["Devices / components / properties / actions / events"]
+    AUTH["Accounts / native authentication / on-demand refresh"]
+    ROUTE["Capability and policy validation / LAN-cloud routing"]
+    EXEC["Send / verify / cancel / uncertain writes"]
+    ADAPTER["Platform and protocol adapters: candidates, unimplemented and unverified"]
+    DOMAIN --> ROUTE
+    AUTH --> ROUTE
+    ROUTE --> EXEC --> ADAPTER
+  end
+  EXEC --> STORE["Local SQLite and system secret store per installation; no auto-sync"]
+  ADAPTER --> LAN["Appliance LAN: current process must reach the network"]
+  ADAPTER --> CLOUD["Vendor cloud: not a project backend; native-auth admission gate"]
+  NO["Excluded: HA / NAS gateway / daemon / project backend / HTTP MCP / background automation"]

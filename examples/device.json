@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "id": "dev-example-ac",
+  "alias": "bedroom-ac",
+  "brand": "ExampleBrand",
+  "model": "Fictional-AC-01",
+  "components": [
+    {
+      "id": "main",
+      "capabilities": [
+        "power",
+        "climate"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn-example-lan",
+      "adapter": "example.mock",
+      "transport": "lan",
+      "account_id": null,
+      "identity_ref": "identity:fictional-local-1"
+    },
+    {
+      "id": "conn-example-cloud",
+      "adapter": "example.mock",
+      "transport": "cloud",
+      "account_id": "account-example",
+      "identity_ref": "identity:fictional-cloud-1"
+    }
+  ],
+  "support_status": "planned"
+}

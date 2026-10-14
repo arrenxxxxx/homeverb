@@ -1,0 +1,25 @@
+# Local credentials and runtime data
+.env
+.env.*
+!.env.example
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+secrets/
+credentials/
+logs/
+diagnostics/
+# Build / cache
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+target/
+build/
+.dart_tool/
+.flutter-plugins-dependencies
+node_modules/
+.DS_Store
+Thumbs.db

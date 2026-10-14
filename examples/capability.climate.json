@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0",
+  "id": "climate",
+  "revision": 1,
+  "properties": {
+    "target_temperature": {
+      "type": "number",
+      "readable": true,
+      "writable": true,
+      "unit": "celsius",
+      "minimum": 16,
+      "maximum": 30,
+      "multipleOf": 0.5
+    },
+    "mode": {
+      "type": "string",
+      "readable": true,
+      "writable": true,
+      "enum": [
+        "cool",
+        "heat",
+        "fan",
+        "dry",
+        "auto"
+      ]
+    }
+  },
+  "actions": {
+    "set": {
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "target_temperature": {
+            "type": "number",
+            "minimum": 16,
+            "maximum": 30,
+            "multipleOf": 0.5
+          },
+          "mode": {
+            "enum": [
+              "cool",
+              "heat",
+              "fan",
+              "dry",
+              "auto"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "minProperties": 1
+      },
+      "transports": [
+        "lan",
+        "cloud"
+      ],
+      "idempotency": "set_value",
+      "risk": "low",
+      "atomic": false,
+      "verification": "state_match"
+    }
+  },
+  "events": {}
+}

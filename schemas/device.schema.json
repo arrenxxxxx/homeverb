@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Device",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "alias": {
+      "type": "string",
+      "minLength": 1
+    },
+    "brand": {
+      "type": "string",
+      "minLength": 1
+    },
+    "model": {
+      "type": "string",
+      "minLength": 1
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "Component",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1
+          }
+        },
+        "required": [
+          "id",
+          "capabilities"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "connections": {
+      "type": "array",
+      "items": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "Connection",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "adapter": {
+            "type": "string",
+            "minLength": 1
+          },
+          "transport": {
+            "enum": [
+              "lan",
+              "cloud"
+            ]
+          },
+          "account_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "identity_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "adapter",
+          "transport",
+          "account_id",
+          "identity_ref"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "support_status": {
+      "enum": [
+        "planned",
+        "mock-tested",
+        "experimental",
+        "verified",
+        "blocked",
+        "unsupported"
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "alias",
+    "brand",
+    "model",
+    "components",
+    "connections",
+    "support_status"
+  ],
+  "additionalProperties": false
+}

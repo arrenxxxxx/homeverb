@@ -1,0 +1,41 @@
+# Product requirements and scope
+
+Version: v0.1.1-docs. Status: design baseline; application features are not implemented.
+
+## Positioning
+
+Provide independent cross-brand appliance-control tools for users, developers, and local AI hosts. Unify access, capabilities, and invocation, without building another central smart-home platform. Run when requested; stop when finished. A vendor cloud is not a backend operated by this project.
+
+## User journeys
+
+| User | Journey | Acceptance criterion |
+|---|---|---|
+| CLI user | Install binary -> authenticate/pair -> discover -> control | No pre-existing daemon; scriptable JSON; exit after the command |
+| Mobile user | Install app -> native authorization -> discover -> control | The app itself controls devices without a computer or NAS |
+| AI user | Configure a local executable -> call read or authorized write tools | Host-owned stdio session; no public network listener |
+
+## Required functionality
+
+Multiple platforms and accounts; viable native authentication; LAN/cloud discovery and deduplication; stable local IDs and aliases; dynamic capability descriptions; cached snapshots and on-demand refresh; common actions; explicit route policies; execution verification; structured errors; protected credentials; access control; and redacted diagnostics. CLI, App, and MCP use the same Core API.
+
+## Out of scope
+
+A replacement HA integration platform, persistent NAS gateways, microservices, deployed Docker services, cross-device cloud sync, historical charts, continuous collection, rule engines, unattended project scheduling, remote HTTP MCP, webhook receiver services, centrally hosted accounts, and a universal first-time Wi-Fi provisioning engine.
+
+Bounded foreground observation and waiting for a result are allowed. Hidden background loops are not. Native device schedules may be considered as future device capabilities, but the project does not promise to execute future schedules itself.
+
+## Admission without a project server
+
+The client must be able to authenticate legitimately, obtain the required authorization, and reach the target itself. Platforms that require confidential-client backend authentication with no native alternative are `blocked`. Embedding a shared secret in a public client is not a workaround.
+
+For LAN-only devices, the current process must reach the device network. Otherwise return `LAN_UNREACHABLE` before sending. Existing user-managed VPNs are not deployed or maintained by this project. Offline reads may use available cache entries only when clearly marked as cached.
+
+## Non-functional targets - not measurements
+
+A normal command has a default total budget of 10 seconds; discovery defaults to 10 seconds; explicit interactive authentication has a separate 180-second budget. Overrides are bounded. The target in a controlled test environment is to stop remaining client work within 2 seconds after cancellation. Protocol-specific exceptions must be documented; infinite retries are never hidden.
+
+No default telemetry or diagnostic uploads. Listing local configuration without an account must not trigger vendor requests. Offline inspection must not contact an update service.
+
+## Release gate
+
+From a clean environment with all project processes stopped, one client must independently control a verified device. Exiting leaves no daemon, startup entry, persistent listener, or periodic task. Test CLI and mobile independence separately. Two different protocol families must pass the same capability calls before claiming that the cross-platform abstraction is demonstrated.

@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AdapterManifest",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "providers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "transports": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "lan",
+          "cloud"
+        ]
+      },
+      "minItems": 1
+    },
+    "auth_methods": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "requires_daemon": {
+      "const": false
+    },
+    "requires_project_backend": {
+      "const": false
+    },
+    "onboarding_cloud_required": {
+      "type": "boolean"
+    },
+    "operation_cloud_required": {
+      "type": "boolean"
+    },
+    "support_status": {
+      "enum": [
+        "planned",
+        "mock-tested",
+        "experimental",
+        "verified",
+        "blocked",
+        "unsupported"
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "version",
+    "providers",
+    "transports",
+    "auth_methods",
+    "requires_daemon",
+    "requires_project_backend",
+    "onboarding_cloud_required",
+    "operation_cloud_required",
+    "support_status"
+  ],
+  "additionalProperties": false
+}

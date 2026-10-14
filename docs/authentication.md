@@ -1,0 +1,29 @@
+# Accounts, authentication, and credentials
+
+## Unify the flow, not every login mechanism
+
+State machine: `created -> challenge_required -> awaiting_user -> authenticated`. Any applicable stage may become `expired`, `cancelled`, or `failed`. Challenges may involve a browser, verification code, local pairing approval, or another vendor-approved interaction. Adapters declare only methods they actually support; universal QR login is not promised.
+
+CLI uses trusted interactive input, not password arguments. The app uses trusted platform interactions. MCP defaults to `AUTH_REQUIRED` with user-side login guidance; the model must not collect passwords, one-time codes, or refresh tokens.
+
+## Native-client admission
+
+Prefer vendor-approved public-client flows, system browsers, and PKCE. A native application is not a confidential server capable of protecting a global shared secret. An integration requiring a confidential-client backend without a native alternative is `blocked`. [R3](references.md)
+
+There is no background refresh worker. Check the session immediately before an actual operation and refresh only when necessary. Coordinate refresh-token rotation with a local account lock and reread any session another process has updated. Authentication failures must not create an endless login loop.
+
+Cloud login may be needed only to retrieve a LAN pairing key. Therefore "local operation" does not necessarily mean "fully offline onboarding". Record `onboarding_cloud_required` and `operation_cloud_required` separately.
+
+## Credential storage
+
+The business database stores `credential_ref`, not credentials. Implement the system secret-store abstraction separately for each operating system and verify it there. When secure storage is unavailable, do not fall back to plaintext JSON. The first release may reject persistence and offer a bounded interactive in-memory session or instructions to configure secure storage.
+
+Exports contain configuration, aliases, and redacted metadata by default. Credential migration is outside the first release; do not include tokens in backup ZIPs. Redact logs, errors, and MCP output. Use local `account_id` selectors rather than repeatedly exposing emails or phone numbers.
+
+## Logout
+
+Delete local credentials, associated caches, and local authorization state. Revoke vendor tokens only when the platform supports it and the user authorizes that action. If revocation was unavailable or not attempted, explicitly report local deletion only; do not claim remote revocation.
+
+## Tests
+
+Denied consent; mismatched OAuth state; expired authorization codes; invalid verification codes; cancellation; rotated-token races; rejected device pairing; account-region mismatch; and unavailable secret storage. Identity failures must not silently retry with another account.

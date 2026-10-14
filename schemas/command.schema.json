@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Command",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "device_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "component_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "capability": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action": {
+      "type": "string",
+      "minLength": 1
+    },
+    "arguments": {
+      "type": "object"
+    },
+    "connection": {
+      "enum": [
+        "auto",
+        "lan",
+        "cloud"
+      ]
+    },
+    "timeout_ms": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 180000
+    },
+    "wait_for": {
+      "enum": [
+        "accepted",
+        "verified"
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "request_id",
+    "device_id",
+    "component_id",
+    "capability",
+    "action",
+    "arguments",
+    "connection",
+    "timeout_ms",
+    "wait_for"
+  ],
+  "additionalProperties": false
+}

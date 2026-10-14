@@ -1,0 +1,38 @@
+name: Documentation and repository checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate documentation and JSON
+        run: python scripts/validate_docs.py
+      - name: Install contract-check dependency
+        run: python -m pip install -r requirements-dev.txt
+      - name: Validate schemas and counterexamples
+        run: python scripts/validate_contracts.py
+      - name: Guard English text and repository hygiene
+        run: python scripts/validate_repository.py
+      - name: Test repository tooling
+        run: python -m unittest discover -s tests -v
+      - name: Validate pushed history
+        if: github.event_name == 'push'
+        run: python scripts/validate_commits.py --all
+      - name: Validate pull-request commits
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: python scripts/validate_commits.py --range "$BASE_SHA..$HEAD_SHA"
+      - name: Validate pull-request title
+        if: github.event_name == 'pull_request'
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: python scripts/validate_commits.py --pr-title

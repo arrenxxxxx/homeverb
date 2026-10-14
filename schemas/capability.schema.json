@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Capability",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "properties": {
+      "type": "object",
+      "additionalProperties": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "PropertyDescriptor",
+        "type": "object",
+        "properties": {
+          "type": {
+            "enum": [
+              "boolean",
+              "number",
+              "integer",
+              "string"
+            ]
+          },
+          "readable": {
+            "type": "boolean"
+          },
+          "writable": {
+            "type": "boolean"
+          },
+          "unit": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minimum": {
+            "type": "number"
+          },
+          "maximum": {
+            "type": "number"
+          },
+          "multipleOf": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "enum": {
+            "type": "array",
+            "minItems": 1
+          }
+        },
+        "required": [
+          "type",
+          "readable",
+          "writable"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "actions": {
+      "type": "object",
+      "additionalProperties": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "ActionDescriptor",
+        "type": "object",
+        "properties": {
+          "parameters": {
+            "type": "object"
+          },
+          "transports": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "lan",
+                "cloud"
+              ]
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "idempotency": {
+            "enum": [
+              "read_only",
+              "set_value",
+              "non_idempotent",
+              "unknown"
+            ]
+          },
+          "risk": {
+            "enum": [
+              "low",
+              "elevated",
+              "high"
+            ]
+          },
+          "atomic": {
+            "type": "boolean"
+          },
+          "verification": {
+            "enum": [
+              "state_match",
+              "correlated_completion",
+              "unavailable"
+            ]
+          }
+        },
+        "required": [
+          "parameters",
+          "transports",
+          "idempotency",
+          "risk",
+          "atomic",
+          "verification"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "events": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "revision",
+    "properties",
+    "actions",
+    "events"
+  ],
+  "additionalProperties": false
+}
