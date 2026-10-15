@@ -12,6 +12,12 @@ HomeVerb has no application account, registration, sign-in screen, or personal-a
 
 Use Flutter with Material 3, generous spacing, clear typography, restrained card surfaces, consistent line icons, and a small number of accent colors. The device home takes inspiration from the Mi Home room-switching and device-card pattern. Complex dashboards, historical charts, rule editors, and gateway settings are excluded.
 
+The owner-selected default visual direction is **Window Light (01)**, approved October 15, 2026: warm plaster light, diffuse window shadows, cool reflected light, and softly tinted porcelain card surfaces. The [complete Window Light prototype](../output/prototypes/homeverb-window-light-v1/index.html) applies it to 82 screen states, with 21 boards, 14 review journeys, and 198 interaction branches. This is a visual specification, not an implemented Flutter application.
+
+Settings > Appearance includes a skin extension point from the first release, with exactly one available option: **Window Light**, stable ID `window_light`, marked Current. Users can preview it; no alternate skins, dark/system-mode picker, wallpaper importer, or download store are included. Persist the selected skin locally and fall back to Window Light for an unknown ID. Additional reviewed skins can later reuse the same theme tokens and widgets. See the [visual system and Flutter handoff](ui-window-light.md) for implementation and phone-validation gates.
+
+The [functional handoff](ui-functional-spec.md) records all feature groups, recovery paths, available Core interfaces, missing integrations, and development acceptance checks. The [detailed screen inventory](ui-screen-inventory.md) retains every screen ID and branch so prototype functions are not lost during implementation. These documents supersede the earlier atlas's dark-appearance example.
+
 The three primary destinations are **Devices**, **Platforms**, and **Settings**. Use bottom navigation on phones and side navigation on wider layouts. Use **Smart Appliance Platforms** as the platform page title and **platform** or **platform account** in user-facing text, rather than **data source**. Internal Provider and Account identifiers remain unchanged.
 
 Authorization sharing belongs inside Settings, with no primary navigation destination or separate sharing home. Recent Operations is also reached from Settings, with a device-specific entry from Device Controls.

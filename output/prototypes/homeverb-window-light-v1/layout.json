@@ -1,0 +1,658 @@
+{
+  "D01": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 725,
+    "scrollable": false
+  },
+  "D02": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 478,
+    "scrollable": false
+  },
+  "D03": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 638.2,
+    "scrollable": false
+  },
+  "D04": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 482.2,
+    "scrollable": false
+  },
+  "R01": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 491.2,
+    "scrollable": false
+  },
+  "R02": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 824.0,
+    "scrollable": false
+  },
+  "R03": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 626.6,
+    "scrollable": false
+  },
+  "R04": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 535.6,
+    "scrollable": false
+  },
+  "D05": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 824.0,
+    "scrollable": false
+  },
+  "D06": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 633.2,
+    "scrollable": false
+  },
+  "D07": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 824.0,
+    "scrollable": false
+  },
+  "D08": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 434.2,
+    "scrollable": false
+  },
+  "C01": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 658.4,
+    "scrollable": false
+  },
+  "C02": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 824.0,
+    "scrollable": false
+  },
+  "C03": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 599.4,
+    "scrollable": false
+  },
+  "C04": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 616.2,
+    "scrollable": false
+  },
+  "C05": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 731.2,
+    "scrollable": false
+  },
+  "C06": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 634.0,
+    "scrollable": false
+  },
+  "C07": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 742.0,
+    "scrollable": false
+  },
+  "C08": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 633.4,
+    "scrollable": false
+  },
+  "C09": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 561.2,
+    "scrollable": false
+  },
+  "C10": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 585.6,
+    "scrollable": false
+  },
+  "C11": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 643.2,
+    "scrollable": false
+  },
+  "C12": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 491.4,
+    "scrollable": false
+  },
+  "A01": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 397.0,
+    "scrollable": false
+  },
+  "A02": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 824.0,
+    "scrollable": false
+  },
+  "A03": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 585.8,
+    "scrollable": false
+  },
+  "A04": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 520.0,
+    "scrollable": false
+  },
+  "A05": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 575.2,
+    "scrollable": false
+  },
+  "A06": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 489.2,
+    "scrollable": false
+  },
+  "A07": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 591.0,
+    "scrollable": false
+  },
+  "A08": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 376.0,
+    "scrollable": false
+  },
+  "P01": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 518.6,
+    "scrollable": false
+  },
+  "P02": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 459.4,
+    "scrollable": false
+  },
+  "P03": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 555.0,
+    "scrollable": false
+  },
+  "P04": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 713.6,
+    "scrollable": false
+  },
+  "P05": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 446.4,
+    "scrollable": false
+  },
+  "P06": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 513.0,
+    "scrollable": false
+  },
+  "P07": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 359.0,
+    "scrollable": false
+  },
+  "P08": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 389.2,
+    "scrollable": false
+  },
+  "P09": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 575.6,
+    "scrollable": false
+  },
+  "P10": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 455.2,
+    "scrollable": false
+  },
+  "P11": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 544.7,
+    "scrollable": false
+  },
+  "P12": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 535.6,
+    "scrollable": false
+  },
+  "S01": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 706,
+    "scrollable": false
+  },
+  "S02": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 587.0,
+    "scrollable": false
+  },
+  "S03": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 508.4,
+    "scrollable": false
+  },
+  "S04": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 529.4,
+    "scrollable": false
+  },
+  "H01": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 452.4,
+    "scrollable": false
+  },
+  "H02": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 432.2,
+    "scrollable": false
+  },
+  "H03": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 464.6,
+    "scrollable": false
+  },
+  "H04": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 583.2,
+    "scrollable": false
+  },
+  "H05": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 479.4,
+    "scrollable": false
+  },
+  "H06": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 620.6,
+    "scrollable": false
+  },
+  "H07": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 505.4,
+    "scrollable": false
+  },
+  "H08": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 551.4,
+    "scrollable": false
+  },
+  "H09": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 476.2,
+    "scrollable": false
+  },
+  "H10": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 376.0,
+    "scrollable": false
+  },
+  "H11": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 347.4,
+    "scrollable": false
+  },
+  "H12": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 520.0,
+    "scrollable": false
+  },
+  "S05": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 422.2,
+    "scrollable": false
+  },
+  "S06": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 551.4,
+    "scrollable": false
+  },
+  "S07": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 823.4,
+    "scrollable": false
+  },
+  "S08": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 619.4,
+    "scrollable": false
+  },
+  "H13": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 591.0,
+    "scrollable": false
+  },
+  "H14": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 359.0,
+    "scrollable": false
+  },
+  "H15": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 407.4,
+    "scrollable": false
+  },
+  "H16": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 503.0,
+    "scrollable": false
+  },
+  "R05": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 824.0,
+    "scrollable": false
+  },
+  "D09": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 499,
+    "scrollable": false
+  },
+  "P13": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 359.0,
+    "scrollable": false
+  },
+  "S09": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 553.8,
+    "scrollable": false
+  },
+  "S10": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 335.2,
+    "scrollable": false
+  },
+  "S11": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 755.4,
+    "scrollable": false
+  },
+  "S12": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 423.6,
+    "scrollable": false
+  },
+  "D10": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 439.6,
+    "scrollable": false
+  },
+  "W01": {
+    "logical_size": [
+      1024,
+      768
+    ],
+    "content_bottom": 720,
+    "scrollable": false
+  },
+  "W02": {
+    "logical_size": [
+      1024,
+      768
+    ],
+    "content_bottom": 720,
+    "scrollable": false
+  },
+  "D11": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 725,
+    "scrollable": false
+  },
+  "C13": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 605.2,
+    "scrollable": false
+  },
+  "C14": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 824.0,
+    "scrollable": false
+  },
+  "D12": {
+    "logical_size": [
+      390,
+      844
+    ],
+    "content_bottom": 686,
+    "scrollable": true
+  }
+}

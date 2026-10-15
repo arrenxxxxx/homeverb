@@ -15,6 +15,10 @@ Design baseline v0.1.1-docs, October 14, 2026. Application features remain plann
 | [errors.md](errors.md) | Structured errors and outcome invariants |
 | [cli.md](cli.md) | Commands, JSON, exit codes |
 | [mobile-app.md](mobile-app.md) | Flutter screens, custom rooms and cards, appliance platforms, Settings sharing, lifecycle |
+| [Window Light prototype](../output/prototypes/homeverb-window-light-v1/index.html) | Complete visual atlas: 82 screen states, 14 journeys, 198 branches |
+| [ui-functional-spec.md](ui-functional-spec.md) | Functional coverage, recovery paths, integration snapshot and acceptance checks |
+| [ui-screen-inventory.md](ui-screen-inventory.md) | Every screen ID, visible content and review destination |
+| [ui-window-light.md](ui-window-light.md) | Flutter rendering strategy and one-skin extension contract |
 | [mcp.md](mcp.md) | Local stdio tools, permissions, lifecycle |
 | [sdk.md](sdk.md) | Embedded Core interfaces and FFI |
 | [storage.md](storage.md) | SQLite, secret stores, concurrency, recovery |

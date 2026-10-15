@@ -1,0 +1,314 @@
+[
+  {
+    "requirement": "No HomeVerb login; direct first use",
+    "screens": [
+      "D04"
+    ]
+  },
+  {
+    "requirement": "Exactly three primary destinations",
+    "screens": [
+      "D01",
+      "P01",
+      "S01"
+    ]
+  },
+  {
+    "requirement": "Consumer-facing platform naming",
+    "screens": [
+      "P01",
+      "P02",
+      "P09"
+    ]
+  },
+  {
+    "requirement": "Room-filtered two-column cards",
+    "screens": [
+      "D01",
+      "D02"
+    ]
+  },
+  {
+    "requirement": "Custom room creation and validation",
+    "screens": [
+      "R01",
+      "R02",
+      "R05"
+    ]
+  },
+  {
+    "requirement": "Room renaming, ordering and deletion",
+    "screens": [
+      "R01",
+      "R04",
+      "R05"
+    ]
+  },
+  {
+    "requirement": "Move devices without changing authority",
+    "screens": [
+      "R03",
+      "D06"
+    ]
+  },
+  {
+    "requirement": "Unassigned and empty-room handling",
+    "screens": [
+      "R01",
+      "R03",
+      "D09"
+    ]
+  },
+  {
+    "requirement": "Search and card quick actions",
+    "screens": [
+      "D03",
+      "D05"
+    ]
+  },
+  {
+    "requirement": "Favorites and card order",
+    "screens": [
+      "D05",
+      "D10"
+    ]
+  },
+  {
+    "requirement": "Local device name and connection preference",
+    "screens": [
+      "D06",
+      "D07",
+      "D08"
+    ]
+  },
+  {
+    "requirement": "Capability-driven climate controls",
+    "screens": [
+      "C01",
+      "C02",
+      "C14"
+    ]
+  },
+  {
+    "requirement": "Lighting, fan and media controls",
+    "screens": [
+      "C05",
+      "C06",
+      "C07"
+    ]
+  },
+  {
+    "requirement": "Components and read-only measurements",
+    "screens": [
+      "C08",
+      "C13"
+    ]
+  },
+  {
+    "requirement": "Consequential action confirmation",
+    "screens": [
+      "C09",
+      "C10",
+      "C11"
+    ]
+  },
+  {
+    "requirement": "Accepted, verified, failed, unknown and partial",
+    "screens": [
+      "C03",
+      "C04",
+      "C11",
+      "C12",
+      "S05",
+      "S06"
+    ]
+  },
+  {
+    "requirement": "Requested values do not replace observations",
+    "screens": [
+      "C03",
+      "C04",
+      "C14"
+    ]
+  },
+  {
+    "requirement": "Cached, missing and stale states",
+    "screens": [
+      "D11",
+      "C13"
+    ]
+  },
+  {
+    "requirement": "Device discovery and permission request",
+    "screens": [
+      "A01",
+      "A02",
+      "A03",
+      "A04"
+    ]
+  },
+  {
+    "requirement": "Ambiguous identity requires a decision",
+    "screens": [
+      "A05"
+    ]
+  },
+  {
+    "requirement": "Device selection and room assignment",
+    "screens": [
+      "A04",
+      "A06",
+      "R03"
+    ]
+  },
+  {
+    "requirement": "Discovery timeout and denied permissions",
+    "screens": [
+      "A07",
+      "A08"
+    ]
+  },
+  {
+    "requirement": "Multiple platform accounts and regions",
+    "screens": [
+      "P01",
+      "P03",
+      "P09"
+    ]
+  },
+  {
+    "requirement": "Provider browser/code/device authorization",
+    "screens": [
+      "P04",
+      "P05",
+      "P06"
+    ]
+  },
+  {
+    "requirement": "Authorization expiry and reconnection",
+    "screens": [
+      "P07",
+      "P08",
+      "P10"
+    ]
+  },
+  {
+    "requirement": "Local removal distinct from remote revocation",
+    "screens": [
+      "P11",
+      "P12"
+    ]
+  },
+  {
+    "requirement": "Sharing only through Settings",
+    "screens": [
+      "S01",
+      "H01",
+      "H05"
+    ]
+  },
+  {
+    "requirement": "Explicit nearby receiving and peer selection",
+    "screens": [
+      "H02",
+      "H05"
+    ]
+  },
+  {
+    "requirement": "Pair-code comparison and mismatch rejection",
+    "screens": [
+      "H03",
+      "H06",
+      "H14"
+    ]
+  },
+  {
+    "requirement": "Actual share scope, expiry and revocation",
+    "screens": [
+      "H01",
+      "H04"
+    ]
+  },
+  {
+    "requirement": "Bilateral consent and account conflicts",
+    "screens": [
+      "H06",
+      "H07"
+    ]
+  },
+  {
+    "requirement": "Separate transfer, import and validation",
+    "screens": [
+      "H08",
+      "H09",
+      "H12",
+      "H16"
+    ]
+  },
+  {
+    "requirement": "No plaintext fallback; ineligible grants",
+    "screens": [
+      "H10",
+      "H11"
+    ]
+  },
+  {
+    "requirement": "Timeout, interruption and no blind resend",
+    "screens": [
+      "H12",
+      "H13",
+      "H15"
+    ]
+  },
+  {
+    "requirement": "Independent recipient operation",
+    "screens": [
+      "H08"
+    ]
+  },
+  {
+    "requirement": "One Window Light skin, local name and connection defaults",
+    "screens": [
+      "S02",
+      "S03",
+      "S10",
+      "S11"
+    ]
+  },
+  {
+    "requirement": "Local data controls and scoped deletion",
+    "screens": [
+      "S04",
+      "S09"
+    ]
+  },
+  {
+    "requirement": "Recent outcomes and timestamped evidence",
+    "screens": [
+      "S05",
+      "S06"
+    ]
+  },
+  {
+    "requirement": "Redacted diagnostic preview before export",
+    "screens": [
+      "S07"
+    ]
+  },
+  {
+    "requirement": "About and honest compatibility",
+    "screens": [
+      "S08",
+      "S12",
+      "P13"
+    ]
+  },
+  {
+    "requirement": "Large-text and wide layout adaptation",
+    "screens": [
+      "D12",
+      "W01",
+      "W02"
+    ]
+  }
+]

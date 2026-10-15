@@ -1,0 +1,17 @@
+name: homeverb_window_light_reference
+description: Isolated Window Light visual reference with fictional local data.
+publish_to: none
+version: 0.1.0
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/window-light-background.png
+    - assets/ac.png
+    - assets/lamp.png
+    - assets/tv.png
+    - assets/sensor.png
