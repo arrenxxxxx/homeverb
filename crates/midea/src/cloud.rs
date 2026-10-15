@@ -22,6 +22,7 @@ pub enum CloudEndpoint {
     HomeAppliances,
     ApplianceState,
     ApplianceControl,
+    LanCredentials,
 }
 
 impl CloudEndpoint {
@@ -33,6 +34,7 @@ impl CloudEndpoint {
             Self::HomeAppliances => "/v1/appliance/home/list/get",
             Self::ApplianceState => "/mjl/v1/device/status/lua/get",
             Self::ApplianceControl => "/mjl/v1/device/lua/control",
+            Self::LanCredentials => "/v2/iot/secure/getToken",
         }
     }
 }

@@ -278,3 +278,12 @@ deadline and future drop close the socket while preserving transmission evidence
 No adapter or entry point invokes this helper yet, so public schemas and cloud
 write behavior remain unchanged; protected identity, grants and model evidence
 still gate future route admission.
+
+The [account-bound v2 credential helper](adr/0047-account-bound-lan-credentials.md)
+uses an exact protected local binding and fresh unique cloud home membership.
+It returns native handshake material without selecting or contacting a LAN peer.
+No route, permission, inventory change or write outcome follows from a successful
+lookup. Discovery hints cannot select provider IDs for it. A future registered
+route must separately reconcile the endpoint and validate its model/permissions
+before sending the token. Cloud failure does not trigger default keys, v1 lookup,
+alternate UDP methods or automatic route fallback.

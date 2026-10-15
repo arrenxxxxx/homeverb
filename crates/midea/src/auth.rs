@@ -14,6 +14,9 @@ use std::{fmt, str};
 use uuid::Uuid;
 use zeroize::Zeroizing;
 
+mod lan;
+pub use lan::LanUdpIdMethod;
+
 /// Trusted native credentials cannot enter JSON requests.
 /// ```compile_fail
 /// fn export(value: &homeverb_midea::LoginCredentials) { let _ = serde_json::to_string(value); }
@@ -269,6 +272,7 @@ pub async fn login(
                 subject: SecretBytes::new(subject),
                 token: SecretBytes::new(result.mdata.token.0.as_bytes().to_vec()),
                 key,
+                client_device_id: Some(SecretBytes::new(device_id.as_bytes().to_vec())),
             })
         })
         .await
@@ -282,6 +286,7 @@ pub struct MeijuSession {
     subject: SecretBytes,
     token: SecretBytes,
     key: SecretBytes,
+    client_device_id: Option<SecretBytes>,
 }
 
 impl fmt::Debug for MeijuSession {
@@ -296,6 +301,8 @@ struct StoredSession<'a> {
     subject: &'a str,
     token: &'a str,
     key: &'a str,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    client_device_id: Option<&'a str>,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -304,6 +311,8 @@ struct RestoredSession {
     subject: PrivateString,
     token: PrivateString,
     key: PrivateString,
+    #[serde(default)]
+    client_device_id: Option<PrivateString>,
 }
 
 impl MeijuSession {
@@ -347,10 +356,15 @@ impl MeijuSession {
         }
         Ok(SecretBytes::new(
             serde_json::to_vec(&StoredSession {
-                version: 1,
+                version: if self.client_device_id.is_some() {
+                    2
+                } else {
+                    1
+                },
                 subject: text(&self.subject)?,
                 token: text(&self.token)?,
                 key: text(&self.key)?,
+                client_device_id: self.client_device_id.as_ref().map(text).transpose()?,
             })
             .map_err(|_| invalid())?,
         ))
@@ -369,7 +383,18 @@ impl MeijuSession {
         let stored: RestoredSession =
             serde_json::from_slice(bytes.expose()).map_err(|_| invalid_session())?;
         let subject = stored.subject.0.as_bytes();
-        if stored.version != 1
+        let valid_version = match (stored.version, &stored.client_device_id) {
+            (1, None) => true,
+            (2, Some(id)) => {
+                id.0.len() == 16
+                    && id
+                        .0
+                        .bytes()
+                        .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+            }
+            _ => false,
+        };
+        if !valid_version
             || subject
                 .strip_prefix(b"meiju.login-id.v1:")
                 .is_none_or(|id| !ascii(id, 256, false))
@@ -383,6 +408,10 @@ impl MeijuSession {
             subject: SecretBytes::new(subject.to_vec()),
             token: SecretBytes::new(stored.token.0.as_bytes().to_vec()),
             key: SecretBytes::new(stored.key.0.as_bytes().to_vec()),
+            client_device_id: stored
+                .client_device_id
+                .as_ref()
+                .map(|id| SecretBytes::new(id.0.as_bytes().to_vec())),
         })
     }
 

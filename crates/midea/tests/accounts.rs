@@ -1180,3 +1180,6 @@ async fn foreign_region_never_uses_the_mainland_endpoint() {
 
 #[path = "accounts/product.rs"]
 mod product;
+
+#[path = "accounts/lan.rs"]
+mod lan;

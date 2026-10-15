@@ -56,6 +56,11 @@ fn decrypt(bytes: &[u8], key: &[u8]) -> Result<Zeroizing<Vec<u8>>> {
 }
 
 /// One handshake using explicitly supplied protected credentials, with no defaults.
+/// ```compile_fail
+/// fn export(handshake: &homeverb_midea::lan::V3Handshake) {
+///     let _ = serde_json::to_string(handshake);
+/// }
+/// ```
 pub struct V3Handshake {
     key: SecretBytes,
     request: SecretBytes,

@@ -923,3 +923,35 @@ cloud behavior are unchanged. No adapter/entry point invokes this low-level
 helper yet. Protected identity/credentials, current membership, grants, model
 admission and inner response evidence must gate future real LAN access. No real
 account, household endpoint or separate Flutter worktree was accessed.
+
+## Account-bound Meiju LAN credentials
+
+[ADR-0047](adr/0047-account-bound-lan-credentials.md) adds an explicit native
+credential lookup from the exact protected local device binding. Last complete
+membership, region, session and six-byte ID checks precede any request. Fresh
+home listings must yield one target with consistent identity/product evidence;
+partial, conflicting or ambiguous results never trigger a token request. One
+reviewed Meiju v2 request selects exactly one UDP-ID entry and returns protected
+V3 handshake material. No scan, LAN peer access, persistence of Token/Key,
+default key, v1 fallback or automatic alternate method is added.
+
+Successful explicit login now saves protected inner session version 2, retaining
+the original login client identifier required by the complete token request.
+Version-1 sessions remain usable for existing cloud functions and are never
+rewritten implicitly. Only the new lookup requires explicit same-account
+reauthorization when that identifier is absent. Tests preserve the account and
+device bindings through this upgrade and keep the identifier out of SQLite and
+public metadata. Older binaries refuse inner version 2; do not reset bindings.
+
+Native API 1.14.1, all 31 JSON methods/11 C and JNI exports, SQLite schema 4 and
+outer protected payload 3 are unchanged. The helper is not registered as a LAN
+route and requires cloud connectivity; endpoint reconciliation, permissions,
+inner packet/model codecs and physical/off-LAN acceptance remain unfinished.
+No real account, appliance, existing pilot store or Flutter worktree was accessed.
+
+On October 16, 2026, formatting, workspace Clippy, workspace/example builds and
+local validators passed. Rust tests: 359 passed, two explicitly ignored; runtime
+acceptance: 35 passed; native contract: 31 methods/51 fictional examples plus
+approval checks; Python tooling: 33 passed; presentation: six passed. All three
+Android AAR variants passed build/export/16 KiB ELF checks. No fresh emulator,
+phone, live credential, physical or off-LAN acceptance was performed.

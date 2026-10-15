@@ -22,6 +22,13 @@ It exposes no retained connection and spawns no worker. Cancellation or dropping
 the future closes the socket without clearing possible command transmission;
 closing the socket cannot roll back bytes already accepted by the network stack.
 
+The [account-bound credential lookup](adr/0047-account-bound-lan-credentials.md)
+holds the existing native account lease and uses one inherited Operation for all
+home listings and its single v2 token request. Cancellation, expiry or future
+drop stops further requests without saving credentials or changing inventory.
+Returned handshake material has protected ownership and opens no LAN connection;
+there is no retained session cache, refresh task or idle lookup.
+
 Authentication callbacks may bind a temporary loopback port with a short deadline; never bind `0.0.0.0`. A protocol may require a temporary UDP socket. It must not expose a general control API or remain open after the operation.
 
 The [foreground sharing decision](adr/0008-foreground-authorization-sharing.md) additionally permits bounded local-network discovery and transfer listeners within an explicit sharing operation. These expose only the reviewed transfer protocol on the selected local network, never a device-control API or relay. Merely opening Settings does not start them. Closing a sharing operation cannot retract credentials already imported by another installation.

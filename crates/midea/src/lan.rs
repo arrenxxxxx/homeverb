@@ -2,6 +2,7 @@
 //! Derived from the MIT source recorded in third-party/midea-local/NOTICE.md.
 
 mod discovery;
+pub use crate::auth::LanUdpIdMethod;
 pub use discovery::{DiscoveryNetwork, DiscoveryReport, discover};
 mod v3;
 pub use v3::{V3Handshake, V3Response, V3Session, v3_frame_len};

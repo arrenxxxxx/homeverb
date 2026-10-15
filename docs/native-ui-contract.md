@@ -923,3 +923,12 @@ that home's inventory invalid; incomplete retrieval preserves existing cards and
 membership. Uncertain protected saves use the existing pending/recovery flow.
 API 1.12 uses this protected evidence for the reviewed temperature mappings above.
 Physical temperature acceptance and appliance-cycle support remain outstanding.
+
+The native-only LAN credential foundation in
+[ADR-0047](adr/0047-account-bound-lan-credentials.md) changes the protected inner
+session to version 2 after successful explicit login, retaining its private client
+identifier. This is separate from outer account payload version 3. Current
+libraries continue using version-1 sessions for existing cloud functions without
+rewriting them. Older libraries refuse inner version 2; upgrade rather than reset
+accounts or discard local bindings. No client identifier, Token/Key, LAN method or
+new consent flow is exposed to Flutter by this phase; API 1.14.1 is unchanged.

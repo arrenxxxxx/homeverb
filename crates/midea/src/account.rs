@@ -18,6 +18,8 @@ use std::{
 use uuid::Uuid;
 use zeroize::Zeroize;
 
+mod lan;
+
 const PROVIDER: &str = "midea.meiju";
 const MAX_BINDINGS: usize = 4096;
 

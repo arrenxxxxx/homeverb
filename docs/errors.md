@@ -153,6 +153,24 @@ command; a command write begins `possibly_sent`, including partial writes and
 later response failures. A transport error never resets that marker or authorizes
 a retry/fallback. Raw errors, addresses, credentials and packets remain excluded.
 
+The [account-bound LAN credential lookup](adr/0047-account-bound-lan-credentials.md)
+uses existing vault/session errors before network access. A legacy session without its original login client ID
+returns `AUTH_REQUIRED` before any request and needs explicit same-account
+reauthorization for this new lookup only. Malformed inner session version/ID
+combinations return `ACCOUNT_SESSION_UNCONFIRMED`. Foreign regions return
+`AUTH_FLOW_UNSUPPORTED`; unsupported families or IDs wider than six bytes return
+`CAPABILITY_UNSUPPORTED`. Binding changes, conflicting target evidence and duplicate
+target occurrences return `DEVICE_IDENTITY_CONFLICT`. Saved unknown membership
+returns `MIDEA_INVENTORY_REQUIRED`; saved or fresh absence returns
+`MIDEA_DEVICE_NOT_LISTED`. Any home-list failure prevents the token request.
+More than 32 homes, malformed/oversized token responses, duplicate matching UDP
+IDs, invalid hex or credential lengths return `MIDEA_RESPONSE_INVALID`.
+No matching token returns fixed `AUTH_REQUIRED`, which does not prove cloud
+session expiry. Provider rejection/expiry and transport failures retain their
+sanitized read errors, including v2 rejection without v1 fallback. Cancellation
+and deadline stop all further requests. None of these outcomes sends an appliance
+command, changes saved membership or authorizes a credential retry against a peer.
+
 The account-bound read path returns `DEVICE_IDENTITY_CONFLICT` before transport when the local device, selected connection or known model differs from the protected binding. Invalid components return `CAPABILITY_UNSUPPORTED`. Pending or unavailable credentials stop the request through the vault. Core rejects decoded but undeclared properties with `INVALID_OBSERVATION`; neither that rejection nor a protocol failure replaces the previous cache or triggers a retry.
 
 Protected inventory membership is independent of historical identity. API 1.9.1

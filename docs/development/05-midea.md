@@ -301,8 +301,35 @@ failures retain possible transmission. Even a valid response does not establish
 acceptance, device identity, freshness or physical execution. Protected identity,
 membership, grants and exact-model admission must precede this low-level native
 call. Fictional loopback tests verify transport behavior; no real LAN route or
-native JSON method is enabled. Credential retrieval, identity reconciliation,
+native JSON method is enabled. Endpoint identity reconciliation,
 inner packet/model validation and physical acceptance remain pending.
+
+### Account-bound V3 credentials
+
+[ADR-0047](../adr/0047-account-bound-lan-credentials.md) adds the native
+`MeijuAccount::lan_v3_handshake` helper. Supply the exact local `DeviceBinding`
+and explicitly select `LanUdpIdMethod::BigEndian` or `LittleEndian`. The helper
+checks protected membership/session/region, lists at most 32 homes, and requires
+one target occurrence with consistent family, model and product evidence before
+requesting `/v2/iot/secure/getToken` once. The body contains the resolved string
+`homegroupId`, one-element `applianceCodes` array and derived `udpid`, plus the
+reviewed general app fields, UTC stamp and original login client identifier.
+
+New logins retain that identifier in protected inner session version 2. Legacy
+version-1 sessions still support existing cloud reads/controls and are not rewritten
+by restoration or this lookup. The new helper refuses them with `AUTH_REQUIRED`
+before networking; explicit same-account reauthorization supplies the missing
+identifier while preserving local bindings. Outer payload version 3 and SQLite
+schema 4 are unchanged. Older binaries cannot use inner session version 2.
+
+Only one matching token entry is admitted. The returned opaque `V3Handshake`
+uses zeroizing credential ownership; no token/key or home identifier is saved,
+and no account inventory is republished. This operation requires cloud access.
+There is no v1 fallback, default key, automatic alternate method, retry or LAN
+connection. Scripted fictional tests exercise failure, ambiguity, lifecycle and
+unchanged-storage cases. No native JSON method or registered route calls it yet.
+Endpoint reconciliation, permissions, inner model codecs and physical acceptance
+remain necessary before these credentials can be used against a real peer.
 
 ## Fit the embedded Core
 

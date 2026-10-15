@@ -95,6 +95,8 @@ async fn login_persists_only_private_session_and_signs_inventory_and_state_reque
     let encoded = session.encode().unwrap();
     let stored: Value = serde_json::from_slice(encoded.expose()).unwrap();
     assert_eq!(stored["key"], vector()["session_key"]);
+    assert_eq!(stored["version"], 2);
+    assert_eq!(stored["client_device_id"], vector()["device_id"]);
     for forbidden in ["account", "password", "iampwd", "deviceId"] {
         assert!(stored.get(forbidden).is_none());
     }
@@ -138,6 +140,46 @@ async fn login_persists_only_private_session_and_signs_inventory_and_state_reque
     assert!(calls[2..].iter().all(|call| call.2));
     assert_eq!(calls[4].1["applianceCode"], "31");
     assert_eq!(calls[4].1["command"], json!({"query":{}}));
+}
+
+#[test]
+fn stored_session_versions_preserve_legacy_and_validate_private_client_ids() {
+    let legacy = json!({"version":1,"subject":"meiju.login-id.v1:test-id","token":"FICTIONAL-ACCESS-TOKEN","key":"synthetic-key-01"});
+    let restore = |value: &Value| {
+        MeijuSession::restore(&SecretBytes::new(serde_json::to_vec(value).unwrap()))
+    };
+    let session = restore(&legacy).unwrap();
+    let encoded: Value = serde_json::from_slice(session.encode().unwrap().expose()).unwrap();
+    assert_eq!(encoded, legacy);
+    let mut current = legacy.clone();
+    current["version"] = json!(2);
+    current["client_device_id"] = vector()["device_id"].clone();
+    let session = restore(&current).unwrap();
+    let encoded: Value = serde_json::from_slice(session.encode().unwrap().expose()).unwrap();
+    assert_eq!(encoded, current);
+    for (field, value) in [
+        ("version", json!(1)),
+        ("version", json!(3)),
+        ("client_device_id", Value::Null),
+        ("client_device_id", json!("")),
+        ("client_device_id", json!("0123456789abcde")),
+        ("client_device_id", json!("0123456789abcdef0")),
+        ("client_device_id", json!("0123456789abcdeg")),
+        ("client_device_id", json!("0123456789abcdeF")),
+        ("client_device_id", json!("\u{e9}".repeat(8))),
+    ] {
+        let mut malformed = current.clone();
+        malformed[field] = value;
+        assert_eq!(
+            restore(&malformed).unwrap_err().code,
+            "ACCOUNT_SESSION_UNCONFIRMED"
+        );
+    }
+    current.as_object_mut().unwrap().remove("client_device_id");
+    assert_eq!(
+        restore(&current).unwrap_err().code,
+        "ACCOUNT_SESSION_UNCONFIRMED"
+    );
 }
 
 #[tokio::test]
