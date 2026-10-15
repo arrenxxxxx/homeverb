@@ -403,3 +403,42 @@ Mock appliance and opened its card. Android screenshots record the device image
 and detail screen. Force-stop/cold restart restored the saved Mock card, confirmed
 by the accessibility tree and `image-alignment-release-home.png`. The local delivery
 APK/hash manifest was updated. No real network appliance or owner account was used.
+
+
+## Surface-gradient raster alignment
+
+The prototype evaluates its 35% horizontal / 65% vertical gradient at pixel
+origins and truncates each RGB channel. A normal Flutter gradient rounds channel
+values, leaving roughly half of sampled interior pixels one level too bright.
+Window Light now loads a bundled fragment program before the screen catalog and
+computes that formula directly for each physical pixel. Responsive bounds,
+opacity and solid high-contrast surfaces remain supported. Standalone widgets
+retain the ordinary gradient until application skin assets have loaded.
+
+All 82 captures were compared with the unchanged references. Seventy-four screens
+improve and eight remain unchanged; none regresses. Mean channel error drops from
+1.6208 to 1.5145/255. D01 changed pixels drop from 39.408% to 13.078%; S07 drops
+from 45.149% to 10.734%. Two interior regions (12,375 dark-card pixels and 11,250
+light-card pixels) match all RGB channels exactly. Their coordinates and image
+hashes are recorded in `output/flutter-verification/gradient-pixel-samples.json`.
+This regional evidence does not establish whole-page equality: the strict gate
+still fails at **0/82 exact**, and the P08 baseline remains pending owner review.
+
+The final 61-test Flutter suite passed, including native Mock widget clicks,
+198 explicitly simulated atlas branches, narrow/large-text layouts and high
+contrast. No native method or appliance-operation semantics changed.
+
+An initial multi-stop gradient approach produced black dots in the actual Android
+renderer despite passing desktop capture checks. That approach was discarded.
+The direct fragment program renders correctly in the ordinary Android release
+APK. The same 16,425-pixel background region changed from 172 anomalous black
+pixels to zero; the dark card and light Settings cards were visually inspected.
+Cold launch and root navigation passed on the isolated emulator. These checks do
+not establish other GPU, physical-phone or iOS compatibility.
+
+Final static analysis and the isolated web-preview build passed; browser runtime
+rendering was not rechecked in this phase. Documentation, contract and repository
+validators passed. The ordinary Android APK passed 16 KiB ZIP alignment; the local
+delivery APK/hash manifest was updated. GPU comparison evidence is stored as
+`output/flutter-verification/android/gradient-gpu-check.json`, and
+`gradient-alignment-release-home.png` records the final cold launch.

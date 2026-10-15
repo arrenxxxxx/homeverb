@@ -17,9 +17,13 @@ class ScreenCatalog {
   }
   final Map<String, Json> screens = {};
   late final List<Json> branches;
-  static Future<ScreenCatalog> load() async => ScreenCatalog(
-    jsonDecode(await rootBundle.loadString('assets/prototype.json')) as Json,
-  );
+  static Future<ScreenCatalog> load() async {
+    await loadWindowSkin();
+    return ScreenCatalog(
+      jsonDecode(await rootBundle.loadString('assets/prototype.json')) as Json,
+    );
+  }
+
   Json ui(String id) => screens[id]!['ui'] as Json;
 }
 

@@ -20,6 +20,8 @@ dev_dependencies:
     sdk: flutter
 flutter:
   uses-material-design: true
+  shaders:
+    - shaders/window_surface.frag
   assets:
     - assets/
     - assets/fonts/LICENSE.txt

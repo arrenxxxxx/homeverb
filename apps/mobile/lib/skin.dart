@@ -20,6 +20,14 @@ class HomeVerbSkin extends ThemeExtension<HomeVerbSkin> {
 }
 
 const skinRegistry = {'window_light': HomeVerbSkin()};
+ui.FragmentProgram? _surfaceProgram;
+Future<void>? _surfaceProgramLoad;
+Future<void> loadWindowSkin() => _surfaceProgramLoad ??=
+    ui.FragmentProgram.fromAsset('shaders/window_surface.frag').then<void>((
+      program,
+    ) {
+      _surfaceProgram = program;
+    });
 ThemeData windowTheme({bool highContrast = false}) => ThemeData(
   fontFamily: 'Inter',
   useMaterial3: true,
@@ -177,6 +185,7 @@ class Surface extends StatelessWidget {
       gradient: MediaQuery.highContrastOf(context)
           ? null
           : WindowSurfaceGradient(
+              pixelRatio: MediaQuery.devicePixelRatioOf(context),
               bottomBleed: bottomBleed,
               colors: dark
                   ? const [Color(0xff42413e), Color(0xff2b2e2f)]
@@ -209,8 +218,12 @@ class Surface extends StatelessWidget {
 }
 
 class WindowSurfaceGradient extends Gradient {
-  const WindowSurfaceGradient({required super.colors, this.bottomBleed = 0});
-  final double bottomBleed;
+  const WindowSurfaceGradient({
+    required super.colors,
+    required this.pixelRatio,
+    this.bottomBleed = 0,
+  });
+  final double bottomBleed, pixelRatio;
   @override
   Shader createShader(Rect rect, {TextDirection? textDirection}) {
     rect = Rect.fromLTWH(
@@ -219,6 +232,31 @@ class WindowSurfaceGradient extends Gradient {
       rect.width,
       rect.height + bottomBleed,
     );
+    final program = _surfaceProgram;
+    if (program != null && !rect.isEmpty) {
+      final shader = program.fragmentShader();
+      final first = colors.first, last = colors.last;
+      final uniforms = [
+        rect.left,
+        rect.top,
+        rect.width,
+        rect.height,
+        pixelRatio,
+        first.r,
+        first.g,
+        first.b,
+        first.a,
+        last.r,
+        last.g,
+        last.b,
+        last.a,
+      ];
+      for (var i = 0; i < uniforms.length; i++) {
+        shader.setFloat(i, uniforms[i]);
+      }
+      return shader;
+    }
+    // Standalone widgets can render before the application skin assets load.
     // Preserve the prototype's 35% horizontal / 65% vertical light blend at any aspect ratio.
     if (rect.isEmpty)
       return ui.Gradient.linear(Offset.zero, const Offset(1, 1), colors);
@@ -234,11 +272,13 @@ class WindowSurfaceGradient extends Gradient {
 
   @override
   Gradient scale(double factor) => WindowSurfaceGradient(
+    pixelRatio: pixelRatio,
     bottomBleed: bottomBleed,
     colors: colors.map((c) => c.withValues(alpha: c.a * factor)).toList(),
   );
   @override
   Gradient withOpacity(double opacity) => WindowSurfaceGradient(
+    pixelRatio: pixelRatio,
     bottomBleed: bottomBleed,
     colors: colors.map((c) => c.withValues(alpha: opacity)).toList(),
   );
