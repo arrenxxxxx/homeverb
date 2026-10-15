@@ -249,3 +249,15 @@ newer protected exclusion. Static plans and cached reads remain local and do not
 check membership; execution can therefore refuse a previously valid plan. This
 is last-retrieval evidence, not an online signal or current authorization proof.
 No change is made to accepted/unknown writes, existing receipt lookup or journaling.
+
+## Midea LAN candidate collection
+
+The [bounded LAN collector](adr/0045-bounded-lan-discovery-decoding.md) uses the
+caller's existing Operation and a selected private/link-local subnet. It sends
+two fixed probes once, caps setup/collection at five seconds, and closes its
+socket on completion, error, cancellation or future drop. Source filtering,
+datagram/candidate limits and exact-tuple deduplication do not authenticate a
+peer. A normal or limited report is not a complete inventory and must not remove
+cards, merge identities, add routes or authorize TCP connections. CLI, native
+JSON and MCP do not invoke this foundation yet. Public request/result schemas,
+cloud routing and write outcome semantics remain unchanged.

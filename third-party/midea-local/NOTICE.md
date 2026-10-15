@@ -12,8 +12,10 @@ distributing the derived portions. HomeVerb's release license remains undecided.
 
 HomeVerb modifications: a bounded Rust decoder for V2 and V3-wrapped discovery
 packets, with strict inner framing/checksum/padding validation, native-only
-redacted candidates and fictional independent test vectors. No upstream network
-loops, credential caches, device logging or automatic discovery are copied.
+redacted candidates and fictional independent test vectors. A new operation-owned
+collector replaces upstream networking with explicit subnet scope, a fixed total
+window, response limits and cancellation. No upstream network loops, credential
+caches, device logging or automatic discovery are copied.
 Public fixed wire constants do not authenticate a device or protect HomeVerb
 credentials. LAN session authentication and physical compatibility are not
 established by this port.

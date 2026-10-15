@@ -838,3 +838,31 @@ acceptance: 35 passed; native contract: 31 methods/51 fictional examples plus
 approval checks; Python tooling: 33 passed; presentation: six passed. All three
 Android AAR variants passed build/export/16 KiB ELF checks. No real account,
 appliance, Flutter worktree or new Android runtime test was used in this phase.
+
+## Bounded LAN collection
+
+The follow-up to [ADR-0045](adr/0045-bounded-lan-discovery-decoding.md) adds a native
+UDP collector for an explicitly selected private/link-local subnet. It binds to
+the supplied local interface, sends one probe per reviewed port with TTL 1, and
+uses a fixed five-second window within the existing Operation. All datagrams
+count toward the 256-response limit; 64 distinct candidates also ends collection
+with `limit_reached`. Identical hints are deduplicated while conflicts remain
+untrusted candidates. No result establishes a complete inventory or permission.
+
+Six loopback tests exercise real UDP sockets with fictional responses, including
+invalid scope/source refusal, malformed and oversized packets, duplicate and
+conflicting hints, both limits, deadline/cancellation and rebinding after normal
+completion or future drop. The public scope rejects loopback; destination and
+scope overrides are private test fixtures. No household scan was performed.
+
+Native API 1.14.1, its methods/exports, SQLite schema 4, protected payload 3 and
+cloud execution are unchanged. The collector is not registered in Core or any
+entry point. Host network selection/consent, protected identity reconciliation,
+V3 authentication, TCP/model codecs and physical LAN acceptance remain pending.
+
+On October 16, 2026, formatting, workspace Clippy, workspace/example builds and
+local validators passed. Rust tests: 333 passed, two explicitly ignored; runtime
+acceptance: 35 passed; native contract: 31 methods/51 fictional examples plus
+approval checks; Python tooling: 33 passed; presentation: six passed. All three
+Android AAR variants passed build/export/16 KiB ELF checks. No Android network
+runtime, real account, appliance operation or separate Flutter worktree was used.

@@ -48,3 +48,34 @@ all truncation boundaries, oversized frames, checksum/ciphertext corruption,
 invalid padding, lengths, IDs, ports and family fields, and redaction. Compile-fail
 coverage must prevent accidental candidate serialization. No network or live
 appliance is needed for these checks.
+
+## Follow-up: bounded collection
+
+The native `discover` function adds an explicit operation-owned IPv4 UDP socket.
+The trusted caller supplies an assigned interface address and prefix after local
+network consent; neither a constructed scope nor a discovered response proves
+authorization. Accept only an RFC 1918 or link-local subnet, with a host address
+distinct from its network/broadcast address. Public networks, wildcard binding,
+loopback and subnets without broadcast host space are rejected by the public API.
+
+Bind to that local address, use TTL 1, and send the fixed probe once to each of
+ports 6445 and 20086 on that subnet's directed broadcast address. Start a fixed
+five-second window before socket setup; the inherited operation budget can only
+shorten it. No response resets the window. Cancellation, errors or dropping the
+future release the socket. Do not spawn a worker or retain an idle listener.
+
+Accept responses only from host addresses in the selected subnet. Read into a
+513-byte buffer so a truncated oversized datagram cannot masquerade as a valid
+512-byte response. Count all received datagrams, including malformed, duplicate
+and out-of-scope responses. Stop after 256 datagrams or 64 distinct candidates,
+setting `limit_reached`; this is not proof of a complete inventory. Deduplicate
+only identical ID/endpoint/protocol/family tuples. Retain conflicting hints for
+later reconciliation; never select the first identity claim as authoritative.
+
+Tests use private loopback destination overrides, fictional packets and explicit
+clock advances only after real socket setup. They cover both probes, malformed
+and out-of-scope responses, truncation, both limits, preflight cancellation/expiry,
+in-flight cancellation/expiry, fixed-window completion and socket rebinding after
+completion or dropped futures. No real network scan has been performed. Host UI
+selection/consent, protected identity reconciliation, V3 authentication and actual
+device operations remain pending; no native JSON method or schema changes.

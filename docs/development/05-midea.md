@@ -246,7 +246,7 @@ The [LAN setup documentation][ha] describes cloud onboarding to retrieve Token/K
 
 Use one physical Device with cloud and, when established safely, LAN connections. Preserve existing [routing rules](../routing-and-execution.md): explicit cloud works independently of LAN, explicit LAN never falls back, and Auto chooses a permitted action-supported route with LAN preferred when available. Never race writes or replay a possibly-sent write on another route. A cloud API success is not physical verification; keep accepted or uncertain outcomes honest when fresh evidence is unavailable.
 
-### Offline discovery decoder
+### LAN discovery foundation
 
 `homeverb_midea::lan` implements the fixed discovery request and a pure, bounded
 V2/V3-wrapped response decoder under
@@ -257,10 +257,19 @@ limited to 512 bytes. The endpoint uses the supplied datagram peer address.
 
 Candidates are native-only, redacted and unauthenticated. The public checksum and
 wire key do not prove identity; serial, MAC, SSID and model text are discarded.
-This module opens no sockets and does not add a LAN connection to a card. Next
-gates are bounded foreground collection, protected identity reconciliation, V3
-token/key retrieval and handshake, TCP framing and exact-model codecs. V1 XML,
-real LAN scanning and physical LAN acceptance remain unimplemented or unverified.
+The decoder itself opens no sockets or connections. The separate `discover`
+function accepts a trusted `DiscoveryNetwork` built from an assigned private or
+link-local interface address and prefix after network consent. It sends one probe
+to each reviewed port on that subnet, receives for at most five seconds within
+the inherited Operation, and releases its socket on every exit. Reports retain
+conflicting hints and expose `limit_reached` at 64 candidates or 256 datagrams.
+They are not complete account inventories and never remove existing cards.
+
+Loopback tests cover the collector; no real LAN scan has been performed. No native
+JSON method, startup scan or LAN connection is registered. Host network selection
+and consent, protected identity reconciliation, V3 token/key retrieval and
+handshake, TCP framing and exact-model codecs remain next gates. V1 XML is
+unsupported, and physical LAN acceptance remains unverified.
 
 ## Fit the embedded Core
 

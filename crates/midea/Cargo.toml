@@ -19,7 +19,7 @@ hmac = "0.13.0"
 md-5 = "0.11"
 aes = { version = "0.9.3", features = ["zeroize"] }
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls-webpki-roots"] }
-tokio.workspace = true
+tokio = { workspace = true, features = ["net"] }
 
 [dev-dependencies]
 jsonschema.workspace = true

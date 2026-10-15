@@ -1,6 +1,9 @@
 //! Bounded LAN discovery decoding, not device authentication or a registered route.
 //! Derived from the MIT source recorded in third-party/midea-local/NOTICE.md.
 
+mod discovery;
+pub use discovery::{DiscoveryNetwork, DiscoveryReport, discover};
+
 use crate::{ApplianceFamily, CloudId};
 use aes::{
     Aes128,

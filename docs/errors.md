@@ -127,6 +127,14 @@ source addresses, lengths, checksums, padding, IDs, ports or family fields. Erro
 contain no datagram bytes or identifiers. This is local parsing without network
 I/O, account access, retries or device admission; it establishes no write outcome.
 
+The separate bounded LAN collector rejects invalid network scopes with
+`INVALID_ARGUMENT`. Socket setup/send/receive failures return fixed
+`MIDEA_REQUEST_FAILED` without OS messages or addresses; cancellation and inherited
+budget expiry retain `CANCELLED` and `DEADLINE_EXCEEDED`. Received invalid packets
+are ignored within the datagram limit. A completed five-second window is an
+observation report, not proof that every device responded; `limit_reached` marks
+early bounded completion. Errors publish no partial candidates or device changes.
+
 The account-bound read path returns `DEVICE_IDENTITY_CONFLICT` before transport when the local device, selected connection or known model differs from the protected binding. Invalid components return `CAPABILITY_UNSUPPORTED`. Pending or unavailable credentials stop the request through the vault. Core rejects decoded but undeclared properties with `INVALID_OBSERVATION`; neither that rejection nor a protocol failure replaces the previous cache or triggers a retry.
 
 Protected inventory membership is independent of historical identity. API 1.9.1
