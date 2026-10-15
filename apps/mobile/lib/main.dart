@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:file_selector/file_selector.dart';
 import 'blocks.dart';
+import 'appliance_controls.dart';
 import 'controller.dart';
 import 'controls.dart';
 import 'native_client.dart';
@@ -716,7 +717,9 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         break;
       case 'C01':
         ui['header'] = device?['alias'] ?? 'Device';
-        ui['subtitle'] = c.roomName(prefs?['room_id']);
+        ui['subtitle'] = applianceFamily(c) == null
+            ? c.roomName(prefs?['room_id'])
+            : '';
         final temperature = c.observed('climate.target_temperature');
         final targetAction = c.capability('climate')?['actions']?['set'];
         final power = c.capability('power');
@@ -1037,6 +1040,22 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             ? c.filter
             : c.roomName(c.filter),
       );
+    if (id == 'C01' && applianceFamily(c) != null) {
+      final epoch = navigation;
+      return ApplianceControls(
+        key: ValueKey(
+          '${c.selectedDevice}:${c.component}:${applianceFamily(c)}',
+        ),
+        controller: c,
+        family: applianceFamily(c)!,
+        onAction: action,
+        onExecute: (capability, action, arguments) async {
+          final success = await c.execute(capability, action, arguments);
+          if (success && mounted && epoch == navigation) await go('S06');
+          return success;
+        },
+      );
+    }
     if (id == 'C10' && actionCapability != null && actionName != null) {
       final epoch = navigation;
       return CapabilityActionForm(

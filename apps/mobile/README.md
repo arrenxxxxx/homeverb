@@ -47,6 +47,7 @@ fvm flutter build web -t lib/main_preview.dart
 - Core owns metadata. Presentation preferences contain only skin, root, sharing display name and route choices. Save failures retain previous preferences.
 - Component selection uses exact IDs and each component's capability references. Observations are cached separately per device/component; a secondary compartment never replaces the primary card observation. Unsupported temperature actions remain read-only.
 - Described scalar actions use typed parameter forms, exact bounds/steps/enums and explicit submission. Read-only, unsupported and trusted-approval actions remain unavailable. Isolated non-climate fixtures do not register additional native adapters.
+- Single-family light/fan/media/sensor/cycle components use dedicated Window Light controls. Sliders and fan steppers use the described range and step; mixed or coupled actions retain explicit forms. Missing and stale observations remain labelled, and high-risk actions remain unavailable.
 - Diagnostics export only the exact report displayed in the preview.
 
 ## Verification boundary

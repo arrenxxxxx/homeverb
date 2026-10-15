@@ -257,6 +257,139 @@ class ActionButton extends StatelessWidget {
   );
 }
 
+class InlineStepper extends StatelessWidget {
+  const InlineStepper({
+    required this.label,
+    required this.value,
+    required this.onIncrease,
+    required this.onDecrease,
+    super.key,
+  });
+  final String label, value;
+  final VoidCallback? onIncrease, onDecrease;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    width: 155,
+    height: 44 * MediaQuery.textScalerOf(context).scale(12) / 12,
+    child: Stack(
+      alignment: Alignment.center,
+      children: [
+        Positioned(
+          left: 60,
+          right: 45,
+          child: Copy(value, size: 12, bold: true, center: true),
+        ),
+        for (final increase in [false, true])
+          Positioned(
+            left: increase ? 111 : 16,
+            top: 0,
+            bottom: 0,
+            width: 44,
+            child: Semantics(
+              button: true,
+              label: '${increase ? 'Increase' : 'Decrease'} $label',
+              child: InkWell(
+                onTap: increase ? onIncrease : onDecrease,
+                child: Center(
+                  child: Container(
+                    width: 30,
+                    height: 30,
+                    alignment: Alignment.center,
+                    decoration: const BoxDecoration(
+                      color: Color(0xffe6e2d8),
+                      shape: BoxShape.circle,
+                    ),
+                    child: ExcludeSemantics(
+                      child: Copy(increase ? '+' : '−', size: 16, center: true),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    ),
+  );
+}
+
+class ValueSlider extends StatelessWidget {
+  const ValueSlider({
+    required this.label,
+    required this.displayValue,
+    required this.value,
+    required this.onChanged,
+    required this.onChangeEnd,
+    required this.formatValue,
+    this.min = 0,
+    this.max = 1,
+    super.key,
+  });
+  final String label, displayValue;
+  final double value, min, max;
+  final ValueChanged<double>? onChanged, onChangeEnd;
+  final String Function(double) formatValue;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget slider() => SliderTheme(
+      data: SliderTheme.of(context).copyWith(
+        trackHeight: 5,
+        activeTrackColor: accent,
+        inactiveTrackColor: const Color(0xffd5d6cf),
+        thumbShape: const WindowSliderThumb(),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        trackShape: const RoundedRectSliderTrackShape(),
+      ),
+      child: Slider(
+        value: value.clamp(min, max),
+        min: min,
+        max: max,
+        semanticFormatterCallback: formatValue,
+        onChanged: onChanged,
+        onChangeEnd: onChangeEnd,
+      ),
+    );
+    Widget heading() => Row(
+      children: [
+        Expanded(child: Copy(label)),
+        Copy(displayValue, bold: true),
+      ],
+    );
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 13),
+      child: Surface(
+        radius: 18,
+        child: MediaQuery.textScalerOf(context).scale(13) <= 13
+            ? SizedBox(
+                height: 94,
+                child: Stack(
+                  children: [
+                    Positioned(top: 16, left: 16, right: 16, child: heading()),
+                    Positioned(
+                      top: 39.5,
+                      left: 0,
+                      right: 0,
+                      height: 48,
+                      child: slider(),
+                    ),
+                  ],
+                ),
+              )
+            : Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                    child: heading(),
+                  ),
+                  slider(),
+                ],
+              ),
+      ),
+    );
+  }
+}
+
 class ChoiceTile extends StatelessWidget {
   const ChoiceTile({
     required this.label,

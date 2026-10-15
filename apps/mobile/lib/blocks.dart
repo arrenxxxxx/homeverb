@@ -421,87 +421,18 @@ class Blocks extends StatelessWidget {
       case 'slider':
         final label = b[1] as String,
             value = values[b[1]] ?? (b[3] as num).toDouble();
-        Widget slider() => SliderTheme(
-          data: SliderTheme.of(context).copyWith(
-            trackHeight: 5,
-            activeTrackColor: accent,
-            inactiveTrackColor: const Color(0xffd5d6cf),
-            thumbShape: const WindowSliderThumb(),
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            trackShape: const RoundedRectSliderTrackShape(),
-          ),
-          child: Slider(
-            value: value.clamp(0, 1),
-            semanticFormatterCallback: (v) => '$label ${(v * 100).round()}',
-            onChanged: (v) {
-              values[label] = v;
-              onChanged?.call();
-            },
-            onChangeEnd: (_) => onAction('slider:$label'),
-          ),
-        );
-        if (MediaQuery.textScalerOf(context).scale(13) <= 13) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 13),
-            child: Surface(
-              radius: 18,
-              child: SizedBox(
-                height: 94,
-                child: Stack(
-                  children: [
-                    Positioned(
-                      top: 16,
-                      left: 16,
-                      right: 16,
-                      child: Row(
-                        children: [
-                          Expanded(child: Copy(label)),
-                          Copy(
-                            values.containsKey(label)
-                                ? '${(value * 100).round()}'
-                                : b[2],
-                            bold: true,
-                          ),
-                        ],
-                      ),
-                    ),
-                    Positioned(
-                      top: 39.5,
-                      left: 0,
-                      right: 0,
-                      height: 48,
-                      child: slider(),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        }
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 13),
-          child: Surface(
-            radius: 18,
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                  child: Row(
-                    children: [
-                      Expanded(child: Copy(label)),
-                      Copy(
-                        values.containsKey(label)
-                            ? '${(value * 100).round()}'
-                            : b[2],
-                        bold: true,
-                      ),
-                    ],
-                  ),
-                ),
-                slider(),
-              ],
-            ),
-          ),
+        return ValueSlider(
+          label: label,
+          displayValue: values.containsKey(label)
+              ? '${(value * 100).round()}'
+              : b[2],
+          value: value,
+          formatValue: (v) => '$label ${(v * 100).round()}',
+          onChanged: (v) {
+            values[label] = v;
+            onChanged?.call();
+          },
+          onChangeEnd: (_) => onAction('slider:$label'),
         );
       case 'stepper':
         return Rows([
@@ -790,13 +721,22 @@ class Rows extends StatelessWidget {
                           measurement.dispose();
                           final leading = Copy(label);
                           final trailing = stepper
-                              ? _RowStepper(
+                              ? InlineStepper(
                                   label: label,
                                   value: value
                                       .replaceFirst('−', '')
                                       .replaceFirst('+', '')
                                       .trim(),
-                                  onAction: action == null ? null : onAction,
+                                  onIncrease: action == null
+                                      ? null
+                                      : () => onAction(
+                                          'preview-step:increase:$label',
+                                        ),
+                                  onDecrease: action == null
+                                      ? null
+                                      : () => onAction(
+                                          'preview-step:decrease:$label',
+                                        ),
                                 )
                               : toggle
                               ? Row(
@@ -861,64 +801,6 @@ class Rows extends StatelessWidget {
           ],
         ],
       ),
-    ),
-  );
-}
-
-class _RowStepper extends StatelessWidget {
-  const _RowStepper({
-    required this.label,
-    required this.value,
-    required this.onAction,
-  });
-  final String label, value;
-  final ActionHandler? onAction;
-
-  @override
-  Widget build(BuildContext context) => SizedBox(
-    width: 155,
-    height: 44 * MediaQuery.textScalerOf(context).scale(12) / 12,
-    child: Stack(
-      alignment: Alignment.center,
-      children: [
-        Positioned(
-          left: 60,
-          right: 45,
-          child: Copy(value, size: 12, bold: true, center: true),
-        ),
-        for (final increase in [false, true])
-          Positioned(
-            left: increase ? 111 : 16,
-            top: 0,
-            bottom: 0,
-            width: 44,
-            child: Semantics(
-              button: true,
-              label: '${increase ? 'Increase' : 'Decrease'} $label',
-              child: InkWell(
-                onTap: onAction == null
-                    ? null
-                    : () => onAction!(
-                        'preview-step:${increase ? 'increase' : 'decrease'}:$label',
-                      ),
-                child: Center(
-                  child: Container(
-                    width: 30,
-                    height: 30,
-                    alignment: Alignment.center,
-                    decoration: const BoxDecoration(
-                      color: Color(0xffe6e2d8),
-                      shape: BoxShape.circle,
-                    ),
-                    child: ExcludeSemantics(
-                      child: Copy(increase ? '+' : '−', size: 16, center: true),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-      ],
     ),
   );
 }

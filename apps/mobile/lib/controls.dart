@@ -54,12 +54,15 @@ String? actionUnavailable(Json capability, Json action) {
   return null;
 }
 
-List<dynamic> describedControls(HomeController c) {
+List<dynamic> describedControls(
+  HomeController c, {
+  Set<String> exclude = const {},
+}) {
   final result = <dynamic>[];
   for (var i = 0; i < c.capabilities.length; i++) {
     final capability = c.capabilities[i], id = capability['id'] as String;
     // The climate panel and power row already expose these common controls.
-    if (id == 'power') continue;
+    if (id == 'power' || exclude.contains(id)) continue;
     final properties = capability['properties'] as Json;
     final actions = capability['actions'] as Json;
     final extraClimate =
