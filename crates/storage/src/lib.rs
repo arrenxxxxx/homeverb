@@ -13,6 +13,7 @@ use std::{
 };
 
 mod accounts;
+mod file_lock;
 mod journal;
 mod migration;
 mod organization;
@@ -61,7 +62,7 @@ impl SqliteStore {
             .truncate(false)
             .open(directory.join("migration.lock"))
             .map_err(storage_error)?;
-        schema_lock.try_lock_shared().map_err(|_| busy())?;
+        file_lock::shared(&schema_lock).map_err(|_| busy())?;
         let mut connection =
             Connection::open(directory.join("homeverb.sqlite3")).map_err(storage_error)?;
         connection
@@ -72,11 +73,11 @@ impl SqliteStore {
             return Err(migration::unsupported());
         }
         if version < migration::SCHEMA_VERSION {
-            schema_lock.unlock().map_err(storage_error)?;
-            schema_lock.try_lock().map_err(|_| busy())?;
+            file_lock::unlock(&schema_lock).map_err(storage_error)?;
+            file_lock::exclusive(&schema_lock).map_err(|_| busy())?;
             migration::upgrade(&mut connection, directory)?;
-            schema_lock.unlock().map_err(storage_error)?;
-            schema_lock.try_lock_shared().map_err(|_| busy())?;
+            file_lock::unlock(&schema_lock).map_err(storage_error)?;
+            file_lock::shared(&schema_lock).map_err(|_| busy())?;
         }
         connection
             .execute_batch("PRAGMA foreign_keys=ON; PRAGMA synchronous=FULL;")
@@ -219,7 +220,7 @@ impl Store for SqliteStore {
             .truncate(false)
             .open(self.locks.join(name))
             .map_err(storage_error)?;
-        file.try_lock().map_err(|_| {
+        file_lock::exclusive(&file).map_err(|_| {
             Error::new(
                 "RESOURCE_BUSY",
                 "Another process is operating on this device.",

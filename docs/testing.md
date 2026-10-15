@@ -46,8 +46,8 @@ After dependencies are cached, add `--offline` to Cargo commands. Use a Python v
 | CLI runtime | Actual binary output validated against JSON Schemas, exit codes, room/preferences and state persistence, batch rollback after an injected second-device update failure, filtered history, schema-1 upgrade, injected SQLite journal failure, dry run, SIGINT, and forced termination/restart |
 | Meiju CLI | Actual binary empty-account discovery, metadata rename/reopen, native response-schema validation, nested refresh/recovery/removal errors and exit codes, exact cleanup scope, isolated adapter defaults, cached cards/receipts, unavailable-keyring preflight and refusal of ungranted writes/Mock/credential arguments and command-only MCP options; isolated PTY tests cover hidden bounded input, cancellation, echo restoration and queued-input clearing. No live CLI login or provider request |
 | Meiju CLI grants | Strict schema/native-list parity, bounded file reads, final symlink/FIFO/directory/permission refusal, complete validation before profile creation, explicit request IDs, actual CLI exact-device/state/route plans, independent fan revocation, batch preflight without receipts, pending-account not-sent execution, replay/conflict and receipt lookup without grants; fictional profiles only |
-| Android credential storage | Production Java compilation against official API stubs, 54 synthetic encrypted-entry assertions (round trips, randomized ciphertext, profile/reference binding, tampering, key loss, bounded data, locks, symlinks and deletion), and an explicitly run JVM/JNI test for array clearing, status mapping, cancellation/deadlines and uncertain writes; no Android Keystore or phone test |
-| Android native library | API 28 arm64/x86_64 and combined AAR cross-builds with NDK r28c, JDK 21 and API 35 stubs; production-only archives, eight native exports per ABI and 16 KiB ELF alignment checked; six package admission/failure tests; no emulator, APK or release-shrinking test |
+| Android credential storage | Production Java compilation against official API stubs, 54 synthetic encrypted-entry assertions (round trips, randomized ciphertext, profile/reference binding, tampering, key loss, bounded data, locks, symlinks and deletion), and an explicitly run JVM/JNI test for array clearing, status mapping, cancellation/deadlines and uncertain writes; separate emulator evidence below, no physical phone test |
+| Android native library | API 28 arm64/x86_64 and combined AAR cross-builds with NDK r28c, JDK 21 and API 35 stubs; production-only archives, eleven native exports per ABI and 16 KiB ELF alignment checked; six package admission/failure tests; separate test APK evidence below, no release-shrinking test |
 | Trusted user approval | Fictional elevated action; exact immutable scope, complete grants, one explicit connection, expiry/wrong Core/metadata/invalidation refusal, nonserializable one-use preview, adapter marker guard despite weakened risk metadata, journal failure/retired IDs/replay, host background/close/cancel and in-flight expiry; ordinary JSON cannot approve and no real appliance action is admitted |
 | Meiju temperature control | Protected selector priority and exclusions, normalized categories, whole/half-degree constraints, exact temperature-only encoding, retained evidence, readable historical out-of-range values, descriptor/model/identity/membership refusals, exact-target native/CLI/MCP authority, receipts/replay and foreground cancellation; fictional profiles only, no physical controls |
 | Meiju mode activation | Four candidate AC models and five modes, exact combined power-on/mode body, no temperature/fan/cache changes, protected-target and weakened-metadata refusal, independent device/mode/cloud policy, native startup/schema checks, receipts and lifecycle cancellation, CLI/MCP mode-only plans and pre-send failures; fictional profiles only, no physical controls |
@@ -75,6 +75,15 @@ After dependencies are cached, add `--offline` to Cargo commands. Use a Python v
 | Presentation | Exact locale key/placeholder parity, locale fallback, missing keys, unknown observations, and uncertainty display |
 | Diagnostics | Actual CLI/native closed-schema reports, omitted private markers from metadata/receipts/nested items, normalized unknown codes, fixed storage errors, bounded receipt/attempt output, no adapter calls, and no journal mutation |
 | Repository | Markdown targets, fixtures, English policy with a narrow Chinese catalog exception, and commit conventions |
+
+The separate [Android APK procedure](development/08-android-native.md#run-the-isolated-native-acceptance-apk)
+passed 77 assertions across four process invocations on AOSP Android 15 x86_64:
+Core/Mock and lifecycle behavior, migration/device/account locks, real Keystore
+encryption, process persistence, lock refusal, tampering, deliberately removed
+keys, JNI inventory reads and local removal. The runner rejects physical devices
+and requires explicit instrumentation success; four Python tests cover its refusal
+and false-success paths. This procedure is not part of ordinary workspace tests
+and does not use provider accounts or networking.
 
 The CI workflow declares these build/test steps; a local run is not evidence that remote CI ran.
 

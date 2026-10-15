@@ -121,7 +121,7 @@ impl AccountStore for SqliteStore {
             .truncate(false)
             .open(self.locks.join(format!("account-{id}")))
             .map_err(storage_error)?;
-        file.try_lock().map_err(|_| {
+        crate::file_lock::exclusive(&file).map_err(|_| {
             Error::new(
                 "RESOURCE_BUSY",
                 "Another process is using this account session.",

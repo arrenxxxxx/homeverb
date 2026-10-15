@@ -18,6 +18,12 @@ The default remains arm64; use `--abi x86_64` or repeat `--abi` for both. Integr
 one matching AAR, as separate AARs duplicate the Java classes. Keep `consumer-rules.pro` when
 integrating sources manually: JNI requires the exact class, method and field names.
 
+The separate `acceptance/` package builds a network-disabled test APK with the
+production AAR. It owns no Flutter pages and must never enter a production AAR.
+Its [four-phase emulator procedure](../../docs/development/08-android-native.md#run-the-isolated-native-acceptance-apk)
+checks native Core, Android Keystore, process restart and local account cleanup
+using fictional material. The runner refuses physical devices.
+
 The implementation uses Android Keystore keys and authenticated ciphertext in the
 application no-backup directory. Missing keys, damaged ciphertext, unavailable
 storage and lock-screen failures have no plaintext or key-regeneration fallback.

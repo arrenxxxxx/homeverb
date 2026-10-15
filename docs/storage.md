@@ -89,6 +89,16 @@ or erase backups/retained receipts. Reconnecting receives new local IDs. See the
 
 Writes use short transactions; no database write transaction spans adapter I/O. Device and account file locks are nonblocking and return `RESOURCE_BUSY` on contention. Account locks use `account-<local-uuid>` and remain held by the lease until drop. The vault rereads metadata only after acquiring that lock, then reads the current secret. SQLite lock waits are limited to 250 ms per call. These locks cannot coordinate another phone or the vendor app. Synchronous storage work is not preemptible; subsequent secure-store work rechecks the original operation budget.
 
+Android uses Bionic `flock` for shared migration leases, exclusive migration,
+device and account locks. Rust 1.96 standard file locking returns `Unsupported`
+on Android; using it prevented even an empty native profile from opening.
+The Android calls use `LOCK_NB` for acquisition, retain the owning `File`, and
+release on unlock/drop. Other targets retain standard-library locking. Names,
+lease lifetimes, contention errors and SQLite schema are unchanged. The
+[Android acceptance APK](development/08-android-native.md#run-the-isolated-native-acceptance-apk)
+checks shared profile opens, migration-lease exclusion, device/account contention
+and release using independent file descriptors on AOSP Android 15.
+
 Lock filenames retain the existing lowercase UTF-8 hex encoding for device IDs up to 127 bytes. Longer IDs use `sha256-` followed by the lowercase SHA-256 digest of the complete UTF-8 ID, keeping filenames below 255 bytes without truncation. The prefix cannot collide with legacy hex names. The mapping is deterministic across processes and preserves existing short-ID lock coordination; no SQLite migration is needed. Older binaries could not create the oversized hex filenames for these longer IDs on the verified Linux filesystem.
 
 AccountLock requires Send + Sync for borrowed account-session reads inside the existing Send adapter futures. This changes the unreleased Rust trait bound for custom stores, not process-lock behavior or storage layout. The built-in file guard already meets it. The [bound Meiju read](adr/0025-bound-meiju-core-reads.md) tests verify lease contention during an in-flight request and release after cancellation or expiry.

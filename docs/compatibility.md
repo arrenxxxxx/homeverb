@@ -750,3 +750,35 @@ tests and 29 Python tooling tests passed; documentation, contracts and repositor
 hygiene checks passed. These changes do not alter the native API, C exports,
 SQLite schema or protected account format. No Rust/Android build, Flutter/mobile
 runtime or real account/device test was performed for these changes.
+
+## Android file locks and isolated native APK acceptance
+
+The first isolated AOSP Android 15 x86_64 run failed to open a native profile.
+A minimal target executable showed Rust 1.96 `File::try_lock_shared` and
+`File::try_lock` returning `Unsupported`, while Bionic `flock` succeeded. Android
+storage now uses nonblocking Bionic locks for migration, device and account leases;
+other platforms keep standard-library locking. File names, ownership lifetimes,
+contention errors, native API 1.14.0, SQLite 4 and protected payload 3 are unchanged.
+The existing locked `libc` version is now an explicit Android storage dependency.
+
+The [test-only APK](development/08-android-native.md#run-the-isolated-native-acceptance-apk)
+embeds the production AAR with no requested permissions, including Internet.
+On October 16, 2026, image revision 2 and Emulator 37.2.12 passed unsecured, write,
+locked and read phases with 17/17/16/27 assertions. Evidence covers native Mock
+execution/lifecycle, independent lock contention, Android Keystore round trips and
+nonexportable keys, persistence in a different process, tampered ciphertext,
+deliberately removed keys without regeneration, and Rust/JNI inspection/removal
+of a fictional protected account. A failed lock-state precondition is not store
+evidence; both OS transitions were confirmed before successful reruns.
+
+Formatting, Linux workspace and Android-storage Clippy passed with warnings denied.
+Workspace and example builds passed; Rust tests: 321 passed, 2 ignored. The MVP
+runtime suite passed 34 cases; native checks passed 31 methods/51 live fictional
+examples plus trusted approval/dishwasher cases. Python tooling: 33 passed;
+presentation: 6 passed. All three AAR variants were rebuilt and inspected; the
+x86_64 test APK passed signing, permission and 16 KiB ZIP-alignment checks.
+
+Physical/OEM Keystore behavior, successful provider login/session replacement,
+Flutter APK journeys, release shrinking, actual 16 KiB-page execution and real
+appliance operation remain unverified. No owner account, real device, separate
+Flutter worktree or published package was used in this phase.
