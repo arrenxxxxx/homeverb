@@ -225,23 +225,31 @@ class ScreenView extends StatelessWidget {
                       child: Column(
                         children: [
                           if (root == null)
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 0, 12, 0),
-                              child: Row(
-                                children: [
-                                  IconAction(
+                            Row(
+                              children: [
+                                Transform.translate(
+                                  offset: const Offset(4, 2),
+                                  child: IconAction(
                                     'back',
                                     'Back',
                                     () => onAction('Back'),
                                   ),
-                                  const Spacer(),
-                                  const Copy(
+                                ),
+                                const Spacer(),
+                                SizedBox(
+                                  width:
+                                      88 *
+                                      MediaQuery.textScalerOf(
+                                        context,
+                                      ).scale(11) /
+                                      11,
+                                  child: const Copy(
                                     'HomeVerb',
                                     size: 11,
                                     color: muted,
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           Expanded(
                             child: SingleChildScrollView(
@@ -1105,6 +1113,10 @@ class PreviewAppState extends State<PreviewApp> {
       'Cancel Transfer': 'H15',
       'Remove Imported Authorization': 'P11',
     };
+    if (label.startsWith('preview-step:')) {
+      setState(() => message = 'Preview only: no device setting was changed.');
+      return;
+    }
     if (label.startsWith('menu:')) {
       go('D05');
       return;

@@ -787,22 +787,24 @@ class Rows extends StatelessWidget {
                 final toggle =
                     ['Power', 'Oscillation', 'Muted'].contains(label) &&
                     ['On', 'Off'].contains(value);
+                final stepper =
+                    ['Target', 'Speed'].contains(label) && value.contains('+');
                 return InkWell(
                   key: action == null ? null : ValueKey(action),
                   onTap: action == null ? null : () => onAction(action),
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(minHeight: 44),
                     child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: toggle ? 0 : 12,
+                      padding: EdgeInsets.fromLTRB(
+                        16,
+                        toggle || stepper ? 0 : 12,
+                        stepper ? 8 : 16,
+                        toggle || stepper ? 0 : 12,
                       ),
                       child: LayoutBuilder(
                         builder: (context, c) {
                           final scale =
                               MediaQuery.textScalerOf(context).scale(13) / 13;
-                          final estimate =
-                              (label.length * 6.8 + value.length * 6.2) * scale;
                           final measurement = TextPainter(
                             text: TextSpan(
                               text: value,
@@ -817,9 +819,29 @@ class Rows extends StatelessWidget {
                             textScaler: MediaQuery.textScalerOf(context),
                           )..layout();
                           final valueWidth = measurement.width;
+                          measurement.text = TextSpan(
+                            text: label,
+                            style: const TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 13,
+                              fontWeight: FontWeight.w400,
+                              letterSpacing: 0,
+                            ),
+                          );
+                          measurement.layout();
+                          final combinedWidth = measurement.width + valueWidth;
                           measurement.dispose();
                           final leading = Copy(label);
-                          final trailing = toggle
+                          final trailing = stepper
+                              ? _RowStepper(
+                                  label: label,
+                                  value: value
+                                      .replaceFirst('−', '')
+                                      .replaceFirst('+', '')
+                                      .trim(),
+                                  onAction: action == null ? null : onAction,
+                                )
+                              : toggle
                               ? Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -853,9 +875,10 @@ class Rows extends StatelessWidget {
                                   ],
                                 )
                               : Copy(value, size: 12, color: muted);
-                          if (!toggle &&
-                              (estimate > c.maxWidth - 18 ||
-                                  valueWidth > c.maxWidth - 18))
+                          if ((!toggle &&
+                                  !stepper &&
+                                  combinedWidth > c.maxWidth - 18) ||
+                              (stepper && scale > 1))
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -881,6 +904,64 @@ class Rows extends StatelessWidget {
           ],
         ],
       ),
+    ),
+  );
+}
+
+class _RowStepper extends StatelessWidget {
+  const _RowStepper({
+    required this.label,
+    required this.value,
+    required this.onAction,
+  });
+  final String label, value;
+  final ActionHandler? onAction;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    width: 155,
+    height: 44 * MediaQuery.textScalerOf(context).scale(12) / 12,
+    child: Stack(
+      alignment: Alignment.center,
+      children: [
+        Positioned(
+          left: 60,
+          right: 45,
+          child: Copy(value, size: 12, bold: true, center: true),
+        ),
+        for (final increase in [false, true])
+          Positioned(
+            left: increase ? 111 : 16,
+            top: 0,
+            bottom: 0,
+            width: 44,
+            child: Semantics(
+              button: true,
+              label: '${increase ? 'Increase' : 'Decrease'} $label',
+              child: InkWell(
+                onTap: onAction == null
+                    ? null
+                    : () => onAction!(
+                        'preview-step:${increase ? 'increase' : 'decrease'}:$label',
+                      ),
+                child: Center(
+                  child: Container(
+                    width: 30,
+                    height: 30,
+                    alignment: Alignment.center,
+                    decoration: const BoxDecoration(
+                      color: Color(0xffe6e2d8),
+                      shape: BoxShape.circle,
+                    ),
+                    child: ExcludeSemantics(
+                      child: Copy(increase ? '+' : '−', size: 16, center: true),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     ),
   );
 }

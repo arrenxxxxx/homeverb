@@ -240,14 +240,17 @@ class ActionButton extends StatelessWidget {
         ),
       ),
       onPressed: onPressed,
-      child: Text(
-        label,
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          height: 1.1,
-          letterSpacing: 0,
+      child: Transform.translate(
+        offset: const Offset(0, -3),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            height: 1.1,
+            letterSpacing: 0,
+          ),
         ),
       ),
     ),

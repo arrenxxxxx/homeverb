@@ -140,6 +140,38 @@ void main() {
       tester.view.resetDevicePixelRatio();
     },
   );
+  testWidgets('inline steppers have separate preview-only actions', (
+    tester,
+  ) async {
+    final key = GlobalKey<PreviewAppState>();
+    await tester.pumpWidget(
+      PreviewApp(key: key, catalog: catalog, initial: 'C06', testChrome: true),
+    );
+    await tester.pumpAndSettle();
+    for (final direction in ['Increase', 'Decrease']) {
+      await tester.tap(find.bySemanticsLabel('$direction Speed'));
+      await tester.pumpAndSettle();
+      expect(key.currentState!.id, 'C06');
+      expect(
+        find.text('Preview only: no device setting was changed.'),
+        findsOneWidget,
+      );
+    }
+    key.currentState!.go('C08');
+    await tester.pumpAndSettle();
+    for (final direction in ['Increase', 'Decrease']) {
+      final controls = find.bySemanticsLabel('$direction Target');
+      expect(controls, findsNWidgets(2));
+      for (var i = 0; i < 2; i++) {
+        await tester.ensureVisible(controls.at(i));
+        await tester.tap(controls.at(i));
+        await tester.pumpAndSettle();
+        expect(key.currentState!.id, 'C08');
+        expect(tester.takeException(), isNull);
+      }
+    }
+  });
+
   testWidgets('all screens reflow at 320 width and 200 percent text', (
     tester,
   ) async {
