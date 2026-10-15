@@ -808,6 +808,12 @@ impl Store for FailingJournal {
     fn recent_executions(&self) -> Result<Vec<Execution>> {
         self.inner.recent_executions()
     }
+    fn clear_cached_state(&self) -> Result<usize> {
+        self.inner.clear_cached_state()
+    }
+    fn clear_execution_history(&self) -> Result<usize> {
+        self.inner.clear_execution_history()
+    }
     fn device_executions(&self, device_id: &str) -> Result<Vec<Execution>> {
         self.inner.device_executions(device_id)
     }

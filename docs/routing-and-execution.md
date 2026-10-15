@@ -65,11 +65,75 @@ Execution uses groups of at most four borrowed futures and returns results in in
 
 Batch status equals the common item status when all items agree, otherwise `partial`. Evidence belongs to each device or composite child, never to a fabricated batch device. Only per-command receipts are persisted. A forced exit can leave later items unstarted and without records; inspect individual IDs and never automatically resubmit the batch. See [ADR-0017](adr/0017-bounded-device-batches.md).
 
+## Local account removal and late results
+
+Local account removal under [ADR-0028](adr/0028-local-account-removal.md) preserves
+execution receipts and retired IDs. It never rolls back or resends an appliance
+action. Meiju retains its account lease through network work; cleanup refuses a
+busy account. Receipts can still be finalized after the account lease is released,
+even when cleanup has removed the device metadata. Their known outcomes remain
+available through exact receipt lookup and global history.
+
+SQLite rejects descriptor/snapshot saves referencing an account with removal
+intent, including completed removal. Snapshot saves also require an existing
+device. These checks share the write transaction, preventing late inventory or
+read results from recreating cleaned data. They do not retract already delivered
+results or make a multi-device publication atomic. A cache-save failure after
+acceptance/verification follows the existing strongest-outcome preservation rules.
+
+Under [ADR-0033](adr/0033-delete-unreadable-account-credentials.md), explicit account
+removal deletes the exact protected entry without reading/decrypting it. A confirmed
+absent entry causes no mutation; refused or uncertain deletion preserves pending
+cleanup and metadata. This local idempotence does not permit retrying appliance writes.
+
+## Explicit history clearing
+
+[Local-data cleanup](adr/0029-local-cache-and-history-clearing.md) refuses history
+clearing while any journal is active, including a composite parent. Completed
+receipt details are retired atomically with their request IDs preserved. Clearing
+a finalized unknown receipt does not resolve uncertainty or authorize a replay.
+`REQUEST_RETIRED` still prevents sending after reopen. Cache clearing is independent:
+it removes snapshots without cancelling or rolling back device operations, and a
+concurrent read/verification may save new observations after the transaction.
+
 ## Implemented Mock behavior
 
 Capability resolution includes the selected component. Shared definitions omit `component_id`; scoped definitions bind one exact component, and shared/scoped mixing of one capability ID is invalid. The same resolver supplies action parameters, risk/routes/verification policy, live and cached property constraints, and property freshness. A fridge grant cannot authorize its freezer. Both remain one physical device with one write lock and separate component snapshots. See [ADR-0018](adr/0018-component-capability-scopes.md).
 
 Operational lookup checks device/capability schema versions and shapes, unique identities and references, unambiguous property names, and locally compilable action schemas. Invalid metadata returns `CAPABILITY_UNSUPPORTED` before reads, dry runs, journal reservation, or writes. Discovery validates its complete per-adapter response before saving any descriptors from that response; an invalid response leaves existing metadata intact. This validation gate does not make storage commits across multiple devices or adapters atomic. Rediscovery also compares the entire response against stored connection identities before saving. `DEVICE_IDENTITY_CONFLICT` prevents silent binding changes under an already granted device ID. SQLite repeats each comparison within its write transaction to catch concurrent changes; earlier saved devices remain saved if a later transaction fails. This guard does not change command execution outcomes or authorize route merging.
+
+The experimental Meiju adapter additionally requires complete account inventory
+retrieval and checks current plus historical protected appliance bindings across
+all selected accounts before returning descriptors. Native account connect/refresh reuses
+`Core::publish_discovery` for the same registered-adapter, whole-batch validation
+without a second cloud inventory request; no public JSON imports descriptors. Partial inventory and ambiguous
+cross-account identity publish no new descriptor batch. Only explicitly reviewed
+exact model/family pairs expose read properties. Unknown models remain visible with
+unsupported status and no actions. Every Meiju observation remains stale while its
+source timestamp is unproven; it cannot verify a write. Construction, local queries
+and cached reads do no account or network work.
+
+An explicit trusted Meiju adapter opt-in additionally admits experimental AC
+`power.set` for the four exact read models. Default hosts retain read-only adapters
+and no Meiju write grants. Native API 1.3 can receive exact-device/state power grants
+only from trusted startup under [ADR-0027](adr/0027-native-power-grants.md); ordinary
+requests cannot change them. Control repeats the fixed argument contract and protected
+account/device/connection/model checks before sending; public metadata cannot supply
+a provider target. The separate HTTPS control path marks possible transmission
+before executing the request. Only a valid code-zero envelope establishes acceptance;
+HTTP 401/403 and recognized authorization codes establish rejection. Other provider
+codes, malformed replies, HTTP failures and post-send cancellation remain unknown.
+No retry, route fallback or automatic login follows. Verification is unavailable,
+so accepted controls requested with `wait_for: verified` retain `VERIFICATION_PENDING`
+without a state read or cache mutation. Existing Execution schemas and replay rules
+apply unchanged; see the [control probe](development/07-meiju-control.md).
+
+API 1.9 additionally admits a separately opted-in vendor AC fan action under
+[ADR-0034](adr/0034-scoped-meiju-ac-fan-control.md). It shares the same transport,
+protected model/binding checks and conservative outcomes, sending only one reviewed
+`wind_speed` code. Power and fan permissions remain independent. It never changes
+power, mode or temperature to force an effect; mode-dependent effectiveness remains
+unverified. No read, optimistic cache update, fallback or retry follows acceptance.
 
 The current Core attempts each permitted route at most once. Only a proven-unsent reachability failure allows the next write route. A possibly-sent write returns `unknown` immediately; an explicit later read does not silently rewrite its receipt. State-match verification performs one bounded live read. All live snapshots, including verification reads, must use schema 1.0, match the requested device/component, and have every observation sourced from the selected transport. A source observation cannot be later than its local receipt, and a live receipt cannot be in the future. Empty warning strings are invalid. The entire snapshot is checked before saving; a valid target field cannot hide malformed unrelated fields.
 

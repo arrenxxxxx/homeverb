@@ -2,7 +2,7 @@
 
 ## Dependency direction
 
-`domain` defines DTOs and argument schemas. `core` depends on domain and defines Adapter, Store, Clock, SecretStore, and host-policy interfaces. `mock`, `storage`, and `secret-store` implement those interfaces. `host` assembles the Mock application; real-account credential wiring remains pending. CLI/MCP and FFI call Core directly. No entry point invokes another entry point.
+`domain` defines DTOs and argument schemas. `core` depends on domain and defines Adapter, Store, AccountStore, Clock, SecretStore, and host-policy interfaces. `mock`, `storage`, and `secret-store` implement those interfaces. `host` assembles the Mock application and exposes `open_accounts` for trusted native account flows; provider authentication remains pending. CLI/MCP and FFI call Core directly. No entry point invokes another entry point.
 
 Read [repository layout](../repository.md) and [execution semantics](../routing-and-execution.md) before editing the implementation. `crates/host/tests/core_flow.rs` exercises the assembled business logic with isolated SQLite stores and fault-injected adapters.
 
@@ -44,7 +44,7 @@ For multiple devices, use `Core::plan_batch` and `Core::execute_batch` from [bat
 
 Add a failing integration case first. Update the relevant contract and positive/negative fixtures, implement the smallest change, then run formatting, Clippy, Rust tests, runtime acceptance, and contract checks. Keep diagnostics independent of locale; the UI translates stable codes.
 
-Do not add a brand switch to Core or an entry point. Do not add automatic authentication, a periodic refresh task, or a retry that bypasses uncertainty rules. The Linux secret-store library is available to trusted native hosts; unavailable platforms fail closed. Account integration and refresh locking belong to the first real-adapter milestone.
+Do not add a brand switch to Core or an entry point. Do not add automatic authentication, a periodic refresh task, or a retry that bypasses uncertainty rules. The Linux secret-store library is available to trusted native hosts; unavailable platforms fail closed. Use AccountVault leases for session reads/updates; real provider authentication and rotation still belong to the first real-adapter milestone.
 
 ## Trusted write policy
 
@@ -86,9 +86,9 @@ Core implements room creation/rename/order/delete and device aliases, room assig
 
 `assign_devices_to_room` changes membership for 1-256 exact device IDs in one storage transaction, preserving all other preferences. The RoomAssignment destination is explicitly nullable, never omitted. Missing references and storage errors roll back the whole selection. `device_executions` reads one device's retained receipts with the device filter applied before the query limit; it neither refreshes state nor retransmits commands.
 
-The storage implementation upgrades schema 1 to 2 with a verified local backup and exclusive migration access. It retains 100 finalized detailed receipts plus active records, while keeping retired request IDs to prevent replay. The ID ledger can grow. See [storage](../storage.md) and [ADR-0009](../adr/0009-local-organization-and-retention.md). Organization, migration, retention, and fault-injected execution tests exercise these boundaries.
+The storage implementation upgrades schema 1, 2 or 3 to 4 with a verified local backup and exclusive migration access. It retains 100 finalized detailed receipts plus active records, while keeping retired request IDs to prevent replay. The ID ledger can grow. See [storage](../storage.md) and [ADR-0009](../adr/0009-local-organization-and-retention.md). Organization, migration, retention, and fault-injected execution tests exercise these boundaries.
 
-The next integration needs real native-authentication evidence, account wiring into the system secret store, and read-only device testing. Authorization sharing is governed separately by ADR-0008 and must remain disabled until its contract and security gates are satisfied.
+The Meiju native flow now uses the account vault. The next acceptance needs real account identity evidence, production host integration, and read-only device testing. Authorization sharing is governed separately by ADR-0008 and must remain disabled until its contract and security gates are satisfied.
 
 ## Inspect recorded outcomes
 

@@ -5,7 +5,7 @@
 | Entity | Key fields | Meaning |
 |---|---|---|
 | Provider | id / region / auth_methods | Account platform, not necessarily a brand |
-| Account | id / provider / profile / credential_ref | Local account reference without plaintext credentials |
+| Account | id / provider / region / label / credential_ref / credential_state | Local account record in a persisted profile namespace, without plaintext credentials or provider identifiers |
 | Device | id / brand / model / alias / components / connections | Unified identity for one physical appliance |
 | Connection | id / adapter / transport / account_id / identity_ref | A potentially available LAN/cloud route |
 | Component | id / capabilities | A main unit, fridge compartment, freezer compartment, etc. |
@@ -29,6 +29,8 @@ The implemented rediscovery guard preserves an existing local ID's complete conn
 Deduplicate using strong vendor correlation IDs or verified protocol mappings. Matching names, rooms, or models is not enough for automatic merging. Ambiguous matches become user-confirmed merge suggestions. Namespace identifiers by provider and region where necessary.
 
 ## Local organization
+
+The trusted native account vault persists immutable random account and credential references within a random profile namespace. Only its local label can be renamed. Credential state is `pending`, `stored` or `removing`; none establishes provider identity or current authorization. `removing` blocks ordinary leases until explicit cleanup completes under [ADR-0028](adr/0028-local-account-removal.md). A lease coordinates session reads and updates. Meiju's protected payload retains an exact native-validated subject and stable per-account appliance bindings under [ADR-0024](adr/0024-meiju-private-device-bindings.md). The native Meiju connection flow uses a successful server login-ID proof as an exact subject guard and preserves bindings on reconnection. Explicit pending-account reauthorization additionally requires intact protected identity and unchanged bytes across login under [ADR-0031](adr/0031-pending-account-reauthorization.md). Native account summaries, local details/rename and protected connection methods are implemented; real reauthorization identity acceptance, explicit cross-account reconciliation and mobile authentication UI remain separate work. See the [account contract](native-ui-contract.md#local-account-details-and-names) and [vault decision](adr/0021-persistent-account-vault.md).
 
 Room IDs are generated locally. Names are trimmed, limited to 80 characters, and unique after Unicode lowercasing. Device preferences survive rediscovery. Deleting a room unassigns its devices without removing them or changing their permissions. Null alias restores the adapter's label. Duplicate aliases are allowed, so ambiguous selection requires an exact device ID. Renaming or moving a device never changes its identity, routes, credentials, or capabilities.
 

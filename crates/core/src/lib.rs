@@ -1,5 +1,7 @@
 //! Embedded execution policy shared by every host.
 
+mod account_removal;
+mod accounts;
 mod batch;
 mod descriptors;
 mod diagnostics;
@@ -8,6 +10,8 @@ mod observations;
 mod organization;
 mod policy;
 mod secrets;
+pub use account_removal::*;
+pub use accounts::*;
 pub use execution::Core;
 pub use policy::{Grant, Policy};
 pub use secrets::{CredentialRef, SecretBytes, SecretStore, UnavailableSecretStore};
@@ -140,15 +144,20 @@ impl<T: Send> DeviceLock for T {}
 
 pub trait Store: Send + Sync {
     fn devices(&self) -> Result<Vec<Descriptor>>;
-    /// Compare established connection identities and save within one storage transaction.
+    /// Compare established identities and reject removed-account bindings in the save transaction.
     fn save_device(&self, descriptor: &Descriptor) -> Result<()>;
     fn snapshot(&self, device: &str, component: &str) -> Result<Option<Snapshot>>;
+    /// Require a still-present device and reject removed-account bindings in the save transaction.
     fn save_snapshot(&self, snapshot: &Snapshot) -> Result<()>;
+    /// Delete currently cached snapshots without cancelling concurrent reads.
+    fn clear_cached_state(&self) -> Result<usize>;
     fn lock_device(&self, device: &str) -> Result<Box<dyn DeviceLock>>;
     fn execution(&self, request_id: &str) -> Result<Option<(Command, Execution)>>;
     fn save_execution(&self, command: &Command, execution: &Execution) -> Result<()>;
     fn finish_execution(&self, command: &Command, execution: &Execution) -> Result<()>;
     fn recent_executions(&self) -> Result<Vec<Execution>>;
+    /// Refuse active journals; atomically retire all detailed receipts and preserve request IDs.
+    fn clear_execution_history(&self) -> Result<usize>;
     fn device_executions(&self, device_id: &str) -> Result<Vec<Execution>>;
     fn rooms(&self) -> Result<Vec<Room>>;
     fn create_room(&self, id: &str, name: &str) -> Result<Room>;

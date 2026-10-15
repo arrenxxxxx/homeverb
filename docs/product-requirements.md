@@ -31,7 +31,7 @@ Bounded foreground observation and waiting for a result are allowed. Hidden back
 
 ## Admission without a project server
 
-The client must be able to authenticate legitimately, obtain the required authorization, and reach the target itself. Platforms that require confidential-client backend authentication with no native alternative are `blocked`. Embedding a shared secret in a public client is not a workaround.
+The client must be able to authenticate legitimately, obtain the required authorization, and reach the target itself. Platforms that require confidential-client backend authentication with no native alternative are `blocked`. Embedding a shared secret in a public client is not a workaround. The owner-approved [ADR-0022](adr/0022-meiju-community-cloud-admission.md) narrowly admits the pinned public Meiju community app-compatibility material for the personal MVP; confidential developer credentials remain prohibited.
 
 For LAN-only devices, the current process must reach the device network. Otherwise return `LAN_UNREACHABLE` before sending. Existing user-managed VPNs are not deployed or maintained by this project. Offline reads may use available cache entries only when clearly marked as cached.
 

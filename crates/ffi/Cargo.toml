@@ -10,8 +10,14 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 homeverb-host.workspace = true
+homeverb-core.workspace = true
 homeverb-domain.workspace = true
 homeverb-mock.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 tokio.workspace = true
+zeroize.workspace = true
+
+[target.'cfg(target_os = "android")'.dependencies]
+homeverb-secrets.workspace = true
+jni.workspace = true

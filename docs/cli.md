@@ -1,6 +1,6 @@
 # CLI contract
 
-Status: the listed Mock, local organization, and redacted diagnostic commands are implemented. `--mock` is required. Real authentication is pending; do not infer it from the design baseline.
+Status: the listed Mock, local organization, and redacted diagnostic commands are implemented. `--mock` is required. The production CLI does not expose authentication. A separate [local read-only Meiju probe](development/06-meiju-probe.md) now implements the native login/inventory flow; real account acceptance remains pending.
 
 ## Implemented commands
 

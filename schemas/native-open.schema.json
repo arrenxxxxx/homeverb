@@ -27,6 +27,69 @@
         "partial",
         "correlated-completion"
       ]
+    },
+    "adapter": {
+      "enum": [
+        "homeverb.mock",
+        "midea.meiju"
+      ],
+      "default": "homeverb.mock"
+    },
+    "meiju_power_grants": {
+      "type": "array",
+      "maxItems": 64,
+      "uniqueItems": true,
+      "default": [],
+      "items": {
+        "type": "object",
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "state": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "device_id",
+          "state"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Trusted startup-only permission for one local device and exact power state over cloud. No wildcard, arbitrary action, provider identifier or confirmation flag. Empty grants no power permission."
+    },
+    "meiju_fan_grants": {
+      "type": "array",
+      "maxItems": 64,
+      "uniqueItems": true,
+      "default": [],
+      "items": {
+        "type": "object",
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "wind_speed": {
+            "type": "integer",
+            "enum": [
+              20,
+              40,
+              60,
+              80,
+              100,
+              102
+            ]
+          }
+        },
+        "required": [
+          "device_id",
+          "wind_speed"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Trusted startup-only permission for one local AC and one reviewed vendor wind_speed code over cloud. Independent of power grants; never a percentage, wildcard or ordinary request field."
     }
   },
   "required": [
@@ -35,5 +98,39 @@
     "allow_mock_writes"
   ],
   "additionalProperties": false,
-  "description": "Trusted Mock startup only. data_dir must be an absolute private OS path. scenario defaults to normal."
+  "description": "Trusted native startup. data_dir must be an absolute private OS path. adapter defaults to homeverb.mock; scenario defaults to normal. Meiju defaults to read-only; optional meiju_power_grants and meiju_fan_grants separately admit exact-device AC power states and vendor fan codes over cloud. Meiju rejects Mock grants or fault scenarios. Opening never authenticates, discovers or controls.",
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "adapter": {
+            "const": "midea.meiju"
+          }
+        },
+        "required": [
+          "adapter"
+        ]
+      },
+      "then": {
+        "properties": {
+          "allow_mock_writes": {
+            "const": false
+          },
+          "scenario": {
+            "const": "normal"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "meiju_power_grants": {
+            "maxItems": 0
+          },
+          "meiju_fan_grants": {
+            "maxItems": 0
+          }
+        }
+      }
+    }
+  ]
 }

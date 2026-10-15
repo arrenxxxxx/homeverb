@@ -1,5 +1,5 @@
 {
-  "api_version": "1.0.0",
+  "api_version": "1.9.0",
   "methods": {
     "get_api_info": {
       "response_kind": "query"
@@ -65,6 +65,30 @@
       "response_kind": "query"
     },
     "assign_devices_to_room": {
+      "response_kind": "query"
+    },
+    "list_accounts": {
+      "response_kind": "query"
+    },
+    "refresh_account": {
+      "response_kind": "query"
+    },
+    "get_account": {
+      "response_kind": "query"
+    },
+    "rename_account": {
+      "response_kind": "query"
+    },
+    "remove_account": {
+      "response_kind": "query"
+    },
+    "clear_cached_state": {
+      "response_kind": "query"
+    },
+    "clear_execution_history": {
+      "response_kind": "query"
+    },
+    "recover_account": {
       "response_kind": "query"
     }
   },

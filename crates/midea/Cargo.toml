@@ -1,0 +1,32 @@
+[package]
+name = "homeverb-midea"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+homeverb-core.workspace = true
+homeverb-domain.workspace = true
+async-trait.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+uuid.workspace = true
+zeroize.workspace = true
+sha2.workspace = true
+hmac = "0.13.0"
+md-5 = "0.11"
+aes = { version = "0.9.3", features = ["zeroize"] }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls-webpki-roots"] }
+tokio.workspace = true
+
+[dev-dependencies]
+jsonschema.workspace = true
+homeverb-secrets.workspace = true
+clap.workspace = true
+rpassword = "7.4"
+rcgen = { version = "0.14", default-features = false, features = ["crypto", "ring"] }
+tokio-rustls = { version = "0.26", default-features = false, features = ["ring", "tls12"] }
+tokio-util.workspace = true
+homeverb-storage.workspace = true

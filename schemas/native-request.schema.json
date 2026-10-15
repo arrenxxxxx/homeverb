@@ -406,6 +406,143 @@
             "assignment"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "list_accounts"
+            }
+          },
+          "required": [
+            "method"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "refresh_account"
+            },
+            "account_id": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "required": [
+            "method",
+            "account_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "get_account"
+            },
+            "account_id": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "required": [
+            "method",
+            "account_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "rename_account"
+            },
+            "account_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "label": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "method",
+            "account_id",
+            "label"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "remove_account"
+            },
+            "account_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "expected_device_ids": {
+              "type": "array",
+              "maxItems": 4096,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              }
+            }
+          },
+          "required": [
+            "method",
+            "account_id",
+            "expected_device_ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "clear_cached_state"
+            }
+          },
+          "required": [
+            "method"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "clear_execution_history"
+            }
+          },
+          "required": [
+            "method"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "recover_account"
+            },
+            "account_id": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "required": [
+            "method",
+            "account_id"
+          ],
+          "additionalProperties": false
         }
       ]
     }

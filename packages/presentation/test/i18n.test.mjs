@@ -8,7 +8,7 @@ test('catalogs have identical English keys and interpolation parameters', async 
     JSON.parse(await readFile(new URL(`../locales/${locale}.json`, import.meta.url)))));
   assert.deepEqual(Object.keys(catalogs[0]).sort(), Object.keys(catalogs[1]).sort());
   for (const key of Object.keys(catalogs[0])) {
-    assert.match(key, /^[a-zA-Z._]+$/);
+    assert.match(key, /^[a-zA-Z][a-zA-Z0-9._]*$/);
     assert.ok(catalogs.every(catalog => typeof catalog[key] === 'string' && catalog[key].length > 0));
     assert.deepEqual(catalogs[0][key].match(/\{\w+\}/g), catalogs[1][key].match(/\{\w+\}/g));
   }

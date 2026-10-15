@@ -31,6 +31,8 @@ def main() -> int:
         ("state", "state"), ("command-result", "command-result.verified"),
         ("state", "state.live"),
         ("command-result", "command-result.accepted"),
+        ("command-result", "command-result.meiju-accepted"),
+        ("command-result", "command-result.meiju-unknown"),
         ("command-result", "command-result.unknown"),
         ("command-result", "command-result.partial"),
         ("command-result", "command-result.composite"),
@@ -39,6 +41,7 @@ def main() -> int:
         ("batch-command", "batch-command"), ("batch-result", "batch-result"),
         ("device", "device.refrigerator"),
         ("capability", "capability.fridge"), ("capability", "capability.freezer"),
+        ("capability", "capability.meiju-fan"), ("command", "command.meiju-fan"),
     ]
     validators = {}
     for path in (ROOT / "schemas").glob("*.schema.json"):
@@ -64,6 +67,13 @@ def main() -> int:
     Draft202012Validator.check_schema(parameters)
     action_validator = Draft202012Validator(parameters)
     action_validator.validate(load("examples/command.json")["arguments"])
+    fan_validator = Draft202012Validator(load("examples/capability.meiju-fan.json")["actions"]["set_fan_speed"]["parameters"])
+    fan_validator.validate(load("examples/command.meiju-fan.json")["arguments"])
+    for speed in [20, 40, 60, 80, 100, 102, 20.0]:
+        fan_validator.validate({"wind_speed": speed})
+    for args in [{}, {"wind_speed": "40"}, {"wind_speed": 40.5}, {"wind_speed": 101},
+                 {"wind_speed": True}, {"wind_speed": 0}, {"wind_speed": 40, "power": "on"}]:
+        assert not fan_validator.is_valid(args), args
     property_validators = {}
     for name, prop in load("examples/capability.climate.json")["properties"].items():
         Draft202012Validator.check_schema(prop)
@@ -95,6 +105,10 @@ def main() -> int:
         fresh["properties"]["target_temperature"]["max_age_ms"] = max_age_ms
         validators["capability"].validate(fresh)
     negative = []
+    for status in ("accepted", "unknown"):
+        bad = load(f"examples/command-result.meiju-{status}.json")
+        bad["status"] = "verified"
+        negative.append((f"cloud {status} promoted without evidence", validators["command-result"], bad))
     for scope in (None, True, 7, [], {}, ""):
         bad = load("examples/capability.fridge.json"); bad["component_id"] = scope
         negative.append((f"invalid capability component scope {scope}", validators["capability"], bad))

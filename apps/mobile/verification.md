@@ -104,3 +104,17 @@ The command verifies the complete 82-file set, writes `output/flutter-verificati
 Native API requests, schemas, C symbols and SQLite schema are unchanged. Presentation preferences are app-private JSON containing no credentials. No real-platform compatibility row is promoted. No real-device write, diagnostic upload or package publication was performed. The owner-authorized frontend implementation has been pushed to `origin/codex/flutter-ui`; the branch is retained. This is an incomplete acceptance checkpoint, not a merge into main or a claim that the pixel gate passed.
 
 Android/iOS project scaffolding is present, but the full Android SDK/NDK and Xcode/Apple environment were unavailable. ADB successfully listed devices and found none attached. No device choice is required to continue shared Flutter UI work; Android/iOS native packaging and actual OS lifecycle acceptance remain separate outstanding checks. Linux GTK/Clang development packages were extracted into a temporary local sysroot for this run; no system package installation was performed. Standard installed Linux dependencies are sufficient for normal development. FVM owns the SDK; no project-local SDK copy is committed.
+
+## Core 1.9 integration checkpoint
+
+The frontend branch merges pinned Core commit `00d44b7` without rewriting frontend
+history. Native API 1.9.0, the seventh protected C symbol, SQLite schema 4, account
+methods, scoped grants, cache/history clearing and the Android library package are
+now present. Earlier sections describe the prior 1.0 UI baseline; account and cleanup
+UI wiring remains separate work at this merge checkpoint. No real profile is opened.
+
+Executed checks: offline locked workspace build; the Rust native-contract test;
+`verify_native_contract.py` (30 methods, 50 actual fictional ABI examples); docs,
+contract and repository validators; and all 49 existing Flutter tests using FVM.
+All passed. This verifies compatibility of the existing Mock UI with the new Core,
+not account UI completion, physical support or exact screenshot equality.

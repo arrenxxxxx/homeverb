@@ -22,6 +22,37 @@ fn prune(transaction: &Transaction<'_>) -> Result<()> {
 }
 
 impl SqliteStore {
+    pub(crate) fn retire_all_executions(&self) -> Result<usize> {
+        let mut connection = self.connection.lock().map_err(storage_error)?;
+        let transaction = connection
+            .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)
+            .map_err(storage_error)?;
+        let active: bool = transaction
+            .query_row(
+                "SELECT EXISTS(SELECT 1 FROM executions WHERE finalized=0)",
+                [],
+                |row| row.get(0),
+            )
+            .map_err(storage_error)?;
+        if active {
+            return Err(Error::new(
+                "RESOURCE_BUSY",
+                "History cannot be cleared while an execution journal is active.",
+            ));
+        }
+        transaction
+            .execute(
+                "INSERT OR IGNORE INTO retired_requests SELECT request_id FROM executions",
+                [],
+            )
+            .map_err(storage_error)?;
+        let removed = transaction
+            .execute("DELETE FROM executions", [])
+            .map_err(storage_error)?;
+        transaction.commit().map_err(storage_error)?;
+        Ok(removed)
+    }
+
     pub(crate) fn load_device_executions(&self, device_id: &str) -> Result<Vec<Execution>> {
         let connection = self.connection.lock().map_err(storage_error)?;
         let mut statement = connection.prepare("SELECT result FROM executions WHERE json_extract(command, '$.device_id')=?1 ORDER BY rowid DESC LIMIT 100").map_err(storage_error)?;

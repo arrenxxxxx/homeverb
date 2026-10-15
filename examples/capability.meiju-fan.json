@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "id": "vendor.midea.ac",
+  "component_id": "main",
+  "revision": 2,
+  "properties": {
+    "mode": {
+      "type": "string",
+      "readable": true,
+      "writable": false
+    },
+    "wind_speed": {
+      "type": "integer",
+      "readable": true,
+      "writable": true
+    }
+  },
+  "actions": {
+    "set_fan_speed": {
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "wind_speed": {
+            "type": "integer",
+            "enum": [
+              20,
+              40,
+              60,
+              80,
+              100,
+              102
+            ]
+          }
+        },
+        "required": [
+          "wind_speed"
+        ],
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "set_value",
+      "risk": "low",
+      "atomic": false,
+      "independent_fields": false,
+      "verification": "unavailable"
+    }
+  },
+  "events": {}
+}

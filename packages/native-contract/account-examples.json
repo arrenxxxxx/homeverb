@@ -1,0 +1,401 @@
+{
+  "api_version": "1.9.0",
+  "provenance": "Fictional account DTO examples. Actual synthetic host responses are checked against the same schemas by crates/host/tests/meiju_accounts.rs. No live identities or credentials.",
+  "connect_metadata": {
+    "schema_version": "1.0",
+    "operation_id": "connect-example",
+    "timeout_ms": 180000,
+    "label": "Example account",
+    "account_id": null
+  },
+  "cases": [
+    {
+      "response_definition": "connect_account",
+      "response": {
+        "schema_version": "1.0",
+        "data": {
+          "account": {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "provider": "midea.meiju",
+            "region": "CN",
+            "label": "Example account",
+            "credential_state": "stored",
+            "authorization": "not_checked"
+          },
+          "authentication": "succeeded",
+          "retrieval": {
+            "status": "complete",
+            "device_ids": [
+              "00000000-0000-4000-8000-000000000002"
+            ],
+            "error": null
+          }
+        },
+        "warnings": [],
+        "error": null
+      }
+    },
+    {
+      "response_definition": "connect_account",
+      "response": {
+        "schema_version": "1.0",
+        "data": {
+          "account": {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "provider": "midea.meiju",
+            "region": "CN",
+            "label": "Example account",
+            "credential_state": "stored",
+            "authorization": "not_checked"
+          },
+          "authentication": "succeeded",
+          "retrieval": {
+            "status": "partial",
+            "device_ids": [],
+            "error": {
+              "code": "MIDEA_INVENTORY_PARTIAL",
+              "message": "Cloud retrieval was incomplete; existing device cards were preserved.",
+              "retryable": false
+            }
+          }
+        },
+        "warnings": [],
+        "error": null
+      }
+    },
+    {
+      "response_definition": "connect_account",
+      "response": {
+        "schema_version": "1.0",
+        "data": {
+          "account": {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "provider": "midea.meiju",
+            "region": "CN",
+            "label": "Example account",
+            "credential_state": "stored",
+            "authorization": "not_checked"
+          },
+          "authentication": "succeeded",
+          "retrieval": {
+            "status": "failed",
+            "device_ids": [],
+            "error": {
+              "code": "AUTH_REQUIRED",
+              "message": "The platform account requires user-side authorization.",
+              "retryable": false
+            }
+          }
+        },
+        "warnings": [],
+        "error": null
+      }
+    },
+    {
+      "response_definition": "connect_account",
+      "response": {
+        "schema_version": "1.0",
+        "data": {
+          "account": {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "provider": "midea.meiju",
+            "region": "CN",
+            "label": "Example account",
+            "credential_state": "stored",
+            "authorization": "not_checked"
+          },
+          "authentication": "succeeded",
+          "retrieval": {
+            "status": "failed",
+            "device_ids": [],
+            "error": {
+              "code": "CANCELLED",
+              "message": "The cloud read was cancelled.",
+              "retryable": false
+            }
+          }
+        },
+        "warnings": [],
+        "error": null
+      }
+    },
+    {
+      "response_definition": "refresh_account",
+      "response": {
+        "schema_version": "1.0",
+        "data": {
+          "account": {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "provider": "midea.meiju",
+            "region": "CN",
+            "label": "Example account",
+            "credential_state": "stored",
+            "authorization": "not_checked"
+          },
+          "authentication": "not_attempted",
+          "retrieval": {
+            "status": "complete",
+            "device_ids": [
+              "00000000-0000-4000-8000-000000000002"
+            ],
+            "error": null
+          }
+        },
+        "warnings": [],
+        "error": null
+      }
+    },
+    {
+      "response_definition": "list_accounts",
+      "response": {
+        "schema_version": "1.0",
+        "data": [
+          {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "provider": "midea.meiju",
+            "region": "CN",
+            "label": "Example account",
+            "credential_state": "stored",
+            "authorization": "not_checked"
+          }
+        ],
+        "warnings": [],
+        "error": null
+      }
+    },
+    {
+      "response_definition": "get_account",
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "get_account-example",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "get_account",
+          "account_id": "00000000-0000-4000-8000-000000000001"
+        }
+      },
+      "response": {
+        "schema_version": "1.0",
+        "data": {
+          "account": {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "provider": "midea.meiju",
+            "region": "CN",
+            "label": "Example account",
+            "credential_state": "stored",
+            "authorization": "not_checked"
+          },
+          "device_ids": [
+            "00000000-0000-4000-8000-000000000002"
+          ]
+        },
+        "warnings": [],
+        "error": null
+      }
+    },
+    {
+      "response_definition": "rename_account",
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "rename_account-example",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "rename_account",
+          "account_id": "00000000-0000-4000-8000-000000000001",
+          "label": "Family appliances"
+        }
+      },
+      "response": {
+        "schema_version": "1.0",
+        "data": {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "provider": "midea.meiju",
+          "region": "CN",
+          "label": "Family appliances",
+          "credential_state": "stored",
+          "authorization": "not_checked"
+        },
+        "warnings": [],
+        "error": null
+      }
+    },
+    {
+      "response_definition": "remove_account",
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "remove-removed",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "remove_account",
+          "account_id": "00000000-0000-4000-8000-000000000001",
+          "expected_device_ids": [
+            "00000000-0000-4000-8000-000000000002"
+          ]
+        }
+      },
+      "response": {
+        "schema_version": "1.0",
+        "data": {
+          "account_id": "00000000-0000-4000-8000-000000000001",
+          "device_ids": [
+            "00000000-0000-4000-8000-000000000002"
+          ],
+          "status": "removed",
+          "remote_revocation": "not_attempted",
+          "error": null
+        },
+        "warnings": [],
+        "error": null
+      }
+    },
+    {
+      "response_definition": "remove_account",
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "remove-pending",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "remove_account",
+          "account_id": "00000000-0000-4000-8000-000000000001",
+          "expected_device_ids": [
+            "00000000-0000-4000-8000-000000000002"
+          ]
+        }
+      },
+      "response": {
+        "schema_version": "1.0",
+        "data": {
+          "account_id": "00000000-0000-4000-8000-000000000001",
+          "device_ids": [
+            "00000000-0000-4000-8000-000000000002"
+          ],
+          "status": "pending",
+          "remote_revocation": "not_attempted",
+          "error": {
+            "code": "SECRET_STORE_WRITE_UNKNOWN",
+            "message": "Local credential deletion is unconfirmed.",
+            "retryable": false
+          }
+        },
+        "warnings": [],
+        "error": null
+      }
+    },
+    {
+      "response_definition": "recover_account",
+      "response": {
+        "schema_version": "1.0",
+        "data": {
+          "account": {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "provider": "midea.meiju",
+            "region": "CN",
+            "label": "Example account",
+            "credential_state": "stored",
+            "authorization": "not_checked"
+          },
+          "authentication": "not_attempted",
+          "retrieval": {
+            "status": "complete",
+            "device_ids": [
+              "00000000-0000-4000-8000-000000000002"
+            ],
+            "error": null
+          }
+        },
+        "warnings": [],
+        "error": null
+      },
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-recover-complete",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "recover_account",
+          "account_id": "00000000-0000-4000-8000-000000000001"
+        }
+      }
+    },
+    {
+      "response_definition": "recover_account",
+      "response": {
+        "schema_version": "1.0",
+        "data": {
+          "account": {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "provider": "midea.meiju",
+            "region": "CN",
+            "label": "Example account",
+            "credential_state": "pending",
+            "authorization": "not_checked"
+          },
+          "authentication": "not_attempted",
+          "retrieval": {
+            "status": "failed",
+            "device_ids": [],
+            "error": {
+              "code": "AUTH_REQUIRED",
+              "message": "The platform account requires user-side authorization.",
+              "retryable": false
+            }
+          }
+        },
+        "warnings": [],
+        "error": null
+      },
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-recover-pending",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "recover_account",
+          "account_id": "00000000-0000-4000-8000-000000000001"
+        }
+      }
+    },
+    {
+      "response_definition": "recover_account",
+      "response": {
+        "schema_version": "1.0",
+        "data": {
+          "account": {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "provider": "midea.meiju",
+            "region": "CN",
+            "label": "Example account",
+            "credential_state": "stored",
+            "authorization": "not_checked"
+          },
+          "authentication": "not_attempted",
+          "retrieval": {
+            "status": "failed",
+            "device_ids": [],
+            "error": {
+              "code": "STORAGE_ERROR",
+              "message": "The local store could not complete the operation.",
+              "retryable": false
+            }
+          }
+        },
+        "warnings": [],
+        "error": null
+      },
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-recover-publication_failed",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "recover_account",
+          "account_id": "00000000-0000-4000-8000-000000000001"
+        }
+      }
+    }
+  ],
+  "reauthorize_metadata": {
+    "schema_version": "1.0",
+    "operation_id": "reauthorize-example",
+    "timeout_ms": 180000,
+    "label": "Example account",
+    "account_id": "00000000-0000-4000-8000-000000000001"
+  }
+}

@@ -2,6 +2,42 @@
 
 ## Unreleased
 
+### Meiju account-bound Core reads
+
+- Verify the protected local device and cloud connection before a default state request, retaining known model evidence and component identity.
+- Exercise AC/E1/CA decoding through Core and SQLite with fictional read-only descriptors; preserve stale evidence and the previous cache on invalid responses.
+- Require thread-safe AccountLock guards so leased reads satisfy Core's Send future contract; native API 1.0.0, SQLite schema 3 and live authentication admission remain unchanged.
+
+### Meiju private account and device bindings
+
+- Persist the provider-validated subject, opaque session and stable account-scoped appliance bindings in one protected vault payload.
+- Preserve local IDs across retrieval and session replacement; reject identity conflicts and retain mappings missing from partial or empty lists.
+- Return new bindings only after confirmed storage, keep uncertain updates pending, and refuse implicit resets of missing/corrupt protected state.
+- Add synthetic SQLite/secret-store coverage and progressive integration guidance; native API 1.0.0 and live authentication admission are unchanged.
+
+### Meiju cloud state decoding
+
+- Add bounded, explicit cloud state queries and selected AC/E1/CA field decoding behind the injected read transport.
+- Keep model-specific codes in vendor namespaces, separate refrigerator compartments, and omit missing values without defaults.
+- Mark unproven cloud observations stale, preserve local receipt time, and redact private source state; no live authentication, controls or native UI methods are enabled.
+
+### Meiju authentication admission review
+
+- Verify the official developer-secret token flow and the separate community app-facing login requirements against primary sources.
+- Record proposed ADR-0022 for a scoped owner decision on community signing material; preserve the current no-backend rule and disabled live authentication until admission is resolved.
+
+### Persistent account vault
+
+- Upgrade SQLite schema 1/2 to 3 with a verified backup, persisting random profile/account/credential references without session bytes or provider identifiers.
+- Compose trusted native account storage with the OS secret store, and hold account leases across rereading and updating sessions.
+- Leave uncertain or unfinished credential updates pending; recover through explicit validation of the exact stored bytes without repeating a secret write.
+- Keep native UI API 1.0.0 unchanged. Provider login, public account methods, account removal and mobile secure stores remain pending; older schema-2 binaries refuse upgraded profiles.
+
+### Meiju inventory protocol
+
+- Add the native Midea cloud home/appliance inventory protocol with an injected read transport, account-scoped deduplication, unknown-family retention, partial errors, and shared cancellation/deadlines.
+- Keep provider identifiers and response bodies out of serializable DTOs and Debug/error output; do not register live authentication or device control without the remaining evidence.
+
 ### Native UI contract
 
 - Publish API version 1.0.0 with a local `get_api_info` query, 22 method schemas, actual Mock examples, and screen-to-interface coverage for independent Flutter work.

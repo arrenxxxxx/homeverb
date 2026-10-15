@@ -16,5 +16,9 @@ uuid.workspace = true
 secret-service.workspace = true
 zbus.workspace = true
 
+[target.'cfg(target_os = "android")'.dependencies]
+jni.workspace = true
+
 [dev-dependencies]
 tokio-util.workspace = true
+jni = { workspace = true, features = ["invocation"] }

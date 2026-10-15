@@ -1,16 +1,27 @@
 # 3. Connect the UI and localization
 
-Visual UI design is independent of this Core implementation. There is no production HTTP bridge or CLI-output parsing path. The [Flutter application](../../apps/mobile/README.md) uses an FVM-pinned SDK and direct Dart FFI, tested with the Linux Mock host. Android packaging and physical-phone lifecycle verification remain incomplete.
+Visual UI design is independent of this Core implementation. There is no production HTTP bridge or CLI-output parsing path. The [Flutter application](../../apps/mobile/README.md) uses an FVM-pinned SDK and direct Dart FFI, tested with the Linux Mock host. Android packaging and physical-phone lifecycle verification remain incomplete. The [Android native package](08-android-native.md) supplies a separate arm64 library builder and Keystore/JNI backend.
 
 The current design handoff is the [complete Window Light prototype](../../output/prototypes/homeverb-window-light-v1/index.html). Use its [functional specification](../ui-functional-spec.md), [82-state inventory](../ui-screen-inventory.md), and [Flutter visual/skin guide](../ui-window-light.md) alongside the native methods below. The application implements the one-option Appearance screen and isolated native-widget preview. Neither establishes platform authorization or nearby-sharing support; [visual equality remains unverified](../../apps/mobile/verification.md).
 
 ## Native boundary
 
+API 1.4 adds local `get_account` and `rename_account` for platform details and names.
+Use the [account metadata contract](../native-ui-contract.md#local-account-details-and-names)
+to show saved linked devices without a refresh or secret-store access. Local names
+do not change account identity, credentials or write permissions. API 1.5 adds
+[explicit local removal](../native-ui-contract.md#remove-an-account-from-this-installation);
+confirm the saved-device scope and render pending cleanup separately from success.
+API 1.7 adds [explicit saved-session recovery](../native-ui-contract.md#recover-interrupted-account-storage)
+for interrupted credential confirmation, with card retrieval and preserved bindings.
+API 1.8 permits [pending-account reauthorization](../native-ui-contract.md#reauthorize-a-pending-account)
+through the protected connection function when saved identity/bindings remain intact.
+
 Start new Flutter work against the [versioned native UI contract](../native-ui-contract.md): it provides the callable catalog, offline request/response schemas, actual Mock examples, page-to-interface coverage, and unavailable-feature boundaries. Call `get_api_info` after opening the native host. Do not derive an interface solely from screenshots or issue undocumented requests.
 
 Build `homeverb-ffi`. The C declarations are in [homeverb.h](../../crates/ffi/include/homeverb.h). Linux produces `target/debug/libhomeverb_ffi.so`. A native UI loads the library in its own process.
 
-1. Call `homeverb_open` with trusted startup configuration: `schema_version`, an absolute private `data_dir`, and `allow_mock_writes`. The returned query envelope contains `data.handle`.
+1. Call `homeverb_open` with trusted startup configuration: `schema_version`, an absolute private `data_dir`, and `allow_mock_writes`. Optional `adapter` defaults to `homeverb.mock`; `midea.meiju` defaults to read-only saved-account access and requires false Mock write permission. API 1.3 optionally accepts exact device/state `meiju_power_grants` from trusted startup; see the [power permission contract](../native-ui-contract.md#scoped-experimental-ac-power-startup). The returned query envelope contains `data.handle` and the selected adapter.
 2. Call `homeverb_call` on a worker thread with a unique `operation_id`. Each returned UTF-8 JSON string must be freed exactly once with `homeverb_string_free`.
 3. On backgrounding, immediately call `homeverb_set_foreground(handle, false)`. This rejects new operations and cancels active work. Returning to the foreground enables explicit new calls, without automatic refresh.
 4. Use `homeverb_cancel` for an individual operation. Call `homeverb_close` when the host closes. Forced termination cannot guarantee a callback; reopen and inspect recorded outcomes.
@@ -26,7 +37,7 @@ Build `homeverb-ffi`. The C declarations are in [homeverb.h](../../crates/ffi/in
 
 Methods: `list_devices`, `discover`, `describe_device` with `device`, `read_state` with `device/component/connection/cached`, `plan` with `command`, `execute` with `command`, `recent_executions`, and `get_execution` with `request_id`. The exact typed request is [HostRequest](../../crates/host/src/session.rs). Execute requires the command's timeout to match the outer timeout and carries the session's original deadline into Core. Queries use `{schema_version,data,warnings,error}`; execute returns the execution envelope directly. Malformed host requests return a query error.
 
-The bridge never accepts a principal, grant, profile change, password, or model-supplied confirmation in a request. `allow_mock_writes` is a startup-only grant for the fictional device's `main` power/climate actions over both simulated transports, not a general real-device authorization mechanism. Core checks action arguments and route scope before sending. A composite plan includes per-step commands and permitted transports in `items`.
+The general JSON bridge never accepts a principal, grant, profile change, password, or model-supplied confirmation in a request. API 1.2 adds local account list/refresh plus a separate protected native connection function; follow its [buffer and result contract](../native-ui-contract.md#account-connection-and-refresh). `allow_mock_writes` is a startup-only grant for the fictional device's `main` power/climate actions over both simulated transports, not a general real-device authorization mechanism. API 1.3 adds separate session-scoped Meiju AC power permissions; ordinary requests still cannot edit grants. Core checks action arguments and route scope before sending. A composite plan includes per-step commands and permitted transports in `items`.
 
 When rendering a component, resolve each referenced capability against that component. `describe_device` may return two definitions with the same capability ID and different `component_id` values. Omitted scope means shared; exact scope means that component only. Core rejects shared/scoped mixing of one ID, so there is no override precedence. Do not pick the first capability by ID or copy one compartment's temperature limits into another. Command and read-state component fields are unchanged. See [component scopes](../adr/0018-component-capability-scopes.md). Older strict readers must be updated before consuming scoped definitions; the C ABI functions do not change.
 
@@ -87,13 +98,21 @@ To inspect a known operation, call `{"method":"get_execution","request_id":"save
 
 These are local queries, with no refresh, replay, or background work. Filtering does not preserve more history: the profile still has a shared finalized-receipt retention limit, so older records may already be retired. Do not describe an empty view as proof that the device was never operated.
 
+## Explicit local-data cleanup
+
+Settings can call `clear_cached_state` or `clear_execution_history` after a separate
+scope confirmation. Use the [cleanup contract](../native-ui-contract.md#clear-local-cache-or-history)
+for counts, active-journal refusal, interrupted calls and replay protection.
+Neither operation removes accounts, grants or room/card organization. Full-profile
+deletion remains unavailable; do not implement it by deleting SQLite files.
+
 ## Diagnostic preview and export
 
 Settings calls `{"method":"diagnostics"}` in the normal host envelope. The query result's data matches [Diagnostics](../../schemas/diagnostics.schema.json). Render a preview, then save that same report only after the user's explicit action. Do not build an export by combining raw `describe_device`, `read_state`, or `recent_executions` results. This method does not accept extra fields or a request to include secrets, and it does not upload anything.
 
 Use the `diagnostics.*` locale keys for the preview/save controls and explanatory notices. Show that this is local metadata, with at most 100 stored receipt summaries and 32 attempts each; `attempts_omitted` makes truncation explicit. `item_outcomes` counts direct children, including partial children as partial, without exporting their private payloads. `OTHER` denotes an unreviewed error code. Room/device/connection counts do not establish online status, and parent/child receipts can represent overlapping work. See [privacy limits](../security-and-privacy.md#local-diagnostic-reports).
 
-This adds a native request method without changing existing payloads, the C ABI, or SQLite schema 2. Older hosts reject the unknown method; the UI must handle that response. Backgrounded/closed hosts continue to reject diagnostic requests.
+This adds a native request method without changing existing payloads, the C ABI, or device storage layout. Older hosts reject the unknown method; the UI must handle that response. Backgrounded/closed hosts continue to reject diagnostic requests.
 
 ## Localization contract
 

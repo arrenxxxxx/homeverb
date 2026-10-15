@@ -14,7 +14,7 @@ Read `README.md`, `docs/product-requirements.md`, `docs/architecture.md`, `docs/
 4. The app performs foreground, on-demand work only. Leaving the foreground cancels networking and closes subscriptions. Unconfirmed writes are recorded as `unknown`. Do not promise a callback after a forced termination.
 5. Do not implement remote HTTP MCP, public control APIs, device relays, cloud sync, or background automation. Changing this boundary requires an explicit owner decision and a new ADR. Do not reintroduce these features under an "optional" label.
 6. Local SQLite and system secret stores do not require a self-hosted service. Temporary loopback authentication callbacks and short-lived protocol UDP sockets are allowed only within a bounded operation.
-7. A platform requiring a confidential shared client secret, private server callback, or persistent relay is incompatible unless it has a viable native-client alternative. Never embed a backend secret in an app to claim support.
+7. A platform requiring a confidential shared client secret, private server callback, or persistent relay is incompatible unless it has a viable native-client alternative. Never embed a backend secret in an app to claim support. The owner-approved ADR-0022 exception permits only the pinned public Meiju community app-compatibility material for the personal MVP; it does not permit confidential developer secrets, publication, or real-device writes.
 
 ## Layering rules
 
@@ -46,7 +46,7 @@ Use `<type>(<optional-scope>): <English imperative summary>`. Allowed types: `fe
 
 ## Implementation status and test honesty
 
-The Rust Mock MVP and Linux Secret Service library are implemented. Read the progressive guides in `docs/development/` before changing them. Real authentication/account integration, mobile credential stores and packaging, and physical-device support remain pending; see `docs/task-breakdown.md`. A real adapter is `verified` only after model-specific physical-device testing.
+The Rust Mock MVP, Linux Secret Service library, and native account vault are implemented. Read the progressive guides in `docs/development/` before changing them. Native Meiju login, protected connection and automatic inventory are synthetic-tested with a local read-only probe. One real mainland account has passed login/inventory and saved-session refresh; six exact models have experimental read-only Core/native mappings. Native API 1.9.0 provides local account details/rename/removal and explicit cache/history clearing, selects Mock by default or explicit Meiju reads, lists/refreshes/recovers accounts and accepts protected connection buffers outside general JSON, including explicit pending-account reauthorization with intact protected identity. Trusted startup can independently grant exact-device AC power states or reviewed vendor fan codes over cloud; ordinary requests cannot edit authority. An explicitly opted-in AC power probe is synthetic-tested; default native Meiju sessions remain read-only and real writes require separate owner authorization. An Android Keystore/JNI backend has synthetic JVM evidence, and its API 28 arm64 AAR cross-build passed archive/export/alignment checks. Real reauthorization, Flutter account UI, Android Keystore/APK/phone acceptance, iOS credentials/packaging, and physical-device support remain pending; see `docs/task-breakdown.md`. A real adapter is `verified` only after model-specific physical-device testing.
 
 Current checks:
 

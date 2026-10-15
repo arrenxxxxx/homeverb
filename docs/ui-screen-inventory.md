@@ -597,6 +597,18 @@ Visible content: Home account · h***@example.invalid; Region / Europe / Devices
 
 ### P10 — Reconnect needed
 
+API 1.7 amendment: distinguish expired confirmed authorization from interrupted
+credential persistence. A pending account offers Recover Saved Authorization using
+`recover_account`, with finite progress/cancel and explicit failure/retry states.
+Inspect both the returned credential state and retrieval result; stored credentials
+with failed publication are not completed card loading. Recovery preserves known
+organization and sends no controls or new login. API 1.8 additionally offers explicit Sign In to the Original Account through the
+protected connection function when saved identity/bindings are intact, including
+expired pending sessions. Missing/corrupt material stays pending; explain the
+limitation without an automatic reconnect/removal loop.
+This is a functional amendment, not newly rendered or visually verified atlas states.
+
+
 [Rendered state](../output/prototypes/homeverb-window-light-v1/screens/P10.png) · Nested screen
 
 Same account detail with amber Sign-in needed / Your platform authorization has expired. Cached device count remains labelled Last known. Primary Reauthorize. Secondary View Devices and Remove From This Device. No other account auto-selection.
@@ -621,6 +633,14 @@ Visible content: Local authorization and associated cached data will be removed.
 |---|---|
 | Remove Locally | [P01](../output/prototypes/homeverb-window-light-v1/screens/P01.png) |
 | Cancel | [P09](../output/prototypes/homeverb-window-light-v1/screens/P09.png) |
+
+API 1.5 amendment: obtain `get_account`, show the linked-card count and actual scope,
+then pass that exact ID set to `remove_account` after confirmation. Only
+`data.status: removed` leads to P01. `pending` keeps the account visible with cleanup
+errors and explicit retry; changed scope requires another review, and shared-route
+removal is unavailable. Rooms and operation receipts remain. These are functional
+requirements; the rendered dialog does not establish their visual acceptance.
+Provider revocation remains unavailable.
 
 ### P12 — Revoke provider access
 
@@ -685,6 +705,16 @@ Visible content: Auto — prefer local when available / Local network only — n
 | Back | [S01](../output/prototypes/homeverb-window-light-v1/screens/S01.png) |
 
 ### S04 — Local data
+
+API 1.6 amendment: Clear Cached State and Clear Recent Operations call separate
+native cleanup methods after scope confirmation. Report removed snapshot/receipt
+counts. Active journals block history clearing with `RESOURCE_BUSY`; retain the
+view and offer an explicit retry. Clearing history includes detailed unknown
+outcomes but keeps request-ID replay protection. Cached state may reappear from an
+already-running read. Reload local views after interrupted calls. Full Remove Local
+Data remains unavailable. These confirmation/busy/error/result variants are a
+functional amendment, not newly rendered or visually verified atlas states.
+
 
 [Rendered state](../output/prototypes/homeverb-window-light-v1/screens/S04.png) · Nested screen
 
