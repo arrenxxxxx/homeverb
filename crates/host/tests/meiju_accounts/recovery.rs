@@ -5,7 +5,12 @@ fn recover(id: Uuid) -> Value {
 }
 
 async fn pending_account(f: &Fixture) -> AccountRecord {
-    f.connect(None).await;
+    let connected = f.connect(None).await;
+    assert_eq!(
+        connected["data"]["retrieval"]["status"], "complete",
+        "{connected}"
+    );
+    assert_eq!(f.store.devices().unwrap().len(), 2);
     let account = f.store.accounts().unwrap().remove(0);
     f.store
         .set_credential_state(account.id, CredentialState::Pending)
@@ -13,7 +18,7 @@ async fn pending_account(f: &Fixture) -> AccountRecord {
     account
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn recovery_completes_interrupted_initial_connection_without_another_login() {
     let f = Fixture::new();
     f.secrets.uncertain.store(true, Ordering::Relaxed);
@@ -51,7 +56,7 @@ async fn recovery_completes_interrupted_initial_connection_without_another_login
     assert_eq!(f.store.accounts().unwrap().len(), 1);
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn recovery_reuses_uncertain_saved_bindings_and_preserves_card_preferences() {
     let f = Fixture::new();
     let connected = f.connect(None).await;
@@ -105,7 +110,7 @@ async fn recovery_reuses_uncertain_saved_bindings_and_preserves_card_preferences
     assert_eq!(reopened.devices().unwrap().len(), 3);
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn recovery_rejection_and_partial_inventory_leave_credentials_unconfirmed() {
     for (home_code, appliance_code, expected) in [
         (7400, 0, "AUTH_REQUIRED"),
@@ -131,7 +136,7 @@ async fn recovery_rejection_and_partial_inventory_leave_credentials_unconfirmed(
     }
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn invalid_recovery_material_never_reaches_the_provider_or_resets_identity() {
     for kind in [
         "missing",
@@ -201,7 +206,7 @@ async fn invalid_recovery_material_never_reaches_the_provider_or_resets_identity
     }
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn recovery_confirms_exact_bytes_and_handles_sqlite_failure_without_rewriting_secrets() {
     for changed_bytes in [true, false] {
         let f = Fixture::new();
@@ -331,7 +336,7 @@ async fn interrupted_recovery_never_confirms_or_runs_on_restart_and_releases_lea
     }
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn recovery_admission_refuses_wrong_account_region_busy_and_removal_intent() {
     let f = Fixture::new();
     let account = pending_account(&f).await;
@@ -380,7 +385,7 @@ async fn recovery_admission_refuses_wrong_account_region_busy_and_removal_intent
     );
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn recovery_reports_new_mapping_uncertainty_and_publication_failure_separately() {
     let f = Fixture::new();
     f.secrets.uncertain.store(true, Ordering::Relaxed);

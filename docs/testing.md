@@ -22,6 +22,13 @@ python3 -m unittest discover -s tests -v
 
 After dependencies are cached, add `--offline` to Cargo commands. Use a Python virtual environment when system package installation is restricted. `requirements-dev.txt` explicitly includes RFC 3339 validation; contract and runtime checks fail if `date-time` checking is unavailable rather than silently ignoring timestamp formats. The runtime acceptance script currently targets Linux (`libhomeverb_ffi.so`) and uses temporary fictional profiles. Its SIGINT case requires ordinary OS signal delivery. A sandboxed failure must be distinguished from an actual run outside the sandbox; never silently skip that case.
 
+The synthetic `homeverb-host --test meiju_accounts` suite uses paused Tokio time.
+Its one-second operation budgets must model the tested deadline, not the runner's
+scheduling or SQLite fixture setup latency. Deadline cases explicitly advance the
+clock; cancellation, backgrounding and dropped operations retain separate checks.
+Recovery setup asserts complete initial retrieval before marking the account
+pending. Real TLS and subprocess runtime suites continue to use real time.
+
 ## Coverage
 
 | Layer | Evidence |

@@ -42,7 +42,7 @@ async fn connected() -> (Fixture, String, Uuid) {
     (f, device, account)
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn fan_sessions_keep_exact_permissions_receipts_and_read_only_reopening() {
     let (mut f, device, account) = connected().await;
     let before = f.calls();

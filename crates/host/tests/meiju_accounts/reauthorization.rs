@@ -13,7 +13,7 @@ fn saved(f: &Fixture, account: &AccountRecord) -> Vec<u8> {
     f.secrets.values.lock().unwrap()[&account.credential_ref.to_string()].clone()
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn explicit_pending_reauthorization_preserves_bindings_preferences_and_scoped_grants() {
     let mut f = Fixture::new();
     f.connect(None).await;
@@ -117,7 +117,7 @@ async fn explicit_pending_reauthorization_preserves_bindings_preferences_and_sco
     }
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn pending_reauthorization_rejects_wrong_identity_and_login_failure_without_mutation() {
     for wrong_subject in [true, false] {
         let f = Fixture::new();
@@ -153,7 +153,7 @@ async fn pending_reauthorization_rejects_wrong_identity_and_login_failure_withou
     }
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn pending_reauthorization_requires_explicit_selection_and_intact_identity_before_login() {
     for kind in [
         "unselected",
@@ -218,7 +218,7 @@ async fn pending_reauthorization_requires_explicit_selection_and_intact_identity
     }
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn reauthorization_refuses_changed_protected_bytes_after_login() {
     let f = Fixture::new();
     let account = pending(&f).await;
@@ -246,7 +246,7 @@ async fn reauthorization_refuses_changed_protected_bytes_after_login() {
     );
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn interrupted_reauthorization_persistence_stays_pending_and_can_recover() {
     for metadata_failure in [false, true] {
         let f = Fixture::new();
@@ -365,7 +365,7 @@ async fn reauthorization_lifecycle_preserves_last_persisted_state_and_releases_l
     }
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn reauthorized_pending_account_reports_partial_inventory_without_losing_cards() {
     let f = Fixture::new();
     let account = pending(&f).await;

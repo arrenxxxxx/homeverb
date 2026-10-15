@@ -47,7 +47,7 @@ async fn connected() -> (Fixture, String, Uuid) {
     (f, device, account)
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn mode_sessions_keep_permissions_outcomes_and_receipts_separate() {
     let (mut f, device, _) = connected().await;
     assert!(

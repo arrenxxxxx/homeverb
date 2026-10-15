@@ -5,7 +5,7 @@ fn saved(f: &Fixture, account: &AccountRecord) -> Value {
         .unwrap()
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn product_evidence_stays_protected_across_refresh_and_pending_reauthorization() {
     let f = Fixture::new();
     f.connect(None).await;
@@ -73,7 +73,7 @@ async fn product_evidence_stays_protected_across_refresh_and_pending_reauthoriza
     assert!(!f.calls().contains(&CloudEndpoint::ApplianceControl));
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn product_storage_uncertainty_recovers_without_relogin_or_duplicate_cards() {
     let f = Fixture::new();
     f.connect(None).await;

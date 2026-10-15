@@ -5,7 +5,7 @@ fn removal_request(connection: &Value) -> Value {
         "expected_device_ids":connection["data"]["retrieval"]["device_ids"]})
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn removal_of_unreadable_credentials_never_reads_secrets_or_changes_another_account() {
     for state in [CredentialState::Stored, CredentialState::Pending] {
         let f = Fixture::new();
@@ -52,7 +52,7 @@ async fn removal_of_unreadable_credentials_never_reads_secrets_or_changes_anothe
     }
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn removal_keeps_receipts_and_rooms_and_refuses_late_discovery_and_cache() {
     let f = Fixture::new();
     let connected = f.connect(None).await;
@@ -132,7 +132,7 @@ async fn removal_keeps_receipts_and_rooms_and_refuses_late_discovery_and_cache()
     assert_eq!(f.calls(), calls);
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn removal_pending_cleanup_is_visible_and_explicit_retry_delegates_exact_entry_check() {
     for mode in [2, 3] {
         let f = Fixture::new();
@@ -195,7 +195,7 @@ async fn removal_pending_cleanup_is_visible_and_explicit_retry_delegates_exact_e
     }
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn removal_scope_and_lease_failures_precede_mutation() {
     let f = Fixture::new();
     let connected = f.connect(None).await;
@@ -252,7 +252,7 @@ async fn removal_scope_and_lease_failures_precede_mutation() {
     assert_eq!(f.secrets.deletes.load(Ordering::Relaxed), 0);
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn removal_metadata_failure_rolls_back_and_retry_does_not_repeat_secret_deletion() {
     let f = Fixture::new();
     let connected = f.connect(None).await;
@@ -326,7 +326,7 @@ async fn removal_interruption_retains_cleanup_intent_and_releases_leases() {
     }
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn dropped_removal_has_no_callback_or_startup_retry_and_can_resume_explicitly() {
     let f = Fixture::new();
     let connected = f.connect(None).await;
@@ -360,7 +360,7 @@ async fn dropped_removal_has_no_callback_or_startup_retry_and_can_resume_explici
     assert_eq!(f.secrets.deleted_entries.load(Ordering::Relaxed), 1);
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn deletion_refusals_leave_intent_without_erasure_and_scope_retry_is_exact() {
     for (mode, error) in [
         (3, "SECRET_STORE_UNAVAILABLE"),
