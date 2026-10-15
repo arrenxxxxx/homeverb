@@ -51,6 +51,15 @@ Trusted recovery uses `inspect_session`, validates those exact bytes with the pr
 
 The [Meiju private account layer](../crates/midea/src/account.rs) stores its versioned session and identity map together under the leased credential reference. A complete payload is bound to the immutable local account/provider/region/reference. New appliance IDs receive random local device, cloud-connection and identity-reference IDs before descriptor publication. Reauthorization requires the same provider-validated subject; no subject or appliance identifier is written to SQLite. Every changed map uses the same pending/stored transition as session replacement. Uncertain saves return no generated bindings and require explicit recovery; unchanged maps do not rewrite credentials. Missing or malformed protected state cannot be reset through an existing lease. See [ADR-0024](adr/0024-meiju-private-device-bindings.md) for account scope and remaining cross-account identity work.
 
+Protected payload version 3 adds optional product mapping evidence per binding:
+`sn8`, canonical numeric `subtype` and `category`. The parser retains only these
+bounded fields from the existing inventory; full serial numbers are ignored.
+[ADR-0040](adr/0040-protected-meiju-product-profiles.md) defines unknown values,
+conflict refusal and migration. Older payloads open without writes; only an
+explicit changed binding/session persists version 3. Known evidence survives
+omissions and reauthorization. Older binaries refuse version 3. No SQLite schema
+change or profile field is added to public account/device results.
+
 ## Explicit account cleanup
 
 [ADR-0028](adr/0028-local-account-removal.md) coordinates removal under the profile

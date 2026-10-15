@@ -1,6 +1,6 @@
 # HomeVerb native contract
 
-Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.11.0 has 31 callable JSON methods and one separate protected account-connection function; the JSON envelope schema is 1.0.
+Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.11.1 has 31 callable JSON methods and one separate protected account-connection function; the JSON envelope schema is 1.0.
 
 - [api.json](api.json) is compiled into the `get_api_info` response.
 - [examples.json](examples.json) contains fictional requests and actual Mock native responses, including failures and lifecycle states. It is preview/test data, never a production device database.
@@ -15,3 +15,5 @@ Trusted startup can select `midea.meiju` for read-only access to previously conn
 API 1.10 adds `inspect_account_inventory` for explicit protected local membership inspection. It never contacts the provider or changes credentials; unavailable secrets return an error. Membership is separate from online state and write permission.
 
 API 1.11 adds independent `meiju_mode_grants` for explicit combined AC power-on and mode selection. Negotiate the version before supplying the field; older libraries reject it. See the [activation startup contract](../../docs/native-ui-contract.md#scoped-experimental-ac-mode-activation-startup) for exact values, consent labels and unchanged outcome limits.
+
+API 1.11.1 preserves product mapping evidence only inside protected account payload version 3. Older payloads remain readable without mutation; older binaries cannot open the upgraded payload. Native methods and public DTOs are unchanged. Follow the [migration guidance](../../docs/native-ui-contract.md#protected-product-profile-migration).

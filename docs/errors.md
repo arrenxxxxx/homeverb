@@ -119,6 +119,17 @@ revocation, delete the card or resend a write automatically. Controls retain
 `failed` / `not_sent`. Local/cached access remains available. See
 [ADR-0035](adr/0035-meiju-inventory-membership.md).
 
+## Meiju product mapping evidence
+
+Malformed `sn8`, `modelNumber` or `category` in inventory returns a sanitized
+`MIDEA_RESPONSE_INVALID` for that home; retrieval is partial and cannot publish
+new cards. Conflicting nonempty evidence for one appliance, within retrieval or
+against protected bindings, returns `DEVICE_IDENTITY_CONFLICT` before saving the
+binding update. No value is included in the error. Missing values do not erase
+known evidence. Corrupt or unsupported protected payloads return
+`ACCOUNT_SESSION_UNCONFIRMED`; do not recreate bindings. See
+[ADR-0040](adr/0040-protected-meiju-product-profiles.md).
+
 ## Meiju cloud control errors
 
 The explicit experimental AC control path uses existing execution codes and schema

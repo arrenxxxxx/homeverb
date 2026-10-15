@@ -459,3 +459,42 @@ fixtures. This phase accessed no owner account or appliance and did not modify
 the separate Flutter worktree. Physical/off-LAN acceptance remains deferred;
 model-specific AC temperature bounds, dishwasher/refrigerator controls and the
 complete mobile journey remain incomplete. Remote CI was not verified.
+
+## Protected product mapping evidence 1.11.1
+
+The existing Meiju inventory now retains optional `sn8`, `modelNumber` and
+`category` as private product mapping evidence under
+[ADR-0040](adr/0040-protected-meiju-product-profiles.md). Numeric subtype
+representations are canonicalized, absent/placeholder fields remain unknown,
+and conflicting nonempty evidence refuses the whole binding update. Malformed
+fields invalidate that home's response; partial retrieval preserves cards and
+established membership. No additional endpoint, full serial-number decoding,
+Lua/plugin download, device control or automatic refresh is introduced.
+
+Protected account payload version 3 stores this evidence with existing immutable
+bindings. Versions 1 and 2 open without writes or invented values; a later explicit
+protected mutation writes version 3. Missing later fields, session replacement,
+pending reauthorization and recovery retain established evidence and local IDs.
+Uncertain storage keeps the account pending. Older binaries cannot reopen version
+3; preserve the profile and upgrade the library instead of resetting accounts.
+Native API 1.11.1 identifies this storage change, with the same 31 JSON methods,
+seven C functions, public DTOs and SQLite schema 4. Source inventory gains an
+opaque, nonserializable `ProductProfile`; external Rust literal constructors must
+initialize its new field. No new model or control is admitted by this evidence.
+
+Local verification on October 16, 2026 passed 287 Rust tests (two opt-in system
+probes ignored), Clippy with warnings denied, formatting, the workspace build,
+`cargo build --workspace --examples --offline --locked`, 33 runtime cases,
+the 31-method/51-example native ABI suite, 29 Python tests and five presentation
+tests. Contract checks passed 17 schemas, 32 positive and 111 negative fixtures;
+document/repository/commit checks passed. Rust/runtime suites used ordinary local
+socket and signal access. Native session tests cover protected evidence capture,
+unchanged descriptors, pending reauthorization, exact-byte recovery without
+relogin, and absent profile markers in public responses and SQLite/WAL.
+
+The API 28 arm64, x86_64 and combined Android AARs were rebuilt using NDK r28c,
+JDK 21 and API 35 stubs; production archive contents, eight exports per ABI and
+16 KiB ELF alignment passed. No APK, emulator, Android Keystore, phone, real
+account/profile, appliance or remote CI acceptance was performed. The separate
+Flutter worktree was untouched. Model-specific temperature/program constraints,
+physical/off-LAN controls and the complete mobile journey remain incomplete.

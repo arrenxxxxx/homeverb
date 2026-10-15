@@ -169,6 +169,7 @@ struct Wire {
     homes_code: AtomicI32,
     extra_device: AtomicBool,
     empty_inventory: AtomicBool,
+    product_fields: Mutex<Option<Value>>,
     delay: Mutex<Option<CloudEndpoint>>,
     started: tokio::sync::Notify,
     resume: tokio::sync::Notify,
@@ -185,6 +186,7 @@ impl Default for Wire {
             homes_code: AtomicI32::new(0),
             extra_device: AtomicBool::new(false),
             empty_inventory: AtomicBool::new(false),
+            product_fields: Mutex::new(None),
             delay: Mutex::new(None),
             started: tokio::sync::Notify::new(),
             resume: tokio::sync::Notify::new(),
@@ -242,6 +244,14 @@ impl CloudTransport for Wire {
             ),
             _ => panic!("Account connection must not request state or controls."),
         };
+        if request.endpoint() == CloudEndpoint::HomeAppliances
+            && let Some(fields) = self.product_fields.lock().unwrap().as_ref()
+        {
+            data["homeList"][0]["roomList"][0]["applianceList"][0]
+                .as_object_mut()
+                .unwrap()
+                .extend(fields.as_object().unwrap().clone());
+        }
         if request.endpoint() == CloudEndpoint::HomeAppliances
             && self.extra_device.load(Ordering::Relaxed)
         {
@@ -992,3 +1002,6 @@ mod recovery;
 
 #[path = "meiju_accounts/reauthorization.rs"]
 mod reauthorization;
+
+#[path = "meiju_accounts/product.rs"]
+mod product;

@@ -14,7 +14,8 @@ The inspected revision contains no NOTICE file. Retain this attribution and the
 license when distributing the derived portions; HomeVerb's release license remains undecided.
 
 HomeVerb modifications: a minimal Rust port of the Meiju password transforms,
-request signing, session-key decoding, login/read request shapes and explicit AC
+request signing, session-key decoding, login/read request shapes, protected product
+mapping evidence and explicit AC
 power, vendor fan-preset and combined power-on/mode control encoding, with bounded
 operations, restricted HTTPS endpoints, conservative write outcomes, redacted native data and synthetic tests.
 No default appliance keys, SmartHome routing, executable Lua downloads, automatic

@@ -2,8 +2,8 @@
 
 use crate::{
     Appliance, ApplianceFamily, CloudId, CloudTransport, Inventory, LoginCredentials,
-    MAX_RESPONSE_BYTES, MeijuSession, ReadTransport, StateQuery, login, read_cloud_state,
-    retrieve_inventory,
+    MAX_RESPONSE_BYTES, MeijuSession, ProductProfile, ReadTransport, StateQuery, login,
+    read_cloud_state, retrieve_inventory,
 };
 use homeverb_core::{
     AccountLease, AccountRecord, AccountVault, Clock, CredentialRef, CredentialState, Operation,
@@ -43,6 +43,8 @@ struct StoredBinding {
     local: DeviceBinding,
     #[serde(default)]
     listed: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    product_profile: Option<crate::product::StoredProfile>,
 }
 
 impl StoredBinding {
@@ -141,8 +143,8 @@ impl Payload {
         let mut payload: Self =
             serde_json::from_slice(bytes.expose()).map_err(|_| unconfirmed())?;
         payload.validate(record)?;
-        // Decode legacy identities without writing; the next explicit update uses version 2.
-        payload.version = 2;
+        // Decode legacy identities without writing; the next explicit update uses version 3.
+        payload.version = 3;
         Ok(payload)
     }
 
@@ -155,7 +157,7 @@ impl Payload {
     }
 
     fn validate(&self, record: &AccountRecord) -> Result<()> {
-        if !matches!(self.version, 1 | 2)
+        if !matches!(self.version, 1..=3)
             || self.account_id != record.id
             || self.credential_ref != record.credential_ref
             || self.provider != PROVIDER
@@ -175,8 +177,12 @@ impl Payload {
                 || !appliances.insert(id)
                 || !valid_model(&binding.model)
                 || (self.version == 1 && binding.listed.is_some())
+                || (self.version < 3 && binding.product_profile.is_some())
             {
                 return Err(unconfirmed());
+            }
+            if let Some(profile) = &binding.product_profile {
+                profile.validate().map_err(|_| unconfirmed())?;
             }
             for id in [
                 binding.local.device_id,
@@ -308,7 +314,7 @@ impl MeijuAccount {
             return Err(unconfirmed());
         }
         let payload = Payload {
-            version: 2,
+            version: 3,
             account_id: account.record().id,
             credential_ref: account.record().credential_ref,
             provider: account.record().provider.clone(),
@@ -490,6 +496,11 @@ impl MeijuAccount {
                         if binding.family != family || model_conflicts {
                             return Err(identity_conflict());
                         }
+                        let mut profile = ProductProfile::from_stored(&binding.product_profile);
+                        if profile.merge(&appliance.product_profile)? {
+                            binding.product_profile = profile.stored();
+                            changed = true;
+                        }
                         if binding.model.is_none() && appliance.model.is_some() {
                             binding.model = appliance.model.clone();
                             changed = true;
@@ -510,6 +521,7 @@ impl MeijuAccount {
                             model: appliance.model.clone(),
                             local,
                             listed: None,
+                            product_profile: appliance.product_profile.stored(),
                         });
                         result.push(local);
                         changed = true;
@@ -582,6 +594,7 @@ impl MeijuAccount {
             name: None,
             model: binding.model.clone(),
             online_hint: None,
+            product_profile: ProductProfile::from_stored(&binding.product_profile),
         })
     }
 
@@ -638,6 +651,7 @@ impl MeijuAccount {
                     name: None,
                     model: binding.model.clone(),
                     online_hint: None,
+                    product_profile: ProductProfile::from_stored(&binding.product_profile),
                 })
             })
             .await?;

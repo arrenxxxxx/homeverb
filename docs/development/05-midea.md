@@ -134,7 +134,7 @@ real reauthorization and off-LAN acceptance remain to be recorded.
 
 ## Native account identity and device persistence
 
-`MeijuAccount` owns an AccountVault lease for one bounded operation. After admitted native authentication validates an account subject and session, `create(vault, region, label, subject, session, operation)` reserves a fresh local account and stores a private version-1 payload. For an existing account, acquire its lease and use `open`; it never initializes or resets an absent/corrupt map. `record()` exposes local metadata, and `session(operation)` returns protected native bytes. These remain low-level Rust calls; the native UI exposes reviewed projections and operations through API 1.2 without returning private payloads.
+`MeijuAccount` owns an AccountVault lease for one bounded operation. After admitted native authentication validates an account subject and session, `create(vault, region, label, subject, session, operation)` reserves a fresh local account and stores a private version-3 payload. For an existing account, acquire its lease and use `open`; it never initializes or resets an absent/corrupt map. `record()` exposes local metadata, and `session(operation)` returns protected native bytes. These remain low-level Rust calls; the native UI exposes reviewed projections and operations through API 1.2 without returning private payloads.
 
 The opaque subject must come from reviewed provider evidence, not a nickname or mutable login spelling. The native login flow below binds a successful password proof to the exact server-issued login ID; the storage layer itself does not infer a provider field. `replace_session` requires that exact subject and keeps the bindings. A mismatch returns `ACCOUNT_IDENTITY_CONFLICT` without changing stored state. Neither opening a payload nor matching the subject proves live authorization.
 
@@ -142,7 +142,18 @@ After retrieval, `bind_inventory` validates the inventory's credential reference
 
 Repeated inventories preserve IDs. Missing entries never remove mappings, including after a complete empty list. Names, vendor rooms and online hints do not affect identity. Known family/model conflicts reject the whole update; an absent model can become known. Unknown families receive bindings without gaining capabilities. Unchanged identities and membership require no secret-store write. This storage helper does not publish Core descriptors. The read-only adapter checks protected current and historical bindings across accounts before publishing; ambiguity fails without silently merging devices.
 
-The protected payload contains the immutable local account binding, subject/session bytes and private appliance map. Limits are 1 MiB total, 1024 subject bytes, 65536 session bytes, 4096 bindings, and 256 UTF-8 bytes per model. The system secret store protects the payload; SQLite contains no provider identifiers or session data. Debug/errors are redacted. Pending writes need exact-byte recovery through the vault before `open` can succeed; never retry by resetting or recreating the account. Tests use synthetic secrets and real SQLite, including unchanged local preferences after descriptor rediscovery. The Linux connect/refresh probe has exercised real account persistence; reauthorization and phone support remain pending.
+The protected payload contains the immutable local account binding, subject/session bytes and private appliance map.
+Under [ADR-0040](../adr/0040-protected-meiju-product-profiles.md), each binding may
+also retain private `sn8`, `modelNumber` (as canonical `subtype`) and `category`
+evidence from the existing inventory request. These inform later reviewed mapping
+selection; they are not public descriptors or permission to use a family default.
+Missing fields preserve known evidence; conflicting known fields reject the whole
+binding update. Invalid fields invalidate that home's response. The full serial
+number, downloaded Lua and plugins are neither used nor retained. Versions 1 and 2
+open without writes; the next explicit protected mutation writes version 3, which
+old binaries cannot reopen. Do not reset an account to downgrade.
+
+Limits are 1 MiB total, 1024 subject bytes, 65536 session bytes, 4096 bindings, and 256 UTF-8 bytes per model. The system secret store protects the payload; SQLite contains no provider identifiers or session data. Debug/errors are redacted. Pending writes need exact-byte recovery through the vault before `open` can succeed; never retry by resetting or recreating the account. Tests use synthetic secrets and real SQLite, including unchanged local preferences after descriptor rediscovery. The Linux connect/refresh probe has exercised real account persistence; reauthorization and phone support remain pending.
 
 For a Core adapter's default state read, use `read_bound_state(transport, device, component, connection, clock, operation)` on the leased account. It checks the exact local device and full cloud connection against the protected map, known model evidence, confirmed membership in the last complete inventory, and the requested component before issuing one request. The private appliance target comes from the map, not from UI arguments. Use an operation-scoped transport that already resolves the correct session under this lease; do not reacquire the account lock inside the transport. This helper does not discover capabilities or turn read properties into actions.
 

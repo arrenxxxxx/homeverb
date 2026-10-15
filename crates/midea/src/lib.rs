@@ -6,8 +6,10 @@ mod codec;
 mod control;
 pub use control::{AC_FAN_SPEEDS, AC_MODES, AcMode};
 mod material;
+mod product;
 pub use auth::{LoginCredentials, MeijuSession, SessionReads, login};
 pub use cloud::{CloudEndpoint, CloudTransport, MeijuHttps, SignedRequest};
+pub use product::ProductProfile;
 
 mod account;
 pub use account::{
@@ -75,6 +77,7 @@ pub struct Appliance {
     pub name: Option<String>,
     pub model: Option<String>,
     pub online_hint: Option<bool>,
+    pub product_profile: ProductProfile,
 }
 
 impl fmt::Debug for Appliance {
@@ -183,6 +186,7 @@ pub async fn retrieve_inventory(
                                 "The account inventory contains conflicting appliance identity evidence.",
                             ));
                         }
+                        known.product_profile.merge(&appliance.product_profile)?;
                         // Conflicting cloud hints are unknown, not a newer physical observation.
                         if known.online_hint != appliance.online_hint {
                             known.online_hint = None;
@@ -322,6 +326,7 @@ fn parse_appliances(body: &SecretBytes, requested_home: &CloudId) -> Result<Vec<
                     name: fields.name.filter(|value| !value.is_empty()),
                     model: fields.model.filter(|value| !value.is_empty()),
                     online_hint,
+                    product_profile: ProductProfile::parse(entry)?,
                 });
             }
         }
