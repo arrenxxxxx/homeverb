@@ -9,18 +9,21 @@ from contextlib import closing
 from datetime import datetime, timedelta, timezone
 import json
 import os
+import pty
 from pathlib import Path
 import selectors
 import signal
 import sqlite3
 import subprocess
 import tempfile
+import termios
 import threading
 import time
 import unittest
 
 from jsonschema import Draft202012Validator
 from validate_contracts import checked_formats
+from native_contract import validator
 
 ROOT = Path(__file__).resolve().parents[1]
 BINARY = ROOT / 'target/debug/homeverb'
@@ -55,6 +58,131 @@ class RuntimeAcceptance(unittest.TestCase):
     def schema(self, name, value):
         schema = json.loads((ROOT / f'schemas/{name}.schema.json').read_text())
         Draft202012Validator(schema, format_checker=self.formats).validate(value)
+
+    def meiju(self, *arguments, expected=0, profile='meiju'):
+        result = subprocess.run([str(BINARY), '--adapter', 'midea.meiju', '--data-dir',
+                                 self.directory.name, '--profile', profile, *arguments],
+                                capture_output=True, text=True, timeout=5,
+                                env={**os.environ, 'DBUS_SESSION_BUS_ADDRESS':
+                                     f'unix:path={self.directory.name}/absent-bus'})
+        self.assertEqual(result.returncode, expected, result.stdout + result.stderr)
+        self.assertEqual(result.stderr, '')
+        response = json.loads(result.stdout)
+        if response['error'] is not None:
+            definition = 'query_error'
+        elif arguments[0] == 'account':
+            definition = {'list': 'list_accounts', 'show': 'get_account',
+                          'rename': 'rename_account', 'remove': 'remove_account',
+                          'inventory': 'inspect_account_inventory', 'refresh': 'refresh_account',
+                          'recover': 'recover_account', 'connect': 'connect_account'}[arguments[1]]
+        elif arguments[0] == 'device':
+            definition = {'discover': 'discover', 'cards': 'list_device_cards',
+                          'state': 'read_state'}[arguments[1]]
+        else:
+            definition = {'execution': 'get_execution', 'diagnostics': 'diagnostics'}[arguments[0]]
+        validator('native-response', definition).validate(response)
+        return response
+
+    def test_meiju_cli_metadata_inventory_refusal_and_recoverable_removal(self):
+        self.assertEqual(self.meiju('account', 'list')['data'], [])
+        self.assertEqual(self.meiju('device', 'discover')['data'], [])
+        self.assertEqual(self.meiju('device', 'cards')['data'], [])
+        account = '40000000-0000-4000-8000-000000000001'
+        reference = '50000000-0000-4000-8000-000000000001'
+        database = Path(self.directory.name) / 'meiju/homeverb.sqlite3'
+        with closing(sqlite3.connect(database)) as connection, connection:
+            connection.execute('INSERT INTO accounts VALUES (?, ?, ?, ?, ?, ?)',
+                               (account, 'midea.meiju', 'CN', 'Fictional account', reference, 'pending'))
+        details = self.meiju('account', 'show', account)['data']
+        self.assertEqual(details['device_ids'], [])
+        self.assertEqual(details['account']['authorization'], 'not_checked')
+        self.assertNotIn(reference, json.dumps(details))
+        renamed = self.meiju('account', 'rename', account, '  Family appliances  ')['data']
+        self.assertEqual(renamed['label'], 'Family appliances')
+        self.assertEqual(renamed['credential_state'], 'pending')
+        self.assertEqual(self.meiju('account', 'list')['data'][0]['label'], 'Family appliances')
+        for command in ['inventory', 'refresh']:
+            result = self.meiju('account', command, account, expected=3)
+            error = result['error'] if command == 'inventory' else result['data']['retrieval']['error']
+            self.assertEqual(error['code'], 'ACCOUNT_SESSION_UNCONFIRMED')
+        result = self.meiju('account', 'recover', account, expected=3)
+        self.assertEqual(result['data']['retrieval']['error']['code'], 'SECRET_STORE_UNAVAILABLE')
+        result = self.meiju('account', 'remove', account, '--expected-device-id', 'unexpected', expected=7)
+        self.assertEqual(result['error']['code'], 'ACCOUNT_SCOPE_CHANGED')
+        result = self.meiju('account', 'remove', account, expected=3)
+        self.assertIsNone(result['error'])
+        self.assertEqual(result['data']['status'], 'pending')
+        self.assertEqual(result['data']['error']['code'], 'SECRET_STORE_UNAVAILABLE')
+        self.assertEqual(self.meiju('account', 'show', account)['data']['account']['credential_state'], 'removing')
+        self.assertFalse((database.parent / 'mock-appliance.sqlite3').exists())
+
+    def test_meiju_cli_rejects_writes_mock_options_and_unsafe_login_input(self):
+        for arguments, expected, code in [
+            (['power', 'set', 'unknown', '--on'], 6, 'POLICY_DENIED'),
+            (['--dry-run', 'power', 'set', 'unknown', '--off'], 6, 'POLICY_DENIED'),
+            (['batch', '--file', 'does-not-exist'], 6, 'POLICY_DENIED'),
+            (['--mock', 'device', 'list'], 2, 'INVALID_ARGUMENT'),
+            (['--scenario', 'normal', 'device', 'list'], 4, 'CAPABILITY_UNSUPPORTED'),
+            (['--dry-run', 'account', 'list'], 2, 'INVALID_ARGUMENT'),
+            (['account', 'connect', '--label', 'Fictional'], 3, 'INPUT_UNAVAILABLE'),
+            (['account', 'connect', '--label', 'Fictional', '--password', 'FICTIONAL_PRIVATE_MARKER'], 2, 'INVALID_ARGUMENT'),
+            (['account', 'connect', '--label', 'Fictional', '--account-id', 'not-a-uuid'], 2, 'INVALID_ARGUMENT'),
+            (['--timeout-ms', '0', 'account', 'connect', '--label', 'Fictional'], 2, 'INVALID_ARGUMENT'),
+        ]:
+            with self.subTest(arguments=arguments):
+                result = self.meiju(*arguments, expected=expected)
+                self.assertEqual(result['error']['code'], code)
+                self.assertNotIn('FICTIONAL_PRIVATE_MARKER', json.dumps(result))
+                self.assertFalse((Path(self.directory.name) / 'meiju').exists())
+
+    def test_meiju_cli_reuses_core_cards_cache_and_history_without_mock_startup(self):
+        self.cli('device', 'discover')
+        state = self.cli('device', 'state', 'mock-ac', '--fresh')['data']
+        receipt = self.cli('--request-id', 'fictional-receipt', 'power', 'set', 'mock-ac', '--on')
+        cached = self.meiju('device', 'state', 'mock-ac', '--cached', profile='acceptance')['data']
+        self.assertTrue(cached['from_cache'])
+        self.assertEqual(set(cached['observations']), set(state['observations']))
+        self.assertEqual(self.meiju('execution', 'fictional-receipt', profile='acceptance')['data'], receipt)
+        self.assertEqual(self.meiju('device', 'cards', profile='acceptance')['data'][0]['device']['id'], 'dev-mock-ac')
+        refused = self.meiju('device', 'state', 'mock-ac', '--fresh', expected=5, profile='acceptance')
+        self.assertEqual(refused['error']['code'], 'LAN_UNREACHABLE')
+        self.schema('diagnostics', self.meiju('diagnostics', profile='acceptance')['data'])
+
+    def test_meiju_cli_defaults_isolate_profiles_and_preflight_storage_before_input(self):
+        base = [str(BINARY), '--data-dir', self.directory.name]
+        result = subprocess.run([*base, '--adapter', 'midea.meiju', 'account', 'list'],
+                                capture_output=True, text=True, timeout=5)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(json.loads(result.stdout)['data'], [])
+        self.assertTrue((Path(self.directory.name) / 'meiju/homeverb.sqlite3').exists())
+        self.assertFalse((Path(self.directory.name) / 'mock').exists())
+        result = subprocess.run([*base, '--mock', 'device', 'list'],
+                                capture_output=True, text=True, timeout=5)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertTrue((Path(self.directory.name) / 'mock/mock-appliance.sqlite3').exists())
+        result = subprocess.run([*base, '--adapter', 'midea.meiju', '--profile', 'refused', 'mcp', '--stdio'],
+                                capture_output=True, text=True, timeout=5)
+        self.assertEqual(result.returncode, 4)
+        self.assertEqual(result.stdout, '')
+        self.assertIn('CAPABILITY_UNSUPPORTED', result.stderr)
+        self.assertFalse((Path(self.directory.name) / 'refused').exists())
+        master, slave = pty.openpty()
+        try:
+            before = termios.tcgetattr(slave)
+            result = subprocess.run([*base, '--adapter', 'midea.meiju', 'account', 'connect', '--label', 'Fictional'],
+                                    stdin=slave, stderr=slave, stdout=subprocess.PIPE, text=True, timeout=5,
+                                    env={**os.environ, 'DBUS_SESSION_BUS_ADDRESS':
+                                         f'unix:path={self.directory.name}/absent-bus'})
+            self.assertEqual(result.returncode, 3, result.stdout)
+            self.assertEqual(json.loads(result.stdout)['error']['code'], 'SECRET_STORE_UNAVAILABLE')
+            self.assertEqual(termios.tcgetattr(slave), before)
+            os.set_blocking(master, False)
+            with self.assertRaises(BlockingIOError):
+                os.read(master, 1024)
+            self.assertEqual(self.meiju('account', 'list')['data'], [])
+        finally:
+            os.close(master)
+            os.close(slave)
 
     def test_cli_discovery_state_validation_and_persistence(self):
         self.assertEqual(self.cli('device', 'list')['data'], [])

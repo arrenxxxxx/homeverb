@@ -1,6 +1,10 @@
 # CLI contract
 
-Status: the listed Mock, local organization, and redacted diagnostic commands are implemented. `--mock` is required. The production CLI does not expose authentication. A separate [local read-only Meiju probe](development/06-meiju-probe.md) now implements the native login/inventory flow; real account acceptance remains pending.
+Status: Mock commands, local organization, diagnostics and the experimental mainland
+Meiju account/read flow are implemented. Select `--mock` or `--adapter midea.meiju`
+explicitly. Meiju uses the same native Host/Core as the app bridge; no example
+executable, HA or service is required. Real CLI login/read acceptance remains
+separate from the earlier [developer probe](development/06-meiju-probe.md).
 
 ## Implemented commands
 
@@ -29,7 +33,86 @@ homeverb --mock diagnostics
 homeverb --mock mcp --stdio
 ```
 
-Global options: `--profile` (default `mock`), `--data-dir`, `--connection auto|lan|cloud`, `--timeout-ms` (1-180000, default 10000), `--wait accepted|verified` (default verified), `--request-id`, `--dry-run`, `--scenario`, and `--json`. All operation responses are JSON even without `--json`. Help/version output is text.
+Global options: `--profile` (default `mock` or `meiju` for the selected adapter),
+`--data-dir`, `--connection auto|lan|cloud`, `--timeout-ms` (1-180000, default 10000;
+account connect defaults to 180000 after input), `--wait accepted|verified`
+(default verified), `--request-id`, `--dry-run`, `--scenario`, and `--json`.
+All operation responses are JSON even without `--json`. Help/version output is text.
+`--mock` conflicts with `--adapter`. Explicit `--scenario` and MCP startup remain
+Mock-only. Existing Mock command forms and profile paths are unchanged.
+
+## Meiju account and read commands
+
+The default Meiju profile is `$XDG_DATA_HOME/homeverb/meiju`, or
+`$HOME/.local/share/homeverb/meiju` when XDG_DATA_HOME is unset. An explicit
+`--data-dir` is the parent directory; `--profile` is always appended. To reuse the
+existing developer-probe profile, pass `--data-dir "$HOME/.local/share/homeverb"
+--profile meiju-pilot`; do not append `meiju-pilot` twice or copy credential files.
+
+```text
+homeverb --adapter midea.meiju account connect --label "Home appliances"
+homeverb --adapter midea.meiju account connect --label "Home appliances" --account-id <local-account-id>
+homeverb --adapter midea.meiju account list
+homeverb --adapter midea.meiju account show <local-account-id>
+homeverb --adapter midea.meiju account inventory <local-account-id>
+homeverb --adapter midea.meiju account refresh <local-account-id>
+homeverb --adapter midea.meiju account recover <local-account-id>
+homeverb --adapter midea.meiju account rename <local-account-id> "Home appliances"
+homeverb --adapter midea.meiju account remove <local-account-id> --expected-device-id <local-device-id>
+homeverb --adapter midea.meiju device discover
+homeverb --adapter midea.meiju device cards
+homeverb --adapter midea.meiju device describe <local-device-id>
+homeverb --adapter midea.meiju --connection cloud device state <local-device-id> --fresh --component main
+homeverb --adapter midea.meiju device state <local-device-id> --cached --component main
+```
+
+`connect` is Linux-only and requires interactive stdin/stderr plus an unlocked
+Secret Service collection. It checks storage before prompting. Account and password
+are read from the controlling terminal with echo disabled, bounded to 256 bytes
+each, then passed as native secret buffers. There are no credential arguments,
+environment inputs, pipe inputs or public credential JSON. Ctrl+C cancels input
+and normal unwinding restores terminal settings; forced process termination cannot
+promise cleanup. Temporary application buffers are cleared; kernel/terminal copies
+and forensic erasure cannot be guaranteed. Unsupported credential characters or
+provider challenges fail through the existing native flow.
+
+Human input is outside the network budget. A separate 10-second preflight checks
+secure storage; after input, `--timeout-ms` bounds the shared login/inventory work.
+Other account methods begin their budget at native dispatch after local host startup.
+No background worker, automatic login, refresh or retry is started. Ctrl+C propagates
+to the native session and waits for its result, preserving known/uncertain storage
+outcomes instead of discarding them. Successful connection automatically publishes
+supported and unsupported cards through the same Core validation as the app.
+
+`list`, `show` and `rename` use local metadata without reading credentials.
+`inventory` reads saved protected membership without network access. `refresh`
+retrieves the selected account's devices with saved credentials. `recover` explicitly
+validates interrupted saved authorization; it never substitutes another login.
+See [account recovery and reauthorization](native-ui-contract.md#recover-interrupted-account-storage).
+`remove` deletes only local authorization and the reviewed linked-card set. Repeat
+`--expected-device-id` for every ID returned by `show`; omit it only for an empty
+set. A changed set refuses cleanup. A pending cleanup retains its nested error
+and can be retried explicitly with the same reviewed set. No provider revocation
+or appliance command follows removal.
+
+Account responses retain the [native response shapes](../schemas/native-response.schema.json).
+Exit status inspects both the top-level error and nested retrieval/removal errors.
+Stored authorization with partial retrieval exits 13; failed retrieval uses its
+error's exit code. Pending removal is never exit 0. Do not discard the account
+result merely because the command exits nonzero. `--dry-run`, command request IDs,
+nondefault route/wait options and Mock scenarios are invalid for account operations.
+
+Local room/card/preferences, cache, receipt and diagnostic commands also work
+with the Meiju profile. Live discovery/reads use the selected adapter only; cached
+reads retain their recorded evidence. Missing/unsupported models stay unsupported,
+cloud readings remain stale, and no LAN route is added. The Meiju CLI admits no
+power, climate, generic execute or batch writes, including dry runs; it returns
+`POLICY_DENIED` before opening the profile. Native experimental grants are not
+imported from metadata or accepted as CLI flags. Real controls remain in the
+separately authorized [control probe](development/07-meiju-control.md) and trusted
+native host configuration. The MCP tool surface is unchanged.
+
+## Shared command behavior
 
 `batch --file` reads a [BatchCommand](../schemas/batch-command.schema.json): `schema_version: "1.0"` and 1-32 full `commands` for distinct device IDs. Each command supplies its route, wait condition, timeout, and request ID. Global nondefault `--connection`/`--wait` and any global `--request-id` are rejected for batches. Global `--timeout-ms` limits the entire batch, including preflight and queued work. The fictional CLI host still grants only its known Mock device. Do not put credentials in batch files.
 
@@ -57,15 +140,15 @@ For multi-field writes explicitly declared as independent setters, `--dry-run` i
 |---|---|
 | 0 | Query succeeded or write met its requested wait condition |
 | 2 | Invalid syntax, argument, capability schema, contract version, or conflicting room name |
-| 3 | Authentication or secure credential storage required |
-| 4 | Unknown room/device/receipt, ambiguous device, conflicting discovery identity, or unsupported capability |
+| 3 | Authentication, confirmed saved credentials, secure storage or interactive input required |
+| 4 | Unknown room/device/account/receipt, identity conflict, missing inventory membership, or unsupported capability/flow |
 | 5 | No reachable permitted route or unsent deadline expiry |
 | 6 | Policy denied |
-| 7 | Device/migration lock, request-ID conflict, or retired request ID |
+| 7 | Lock, request-ID/credential conflict, changed removal scope, pending cleanup, or retired request ID |
 | 10 | Explicit device failure or local infrastructure error |
 | 11 | Unknown write outcome |
 | 12 | Accepted, but requested verification is unavailable |
-| 13 | Different non-atomic sub-operation outcomes |
+| 13 | Different non-atomic sub-operation outcomes or partial account inventory |
 | 130 | User interruption; inspect the result because transmission may have occurred |
 
 `--wait accepted` permits exit 0 for acceptance without physical verification. An identical request ID returns its recorded result; a changed command under that ID is rejected. Once detailed history is retired, any reuse returns `REQUEST_RETIRED` without sending. Refresh state instead of automatically replacing that ID. No daemon, service installer, HTTP server, automation, or scheduled execution command exists.

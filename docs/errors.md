@@ -21,6 +21,7 @@
 | AUTH_REQUIRED | Login or user consent required | Start login through a trusted UI |
 | AUTH_EXPIRED | Session cannot be refreshed safely | Request reauthorization |
 | AUTH_FLOW_UNSUPPORTED | Authentication requires an excluded backend | Mark blocked; do not add a hidden backend |
+| INPUT_UNAVAILABLE | The CLI cannot provide protected interactive terminal input | Use an interactive Linux terminal; never pass credentials as arguments or pipe input |
 | ACCOUNT_NOT_FOUND | Unknown local account reference | Reload local account records; do not select another account implicitly |
 | ACCOUNT_REMOVAL_PENDING | Account cleanup is incomplete; ordinary credential use or late publication is refused | Finish explicit local cleanup; never reconnect or restore the old account automatically |
 | ACCOUNT_SCOPE_CHANGED | The device set differs from the reviewed removal scope | Reload local details and obtain a new user confirmation before removal |

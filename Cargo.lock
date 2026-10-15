@@ -839,11 +839,14 @@ dependencies = [
  "homeverb-domain",
  "homeverb-host",
  "homeverb-mock",
+ "libc",
  "serde",
  "serde_json",
+ "tempfile",
  "tokio",
  "tokio-util",
  "uuid",
+ "zeroize",
 ]
 
 [[package]]

@@ -1,5 +1,12 @@
 # 6. Verify a Meiju account locally
 
+For ordinary use, start with the implemented
+[Meiju CLI account/read flow](../cli.md#meiju-account-and-read-commands). It reuses
+the native Host/Core, supports account recovery/removal and automatically publishes
+cards. The probe below remains a development evidence tool with specialized count
+and protocol reports. Its direct `--data-dir` is a profile directory; the CLI
+instead appends `--profile` to `--data-dir`. Neither path grants appliance controls.
+
 This is an explicit read-only developer probe for the owner-approved personal MVP
 under [ADR-0022](../adr/0022-meiju-community-cloud-admission.md). It signs requests
 directly to the mainland Meiju service, stores the session in Linux Secret Service,

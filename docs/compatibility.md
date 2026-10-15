@@ -325,3 +325,28 @@ passed. No Flutter worktree, real account or appliance was accessed by this phas
 Emulator startup, APK integration, Android Keystore and physical/off-LAN acceptance
 remain unverified; no emulator was available in the inspected SDK. See the
 [Android build and startup guide](development/08-android-native.md).
+
+## Meiju CLI account and read entrypoint
+
+The CLI accepts explicit `--adapter midea.meiju` and reuses the native account
+session for protected Linux terminal connection, listing/details, rename/removal,
+saved membership inspection, refresh and recovery. Device reads and local
+organization/history/diagnostics use the same Core. The default Meiju profile is
+separate from Mock; explicit profile selection can reopen existing native data.
+Account and credential mutations retain the existing identity, lease, pending
+state and uncertainty rules. No password, provider identifier or session material
+is accepted in CLI arguments, piped input or ordinary JSON.
+
+The CLI supplies no Meiju appliance grants and refuses writes before profile
+startup. Mock behavior and its MCP surface remain compatible. No native API,
+capability, SQLite or protected payload version changes; native API 1.10.0 still
+has 31 methods and seven C functions. Terminal login requires Linux; this does not
+provide mobile input or storage. See the [CLI contract](cli.md).
+
+Local verification passed 265 Rust tests (two opt-in system probes ignored),
+Clippy with warnings denied, formatting/build checks, 28 runtime cases, the
+31-method/51-example native ABI suite, 29 Python tests, five presentation tests,
+and document/contract/repository checks. The final input-buffer bound was rechecked
+with the CLI unit suite and Clippy. Tests use fictional profiles, local PTYs and
+an unavailable test D-Bus address. No owner profile, vendor login/read, device
+write, Flutter worktree, phone or remote CI acceptance was performed by this phase.
