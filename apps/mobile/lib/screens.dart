@@ -79,6 +79,28 @@ class ScreenView extends StatelessWidget {
     final ui = screenOverride ?? catalog.ui(id),
         root = ui['root'] as String?,
         base = ui['base'] as String?;
+    return CallbackShortcuts(
+      bindings: {
+        if (base != null || root == null)
+          const SingleActivator(LogicalKeyboardKey.escape): () =>
+              onAction('Back'),
+      },
+      child: FocusScope(
+        key: ValueKey('screen-focus:$id'),
+        autofocus: true,
+        child: Semantics(
+          scopesRoute: true,
+          explicitChildNodes: true,
+          child: content(context),
+        ),
+      ),
+    );
+  }
+
+  Widget content(BuildContext context) {
+    final ui = screenOverride ?? catalog.ui(id),
+        root = ui['root'] as String?,
+        base = ui['base'] as String?;
     return LightBackground(
       child: LayoutBuilder(
         builder: (context, c) {
@@ -97,20 +119,22 @@ class ScreenView extends StatelessWidget {
             final dialog = ui['overlay'] == 'dialog';
             return Stack(
               children: [
-                ExcludeSemantics(
-                  child: IgnorePointer(
-                    child: ScreenView(
-                      id: base,
-                      catalog: catalog,
-                      screenOverride: resolveScreen?.call(base),
-                      home: resolveHome?.call(base),
-                      resolveScreen: resolveScreen,
-                      resolveHome: resolveHome,
-                      onAction: (_) {},
-                      fields: resolveScreen == null ? {} : fields,
-                      choices: {},
-                      values: resolveScreen == null ? {} : values,
-                      testChrome: testChrome,
+                ExcludeFocus(
+                  child: ExcludeSemantics(
+                    child: IgnorePointer(
+                      child: ScreenView(
+                        id: base,
+                        catalog: catalog,
+                        screenOverride: resolveScreen?.call(base),
+                        home: resolveHome?.call(base),
+                        resolveScreen: resolveScreen,
+                        resolveHome: resolveHome,
+                        onAction: (_) {},
+                        fields: resolveScreen == null ? {} : fields,
+                        choices: {},
+                        values: resolveScreen == null ? {} : values,
+                        testChrome: testChrome,
+                      ),
                     ),
                   ),
                 ),
@@ -161,11 +185,25 @@ class ScreenView extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 24),
                               ],
-                              Copy(header, size: dialog ? 22 : 23, bold: true),
+                              Semantics(
+                                header: true,
+                                namesRoute: true,
+                                child: Copy(
+                                  header,
+                                  size: dialog ? 22 : 23,
+                                  bold: true,
+                                ),
+                              ),
                               SizedBox(height: dialog ? 17 : 21),
                               content,
                               if (error != null)
-                                Copy('$error', color: const Color(0xff9e3421)),
+                                Semantics(
+                                  liveRegion: true,
+                                  child: Copy(
+                                    '$error',
+                                    color: const Color(0xff9e3421),
+                                  ),
+                                ),
                             ],
                           ),
                         ),
@@ -178,7 +216,7 @@ class ScreenView extends StatelessWidget {
                     top: 0,
                     left: 0,
                     right: 0,
-                    child: LinearProgressIndicator(),
+                    child: OperationProgress(),
                   ),
               ],
             );
@@ -268,12 +306,16 @@ class ScreenView extends StatelessWidget {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Expanded(
-                                        child: Copy(
-                                          header,
-                                          size: root != null
-                                              ? (id == 'P01' ? 28 : 30)
-                                              : 25,
-                                          bold: true,
+                                        child: Semantics(
+                                          header: true,
+                                          namesRoute: true,
+                                          child: Copy(
+                                            header,
+                                            size: root != null
+                                                ? (id == 'P01' ? 28 : 30)
+                                                : 25,
+                                            bold: true,
+                                          ),
                                         ),
                                       ),
                                       if (root == 'Devices') ...[
@@ -323,7 +365,7 @@ class ScreenView extends StatelessWidget {
                                   if (busy)
                                     const Padding(
                                       padding: EdgeInsets.only(bottom: 12),
-                                      child: LinearProgressIndicator(),
+                                      child: OperationProgress(),
                                     ),
                                   if (error != null) ...[
                                     blocks([
@@ -420,10 +462,14 @@ class ScreenView extends StatelessWidget {
     return Stack(
       children: [
         Positioned(left: 0, top: 0, bottom: 0, child: _rail('Devices')),
-        const Positioned(
+        Positioned(
           left: 118,
           top: 37,
-          child: Copy('HomeVerb', size: 28, bold: true),
+          child: Semantics(
+            header: true,
+            namesRoute: true,
+            child: Copy('HomeVerb', size: 28, bold: true),
+          ),
         ),
         const Positioned(left: 118, top: 83, child: Copy('My home', size: 16)),
         if (!detail) ...[
@@ -553,6 +599,7 @@ class ScreenView extends StatelessWidget {
         return Expanded(
           child: Semantics(
             selected: root == labels[i],
+            button: true,
             child: InkWell(
               onTap: () => onAction(labels[i]),
               child: MediaQuery.textScalerOf(context).scale(11) <= 11
@@ -615,32 +662,36 @@ class ScreenView extends StatelessWidget {
           }.entries)
             Padding(
               padding: const EdgeInsets.only(bottom: 20),
-              child: InkWell(
-                onTap: () => onAction(entry.key),
-                child: Container(
-                  width: 64,
-                  constraints: const BoxConstraints(minHeight: 72),
-                  padding: const EdgeInsets.only(top: 16, bottom: 10),
-                  decoration: BoxDecoration(
-                    color: root == entry.key ? const Color(0xffe7d3c4) : null,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Glyph(
-                        entry.value,
-                        size: 22,
-                        color: root == entry.key ? accent : muted,
-                      ),
-                      const SizedBox(height: 10),
-                      Copy(
-                        entry.key,
-                        size: 10,
-                        color: root == entry.key ? accent : muted,
-                      ),
-                    ],
+              child: Semantics(
+                selected: root == entry.key,
+                button: true,
+                child: InkWell(
+                  onTap: () => onAction(entry.key),
+                  child: Container(
+                    width: 64,
+                    constraints: const BoxConstraints(minHeight: 72),
+                    padding: const EdgeInsets.only(top: 16, bottom: 10),
+                    decoration: BoxDecoration(
+                      color: root == entry.key ? const Color(0xffe7d3c4) : null,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Glyph(
+                          entry.value,
+                          size: 22,
+                          color: root == entry.key ? accent : muted,
+                        ),
+                        const SizedBox(height: 10),
+                        Copy(
+                          entry.key,
+                          size: 10,
+                          color: root == entry.key ? accent : muted,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

@@ -257,6 +257,21 @@ class ActionButton extends StatelessWidget {
   );
 }
 
+class OperationProgress extends StatelessWidget {
+  const OperationProgress({super.key});
+  @override
+  Widget build(BuildContext context) => Semantics(
+    label: 'Operation in progress',
+    liveRegion: true,
+    child: ExcludeSemantics(
+      child: LinearProgressIndicator(
+        // A static activity marker avoids an indefinite animation when requested.
+        value: MediaQuery.disableAnimationsOf(context) ? .35 : null,
+      ),
+    ),
+  );
+}
+
 class InlineStepper extends StatelessWidget {
   const InlineStepper({
     required this.label,
@@ -343,22 +358,27 @@ class ValueSlider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget slider() => SliderTheme(
-      data: SliderTheme.of(context).copyWith(
-        trackHeight: 5,
-        activeTrackColor: accent,
-        inactiveTrackColor: const Color(0xffd5d6cf),
-        thumbShape: const WindowSliderThumb(),
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        trackShape: const RoundedRectSliderTrackShape(),
-      ),
-      child: Slider(
-        value: value.clamp(min, max),
-        min: min,
-        max: max,
-        semanticFormatterCallback: formatValue,
-        onChanged: onChanged,
-        onChangeEnd: onChangeEnd,
+    Widget slider() => MergeSemantics(
+      child: Semantics(
+        label: label,
+        child: SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            trackHeight: 5,
+            activeTrackColor: accent,
+            inactiveTrackColor: const Color(0xffd5d6cf),
+            thumbShape: const WindowSliderThumb(),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            trackShape: const RoundedRectSliderTrackShape(),
+          ),
+          child: Slider(
+            value: value.clamp(min, max),
+            min: min,
+            max: max,
+            semanticFormatterCallback: formatValue,
+            onChanged: onChanged,
+            onChangeEnd: onChangeEnd,
+          ),
+        ),
       ),
     );
     Widget heading() => Row(

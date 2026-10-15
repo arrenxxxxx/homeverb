@@ -191,7 +191,10 @@ class _CapabilityActionFormState extends State<CapabilityActionForm> {
       if (message != null)
         Padding(
           padding: const EdgeInsets.only(bottom: 12),
-          child: Copy(message!, color: const Color(0xff9e3421)),
+          child: Semantics(
+            liveRegion: true,
+            child: Copy(message!, color: const Color(0xff9e3421)),
+          ),
         ),
       ActionButton('Apply', onPressed: saving ? null : submit),
       ActionButton('Cancel', style: 'secondary', onPressed: widget.onCancel),
@@ -288,29 +291,36 @@ class _CapabilityActionFormState extends State<CapabilityActionForm> {
                 ],
               )
             else
-              TextField(
-                key: ValueKey('parameter:$name'),
-                controller: controller,
-                enabled: !saving,
-                keyboardType: numeric
-                    ? const TextInputType.numberWithOptions(
-                        decimal: true,
-                        signed: true,
-                      )
-                    : TextInputType.text,
-                style: const TextStyle(fontSize: 15, height: 4 / 3, color: ink),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: const Color(0xfff8f5ee),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide.none,
+              Semantics(
+                label: controlLabel(name),
+                child: TextField(
+                  key: ValueKey('parameter:$name'),
+                  controller: controller,
+                  enabled: !saving,
+                  keyboardType: numeric
+                      ? const TextInputType.numberWithOptions(
+                          decimal: true,
+                          signed: true,
+                        )
+                      : TextInputType.text,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    height: 4 / 3,
+                    color: ink,
                   ),
-                  contentPadding: const EdgeInsets.all(15),
-                  hintText: 'Enter ${controlLabel(name).toLowerCase()}',
-                  suffixText: controlUnit(property['unit']),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: const Color(0xfff8f5ee),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.all(15),
+                    hintText: 'Enter ${controlLabel(name).toLowerCase()}',
+                    suffixText: controlUnit(property['unit']),
+                  ),
+                  onChanged: (_) => setState(() => message = null),
                 ),
-                onChanged: (_) => setState(() => message = null),
               ),
             if (numeric &&
                 lower is num &&

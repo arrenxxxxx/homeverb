@@ -24,7 +24,12 @@ class Blocks extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: blocks.map((b) => block(context, b as List)).toList(),
+    children: blocks.map((b) {
+      final child = block(context, b as List);
+      return b[0] == 'status'
+          ? Semantics(liveRegion: true, child: child)
+          : child;
+    }).toList(),
   );
   Widget block(BuildContext context, List b) {
     final type = b[0];
@@ -81,38 +86,41 @@ class Blocks extends StatelessWidget {
                 radius: 14,
                 border: b.length > 3 ? const Color(0xffae452d) : null,
                 borderWidth: b.length > 3 ? 1 : .6,
-                child: TextField(
-                  controller: field,
-                  key: ValueKey('field:$label'),
-                  onChanged: (_) => onChanged?.call(),
-                  keyboardType: label == 'Target temperature'
-                      ? const TextInputType.numberWithOptions(
-                          decimal: true,
-                          signed: true,
-                        )
-                      : TextInputType.text,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    height: 4 / 3,
-                    letterSpacing: 0,
-                  ),
-                  decoration: InputDecoration(
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 15,
-                      vertical: 15,
-                    ),
-                    border: InputBorder.none,
-                    hintText: 'Search by name',
-                    suffixIcon: label.startsWith('Search')
-                        ? IconButton(
-                            tooltip: 'Clear search',
-                            onPressed: () {
-                              field.clear();
-                              onChanged?.call();
-                            },
-                            icon: const Icon(Icons.close, size: 18),
+                child: Semantics(
+                  label: label,
+                  child: TextField(
+                    controller: field,
+                    key: ValueKey('field:$label'),
+                    onChanged: (_) => onChanged?.call(),
+                    keyboardType: label == 'Target temperature'
+                        ? const TextInputType.numberWithOptions(
+                            decimal: true,
+                            signed: true,
                           )
-                        : null,
+                        : TextInputType.text,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      height: 4 / 3,
+                      letterSpacing: 0,
+                    ),
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 15,
+                        vertical: 15,
+                      ),
+                      border: InputBorder.none,
+                      hintText: 'Search by name',
+                      suffixIcon: label.startsWith('Search')
+                          ? IconButton(
+                              tooltip: 'Clear search',
+                              onPressed: () {
+                                field.clear();
+                                onChanged?.call();
+                              },
+                              icon: const Icon(Icons.close, size: 18),
+                            )
+                          : null,
+                    ),
                   ),
                 ),
               ),
@@ -686,6 +694,8 @@ class Rows extends StatelessWidget {
                     ['Target', 'Speed'].contains(label) && value.contains('+');
                 final inline = stepper || trailing.containsKey(i);
                 return InkWell(
+                  canRequestFocus: !toggle,
+                  excludeFromSemantics: toggle,
                   key: action == null ? null : ValueKey(action),
                   onTap: action == null ? null : () => onAction(action),
                   child: ConstrainedBox(
@@ -758,11 +768,14 @@ class Rows extends StatelessWidget {
                                           height: 40,
                                           width: 44,
                                           child: FittedBox(
-                                            child: Switch(
-                                              value: value == 'On',
-                                              onChanged: action == null
-                                                  ? null
-                                                  : (_) => onAction(action),
+                                            child: Semantics(
+                                              label: label,
+                                              child: Switch(
+                                                value: value == 'On',
+                                                onChanged: action == null
+                                                    ? null
+                                                    : (_) => onAction(action),
+                                              ),
                                             ),
                                           ),
                                         ),
