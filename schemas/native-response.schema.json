@@ -1,0 +1,1322 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "native-response",
+  "$defs": {
+    "query_error": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "data": {
+          "type": "null"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "error": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "minLength": 1
+            },
+            "message": {
+              "type": "string"
+            },
+            "retryable": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "retryable"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "schema_version",
+        "data",
+        "warnings",
+        "error"
+      ],
+      "additionalProperties": false
+    },
+    "get_api_info": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "api_version": {
+                  "type": "string",
+                  "pattern": "^1\\.[0-9]+\\.[0-9]+$"
+                },
+                "methods": {
+                  "type": "object",
+                  "properties": {
+                    "get_api_info": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "list_devices": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "discover": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "describe_device": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "read_state": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "plan": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "execute": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "execution"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "plan_batch": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "execute_batch": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "batch_execution"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "recent_executions": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "get_execution": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "diagnostics": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "device_executions": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "list_rooms": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "create_room": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "rename_room": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "delete_room": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "reorder_rooms": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "list_device_cards": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "set_device_preferences": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "reorder_devices": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "assign_devices_to_room": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": true
+                    }
+                  },
+                  "required": [
+                    "get_api_info",
+                    "list_devices",
+                    "discover",
+                    "describe_device",
+                    "read_state",
+                    "plan",
+                    "execute",
+                    "plan_batch",
+                    "execute_batch",
+                    "recent_executions",
+                    "get_execution",
+                    "diagnostics",
+                    "device_executions",
+                    "list_rooms",
+                    "create_room",
+                    "rename_room",
+                    "delete_room",
+                    "reorder_rooms",
+                    "list_device_cards",
+                    "set_device_preferences",
+                    "reorder_devices",
+                    "assign_devices_to_room"
+                  ],
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "response_kind": {
+                        "enum": [
+                          "query",
+                          "execution",
+                          "batch_execution"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "response_kind"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "limits": {
+                  "type": "object",
+                  "properties": {
+                    "max_active_operations": {
+                      "const": 8
+                    },
+                    "max_request_bytes": {
+                      "const": 1048576
+                    },
+                    "max_timeout_ms": {
+                      "const": 180000
+                    }
+                  },
+                  "required": [
+                    "max_active_operations",
+                    "max_request_bytes",
+                    "max_timeout_ms"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "api_version",
+                "methods",
+                "limits"
+              ],
+              "additionalProperties": false
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "#/$defs/query_error"
+        }
+      ]
+    },
+    "list_devices": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "type": "array",
+              "items": {
+                "$ref": "urn:homeverb:schema:device"
+              }
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "#/$defs/query_error"
+        }
+      ]
+    },
+    "discover": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "type": "array",
+              "items": {
+                "$ref": "urn:homeverb:schema:device"
+              }
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "#/$defs/query_error"
+        }
+      ]
+    },
+    "describe_device": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "device": {
+                  "$ref": "urn:homeverb:schema:device"
+                },
+                "capabilities": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "urn:homeverb:schema:capability"
+                  }
+                }
+              },
+              "required": [
+                "device",
+                "capabilities"
+              ],
+              "additionalProperties": false
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "#/$defs/query_error"
+        }
+      ]
+    },
+    "read_state": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "$ref": "urn:homeverb:schema:state"
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "#/$defs/query_error"
+        }
+      ]
+    },
+    "plan": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "command": {
+                  "$ref": "urn:homeverb:schema:command"
+                },
+                "transports": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "lan",
+                      "cloud"
+                    ]
+                  }
+                },
+                "warnings": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "command": {
+                        "$ref": "urn:homeverb:schema:command"
+                      },
+                      "transports": {
+                        "type": "array",
+                        "items": {
+                          "enum": [
+                            "lan",
+                            "cloud"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "command",
+                      "transports"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "command",
+                "transports",
+                "warnings"
+              ],
+              "additionalProperties": false
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "#/$defs/query_error"
+        }
+      ]
+    },
+    "execute": {
+      "oneOf": [
+        {
+          "$ref": "urn:homeverb:schema:command-result"
+        },
+        {
+          "$ref": "#/$defs/query_error"
+        }
+      ]
+    },
+    "plan_batch": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "command": {
+                        "$ref": "urn:homeverb:schema:command"
+                      },
+                      "transports": {
+                        "type": "array",
+                        "items": {
+                          "enum": [
+                            "lan",
+                            "cloud"
+                          ]
+                        }
+                      },
+                      "warnings": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "items": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "command": {
+                              "$ref": "urn:homeverb:schema:command"
+                            },
+                            "transports": {
+                              "type": "array",
+                              "items": {
+                                "enum": [
+                                  "lan",
+                                  "cloud"
+                                ]
+                              }
+                            }
+                          },
+                          "required": [
+                            "command",
+                            "transports"
+                          ],
+                          "additionalProperties": false
+                        }
+                      }
+                    },
+                    "required": [
+                      "command",
+                      "transports",
+                      "warnings"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "max_concurrency": {
+                  "const": 4
+                },
+                "warnings": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "items",
+                "max_concurrency",
+                "warnings"
+              ],
+              "additionalProperties": false
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "#/$defs/query_error"
+        }
+      ]
+    },
+    "execute_batch": {
+      "oneOf": [
+        {
+          "$ref": "urn:homeverb:schema:batch-result"
+        },
+        {
+          "$ref": "#/$defs/query_error"
+        }
+      ]
+    },
+    "recent_executions": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "type": "array",
+              "items": {
+                "$ref": "urn:homeverb:schema:command-result"
+              }
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "#/$defs/query_error"
+        }
+      ]
+    },
+    "get_execution": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "$ref": "urn:homeverb:schema:command-result"
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "#/$defs/query_error"
+        }
+      ]
+    },
+    "diagnostics": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "$ref": "urn:homeverb:schema:diagnostics"
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "#/$defs/query_error"
+        }
+      ]
+    },
+    "device_executions": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "type": "array",
+              "items": {
+                "$ref": "urn:homeverb:schema:command-result"
+              }
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "#/$defs/query_error"
+        }
+      ]
+    },
+    "list_rooms": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "type": "array",
+              "items": {
+                "$ref": "urn:homeverb:schema:room"
+              }
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "#/$defs/query_error"
+        }
+      ]
+    },
+    "create_room": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "$ref": "urn:homeverb:schema:room"
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "#/$defs/query_error"
+        }
+      ]
+    },
+    "rename_room": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "$ref": "urn:homeverb:schema:room"
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "#/$defs/query_error"
+        }
+      ]
+    },
+    "delete_room": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "type": "null"
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "#/$defs/query_error"
+        }
+      ]
+    },
+    "reorder_rooms": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "type": "array",
+              "items": {
+                "$ref": "urn:homeverb:schema:room"
+              }
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "#/$defs/query_error"
+        }
+      ]
+    },
+    "list_device_cards": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "device": {
+                    "$ref": "urn:homeverb:schema:device"
+                  },
+                  "preferences": {
+                    "$ref": "urn:homeverb:schema:device-preferences"
+                  }
+                },
+                "required": [
+                  "device",
+                  "preferences"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "#/$defs/query_error"
+        }
+      ]
+    },
+    "set_device_preferences": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "$ref": "urn:homeverb:schema:device-preferences"
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "#/$defs/query_error"
+        }
+      ]
+    },
+    "reorder_devices": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "type": "array",
+              "items": {
+                "$ref": "urn:homeverb:schema:device-preferences"
+              }
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "#/$defs/query_error"
+        }
+      ]
+    },
+    "assign_devices_to_room": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "type": "array",
+              "items": {
+                "$ref": "urn:homeverb:schema:device-preferences"
+              }
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "#/$defs/query_error"
+        }
+      ]
+    },
+    "open": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "handle": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "adapter": {
+                  "const": "homeverb.mock"
+                }
+              },
+              "required": [
+                "handle",
+                "adapter"
+              ],
+              "additionalProperties": false
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "#/$defs/query_error"
+        }
+      ]
+    }
+  },
+  "description": "Select the method with #/$defs/<method>; open is the startup response. No method tag is added to runtime responses."
+}

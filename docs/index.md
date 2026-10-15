@@ -17,6 +17,7 @@ Start with the progressive development path. Reference documents define invarian
 - Product: [requirements](product-requirements.md), [architecture](architecture.md), [lifecycle](process-lifecycle.md).
 - Contracts: [domain](domain-model.md), [capabilities](capabilities.md), [adapters](adapter-contract.md), [routing/execution](routing-and-execution.md), [errors](errors.md), [schemas](../schemas/README.md).
 - Entry points: [CLI](cli.md), [native SDK](sdk.md), [mobile requirements](mobile-app.md), [MCP](mcp.md).
+- Flutter handoff: [versioned native contract](native-ui-contract.md), [callable catalog and examples](../packages/native-contract/README.md), [native contract decision](adr/0019-native-ui-contract.md).
 - UI delivery: [Window Light prototype](../output/prototypes/homeverb-window-light-v1/index.html), [functional handoff](ui-functional-spec.md), [82-state inventory](ui-screen-inventory.md), [Flutter visual system and one-skin extension](ui-window-light.md).
 - Persistence/security: [storage](storage.md), [authentication](authentication.md), [security/privacy](security-and-privacy.md).
 - Delivery: [repository layout](repository.md), [testing](testing.md), [task status](task-breakdown.md), [roadmap](roadmap.md), [compatibility](compatibility.md), [commit conventions](commit-conventions.md), [private publishing](publishing.md).

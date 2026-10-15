@@ -8,6 +8,8 @@ Account-flow amendment, October 15, 2026: Midea Meiju authorization must automat
 
 This document expands [mobile requirements](mobile-app.md). The [embedded Core boundary](sdk.md), schemas, and ADRs remain authoritative for execution semantics. Preserve existing Core work; do not infer a new network service from this handoff. Native request details below are an integration snapshot of separate local implementation work, not code delivered by this UI documentation commit.
 
+The [native UI contract 1.0](native-ui-contract.md) now supplies a committed integration baseline: 22 callable methods, schemas, actual Mock request/response examples, version negotiation, and screen coverage. Use it when starting the Flutter worktree. Account, sharing, identity-merge and destructive-cleanup APIs remain unavailable; UI previews must stay separate from production native state.
+
 ## Product boundary
 
 - Open directly into Devices, without HomeVerb registration, login, or an account center. Only third-party authorization and appliance pairing require authentication.
@@ -60,7 +62,7 @@ These statuses were checked against `crates/host/src/session.rs` and `docs/devel
 | Lifecycle | `homeverb_set_foreground`, `homeverb_cancel`, `homeverb_close` | Wire Flutter lifecycle changes, operation ownership and worker-isolate calls; verify Android/iOS behavior, background races and termination recovery. |
 | Account catalog/authentication/removal/revocation | Native-client and secret-store contracts; Linux secret-store library | Real provider flows, persisted account host methods, automatic bound-device retrieval, native mobile secure stores, scope/revocation evidence, and cloud read/control acceptance away from home. P01–P13 remain planned application flows. |
 | Nearby authorization sharing | [ADR-0008](adr/0008-foreground-authorization-sharing.md) requirements | Reviewed protocol, eligible adapters, trusted peer verification, bilateral consent, encrypted transfer, atomic secure import, records and interruption handling. No real sharing implementation is implied. |
-| Appearance, sharing name, connection preference | Theme/local preference design; command route choice exists | Persist versioned local preferences. Resolve device > installation > Auto policy without broadening allowed routes. A production preference-storage API is not yet established by these mockups. |
+| Appearance, sharing name, connection preference | Flutter-owned private preferences under the [native handoff](native-ui-contract.md); explicit read/command route choice exists | Implement Flutter preference persistence. Resolve device > installation > Auto without broadening allowed routes; do not add route fields to Core's device-preference payload or start sharing from a saved name. |
 | Cache/history/full-data clearing | Retention and storage contracts exist | Define safe scoped cleanup entry points, active-operation guards, secure-store removal and partial failure reporting. Do not delete journals or retired-ID safeguards by treating a UI history-clear action as a raw database deletion. |
 | Localization | en-US and zh-CN catalogs and presentation helpers | Add approved missing UI keys; keep public IDs and stored outcomes unchanged. Prototype copy is English. Match locale parity/placeholders before release. |
 

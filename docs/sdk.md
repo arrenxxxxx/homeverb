@@ -4,6 +4,8 @@ The SDK is implemented in Rust. `homeverb-core::Core` accepts injected Store, Ad
 
 Use [the UI integration guide](development/03-ui-integration.md) for the JSON request contract and C ABI. [homeverb.h](../crates/ffi/include/homeverb.h) defines ownership and thread requirements. The UI never shells out to CLI or contacts a loopback HTTP service.
 
+The [native UI contract](native-ui-contract.md) publishes API version 1.0.0, all 22 methods, startup/request/method-response schemas, and fictional native examples. `get_api_info` returns the compiled catalog without discovery or networking. Missing methods are unavailable; API presence does not confer device permissions. See [ADR-0019](adr/0019-native-ui-contract.md).
+
 Core supports local listing/describing, room/device preferences, explicit discovery, cached/live reads, single-command and bounded-batch planning/execution, and recent outcomes. `Core::execution(request_id, operation)` retrieves one retained receipt without device access or current write grants; missing and retired IDs remain distinct. See [ADR-0014](adr/0014-local-receipt-lookup.md).
 
 Core implements state-match verification and validates adapter-provided correlated completion under [ADR-0016](adr/0016-correlated-completion.md). Real adapters must establish protocol correlation and authentication; no real adapter is registered yet. An unavailable secret provider fails closed. Component-specific definitions resolve through `Descriptor::capability(component_id, capability_id)`; see [ADR-0018](adr/0018-component-capability-scopes.md). Do not select a definition by capability ID alone.

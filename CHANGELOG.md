@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Native UI contract
+
+- Publish API version 1.0.0 with a local `get_api_info` query, 22 method schemas, actual Mock examples, and screen-to-interface coverage for independent Flutter work.
+- Reject undeclared fields on no-argument native methods consistently with the existing closed-request policy.
+- Verify the catalog through the built native library, including query/admitted-execution response differences, uncertainty, cancellation, and unavailable methods.
+
 ### Mock MVP
 
 - Add the Rust domain/Core/Mock/storage/host workspace, JSON CLI, read-only MCP stdio, and native C ABI.

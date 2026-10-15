@@ -24,6 +24,8 @@ Explicit device batches are additive Core/CLI/native functionality under [ADR-00
 
 Component-scoped capability definitions are supported under [ADR-0018](adr/0018-component-capability-scopes.md). Existing shared definitions retain their JSON representation; old strict readers reject the new scope field. Update consumers before loading scoped descriptors, and never discard scope to claim compatibility. SQLite and C ABI functions are unchanged. The fridge/freezer fixtures demonstrate Core semantics only; no real refrigerator model is verified.
 
+The [native UI contract](native-ui-contract.md) adds `get_api_info` and publishes API version 1.0.0 under [ADR-0019](adr/0019-native-ui-contract.md). Existing valid JSON requests, C symbols and stored data are unchanged. No-argument methods now reject previously ignored extra fields, enforcing the existing closed-request policy. Older hosts reject the new query; new UIs must require an upgraded library before assuming method availability. The callable catalog describes interfaces, not real-platform support or write permission.
+
 ## Status definitions
 
 Foreground authorization sharing is also planned and unverified for every candidate. Login support alone does not establish transferability. Before enabling sharing, record provider-specific evidence for permission scope, device binding, refresh-token behavior across installations, expiry, and revocation under [ADR-0008](adr/0008-foreground-authorization-sharing.md).

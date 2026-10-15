@@ -1,0 +1,421 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "native-request",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "operation_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "timeout_ms": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 180000
+    },
+    "request": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "get_api_info"
+            }
+          },
+          "required": [
+            "method"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "list_devices"
+            }
+          },
+          "required": [
+            "method"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "discover"
+            }
+          },
+          "required": [
+            "method"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "describe_device"
+            },
+            "device": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "method",
+            "device"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "read_state"
+            },
+            "device": {
+              "type": "string",
+              "minLength": 1
+            },
+            "component": {
+              "type": "string",
+              "minLength": 1
+            },
+            "connection": {
+              "enum": [
+                "auto",
+                "lan",
+                "cloud"
+              ]
+            },
+            "cached": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "method",
+            "device",
+            "component",
+            "connection",
+            "cached"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "plan"
+            },
+            "command": {
+              "$ref": "urn:homeverb:schema:command"
+            }
+          },
+          "required": [
+            "method",
+            "command"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "execute"
+            },
+            "command": {
+              "$ref": "urn:homeverb:schema:command"
+            }
+          },
+          "required": [
+            "method",
+            "command"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "plan_batch"
+            },
+            "batch": {
+              "$ref": "urn:homeverb:schema:batch-command"
+            }
+          },
+          "required": [
+            "method",
+            "batch"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "execute_batch"
+            },
+            "batch": {
+              "$ref": "urn:homeverb:schema:batch-command"
+            }
+          },
+          "required": [
+            "method",
+            "batch"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "recent_executions"
+            }
+          },
+          "required": [
+            "method"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "get_execution"
+            },
+            "request_id": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "method",
+            "request_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "diagnostics"
+            }
+          },
+          "required": [
+            "method"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "device_executions"
+            },
+            "device_id": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "method",
+            "device_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "list_rooms"
+            }
+          },
+          "required": [
+            "method"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "create_room"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "method",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "rename_room"
+            },
+            "room_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "method",
+            "room_id",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "delete_room"
+            },
+            "room_id": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "method",
+            "room_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "reorder_rooms"
+            },
+            "room_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "required": [
+            "method",
+            "room_ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "list_device_cards"
+            }
+          },
+          "required": [
+            "method"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "set_device_preferences"
+            },
+            "device_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "preferences": {
+              "type": "object",
+              "properties": {
+                "alias": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "room_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "favorite": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "alias",
+                "room_id",
+                "favorite"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "method",
+            "device_id",
+            "preferences"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "reorder_devices"
+            },
+            "device_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "required": [
+            "method",
+            "device_ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "assign_devices_to_room"
+            },
+            "assignment": {
+              "$ref": "urn:homeverb:schema:room-assignment"
+            }
+          },
+          "required": [
+            "method",
+            "assignment"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "operation_id",
+    "timeout_ms",
+    "request"
+  ],
+  "additionalProperties": false,
+  "description": "Identifiers are limited by UTF-8 bytes in the host; JSON Schema maxLength counts characters. Core additionally validates permissions, identity, exact reorder sets, names, and command budgets."
+}

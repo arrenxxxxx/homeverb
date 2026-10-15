@@ -1,0 +1,76 @@
+{
+  "api_version": "1.0.0",
+  "methods": {
+    "get_api_info": {
+      "response_kind": "query"
+    },
+    "list_devices": {
+      "response_kind": "query"
+    },
+    "discover": {
+      "response_kind": "query"
+    },
+    "describe_device": {
+      "response_kind": "query"
+    },
+    "read_state": {
+      "response_kind": "query"
+    },
+    "plan": {
+      "response_kind": "query"
+    },
+    "execute": {
+      "response_kind": "execution"
+    },
+    "plan_batch": {
+      "response_kind": "query"
+    },
+    "execute_batch": {
+      "response_kind": "batch_execution"
+    },
+    "recent_executions": {
+      "response_kind": "query"
+    },
+    "get_execution": {
+      "response_kind": "query"
+    },
+    "diagnostics": {
+      "response_kind": "query"
+    },
+    "device_executions": {
+      "response_kind": "query"
+    },
+    "list_rooms": {
+      "response_kind": "query"
+    },
+    "create_room": {
+      "response_kind": "query"
+    },
+    "rename_room": {
+      "response_kind": "query"
+    },
+    "delete_room": {
+      "response_kind": "query"
+    },
+    "reorder_rooms": {
+      "response_kind": "query"
+    },
+    "list_device_cards": {
+      "response_kind": "query"
+    },
+    "set_device_preferences": {
+      "response_kind": "query"
+    },
+    "reorder_devices": {
+      "response_kind": "query"
+    },
+    "assign_devices_to_room": {
+      "response_kind": "query"
+    }
+  },
+  "limits": {
+    "max_active_operations": 8,
+    "max_request_bytes": 1048576,
+    "max_timeout_ms": 180000
+  }
+}

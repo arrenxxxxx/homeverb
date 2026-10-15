@@ -1,0 +1,2388 @@
+{
+  "api_version": "1.0.0",
+  "cases": [
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-1",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "get_api_info"
+        }
+      },
+      "response": {
+        "data": {
+          "api_version": "1.0.0",
+          "limits": {
+            "max_active_operations": 8,
+            "max_request_bytes": 1048576,
+            "max_timeout_ms": 180000
+          },
+          "methods": {
+            "assign_devices_to_room": {
+              "response_kind": "query"
+            },
+            "create_room": {
+              "response_kind": "query"
+            },
+            "delete_room": {
+              "response_kind": "query"
+            },
+            "describe_device": {
+              "response_kind": "query"
+            },
+            "device_executions": {
+              "response_kind": "query"
+            },
+            "diagnostics": {
+              "response_kind": "query"
+            },
+            "discover": {
+              "response_kind": "query"
+            },
+            "execute": {
+              "response_kind": "execution"
+            },
+            "execute_batch": {
+              "response_kind": "batch_execution"
+            },
+            "get_api_info": {
+              "response_kind": "query"
+            },
+            "get_execution": {
+              "response_kind": "query"
+            },
+            "list_device_cards": {
+              "response_kind": "query"
+            },
+            "list_devices": {
+              "response_kind": "query"
+            },
+            "list_rooms": {
+              "response_kind": "query"
+            },
+            "plan": {
+              "response_kind": "query"
+            },
+            "plan_batch": {
+              "response_kind": "query"
+            },
+            "read_state": {
+              "response_kind": "query"
+            },
+            "recent_executions": {
+              "response_kind": "query"
+            },
+            "rename_room": {
+              "response_kind": "query"
+            },
+            "reorder_devices": {
+              "response_kind": "query"
+            },
+            "reorder_rooms": {
+              "response_kind": "query"
+            },
+            "set_device_preferences": {
+              "response_kind": "query"
+            }
+          }
+        },
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-2",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "list_devices"
+        }
+      },
+      "response": {
+        "data": [],
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-3",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "list_device_cards"
+        }
+      },
+      "response": {
+        "data": [],
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-4",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "list_rooms"
+        }
+      },
+      "response": {
+        "data": [],
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-5",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "discover"
+        }
+      },
+      "response": {
+        "data": [
+          {
+            "alias": "mock-ac",
+            "brand": "ExampleBrand",
+            "components": [
+              {
+                "capabilities": [
+                  "power",
+                  "climate"
+                ],
+                "id": "main"
+              }
+            ],
+            "connections": [
+              {
+                "account_id": null,
+                "adapter": "homeverb.mock",
+                "id": "conn-example-lan",
+                "identity_ref": "identity:fictional-local-1",
+                "transport": "lan"
+              },
+              {
+                "account_id": null,
+                "adapter": "homeverb.mock",
+                "id": "conn-example-cloud",
+                "identity_ref": "identity:fictional-cloud-1",
+                "transport": "cloud"
+              }
+            ],
+            "id": "dev-mock-ac",
+            "model": "Fictional-AC-01",
+            "schema_version": "1.0",
+            "support_status": "mock-tested"
+          }
+        ],
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-6",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "describe_device",
+          "device": "dev-mock-ac"
+        }
+      },
+      "response": {
+        "data": {
+          "capabilities": [
+            {
+              "actions": {
+                "set": {
+                  "atomic": true,
+                  "idempotency": "set_value",
+                  "independent_fields": false,
+                  "parameters": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "state": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "state"
+                    ],
+                    "type": "object"
+                  },
+                  "risk": "low",
+                  "transports": [
+                    "lan",
+                    "cloud"
+                  ],
+                  "verification": "state_match"
+                }
+              },
+              "events": {},
+              "id": "power",
+              "properties": {
+                "state": {
+                  "readable": true,
+                  "type": "boolean",
+                  "writable": true
+                }
+              },
+              "revision": 1,
+              "schema_version": "1.0"
+            },
+            {
+              "actions": {
+                "set": {
+                  "atomic": false,
+                  "idempotency": "set_value",
+                  "independent_fields": true,
+                  "parameters": {
+                    "additionalProperties": false,
+                    "minProperties": 1,
+                    "properties": {
+                      "mode": {
+                        "enum": [
+                          "cool",
+                          "heat",
+                          "fan",
+                          "dry",
+                          "auto"
+                        ]
+                      },
+                      "target_temperature": {
+                        "maximum": 30,
+                        "minimum": 16,
+                        "multipleOf": 0.5,
+                        "type": "number"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "risk": "low",
+                  "transports": [
+                    "lan",
+                    "cloud"
+                  ],
+                  "verification": "state_match"
+                }
+              },
+              "events": {},
+              "id": "climate",
+              "properties": {
+                "mode": {
+                  "enum": [
+                    "cool",
+                    "heat",
+                    "fan",
+                    "dry",
+                    "auto"
+                  ],
+                  "readable": true,
+                  "type": "string",
+                  "writable": true
+                },
+                "target_temperature": {
+                  "maximum": 30,
+                  "minimum": 16,
+                  "multipleOf": 0.5,
+                  "readable": true,
+                  "type": "number",
+                  "unit": "celsius",
+                  "writable": true
+                }
+              },
+              "revision": 2,
+              "schema_version": "1.0"
+            }
+          ],
+          "device": {
+            "alias": "mock-ac",
+            "brand": "ExampleBrand",
+            "components": [
+              {
+                "capabilities": [
+                  "power",
+                  "climate"
+                ],
+                "id": "main"
+              }
+            ],
+            "connections": [
+              {
+                "account_id": null,
+                "adapter": "homeverb.mock",
+                "id": "conn-example-lan",
+                "identity_ref": "identity:fictional-local-1",
+                "transport": "lan"
+              },
+              {
+                "account_id": null,
+                "adapter": "homeverb.mock",
+                "id": "conn-example-cloud",
+                "identity_ref": "identity:fictional-cloud-1",
+                "transport": "cloud"
+              }
+            ],
+            "id": "dev-mock-ac",
+            "model": "Fictional-AC-01",
+            "schema_version": "1.0",
+            "support_status": "mock-tested"
+          }
+        },
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-7",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "read_state",
+          "device": "dev-mock-ac",
+          "component": "main",
+          "connection": "auto",
+          "cached": false
+        }
+      },
+      "response": {
+        "data": {
+          "component_id": "main",
+          "device_id": "dev-mock-ac",
+          "from_cache": false,
+          "observations": {
+            "climate.mode": {
+              "observed_at": null,
+              "received_at": "2026-10-15T06:58:53.150872426Z",
+              "source": "lan",
+              "stale": false,
+              "value": "cool"
+            },
+            "climate.target_temperature": {
+              "observed_at": null,
+              "received_at": "2026-10-15T06:58:53.150872426Z",
+              "source": "lan",
+              "stale": false,
+              "value": 26.0
+            },
+            "power.state": {
+              "observed_at": null,
+              "received_at": "2026-10-15T06:58:53.150872426Z",
+              "source": "lan",
+              "stale": false,
+              "value": false
+            }
+          },
+          "schema_version": "1.0",
+          "warnings": [
+            "Fictional Mock appliance; no physical device was contacted."
+          ]
+        },
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-8",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "read_state",
+          "device": "dev-mock-ac",
+          "component": "main",
+          "connection": "auto",
+          "cached": true
+        }
+      },
+      "response": {
+        "data": {
+          "component_id": "main",
+          "device_id": "dev-mock-ac",
+          "from_cache": true,
+          "observations": {
+            "climate.mode": {
+              "observed_at": null,
+              "received_at": "2026-10-15T06:58:53.150872426Z",
+              "source": "lan",
+              "stale": false,
+              "value": "cool"
+            },
+            "climate.target_temperature": {
+              "observed_at": null,
+              "received_at": "2026-10-15T06:58:53.150872426Z",
+              "source": "lan",
+              "stale": false,
+              "value": 26.0
+            },
+            "power.state": {
+              "observed_at": null,
+              "received_at": "2026-10-15T06:58:53.150872426Z",
+              "source": "lan",
+              "stale": false,
+              "value": false
+            }
+          },
+          "schema_version": "1.0",
+          "warnings": [
+            "Fictional Mock appliance; no physical device was contacted.",
+            "Cached observation; no device request was made."
+          ]
+        },
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-9",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "create_room",
+          "name": "Bedroom"
+        }
+      },
+      "response": {
+        "data": {
+          "id": "3bda2190-792b-4625-951f-5d04eecf9ec0",
+          "name": "Bedroom",
+          "position": 0
+        },
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-10",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "rename_room",
+          "room_id": "3bda2190-792b-4625-951f-5d04eecf9ec0",
+          "name": "Primary Bedroom"
+        }
+      },
+      "response": {
+        "data": {
+          "id": "3bda2190-792b-4625-951f-5d04eecf9ec0",
+          "name": "Primary Bedroom",
+          "position": 0
+        },
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-11",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "reorder_rooms",
+          "room_ids": [
+            "3bda2190-792b-4625-951f-5d04eecf9ec0"
+          ]
+        }
+      },
+      "response": {
+        "data": [
+          {
+            "id": "3bda2190-792b-4625-951f-5d04eecf9ec0",
+            "name": "Primary Bedroom",
+            "position": 0
+          }
+        ],
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-12",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "set_device_preferences",
+          "device_id": "dev-mock-ac",
+          "preferences": {
+            "alias": "Quiet AC",
+            "room_id": "3bda2190-792b-4625-951f-5d04eecf9ec0",
+            "favorite": true
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "alias": "Quiet AC",
+          "device_id": "dev-mock-ac",
+          "favorite": true,
+          "position": 0,
+          "room_id": "3bda2190-792b-4625-951f-5d04eecf9ec0"
+        },
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-13",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "assign_devices_to_room",
+          "assignment": {
+            "device_ids": [
+              "dev-mock-ac"
+            ],
+            "room_id": null
+          }
+        }
+      },
+      "response": {
+        "data": [
+          {
+            "alias": "Quiet AC",
+            "device_id": "dev-mock-ac",
+            "favorite": true,
+            "position": 0,
+            "room_id": null
+          }
+        ],
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-14",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "reorder_devices",
+          "device_ids": [
+            "dev-mock-ac"
+          ]
+        }
+      },
+      "response": {
+        "data": [
+          {
+            "alias": "Quiet AC",
+            "device_id": "dev-mock-ac",
+            "favorite": true,
+            "position": 0,
+            "room_id": null
+          }
+        ],
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-15",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "list_device_cards"
+        }
+      },
+      "response": {
+        "data": [
+          {
+            "device": {
+              "alias": "Quiet AC",
+              "brand": "ExampleBrand",
+              "components": [
+                {
+                  "capabilities": [
+                    "power",
+                    "climate"
+                  ],
+                  "id": "main"
+                }
+              ],
+              "connections": [
+                {
+                  "account_id": null,
+                  "adapter": "homeverb.mock",
+                  "id": "conn-example-lan",
+                  "identity_ref": "identity:fictional-local-1",
+                  "transport": "lan"
+                },
+                {
+                  "account_id": null,
+                  "adapter": "homeverb.mock",
+                  "id": "conn-example-cloud",
+                  "identity_ref": "identity:fictional-cloud-1",
+                  "transport": "cloud"
+                }
+              ],
+              "id": "dev-mock-ac",
+              "model": "Fictional-AC-01",
+              "schema_version": "1.0",
+              "support_status": "mock-tested"
+            },
+            "preferences": {
+              "alias": "Quiet AC",
+              "device_id": "dev-mock-ac",
+              "favorite": true,
+              "position": 0,
+              "room_id": null
+            }
+          }
+        ],
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-16",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "delete_room",
+          "room_id": "3bda2190-792b-4625-951f-5d04eecf9ec0"
+        }
+      },
+      "response": {
+        "data": null,
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-17",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "plan",
+          "command": {
+            "schema_version": "1.0",
+            "request_id": "plan-example",
+            "device_id": "dev-mock-ac",
+            "component_id": "main",
+            "capability": "power",
+            "action": "set",
+            "arguments": {
+              "state": true
+            },
+            "connection": "auto",
+            "timeout_ms": 10000,
+            "wait_for": "verified"
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "command": {
+            "action": "set",
+            "arguments": {
+              "state": true
+            },
+            "capability": "power",
+            "component_id": "main",
+            "connection": "auto",
+            "device_id": "dev-mock-ac",
+            "request_id": "plan-example",
+            "schema_version": "1.0",
+            "timeout_ms": 10000,
+            "wait_for": "verified"
+          },
+          "transports": [
+            "lan",
+            "cloud"
+          ],
+          "warnings": [
+            "Local validation only; capability metadata may be stale. No write or login was performed."
+          ]
+        },
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-18",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "plan",
+          "command": {
+            "schema_version": "1.0",
+            "request_id": "compound-example",
+            "device_id": "dev-mock-ac",
+            "component_id": "main",
+            "capability": "climate",
+            "action": "set",
+            "arguments": {
+              "mode": "heat",
+              "target_temperature": 25
+            },
+            "connection": "auto",
+            "timeout_ms": 10000,
+            "wait_for": "verified"
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "command": {
+            "action": "set",
+            "arguments": {
+              "mode": "heat",
+              "target_temperature": 25
+            },
+            "capability": "climate",
+            "component_id": "main",
+            "connection": "auto",
+            "device_id": "dev-mock-ac",
+            "request_id": "compound-example",
+            "schema_version": "1.0",
+            "timeout_ms": 10000,
+            "wait_for": "verified"
+          },
+          "items": [
+            {
+              "command": {
+                "action": "set",
+                "arguments": {
+                  "mode": "heat"
+                },
+                "capability": "climate",
+                "component_id": "main",
+                "connection": "auto",
+                "device_id": "dev-mock-ac",
+                "request_id": "compound-example:0",
+                "schema_version": "1.0",
+                "timeout_ms": 10000,
+                "wait_for": "verified"
+              },
+              "transports": [
+                "lan",
+                "cloud"
+              ]
+            },
+            {
+              "command": {
+                "action": "set",
+                "arguments": {
+                  "target_temperature": 25
+                },
+                "capability": "climate",
+                "component_id": "main",
+                "connection": "auto",
+                "device_id": "dev-mock-ac",
+                "request_id": "compound-example:1",
+                "schema_version": "1.0",
+                "timeout_ms": 10000,
+                "wait_for": "verified"
+              },
+              "transports": [
+                "lan",
+                "cloud"
+              ]
+            }
+          ],
+          "transports": [
+            "lan",
+            "cloud"
+          ],
+          "warnings": [
+            "Local validation only; capability metadata may be stale. No write or login was performed."
+          ]
+        },
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-19",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "execute",
+          "command": {
+            "schema_version": "1.0",
+            "request_id": "compound-example",
+            "device_id": "dev-mock-ac",
+            "component_id": "main",
+            "capability": "climate",
+            "action": "set",
+            "arguments": {
+              "mode": "heat",
+              "target_temperature": 25
+            },
+            "connection": "auto",
+            "timeout_ms": 10000,
+            "wait_for": "verified"
+          }
+        }
+      },
+      "response": {
+        "attempts": [],
+        "completed_at": "2026-10-15T06:58:53.177193820Z",
+        "data": {
+          "mode": "heat",
+          "target_temperature": 25
+        },
+        "device_id": "dev-mock-ac",
+        "error": null,
+        "items": [
+          {
+            "attempts": [
+              {
+                "duration_ms": 2,
+                "phase": "accepted",
+                "transport": "lan"
+              }
+            ],
+            "completed_at": "2026-10-15T06:58:53.172242944Z",
+            "data": {
+              "mode": "heat"
+            },
+            "device_id": "dev-mock-ac",
+            "error": null,
+            "request_id": "compound-example:0",
+            "schema_version": "1.0",
+            "started_at": "2026-10-15T06:58:53.168406335Z",
+            "status": "verified",
+            "verification": {
+              "kind": "state_match",
+              "matches_target": true,
+              "note": "Fresh state matches the target; this does not prove request causality.",
+              "received_at": "2026-10-15T06:58:53.171294367Z",
+              "source": "lan"
+            }
+          },
+          {
+            "attempts": [
+              {
+                "duration_ms": 2,
+                "phase": "accepted",
+                "transport": "lan"
+              }
+            ],
+            "completed_at": "2026-10-15T06:58:53.176510697Z",
+            "data": {
+              "target_temperature": 25
+            },
+            "device_id": "dev-mock-ac",
+            "error": null,
+            "request_id": "compound-example:1",
+            "schema_version": "1.0",
+            "started_at": "2026-10-15T06:58:53.172976337Z",
+            "status": "verified",
+            "verification": {
+              "kind": "state_match",
+              "matches_target": true,
+              "note": "Fresh state matches the target; this does not prove request causality.",
+              "received_at": "2026-10-15T06:58:53.175687064Z",
+              "source": "lan"
+            }
+          }
+        ],
+        "request_id": "compound-example",
+        "schema_version": "1.0",
+        "started_at": "2026-10-15T06:58:53.166174665Z",
+        "status": "verified",
+        "verification": {
+          "kind": "state_match",
+          "matches_target": true,
+          "note": "Each sub-operation has separate verification evidence; inspect items. This is not an atomic or exactly-once guarantee.",
+          "received_at": "2026-10-15T06:58:53.171294367Z",
+          "source": "lan"
+        }
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-20",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "plan_batch",
+          "batch": {
+            "schema_version": "1.0",
+            "commands": [
+              {
+                "schema_version": "1.0",
+                "request_id": "batch-example",
+                "device_id": "dev-mock-ac",
+                "component_id": "main",
+                "capability": "power",
+                "action": "set",
+                "arguments": {
+                  "state": true
+                },
+                "connection": "auto",
+                "timeout_ms": 10000,
+                "wait_for": "verified"
+              }
+            ]
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "items": [
+            {
+              "command": {
+                "action": "set",
+                "arguments": {
+                  "state": true
+                },
+                "capability": "power",
+                "component_id": "main",
+                "connection": "auto",
+                "device_id": "dev-mock-ac",
+                "request_id": "batch-example",
+                "schema_version": "1.0",
+                "timeout_ms": 10000,
+                "wait_for": "verified"
+              },
+              "transports": [
+                "lan",
+                "cloud"
+              ],
+              "warnings": [
+                "Local validation only; capability metadata may be stale. No write or login was performed."
+              ]
+            }
+          ],
+          "max_concurrency": 4,
+          "warnings": [
+            "Local preflight only; the batch is not an atomic or durable job."
+          ]
+        },
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-21",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "execute_batch",
+          "batch": {
+            "schema_version": "1.0",
+            "commands": [
+              {
+                "schema_version": "1.0",
+                "request_id": "batch-example",
+                "device_id": "dev-mock-ac",
+                "component_id": "main",
+                "capability": "power",
+                "action": "set",
+                "arguments": {
+                  "state": true
+                },
+                "connection": "auto",
+                "timeout_ms": 10000,
+                "wait_for": "verified"
+              }
+            ]
+          }
+        }
+      },
+      "response": {
+        "completed_at": "2026-10-15T06:58:53.187261212Z",
+        "items": [
+          {
+            "attempts": [
+              {
+                "duration_ms": 2,
+                "phase": "accepted",
+                "transport": "lan"
+              }
+            ],
+            "completed_at": "2026-10-15T06:58:53.186544448Z",
+            "data": {
+              "state": true
+            },
+            "device_id": "dev-mock-ac",
+            "error": null,
+            "request_id": "batch-example",
+            "schema_version": "1.0",
+            "started_at": "2026-10-15T06:58:53.181761972Z",
+            "status": "verified",
+            "verification": {
+              "kind": "state_match",
+              "matches_target": true,
+              "note": "Fresh state matches the target; this does not prove request causality.",
+              "received_at": "2026-10-15T06:58:53.185678881Z",
+              "source": "lan"
+            }
+          }
+        ],
+        "schema_version": "1.0",
+        "started_at": "2026-10-15T06:58:53.181150941Z",
+        "status": "verified"
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-22",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "get_execution",
+          "request_id": "compound-example"
+        }
+      },
+      "response": {
+        "data": {
+          "attempts": [],
+          "completed_at": "2026-10-15T06:58:53.177193820Z",
+          "data": {
+            "mode": "heat",
+            "target_temperature": 25
+          },
+          "device_id": "dev-mock-ac",
+          "error": null,
+          "items": [
+            {
+              "attempts": [
+                {
+                  "duration_ms": 2,
+                  "phase": "accepted",
+                  "transport": "lan"
+                }
+              ],
+              "completed_at": "2026-10-15T06:58:53.172242944Z",
+              "data": {
+                "mode": "heat"
+              },
+              "device_id": "dev-mock-ac",
+              "error": null,
+              "request_id": "compound-example:0",
+              "schema_version": "1.0",
+              "started_at": "2026-10-15T06:58:53.168406335Z",
+              "status": "verified",
+              "verification": {
+                "kind": "state_match",
+                "matches_target": true,
+                "note": "Fresh state matches the target; this does not prove request causality.",
+                "received_at": "2026-10-15T06:58:53.171294367Z",
+                "source": "lan"
+              }
+            },
+            {
+              "attempts": [
+                {
+                  "duration_ms": 2,
+                  "phase": "accepted",
+                  "transport": "lan"
+                }
+              ],
+              "completed_at": "2026-10-15T06:58:53.176510697Z",
+              "data": {
+                "target_temperature": 25
+              },
+              "device_id": "dev-mock-ac",
+              "error": null,
+              "request_id": "compound-example:1",
+              "schema_version": "1.0",
+              "started_at": "2026-10-15T06:58:53.172976337Z",
+              "status": "verified",
+              "verification": {
+                "kind": "state_match",
+                "matches_target": true,
+                "note": "Fresh state matches the target; this does not prove request causality.",
+                "received_at": "2026-10-15T06:58:53.175687064Z",
+                "source": "lan"
+              }
+            }
+          ],
+          "request_id": "compound-example",
+          "schema_version": "1.0",
+          "started_at": "2026-10-15T06:58:53.166174665Z",
+          "status": "verified",
+          "verification": {
+            "kind": "state_match",
+            "matches_target": true,
+            "note": "Each sub-operation has separate verification evidence; inspect items. This is not an atomic or exactly-once guarantee.",
+            "received_at": "2026-10-15T06:58:53.171294367Z",
+            "source": "lan"
+          }
+        },
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-23",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "recent_executions"
+        }
+      },
+      "response": {
+        "data": [
+          {
+            "attempts": [
+              {
+                "duration_ms": 2,
+                "phase": "accepted",
+                "transport": "lan"
+              }
+            ],
+            "completed_at": "2026-10-15T06:58:53.186544448Z",
+            "data": {
+              "state": true
+            },
+            "device_id": "dev-mock-ac",
+            "error": null,
+            "request_id": "batch-example",
+            "schema_version": "1.0",
+            "started_at": "2026-10-15T06:58:53.181761972Z",
+            "status": "verified",
+            "verification": {
+              "kind": "state_match",
+              "matches_target": true,
+              "note": "Fresh state matches the target; this does not prove request causality.",
+              "received_at": "2026-10-15T06:58:53.185678881Z",
+              "source": "lan"
+            }
+          },
+          {
+            "attempts": [
+              {
+                "duration_ms": 2,
+                "phase": "accepted",
+                "transport": "lan"
+              }
+            ],
+            "completed_at": "2026-10-15T06:58:53.176510697Z",
+            "data": {
+              "target_temperature": 25
+            },
+            "device_id": "dev-mock-ac",
+            "error": null,
+            "request_id": "compound-example:1",
+            "schema_version": "1.0",
+            "started_at": "2026-10-15T06:58:53.172976337Z",
+            "status": "verified",
+            "verification": {
+              "kind": "state_match",
+              "matches_target": true,
+              "note": "Fresh state matches the target; this does not prove request causality.",
+              "received_at": "2026-10-15T06:58:53.175687064Z",
+              "source": "lan"
+            }
+          },
+          {
+            "attempts": [
+              {
+                "duration_ms": 2,
+                "phase": "accepted",
+                "transport": "lan"
+              }
+            ],
+            "completed_at": "2026-10-15T06:58:53.172242944Z",
+            "data": {
+              "mode": "heat"
+            },
+            "device_id": "dev-mock-ac",
+            "error": null,
+            "request_id": "compound-example:0",
+            "schema_version": "1.0",
+            "started_at": "2026-10-15T06:58:53.168406335Z",
+            "status": "verified",
+            "verification": {
+              "kind": "state_match",
+              "matches_target": true,
+              "note": "Fresh state matches the target; this does not prove request causality.",
+              "received_at": "2026-10-15T06:58:53.171294367Z",
+              "source": "lan"
+            }
+          },
+          {
+            "attempts": [],
+            "completed_at": "2026-10-15T06:58:53.177193820Z",
+            "data": {
+              "mode": "heat",
+              "target_temperature": 25
+            },
+            "device_id": "dev-mock-ac",
+            "error": null,
+            "items": [
+              {
+                "attempts": [
+                  {
+                    "duration_ms": 2,
+                    "phase": "accepted",
+                    "transport": "lan"
+                  }
+                ],
+                "completed_at": "2026-10-15T06:58:53.172242944Z",
+                "data": {
+                  "mode": "heat"
+                },
+                "device_id": "dev-mock-ac",
+                "error": null,
+                "request_id": "compound-example:0",
+                "schema_version": "1.0",
+                "started_at": "2026-10-15T06:58:53.168406335Z",
+                "status": "verified",
+                "verification": {
+                  "kind": "state_match",
+                  "matches_target": true,
+                  "note": "Fresh state matches the target; this does not prove request causality.",
+                  "received_at": "2026-10-15T06:58:53.171294367Z",
+                  "source": "lan"
+                }
+              },
+              {
+                "attempts": [
+                  {
+                    "duration_ms": 2,
+                    "phase": "accepted",
+                    "transport": "lan"
+                  }
+                ],
+                "completed_at": "2026-10-15T06:58:53.176510697Z",
+                "data": {
+                  "target_temperature": 25
+                },
+                "device_id": "dev-mock-ac",
+                "error": null,
+                "request_id": "compound-example:1",
+                "schema_version": "1.0",
+                "started_at": "2026-10-15T06:58:53.172976337Z",
+                "status": "verified",
+                "verification": {
+                  "kind": "state_match",
+                  "matches_target": true,
+                  "note": "Fresh state matches the target; this does not prove request causality.",
+                  "received_at": "2026-10-15T06:58:53.175687064Z",
+                  "source": "lan"
+                }
+              }
+            ],
+            "request_id": "compound-example",
+            "schema_version": "1.0",
+            "started_at": "2026-10-15T06:58:53.166174665Z",
+            "status": "verified",
+            "verification": {
+              "kind": "state_match",
+              "matches_target": true,
+              "note": "Each sub-operation has separate verification evidence; inspect items. This is not an atomic or exactly-once guarantee.",
+              "received_at": "2026-10-15T06:58:53.171294367Z",
+              "source": "lan"
+            }
+          }
+        ],
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-24",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "device_executions",
+          "device_id": "dev-mock-ac"
+        }
+      },
+      "response": {
+        "data": [
+          {
+            "attempts": [
+              {
+                "duration_ms": 2,
+                "phase": "accepted",
+                "transport": "lan"
+              }
+            ],
+            "completed_at": "2026-10-15T06:58:53.186544448Z",
+            "data": {
+              "state": true
+            },
+            "device_id": "dev-mock-ac",
+            "error": null,
+            "request_id": "batch-example",
+            "schema_version": "1.0",
+            "started_at": "2026-10-15T06:58:53.181761972Z",
+            "status": "verified",
+            "verification": {
+              "kind": "state_match",
+              "matches_target": true,
+              "note": "Fresh state matches the target; this does not prove request causality.",
+              "received_at": "2026-10-15T06:58:53.185678881Z",
+              "source": "lan"
+            }
+          },
+          {
+            "attempts": [
+              {
+                "duration_ms": 2,
+                "phase": "accepted",
+                "transport": "lan"
+              }
+            ],
+            "completed_at": "2026-10-15T06:58:53.176510697Z",
+            "data": {
+              "target_temperature": 25
+            },
+            "device_id": "dev-mock-ac",
+            "error": null,
+            "request_id": "compound-example:1",
+            "schema_version": "1.0",
+            "started_at": "2026-10-15T06:58:53.172976337Z",
+            "status": "verified",
+            "verification": {
+              "kind": "state_match",
+              "matches_target": true,
+              "note": "Fresh state matches the target; this does not prove request causality.",
+              "received_at": "2026-10-15T06:58:53.175687064Z",
+              "source": "lan"
+            }
+          },
+          {
+            "attempts": [
+              {
+                "duration_ms": 2,
+                "phase": "accepted",
+                "transport": "lan"
+              }
+            ],
+            "completed_at": "2026-10-15T06:58:53.172242944Z",
+            "data": {
+              "mode": "heat"
+            },
+            "device_id": "dev-mock-ac",
+            "error": null,
+            "request_id": "compound-example:0",
+            "schema_version": "1.0",
+            "started_at": "2026-10-15T06:58:53.168406335Z",
+            "status": "verified",
+            "verification": {
+              "kind": "state_match",
+              "matches_target": true,
+              "note": "Fresh state matches the target; this does not prove request causality.",
+              "received_at": "2026-10-15T06:58:53.171294367Z",
+              "source": "lan"
+            }
+          },
+          {
+            "attempts": [],
+            "completed_at": "2026-10-15T06:58:53.177193820Z",
+            "data": {
+              "mode": "heat",
+              "target_temperature": 25
+            },
+            "device_id": "dev-mock-ac",
+            "error": null,
+            "items": [
+              {
+                "attempts": [
+                  {
+                    "duration_ms": 2,
+                    "phase": "accepted",
+                    "transport": "lan"
+                  }
+                ],
+                "completed_at": "2026-10-15T06:58:53.172242944Z",
+                "data": {
+                  "mode": "heat"
+                },
+                "device_id": "dev-mock-ac",
+                "error": null,
+                "request_id": "compound-example:0",
+                "schema_version": "1.0",
+                "started_at": "2026-10-15T06:58:53.168406335Z",
+                "status": "verified",
+                "verification": {
+                  "kind": "state_match",
+                  "matches_target": true,
+                  "note": "Fresh state matches the target; this does not prove request causality.",
+                  "received_at": "2026-10-15T06:58:53.171294367Z",
+                  "source": "lan"
+                }
+              },
+              {
+                "attempts": [
+                  {
+                    "duration_ms": 2,
+                    "phase": "accepted",
+                    "transport": "lan"
+                  }
+                ],
+                "completed_at": "2026-10-15T06:58:53.176510697Z",
+                "data": {
+                  "target_temperature": 25
+                },
+                "device_id": "dev-mock-ac",
+                "error": null,
+                "request_id": "compound-example:1",
+                "schema_version": "1.0",
+                "started_at": "2026-10-15T06:58:53.172976337Z",
+                "status": "verified",
+                "verification": {
+                  "kind": "state_match",
+                  "matches_target": true,
+                  "note": "Fresh state matches the target; this does not prove request causality.",
+                  "received_at": "2026-10-15T06:58:53.175687064Z",
+                  "source": "lan"
+                }
+              }
+            ],
+            "request_id": "compound-example",
+            "schema_version": "1.0",
+            "started_at": "2026-10-15T06:58:53.166174665Z",
+            "status": "verified",
+            "verification": {
+              "kind": "state_match",
+              "matches_target": true,
+              "note": "Each sub-operation has separate verification evidence; inspect items. This is not an atomic or exactly-once guarantee.",
+              "received_at": "2026-10-15T06:58:53.171294367Z",
+              "source": "lan"
+            }
+          }
+        ],
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-25",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "diagnostics"
+        }
+      },
+      "response": {
+        "data": {
+          "application_version": "0.2.0",
+          "attempt_limit": 32,
+          "connections": {
+            "cloud": 1,
+            "lan": 1
+          },
+          "device_count": 1,
+          "generated_at": "2026-10-15T06:58:53.193316833Z",
+          "receipt_limit": 100,
+          "recent_receipts": [
+            {
+              "attempts": [
+                {
+                  "duration_ms": 2,
+                  "phase": "accepted",
+                  "transport": "lan"
+                }
+              ],
+              "attempts_omitted": 0,
+              "error_code": null,
+              "item_outcomes": {
+                "accepted": 0,
+                "failed": 0,
+                "partial": 0,
+                "unknown": 0,
+                "verified": 0
+              },
+              "status": "verified",
+              "verification_kind": "state_match",
+              "warning_count": 0
+            },
+            {
+              "attempts": [
+                {
+                  "duration_ms": 2,
+                  "phase": "accepted",
+                  "transport": "lan"
+                }
+              ],
+              "attempts_omitted": 0,
+              "error_code": null,
+              "item_outcomes": {
+                "accepted": 0,
+                "failed": 0,
+                "partial": 0,
+                "unknown": 0,
+                "verified": 0
+              },
+              "status": "verified",
+              "verification_kind": "state_match",
+              "warning_count": 0
+            },
+            {
+              "attempts": [
+                {
+                  "duration_ms": 2,
+                  "phase": "accepted",
+                  "transport": "lan"
+                }
+              ],
+              "attempts_omitted": 0,
+              "error_code": null,
+              "item_outcomes": {
+                "accepted": 0,
+                "failed": 0,
+                "partial": 0,
+                "unknown": 0,
+                "verified": 0
+              },
+              "status": "verified",
+              "verification_kind": "state_match",
+              "warning_count": 0
+            },
+            {
+              "attempts": [],
+              "attempts_omitted": 0,
+              "error_code": null,
+              "item_outcomes": {
+                "accepted": 0,
+                "failed": 0,
+                "partial": 0,
+                "unknown": 0,
+                "verified": 2
+              },
+              "status": "verified",
+              "verification_kind": "state_match",
+              "warning_count": 0
+            }
+          ],
+          "room_count": 0,
+          "schema_version": "1.0",
+          "scope": "local_profile"
+        },
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-26",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "get_execution",
+          "request_id": "missing"
+        }
+      },
+      "response": {
+        "data": null,
+        "error": {
+          "code": "REQUEST_NOT_FOUND",
+          "message": "No receipt exists for this request ID in the selected local profile.",
+          "retryable": false
+        },
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-27",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "execute",
+          "command": {
+            "schema_version": "1.0",
+            "request_id": "bad-budget",
+            "device_id": "dev-mock-ac",
+            "component_id": "main",
+            "capability": "power",
+            "action": "set",
+            "arguments": {
+              "state": true
+            },
+            "connection": "auto",
+            "timeout_ms": 9999,
+            "wait_for": "verified"
+          }
+        }
+      },
+      "response": {
+        "data": null,
+        "error": {
+          "code": "INVALID_ARGUMENT",
+          "message": "The request does not satisfy the supported contract.",
+          "retryable": false
+        },
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-28",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "execute",
+          "command": {
+            "schema_version": "1.0",
+            "request_id": "unsupported-example",
+            "device_id": "dev-mock-ac",
+            "component_id": "main",
+            "capability": "vendor.example.unsupported",
+            "action": "set",
+            "arguments": {
+              "state": true
+            },
+            "connection": "auto",
+            "timeout_ms": 10000,
+            "wait_for": "verified"
+          }
+        }
+      },
+      "response": {
+        "attempts": [],
+        "completed_at": "2026-10-15T06:58:53.195816316Z",
+        "data": null,
+        "device_id": "dev-mock-ac",
+        "error": {
+          "code": "CAPABILITY_UNSUPPORTED",
+          "message": "The device does not support this component or action.",
+          "retryable": false
+        },
+        "request_id": "unsupported-example",
+        "schema_version": "1.0",
+        "started_at": "2026-10-15T06:58:53.195378931Z",
+        "status": "failed",
+        "verification": null
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-29",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "execute_batch",
+          "batch": {
+            "schema_version": "1.0",
+            "commands": [
+              {
+                "schema_version": "1.0",
+                "request_id": "unsupported-example",
+                "device_id": "dev-mock-ac",
+                "component_id": "main",
+                "capability": "vendor.example.unsupported",
+                "action": "set",
+                "arguments": {
+                  "state": true
+                },
+                "connection": "auto",
+                "timeout_ms": 10000,
+                "wait_for": "verified"
+              }
+            ]
+          }
+        }
+      },
+      "response": {
+        "data": null,
+        "error": {
+          "code": "CAPABILITY_UNSUPPORTED",
+          "message": "The device does not support this component or action.",
+          "retryable": false
+        },
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-36",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "get_api_info"
+        }
+      },
+      "response": {
+        "data": null,
+        "error": {
+          "code": "HOST_BACKGROUND",
+          "message": "New operations require a foreground host.",
+          "retryable": false
+        },
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-37",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "get_api_info"
+        }
+      },
+      "response": {
+        "data": {
+          "api_version": "1.0.0",
+          "limits": {
+            "max_active_operations": 8,
+            "max_request_bytes": 1048576,
+            "max_timeout_ms": 180000
+          },
+          "methods": {
+            "assign_devices_to_room": {
+              "response_kind": "query"
+            },
+            "create_room": {
+              "response_kind": "query"
+            },
+            "delete_room": {
+              "response_kind": "query"
+            },
+            "describe_device": {
+              "response_kind": "query"
+            },
+            "device_executions": {
+              "response_kind": "query"
+            },
+            "diagnostics": {
+              "response_kind": "query"
+            },
+            "discover": {
+              "response_kind": "query"
+            },
+            "execute": {
+              "response_kind": "execution"
+            },
+            "execute_batch": {
+              "response_kind": "batch_execution"
+            },
+            "get_api_info": {
+              "response_kind": "query"
+            },
+            "get_execution": {
+              "response_kind": "query"
+            },
+            "list_device_cards": {
+              "response_kind": "query"
+            },
+            "list_devices": {
+              "response_kind": "query"
+            },
+            "list_rooms": {
+              "response_kind": "query"
+            },
+            "plan": {
+              "response_kind": "query"
+            },
+            "plan_batch": {
+              "response_kind": "query"
+            },
+            "read_state": {
+              "response_kind": "query"
+            },
+            "recent_executions": {
+              "response_kind": "query"
+            },
+            "rename_room": {
+              "response_kind": "query"
+            },
+            "reorder_devices": {
+              "response_kind": "query"
+            },
+            "reorder_rooms": {
+              "response_kind": "query"
+            },
+            "set_device_preferences": {
+              "response_kind": "query"
+            }
+          }
+        },
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-38",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "list_devices"
+        }
+      },
+      "response": {
+        "data": null,
+        "error": {
+          "code": "HOST_CLOSED",
+          "message": "The native host handle is closed.",
+          "retryable": false
+        },
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-39",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "discover"
+        }
+      },
+      "response": {
+        "data": [
+          {
+            "alias": "mock-ac",
+            "brand": "ExampleBrand",
+            "components": [
+              {
+                "capabilities": [
+                  "power",
+                  "climate"
+                ],
+                "id": "main"
+              }
+            ],
+            "connections": [
+              {
+                "account_id": null,
+                "adapter": "homeverb.mock",
+                "id": "conn-example-lan",
+                "identity_ref": "identity:fictional-local-1",
+                "transport": "lan"
+              },
+              {
+                "account_id": null,
+                "adapter": "homeverb.mock",
+                "id": "conn-example-cloud",
+                "identity_ref": "identity:fictional-cloud-1",
+                "transport": "cloud"
+              }
+            ],
+            "id": "dev-mock-ac",
+            "model": "Fictional-AC-01",
+            "schema_version": "1.0",
+            "support_status": "mock-tested"
+          }
+        ],
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-40",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "execute",
+          "command": {
+            "schema_version": "1.0",
+            "request_id": "scenario-accept-only",
+            "device_id": "dev-mock-ac",
+            "component_id": "main",
+            "capability": "power",
+            "action": "set",
+            "arguments": {
+              "state": true
+            },
+            "connection": "auto",
+            "timeout_ms": 10000,
+            "wait_for": "verified"
+          }
+        }
+      },
+      "response": {
+        "attempts": [
+          {
+            "duration_ms": 0,
+            "phase": "accepted",
+            "transport": "lan"
+          }
+        ],
+        "completed_at": "2026-10-15T06:58:53.222009126Z",
+        "data": null,
+        "device_id": "dev-mock-ac",
+        "error": {
+          "code": "VERIFICATION_PENDING",
+          "message": "The request was accepted, but the required verification evidence is unavailable.",
+          "retryable": false
+        },
+        "request_id": "scenario-accept-only",
+        "schema_version": "1.0",
+        "started_at": "2026-10-15T06:58:53.219982117Z",
+        "status": "accepted",
+        "verification": null
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-41",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "discover"
+        }
+      },
+      "response": {
+        "data": [
+          {
+            "alias": "mock-ac",
+            "brand": "ExampleBrand",
+            "components": [
+              {
+                "capabilities": [
+                  "power",
+                  "climate"
+                ],
+                "id": "main"
+              }
+            ],
+            "connections": [
+              {
+                "account_id": null,
+                "adapter": "homeverb.mock",
+                "id": "conn-example-lan",
+                "identity_ref": "identity:fictional-local-1",
+                "transport": "lan"
+              },
+              {
+                "account_id": null,
+                "adapter": "homeverb.mock",
+                "id": "conn-example-cloud",
+                "identity_ref": "identity:fictional-cloud-1",
+                "transport": "cloud"
+              }
+            ],
+            "id": "dev-mock-ac",
+            "model": "Fictional-AC-01",
+            "schema_version": "1.0",
+            "support_status": "mock-tested"
+          }
+        ],
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-42",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "execute",
+          "command": {
+            "schema_version": "1.0",
+            "request_id": "scenario-lost-ack",
+            "device_id": "dev-mock-ac",
+            "component_id": "main",
+            "capability": "power",
+            "action": "set",
+            "arguments": {
+              "state": true
+            },
+            "connection": "auto",
+            "timeout_ms": 10000,
+            "wait_for": "verified"
+          }
+        }
+      },
+      "response": {
+        "attempts": [
+          {
+            "duration_ms": 2,
+            "phase": "possibly_sent",
+            "transport": "lan"
+          }
+        ],
+        "completed_at": "2026-10-15T06:58:53.238612604Z",
+        "data": null,
+        "device_id": "dev-mock-ac",
+        "error": {
+          "code": "WRITE_OUTCOME_UNKNOWN",
+          "message": "The request may have executed; refresh state without replaying the write.",
+          "retryable": false
+        },
+        "request_id": "scenario-lost-ack",
+        "schema_version": "1.0",
+        "started_at": "2026-10-15T06:58:53.234865440Z",
+        "status": "unknown",
+        "verification": null
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-43",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "discover"
+        }
+      },
+      "response": {
+        "data": [
+          {
+            "alias": "mock-ac",
+            "brand": "ExampleBrand",
+            "components": [
+              {
+                "capabilities": [
+                  "power",
+                  "climate"
+                ],
+                "id": "main"
+              }
+            ],
+            "connections": [
+              {
+                "account_id": null,
+                "adapter": "homeverb.mock",
+                "id": "conn-example-lan",
+                "identity_ref": "identity:fictional-local-1",
+                "transport": "lan"
+              },
+              {
+                "account_id": null,
+                "adapter": "homeverb.mock",
+                "id": "conn-example-cloud",
+                "identity_ref": "identity:fictional-cloud-1",
+                "transport": "cloud"
+              }
+            ],
+            "id": "dev-mock-ac",
+            "model": "Fictional-AC-01",
+            "schema_version": "1.0",
+            "support_status": "mock-tested"
+          }
+        ],
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-44",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "execute",
+          "command": {
+            "schema_version": "1.0",
+            "request_id": "scenario-reject",
+            "device_id": "dev-mock-ac",
+            "component_id": "main",
+            "capability": "power",
+            "action": "set",
+            "arguments": {
+              "state": true
+            },
+            "connection": "auto",
+            "timeout_ms": 10000,
+            "wait_for": "verified"
+          }
+        }
+      },
+      "response": {
+        "attempts": [
+          {
+            "duration_ms": 1,
+            "phase": "rejected",
+            "transport": "lan"
+          }
+        ],
+        "completed_at": "2026-10-15T06:58:53.254508728Z",
+        "data": null,
+        "device_id": "dev-mock-ac",
+        "error": {
+          "code": "DEVICE_REJECTED",
+          "message": "The simulated appliance rejected this write.",
+          "retryable": false
+        },
+        "request_id": "scenario-reject",
+        "schema_version": "1.0",
+        "started_at": "2026-10-15T06:58:53.252125452Z",
+        "status": "failed",
+        "verification": null
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-45",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "discover"
+        }
+      },
+      "response": {
+        "data": [
+          {
+            "alias": "mock-ac",
+            "brand": "ExampleBrand",
+            "components": [
+              {
+                "capabilities": [
+                  "power",
+                  "climate"
+                ],
+                "id": "main"
+              }
+            ],
+            "connections": [
+              {
+                "account_id": null,
+                "adapter": "homeverb.mock",
+                "id": "conn-example-lan",
+                "identity_ref": "identity:fictional-local-1",
+                "transport": "lan"
+              },
+              {
+                "account_id": null,
+                "adapter": "homeverb.mock",
+                "id": "conn-example-cloud",
+                "identity_ref": "identity:fictional-cloud-1",
+                "transport": "cloud"
+              }
+            ],
+            "id": "dev-mock-ac",
+            "model": "Fictional-AC-01",
+            "schema_version": "1.0",
+            "support_status": "mock-tested"
+          }
+        ],
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-46",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "execute",
+          "command": {
+            "schema_version": "1.0",
+            "request_id": "scenario-partial",
+            "device_id": "dev-mock-ac",
+            "component_id": "main",
+            "capability": "climate",
+            "action": "set",
+            "arguments": {
+              "mode": "heat",
+              "target_temperature": 25
+            },
+            "connection": "auto",
+            "timeout_ms": 10000,
+            "wait_for": "verified"
+          }
+        }
+      },
+      "response": {
+        "attempts": [],
+        "completed_at": "2026-10-15T06:58:53.275115031Z",
+        "data": null,
+        "device_id": "dev-mock-ac",
+        "error": {
+          "code": "PARTIAL_EXECUTION",
+          "message": "Inspect each non-atomic sub-operation result.",
+          "retryable": false
+        },
+        "items": [
+          {
+            "attempts": [
+              {
+                "duration_ms": 1,
+                "phase": "accepted",
+                "transport": "lan"
+              }
+            ],
+            "completed_at": "2026-10-15T06:58:53.273347720Z",
+            "data": {
+              "mode": "heat"
+            },
+            "device_id": "dev-mock-ac",
+            "error": null,
+            "request_id": "scenario-partial:0",
+            "schema_version": "1.0",
+            "started_at": "2026-10-15T06:58:53.270161553Z",
+            "status": "verified",
+            "verification": {
+              "kind": "state_match",
+              "matches_target": true,
+              "note": "Fresh state matches the target; this does not prove request causality.",
+              "received_at": "2026-10-15T06:58:53.272585068Z",
+              "source": "lan"
+            }
+          },
+          {
+            "attempts": [
+              {
+                "duration_ms": 0,
+                "phase": "rejected",
+                "transport": "lan"
+              }
+            ],
+            "completed_at": "2026-10-15T06:58:53.274511338Z",
+            "data": null,
+            "device_id": "dev-mock-ac",
+            "error": {
+              "code": "DEVICE_REJECTED",
+              "message": "The simulated appliance rejected this write.",
+              "retryable": false
+            },
+            "request_id": "scenario-partial:1",
+            "schema_version": "1.0",
+            "started_at": "2026-10-15T06:58:53.273932872Z",
+            "status": "failed",
+            "verification": null
+          }
+        ],
+        "request_id": "scenario-partial",
+        "schema_version": "1.0",
+        "started_at": "2026-10-15T06:58:53.267201087Z",
+        "status": "partial",
+        "verification": null
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-47",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "discover"
+        }
+      },
+      "response": {
+        "data": [
+          {
+            "alias": "mock-ac",
+            "brand": "ExampleBrand",
+            "components": [
+              {
+                "capabilities": [
+                  "power",
+                  "climate"
+                ],
+                "id": "main"
+              }
+            ],
+            "connections": [
+              {
+                "account_id": null,
+                "adapter": "homeverb.mock",
+                "id": "conn-example-lan",
+                "identity_ref": "identity:fictional-local-1",
+                "transport": "lan"
+              },
+              {
+                "account_id": null,
+                "adapter": "homeverb.mock",
+                "id": "conn-example-cloud",
+                "identity_ref": "identity:fictional-cloud-1",
+                "transport": "cloud"
+              }
+            ],
+            "id": "dev-mock-ac",
+            "model": "Fictional-AC-01",
+            "schema_version": "1.0",
+            "support_status": "mock-tested"
+          }
+        ],
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-48",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "execute",
+          "command": {
+            "schema_version": "1.0",
+            "request_id": "cancel-before-send",
+            "device_id": "dev-mock-ac",
+            "component_id": "main",
+            "capability": "power",
+            "action": "set",
+            "arguments": {
+              "state": true
+            },
+            "connection": "auto",
+            "timeout_ms": 10000,
+            "wait_for": "verified"
+          }
+        }
+      },
+      "response": {
+        "attempts": [
+          {
+            "duration_ms": 3,
+            "phase": "not_sent",
+            "transport": "lan"
+          }
+        ],
+        "completed_at": "2026-10-15T06:58:53.291452619Z",
+        "data": null,
+        "device_id": "dev-mock-ac",
+        "error": {
+          "code": "CANCELLED",
+          "message": "The operation was cancelled.",
+          "retryable": false
+        },
+        "request_id": "cancel-before-send",
+        "schema_version": "1.0",
+        "started_at": "2026-10-15T06:58:53.286404658Z",
+        "status": "failed",
+        "verification": null
+      }
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "native-open",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "data_dir": {
+      "type": "string",
+      "minLength": 1
+    },
+    "allow_mock_writes": {
+      "type": "boolean"
+    },
+    "scenario": {
+      "enum": [
+        "normal",
+        "reject",
+        "lost-ack",
+        "accept-only",
+        "lan-offline",
+        "offline",
+        "slow-before-send",
+        "slow-after-send",
+        "stale-read",
+        "partial",
+        "correlated-completion"
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "data_dir",
+    "allow_mock_writes"
+  ],
+  "additionalProperties": false,
+  "description": "Trusted Mock startup only. data_dir must be an absolute private OS path. scenario defaults to normal."
+}

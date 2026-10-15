@@ -6,6 +6,8 @@ The current design handoff is the [complete Window Light prototype](../../output
 
 ## Native boundary
 
+Start new Flutter work against the [versioned native UI contract](../native-ui-contract.md): it provides the callable catalog, offline request/response schemas, actual Mock examples, page-to-interface coverage, and unavailable-feature boundaries. Call `get_api_info` after opening the native host. Do not derive an interface solely from screenshots or issue undocumented requests.
+
 Build `homeverb-ffi`. The C declarations are in [homeverb.h](../../crates/ffi/include/homeverb.h). Linux produces `target/debug/libhomeverb_ffi.so`. A native UI loads the library in its own process.
 
 1. Call `homeverb_open` with trusted startup configuration: `schema_version`, an absolute private `data_dir`, and `allow_mock_writes`. The returned query envelope contains `data.handle`.

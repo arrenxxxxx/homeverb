@@ -11,6 +11,7 @@ cargo test --workspace --locked
 cargo build --workspace --locked
 python3 -m pip install -r requirements-dev.txt
 python3 scripts/verify_mvp.py
+python3 scripts/verify_native_contract.py
 node packages/presentation/test/i18n.test.mjs
 python3 scripts/validate_docs.py
 python3 scripts/validate_contracts.py
@@ -42,6 +43,7 @@ After dependencies are cached, add `--offline` to Cargo commands. Use a Python v
 | Native credentials | Opaque references, nonserializable/redacted secret buffers, unavailable/locked/duplicate error mapping, preflight cancellation/deadline refusal, and uncertain mutations; explicit Linux service probe below |
 | CLI runtime | Actual binary output validated against JSON Schemas, exit codes, room/preferences and state persistence, batch rollback after an injected second-device update failure, filtered history, schema-1 upgrade, injected SQLite journal failure, dry run, SIGINT, and forced termination/restart |
 | Native ABI | Linux library loaded directly, independent discovery/control, room/card requests, concurrent foreground cancellation, and explicit close |
+| Native UI contract | All 22 published methods called through the built C ABI, offline method-specific response validation, saved examples, closed-field rejection, null success, admission errors, all execution outcomes, explicit cancellation and foreground/closed-session refusal |
 | MCP runtime | Initialization, tools, structured results, default denial, forged fields, no Internet sockets while idle, and EOF exit |
 | Presentation | Exact locale key/placeholder parity, locale fallback, missing keys, unknown observations, and uncertainty display |
 | Diagnostics | Actual CLI/native closed-schema reports, omitted private markers from metadata/receipts/nested items, normalized unknown codes, fixed storage errors, bounded receipt/attempt output, no adapter calls, and no journal mutation |

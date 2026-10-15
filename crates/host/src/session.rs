@@ -17,8 +17,9 @@ pub struct HostRequest {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(tag = "method", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Request {
-    ListDevices,
-    Discover,
+    GetApiInfo {},
+    ListDevices {},
+    Discover {},
     DescribeDevice {
         device: String,
     },
@@ -40,7 +41,7 @@ pub enum Request {
     ExecuteBatch {
         batch: BatchCommand,
     },
-    RecentExecutions,
+    RecentExecutions {},
     GetExecution {
         request_id: String,
     },
@@ -48,7 +49,7 @@ pub enum Request {
     DeviceExecutions {
         device_id: String,
     },
-    ListRooms,
+    ListRooms {},
     CreateRoom {
         name: String,
     },
@@ -62,7 +63,7 @@ pub enum Request {
     ReorderRooms {
         room_ids: Vec<String>,
     },
-    ListDeviceCards,
+    ListDeviceCards {},
     SetDevicePreferences {
         device_id: String,
         preferences: PreferencesInput,
@@ -186,8 +187,12 @@ impl Session {
             id: input.operation_id,
         };
         let result = match input.request {
-            Request::ListDevices => self.core.list().map(|v| json!(v)),
-            Request::Discover => self.core.discover(&operation).await.map(|v| json!(v)),
+            Request::GetApiInfo {} => Ok(serde_json::from_str(include_str!(
+                "../../../packages/native-contract/api.json"
+            ))
+            .expect("the compiled native API catalog is valid JSON")),
+            Request::ListDevices {} => self.core.list().map(|v| json!(v)),
+            Request::Discover {} => self.core.discover(&operation).await.map(|v| json!(v)),
             Request::DescribeDevice { device } => self.core.describe(&device).map(|v| json!(v)),
             Request::ReadState {
                 device,
@@ -218,7 +223,7 @@ impl Session {
                     self.core.execute_with_operation(command, &operation).await
                 ));
             }
-            Request::RecentExecutions => self.core.recent_executions().map(|v| json!(v)),
+            Request::RecentExecutions {} => self.core.recent_executions().map(|v| json!(v)),
             Request::GetExecution { request_id } => self
                 .core
                 .execution(&request_id, &operation)
@@ -228,7 +233,7 @@ impl Session {
             Request::DeviceExecutions { device_id } => {
                 self.core.device_executions(&device_id).map(|v| json!(v))
             }
-            Request::ListRooms => self.core.list_rooms().map(|v| json!(v)),
+            Request::ListRooms {} => self.core.list_rooms().map(|v| json!(v)),
             Request::CreateRoom { name } => self.core.create_room(&name).map(|v| json!(v)),
             Request::RenameRoom { room_id, name } => {
                 self.core.rename_room(&room_id, &name).map(|v| json!(v))
@@ -237,7 +242,7 @@ impl Session {
             Request::ReorderRooms { room_ids } => {
                 self.core.reorder_rooms(&room_ids).map(|v| json!(v))
             }
-            Request::ListDeviceCards => self.core.list_device_cards().map(|v| json!(v)),
+            Request::ListDeviceCards {} => self.core.list_device_cards().map(|v| json!(v)),
             Request::SetDevicePreferences {
                 device_id,
                 preferences,

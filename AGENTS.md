@@ -64,4 +64,6 @@ Run the Rust and runtime commands in `docs/testing.md` for application changes. 
 
 Choose a small task with acceptance criteria. Update contracts and tests, then Core/Adapter logic, then entry points. Keep documentation, fixtures, errors, and compatibility records synchronized. Write an ADR before a breaking public API change.
 
+Commit each completed and verified development phase separately, as requested by the owner. Keep unrelated work out of the commit. A phase commit is local; pushing or publishing remains a separate external action. Flutter development uses the versioned contract in `docs/native-ui-contract.md` and may proceed in a separate owner-created worktree.
+
 A completion report identifies changed files, commands actually run, results, unverified work, compatibility effects, and external actions. Creating or pushing repositories, publishing packages, performing real-device writes, and uploading diagnostics require explicit user authorization. Never claim a remote action succeeded without checking the resulting remote state.
