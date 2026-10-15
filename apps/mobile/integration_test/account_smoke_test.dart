@@ -73,6 +73,15 @@ void main() {
         final password = find.byKey(const ValueKey('credential:Password'));
         await tester.enterText(login, 'fixture@example.invalid');
         await tester.enterText(password, 'fictional-pass');
+        await tester.pumpAndSettle();
+        expect(
+          tester.widget<TextField>(login).controller!.text,
+          'fixture@example.invalid',
+        );
+        expect(
+          tester.widget<TextField>(password).controller!.text,
+          'fictional-pass',
+        );
         tester.binding.handleAppLifecycleStateChanged(
           AppLifecycleState.inactive,
         );

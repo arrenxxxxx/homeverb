@@ -28,7 +28,7 @@ class SavePicker extends FileSelectorPlatform {
   }
 }
 
-void main() {
+void main({bool deviceRun = false}) {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(() async {
     await (FontLoader('Inter')
@@ -42,13 +42,20 @@ void main() {
   testWidgets(
     'click real native discovery, control, organization, preferences and unavailable gates',
     (tester) async {
-      tester.view.physicalSize = const Size(780, 1688);
-      tester.view.devicePixelRatio = 2;
-      tester.view.padding = const FakeViewPadding(top: 88, bottom: 28);
+      if (deviceRun) {
+        tester.testTextInput.register();
+        addTearDown(tester.testTextInput.unregister);
+      }
+      if (!deviceRun) {
+        tester.view.physicalSize = const Size(780, 1688);
+        tester.view.devicePixelRatio = 2;
+        tester.view.padding = const FakeViewPadding(top: 88, bottom: 28);
+      }
+      final originalShadows = debugDisableShadows;
       debugDisableShadows = false;
       WidgetController.hitTestWarningShouldBeFatal = true;
       addTearDown(() {
-        debugDisableShadows = true;
+        debugDisableShadows = originalShadows;
         WidgetController.hitTestWarningShouldBeFatal = false;
         tester.view.resetPadding();
       });
@@ -62,9 +69,9 @@ void main() {
         catalog = await ScreenCatalog.load();
         core = await NativeClient.open(
           dataDir: directory.path,
-          libraryPath: File(
-            '../../target/debug/libhomeverb_ffi.so',
-          ).absolute.path,
+          libraryPath: deviceRun
+              ? null
+              : File('../../target/debug/libhomeverb_ffi.so').absolute.path,
           allowMockWrites: true,
         );
         controller = HomeController(
@@ -75,7 +82,11 @@ void main() {
       final app = GlobalKey<NativeAppState>();
       final boundary = GlobalKey();
       final captures = <Map<String, String>>[];
-      final output = Directory('build/verification/native');
+      final output = Directory(
+        deviceRun
+            ? '${Directory.systemTemp.path}/homeverb-native-captures'
+            : 'build/verification/native',
+      );
       output.createSync(recursive: true);
       Future<void> capture(String trigger) async {
         final id = app.currentState!.id;
@@ -85,7 +96,7 @@ void main() {
           final image =
               await (boundary.currentContext!.findRenderObject()
                       as RenderRepaintBoundary)
-                  .toImage(pixelRatio: 2);
+                  .toImage(pixelRatio: tester.view.devicePixelRatio);
           final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
           File(
             '${output.path}/$filename',
@@ -478,30 +489,47 @@ void main() {
             reason: id,
           );
         }
-        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+        for (final phase in [
+          AppLifecycleState.inactive,
+          AppLifecycleState.hidden,
+          AppLifecycleState.paused,
+        ]) {
+          tester.binding.handleAppLifecycleStateChanged(phase);
+        }
         await expectLater(
           core.call('list_rooms'),
           throwsA(isA<NativeFailure>()),
         );
-        tester.binding.handleAppLifecycleStateChanged(
+        for (final phase in [
+          AppLifecycleState.hidden,
+          AppLifecycleState.inactive,
           AppLifecycleState.resumed,
-        );
+        ]) {
+          tester.binding.handleAppLifecycleStateChanged(phase);
+        }
         expect(controller.cards.length, 1);
         expect(captures.length, greaterThan(40));
         await tester.runAsync(() async {
           File('${output.path}/manifest.json').writeAsStringSync(
             const JsonEncoder.withIndent('  ').convert({
-              'source':
-                  'Native Mock via FFI; fictional data; widget viewport captures',
-              'size': [780, 1688],
-              'system_chrome':
-                  'Insets simulated; OS status icons are not captured',
-              'captures': captures,
-            }),
+                  'source': deviceRun
+                      ? 'Native Mock via FFI in an application process; fictional data; text input and file picker simulated'
+                      : 'Native Mock via FFI; fictional data; widget viewport captures',
+                  'platform': Platform.operatingSystem,
+                  'size': [
+                    tester.view.physicalSize.width,
+                    tester.view.physicalSize.height,
+                  ],
+                  'system_chrome': deviceRun
+                      ? 'Actual device insets; Flutter surface captures exclude OS status icons; lifecycle transitions are injected'
+                      : 'Insets simulated; OS status icons are not captured',
+                  'captures': captures,
+                }) +
+                '\n',
           );
         });
       } finally {
-        debugDisableShadows = true;
+        debugDisableShadows = originalShadows;
         FileSelectorPlatform.instance = originalPicker;
         await tester.pumpWidget(const SizedBox());
         await tester.runAsync(() => core.close());

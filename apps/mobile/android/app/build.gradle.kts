@@ -15,11 +15,10 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "dev.homeverb.homeverb_mobile"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        minSdk = 28
         targetSdk = flutter.targetSdkVersion
         // Uses the version code from pubspec.yaml. When using split APKs, 1000 * ABI_VERSION
         // is added automatically by Flutter. (https://developer.android.com/studio/build/configure-apk-splits#configure-APK-versions)
@@ -27,6 +26,9 @@ android {
         // flag during build.
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        ndk {
+            abiFilters += listOf("arm64-v8a", "x86_64")
+        }
     }
 
     buildTypes {
@@ -46,4 +48,13 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+// Build from this checkout with scripts/build_android_native.py before assembling.
+val homeverbCore = rootProject.file("../../../target/android/homeverb-core-universal.aar")
+check(homeverbCore.isFile) {
+    "Build the matching HomeVerb arm64-v8a/x86_64 AAR first; see apps/mobile/README.md."
+}
+dependencies {
+    implementation(files(homeverbCore))
 }

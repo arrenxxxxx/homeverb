@@ -1,6 +1,6 @@
 # HomeVerb Flutter application
 
-The native application embeds Core using native UI contract 1.10. The separate visual preview contains fictional Window Light fixtures and never opens Core. The default build opens an isolated Mock profile. Explicit Meiju builds provide protected account connection, local metadata, retrieval/recovery and scoped local removal; Android startup wiring and physical acceptance remain pending. Cache and history clearing are connected with separate confirmations. Nearby sharing and full-profile deletion remain unavailable. Their preview states are not live features.
+The native application embeds Core using native UI contract 1.10. The separate visual preview contains fictional Window Light fixtures and never opens Core. The default build opens an isolated Mock profile. Explicit Meiju builds provide protected account connection, local metadata, retrieval/recovery and scoped local removal; Android startup wiring and Mock process journeys are emulator-tested; actual Keystore and physical acceptance remain pending. Cache and history clearing are connected with separate confirmations. Nearby sharing and full-profile deletion remain unavailable. Their preview states are not live features.
 
 ## Account integration
 
@@ -86,6 +86,61 @@ fvm flutter build web -t lib/main_preview.dart
 - Diagnostics export only the exact report displayed in the preview.
 - Modal focus stays above the inactive backdrop; Tab/Enter and Escape support keyboard navigation. Fields, sliders and switches expose their purpose. Busy activity becomes static when the system requests reduced motion. System high contrast uses solid surfaces, stronger outlines and larger semibold text; disabling it restores the original Window Light appearance.
 
+## Android development build
+
+The Android application includes the matching local Core AAR for `arm64-v8a` and
+`x86_64`; 32-bit targets are excluded. Build the library from the same checkout
+before assembling an APK. SDK/NDK paths are local environment settings, not
+repository dependencies. The app requires Android API 28 or later.
+
+From the repository root, with the two Rust Android targets installed:
+
+```sh
+python3 scripts/build_android_native.py \
+  --ndk /absolute/android-ndk-r28c \
+  --android-jar /absolute/android-sdk/platforms/android-36/android.jar \
+  --java-home /absolute/jdk-21 \
+  --abi arm64-v8a --abi x86_64
+cd apps/mobile
+fvm flutter build apk --debug --target-platform android-arm64,android-x64
+fvm flutter build apk --release --target-platform android-arm64,android-x64
+```
+
+Run Flutter builds and integration tests sequentially in a checkout. When switching
+between test/debug and release builds, keep dependency/tooling generation enabled:
+`--no-pub` skips release plugin regeneration in this pinned Flutter version and can
+leave the development-only integration-test plugin in the generated registrant.
+Do not edit the generated registrant or add the test plugin to production dependencies.
+
+Configure the Android SDK through the local `android/local.properties` or standard
+SDK environment. Application startup loads Core and installs the Android credential
+backend before Flutter starts. Installation does not read credentials or contact a
+provider; Core checks actual storage availability on each protected operation.
+Loading/installation failure never enables a plaintext fallback. Application data
+is excluded from cloud backup and device transfer, because credentials require the
+original Keystore. Internet permission supports explicit foreground operations.
+The default build still uses Mock; the separate opt-in Meiju profile and write
+restrictions described below are unchanged.
+
+Run the process tests on a connected Android device or emulator:
+
+```sh
+fvm flutter test integration_test/native_journeys_test.dart -d DEVICE_ID --no-uninstall
+fvm flutter test integration_test/native_smoke_test.dart -d DEVICE_ID
+fvm flutter test integration_test/account_smoke_test.dart -d DEVICE_ID
+```
+
+These tests create temporary isolated profiles. The full journey captures its
+Flutter surfaces under Dart's temporary directory (`code_cache` on the tested
+Android emulator) at `homeverb-native-captures`, using
+the device dimensions. It simulates text input and the file picker and injects
+lifecycle transitions; it does not verify the OS keyboard, picker or task switcher.
+The account test uses empty local
+metadata and fictional input without submitting valid credentials or calling a
+vendor. Passing these checks does not establish Android Keystore round trips or
+physical-device support. Release signing still uses the development debug key;
+these builds are development artifacts, not distributable store releases.
+
 ## Verification boundary
 
 See [verification.md](verification.md) for executed checks and remaining acceptance gates. All 82 native-widget preview states render and all 198 simulated atlas event branches are clicked separately from the real Core tests. The actual Linux Flutter process also discovers, reads and writes the fictional Mock appliance through FFI. Screenshot equality has **not passed**; do not describe the application as a pixel-identical or phone-verified delivery.
@@ -106,4 +161,4 @@ python3 apps/mobile/tool/native_gallery.py
 
 The generated `output/flutter-verification/native-gallery.html` labels clicks, drag gestures and direct test navigation separately. Its reference column uses different sample data; this gallery does not replace strict pixel comparison or physical-phone acceptance.
 
-Android/iOS scaffolding alone does not establish native library packaging, secure-store integration, physical-phone lifecycle, accessibility or performance. No real provider is enabled. Project release licensing remains undecided. Bundled Inter fonts use the adjacent SIL Open Font License.
+Android APK packaging and x86_64 emulator Mock journeys are verified separately from actual Keystore, physical-phone lifecycle, iOS packaging, accessibility and performance. The default build uses Mock; Meiju requires an explicit opt-in. Project release licensing remains undecided. Bundled Inter fonts use the adjacent SIL Open Font License.

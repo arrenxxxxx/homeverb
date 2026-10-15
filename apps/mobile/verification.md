@@ -198,3 +198,62 @@ image was replaced and no tolerance was accepted. New protected-login and amende
 account outcome states have functional screenshot evidence but do not establish
 authoritative prototype parity. Android packaging/Keystore, iOS, physical account
 acceptance, localization and full accessibility remain unfinished.
+
+## Android embedding and emulator checkpoint
+
+The application now packages the matching arm64-v8a/x86_64 Core AAR, requires API
+28, installs the JNI credential backend from Application startup, declares Internet
+permission, and excludes private app data from cloud backup and device transfer.
+FVM remains pinned to Flutter 3.47.7. The development build used JDK 21, SDK 36,
+NDK r28c and the checksum-pinned Gradle 9.3.1 wrapper. No toolchain files are committed.
+
+An actual first launch exposed `Unsupported` from Rust 1.96 standard-library file
+locks on Android, previously reported as `RESOURCE_BUSY`. An isolated Android
+executable reproduced it. The Android-only Bionic `flock` implementation preserves
+nonblocking shared/exclusive leases and release on close. All 13 storage tests
+passed on Linux and Android 15 x86_64, including migrations, contention, rollback
+and replay retention. Workspace formatting, Clippy, Rust tests, 24 MVP runtime tests
+and all 31 native methods/51 fictional C ABI examples passed on Linux.
+
+The corrected dual-ABI debug and development-signed release APKs built, installed and cold-started on an isolated
+Android 15 x86_64 Pixel 7 emulator with KVM and SwiftShader at 1080 x 2400. Both
+packaged Core libraries passed eight-export and 16 KiB ELF alignment checks; the
+APK passed 16 KiB ZIP alignment. No physical phone or real appliance was used.
+
+The comprehensive Mock journey passed in actual Linux and Android processes. The
+Android run retained 88 captures over 27 screen IDs, including native discovery,
+read/control receipts, room/card organization, settings, diagnostics and separate
+cache/history cleanup. It uses simulated text input/file-picker responses and
+injected lifecycle transitions; these do not prove OS keyboard, picker or task
+switcher behavior. Direct test navigation is labeled separately from clicks.
+The gallery is `output/flutter-verification/android/index.html`. Use
+`--no-uninstall` to retain device captures; Dart's temporary directory is
+`code_cache` on this emulator. The local manifest records OS and actual viewport.
+
+The Android account-process test also passed with an empty isolated Meiju profile:
+local catalog navigation, empty-submission refusal, confirmed fictional field
+values, lifecycle clearing, local account reread and cancellation. No credentials
+were submitted to a provider, and no real secret store round trip was performed.
+Its capture is `output/flutter-verification/android/account-process.png`.
+
+All 59 Flutter tests passed. The strict unchanged-reference comparison remains
+**0/82 exact**, with mean channel error **1.6798/255**. Actual Keystore, physical-phone
+and iOS acceptance, full localization/accessibility, provider/device acceptance
+and strict prototype equality remain unfinished. The default app remains Mock;
+explicit Meiju builds retain separate profiles and no appliance write grants.
+
+The ordinary `lib/main.dart` release APK was rebuilt with tooling regeneration
+enabled, excluding the dev-only integration plugin. The final package passed both
+Core ABI/eight-export and 16 KiB ELF/ZIP checks. Its compiled manifest retains API
+28, Internet permission, HomeVerbApplication, disabled backup and extraction rules.
+R8 retains the JNI credential class names. Actual Android input opened the system
+IME and entered fictional search text; Home/resume preserved that nonsecret query,
+and force-stop/restart returned to the local home page. Screenshots and UI dumps
+are saved as `output/flutter-verification/android/release-*`. These limited real OS
+checks complement, rather than replace, the injected lifecycle journey tests.
+
+The installable artifact is
+`output/flutter-verification/android/homeverb-0.2.0-android-development-release.apk`;
+`release-artifact.json` records its SHA-256 and acceptance boundaries. It uses the
+development debug signing key and is not a store release. The earlier startup
+failure artifact and integration-test APK are not delivery artifacts.

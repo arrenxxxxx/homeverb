@@ -13,10 +13,10 @@ import 'package:homeverb_mobile/screens.dart' hide Json;
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   testWidgets(
-    'native Linux process discovers, controls and clears local data through FFI',
+    'native process discovers, controls and clears local data through FFI',
     (tester) async {
       final dir = await Directory.systemTemp.createTemp(
-        'homeverb-linux-smoke-',
+        'homeverb-native-smoke-',
       );
       const path = String.fromEnvironment('HOMEVERB_LIBRARY');
       final core = await NativeClient.open(
