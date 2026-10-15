@@ -65,7 +65,7 @@ Controller/FFI tests additionally cover persisted reopen, accepted/verified/fail
 
 The screenshot test captures every ID at the reference size: 780 x 1688, or 2048 x 1536 for W01/W02. It loads the licensed Inter fonts and approved product/background assets. All text, controls and semantics are widgets; complete screen images are never used as the app interface. Test status/navigation chrome is deterministic artwork, not a captured phone OS.
 
-The latest complete comparison has **0 of 82 exact matches**, with mean absolute channel error **1.6514 / 255**, down from 6.1482 before rendering refinements. Native switches now use the prototype's accent/gray tracks and light thumbs. A lower average alone does not establish correct states or layouts. These metrics measure differences, not an acceptance tolerance. Text rasterization, icons, surfaces, controls and layout still differ. P08 intentionally follows the amended automatic-retrieval contract; the approved atlas still depicts the superseded manual step.
+The latest complete comparison has **0 of 82 exact matches**, with mean absolute channel error **1.6529 / 255**, down from 6.1482 before rendering refinements. Native switches now use the prototype's accent/gray tracks and light thumbs. A lower average alone does not establish correct states or layouts. These metrics measure differences, not an acceptance tolerance. Text rasterization, icons, surfaces, controls and layout still differ. P08 intentionally follows the amended automatic-retrieval contract; the approved atlas still depicts the superseded manual step.
 
 The latest shared-widget refinement aligns the non-root header, raises button labels to the reference position, and measures actual label/value font widths before wrapping rows. Fan and refrigerator preview steppers now expose separate increase/decrease controls with explicit preview-only feedback. The added interaction check clicks all six controls without changing page or claiming a native write. All 29 Flutter tests, static analysis and the Linux release build passed after this refinement.
 
@@ -317,3 +317,31 @@ native click coverage and do not establish physical-device or pixel acceptance.
 The final ordinary Android release APK rebuilt, passed 16 KiB ZIP alignment,
 installed and cold-started on the isolated emulator. The delivery APK and SHA-256
 manifest were updated; `visual-alignment-release-home.png` records the launch.
+
+## P08 contract and reference review
+
+The original P08 reference still presents manual Find Devices after successful
+authorization. The current contract instead combines connection and automatic
+retrieval and explicitly provides no staged-progress callback. The isolated P08
+preview no longer claims completed authorization or a fabricated 40% completion.
+It displays a single connecting/retrieving state with Cancel. The native account
+flow already waits for the actual returned report; its behavior is unchanged.
+
+All 10 screenshot/branch/reflow/high-contrast checks passed, including an assertion
+against staged completion/determinate progress in P08. Static analysis and the
+isolated web-preview build passed. The unchanged 82-reference comparison still
+fails: 0 exact, mean channel error 1.6529/255. This small increase follows the
+required semantic correction; it is not a new tolerance or acceptance claim.
+
+Seven separate fictional P08 candidate images cover connecting, complete, empty,
+partial, failed, reauthorization and interrupted results. They reuse a temporary
+copy of the existing prototype renderer, have checked dimensions/content bounds
+and SHA-256 values, and are available locally under
+`output/flutter-verification/p08-proposal/index.html`. The proposal is awaiting
+owner review. It has not replaced any approved reference or changed the strict
+comparison. Approval of its layout would still require Flutter implementation,
+click verification and independent screenshot comparison for the revised states.
+
+The ordinary Android release APK was rebuilt with the corrected catalog, passed
+16 KiB ZIP alignment, installed and cold-started on the isolated emulator. The
+local delivery APK/hash manifest and `p08-catalog-release-home.png` were refreshed.

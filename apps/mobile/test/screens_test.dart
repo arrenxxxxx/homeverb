@@ -60,6 +60,12 @@ void main() {
       });
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull, reason: id);
+      if (id == 'P08') {
+        expect(find.text('Connect platform'), findsOneWidget);
+        expect(find.text('Connecting and retrieving'), findsOneWidget);
+        expect(find.textContaining('Authorization finished'), findsNothing);
+        expect(find.byType(LinearProgressIndicator), findsNothing);
+      }
       await tester.runAsync(() async {
         final image =
             await (boundary.currentContext!.findRenderObject()

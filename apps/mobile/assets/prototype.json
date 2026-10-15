@@ -1946,23 +1946,22 @@
         },
         {
           "id": "P08",
-          "title": "Platform connected",
-          "description": "Back Platform Connected. Terracotta check, Example Home / Home account / Europe. Text Authorization saved securely. Primary Find Devices, secondary Done. No invented devices until discovery; no raw token display.",
+          "title": "Connecting platform",
+          "description": "Combined foreground connection and device retrieval. No staged completion or progress percentage is available. This is an isolated fictional preview.",
           "image": "screens/P08.png",
           "board": "10-authentication",
           "ui": {
-            "header": "Platform connected",
+            "header": "Connect platform",
             "blocks": [
               [
                 "status",
-                "Retrieving account devices",
-                "Authorization finished. Bound devices are retrieved automatically.",
+                "Connecting and retrieving",
+                "Account connection and device retrieval are still in progress.",
                 "neutral"
               ],
               [
-                "progress",
-                0.4,
-                "Retrieving supported appliances"
+                "note",
+                "Keep HomeVerb open until the operation finishes."
               ],
               [
                 "note",
