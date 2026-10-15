@@ -17,7 +17,7 @@ Commands below ran in the isolated worktree; Flutter commands used the pinned FV
 | Check | Evidence / result |
 |---|---|
 | `fvm flutter analyze` | No issues found |
-| `fvm flutter test --reporter expanded` | Full 63-test suite passed, including two saved-inventory checks, two native account and five synthetic account checks, three cleanup regressions and all 11 prior native/controller checks and the inline-stepper interaction check. Other coverage: one extended native click scenario, three native outcome scenarios, two component checks, four compartment-overview checks, five accessibility checks, three system-contrast checks, two receipt checks, two descriptor-control checks, six dedicated appliance-layout checks, three organization checks and nine screen/interaction/reflow checks |
+| `fvm flutter test --reporter expanded` | Full 65-test suite passed, including two saved-inventory checks, two native account and five synthetic account checks, three cleanup regressions and all 11 prior native/controller checks and the inline-stepper interaction check. Other coverage: one extended native click scenario, three native outcome scenarios, two component checks, four compartment-overview checks, five accessibility checks, three system-contrast checks, two receipt checks, two descriptor-control checks, six dedicated appliance-layout checks, three organization checks nine screen/interaction/reflow checks and two Android export-channel checks |
 | `fvm flutter test integration_test/native_smoke_test.dart -d linux` under Xvfb | Actual Linux process loads the bundled Core library without a path override, discovers Mock, reads state, sets mode and verifies the returned receipt; process screenshot captured; the latest run also cancels and confirms cache cleanup and confirms history cleanup |
 | `fvm flutter build linux --release` | Linux bundle includes `libhomeverb_ffi.so`; the bundled Rust library is the checked debug build |
 | `fvm flutter build web -t lib/main_preview.dart` | Isolated preview compiles; web preview does not call native Core |
@@ -94,7 +94,7 @@ The command verifies the complete 82-file set, writes `output/flutter-verificati
 | UI-09 | No current native sharing methods; no peer networking or credential transfer. |
 | UI-10 | Dart/native foreground, cancellation and rapid-resume checks passed. Component read sequences discard late results and stop before the next read after cancellation/backgrounding. Physical Android/iOS background and termination acceptance pending. |
 | UI-11 | One registered skin, local persistence/fallback and preview implemented and tested. |
-| UI-12 | Exact diagnostics preview/export and retained receipt navigation tested. Confirmed native cache/history cleanup, cancel, busy-journal refusal, local reload and request retirement are click/native-tested. Full-profile deletion and real OS save chooser acceptance remain pending. |
+| UI-12 | Exact diagnostics preview/export and retained receipt navigation tested. Confirmed native cache/history cleanup, cancel, busy-journal refusal, local reload and request retirement are click/native-tested. Android system-document cancel/save and exact-byte read-back passed on the isolated emulator. Full-profile deletion, physical phones and other OS save choosers remain pending. |
 | UI-13 | Reference phone/wide captures, 320-width/200% text, all-state landscape/150% text and all-form simulated keyboard checks passed. Field/control semantics, all-state tap labels and reduced-motion busy indicators tested. System high contrast passes the 82 initial-viewport text-contrast checks and all-state 320-width/200% layouts. Full zh-CN wiring, offscreen contrast, remaining animation behavior, screen-reader and physical-keyboard acceptance pending. |
 | UI-14 | Linux process/bundle and Android debug/development-release APKs verified. Android 15 x86_64 journeys, cold launch, real IME and Home/resume checks passed. Physical phones, iOS, profiling and pixel equality remain unverified. |
 | UI-15 | Meiju Core and explicit read-only Flutter startup/account integration are present; real account and off-LAN acceptance remain pending. P08 preview copy follows automatic retrieval; replacement authoritative artwork and real off-LAN acceptance pending. |
@@ -528,3 +528,40 @@ separate actual-process export check on the preceding `eb72306` APK reproduced
 The earlier simulated-picker tests did not cover that platform limitation. Android
 system-document export is a confirmed remaining functional defect, not a passed
 acceptance item.
+
+
+## Android system-document export
+
+Actual clicks in the ordinary APK reproduced an Android export failure before
+this change: the desktop-oriented save-location API is not implemented by the
+Android file-selector plugin. Android now uses ACTION_CREATE_DOCUMENT with JSON
+MIME type and local-only providers, then writes the exact captured preview through
+the granted document URI. It requests no broad storage permissions. A bounded
+worker performs the write; success is returned only after the stream closes.
+Cancellation, picker failure, write failure and activity destruction are distinct
+bridge outcomes. Repeated clicks cannot open another export while one is pending.
+No report is regenerated during the picker round trip.
+
+Two channel tests verify exact preview transfer, cancel/success results and
+failure/missing-confirmation rejection. The complete 65-test Flutter suite passed;
+a subsequent native Mock click regression additionally verified that a second
+click during a pending export makes no new picker call. Its Android integration
+variant retains an explicitly simulated picker through the new channel; that
+full on-device simulated journey was not rerun in this phase. Static analysis,
+ordinary dual-ABI Android release compilation and 16 KiB ZIP alignment passed.
+
+The final ordinary APK was installed on the isolated Android 15 x86_64 emulator.
+Actual taps opened Settings, Diagnostics and the system Downloads picker. Back
+cancelled without error or a created file. A second open/save returned to the
+unchanged preview and reenabled export. Reading the resulting local file through
+adb proved all 308 bytes equal the pre-export accessibility preview, including
+the generated timestamp. Evidence and hashes are recorded in
+`output/flutter-verification/android/export-system-picker-check.json`; screenshots
+record the original failure, real system picker and successful return. The
+Settings screenshot also records the preceding row-divider correction in the
+actual Android renderer. No real account, appliance or diagnostic upload was used.
+
+The delivery APK/hash manifest was refreshed. All 82 atlas metrics remain at the
+row-geometry checkpoint: 0/82 exact, mean channel error 1.4822/255, with its seven
+recorded visual regressions unresolved. iOS document export, physical devices and
+full prototype parity remain unverified.

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:file_selector_platform_interface/file_selector_platform_interface.dart';
@@ -17,12 +18,14 @@ class SavePicker extends FileSelectorPlatform {
   String? path;
   bool fail = false;
   int calls = 0;
+  Completer<void>? pending;
   @override
   Future<FileSaveLocation?> getSaveLocation({
     List<XTypeGroup>? acceptedTypeGroups,
     SaveDialogOptions options = const SaveDialogOptions(),
   }) async {
     calls++;
+    await pending?.future;
     if (fail) throw const FileSystemException('Test save failure');
     return path == null ? null : FileSaveLocation(path!);
   }
@@ -109,6 +112,20 @@ void main({bool deviceRun = false}) {
       final originalPicker = FileSelectorPlatform.instance;
       final picker = SavePicker();
       FileSelectorPlatform.instance = picker;
+      const exportChannel = MethodChannel('dev.homeverb/document_export');
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      if (Platform.isAndroid) {
+        messenger.setMockMethodCallHandler(exportChannel, (call) async {
+          expect(call.method, 'saveDiagnostics');
+          final location = await picker.getSaveLocation();
+          if (location == null) return false;
+          await File(
+            location.path,
+          ).writeAsString(call.arguments['text'] as String);
+          return true;
+        });
+      }
       Future<void> settle() async {
         for (var i = 0; i < 200; i++) {
           await tester.pump(const Duration(milliseconds: 100));
@@ -414,8 +431,15 @@ void main({bool deviceRun = false}) {
         final exact = const JsonEncoder.withIndent(
           '  ',
         ).convert(controller.diagnostics);
+        picker.pending = Completer<void>();
+        await tap('Export Redacted Report');
+        expect(app.currentState!.exporting, isTrue);
         await tap('Export Redacted Report');
         expect(picker.calls, 1);
+        picker.pending!.complete();
+        picker.pending = null;
+        await settle();
+        expect(app.currentState!.exporting, isFalse);
         expect(controller.error, isNull);
         picker.path = '${directory.path}/report.json';
         await tap('Export Redacted Report');
@@ -531,6 +555,9 @@ void main({bool deviceRun = false}) {
       } finally {
         debugDisableShadows = originalShadows;
         FileSelectorPlatform.instance = originalPicker;
+        if (Platform.isAndroid) {
+          messenger.setMockMethodCallHandler(exportChannel, null);
+        }
         await tester.pumpWidget(const SizedBox());
         await tester.runAsync(() => core.close());
         directory.deleteSync(recursive: true);

@@ -10,6 +10,7 @@ import 'appliance_controls.dart';
 import 'account_views.dart';
 import 'compartment_controls.dart';
 import 'controller.dart';
+import 'diagnostics_export.dart';
 import 'controls.dart';
 import 'native_client.dart';
 import 'preferences.dart';
@@ -100,6 +101,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   String? formError;
   LocalCleanup? cleanupScope;
   bool editingAccountName = false;
+  bool exporting = false;
   String connectionLabel = 'Meiju account';
   bool _disposed = false;
   int navigation = 0;
@@ -673,9 +675,15 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   }
 
   Future<void> export() async {
-    if (c.diagnostics == null) return;
+    if (c.diagnostics == null || exporting) return;
+    exporting = true;
+    changed();
     final exact = const JsonEncoder.withIndent('  ').convert(c.diagnostics);
     try {
+      if (Platform.isAndroid) {
+        await exportAndroidDiagnostics(exact);
+        return;
+      }
       final location = await getSaveLocation(
         suggestedName: 'homeverb-diagnostics.json',
         acceptedTypeGroups: [
@@ -693,6 +701,9 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         'EXPORT_FAILED',
         'Could not save the previewed report.',
       );
+      changed();
+    } finally {
+      exporting = false;
       changed();
     }
   }
@@ -1217,7 +1228,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                 ? 'No report loaded.'
                 : const JsonEncoder.withIndent('  ').convert(c.diagnostics),
           ],
-          ['button', 'Export Redacted Report'],
+          ['button', 'Export Redacted Report', exporting ? 'disabled' : ''],
           ['button', 'Cancel', 'secondary'],
         ];
         break;
