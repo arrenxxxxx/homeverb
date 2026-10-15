@@ -639,9 +639,16 @@ Widget product(String key, {double size = 80}) =>
     : Center(child: Glyph(key, size: 52, color: accent));
 
 class Rows extends StatelessWidget {
-  const Rows(this.items, {required this.onAction, this.title, super.key});
+  const Rows(
+    this.items, {
+    required this.onAction,
+    this.title,
+    this.trailing = const {},
+    super.key,
+  });
   final List items;
   final String? title;
+  final Map<int, Widget> trailing;
   final ActionHandler onAction;
   @override
   Widget build(BuildContext context) => Padding(
@@ -677,6 +684,7 @@ class Rows extends StatelessWidget {
                     ['On', 'Off'].contains(value);
                 final stepper =
                     ['Target', 'Speed'].contains(label) && value.contains('+');
+                final inline = stepper || trailing.containsKey(i);
                 return InkWell(
                   key: action == null ? null : ValueKey(action),
                   onTap: action == null ? null : () => onAction(action),
@@ -685,9 +693,9 @@ class Rows extends StatelessWidget {
                     child: Padding(
                       padding: EdgeInsets.fromLTRB(
                         16,
-                        toggle || stepper ? 0 : 12,
-                        stepper ? 8 : 16,
-                        toggle || stepper ? 0 : 12,
+                        toggle || inline ? 0 : 12,
+                        inline ? 8 : 16,
+                        toggle || inline ? 0 : 12,
                       ),
                       child: LayoutBuilder(
                         builder: (context, c) {
@@ -720,62 +728,68 @@ class Rows extends StatelessWidget {
                           final combinedWidth = measurement.width + valueWidth;
                           measurement.dispose();
                           final leading = Copy(label);
-                          final trailing = stepper
-                              ? InlineStepper(
-                                  label: label,
-                                  value: value
-                                      .replaceFirst('−', '')
-                                      .replaceFirst('+', '')
-                                      .trim(),
-                                  onIncrease: action == null
-                                      ? null
-                                      : () => onAction(
-                                          'preview-step:increase:$label',
+                          final trailing =
+                              this.trailing[i] ??
+                              (stepper
+                                  ? InlineStepper(
+                                      label: label,
+                                      value: value
+                                          .replaceFirst('−', '')
+                                          .replaceFirst('+', '')
+                                          .trim(),
+                                      onIncrease: action == null
+                                          ? null
+                                          : () => onAction(
+                                              'preview-step:increase:$label',
+                                            ),
+                                      onDecrease: action == null
+                                          ? null
+                                          : () => onAction(
+                                              'preview-step:decrease:$label',
+                                            ),
+                                    )
+                                  : toggle
+                                  ? Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Copy(value, size: 12, color: muted),
+                                        const SizedBox(width: 8),
+                                        SizedBox(
+                                          height: 40,
+                                          width: 44,
+                                          child: FittedBox(
+                                            child: Switch(
+                                              value: value == 'On',
+                                              onChanged: action == null
+                                                  ? null
+                                                  : (_) => onAction(action),
+                                            ),
+                                          ),
                                         ),
-                                  onDecrease: action == null
-                                      ? null
-                                      : () => onAction(
-                                          'preview-step:decrease:$label',
+                                      ],
+                                    )
+                                  : value.contains('≡')
+                                  ? Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Copy(
+                                          value.replaceAll('≡', '').trim(),
+                                          size: 12,
+                                          color: muted,
                                         ),
-                                )
-                              : toggle
-                              ? Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Copy(value, size: 12, color: muted),
-                                    const SizedBox(width: 8),
-                                    SizedBox(
-                                      height: 40,
-                                      width: 44,
-                                      child: FittedBox(
-                                        child: Switch(
-                                          value: value == 'On',
-                                          onChanged: action == null
-                                              ? null
-                                              : (_) => onAction(action),
+                                        const SizedBox(width: 8),
+                                        const Glyph(
+                                          'drag',
+                                          size: 20,
+                                          color: muted,
                                         ),
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              : value.contains('≡')
-                              ? Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Copy(
-                                      value.replaceAll('≡', '').trim(),
-                                      size: 12,
-                                      color: muted,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    const Glyph('drag', size: 20, color: muted),
-                                  ],
-                                )
-                              : Copy(value, size: 12, color: muted);
+                                      ],
+                                    )
+                                  : Copy(value, size: 12, color: muted));
                           if ((!toggle &&
-                                  !stepper &&
+                                  !inline &&
                                   combinedWidth > c.maxWidth - 18) ||
-                              (stepper && scale > 1))
+                              (inline && scale > 1))
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [

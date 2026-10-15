@@ -269,46 +269,57 @@ class InlineStepper extends StatelessWidget {
   final VoidCallback? onIncrease, onDecrease;
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-    width: 155,
-    height: 44 * MediaQuery.textScalerOf(context).scale(12) / 12,
-    child: Stack(
-      alignment: Alignment.center,
-      children: [
-        Positioned(
-          left: 60,
-          right: 45,
-          child: Copy(value, size: 12, bold: true, center: true),
-        ),
-        for (final increase in [false, true])
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) => SizedBox(
+      width: math.min(
+        155 * math.max(1, MediaQuery.textScalerOf(context).scale(12) / 12),
+        constraints.maxWidth,
+      ),
+      height: 44 * MediaQuery.textScalerOf(context).scale(12) / 12,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
           Positioned(
-            left: increase ? 111 : 16,
-            top: 0,
-            bottom: 0,
-            width: 44,
-            child: Semantics(
-              button: true,
-              label: '${increase ? 'Increase' : 'Decrease'} $label',
-              child: InkWell(
-                onTap: increase ? onIncrease : onDecrease,
-                child: Center(
-                  child: Container(
-                    width: 30,
-                    height: 30,
-                    alignment: Alignment.center,
-                    decoration: const BoxDecoration(
-                      color: Color(0xffe6e2d8),
-                      shape: BoxShape.circle,
-                    ),
-                    child: ExcludeSemantics(
-                      child: Copy(increase ? '+' : '−', size: 16, center: true),
+            left: 60,
+            right: 45,
+            child: Copy(value, size: 12, bold: true, center: true),
+          ),
+          for (final increase in [false, true])
+            Positioned(
+              left: increase ? null : 16,
+              right: increase ? 0 : null,
+              top: 0,
+              bottom: 0,
+              width: 44,
+              child: Semantics(
+                button: true,
+                label: '${increase ? 'Increase' : 'Decrease'} $label',
+                enabled: (increase ? onIncrease : onDecrease) != null,
+                child: InkWell(
+                  onTap: increase ? onIncrease : onDecrease,
+                  child: Center(
+                    child: Container(
+                      width: 30,
+                      height: 30,
+                      alignment: Alignment.center,
+                      decoration: const BoxDecoration(
+                        color: Color(0xffe6e2d8),
+                        shape: BoxShape.circle,
+                      ),
+                      child: ExcludeSemantics(
+                        child: Copy(
+                          increase ? '+' : '−',
+                          size: 16,
+                          center: true,
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     ),
   );
 }

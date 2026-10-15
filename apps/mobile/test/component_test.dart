@@ -148,112 +148,115 @@ void main() {
     },
   );
 
-  testWidgets(
-    'click compartment-specific bounds, steps and read-only controls',
-    (tester) async {
-      tester.view.physicalSize = const Size(780, 1688);
-      tester.view.devicePixelRatio = 2;
-      WidgetController.hitTestWarningShouldBeFatal = true;
-      addTearDown(() => WidgetController.hitTestWarningShouldBeFatal = false);
-      final core = CompartmentFixture();
-      final controller = HomeController(
-        core,
-        LocalPreferences(File('/unused/preferences.json')),
-      );
-      final app = GlobalKey<NativeAppState>();
-      final catalog = (await tester.runAsync(ScreenCatalog.load))!;
-      Future<void> tap(String text) async {
-        final target = find.text(text).last;
-        await tester.ensureVisible(target);
-        await tester.tap(target);
-        await tester.pumpAndSettle();
-        expect(tester.takeException(), isNull);
-      }
+  testWidgets('click compartment-specific bounds, steps and read-only controls', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(780, 1688);
+    tester.view.devicePixelRatio = 2;
+    WidgetController.hitTestWarningShouldBeFatal = true;
+    addTearDown(() => WidgetController.hitTestWarningShouldBeFatal = false);
+    final core = CompartmentFixture();
+    final controller = HomeController(
+      core,
+      LocalPreferences(File('/unused/preferences.json')),
+    );
+    final app = GlobalKey<NativeAppState>();
+    final catalog = (await tester.runAsync(ScreenCatalog.load))!;
+    Future<void> tap(String text) async {
+      final target = find.text(text).last;
+      await tester.ensureVisible(target);
+      await tester.tap(target);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    }
 
-      try {
-        await tester.pumpWidget(
-          NativeApp(key: app, catalog: catalog, controller: controller),
-        );
-        await tester.pumpAndSettle();
-        await tap('Example refrigerator');
-        core.readGate = Completer<void>();
-        await tester.tap(find.text('freezer'));
-        await tester.pump();
-        expect(controller.busy, true);
-        await tester.tap(find.text('fridge'));
-        await tester.pump();
-        final freezerSemantics = tester
-            .widgetList<Semantics>(
-              find.ancestor(
-                of: find.text('freezer'),
-                matching: find.byType(Semantics),
-              ),
-            )
-            .where((widget) => widget.properties.selected != null)
-            .single;
-        expect(freezerSemantics.properties.selected, true);
-        core.readGate!.complete();
-        core.readGate = null;
-        await tester.pumpAndSettle();
-        expect(controller.component, 'freezer');
-        expect(find.text('-18°'), findsOneWidget);
-        await tap('-18°');
-        final input = find.byKey(const ValueKey('field:Target temperature'));
-        for (final invalid in {
-          '4': 'Maximum: -16',
-          '-18.5': 'Supported step: 1',
-        }.entries) {
-          await tester.enterText(input, invalid.key);
-          await tap('Save target');
-          expect(find.text(invalid.value), findsOneWidget);
-          expect(core.receipts, isEmpty);
-        }
-        await tester.enterText(input, '-19');
+    try {
+      await tester.pumpWidget(
+        NativeApp(key: app, catalog: catalog, controller: controller),
+      );
+      await tester.pumpAndSettle();
+      await tap('Example refrigerator');
+      expect(app.currentState!.id, 'C08');
+      // Exercise the single-component detail view independently of the overview.
+      await app.currentState!.go('C01');
+      await tester.pumpAndSettle();
+      core.readGate = Completer<void>();
+      await tester.tap(find.text('freezer'));
+      await tester.pump();
+      expect(controller.busy, true);
+      await tester.tap(find.text('fridge'));
+      await tester.pump();
+      final freezerSemantics = tester
+          .widgetList<Semantics>(
+            find.ancestor(
+              of: find.text('freezer'),
+              matching: find.byType(Semantics),
+            ),
+          )
+          .where((widget) => widget.properties.selected != null)
+          .single;
+      expect(freezerSemantics.properties.selected, true);
+      core.readGate!.complete();
+      core.readGate = null;
+      await tester.pumpAndSettle();
+      expect(controller.component, 'freezer');
+      expect(find.text('-18°'), findsOneWidget);
+      await tap('-18°');
+      final input = find.byKey(const ValueKey('field:Target temperature'));
+      for (final invalid in {
+        '4': 'Maximum: -16',
+        '-18.5': 'Supported step: 1',
+      }.entries) {
+        await tester.enterText(input, invalid.key);
         await tap('Save target');
-        expect(app.currentState!.id, 'S06');
-        expect(
-          core.calls.lastWhere(
-            (c) => c['method'] == 'execute',
-          )['command']['component_id'],
-          'freezer',
-        );
-        expect(core.targets['fridge'], 4);
-        expect(controller.observed('climate.target_temperature'), -18);
-        await tap('Refresh State');
-        expect(controller.observed('climate.target_temperature'), -19);
-        expect(core.receipts, hasLength(1));
-        await tester.tap(find.byTooltip('Back'));
-        await tester.pumpAndSettle();
-        await tap('Cancel');
-        await tap('fridge');
-        await tap('4°');
-        await tester.enterText(
-          find.byKey(const ValueKey('field:Target temperature')),
-          '4.5',
-        );
-        await tap('Save target');
-        expect(
-          core.calls.lastWhere(
-            (c) => c['method'] == 'execute',
-          )['command']['component_id'],
-          'fridge',
-        );
-        expect(core.targets['freezer'], -19);
-        core.capabilities.first['actions'] = <String, dynamic>{};
-        await tester.tap(find.byTooltip('Back'));
-        await tester.pumpAndSettle();
-        await tap('Cancel');
-        await tap('4°');
-        expect(app.currentState!.id, 'C01');
-        expect(find.text('Temperature is read-only here.'), findsOneWidget);
-        await tap('+');
-        expect(core.receipts, hasLength(2));
-        expect(app.currentState!.id, 'C01');
-      } finally {
-        await tester.pumpWidget(const SizedBox());
-        tester.view.resetPhysicalSize();
-        tester.view.resetDevicePixelRatio();
+        expect(find.text(invalid.value), findsOneWidget);
+        expect(core.receipts, isEmpty);
       }
-    },
-  );
+      await tester.enterText(input, '-19');
+      await tap('Save target');
+      expect(app.currentState!.id, 'S06');
+      expect(
+        core.calls.lastWhere(
+          (c) => c['method'] == 'execute',
+        )['command']['component_id'],
+        'freezer',
+      );
+      expect(core.targets['fridge'], 4);
+      expect(controller.observed('climate.target_temperature'), -18);
+      await tap('Refresh State');
+      expect(controller.observed('climate.target_temperature'), -19);
+      expect(core.receipts, hasLength(1));
+      await tester.tap(find.byTooltip('Back'));
+      await tester.pumpAndSettle();
+      await tap('Cancel');
+      await tap('fridge');
+      await tap('4°');
+      await tester.enterText(
+        find.byKey(const ValueKey('field:Target temperature')),
+        '4.5',
+      );
+      await tap('Save target');
+      expect(
+        core.calls.lastWhere(
+          (c) => c['method'] == 'execute',
+        )['command']['component_id'],
+        'fridge',
+      );
+      expect(core.targets['freezer'], -19);
+      core.capabilities.first['actions'] = <String, dynamic>{};
+      await tester.tap(find.byTooltip('Back'));
+      await tester.pumpAndSettle();
+      await tap('Cancel');
+      await tap('4°');
+      expect(app.currentState!.id, 'C01');
+      expect(find.text('Temperature is read-only here.'), findsOneWidget);
+      await tap('+');
+      expect(core.receipts, hasLength(2));
+      expect(app.currentState!.id, 'C01');
+    } finally {
+      await tester.pumpWidget(const SizedBox());
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    }
+  });
 }

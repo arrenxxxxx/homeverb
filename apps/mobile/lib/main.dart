@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:file_selector/file_selector.dart';
 import 'blocks.dart';
 import 'appliance_controls.dart';
+import 'compartment_controls.dart';
 import 'controller.dart';
 import 'controls.dart';
 import 'native_client.dart';
@@ -106,7 +107,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    c.core.foreground(state == AppLifecycleState.resumed);
+    c.setForeground(state == AppLifecycleState.resumed);
   }
 
   @override
@@ -114,6 +115,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     _disposed = true;
     WidgetsBinding.instance.removeObserver(this);
     c.removeListener(changed);
+    c.cancelPending();
     c.core.close();
     for (final field in fields.values) {
       field.dispose();
@@ -133,8 +135,8 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
 
   Future<void> go(String target, {bool back = false}) async {
     if (!mounted) return;
-    final deviceHistory = ['C01', 'D06'].contains(id);
-    c.core.cancelAll();
+    final deviceHistory = ['C01', 'C08', 'D06'].contains(id);
+    c.cancelPending();
     setState(() {
       navigation++;
       receiptParents.clear();
@@ -208,6 +210,27 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       await go('C10');
       return;
     }
+    if (label.startsWith('open-component:') ||
+        label.startsWith('edit-component:')) {
+      final componentId = Uri.decodeComponent(
+        label.substring(label.indexOf(':') + 1),
+      );
+      final epoch = navigation;
+      if (await c.selectComponent(componentId) &&
+          mounted &&
+          epoch == navigation) {
+        final edit = label.startsWith('edit-component:');
+        final setter = c.capability('climate')?['actions']?['set'] as Json?;
+        if (edit && setter != null && !hasDirectTarget(setter)) {
+          actionCapability = c.capability('climate');
+          actionName = 'set';
+          await go('C10');
+        } else {
+          await go(edit ? 'C14' : 'C01');
+        }
+      }
+      return;
+    }
     if (label.startsWith('component:')) {
       if (c.busy) return;
       clearFields();
@@ -241,7 +264,13 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         }
         await finish(c.execute('power', 'set', {'state': !state}), 'S06');
       } else {
-        await go(label.startsWith('menu:') ? 'D05' : 'C01');
+        await go(
+          label.startsWith('menu:')
+              ? 'D05'
+              : c.hasCompartmentOverview
+              ? 'C08'
+              : 'C01',
+        );
       }
       return;
     }
@@ -250,6 +279,8 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         await c.refreshCards();
       else if (id == 'S06')
         await c.refreshReceipt();
+      else if (id == 'C08')
+        await c.refreshComponents();
       else
         await c.refresh();
       return;
@@ -808,6 +839,11 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           ['button', 'Recent Operations', 'secondary'],
         ];
         break;
+      case 'C08':
+        ui['header'] = device?['alias'] ?? 'Device';
+        ui['subtitle'] = '';
+        b = [];
+        break;
       case 'C02':
         b = [
           [
@@ -823,7 +859,9 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         ];
         break;
       case 'C10':
-        ui['base'] = 'C01';
+        ui['base'] = history.isNotEmpty && history.last == 'C08'
+            ? 'C08'
+            : 'C01';
         ui['overlay'] = 'sheet';
         ui['header'] = actionName == null
             ? 'Action unavailable'
@@ -877,6 +915,9 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
               ];
         break;
       case 'C14':
+        ui['base'] = history.isNotEmpty && history.last == 'C08'
+            ? 'C08'
+            : 'C01';
         b = [
           [
             'note',
@@ -1040,6 +1081,18 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             ? c.filter
             : c.roomName(c.filter),
       );
+    if (id == 'C08') {
+      return CompartmentControls(
+        controller: c,
+        onAction: action,
+        onTarget: (component, value) => finish(
+          c.execute('climate', 'set', {
+            'target_temperature': value,
+          }, componentId: component),
+          'S06',
+        ),
+      );
+    }
     if (id == 'C01' && applianceFamily(c) != null) {
       final epoch = navigation;
       return ApplianceControls(
