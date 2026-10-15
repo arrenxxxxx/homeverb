@@ -17,7 +17,7 @@ Commands below ran in the isolated worktree; Flutter commands used the pinned FV
 | Check | Evidence / result |
 |---|---|
 | `fvm flutter analyze` | No issues found |
-| `fvm flutter test --reporter expanded` | Full 61-test suite passed, including two saved-inventory checks, two native account and five synthetic account checks, three cleanup regressions and all 11 prior native/controller checks and the inline-stepper interaction check. Other coverage: one extended native click scenario, three native outcome scenarios, two component checks, four compartment-overview checks, five accessibility checks, three system-contrast checks, two receipt checks, two descriptor-control checks, six dedicated appliance-layout checks, three organization checks and seven screen/interaction/reflow checks |
+| `fvm flutter test --reporter expanded` | Full 63-test suite passed, including two saved-inventory checks, two native account and five synthetic account checks, three cleanup regressions and all 11 prior native/controller checks and the inline-stepper interaction check. Other coverage: one extended native click scenario, three native outcome scenarios, two component checks, four compartment-overview checks, five accessibility checks, three system-contrast checks, two receipt checks, two descriptor-control checks, six dedicated appliance-layout checks, three organization checks and nine screen/interaction/reflow checks |
 | `fvm flutter test integration_test/native_smoke_test.dart -d linux` under Xvfb | Actual Linux process loads the bundled Core library without a path override, discovers Mock, reads state, sets mode and verifies the returned receipt; process screenshot captured; the latest run also cancels and confirms cache cleanup and confirms history cleanup |
 | `fvm flutter build linux --release` | Linux bundle includes `libhomeverb_ffi.so`; the bundled Rust library is the checked debug build |
 | `fvm flutter build web -t lib/main_preview.dart` | Isolated preview compiles; web preview does not call native Core |
@@ -468,3 +468,31 @@ and cold-started on the isolated emulator. The final card/shadow screenshot was
 inspected, and the sampled gradient region remained free of anomalous black
 pixels. The local delivery APK/hash manifest and
 `shadow-alignment-release-home.png` were updated.
+
+
+## Long device names and room labels
+
+Fixed-height device cards now truncate long names, room labels, readings and
+captions within their existing text areas. The information-page hero also limits
+its fixed-height name and room lines. Large-text layouts continue to flow with
+full text. Accessibility semantics retain the complete name and room, and the
+information rows continue to display the full saved alias.
+
+A 73-character fictional alias exposed overlapping text in a compact card; actual
+Android input additionally exposed overlap in the information hero. Two regression
+checks cover card widths of 350 and 300 logical pixels, 100% and 200% text, full
+semantics and exact card-click dispatch, plus the information heading at 300
+logical pixels with both text scales. The full 63-test suite and static analysis
+passed. All 82 screenshot metrics are unchanged from the preceding checkpoint:
+mean channel error 1.4999/255 and **0/82 exact**. Original references are unchanged.
+
+The ordinary Android release rebuilt, passed 16 KiB ZIP alignment and installed
+on the isolated Android 15 emulator. Actual keyboard input saved the fictional
+alias; force-stop and cold restart retained it. Final-build taps opened the exact
+renamed card and its information page. Inspected screenshots show separated name
+and room lines, and the information row/accessibility tree retain the full alias.
+The final hero name ends at physical y=806 and the room begins at y=841. Captures
+are `long-label-release-home.png`, `long-label-release-detail.png` and
+`long-label-release-info.png` under `output/flutter-verification/android/`.
+The local delivery APK and hash manifest were refreshed. No real account or
+appliance was used, and native operation semantics are unchanged.

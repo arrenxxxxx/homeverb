@@ -81,12 +81,14 @@ class Copy extends StatelessWidget {
     this.color = ink,
     this.bold = false,
     this.center = false,
+    this.maxLines,
     super.key,
   });
   final String text;
   final double size;
   final Color color;
   final bool bold, center;
+  final int? maxLines;
   @override
   Widget build(BuildContext context) {
     final textSize = MediaQuery.highContrastOf(context)
@@ -124,6 +126,8 @@ class Copy extends StatelessWidget {
         child: Text(
           text,
           textAlign: center ? TextAlign.center : TextAlign.start,
+          maxLines: maxLines,
+          overflow: maxLines == null ? null : TextOverflow.ellipsis,
           textHeightBehavior: const TextHeightBehavior(
             applyHeightToFirstAscent: false,
             applyHeightToLastDescent: false,

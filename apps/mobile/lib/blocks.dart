@@ -291,13 +291,19 @@ class Blocks extends StatelessWidget {
                       top: 119,
                       left: 10,
                       right: 10,
-                      child: Copy(b[2], size: 23, bold: true, center: true),
+                      child: Copy(
+                        b[2],
+                        size: 23,
+                        bold: true,
+                        center: true,
+                        maxLines: 1,
+                      ),
                     ),
                     Positioned(
                       top: 158,
                       left: 20,
                       right: 20,
-                      child: Copy(b[3], size: 12, color: muted),
+                      child: Copy(b[3], size: 12, color: muted, maxLines: 1),
                     ),
                   ],
                 ),
@@ -666,6 +672,7 @@ Widget product(String key, {double size = 80}) {
             : lower;
         return rounded / ratio;
       }
+
       final width = pixel(fitted.destination.width);
       final height = pixel(fitted.destination.height);
       // Keep the image bounds on physical pixels, as in the source artwork.
@@ -1211,6 +1218,7 @@ class DeviceTile extends StatelessWidget {
                               top: 23,
                               child: Copy(
                                 d[0],
+                                maxLines: 2,
                                 size: 19,
                                 bold: true,
                                 color: color,
@@ -1220,7 +1228,12 @@ class DeviceTile extends StatelessWidget {
                               left: 138,
                               right: 14,
                               top: 77,
-                              child: Copy(d[1], size: 14, color: secondary),
+                              child: Copy(
+                                d[1],
+                                size: 14,
+                                color: secondary,
+                                maxLines: 1,
+                              ),
                             ),
                             Positioned(
                               left: 138,
@@ -1228,6 +1241,7 @@ class DeviceTile extends StatelessWidget {
                               top: 116,
                               child: Copy(
                                 d[2],
+                                maxLines: 1,
                                 size: 26,
                                 bold: true,
                                 color: color,
@@ -1237,23 +1251,49 @@ class DeviceTile extends StatelessWidget {
                               left: 138,
                               right: 14,
                               top: 154,
-                              child: Copy(d[3], size: 14, color: secondary),
+                              child: Copy(
+                                d[3],
+                                size: 14,
+                                color: secondary,
+                                maxLines: 1,
+                              ),
                             ),
                           ] else ...[
                             textAt(
                               117,
-                              Copy(d[0], size: 15, bold: true, color: color),
+                              Copy(
+                                d[0],
+                                size: 15,
+                                bold: true,
+                                color: color,
+                                maxLines: 1,
+                              ),
                             ),
-                            textAt(143, Copy(d[1], size: 11, color: secondary)),
+                            textAt(
+                              143,
+                              Copy(
+                                d[1],
+                                size: 11,
+                                color: secondary,
+                                maxLines: 1,
+                              ),
+                            ),
                             textAt(
                               compactHeight - 59,
-                              Copy(d[2], size: 24, bold: true, color: color),
+                              Copy(
+                                d[2],
+                                size: 24,
+                                bold: true,
+                                color: color,
+                                maxLines: 1,
+                              ),
                               right: 50,
                             ),
                             textAt(
                               compactHeight - 26,
                               Copy(
                                 cached ? 'Cached · 2h ago' : d[3],
+                                maxLines: 1,
                                 size: 10,
                                 color: secondary,
                               ),

@@ -5,6 +5,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:homeverb_mobile/screens.dart';
+import 'package:homeverb_mobile/blocks.dart';
+import 'package:homeverb_mobile/skin.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -305,5 +307,123 @@ void main() {
     }
     tester.view.resetPhysicalSize();
     tester.view.resetDevicePixelRatio();
+  });
+
+  testWidgets('long card names retain semantics without covering readings', (
+    tester,
+  ) async {
+    const alias =
+        'Upstairs bedroom climate controller with a long label for visiting family';
+    const room = 'North upstairs bedroom and home office beside the landing';
+    final semantics = tester.ensureSemantics();
+    tester.view.physicalSize = const Size(780, 1688);
+    tester.view.devicePixelRatio = 2;
+    try {
+      for (final (width, scale) in [(350.0, 1.0), (300.0, 1.0), (300.0, 2.0)]) {
+        final actions = <String>[];
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: windowTheme(),
+            home: Scaffold(
+              body: MediaQuery(
+                data: MediaQueryData(
+                  size: const Size(390, 844),
+                  devicePixelRatio: 2,
+                  textScaler: TextScaler.linear(scale),
+                ),
+                child: SingleChildScrollView(
+                  child: SizedBox(
+                    width: width,
+                    child: DeviceGrid(
+                      keys: const ['ac'],
+                      data: const [
+                        [alias, room, '24°C', 'Cooling'],
+                      ],
+                      onAction: actions.add,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        expect(tester.getSize(find.byType(DeviceGrid)).width, width);
+        final titleBox = tester.getRect(find.text(alias));
+        final roomBox = tester.getRect(find.text(room));
+        final valueBox = tester.getRect(find.text('24°C'));
+        expect(
+          titleBox.bottom,
+          lessThanOrEqualTo(roomBox.top),
+          reason: 'Name covers room at width $width and scale $scale',
+        );
+        expect(
+          roomBox.bottom,
+          lessThanOrEqualTo(valueBox.top),
+          reason: 'Room covers reading at width $width and scale $scale',
+        );
+        expect(
+          find.bySemanticsLabel(RegExp(RegExp.escape('Open $alias'))),
+          findsOneWidget,
+        );
+        expect(
+          find.bySemanticsLabel(RegExp(RegExp.escape(room))),
+          findsOneWidget,
+        );
+        await tester.ensureVisible(find.text(alias));
+        await tester.tap(find.text(alias));
+        expect(actions, ['open:ac']);
+      }
+    } finally {
+      semantics.dispose();
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    }
+  });
+  testWidgets('long information headings retain semantics without overlap', (
+    tester,
+  ) async {
+    const alias =
+        'Upstairs bedroom climate controller with a long label for visiting family';
+    const room = 'North upstairs bedroom and home office beside the landing';
+    final semantics = tester.ensureSemantics();
+    try {
+      for (final scale in [1.0, 2.0]) {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: windowTheme(),
+            home: Scaffold(
+              body: MediaQuery(
+                data: MediaQueryData(textScaler: TextScaler.linear(scale)),
+                child: SingleChildScrollView(
+                  child: SizedBox(
+                    width: 300,
+                    child: Blocks(
+                      const [
+                        ['hero', 'ac', alias, room],
+                      ],
+                      onAction: (_) {},
+                      fields: {},
+                      choices: {},
+                      values: {},
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        final titleBox = tester.getRect(find.text(alias));
+        final roomBox = tester.getRect(find.text(room));
+        expect(titleBox.bottom, lessThanOrEqualTo(roomBox.top));
+        expect(find.bySemanticsLabel(alias), findsOneWidget);
+        expect(find.bySemanticsLabel(room), findsOneWidget);
+      }
+    } finally {
+      semantics.dispose();
+    }
   });
 }
