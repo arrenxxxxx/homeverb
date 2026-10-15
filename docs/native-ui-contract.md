@@ -563,6 +563,21 @@ Physical acceptance must check that the vendor encoder preserves power, mode and
 temperature without that context. No physical fan control has been tested,
 including away from home.
 
+## Refrigerator read-only presentation
+
+The experimental Meiju `BCD-600WUFIPZM(E)` descriptor supplies `fridge` and
+`freezer` components on one device. Render their available power, current and
+target temperature observations separately. Missing readings remain unknown;
+cloud values retain unproven freshness. A readable target is not an editable
+target: this descriptor has no setting or mode actions. Build controls only from
+admitted component action schemas, without a brand/model switch in the UI.
+
+Keep out-of-range observations visible. Neither prototype ranges, community
+defaults nor manual setpoint bounds are runtime write permissions. The
+[model evidence and write gate](development/05-midea.md#refrigerator-write-evidence)
+remain separate from this available read path. Native API 1.14.0, methods and
+startup grants are unchanged by this clarification.
+
 ## Scoped experimental AC mode activation startup
 
 API 1.11.0 adds independent `meiju_mode_grants` under

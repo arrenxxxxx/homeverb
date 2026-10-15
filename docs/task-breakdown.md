@@ -29,6 +29,11 @@ Use the [progressive guides](index.md). UI development can proceed against the n
 
 Research and offline contract/protocol implementation can proceed before exact model details arrive; account/region evidence gates real authentication and model/firmware evidence gates physical compatibility claims. The inspected refrigerator LAN setter is empty, while cloud mappings include compartment temperature settings; assess those routes separately. Mobile needs its own secure-store implementation. Preserve specific blockers for live access and mobile tooling. Authorization sharing remains gated by ADR-0008.
 
+The selected refrigerator's [write evidence review](development/05-midea.md#refrigerator-write-evidence)
+establishes model-specific manual bounds but leaves encoder preservation and
+temperature step unproven. Keep its existing reads available while researching
+that gate; Flutter can implement the read-only compartment view now.
+
 Each completion record names the task, changed interfaces, commands actually run, results, skipped checks, compatibility effects, and external actions. All such records are English.
 
 The owner requires one commit and remote push per completed, verified phase. The existing Mock MVP is committed as the reusable baseline. Independent Flutter work starts from the [native UI contract](native-ui-contract.md); frontend development must not wait for real-device acceptance to implement the available room/card/control flows. Subsequent account/cloud work adds reviewed contracts and implementation in separate verified phases.

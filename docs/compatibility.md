@@ -734,3 +734,19 @@ Validation performed on October 16, 2026:
 No real account or appliance was accessed. Physical/off-LAN dishwasher operation,
 remaining product mappings, refrigerator writes, Flutter consent and mobile
 acceptance remain outstanding; this stage does not complete T10 or the MVP goal.
+
+## Refrigerator evidence review and presentation correction
+
+On October 16, 2026, the [refrigerator review](development/05-midea.md#refrigerator-write-evidence)
+compared the exact-model manufacturer manual with the pinned community mapping
+and centralized setter. This documents a write-admission blocker, not implemented
+refrigerator control. Existing read descriptors and observation ranges are unchanged.
+
+The presentation helper now resolves numeric observation labels by exact property
+and value, so the existing AC code 102 displays Auto. Unknown codes still use
+locale number formatting; typed values and evidence remain intact. A regression
+test reproduced the numeric-label failure before the fix. All six presentation
+tests and 29 Python tooling tests passed; documentation, contracts and repository
+hygiene checks passed. These changes do not alter the native API, C exports,
+SQLite schema or protected account format. No Rust/Android build, Flutter/mobile
+runtime or real account/device test was performed for these changes.

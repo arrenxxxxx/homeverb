@@ -37,6 +37,44 @@ The projects have separate histories and cloud/LAN paths. Check their feature se
 
 Select the adapter and message variant using protocol evidence. The same implementation can serve Midea or Hualing devices using the same protocol, but a brand label is insufficient evidence. Midea and Hualing using one protocol family do not satisfy the separate two-protocol release gate.
 
+## Refrigerator write evidence
+
+Reviewed on October 16, 2026. `BCD-600WUFIPZM(E)` remains read-only in HomeVerb.
+The [official product page](https://www.midea.cn/detail/index?itemid=10000000004006921296985)
+links the [manufacturer manual](https://dsdcp.smartmidea.net/mcsp/prod/20250825/ef3a35a69dac4982bfad119f0b8150d2.pdf),
+document `16131000031244`, drawing `SMS-2810`. Its cover names the exact model
+alongside `BCD-600WUFGPZM`; distinguish their model-specific instructions.
+
+| Evidence | Established fact | Remaining gap |
+|---|---|---|
+| Manual, printed pages 12-13 (PDF page 9) | Ordinary fridge targets are 2-8 Celsius; ordinary freezer targets are -24 to -16 Celsius. Quick-cool/quick-freeze are separate modes | The temperature paragraph does not establish a wire step or cloud encoding |
+| Manual, printed pages 14-15 (PDF page 10) | The selected model uses Meiju to activate deep cooling | No reviewed wire-field correspondence to a deep-cooling action |
+| Pinned [CA mapping][ca-cloud-source] | Only a family default; generic fridge range -10 to 10 and freezer range -30 to -10, with half-degree precision metadata | No exact-model/product override; these defaults must not become this model's writable contract |
+| Pinned [device control implementation][cloud-device-source] | Setters copy 16 centralized fields from retained attributes, overlay requested changes and supply status to the encoder | No evidence that a one-field command preserves other settings, or that copied cloud state is current |
+
+The centralized fields cover eight modes (`freezing_mode`, `intelligent_mode`,
+`energy_saving_mode`, `holiday_mode`, `moisturize_mode`, `preservation_mode`,
+`acme_freezing_mode`, `variable_mode`), four power fields (`storage_power`,
+`freezing_power`, `left_flexzone_power`, `right_flexzone_power`) and the matching
+four temperature fields. This list is protocol research, not a declaration that
+all those zones or modes exist on the selected model. Similar names do not prove
+that a manual mode equals a particular wire field.
+
+The write gate is **blocked: exact-model encoder preservation and temperature
+step are unproven**. Continue with public model/codec evidence; do not derive
+control defaults from the manual, enable the generic family mapping, or copy
+stale cloud observations into writes. Before adding an action, establish the
+protected product selector, exact input domain and behavior of omitted settings,
+then add positive/negative offline fixtures. Physical preservation and off-LAN
+acceptance require a separately authorized test. No account or appliance access
+was performed for this review.
+
+Existing temperature observations must remain visible even outside ordinary
+setpoint bounds. The manual does not justify narrowing readable properties,
+clamping values, manufacturing mode observations or adding UI sliders. The
+[native handoff](../native-ui-contract.md#refrigerator-read-only-presentation)
+describes the currently available experience.
+
 ## Account authorization and automatic device retrieval
 
 The inspected [Meiju cloud client][meiju-cloud-source] supplies the following source evidence. These are community implementations of app-facing APIs, not proof of official public-client admission or stable public API contracts.
@@ -254,6 +292,7 @@ CloudState retains account/appliance identity privately and has redacted Debug w
 
 [cloud-integration]: https://github.com/sususweet/midea_auto_cloud/tree/ce0c4b88224def0f6b53714312c19f71aa9c2a50
 [meiju-cloud-source]: https://github.com/sususweet/midea_auto_cloud/blob/ce0c4b88224def0f6b53714312c19f71aa9c2a50/custom_components/midea_auto_cloud/core/cloud.py
+[cloud-device-source]: https://github.com/sususweet/midea_auto_cloud/blob/ce0c4b88224def0f6b53714312c19f71aa9c2a50/custom_components/midea_auto_cloud/core/device.py
 [ca-cloud-source]: https://github.com/sususweet/midea_auto_cloud/blob/ce0c4b88224def0f6b53714312c19f71aa9c2a50/custom_components/midea_auto_cloud/device_mapping/T0xCA.py
 [ac-cloud-source]: https://github.com/sususweet/midea_auto_cloud/blob/ce0c4b88224def0f6b53714312c19f71aa9c2a50/custom_components/midea_auto_cloud/device_mapping/T0xAC.py
 [e1-cloud-source]: https://github.com/sususweet/midea_auto_cloud/blob/ce0c4b88224def0f6b53714312c19f71aa9c2a50/custom_components/midea_auto_cloud/device_mapping/T0xE1.py
