@@ -421,7 +421,52 @@ void main() {
         expect(find.byType(LicensePage), findsOneWidget);
         app.currentState!.navigator.currentState!.pop();
         await settle();
-        for (final id in ['P01', 'P02', 'H01', 'H05', 'S04', 'S09']) {
+        await route('S04');
+        final receiptsBeforeCleanup = controller.history.length;
+        expect(controller.snapshots, isNotEmpty);
+        await tap('Clear Cached State');
+        expect(app.currentState!.id, 'S09');
+        await tap('Cancel');
+        expect(controller.snapshots, isNotEmpty);
+        expect(controller.cleanupCount, isNull);
+        await tap('Clear Cached State');
+        await tap('Confirm Clear');
+        expect(app.currentState!.id, 'S04');
+        expect(controller.snapshots, isEmpty);
+        expect(controller.snapshot, isNull);
+        expect(controller.cleanupCount, greaterThan(0));
+        expect(controller.history, hasLength(receiptsBeforeCleanup));
+        final retired = controller.history.first['request_id'];
+        await tap('Clear Recent Operations');
+        expect(
+          find.textContaining('including uncertain outcomes'),
+          findsOneWidget,
+        );
+        await tap('Cancel');
+        expect(controller.history, isNotEmpty);
+        await tap('Clear Recent Operations');
+        await tap('Confirm Clear');
+        expect(controller.history, isEmpty);
+        expect(controller.receipt, isNull);
+        expect(controller.batchResult, isNull);
+        expect(controller.cards, hasLength(1));
+        expect(controller.rooms, hasLength(1));
+        await tester.runAsync(() async {
+          await expectLater(
+            core.call('get_execution', {'request_id': retired}),
+            throwsA(
+              isA<NativeFailure>().having(
+                (e) => e.code,
+                'code',
+                'REQUEST_RETIRED',
+              ),
+            ),
+          );
+        });
+        await tap('Remove Local Data');
+        expect(find.text('Full cleanup unavailable'), findsOneWidget);
+        expect(find.text('Confirm Clear'), findsNothing);
+        for (final id in ['P01', 'P02', 'H01', 'H05', 'S09']) {
           await route(id);
           expect(
             find

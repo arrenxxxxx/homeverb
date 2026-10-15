@@ -1,6 +1,6 @@
 # HomeVerb Flutter application
 
-The native application embeds Core using native UI contract 1.0. The separate visual preview contains fictional Window Light fixtures and never opens Core. Account authentication, nearby authorization sharing and destructive cleanup remain unavailable in the native contract. Their preview states are not live features.
+The native application embeds Core using native UI contract 1.9. The separate visual preview contains fictional Window Light fixtures and never opens Core. This UI currently opens an isolated Mock profile; Meiju account input and Android startup wiring remain pending. Cache and history clearing are connected with separate confirmations. Nearby sharing and full-profile deletion remain unavailable. Their preview states are not live features.
 
 ## Development
 
@@ -28,7 +28,7 @@ build/linux/x64/release/bundle/homeverb_mobile
 
 The Linux CMake install step packages `target/debug/libhomeverb_ffi.so` in the bundle's `lib` directory. Set CMake `HOMEVERB_NATIVE_LIBRARY` to use another build. Keep the whole bundle together. A development override is available through `--dart-define=HOMEVERB_LIBRARY=/absolute/path/to/libhomeverb_ffi.so`. Linux builds require Flutter's standard CMake, Ninja, Clang and GTK development dependencies.
 
-The explicit Mock host permits fictional writes only. Native metadata and presentation preferences live in the OS application support directory. Opening a page does not discover or refresh devices. Use Add Device to discover the Mock appliance and Refresh State to read it. Device menu > Select Devices offers explicit batch power actions; results remain per item. Unsupported or ambiguous capabilities fail admission before execution.
+The explicit Mock host permits fictional writes only. Native metadata and presentation preferences live in the OS application support directory. Opening a page does not discover or refresh devices. Local Data offers cache/history cleanup after reviewing each scope. History clearing also removes uncertain receipt details while retaining request-ID replay protection. Interrupted cleanup requires local reloading before an explicit retry; the UI never deletes database files. Use Add Device to discover the Mock appliance and Refresh State to read it. Device menu > Select Devices offers explicit batch power actions; results remain per item. Unsupported or ambiguous capabilities fail admission before execution.
 
 The isolated visual preview runs independently:
 

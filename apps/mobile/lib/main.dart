@@ -91,6 +91,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   Json? actionCapability;
   String? actionName;
   String? formError;
+  LocalCleanup? cleanupScope;
   bool _disposed = false;
   int navigation = 0;
   @override
@@ -150,6 +151,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       await c.savePreferences({'root': target});
     if (target == 'S05') await c.loadHistory(deviceOnly: deviceHistory);
     if (target == 'S07') await c.loadDiagnostics();
+    if (target == 'S04' && c.cleanupNeedsReload) await c.initialize();
   }
 
   Future<void> finish(Future<bool> work, String destination) async {
@@ -456,6 +458,19 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       );
       return;
     }
+    if (label == 'Clear Cached State' || label == 'Clear Recent Operations') {
+      cleanupScope = label == 'Clear Cached State'
+          ? LocalCleanup.cachedState
+          : LocalCleanup.executionHistory;
+      await go('S09');
+      return;
+    }
+    if (label == 'Confirm Clear' && cleanupScope != null) {
+      receiptParents.clear();
+      await finish(c.clearLocalData(cleanupScope!), 'S04');
+      return;
+    }
+    if (label == 'Remove Local Data') cleanupScope = null;
     if (label == 'Export Redacted Report') {
       await export();
       return;
@@ -553,7 +568,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     }
     c.error = NativeFailure(
       'UNAVAILABLE',
-      'This operation is not exposed by native contract 1.0.',
+      'This operation is unavailable in the current native session.',
     );
     changed();
   }
@@ -594,8 +609,8 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           'status',
           'Unavailable',
           id.startsWith('P')
-              ? 'Platform authorization is not available in native contract 1.0.'
-              : 'Nearby sharing is not available in native contract 1.0.',
+              ? 'Platform authorization is unavailable in this Mock session. Meiju account input is not connected to the UI yet.'
+              : 'Nearby sharing is unavailable in the current native contract.',
           'warning',
         ],
         [
@@ -966,16 +981,84 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         ];
         break;
       case 'S04':
-      case 'S09':
         b = [
+          if (c.cleanupCount != null)
+            [
+              'status',
+              'Local cleanup completed',
+              '${c.cleanupCount} ${c.cleanupResult == LocalCleanup.cachedState ? 'saved snapshots' : 'detailed receipts'} removed. New operations can add data again.',
+              'neutral',
+            ],
           [
-            'status',
-            'Cleanup unavailable',
-            'Native contract 1.0 has no safe cleanup methods. Execution journals and replay safeguards remain intact.',
-            'warning',
+            'note',
+            'Choose what to clear. Accounts, credentials, devices, rooms and preferences stay on this installation.',
           ],
-          ['button', 'Back', 'secondary'],
+          if (c.supports('clear_cached_state'))
+            ['button', 'Clear Cached State', 'secondary'],
+          if (c.supports('clear_execution_history'))
+            ['button', 'Clear Recent Operations', 'secondary'],
+          if (!c.supports('clear_cached_state') ||
+              !c.supports('clear_execution_history'))
+            ['note', 'Some cleanup actions require a native library update.'],
+          if (c.cleanupNeedsReload) ...[
+            [
+              'note',
+              'Cleanup was not fully confirmed. Reload local data before deciding what to do next.',
+            ],
+            ['button', 'Reload local data', 'secondary'],
+          ],
+          ['button', 'Remove Local Data', 'secondary'],
+          [
+            'note',
+            'Full-profile deletion is unavailable. Backups and storage pages are not securely erased.',
+          ],
         ];
+        break;
+      case 'S09':
+        ui['header'] = cleanupScope == LocalCleanup.cachedState
+            ? 'Clear cached state?'
+            : cleanupScope == LocalCleanup.executionHistory
+            ? 'Clear recent operations?'
+            : 'Remove local data';
+        b = cleanupScope == null
+            ? [
+                [
+                  'status',
+                  'Full cleanup unavailable',
+                  'Full-profile deletion is not available. Use the separate cache or history action.',
+                  'warning',
+                ],
+                ['button', 'Back', 'secondary'],
+              ]
+            : [
+                [
+                  'status',
+                  'Review the scope',
+                  cleanupScope == LocalCleanup.cachedState
+                      ? 'Remove saved device and component readings from this installation. Missing readings become unknown. No device refresh will start.'
+                      : 'Remove detailed operation receipts, including uncertain outcomes and their evidence. Request IDs remain reserved: clearing history never permits replay. Active operations prevent cleanup.',
+                  'warning',
+                ],
+                [
+                  'note',
+                  cleanupScope == LocalCleanup.cachedState
+                      ? 'Operation receipts are retained.'
+                      : 'Saved device readings are retained.',
+                ],
+                [
+                  'note',
+                  'Accounts, credentials, devices, rooms, preferences and permissions remain. This does not securely erase backups or storage pages.',
+                ],
+                if (c.cleanupNeedsReload) ...[
+                  [
+                    'note',
+                    'Reload local data before confirming another cleanup.',
+                  ],
+                  ['button', 'Reload local data', 'secondary'],
+                ] else
+                  ['button', 'Confirm Clear'],
+                ['button', 'Cancel', 'secondary'],
+              ];
         break;
       case 'S10':
         b = [
@@ -1023,7 +1106,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           [
             'status',
             'Mock tested',
-            'Linux native contract 1.0. Real platforms and mobile secure stores remain unavailable.',
+            'Core contract 1.9 includes experimental Meiju reads and Android native storage. This UI currently opens Mock; account input and phone acceptance remain pending.',
             'neutral',
           ],
           [

@@ -1,6 +1,6 @@
 # Flutter implementation verification
 
-Date: October 15, 2026. Baseline: native UI contract 1.0.0 and the approved Window Light atlas. This is an implementation checkpoint, not completion of the owner's pixel-identical acceptance requirement.
+Date: October 15, 2026. Baseline: native UI contract 1.9.0 (pinned Core `00d44b7`) and the approved Window Light atlas. This is an implementation checkpoint, not completion of the owner's pixel-identical acceptance requirement.
 
 ## Implemented scope
 
@@ -8,7 +8,7 @@ The application pins Flutter 3.47.7 through FVM 4.3.1. It loads the native libra
 
 The native Mock path provides first launch, three roots, local search, room filters, room create/rename/reorder/delete, atomic assignment, alias/pin/order, explicit discovery and reads, component-described climate controls, explicit selected-device power batches, exact receipts/history, local route/name/skin preferences and allowlisted diagnostics preview/export. Loading and failed local reads do not display fictional preview cards. Modal backgrounds use the selected native device state.
 
-All 82 atlas states have native-widget implementations in an isolated, visibly labelled preview. The 198 event buttons in that preview simulate atlas branches. They are **not 198 successful native operations**. Real accounts, authorization, sharing, identity merge and cleanup remain unavailable under the owner's approved current-contract scope. Non-climate native forms consume described scalar properties/actions. A selected component with one light, fan, media, sensor or cycle family now uses a dedicated Window Light layout; mixed families retain the descriptor list. These isolated fixtures are not registered native adapters or physical-device support. The multi-compartment overview now groups exact component readings and target controls. Strict layout equality remains pending.
+All 82 atlas states have native-widget implementations in an isolated, visibly labelled preview. The 198 event buttons in that preview simulate atlas branches. They are **not 198 successful native operations**. Meiju accounts and authorization are now callable in Core but their Flutter input remains pending. Nearby sharing, identity merge and full-profile deletion remain unavailable. Native cache/history cleanup is implemented with separate scope confirmations. Non-climate native forms consume described scalar properties/actions. A selected component with one light, fan, media, sensor or cycle family now uses a dedicated Window Light layout; mixed families retain the descriptor list. These isolated fixtures are not registered native adapters or physical-device support. The multi-compartment overview now groups exact component readings and target controls. Strict layout equality remains pending.
 
 ## Executed verification
 
@@ -17,15 +17,15 @@ Commands below ran in the isolated worktree; Flutter commands used the pinned FV
 | Check | Evidence / result |
 |---|---|
 | `fvm flutter analyze` | No issues found |
-| `fvm flutter test --reporter expanded` | Full 49-test suite passed, including all 11 native/controller checks and the inline-stepper interaction check. Other coverage: one extended native click scenario, three native outcome scenarios, two component checks, four compartment-overview checks, five accessibility checks, three system-contrast checks, two receipt checks, two descriptor-control checks, six dedicated appliance-layout checks, three organization checks and seven screen/interaction/reflow checks |
-| `fvm flutter test integration_test/native_smoke_test.dart -d linux` under Xvfb | Actual Linux process loads the bundled Core library without a path override, discovers Mock, reads state, sets mode and verifies the returned receipt; process screenshot captured |
+| `fvm flutter test --reporter expanded` | Full 52-test suite passed, including three new cleanup regressions and all 11 prior native/controller checks and the inline-stepper interaction check. Other coverage: one extended native click scenario, three native outcome scenarios, two component checks, four compartment-overview checks, five accessibility checks, three system-contrast checks, two receipt checks, two descriptor-control checks, six dedicated appliance-layout checks, three organization checks and seven screen/interaction/reflow checks |
+| `fvm flutter test integration_test/native_smoke_test.dart -d linux` under Xvfb | Actual Linux process loads the bundled Core library without a path override, discovers Mock, reads state, sets mode and verifies the returned receipt; process screenshot captured; the latest run also cancels and confirms cache cleanup and confirms history cleanup |
 | `fvm flutter build linux --release` | Linux bundle includes `libhomeverb_ffi.so`; the bundled Rust library is the checked debug build |
 | `fvm flutter build web -t lib/main_preview.dart` | Isolated preview compiles; web preview does not call native Core |
 | `cargo fmt --all -- --check` | Passed |
 | `cargo clippy --workspace --all-targets --offline --locked -- -D warnings` | Passed |
 | `cargo test --workspace --offline --locked` | Passed |
 | `cargo build --workspace --offline --locked` | Passed |
-| `python3 scripts/verify_native_contract.py` | 22 native methods and 42 live examples passed |
+| `python3 scripts/verify_native_contract.py` | 30 native methods and 50 live fictional examples passed |
 | `python3 scripts/verify_mvp.py` | 24 runtime checks passed |
 | `python3 scripts/validate_contracts.py` | 15 schemas, 24 positive and 86 negative fixtures passed |
 | `node packages/presentation/test/i18n.test.mjs` | 5 shared-catalog tests passed; this does not establish Flutter localization |
@@ -33,7 +33,7 @@ Commands below ran in the isolated worktree; Flutter commands used the pinned FV
 
 The native click scenario exercises discovery, read, mode and target writes, quick power before/after reading, card long press, invalid target rejection, blank selection rejection, batch execution, blank/overlong/control-character/duplicate room rejection with retained input, room rename/drag/menu reorder/delete, exact-room assignment, All/custom/Unassigned filters, alias/pin/unpin, search/clear/exit, unchanged route persistence, sharing-name persistence, receipt refresh with no current device selection, history, diagnostics export cancel/save/failure, unavailable gates and foreground lifecycle. Room-menu assignment preselects its exact room and rejects empty device selection; device-menu assignment visibly selects the current device. Corrected input clears outdated validation messages before the next submission. The file picker is replaced by a controlled platform implementation; saved file bytes must equal the exact preview. The actual Linux integration separately exercises the real Flutter process, not the system save chooser.
 
-The native widget click test now loads the bundled Inter/Material fonts and fails missed pointer targets. Its latest successful run saves 79 viewport captures across 27 screen IDs, including errors and intermediate states. Generate `output/flutter-verification/native-gallery.html` with `python3 apps/mobile/tool/native_gallery.py`. Entries identify clicks, drags and direct test navigation; all records are fictional native Mock data. Phone insets are simulated and OS status icons are absent. This is separate evidence from the 82-state isolated atlas and from the actual Linux-process screenshot. The native room page now uses the prototype's grouped rows and exposes assignment through its row menu; its drag handle and menu ordering are both exercised.
+The native widget click test now loads the bundled Inter/Material fonts and fails missed pointer targets. Its latest successful run saves 88 viewport captures across 27 screen IDs, including errors and intermediate states. Generate `output/flutter-verification/native-gallery.html` with `python3 apps/mobile/tool/native_gallery.py`. Entries identify clicks, drags and direct test navigation; all records are fictional native Mock data. Phone insets are simulated and OS status icons are absent. This is separate evidence from the 82-state isolated atlas and from the actual Linux-process screenshot. The native room page now uses the prototype's grouped rows and exposes assignment through its row menu; its drag handle and menu ordering are both exercised.
 
 Three additional click scenarios use the native `lost-ack`, `accept-only`, and `reject` fixtures. They click discovery, read, power, receipt refresh and history; assert the displayed `unknown`, `accepted`, or `failed` outcome; retain observations until an explicit read; and verify the original request ID and unchanged history count after refresh. These are fictional native operations, not physical-device evidence.
 
@@ -89,21 +89,21 @@ The command verifies the complete 82-file set, writes `output/flutter-verificati
 | UI-04 | Exact-component selection, capability references, cache isolation, climate bounds/enums and unknown/read-only values implemented. Isolated fridge/freezer fixture clicks verify distinct ranges and steps; Scalar non-climate action forms, stale/read-only properties, denied plans and cancellation are fixture-tested. Dedicated single-family layouts, numeric/enum fan controls, one-shot-action exclusion, unknown-value semantics and coupled-action fallback are fixture-tested. The combined overview, exact targets, partial-read recovery and compound target forms are fixture-tested. Pixel parity and physical multi-component acceptance remain pending. |
 | UI-05 | Native outcomes preserved, including nested partial results with per-item evidence navigation. Explicit batches plan before execution; no aggregate rollback/retry. Physical evidence unavailable. |
 | UI-06 | Explicit bounded Mock discovery implemented. Real permission, identity-merge and nearby-pairing paths unavailable. |
-| UI-07 | Unavailable under native contract 1.0; isolated preview only. |
-| UI-08 | Unavailable under native contract 1.0; no raw storage deletion or fabricated revocation. |
-| UI-09 | Unavailable under native contract 1.0; no peer networking or credential transfer. |
+| UI-07 | Core 1.9 account methods are integrated into this branch. Flutter protected account input is pending; isolated preview only. |
+| UI-08 | Core supports scoped local account removal, but Flutter account confirmation/recovery is pending. Provider revocation remains unavailable. |
+| UI-09 | No current native sharing methods; no peer networking or credential transfer. |
 | UI-10 | Dart/native foreground, cancellation and rapid-resume checks passed. Component read sequences discard late results and stop before the next read after cancellation/backgrounding. Physical Android/iOS background and termination acceptance pending. |
 | UI-11 | One registered skin, local persistence/fallback and preview implemented and tested. |
-| UI-12 | Exact diagnostics preview/export and retained receipt navigation tested. Real OS save chooser acceptance and safe cleanup methods pending. |
+| UI-12 | Exact diagnostics preview/export and retained receipt navigation tested. Confirmed native cache/history cleanup, cancel, busy-journal refusal, local reload and request retirement are click/native-tested. Full-profile deletion and real OS save chooser acceptance remain pending. |
 | UI-13 | Reference phone/wide captures, 320-width/200% text, all-state landscape/150% text and all-form simulated keyboard checks passed. Field/control semantics, all-state tap labels and reduced-motion busy indicators tested. System high contrast passes the 82 initial-viewport text-contrast checks and all-state 320-width/200% layouts. Full zh-CN wiring, offscreen contrast, remaining animation behavior, screen-reader and physical-keyboard acceptance pending. |
 | UI-14 | Linux process and bundle verified. Android/iOS builds, phone profiling and pixel equality not passed. |
-| UI-15 | Real Meiju integration unavailable. P08 preview copy follows automatic retrieval; replacement authoritative artwork and real off-LAN acceptance pending. |
+| UI-15 | Meiju Core integration is present; Flutter account input/startup integration remains pending. P08 preview copy follows automatic retrieval; replacement authoritative artwork and real off-LAN acceptance pending. |
 
 ## Compatibility and environment
 
-Native API requests, schemas, C symbols and SQLite schema are unchanged. Presentation preferences are app-private JSON containing no credentials. No real-platform compatibility row is promoted. No real-device write, diagnostic upload or package publication was performed. The owner-authorized frontend implementation has been pushed to `origin/codex/flutter-ui`; the branch is retained. This is an incomplete acceptance checkpoint, not a merge into main or a claim that the pixel gate passed.
+The frontend merged Core API 1.9 and SQLite schema 4 from pinned commit `00d44b7`, including the protected seventh C symbol. This cleanup UI uses the existing native methods without further schema changes. Presentation preferences are app-private JSON containing no credentials. No real-platform compatibility row is promoted. No real-device write, diagnostic upload or package publication was performed. The owner-authorized frontend implementation has been pushed to `origin/codex/flutter-ui`; the branch is retained. This is an incomplete acceptance checkpoint, not a merge into main or a claim that the pixel gate passed.
 
-Android/iOS project scaffolding is present, but the full Android SDK/NDK and Xcode/Apple environment were unavailable. ADB successfully listed devices and found none attached. No device choice is required to continue shared Flutter UI work; Android/iOS native packaging and actual OS lifecycle acceptance remain separate outstanding checks. Linux GTK/Clang development packages were extracted into a temporary local sysroot for this run; no system package installation was performed. Standard installed Linux dependencies are sufficient for normal development. FVM owns the SDK; no project-local SDK copy is committed.
+Android/iOS project scaffolding is present. Core now supplies a verified arm64 AAR builder and Android credential backend, but Flutter packaging/startup and actual Keystore acceptance remain pending. The prior Flutter environment check lacked the complete SDK/NDK; the current Android integration environment must be rechecked. Xcode/Apple validation remains unavailable on Linux. ADB successfully listed devices and found none attached. No device choice is required to continue shared Flutter UI work; Android/iOS native packaging and actual OS lifecycle acceptance remain separate outstanding checks. Linux GTK/Clang development packages were extracted into a temporary local sysroot for this run; no system package installation was performed. Standard installed Linux dependencies are sufficient for normal development. FVM owns the SDK; no project-local SDK copy is committed.
 
 ## Core 1.9 integration checkpoint
 
@@ -118,3 +118,32 @@ Executed checks: offline locked workspace build; the Rust native-contract test;
 contract and repository validators; and all 49 existing Flutter tests using FVM.
 All passed. This verifies compatibility of the existing Mock UI with the new Core,
 not account UI completion, physical support or exact screenshot equality.
+
+## Native cleanup UI checkpoint
+
+Settings > Local Data now negotiates cache/history methods and opens a separate
+scope confirmation for each. Cancel performs no mutation. Cache cleanup invalidates
+component/card snapshots; history cleanup drops visible detail/aggregate receipts
+and diagnostic previews. Both reload local metadata and retained history; any
+selected component uses cached reads only, with missing data shown as unknown.
+A lost reply invalidates affected UI data and requires local reloading before
+explicit reconfirmation. No cleanup retry or network refresh runs automatically.
+
+Three cleanup regressions cover actual ABI cache misses, preservation of room/card
+organization and observations, unknown-receipt retirement, failed replay with zero
+attempts, zero-item cleanup, interrupted results, and a fixture busy-journal
+confirmation/reload/reconfirmation sequence. The extended native widget scenario
+clicks cancel and confirm for both methods and records screenshots. Full-profile
+deletion remains explicitly unavailable. No existing owner profile is modified.
+
+The merged Core also passed offline workspace formatting, Clippy with warnings
+denied, all default workspace tests and all 24 MVP runtime tests. Physical account
+or appliance tests were not run. Strict screenshot equality remains a failing gate.
+
+The final 52-test Flutter suite, analyzer, Linux release build and actual Linux
+Flutter process cleanup scenario passed. The process screenshot is retained in
+`output/flutter-verification/cleanup-native-linux.png`. The strict reference run
+still reports **0/82 exact matches**, mean channel error **1.6798/255**; exit status
+1 is retained as a failed acceptance gate. This phase changes native data-backed
+views, not the fictional prototype raster references. The 88 native widget captures
+cover 27 screen IDs, including cleanup scope/cancel/completion states.

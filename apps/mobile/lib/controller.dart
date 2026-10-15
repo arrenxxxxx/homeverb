@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'native_client.dart';
 import 'preferences.dart';
 
+enum LocalCleanup { cachedState, executionHistory }
+
 class HomeController extends ChangeNotifier {
   HomeController(this.core, this.preferences);
   final CoreClient core;
@@ -54,7 +56,8 @@ class HomeController extends ChangeNotifier {
     cards = (results[1] as List).cast<Json>();
   }
 
-  Future<bool> initialize() => perform(loadLocal);
+  Future<bool> initialize() =>
+      perform(cleanupNeedsReload ? reloadAfterCleanup : loadLocal);
   Future<bool> discover() => perform(() async {
     await core.call('discover');
     await loadLocal();
@@ -342,6 +345,63 @@ class HomeController extends ChangeNotifier {
     receipt = await core.call('execute', {'command': command}) as Json;
     // Observations only change after an explicit read, never from a requested value.
   });
+  bool supports(String method) =>
+      core is! NativeClient || (core as NativeClient).methods.contains(method);
+  int? cleanupCount;
+  LocalCleanup? cleanupResult;
+  bool cleanupNeedsReload = false;
+
+  Future<bool> clearLocalData(LocalCleanup scope) => perform(() async {
+    cleanupCount = null;
+    cleanupResult = null;
+    final method = scope == LocalCleanup.cachedState
+        ? 'clear_cached_state'
+        : 'clear_execution_history';
+    // Fence late reads and invalidate affected views even after a lost reply.
+    _readEpoch++;
+    cleanupNeedsReload = true;
+    Json result;
+    try {
+      result = await core.call(method) as Json;
+    } finally {
+      diagnostics = null;
+      if (scope == LocalCleanup.cachedState) {
+        snapshots.clear();
+        _componentSnapshots.clear();
+        _componentReadErrors.clear();
+        snapshot = null;
+      } else {
+        history = [];
+        receipt = null;
+        batchResult = null;
+      }
+    }
+    cleanupCount =
+        result[scope == LocalCleanup.cachedState
+                ? 'removed_snapshots'
+                : 'removed_receipts']
+            as int;
+    cleanupResult = scope;
+    await reloadAfterCleanup();
+  });
+
+  Future<void> reloadAfterCleanup() async {
+    await loadLocal();
+    history = (await core.call('recent_executions') as List).cast<Json>();
+    // No cached-state miss ever falls through to a live read.
+    if (selectedDevice != null && currentCard != null && description != null) {
+      for (final part in components) {
+        try {
+          await readComponent(part['id'], cached: true);
+        } on NativeFailure catch (error) {
+          if (!['CACHE_MISS', 'STATE_UNAVAILABLE'].contains(error.code))
+            rethrow;
+        }
+      }
+    }
+    cleanupNeedsReload = false;
+  }
+
   Future<bool> loadHistory({bool deviceOnly = false}) => perform(() async {
     history =
         (await core.call(
