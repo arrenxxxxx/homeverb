@@ -1227,40 +1227,105 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           ),
         ],
       );
-    if (id == 'D10')
+    if (id == 'D10') {
+      final cards = c.visibleCards;
+      Future<void> move(int from, int to) async {
+        if (c.busy || to < 0 || to >= cards.length) return;
+        final ids = cards
+            .map((card) => card['device']['id'] as String)
+            .toList();
+        ids.insert(to, ids.removeAt(from));
+        await c.reorderDevices(ids);
+      }
+
       return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (final card in c.visibleCards)
-            ListTile(
-              title: Text(card['device']['alias']),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (final offset in [-1, 1])
-                    IconButton(
-                      tooltip: offset < 0 ? 'Move up' : 'Move down',
-                      icon: Icon(
-                        offset < 0 ? Icons.arrow_upward : Icons.arrow_downward,
+          Copy(
+            '${c.filter == 'All' || c.filter == 'Unassigned' ? c.filter : c.roomName(c.filter)} · Drag handles change the visible order.',
+            color: muted,
+          ),
+          const SizedBox(height: 12),
+          if (cards.isEmpty)
+            const Copy('No devices in this view.')
+          else
+            Surface(
+              radius: 18,
+              child: ReorderableListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: EdgeInsets.zero,
+                buildDefaultDragHandles: false,
+                itemCount: cards.length,
+                onReorderItem: move,
+                itemBuilder: (context, index) {
+                  final card = cards[index],
+                      deviceId = card['device']['id'] as String;
+                  return Column(
+                    key: ValueKey(deviceId),
+                    children: [
+                      if (index > 0)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          child: Divider(
+                            height: 0,
+                            thickness: .6,
+                            color: Color(0xffdeded7),
+                          ),
+                        ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 16, right: 4),
+                        child: Row(
+                          children: [
+                            Expanded(child: Copy(card['device']['alias'])),
+                            if (card['preferences']['favorite'] == true)
+                              const Copy('Pinned', size: 12, color: muted),
+                            ReorderableDragStartListener(
+                              index: index,
+                              enabled: !c.busy,
+                              child: PopupMenuButton<int>(
+                                key: ValueKey('order-menu:$deviceId'),
+                                tooltip: 'Reorder ${card['device']['alias']}',
+                                enabled: !c.busy,
+                                icon: const Glyph(
+                                  'drag',
+                                  size: 20,
+                                  color: muted,
+                                ),
+                                onSelected: (offset) =>
+                                    move(index, index + offset),
+                                itemBuilder: (_) => [
+                                  PopupMenuItem(
+                                    value: -1,
+                                    enabled: index > 0,
+                                    child: const Text('Move up'),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 1,
+                                    enabled: index + 1 < cards.length,
+                                    child: const Text('Move down'),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      onPressed: () async {
-                        final ids = c.visibleCards
-                                .map((v) => v['device']['id'] as String)
-                                .toList(),
-                            index = c.visibleCards.indexOf(card),
-                            target = index + offset;
-                        if (target >= 0 && target < ids.length) {
-                          ids.removeAt(index);
-                          ids.insert(target, card['device']['id']);
-                          await c.reorderDevices(ids);
-                        }
-                      },
-                    ),
-                ],
+                    ],
+                  );
+                },
               ),
             ),
-          ActionButton('Done', onPressed: () => go('D01')),
+          const SizedBox(height: 12),
+          const Copy(
+            'Room membership stays unchanged. Hidden devices retain their position.',
+            color: muted,
+          ),
+          const SizedBox(height: 12),
+          ActionButton('Done', onPressed: () => action('Back')),
         ],
       );
+    }
     if (id == 'S05')
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

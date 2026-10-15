@@ -88,6 +88,35 @@ void main() {
       }
     },
   );
+  test('native room ordering reloads a concurrently changed list', () async {
+    final dir = await Directory.systemTemp.createTemp('homeverb-order-');
+    final core = await NativeClient.open(
+      dataDir: dir.path,
+      libraryPath: library,
+    );
+    final state = HomeController(
+      core,
+      LocalPreferences(File('${dir.path}/ui.json')),
+    );
+    try {
+      await state.initialize();
+      await state.saveRoom('Study');
+      final original = state.rooms.single['id'] as String;
+      final added = await core.call('create_room', {'name': 'Kitchen'}) as Json;
+      expect(await state.reorderRooms([original]), false);
+      expect((state.error as NativeFailure).code, 'INVALID_ARGUMENT');
+      expect(state.rooms.map((r) => r['id']), [original, added['id']]);
+      expect(await state.reorderRooms([added['id'], original]), true);
+      expect(state.rooms.map((r) => r['id']), [added['id'], original]);
+      await state.discover();
+      final device = state.cards.single['device']['id'] as String;
+      expect(await state.reorderDevices([device]), true);
+      expect(state.cards.single['device']['id'], device);
+    } finally {
+      await core.close();
+      await dir.delete(recursive: true);
+    }
+  });
   for (final pair in {
     'lost-ack': 'unknown',
     'accept-only': 'accepted',

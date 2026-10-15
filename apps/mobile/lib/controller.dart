@@ -206,19 +206,41 @@ class HomeController extends ChangeNotifier {
     await loadLocal();
   });
   Future<bool> reorderRooms(List<String> ids) => perform(() async {
-    await core.call('reorder_rooms', {'room_ids': ids});
-    await loadLocal();
+    await reorder('reorder_rooms', {'room_ids': ids});
   });
   Future<bool> reorderDevices(List<String> visible) => perform(() async {
     final selected = visible.toSet();
+    final expected = visibleCards.map((card) => card['device']['id']).toSet();
+    if (selected.length != visible.length ||
+        selected.length != expected.length ||
+        !selected.containsAll(expected)) {
+      throw NativeFailure(
+        'INVALID_ARGUMENT',
+        'Include every visible device exactly once.',
+      );
+    }
     var index = 0;
     final ids = cards
         .map((c) => c['device']['id'] as String)
         .map((id) => selected.contains(id) ? visible[index++] : id)
         .toList();
-    await core.call('reorder_devices', {'device_ids': ids});
-    await loadLocal();
+    await reorder('reorder_devices', {'device_ids': ids});
   });
+
+  Future<void> reorder(String method, Json arguments) async {
+    try {
+      await core.call(method, arguments);
+    } on NativeFailure catch (error) {
+      if (error.code != 'INVALID_ARGUMENT') rethrow;
+      await loadLocal();
+      throw NativeFailure(
+        'INVALID_ARGUMENT',
+        'The list changed. Review the refreshed order and try again.',
+      );
+    }
+    await loadLocal();
+  }
+
   Future<bool> execute(
     String capabilityId,
     String action,
