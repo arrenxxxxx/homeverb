@@ -44,7 +44,7 @@ This exits with code 11. Refresh state to inspect the result; do not blindly res
 - Explicit device batches through Core, CLI files, and native requests, with whole-list preflight, four-device concurrency, shared deadlines, and per-device receipts.
 - Component-scoped capabilities for different constraints on one physical appliance, verified with fictional fridge/freezer fixtures.
 - One-shot CLI, host-owned read-only MCP stdio, and a C ABI that loads Core directly in the UI process.
-- Experimental [Meiju CLI account and read commands](docs/cli.md#meiju-account-and-read-commands): protected Linux terminal login, automatic card retrieval, saved-session refresh/recovery, local account management and on-demand Core reads. Meiju CLI appliance writes remain disabled; live CLI/phone acceptance is separate.
+- Experimental [Meiju CLI account and read commands](docs/cli.md#meiju-account-and-read-commands): protected Linux terminal login, automatic card retrieval, saved-session refresh/recovery, local account management and on-demand Core reads. Default startup stays read-only; an explicit [owner-controlled grant file](docs/cli.md#scoped-meiju-controls) can admit exact-device power states and vendor fan codes. Live CLI/phone acceptance is separate.
 - Framework-independent `en-US` and `zh-CN` catalogs, locale normalization, and presentation helpers. Visual UI design remains separate.
 
 ## Boundaries

@@ -59,7 +59,7 @@ class RuntimeAcceptance(unittest.TestCase):
         schema = json.loads((ROOT / f'schemas/{name}.schema.json').read_text())
         Draft202012Validator(schema, format_checker=self.formats).validate(value)
 
-    def meiju(self, *arguments, expected=0, profile='meiju'):
+    def meiju(self, *arguments, expected=0, profile='meiju', response_definition=None, execution_schema=None):
         result = subprocess.run([str(BINARY), '--adapter', 'midea.meiju', '--data-dir',
                                  self.directory.name, '--profile', profile, *arguments],
                                 capture_output=True, text=True, timeout=5,
@@ -68,8 +68,13 @@ class RuntimeAcceptance(unittest.TestCase):
         self.assertEqual(result.returncode, expected, result.stdout + result.stderr)
         self.assertEqual(result.stderr, '')
         response = json.loads(result.stdout)
+        if execution_schema:
+            self.schema(execution_schema, response)
+            return response
         if response['error'] is not None:
             definition = 'query_error'
+        elif response_definition:
+            definition = response_definition
         elif arguments[0] == 'account':
             definition = {'list': 'list_accounts', 'show': 'get_account',
                           'rename': 'rename_account', 'remove': 'remove_account',
@@ -82,6 +87,96 @@ class RuntimeAcceptance(unittest.TestCase):
             definition = {'execution': 'get_execution', 'diagnostics': 'diagnostics'}[arguments[0]]
         validator('native-response', definition).validate(response)
         return response
+
+    def test_meiju_grants_require_secure_explicit_files_and_request_ids_before_startup(self):
+        path = Path(self.directory.name) / 'grants.json'
+        value = json.loads((ROOT / 'examples/cli-meiju-grants.json').read_text())
+        path.write_text(json.dumps(value))
+        path.chmod(0o600)
+        target = value['meiju_power_grants'][0]['device_id']
+        result = self.meiju('--meiju-grants', str(path), 'power', 'set', target, '--off', expected=2)
+        self.assertEqual(result['error']['code'], 'INVALID_ARGUMENT')
+        self.assertFalse((path.parent / 'meiju').exists())
+        for mode in [0o620, 0o602]:
+            path.chmod(mode)
+            result = self.meiju('--meiju-grants', str(path), '--request-id', 'grant-check',
+                                'power', 'set', target, '--off', expected=6)
+            self.assertEqual(result['error']['code'], 'POLICY_DENIED')
+            self.assertFalse((path.parent / 'meiju').exists())
+        path.chmod(0o600)
+        value['meiju_fan_grants'][0]['wind_speed'] = 101
+        path.write_text(json.dumps(value))
+        result = self.meiju('--meiju-grants', str(path), 'account', 'list', expected=2)
+        self.assertEqual(result['error']['code'], 'INVALID_ARGUMENT')
+        self.assertFalse((path.parent / 'meiju').exists())
+        path.write_text('{"schema_version":"1.0"}')
+        result = self.meiju('--meiju-grants', str(path), '--request-id', 'grant-check',
+                            'power', 'set', target, '--off', expected=6)
+        self.assertEqual(result['error']['code'], 'POLICY_DENIED')
+        self.assertFalse((path.parent / 'meiju').exists())
+
+    def test_meiju_grants_bound_real_cli_plans_execution_refusals_and_receipt_replay(self):
+        self.cli('device', 'discover')
+        base = self.cli('device', 'describe', 'mock-ac')['data']
+        power = next(item for item in base['capabilities'] if item['id'] == 'power')
+        power['actions']['set'].update(transports=['cloud'], verification='unavailable', atomic=False)
+        fan = json.loads((ROOT / 'examples/capability.meiju-fan.json').read_text())
+        grants = json.loads((ROOT / 'examples/cli-meiju-grants.json').read_text())
+        target = grants['meiju_power_grants'][0]['device_id']
+        other = '30000000-0000-4000-8000-000000000002'
+        account = '40000000-0000-4000-8000-000000000001'
+        path = Path(self.directory.name) / 'grants.json'
+        path.write_text(json.dumps(grants))
+        path.chmod(0o600)
+        options = ['--meiju-grants', str(path)]
+        self.assertEqual(self.meiju(*options, 'account', 'list', response_definition='list_accounts')['data'], [])
+        database = path.parent / 'meiju/homeverb.sqlite3'
+        with closing(sqlite3.connect(database)) as connection, connection:
+            connection.execute('INSERT INTO accounts VALUES (?, ?, ?, ?, ?, ?)',
+                               (account, 'midea.meiju', 'CN', 'Fictional pending account',
+                                '50000000-0000-4000-8000-000000000001', 'pending'))
+            for index, device_id in enumerate([target, other]):
+                device = copy.deepcopy(base['device'])
+                device.update(id=device_id, alias=f'Fictional AC {index}', model='KFR-35G/WF2',
+                              support_status='experimental', components=[{'id':'main', 'capabilities':['power', 'vendor.midea.ac']}],
+                              connections=[{'id':f'fictional-cloud-{index}', 'adapter':'midea.meiju',
+                                            'transport':'cloud', 'account_id':account, 'identity_ref':f'fictional-binding-{index}'}])
+                connection.execute('INSERT INTO devices VALUES (?, ?)',
+                                   (device_id, json.dumps({'device':device, 'capabilities':[power, fan]})))
+        plan = self.meiju(*options, '--request-id', 'scoped-power', '--dry-run', 'power', 'set', target, '--off',
+                          response_definition='plan')['data']
+        self.assertEqual(plan['transports'], ['cloud'])
+        for state, selected, route in [('--on', target, 'auto'), ('--off', other, 'auto'), ('--off', target, 'lan')]:
+            denied = self.meiju(*options, '--request-id', 'denied-plan', '--connection', route, '--dry-run',
+                                'power', 'set', selected, state, expected=6)
+            self.assertEqual(denied['error']['code'], 'POLICY_DENIED')
+        fan_args = ['device', 'execute', target, '--capability', 'vendor.midea.ac', '--action', 'set_fan_speed',
+                    '--arguments', '{"wind_speed":40}']
+        self.meiju(*options, '--request-id', 'scoped-fan', '--dry-run', *fan_args, response_definition='plan')
+        grants['meiju_fan_grants'] = []
+        path.write_text(json.dumps(grants))
+        denied = self.meiju(*options, '--request-id', 'scoped-fan', '--dry-run', *fan_args, expected=6)
+        self.assertEqual(denied['error']['code'], 'POLICY_DENIED')
+        batch = {'schema_version':'1.0', 'commands':[plan['command'], {**plan['command'], 'device_id':other, 'request_id':'other-batch'}]}
+        batch_path = path.parent / 'batch.json'
+        batch_path.write_text(json.dumps(batch))
+        denied = self.meiju(*options, 'batch', '--file', str(batch_path), expected=6)
+        self.assertEqual(denied['error']['code'], 'POLICY_DENIED')
+        with closing(sqlite3.connect(database)) as connection:
+            self.assertEqual(connection.execute('SELECT COUNT(*) FROM executions').fetchone()[0], 0)
+        arguments = [*options, '--request-id', 'scoped-power', 'power', 'set', target, '--off']
+        receipt = self.meiju(*arguments, expected=3, execution_schema='command-result')
+        self.assertEqual(receipt['status'], 'failed')
+        self.assertEqual(receipt['error']['code'], 'ACCOUNT_SESSION_UNCONFIRMED')
+        self.assertEqual([attempt['phase'] for attempt in receipt['attempts']], ['not_sent'])
+        self.assertEqual(self.meiju(*arguments, expected=3, execution_schema='command-result'), receipt)
+        grants['meiju_power_grants'].append({'device_id':target, 'state':True})
+        path.write_text(json.dumps(grants))
+        changed = self.meiju(*arguments[:-1], '--on', expected=7, execution_schema='command-result')
+        self.assertEqual(changed['error']['code'], 'REQUEST_CONFLICT')
+        self.assertEqual(self.meiju('execution', 'scoped-power')['data'], receipt)
+        self.assertEqual(self.meiju('--request-id', 'scoped-power', 'power', 'set', target, '--off', expected=6)['error']['code'], 'POLICY_DENIED')
+        self.assertFalse((database.parent / 'mock-appliance.sqlite3').exists())
 
     def test_meiju_cli_metadata_inventory_refusal_and_recoverable_removal(self):
         self.assertEqual(self.meiju('account', 'list')['data'], [])

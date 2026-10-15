@@ -135,6 +135,13 @@ protected model/binding checks and conservative outcomes, sending only one revie
 power, mode or temperature to force an effect; mode-dependent effectiveness remains
 unverified. No read, optimistic cache update, fallback or retry follows acceptance.
 
+The Linux CLI can supply these same independent grants through an explicit
+owner-controlled file under [ADR-0037](adr/0037-cli-meiju-control-grants.md).
+It requires explicit request IDs for single writes and previews, and never
+refreshes capabilities implicitly before execution. Removing the file from a
+later invocation revokes its permissions without erasing recorded receipts.
+Default startup remains read-only; transport and outcome semantics are unchanged.
+
 The current Core attempts each permitted route at most once. Only a proven-unsent reachability failure allows the next write route. A possibly-sent write returns `unknown` immediately; an explicit later read does not silently rewrite its receipt. State-match verification performs one bounded live read. All live snapshots, including verification reads, must use schema 1.0, match the requested device/component, and have every observation sourced from the selected transport. A source observation cannot be later than its local receipt, and a live receipt cannot be in the future. Empty warning strings are invalid. The entire snapshot is checked before saving; a valid target field cannot hide malformed unrelated fields.
 
 The live-read rule applies to `state_match`. For `correlated_completion`, Core instead uses successful completion evidence returned by the same bounded adapter execution. The adapter validates protocol correlation; Core requires an exact match of request, device, component, and selected connection IDs. Receipt time must be at or after attempt start and no later than the current clock. If available, trustworthy completion time must be between attempt start and receipt. Evidence is used only after acceptance and when the caller requests verification. Missing or invalid evidence keeps `accepted` with `VERIFICATION_PENDING`, without a state-read fallback or another send. An enqueue acknowledgement is never completion.

@@ -1,9 +1,9 @@
 # CLI contract
 
 Status: Mock commands, local organization, diagnostics and the experimental mainland
-Meiju account/read flow are implemented. Select `--mock` or `--adapter midea.meiju`
+Meiju account/read flow and scoped power/fan controls are implemented. Select `--mock` or `--adapter midea.meiju`
 explicitly. Meiju uses the same native Host/Core as the app bridge; no example
-executable, HA or service is required. Real CLI login/read acceptance remains
+executable, HA or service is required. Real CLI login/read/control acceptance remains
 separate from the earlier [developer probe](development/06-meiju-probe.md).
 
 ## Implemented commands
@@ -36,7 +36,7 @@ homeverb --mock mcp --stdio
 Global options: `--profile` (default `mock` or `meiju` for the selected adapter),
 `--data-dir`, `--connection auto|lan|cloud`, `--timeout-ms` (1-180000, default 10000;
 account connect defaults to 180000 after input), `--wait accepted|verified`
-(default verified), `--request-id`, `--dry-run`, `--scenario`, and `--json`.
+(default verified), `--request-id`, `--dry-run`, `--scenario`, `--meiju-grants`, and `--json`.
 All operation responses are JSON even without `--json`. Help/version output is text.
 `--mock` conflicts with `--adapter`. Explicit `--scenario` and MCP startup remain
 Mock-only. Existing Mock command forms and profile paths are unchanged.
@@ -105,12 +105,64 @@ nondefault route/wait options and Mock scenarios are invalid for account operati
 Local room/card/preferences, cache, receipt and diagnostic commands also work
 with the Meiju profile. Live discovery/reads use the selected adapter only; cached
 reads retain their recorded evidence. Missing/unsupported models stay unsupported,
-cloud readings remain stale, and no LAN route is added. The Meiju CLI admits no
-power, climate, generic execute or batch writes, including dry runs; it returns
-`POLICY_DENIED` before opening the profile. Native experimental grants are not
-imported from metadata or accepted as CLI flags. Real controls remain in the
-separately authorized [control probe](development/07-meiju-control.md) and trusted
-native host configuration. The MCP tool surface is unchanged.
+cloud readings remain stale, and no LAN route is added. Without nonempty explicit
+startup grants, appliance writes and their dry runs return `POLICY_DENIED` before
+opening the profile. The MCP tool surface is unchanged.
+
+## Scoped Meiju controls
+
+On Linux, `--adapter midea.meiju --meiju-grants <absolute-path>` loads a trusted
+startup file for the existing experimental AC power and vendor fan actions. The
+owner must review each local device ID and allowed value. The file is never loaded
+automatically, saved into the profile or accepted inside ordinary command JSON.
+It has the closed [CLI grant schema](../schemas/cli-meiju-grants.schema.json); see
+the [fictional example](../examples/cli-meiju-grants.json) and
+[ADR-0037](adr/0037-cli-meiju-control-grants.md).
+
+`schema_version` is `"1.0"`. Each independent list, `meiju_power_grants` and
+`meiju_fan_grants`, permits at most 64 distinct entries. Power entries name one
+local `device_id` and boolean `state`; fan entries name one local `device_id` and
+one `wind_speed` code: 20, 40, 60, 80, 100 or 102. These are vendor codes, not
+percentages. Omitted/empty lists grant nothing. No wildcard, provider identifier,
+arbitrary action, credential or approval flag is accepted. Only the existing
+exact-model AC mappings and cloud route are admitted; temperature, dishwasher and
+refrigerator controls remain unsupported.
+
+Store the file outside the repository at an absolute path, owned by the current
+OS user and not writable by group/others; mode `0600` is recommended. The loader
+checks the opened regular file, refuses final symlinks and limits content to
+32 KiB. Invalid content or a relative path returns `INVALID_ARGUMENT`; an unsafe,
+unavailable or oversized file returns `POLICY_DENIED`. The complete policy is
+validated before profile creation. This does not defend against a compromised
+owning process or validate every parent path component.
+
+After connecting read-only and obtaining local IDs, prepare the reviewed file and
+explicitly refresh the selected account with it to publish admitted descriptors.
+There is no hidden discovery or refresh before a write. These commands illustrate
+the workflow; replace placeholders and use the same profile throughout:
+
+```text
+homeverb --adapter midea.meiju --meiju-grants <absolute-grants-path> account refresh <local-account-id>
+homeverb --adapter midea.meiju --meiju-grants <absolute-grants-path> --request-id <unique-request-id> --dry-run power set <local-device-id> --off
+```
+
+A single write or preview requires an explicit `--request-id`; batch files retain
+their per-command IDs and whole-list preflight. Dry run checks local descriptors
+and permissions without contacting the provider or creating a receipt. It cannot
+prove saved inventory membership, reachability or physical behavior. Only after
+separate owner authorization for the real operation, remove `--dry-run` to send
+with the reviewed request ID. For a fan preview, use the same options with
+`device execute <local-device-id> --capability vendor.midea.ac --action set_fan_speed
+--arguments '{"wind_speed":40}'`.
+
+Execution repeats Core and protected-account checks. Cloud acceptance remains
+`accepted`, never physical verification; the default verified wait exits 12 when
+verification is unavailable. A possibly sent request remains `unknown`. Inspect
+`homeverb --adapter midea.meiju execution <request-id>` without a grant file after
+interruption or permission removal. Reusing an identical authorized request
+returns its receipt; changing its command conflicts. Never create a fresh ID to
+automatically retry an accepted/unknown request. See the
+[control evidence limits](development/07-meiju-control.md#outcome-contract).
 
 ## Shared command behavior
 

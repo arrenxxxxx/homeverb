@@ -138,6 +138,14 @@ before profile creation. A valid startup grants only the listed local devices an
 exact states or reviewed fan codes over cloud. Other values/routes still return
 `POLICY_DENIED`; no implicit grant expansion is allowed.
 
+The Linux CLI applies the same validation to an explicit `--meiju-grants` startup
+file. Relative paths and malformed contents return `INVALID_ARGUMENT`. Unreadable,
+nonregular, foreign-owned, group/other-writable or oversized files and final
+symlinks return `POLICY_DENIED`, without exposing their path or contents. Missing
+or empty grants deny appliance writes before profile startup. Single Meiju writes
+and previews without an explicit request ID return `INVALID_ARGUMENT` when grants
+are present. See [CLI admission](cli.md#scoped-meiju-controls).
+
 ## Native account connection results
 
 `homeverb_connect_account` is separate from ordinary JSON and rejects invalid

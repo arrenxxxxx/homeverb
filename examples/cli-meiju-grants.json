@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "meiju_power_grants": [
+    {
+      "device_id": "30000000-0000-4000-8000-000000000001",
+      "state": false
+    }
+  ],
+  "meiju_fan_grants": [
+    {
+      "device_id": "30000000-0000-4000-8000-000000000001",
+      "wind_speed": 40
+    }
+  ]
+}

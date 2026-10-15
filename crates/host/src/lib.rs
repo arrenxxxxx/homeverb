@@ -28,7 +28,16 @@ pub fn open_accounts(directory: &Path) -> Result<homeverb_core::AccountVault> {
 /// Compose the real read-only adapter without loading credentials or contacting the provider.
 /// Account connection is a separate trusted native operation; there are no write grants.
 pub fn open_meiju_read_only(directory: &Path) -> Result<Core> {
-    meiju_parts(directory, &[], &[]).map(|(core, _)| core)
+    open_meiju_with_control_grants(directory, &[], &[])
+}
+
+/// Trusted startup for direct Core hosts; validates all grants before opening a profile.
+pub fn open_meiju_with_control_grants(
+    directory: &Path,
+    power: &[MeijuPowerGrant],
+    fan: &[MeijuFanGrant],
+) -> Result<Core> {
+    meiju_parts(directory, power, fan).map(|(core, _)| core)
 }
 
 /// Compose foreground account operations and the read-only Core with one adapter instance.

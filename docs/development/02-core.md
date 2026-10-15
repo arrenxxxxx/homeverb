@@ -76,7 +76,7 @@ let grant = Grant {
 
 These bounds describe this example permission, not universal device limits. `auto` may choose only transports authorized for that complete command. Unsent fallback cannot escape the grant. Non-atomic commands require both whole-command and per-step authorization; each step uses their route intersection. A grant requiring both fields may intentionally prevent splitting unless separate matching step grants are also supplied. Dry-run uses the same authorization preflight and includes per-step `items` with their allowed transports.
 
-Grants are trusted in-memory configuration, not JSON inputs accepted by CLI, native calls, or MCP tools. The Mock host's explicit write option grants `main` power/climate actions over both simulated transports; MCP supplies no grants. Elevated/high-risk actions remain denied. See [ADR-0010](../adr/0010-scoped-write-grants.md) for the unreleased Rust API migration and [policy tests](../../crates/host/tests/write_policy.rs).
+Grants are trusted host configuration, never ordinary CLI command JSON, native method arguments or MCP tool inputs. Native startup can supply exact Meiju power/fan grants; the Linux CLI can explicitly load the same scopes from an [owner-controlled startup file](../cli.md#scoped-meiju-controls). The Mock host's explicit write option grants `main` power/climate actions over both simulated transports; MCP supplies no grants. Elevated/high-risk actions remain denied. See [ADR-0010](../adr/0010-scoped-write-grants.md) for the unreleased Rust API migration and [policy tests](../../crates/host/tests/write_policy.rs).
 
 Next: [Connect the UI](03-ui-integration.md).
 

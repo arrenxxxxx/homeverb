@@ -51,6 +51,7 @@ pub async fn run(
     command: AccountCommand,
     timeout_ms: u64,
     cancellation: CancellationToken,
+    grants: &super::grants::Grants,
 ) -> Result<u8> {
     if let AccountCommand::Connect { label, account_id } = &command {
         local_name(label)?;
@@ -59,7 +60,11 @@ pub async fn run(
         }
         super::terminal::require_interactive()?;
     }
-    let session = homeverb_host::open_meiju_session(directory)?;
+    let session = homeverb_host::open_meiju_session_with_control_grants(
+        directory,
+        &grants.meiju_power_grants,
+        &grants.meiju_fan_grants,
+    )?;
     let operation_id = Uuid::new_v4().to_string();
     let response = match command {
         AccountCommand::Connect { label, account_id } => {

@@ -21,6 +21,7 @@ def checked_formats() -> FormatChecker:
 def main() -> int:
     formats = checked_formats()
     pairs = [
+        ("cli-meiju-grants", "cli-meiju-grants"),
         ("device", "device"), ("capability", "capability.climate"),
         ("room", "room"), ("device-preferences", "device-preferences"),
         ("room-assignment", "room-assignment"),
@@ -51,6 +52,9 @@ def main() -> int:
         validators[path.name.removesuffix(".schema.json")] = Draft202012Validator(sch, format_checker=formats)
     for sch, fixture in pairs:
         validators[sch].validate(load(f"examples/{fixture}.json"))
+    for key in ("meiju_power_grants", "meiju_fan_grants"):
+        assert load("schemas/cli-meiju-grants.schema.json")["properties"][key] == load("schemas/native-open.schema.json")["properties"][key]
+    validators["cli-meiju-grants"].validate({"schema_version": "1.0"})
     assert load("schemas/batch-command.schema.json")["$defs"]["command"] == load("schemas/command.schema.json")
     nested_execution = json.loads(json.dumps(load("schemas/command-result.schema.json")).replace(
         '"$ref": "#"', '"$ref": "#/$defs/execution"'))
@@ -106,6 +110,17 @@ def main() -> int:
         fresh["properties"]["target_temperature"]["max_age_ms"] = max_age_ms
         validators["capability"].validate(fresh)
     negative = []
+    for key, value in [("schema_version", "2.0"), ("confirmed", True), ("principal", "owner"),
+                       ("password", "PRIVATE"), ("meiju_power_grants", None)]:
+        bad = load("examples/cli-meiju-grants.json"); bad[key] = value
+        negative.append((f"invalid CLI grant field {key}", validators["cli-meiju-grants"], bad))
+    for key in ("meiju_power_grants", "meiju_fan_grants"):
+        for field, value in [("device_id", "*"), ("device_id", "provider-appliance-id"),
+                             ("connection", "lan"), ("action", "start")]:
+            bad = load("examples/cli-meiju-grants.json"); bad[key][0][field] = value
+            negative.append((f"invalid CLI grant scope {key}/{field}/{value}", validators["cli-meiju-grants"], bad))
+        bad = load("examples/cli-meiju-grants.json"); bad[key] *= 2
+        negative.append((f"duplicate CLI grants {key}", validators["cli-meiju-grants"], bad))
     bad = load("examples/command-result.meiju-not-listed.json")
     bad["status"] = "verified"
     negative.append(("inventory refusal promoted without evidence", validators["command-result"], bad))

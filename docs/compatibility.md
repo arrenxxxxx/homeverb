@@ -337,8 +337,9 @@ Account and credential mutations retain the existing identity, lease, pending
 state and uncertainty rules. No password, provider identifier or session material
 is accepted in CLI arguments, piped input or ordinary JSON.
 
-The CLI supplies no Meiju appliance grants and refuses writes before profile
-startup. Mock behavior and its MCP surface remain compatible. No native API,
+This phase supplied no Meiju appliance grants and refused writes before profile
+startup; the following scoped-control phase adds explicit admission. Mock behavior
+and its MCP surface remain compatible. No native API,
 capability, SQLite or protected payload version changes; native API 1.10.0 still
 has 31 methods and seven C functions. Terminal login requires Linux; this does not
 provide mobile input or storage. See the [CLI contract](cli.md).
@@ -350,3 +351,37 @@ and document/contract/repository checks. The final input-buffer bound was rechec
 with the CLI unit suite and Clippy. Tests use fictional profiles, local PTYs and
 an unavailable test D-Bus address. No owner profile, vendor login/read, device
 write, Flutter worktree, phone or remote CI acceptance was performed by this phase.
+
+## Explicit Meiju CLI control grants
+
+The Linux CLI now accepts an explicitly selected `--meiju-grants` file containing
+exact local-device power states and independent vendor fan codes. It reuses the
+existing native grant validation, Core execution and protected adapter checks.
+Default startup remains read-only; a file cannot admit elevated-risk actions or
+other appliance controls. Whole-file validation, ownership/mode checks, final
+symlink/nonregular-file refusal and a 32 KiB bound precede profile startup.
+See [ADR-0037](adr/0037-cli-meiju-control-grants.md) and the
+[CLI workflow](cli.md#scoped-meiju-controls).
+
+Single Meiju writes and previews require explicit request IDs. Existing batch
+files retain per-command IDs, complete preflight and individual receipts.
+Discovery/account refresh explicitly publishes the admitted actions; planning
+does not refresh them or contact the provider. Control still distinguishes
+not-sent failures, acceptance and uncertainty without automatic retry or physical
+verification. Receipt lookup remains available without grants.
+
+Mock commands and MCP are unchanged. This adds a CLI option, one schema/fictional
+fixture and an additive Rust host helper; native API 1.10.0 still has 31 JSON
+methods and seven C functions. SQLite schema 4, protected payload version 2,
+capabilities and execution outcomes are unchanged. No mobile artifact rebuild is
+required by the CLI option.
+
+Local verification passed 268 Rust tests (two opt-in system probes ignored),
+Clippy with warnings denied, formatting and workspace build, 30 actual CLI runtime
+cases, the 31-method/51-example native ABI suite, 29 Python tests and five
+presentation tests. Contract validation passed 17 schemas, 30 positive fixtures
+and 105 negative fixtures; document/repository/commit checks also passed. The
+runtime grant cases use fictional SQLite profiles, pending accounts and an
+unavailable test D-Bus endpoint. No owner profile, vendor request, appliance
+control, Flutter worktree, phone or remote CI was tested by this phase. Physical
+model, off-LAN and real CLI acceptance remain pending.

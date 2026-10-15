@@ -6,6 +6,13 @@ default to read-only; API 1.3 adds separately configured
 [scoped power permissions](../native-ui-contract.md#scoped-experimental-ac-power-startup). This developer probe is a separate
 trusted Core host, not a production CLI dependency for Flutter.
 
+The formal Linux CLI now supports the same exact power/fan authority through
+[explicit startup grant files](../cli.md#scoped-meiju-controls). Its dry run is
+local-only and requires a separate account refresh to publish descriptors; the
+probe below deliberately includes inventory reads in its preview. Both paths
+retain the same physical acceptance limits and require owner authorization for
+real sends.
+
 ## Admitted scope and evidence
 
 The four exact AC models in [the observed model table](../compatibility.md#observed-cloud-read-models)

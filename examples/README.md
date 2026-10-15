@@ -9,6 +9,7 @@ Every device, account, timestamp, and result here is fictional data, not physica
 | [device.refrigerator.json](device.refrigerator.json) | One fictional device with fridge and freezer components |
 | [capability.fridge.json](capability.fridge.json) / [capability.freezer.json](capability.freezer.json) | Distinct component-scoped definitions of `climate`; illustrative ranges, steps, and freshness only |
 | [command.json](command.json) | Brand-independent command envelope |
+| [cli-meiju-grants.json](cli-meiju-grants.json) | Fictional exact-device power-off and vendor fan-code permissions for explicit CLI startup; never an ordinary command |
 | [batch-command.json](batch-command.json) | Explicit commands for two fictional devices; not a runnable two-device Mock setup |
 | [batch-result.json](batch-result.json) | Mixed per-device outcomes with preserved evidence and uncertainty |
 | [command-result.verified.json](command-result.verified.json) | Result with state-match evidence |

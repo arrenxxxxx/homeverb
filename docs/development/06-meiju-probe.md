@@ -5,7 +5,9 @@ For ordinary use, start with the implemented
 the native Host/Core, supports account recovery/removal and automatically publishes
 cards. The probe below remains a development evidence tool with specialized count
 and protocol reports. Its direct `--data-dir` is a profile directory; the CLI
-instead appends `--profile` to `--data-dir`. Neither path grants appliance controls.
+instead appends `--profile` to `--data-dir`. This probe and default CLI startup
+grant no appliance controls; the CLI has a separate explicit
+[scoped control flow](../cli.md#scoped-meiju-controls).
 
 This is an explicit read-only developer probe for the owner-approved personal MVP
 under [ADR-0022](../adr/0022-meiju-community-cloud-admission.md). It signs requests

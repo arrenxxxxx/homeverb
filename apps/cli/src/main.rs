@@ -1,4 +1,5 @@
 mod accounts;
+mod grants;
 mod mcp;
 mod terminal;
 
@@ -25,6 +26,14 @@ struct Cli {
     mock: bool,
     #[arg(long, global = true, conflicts_with = "mock", value_parser = ["midea.meiju"])]
     adapter: Option<String>,
+    #[arg(
+        long,
+        global = true,
+        requires = "adapter",
+        conflicts_with = "mock",
+        help = "Explicit absolute path to an owner-controlled Meiju power/fan grant file"
+    )]
+    meiju_grants: Option<PathBuf>,
     #[arg(long, global = true)]
     data_dir: Option<PathBuf>,
     #[arg(
@@ -258,20 +267,30 @@ async fn run(cli: Cli, cancellation: CancellationToken) -> Result<u8> {
             "Mock scenarios and MCP startup require --mock.",
         ));
     }
-    if meiju
-        && matches!(
-            cli.command,
-            Commands::Power { .. }
-                | Commands::Climate { .. }
-                | Commands::Batch { .. }
-                | Commands::Device {
-                    command: DeviceCommand::Execute { .. }
-                }
-        )
-    {
+    let is_write = matches!(
+        cli.command,
+        Commands::Power { .. }
+            | Commands::Climate { .. }
+            | Commands::Batch { .. }
+            | Commands::Device {
+                command: DeviceCommand::Execute { .. }
+            }
+    );
+    let grants = grants::Grants::load(cli.meiju_grants.as_deref())?;
+    if meiju && is_write && grants.is_empty() {
         return Err(Error::new(
             "POLICY_DENIED",
-            "The Meiju CLI has no appliance write grants.",
+            "The Meiju CLI requires explicit scoped startup grants for appliance writes.",
+        ));
+    }
+    if meiju
+        && is_write
+        && !matches!(cli.command, Commands::Batch { .. })
+        && cli.request_id.is_none()
+    {
+        return Err(Error::new(
+            "INVALID_ARGUMENT",
+            "Meiju writes and previews require an explicit --request-id.",
         ));
     }
     if matches!(cli.command, Commands::Account { .. })
@@ -330,11 +349,15 @@ async fn run(cli: Cli, cancellation: CancellationToken) -> Result<u8> {
     }
     .join(profile);
     if let Commands::Account { command } = cli.command {
-        return accounts::run(&directory, command, timeout_ms, cancellation).await;
+        return accounts::run(&directory, command, timeout_ms, cancellation, &grants).await;
     }
     let is_mcp = matches!(cli.command, Commands::Mcp { .. });
     let core = if meiju {
-        homeverb_host::open_meiju_read_only(&directory)?
+        homeverb_host::open_meiju_with_control_grants(
+            &directory,
+            &grants.meiju_power_grants,
+            &grants.meiju_fan_grants,
+        )?
     } else {
         homeverb_host::open_mock(&directory, scenario, !is_mcp)?
     };
