@@ -19,7 +19,7 @@ void main() {
     const path = String.fromEnvironment('HOMEVERB_LIBRARY');
     final core = await NativeClient.open(
       dataDir: dir.path,
-      libraryPath: path,
+      libraryPath: path.isEmpty ? null : path,
       allowMockWrites: true,
     );
     final controller = HomeController(

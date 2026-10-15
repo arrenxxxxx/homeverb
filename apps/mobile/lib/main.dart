@@ -212,6 +212,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       return;
     }
     if (label == 'Save Room') {
+      formError = null;
       final name = input('Room name').trim();
       if (name.isEmpty ||
           name.runes.length > 80 ||
@@ -229,6 +230,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       return;
     }
     if (label == 'Save Name') {
+      formError = null;
       if (id == 'S10') {
         final name = input('Sharing name').trim();
         if (name.isEmpty || name.length > 80) {
@@ -301,6 +303,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       return;
     }
     if (label == 'Increase target' || label == 'Decrease target') {
+      formError = null;
       final schema =
           c.capability(
                 'climate',
@@ -346,6 +349,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       return;
     }
     if (label == 'Save target') {
+      formError = null;
       final value = num.tryParse(input('Target temperature'));
       final schema =
           c.capability(

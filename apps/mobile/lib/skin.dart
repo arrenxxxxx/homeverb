@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 const ink = Color(0xff292b2d),
@@ -45,24 +46,46 @@ class Copy extends StatelessWidget {
   final Color color;
   final bool bold, center;
   @override
-  Widget build(BuildContext context) => Transform.translate(
-    offset: Offset(0, -size * .20),
-    child: Text(
-      text,
-      textAlign: center ? TextAlign.center : TextAlign.start,
+  Widget build(BuildContext context) {
+    final style = TextStyle(
+      fontFamily: 'Inter',
+      fontSize: size,
+      height: 1.4,
+      letterSpacing: 0,
+      wordSpacing: 0,
+      color: color,
+      fontWeight: bold ? FontWeight.w600 : FontWeight.w400,
+    );
+    final measure = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
       textHeightBehavior: const TextHeightBehavior(
         applyHeightToFirstAscent: false,
         applyHeightToLastDescent: false,
       ),
-      style: TextStyle(
-        fontFamily: 'Inter',
-        fontSize: size,
-        height: 1.4,
-        color: color,
-        fontWeight: bold ? FontWeight.w600 : FontWeight.w400,
+    )..layout();
+    final glyphHeight = measure.height;
+    measure.textHeightBehavior = const TextHeightBehavior();
+    measure.layout();
+    final leading = math.max(0.0, measure.height - glyphHeight);
+    measure.dispose();
+    return Padding(
+      padding: EdgeInsets.only(bottom: leading),
+      child: Transform.translate(
+        offset: Offset(0, -size * .20),
+        child: Text(
+          text,
+          textAlign: center ? TextAlign.center : TextAlign.start,
+          textHeightBehavior: const TextHeightBehavior(
+            applyHeightToFirstAscent: false,
+            applyHeightToLastDescent: false,
+          ),
+          style: style,
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class LightBackground extends StatelessWidget {
@@ -92,6 +115,7 @@ class Surface extends StatelessWidget {
     this.dark = false,
     this.radius = 22,
     this.border,
+    this.bottomBleed = 0,
     this.padding = EdgeInsets.zero,
     super.key,
   });
@@ -99,18 +123,21 @@ class Surface extends StatelessWidget {
   final bool dark;
   final double radius;
   final Color? border;
+  final double bottomBleed;
   final EdgeInsetsGeometry padding;
   @override
   Widget build(BuildContext context) => DecoratedBox(
     decoration: BoxDecoration(
-      gradient: LinearGradient(
-        begin: const Alignment(-.54, -1),
-        end: const Alignment(.54, 1),
+      gradient: WindowSurfaceGradient(
+        bottomBleed: bottomBleed,
         colors: dark
             ? const [Color(0xff42413e), Color(0xff2b2e2f)]
             : const [Color(0xfffdfaf3), Color(0xffeeefeb)],
       ),
-      borderRadius: BorderRadius.circular(radius),
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(radius),
+        bottom: Radius.circular(bottomBleed > 0 ? 0 : radius),
+      ),
       border: Border.all(
         color: border ?? (dark ? const Color(0xff5e605c) : Colors.white),
         width: .6,
@@ -124,6 +151,42 @@ class Surface extends StatelessWidget {
       ],
     ),
     child: Padding(padding: padding, child: child),
+  );
+}
+
+class WindowSurfaceGradient extends Gradient {
+  const WindowSurfaceGradient({required super.colors, this.bottomBleed = 0});
+  final double bottomBleed;
+  @override
+  Shader createShader(Rect rect, {TextDirection? textDirection}) {
+    rect = Rect.fromLTWH(
+      rect.left,
+      rect.top,
+      rect.width,
+      rect.height + bottomBleed,
+    );
+    // Preserve the prototype's 35% horizontal / 65% vertical light blend at any aspect ratio.
+    if (rect.isEmpty)
+      return ui.Gradient.linear(Offset.zero, const Offset(1, 1), colors);
+    final x = .35 / rect.width, y = .65 / rect.height;
+    final denominator = x * x + y * y;
+    final delta = Offset(x / denominator, y / denominator);
+    return ui.Gradient.linear(
+      rect.center - delta / 2,
+      rect.center + delta / 2,
+      colors,
+    );
+  }
+
+  @override
+  Gradient scale(double factor) => WindowSurfaceGradient(
+    bottomBleed: bottomBleed,
+    colors: colors.map((c) => c.withValues(alpha: c.a * factor)).toList(),
+  );
+  @override
+  Gradient withOpacity(double opacity) => WindowSurfaceGradient(
+    bottomBleed: bottomBleed,
+    colors: colors.map((c) => c.withValues(alpha: opacity)).toList(),
   );
 }
 
@@ -142,6 +205,8 @@ class ActionButton extends StatelessWidget {
     child: FilledButton(
       style: FilledButton.styleFrom(
         minimumSize: const Size(double.infinity, 48),
+        disabledBackgroundColor: const Color(0xffe4e2dc),
+        disabledForegroundColor: const Color(0xff888781),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         backgroundColor: style == 'danger'
             ? const Color(0xfffae7df)
@@ -168,6 +233,7 @@ class ActionButton extends StatelessWidget {
           fontSize: 14,
           fontWeight: FontWeight.w600,
           height: 1.1,
+          letterSpacing: 0,
         ),
       ),
     ),
@@ -184,6 +250,34 @@ class Glyph extends StatelessWidget {
     dimension: size,
     child: CustomPaint(painter: _GlyphPainter(name, color)),
   );
+}
+
+class WindowSliderThumb extends SliderComponentShape {
+  const WindowSliderThumb();
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) => const Size(20, 20);
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+  }) {
+    context.canvas.drawCircle(center, 10, Paint()..color = accent);
+    context.canvas.drawCircle(
+      center,
+      8,
+      Paint()..color = const Color(0xfffffaf3),
+    );
+  }
 }
 
 class _GlyphPainter extends CustomPainter {
@@ -215,6 +309,10 @@ class _GlyphPainter extends CustomPainter {
           p,
         );
     switch (name) {
+      case 'drag':
+        for (final y in [6.0, 12.0, 18.0]) {
+          line([Offset(7.5, y), Offset(24, y)]);
+        }
       case 'back':
         line(const [Offset(15, 4), Offset(7, 12), Offset(15, 20)]);
       case 'plus':

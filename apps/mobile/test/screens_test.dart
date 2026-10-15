@@ -167,6 +167,61 @@ void main() {
     tester.view.resetPhysicalSize();
     tester.view.resetDevicePixelRatio();
   });
+  testWidgets('all states reflow in landscape at 150 percent text', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1688, 780);
+    tester.view.devicePixelRatio = 2;
+    for (final id in catalog.screens.keys) {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(1.5)),
+          child: PreviewApp(
+            key: ValueKey('landscape-$id'),
+            catalog: catalog,
+            initial: id,
+            testChrome: true,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull, reason: id);
+    }
+    tester.view.resetPhysicalSize();
+    tester.view.resetDevicePixelRatio();
+  });
+  testWidgets('all forms remain editable above the keyboard', (tester) async {
+    tester.view.physicalSize = const Size(780, 1688);
+    tester.view.devicePixelRatio = 2;
+    tester.view.viewInsets = const FakeViewPadding(bottom: 560);
+    for (final id in catalog.screens.keys.where(
+      (id) => (catalog.ui(id)['blocks'] as List).any((b) => b[0] == 'field'),
+    )) {
+      await tester.pumpWidget(
+        PreviewApp(
+          key: ValueKey('keyboard-$id'),
+          catalog: catalog,
+          initial: id,
+          testChrome: true,
+        ),
+      );
+      await tester.pumpAndSettle();
+      final input = find.byType(TextField).last;
+      await tester.ensureVisible(input);
+      await tester.tap(input);
+      await tester.enterText(input, 'Editable input');
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull, reason: id);
+      expect(
+        tester.getBottomRight(input).dy,
+        lessThanOrEqualTo(564),
+        reason: '$id input must stay above the keyboard',
+      );
+    }
+    tester.view.resetViewInsets();
+    tester.view.resetPhysicalSize();
+    tester.view.resetDevicePixelRatio();
+  });
   testWidgets('click all 198 explicitly simulated atlas branches', (
     tester,
   ) async {

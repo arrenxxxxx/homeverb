@@ -136,12 +136,28 @@ void main() {
         await tap('Save Room');
         expect(controller.rooms.single['name'], 'Study');
         await tap('Add Room');
+        for (final invalid in ['', 'x' * 81, 'Room\u0001name']) {
+          final input = find.byKey(const ValueKey('field:Room name'));
+          await tester.enterText(input, invalid);
+          await tap('Save Room');
+          expect(
+            find.text('Use 1–80 characters without control characters.'),
+            findsOneWidget,
+          );
+          expect(controller.rooms, hasLength(1));
+          expect(app.currentState!.id, 'R02');
+          expect(tester.widget<TextField>(input).controller!.text, invalid);
+        }
         await tester.enterText(
           find.byKey(const ValueKey('field:Room name')),
           'Study',
         );
         await tap('Save Room');
         expect(controller.error, isNotNull);
+        expect(
+          find.text('Use 1–80 characters without control characters.'),
+          findsNothing,
+        );
         await route('D07');
         await tester.enterText(
           find.byKey(const ValueKey('field:Local name')),

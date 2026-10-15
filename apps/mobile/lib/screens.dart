@@ -127,7 +127,7 @@ class ScreenView extends StatelessWidget {
                       dialog ? 26 : 0,
                       dialog ? 0 : 80,
                       dialog ? 26 : 0,
-                      MediaQuery.viewInsetsOf(context).bottom,
+                      0,
                     ),
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
@@ -136,11 +136,12 @@ class ScreenView extends StatelessWidget {
                       ),
                       child: Surface(
                         radius: dialog ? 25 : 28,
+                        bottomBleed: dialog ? 0 : 24,
                         padding: EdgeInsets.fromLTRB(
                           20,
                           dialog ? 25 : 11,
                           20,
-                          dialog ? 16 : 24,
+                          dialog ? 14 : 20,
                         ),
                         child: SingleChildScrollView(
                           child: Column(
@@ -161,7 +162,7 @@ class ScreenView extends StatelessWidget {
                                 const SizedBox(height: 24),
                               ],
                               Copy(header, size: dialog ? 22 : 23, bold: true),
-                              const SizedBox(height: 21),
+                              SizedBox(height: dialog ? 17 : 21),
                               content,
                               if (error != null)
                                 Copy('$error', color: const Color(0xff9e3421)),
@@ -187,17 +188,17 @@ class ScreenView extends StatelessWidget {
               if (testChrome && !wide)
                 SizedBox(
                   height: 44,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
-                    child: Row(
-                      children: [
-                        const Copy('9:41', size: 12, bold: true),
-                        const Spacer(),
-                        const Icon(Icons.signal_cellular_alt, size: 18),
-                        const SizedBox(width: 7),
-                        const Icon(Icons.battery_full, size: 20),
-                      ],
-                    ),
+                  child: Stack(
+                    children: [
+                      const Positioned(
+                        left: 24,
+                        top: 16,
+                        child: Copy('9:41', size: 12, bold: true),
+                      ),
+                      Positioned.fill(
+                        child: CustomPaint(painter: _StatusChrome()),
+                      ),
+                    ],
                   ),
                 )
               else
@@ -291,12 +292,24 @@ class ScreenView extends StatelessWidget {
                                   ),
                                   SizedBox(
                                     height: root == 'Devices'
-                                        ? (id == 'D04' ? 16 : 8)
+                                        ? ((ui['blocks'] as List)
+                                                          .firstOrNull?[0] ==
+                                                      'home' ||
+                                                  home is DeviceHome
+                                              ? 8
+                                              : 16)
+                                        : root == 'Settings'
+                                        ? 16
+                                        : root == 'Platforms'
+                                        ? 23
                                         : 22,
                                   ),
                                   if (ui['subtitle'] != '' &&
                                       ui['subtitle'] != null) ...[
-                                    Copy(ui['subtitle'], color: muted),
+                                    Transform.translate(
+                                      offset: const Offset(0, -9),
+                                      child: Copy(ui['subtitle'], color: muted),
+                                    ),
                                     const SizedBox(height: 9),
                                   ],
                                   if (busy)
@@ -369,7 +382,7 @@ class ScreenView extends StatelessWidget {
                   ],
                 ),
               ),
-              if (root != null && !wide) _nav(root),
+              if (root != null && !wide) _nav(root, context),
               if (testChrome && !wide)
                 Container(
                   color: root != null ? const Color(0xfff6f2ea) : null,
@@ -521,9 +534,9 @@ class ScreenView extends StatelessWidget {
     );
   }
 
-  Widget _nav(String root) => Container(
+  Widget _nav(String root, BuildContext context) => Container(
     color: const Color(0xfff6f2ea),
-    height: 58,
+    height: MediaQuery.textScalerOf(context).scale(11) > 11 ? 72 : 58,
     child: Row(
       children: List.generate(3, (i) {
         const labels = ['Devices', 'Platforms', 'Settings'],
@@ -534,19 +547,44 @@ class ScreenView extends StatelessWidget {
             selected: root == labels[i],
             child: InkWell(
               onTap: () => onAction(labels[i]),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Glyph(icons[i], size: 22, color: color),
-                  const SizedBox(height: 6),
-                  Copy(
-                    labels[i],
-                    size: 11,
-                    color: color,
-                    bold: root == labels[i],
-                  ),
-                ],
-              ),
+              child: MediaQuery.textScalerOf(context).scale(11) <= 11
+                  ? Stack(
+                      children: [
+                        Positioned(
+                          top: 12,
+                          left: 0,
+                          right: 0,
+                          child: Center(
+                            child: Glyph(icons[i], size: 22, color: color),
+                          ),
+                        ),
+                        Positioned(
+                          top: 40,
+                          left: 0,
+                          right: 0,
+                          child: Copy(
+                            labels[i],
+                            size: 11,
+                            color: color,
+                            bold: root == labels[i],
+                            center: true,
+                          ),
+                        ),
+                      ],
+                    )
+                  : Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Glyph(icons[i], size: 22, color: color),
+                        const SizedBox(height: 6),
+                        Copy(
+                          labels[i],
+                          size: 11,
+                          color: color,
+                          bold: root == labels[i],
+                        ),
+                      ],
+                    ),
             ),
           ),
         );
@@ -556,46 +594,51 @@ class ScreenView extends StatelessWidget {
   Widget _rail(String root) => Container(
     width: 88,
     color: const Color(0xfff4f0e8),
-    child: Column(
-      children: [
-        const SizedBox(height: 26),
-        const Glyph('home', size: 28, color: accent),
-        const SizedBox(height: 64),
-        for (final entry in const {
-          'Devices': 'home',
-          'Platforms': 'platform',
-          'Settings': 'settings',
-        }.entries)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 20),
-            child: InkWell(
-              onTap: () => onAction(entry.key),
-              child: Container(
-                width: 64,
-                height: 72,
-                decoration: BoxDecoration(
-                  color: root == entry.key ? const Color(0xffe7d3c4) : null,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Glyph(
-                      entry.value,
-                      color: root == entry.key ? accent : muted,
-                    ),
-                    const SizedBox(height: 8),
-                    Copy(
-                      entry.key,
-                      size: 10,
-                      color: root == entry.key ? accent : muted,
-                    ),
-                  ],
+    child: SingleChildScrollView(
+      child: Column(
+        children: [
+          const SizedBox(height: 26),
+          const Glyph('home', size: 28, color: accent),
+          const SizedBox(height: 64),
+          for (final entry in const {
+            'Devices': 'home',
+            'Platforms': 'platform',
+            'Settings': 'settings',
+          }.entries)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: InkWell(
+                onTap: () => onAction(entry.key),
+                child: Container(
+                  width: 64,
+                  constraints: const BoxConstraints(minHeight: 72),
+                  padding: const EdgeInsets.only(top: 16, bottom: 10),
+                  decoration: BoxDecoration(
+                    color: root == entry.key ? const Color(0xffe7d3c4) : null,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Glyph(
+                        entry.value,
+                        size: 22,
+                        color: root == entry.key ? accent : muted,
+                      ),
+                      const SizedBox(height: 10),
+                      Copy(
+                        entry.key,
+                        size: 10,
+                        color: root == entry.key ? accent : muted,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     ),
   );
 }
@@ -614,119 +657,332 @@ class DeviceHome extends StatelessWidget {
   final Widget? cards;
   final List<String>? roomNames;
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      Row(
+  Widget build(BuildContext context) {
+    if (MediaQuery.textScalerOf(context).scale(13) <= 13) {
+      final labels =
+          roomNames ?? const ['All', 'Living Room', 'Bedroom', 'Bathroom'];
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Copy('My home', size: 16, bold: true),
-          const SizedBox(width: 8),
-          const Icon(Icons.keyboard_arrow_down, size: 16),
-          const Spacer(),
           SizedBox(
-            height: 32,
-            child: IconAction(
-              'settings',
-              'Manage rooms',
-              () => onAction('Manage rooms'),
-              color: muted,
-            ),
-          ),
-        ],
-      ),
-      const SizedBox(height: 14),
-      SizedBox(
-        height: 28 + MediaQuery.textScalerOf(context).scale(13),
-        child: ListView(
-          scrollDirection: Axis.horizontal,
-          children: [
-            for (final label
-                in roomNames ??
-                    const ['All', 'Living Room', 'Bedroom', 'Bathroom'])
-              Padding(
-                padding: const EdgeInsets.only(right: 18),
-                child: InkWell(
-                  onTap: () => onAction('room:$label'),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Copy(
-                        label,
-                        color:
-                            label == (mode == 'living' ? 'Living Room' : filter)
-                            ? ink
-                            : muted,
-                        bold:
-                            label ==
-                            (mode == 'living' ? 'Living Room' : filter),
-                      ),
-                      const SizedBox(height: 12),
-                      if (label == (mode == 'living' ? 'Living Room' : filter))
-                        Container(
-                          height: 3,
-                          width: label.length < 4 ? 18 : 58,
-                          decoration: BoxDecoration(
-                            color: accent,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                    ],
+            height: 46,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Positioned(
+                  left: 0,
+                  top: 0,
+                  child: Copy('My home', size: 16, bold: true),
+                ),
+                const Positioned(left: 81, top: 0, child: Copy('⌄', size: 16)),
+                Positioned(
+                  right: -12,
+                  top: -15,
+                  width: 48,
+                  height: 48,
+                  child: IconButton(
+                    tooltip: 'Manage rooms',
+                    onPressed: () => onAction('Manage rooms'),
+                    icon: const Glyph('settings', size: 20, color: muted),
                   ),
                 ),
-              ),
-          ],
-        ),
-      ),
-      Row(
-        children: [
-          Copy(
-            cards != null
-                ? 'Devices'
-                : mode == 'living'
-                ? '2 devices'
-                : '4 devices',
-            size: 11,
-            color: muted,
+              ],
+            ),
           ),
-          const Spacer(),
-          Flexible(
-            child: InkWell(
-              onTap: () => onAction('Inspect cached state'),
-              child: Copy(
-                cards != null
-                    ? 'Saved locally'
-                    : mode == 'cached'
-                    ? 'Cached · 2h ago'
-                    : 'Updated just now',
-                size: 11,
+          SizedBox(
+            height: 49,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                for (var i = 0; i < labels.length; i++)
+                  SizedBox(
+                    width: roomNames == null
+                        ? [45.0, 104.0, 90.0, 90.0][i]
+                        : null,
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        right: roomNames == null ? 0 : 18,
+                      ),
+                      child: InkWell(
+                        onTap: () => onAction('room:${labels[i]}'),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Copy(
+                              labels[i],
+                              bold:
+                                  labels[i] ==
+                                  (mode == 'living' ? 'Living Room' : filter),
+                              color:
+                                  labels[i] ==
+                                      (mode == 'living'
+                                          ? 'Living Room'
+                                          : filter)
+                                  ? ink
+                                  : muted,
+                            ),
+                            const SizedBox(height: 6.8),
+                            if (labels[i] ==
+                                (mode == 'living' ? 'Living Room' : filter))
+                              Container(
+                                width: labels[i] == 'All' ? 17 : 58,
+                                height: 3,
+                                decoration: BoxDecoration(
+                                  color: accent,
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 26,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  child: Copy(
+                    cards != null
+                        ? 'Devices'
+                        : mode == 'living'
+                        ? '2 devices'
+                        : '4 devices',
+                    size: 11,
+                    color: muted,
+                  ),
+                ),
+                Positioned(
+                  right: 24,
+                  top: 0,
+                  child: InkWell(
+                    onTap: () => onAction('Inspect cached state'),
+                    child: Copy(
+                      cards != null
+                          ? 'Saved locally'
+                          : mode == 'cached'
+                          ? 'Cached · 2h ago'
+                          : 'Updated just now',
+                      size: 11,
+                      color: muted,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  right: -15,
+                  top: -17,
+                  width: 48,
+                  height: 48,
+                  child: IconButton(
+                    tooltip: 'Refresh State',
+                    onPressed: () => onAction('Refresh State'),
+                    icon: const Glyph('refresh', size: 16, color: muted),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          cards ??
+              DeviceGrid(
+                keys: mode == 'living'
+                    ? const ['lamp', 'tv']
+                    : mode == 'large'
+                    ? const ['ac', 'lamp']
+                    : const ['ac', 'lamp', 'tv', 'sensor'],
+                onAction: onAction,
+                cached: mode == 'cached',
+                large: mode == 'large',
+              ),
+          if (cards == null && mode == 'large') ...[
+            const SizedBox(height: 20),
+            const Copy('2 more devices below', size: 14, color: muted),
+          ],
+        ],
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            const Copy('My home', size: 16, bold: true),
+            const SizedBox(width: 8),
+            const Icon(Icons.keyboard_arrow_down, size: 16),
+            const Spacer(),
+            SizedBox(
+              height: 32,
+              child: IconAction(
+                'settings',
+                'Manage rooms',
+                () => onAction('Manage rooms'),
                 color: muted,
               ),
             ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        SizedBox(
+          height: 28 + MediaQuery.textScalerOf(context).scale(13),
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: [
+              for (final label
+                  in roomNames ??
+                      const ['All', 'Living Room', 'Bedroom', 'Bathroom'])
+                Padding(
+                  padding: const EdgeInsets.only(right: 18),
+                  child: InkWell(
+                    onTap: () => onAction('room:$label'),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Copy(
+                          label,
+                          color:
+                              label ==
+                                  (mode == 'living' ? 'Living Room' : filter)
+                              ? ink
+                              : muted,
+                          bold:
+                              label ==
+                              (mode == 'living' ? 'Living Room' : filter),
+                        ),
+                        const SizedBox(height: 12),
+                        if (label ==
+                            (mode == 'living' ? 'Living Room' : filter))
+                          Container(
+                            height: 3,
+                            width: label.length < 4 ? 18 : 58,
+                            decoration: BoxDecoration(
+                              color: accent,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
           ),
-          SizedBox(
-            width: 26,
-            height: 26,
-            child: IconButton(
-              padding: EdgeInsets.zero,
-              tooltip: 'Refresh State',
-              onPressed: () => onAction('Refresh State'),
-              icon: const Glyph('refresh', size: 16, color: muted),
+        ),
+        Row(
+          children: [
+            Copy(
+              cards != null
+                  ? 'Devices'
+                  : mode == 'living'
+                  ? '2 devices'
+                  : '4 devices',
+              size: 11,
+              color: muted,
             ),
-          ),
+            const Spacer(),
+            Flexible(
+              child: InkWell(
+                onTap: () => onAction('Inspect cached state'),
+                child: Copy(
+                  cards != null
+                      ? 'Saved locally'
+                      : mode == 'cached'
+                      ? 'Cached · 2h ago'
+                      : 'Updated just now',
+                  size: 11,
+                  color: muted,
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 26,
+              height: 26,
+              child: IconButton(
+                padding: EdgeInsets.zero,
+                tooltip: 'Refresh State',
+                onPressed: () => onAction('Refresh State'),
+                icon: const Glyph('refresh', size: 16, color: muted),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        cards ??
+            DeviceGrid(
+              keys: mode == 'living'
+                  ? const ['lamp', 'tv']
+                  : mode == 'large'
+                  ? const ['ac', 'lamp']
+                  : const ['ac', 'lamp', 'tv', 'sensor'],
+              onAction: onAction,
+              cached: mode == 'cached',
+              large: mode == 'large',
+            ),
+        if (cards == null && mode == 'large') ...[
+          const SizedBox(height: 20),
+          const Copy('2 more devices below', size: 14, color: muted),
         ],
+      ],
+    );
+  }
+}
+
+class _StatusChrome extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = ink;
+    for (var i = 0; i < 4; i++) {
+      canvas.drawRRect(
+        RRect.fromLTRBR(
+          size.width - 69 + i * 4,
+          25 - i * 2,
+          size.width - 67 + i * 4,
+          28,
+          const Radius.circular(1),
+        ),
+        paint,
+      );
+    }
+    canvas.drawRRect(
+      RRect.fromLTRBR(
+        size.width - 44,
+        18,
+        size.width - 24,
+        28,
+        const Radius.circular(3),
       ),
-      const SizedBox(height: 10),
-      cards ??
-          DeviceGrid(
-            keys: mode == 'living'
-                ? const ['lamp', 'tv']
-                : const ['ac', 'lamp', 'tv', 'sensor'],
-            onAction: onAction,
-            cached: mode == 'cached',
-            large: mode == 'large',
-          ),
-    ],
-  );
+      paint
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1,
+    );
+    paint.style = PaintingStyle.fill;
+    canvas.drawRRect(
+      RRect.fromLTRBR(
+        size.width - 42,
+        20,
+        size.width - 27,
+        26,
+        const Radius.circular(1),
+      ),
+      paint,
+    );
+    canvas.drawRRect(
+      RRect.fromLTRBR(
+        size.width - 23,
+        21,
+        size.width - 21,
+        25,
+        const Radius.circular(1),
+      ),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _StatusChrome oldDelegate) => false;
 }
 
 /// Isolated, explicitly labelled visual fixtures. Never constructed with a native client.

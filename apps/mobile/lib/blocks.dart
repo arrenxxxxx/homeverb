@@ -36,7 +36,7 @@ class Blocks extends StatelessWidget {
         );
       case 'section':
         return Padding(
-          padding: const EdgeInsets.fromLTRB(3, 4, 3, 11),
+          padding: const EdgeInsets.fromLTRB(3, 4, 3, 7),
           child: Copy(b[1], size: 10, color: muted, bold: true),
         );
       case 'link':
@@ -45,7 +45,8 @@ class Blocks extends StatelessWidget {
           child: TextButton(
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 2),
-              minimumSize: const Size(48, 48),
+              minimumSize: const Size(48, 40.2),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             onPressed: () => onAction(b[1]),
             child: Copy(b[1], color: accent, bold: true),
@@ -70,14 +71,15 @@ class Blocks extends StatelessWidget {
           () => TextEditingController(text: b[2]),
         );
         return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
+          padding: EdgeInsets.only(bottom: b.length > 3 ? 2 : 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Copy(label, size: 12, color: muted),
-              const SizedBox(height: 9),
+              const SizedBox(height: 5.2),
               Surface(
                 radius: 14,
+                border: b.length > 3 ? const Color(0xffae452d) : null,
                 child: TextField(
                   controller: field,
                   key: ValueKey('field:$label'),
@@ -88,7 +90,11 @@ class Blocks extends StatelessWidget {
                           signed: true,
                         )
                       : TextInputType.text,
-                  style: const TextStyle(fontSize: 15),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    height: 4 / 3,
+                    letterSpacing: 0,
+                  ),
                   decoration: InputDecoration(
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 15,
@@ -111,7 +117,7 @@ class Blocks extends StatelessWidget {
               ),
               if (b.length > 3)
                 Padding(
-                  padding: const EdgeInsets.only(top: 8),
+                  padding: const EdgeInsets.only(top: 9),
                   child: Copy(b[3], size: 12, color: const Color(0xff9e3421)),
                 ),
             ],
@@ -187,6 +193,67 @@ class Blocks extends StatelessWidget {
         );
       case 'chips':
       case 'tabs':
+        if (MediaQuery.textScalerOf(context).scale(12) <= 12) {
+          return Wrap(
+            spacing: 7,
+            children: List.generate((b[1] as List).length, (i) {
+              final label = b[1][i] as String;
+              final selected = type == 'tabs'
+                  ? i == (choices['tabs'] ?? b[2])
+                  : label == '3';
+              final measure = TextPainter(
+                text: TextSpan(
+                  text: label,
+                  style: const TextStyle(fontFamily: 'Inter', fontSize: 12),
+                ),
+                textDirection: Directionality.of(context),
+              )..layout();
+              final width = measure.width + 24;
+              measure.dispose();
+              return Semantics(
+                selected: selected,
+                button: true,
+                child: SizedBox(
+                  width: width,
+                  height: 48,
+                  child: InkWell(
+                    onTap: () {
+                      choices['tabs'] = i;
+                      onAction(label);
+                      onChanged?.call();
+                    },
+                    child: Stack(
+                      children: [
+                        Positioned(
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          height: 32,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: selected ? ink : const Color(0xfff8f5ee),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          top: 10,
+                          left: 12,
+                          right: 12,
+                          child: Copy(
+                            label,
+                            size: 12,
+                            color: selected ? Colors.white : muted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }),
+          );
+        }
         return Padding(
           padding: const EdgeInsets.only(bottom: 15),
           child: Wrap(
@@ -228,10 +295,18 @@ class Blocks extends StatelessWidget {
                 child: Stack(
                   children: [
                     Positioned(
-                      top: 13,
-                      left: 75,
-                      right: 75,
-                      height: 87,
+                      top: ['ac', 'lamp', 'tv', 'sensor'].contains(b[1])
+                          ? 13
+                          : 27,
+                      left: ['ac', 'lamp', 'tv', 'sensor'].contains(b[1])
+                          ? 75
+                          : 0,
+                      right: ['ac', 'lamp', 'tv', 'sensor'].contains(b[1])
+                          ? 75
+                          : 0,
+                      height: ['ac', 'lamp', 'tv', 'sensor'].contains(b[1])
+                          ? 87
+                          : 52,
                       child: product(b[1]),
                     ),
                     Positioned(
@@ -288,6 +363,54 @@ class Blocks extends StatelessWidget {
           'neutral': [Color(0xffe7ebea), Color(0xff4c6067)],
         };
         final colors = palette[b[3]]!;
+        if (MediaQuery.textScalerOf(context).scale(13) <= 13) {
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final text = TextPainter(
+                text: TextSpan(
+                  text: b[2],
+                  style: const TextStyle(fontFamily: 'Inter', fontSize: 12),
+                ),
+                textDirection: Directionality.of(context),
+              )..layout();
+              final lines = (text.width / (constraints.maxWidth - 32))
+                  .ceil()
+                  .clamp(1, 100);
+              text.dispose();
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 13),
+                child: Container(
+                  height: 52 + lines * 17.0,
+                  decoration: BoxDecoration(
+                    color: colors[0],
+                    borderRadius: BorderRadius.circular(17),
+                  ),
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        top: 15,
+                        left: 16,
+                        right: 16,
+                        child: Copy(
+                          b[1],
+                          size: 14,
+                          bold: true,
+                          color: colors[1],
+                        ),
+                      ),
+                      Positioned(
+                        top: 39,
+                        left: 16,
+                        right: 16,
+                        child: Copy(b[2], size: 12, color: colors[1]),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        }
         return Padding(
           padding: const EdgeInsets.only(bottom: 13),
           child: Container(
@@ -328,6 +451,63 @@ class Blocks extends StatelessWidget {
       case 'slider':
         final label = b[1] as String,
             value = values[b[1]] ?? (b[3] as num).toDouble();
+        Widget slider() => SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            trackHeight: 5,
+            activeTrackColor: accent,
+            inactiveTrackColor: const Color(0xffd5d6cf),
+            thumbShape: const WindowSliderThumb(),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            trackShape: const RoundedRectSliderTrackShape(),
+          ),
+          child: Slider(
+            value: value.clamp(0, 1),
+            semanticFormatterCallback: (v) => '$label ${(v * 100).round()}',
+            onChanged: (v) {
+              values[label] = v;
+              onChanged?.call();
+            },
+            onChangeEnd: (_) => onAction('slider:$label'),
+          ),
+        );
+        if (MediaQuery.textScalerOf(context).scale(13) <= 13) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 13),
+            child: Surface(
+              radius: 18,
+              child: SizedBox(
+                height: 94,
+                child: Stack(
+                  children: [
+                    Positioned(
+                      top: 16,
+                      left: 16,
+                      right: 16,
+                      child: Row(
+                        children: [
+                          Expanded(child: Copy(label)),
+                          Copy(
+                            values.containsKey(label)
+                                ? '${(value * 100).round()}'
+                                : b[2],
+                            bold: true,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Positioned(
+                      top: 39.5,
+                      left: 0,
+                      right: 0,
+                      height: 48,
+                      child: slider(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
         return Padding(
           padding: const EdgeInsets.only(bottom: 13),
           child: Surface(
@@ -348,14 +528,7 @@ class Blocks extends StatelessWidget {
                     ],
                   ),
                 ),
-                Slider(
-                  value: value.clamp(0, 1),
-                  onChanged: (v) {
-                    values[label] = v;
-                    onChanged?.call();
-                  },
-                  onChangeEnd: (_) => onAction('slider:$label'),
-                ),
+                slider(),
               ],
             ),
           ),
@@ -365,6 +538,21 @@ class Blocks extends StatelessWidget {
           [b[1], '−       ${b[2]}       +'],
         ], onAction: onAction);
       case 'code':
+        if (MediaQuery.textScalerOf(context).scale(13) <= 13) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 15),
+            child: Surface(
+              radius: 20,
+              child: SizedBox(
+                height: 94,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 31),
+                  child: Copy(b[1], size: 32, bold: true, center: true),
+                ),
+              ),
+            ),
+          );
+        }
         return Padding(
           padding: const EdgeInsets.only(bottom: 15),
           child: Surface(
@@ -374,11 +562,106 @@ class Blocks extends StatelessWidget {
           ),
         );
       case 'devices':
-        return DeviceGrid(
-          keys: (b[1] as List).cast<String>(),
-          onAction: onAction,
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 14),
+          child: DeviceGrid(
+            keys: (b[1] as List).cast<String>(),
+            onAction: onAction,
+          ),
         );
       case 'skin':
+        if (MediaQuery.textScalerOf(context).scale(13) <= 13) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: Surface(
+              border: accent,
+              child: SizedBox(
+                height: 205,
+                child: Stack(
+                  children: [
+                    Positioned(
+                      left: 12,
+                      right: 12,
+                      top: 12,
+                      height: 135,
+                      child: FittedBox(
+                        child: SizedBox(
+                          width: 166,
+                          height: 100,
+                          child: LightBackground(
+                            child: Stack(
+                              children: [
+                                const Positioned(
+                                  left: 10,
+                                  top: 12,
+                                  width: 65,
+                                  height: 76,
+                                  child: Surface(
+                                    dark: true,
+                                    radius: 12,
+                                    child: SizedBox(),
+                                  ),
+                                ),
+                                const Positioned(
+                                  left: 84,
+                                  top: 12,
+                                  width: 71,
+                                  height: 76,
+                                  child: Surface(radius: 12, child: SizedBox()),
+                                ),
+                                Positioned(
+                                  left: 17,
+                                  top: 23,
+                                  width: 52,
+                                  height: 30,
+                                  child: product('ac'),
+                                ),
+                                Positioned(
+                                  left: 104,
+                                  top: 20,
+                                  width: 31,
+                                  height: 47,
+                                  child: product('lamp'),
+                                ),
+                                Positioned(
+                                  left: 22,
+                                  top: 65,
+                                  width: 40,
+                                  height: 7,
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      color: accent,
+                                      borderRadius: BorderRadius.circular(3),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const Positioned(
+                      left: 18,
+                      top: 159,
+                      child: Copy('Window Light', size: 17, bold: true),
+                    ),
+                    const Positioned(
+                      right: 18,
+                      top: 162,
+                      child: Copy(
+                        'Current',
+                        size: 12,
+                        color: accent,
+                        bold: true,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
         return Padding(
           padding: const EdgeInsets.only(bottom: 16),
           child: Surface(
@@ -468,7 +751,7 @@ class Rows extends StatelessWidget {
         children: [
           if (title != null)
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 13, 16, 7),
+              padding: const EdgeInsets.fromLTRB(16, 13, 16, 1.4),
               child: Copy(title!, size: 14, bold: true),
             ),
           for (var i = 0; i < items.length; i++) ...[
@@ -476,7 +759,7 @@ class Rows extends StatelessWidget {
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 child: Divider(
-                  height: .6,
+                  height: 0,
                   thickness: .6,
                   color: Color(0xffdeded7),
                 ),
@@ -521,13 +804,26 @@ class Rows extends StatelessWidget {
                                     ),
                                   ],
                                 )
+                              : value.contains('≡')
+                              ? Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Copy(
+                                      value.replaceAll('≡', '').trim(),
+                                      size: 12,
+                                      color: muted,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    const Glyph('drag', size: 20, color: muted),
+                                  ],
+                                )
                               : Copy(value, size: 12, color: muted);
                           if (!toggle && estimate > c.maxWidth - 18)
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 leading,
-                                const SizedBox(height: 9),
+                                SizedBox(height: scale <= 1 ? 3 : 9),
                                 trailing,
                               ],
                             );
@@ -566,65 +862,157 @@ class Climate extends StatelessWidget {
   final String mode, freshness;
   final bool enabled;
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: 12),
-    child: Surface(
-      dark: true,
-      padding: const EdgeInsets.fromLTRB(31, 22, 31, 13),
-      child: Column(
-        children: [
-          const Copy(
-            'OBSERVED TARGET',
-            size: 10,
-            color: Color(0xffd3d1ca),
-            bold: true,
-          ),
-          const SizedBox(height: 15),
-          InkWell(
-            onTap: () => onAction('Target temperature'),
-            child: Copy(
-              target.isNaN
-                  ? '—'
-                  : '${target == target.roundToDouble() ? target.toInt() : target}°',
-              size: 68,
-              color: const Color(0xfffffaf2),
-              center: true,
+  Widget build(BuildContext context) {
+    if (MediaQuery.textScalerOf(context).scale(13) <= 13) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Surface(
+          dark: true,
+          child: SizedBox(
+            height: 218,
+            child: Stack(
+              children: [
+                const Positioned(
+                  top: 22,
+                  left: 0,
+                  right: 0,
+                  child: Copy(
+                    'OBSERVED TARGET',
+                    size: 10,
+                    color: Color(0xffd3d1ca),
+                    bold: true,
+                    center: true,
+                  ),
+                ),
+                Positioned(
+                  top: 52,
+                  left: 0,
+                  right: 0,
+                  child: InkWell(
+                    onTap: () => onAction('Target temperature'),
+                    child: Copy(
+                      target.isNaN
+                          ? '—'
+                          : '${target == target.roundToDouble() ? target.toInt() : target}°',
+                      size: 68,
+                      color: const Color(0xfffffaf2),
+                      center: true,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 134,
+                  left: 20,
+                  right: 20,
+                  child: Copy(
+                    mode,
+                    size: 14,
+                    color: const Color(0xffe0ddd5),
+                    center: true,
+                  ),
+                ),
+                Positioned(
+                  top: 161,
+                  left: 30,
+                  child: _step('−', 'Decrease target', const Color(0xff535452)),
+                ),
+                Positioned(
+                  top: 161,
+                  right: 30,
+                  child: _step(
+                    '+',
+                    'Increase target',
+                    enabled ? accent : const Color(0xff535452),
+                  ),
+                ),
+                Positioned(
+                  top: 179,
+                  left: 80,
+                  right: 80,
+                  child: Copy(
+                    freshness,
+                    size: 10,
+                    color: const Color(0xffd3d1ca),
+                    center: true,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 10),
-          Copy(mode, size: 14, color: const Color(0xffe0ddd5), center: true),
-          const SizedBox(height: 17),
-          Row(
-            children: [
-              _step('−', 'Decrease target', const Color(0xff535452)),
-              Expanded(
-                child: Copy(
-                  freshness,
-                  size: 10,
-                  color: const Color(0xffd3d1ca),
-                  center: true,
-                ),
+        ),
+      );
+    }
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Surface(
+        dark: true,
+        padding: const EdgeInsets.fromLTRB(31, 22, 31, 13),
+        child: Column(
+          children: [
+            const Copy(
+              'OBSERVED TARGET',
+              size: 10,
+              color: Color(0xffd3d1ca),
+              bold: true,
+            ),
+            const SizedBox(height: 15),
+            InkWell(
+              onTap: () => onAction('Target temperature'),
+              child: Copy(
+                target.isNaN
+                    ? '—'
+                    : '${target == target.roundToDouble() ? target.toInt() : target}°',
+                size: 68,
+                color: const Color(0xfffffaf2),
+                center: true,
               ),
-              _step('+', 'Increase target', accent),
-            ],
-          ),
-        ],
+            ),
+            const SizedBox(height: 10),
+            Copy(mode, size: 14, color: const Color(0xffe0ddd5), center: true),
+            const SizedBox(height: 17),
+            Row(
+              children: [
+                _step('−', 'Decrease target', const Color(0xff535452)),
+                Expanded(
+                  child: Copy(
+                    freshness,
+                    size: 10,
+                    color: const Color(0xffd3d1ca),
+                    center: true,
+                  ),
+                ),
+                _step('+', 'Increase target', accent),
+              ],
+            ),
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
+
   Widget _step(String text, String label, Color color) => Semantics(
     label: label,
     button: true,
     child: SizedBox(
       width: 48,
-      height: 40,
-      child: FilledButton(
-        style: FilledButton.styleFrom(
-          padding: EdgeInsets.zero,
-          backgroundColor: color,
+      height: 48,
+      child: InkWell(
+        onTap: enabled ? () => onAction(label) : null,
+        borderRadius: BorderRadius.circular(24),
+        child: Center(
+          child: Container(
+            width: 47,
+            height: 40,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Copy(text, size: 24, color: Colors.white, center: true),
+            ),
+          ),
         ),
-        onPressed: enabled ? () => onAction(label) : null,
-        child: Text(text, style: const TextStyle(fontSize: 24)),
       ),
     ),
   );
@@ -662,7 +1050,7 @@ class DeviceGrid extends StatelessWidget {
       final width = (c.maxWidth - (columns - 1) * 12) / columns;
       return Wrap(
         spacing: 12,
-        runSpacing: 14,
+        runSpacing: large ? 16 : 14,
         children: List.generate(
           keys.length,
           (i) => SizedBox(
@@ -716,8 +1104,8 @@ class DeviceTile extends StatelessWidget {
             dimension: 48,
             child: Center(
               child: Container(
-                width: 42,
-                height: 42,
+                width: large ? 48 : 42,
+                height: large ? 48 : 42,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: active ? accent : const Color(0xffe0ddd5),
@@ -725,7 +1113,7 @@ class DeviceTile extends StatelessWidget {
                 child: Center(
                   child: Glyph(
                     'power',
-                    size: 22,
+                    size: large ? 24 : 22,
                     color: active ? Colors.white : ink,
                   ),
                 ),
@@ -843,7 +1231,11 @@ class DeviceTile extends StatelessWidget {
             ),
           ),
           if (kind != 'sensor')
-            Positioned(right: 8, bottom: 19, child: power()),
+            Positioned(
+              right: large ? 14 : 8,
+              bottom: large ? 15 : 19,
+              child: power(),
+            ),
           Positioned(
             right: 0,
             top: 0,
