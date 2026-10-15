@@ -622,6 +622,14 @@ Visible content: Local authorization and associated cached data will be removed.
 | Remove Locally | [P01](../output/prototypes/homeverb-window-light-v1/screens/P01.png) |
 | Cancel | [P09](../output/prototypes/homeverb-window-light-v1/screens/P09.png) |
 
+API 1.5 amendment: obtain `get_account`, show the linked-card count and actual scope,
+then pass that exact ID set to `remove_account` after confirmation. Only
+`data.status: removed` leads to P01. `pending` keeps the account visible with cleanup
+errors and explicit retry; changed scope requires another review, and shared-route
+removal is unavailable. Rooms and operation receipts remain. These are functional
+requirements; the rendered dialog does not establish their visual acceptance.
+Provider revocation remains unavailable.
+
 ### P12 — Revoke provider access
 
 [Rendered state](../output/prototypes/homeverb-window-light-v1/screens/P12.png) · Nested screen · Dialog over P09

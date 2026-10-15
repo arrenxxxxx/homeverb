@@ -11,7 +11,7 @@
 
 Hosts inject paths following platform application-directory conventions. Do not hardcode a user's home directory. Desktop CLI/MCP may share storage for the same explicit user/profile. Mobile sandboxes remain independent; there is no automatic sync.
 
-## Implemented schema 3
+## Implemented schema 4
 
 ```text
 devices(id, descriptor)
@@ -22,6 +22,7 @@ executions(request_id, command, result, finalized)
 retired_requests(request_id)
 profile_namespace(singleton, namespace)
 accounts(id, provider, region, label, credential_ref, credential_state)
+account_removals(id, record)
 ```
 
 The SQLite `user_version` records the schema version. Each profile has its own directory. Device descriptors include components, connections, and capabilities; aliases overlay the descriptor at read time. Rediscovery preserves preferences. Deleting a room sets its assignments to null without deleting devices or credentials. Card reads join devices and preferences in one consistent query. See [ADR-0009](adr/0009-local-organization-and-retention.md).
@@ -30,7 +31,7 @@ The SQLite `user_version` records the schema version. Each profile has its own d
 
 Batch room assignments resolve every selected device and destination inside one immediate transaction, then update only `room_id`. Any failure rolls back all selected devices. Responses follow request order without changing stored card order. No additional table or schema upgrade is needed.
 
-Account records contain only local references, provider/region, a local label, and `pending` or `stored` credential state. The profile namespace and account/credential references are random UUIDs persisted before credential writes. Account ID, provider, region, and credential reference cannot be rebound; rename changes only the label. Meiju's internal protected payload now stores exact subject matching and appliance-to-local-ID bindings; model-scoped descriptor publication is implemented; real reauthorization identity acceptance remains pending. JSON columns are not permission to hide secrets in the database. Export using explicit allowlists. See [ADR-0021](adr/0021-persistent-account-vault.md).
+Account records contain only local references, provider/region, a local label, and `pending`, `stored` or `removing` credential state. The profile namespace and account/credential references are random UUIDs persisted before credential writes. Account ID, provider, region, and credential reference cannot be rebound; rename changes only the label. Meiju's internal protected payload now stores exact subject matching and appliance-to-local-ID bindings; model-scoped descriptor publication is implemented; real reauthorization identity acceptance remains pending. JSON columns are not permission to hide secrets in the database. Export using explicit allowlists. See [ADR-0021](adr/0021-persistent-account-vault.md).
 
 ## Native credential storage
 
@@ -46,9 +47,32 @@ The local synthetic test verifies create/read/reopen/replace, profile isolation,
 
 Hold the account lease across session read, any future provider refresh, and replacement. `store_session` persists `pending` before calling the secure store, then records `stored` only after confirmed success. An interruption before finalization leaves pending and ordinary reads return `ACCOUNT_SESSION_UNCONFIRMED`. If the initial metadata update fails, no secret write starts. `stored` proves local persistence only; the adapter must still check expiry, provider identity and validity. A missing referenced secret returns `AUTH_REQUIRED`.
 
-Trusted recovery uses `inspect_session`, validates those exact bytes with the provider while retaining the lease, then calls `confirm_session`. Confirmation rereads and compares the bytes before marking stored, without repeating the secret mutation. A mismatch or absent entry remains unconfirmed. There is no automatic recovery, refresh or credential deletion. Native account methods include protected connection, explicit refresh, local list/details and rename. Rename uses the account lease and changes only the label, without secret access or a credential-state transition. Actual provider rotation, removal and mobile stores remain pending.
+Trusted recovery uses `inspect_session`, validates those exact bytes with the provider while retaining the lease, then calls `confirm_session`. Confirmation rereads and compares the bytes before marking stored, without repeating the secret mutation. A mismatch or absent entry remains unconfirmed. There is no automatic recovery, refresh or credential deletion. Explicit removal is described below. Native account methods include protected connection, explicit refresh, local list/details and rename. Rename uses the account lease and changes only the label, without secret access or a credential-state transition. Actual provider rotation and mobile stores remain pending.
 
 The [Meiju private account layer](../crates/midea/src/account.rs) stores its versioned session and identity map together under the leased credential reference. A complete payload is bound to the immutable local account/provider/region/reference. New appliance IDs receive random local device, cloud-connection and identity-reference IDs before descriptor publication. Reauthorization requires the same provider-validated subject; no subject or appliance identifier is written to SQLite. Every changed map uses the same pending/stored transition as session replacement. Uncertain saves return no generated bindings and require explicit recovery; unchanged maps do not rewrite credentials. Missing or malformed protected state cannot be reset through an existing lease. See [ADR-0024](adr/0024-meiju-private-device-bindings.md) for account scope and remaining cross-account identity work.
+
+## Explicit account cleanup
+
+[ADR-0028](adr/0028-local-account-removal.md) coordinates removal under the profile
+registration lock and account lease. An immediate transaction checks the reviewed
+ID set, refuses cards with other account/provider routes, saves a removal ledger
+entry and sets `removing`. Only then may the secret store be inspected/deleted.
+Ordinary leases refuse `removing`; it cannot be reactivated by changing credential
+state. A later transaction removes the account, cards/preferences/snapshots and
+marks the ledger complete. Rooms, detailed receipts and retired request IDs remain,
+including active receipts still finalizing. No transaction spans secret-store I/O.
+
+The ledger retains only local account/device IDs, provider/region and completion.
+It rejects late descriptor saves referencing that account and answers repeated
+removal without secret access. Snapshot saves check device existence and the same
+ledger in their write transaction, preventing late reads from recreating cache.
+Ledger entries grow with explicit removals and are not erased automatically.
+
+Cleanup errors leave visible intent; explicit retry reads the exact credential
+reference before any deletion. An absent secret needs no second delete. Startup
+never resumes cleanup. Removal does not revoke vendor grants, affect copies elsewhere
+or erase backups/retained receipts. Reconnecting receives new local IDs. See the
+[native removal contract](native-ui-contract.md#remove-an-account-from-this-installation).
 
 ## Concurrency
 
@@ -72,6 +96,6 @@ Device-specific history filters the command's exact device ID in SQLite before l
 
 Startup recovery finalizes orphaned pending records only after acquiring their device locks. Records owned by a live writer are left active. Recovery preserves their last known outcomes and never sends commands. A failed final journal update can leave an older conservative receipt even when the caller received stronger evidence.
 
-New empty profiles initialize schema 3. Schema 1 and 2 upgrades take a consistent, WAL-aware SQLite backup under `backups/schema-<previous-version>-<uuid>.sqlite3`, check its integrity, and sync it before a transactional migration. Failure preserves the old schema and completed backup. Newer versions and unversioned foreign databases are refused. Existing stores hold shared migration leases; an upgrade requires exclusive access and returns `RESOURCE_BUSY` on conflict. Close older clients before upgrading, including versions that predate migration locks. Schema-2 binaries reject schema 3; do not alternate older and newer binaries on an upgraded profile. Backups are retained locally and may contain older detailed history; they contain no credentials in the current schema.
+New empty profiles initialize schema 4. Schema 1, 2 and 3 upgrades take a consistent, WAL-aware SQLite backup under `backups/schema-<previous-version>-<uuid>.sqlite3`, check its integrity, and sync it before a transactional migration. Failure preserves the old schema and completed backup. Newer versions and unversioned foreign databases are refused. Existing stores hold shared migration leases; an upgrade requires exclusive access and returns `RESOURCE_BUSY` on conflict. Close older clients before upgrading, including versions that predate migration locks. Schema-3 binaries reject schema 4; do not alternate older and newer binaries on an upgraded profile. Backups are retained locally and may contain older detailed history; they contain no credentials in the current schema.
 
 Profile deletion is not an implemented command. A future deletion flow must remove its local records and secret-store entries. Do not promise reliable erasure of OS backups or vendor-cloud data.

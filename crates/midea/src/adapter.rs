@@ -247,6 +247,17 @@ impl MeijuAdapter {
         Ok(lease.record().clone())
     }
 
+    pub async fn remove_account(
+        &self,
+        id: Uuid,
+        expected_device_ids: &[String],
+        operation: &Operation,
+    ) -> Result<homeverb_core::AccountRemovalResult> {
+        self.vault
+            .remove_account(id, PROVIDER, "CN", expected_device_ids, operation)
+            .await
+    }
+
     pub async fn connect_devices(
         &self,
         credentials: LoginCredentials,

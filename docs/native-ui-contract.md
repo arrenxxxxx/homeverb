@@ -1,4 +1,4 @@
-# Native UI contract 1.4
+# Native UI contract 1.5
 
 Status: implemented Linux native contract, October 15, 2026, with Mock, default read-only Meiju startup, protected account connection and scoped experimental AC power grants. Six real devices passed the native read path; phone packaging and complete provider/physical acceptance remain pending. See [ADR-0019](adr/0019-native-ui-contract.md).
 
@@ -16,7 +16,7 @@ The seven C functions in [homeverb.h](../crates/ffi/include/homeverb.h) remain t
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects saved-account cloud reads. `scenario` defaults to `normal`. Meiju requires `allow_mock_writes: false` and rejects any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms `homeverb.mock` or `midea.meiju`. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.4.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.5.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -58,6 +58,7 @@ All rows use query envelopes except the two execution methods. The schemas and a
 | `list_accounts` | None | Local account summaries; no credentials or network work |
 | `get_account` | `account_id` | `{account, device_ids}` from local metadata; no authorization check |
 | `rename_account` | `account_id`, `label` | Updated local AccountSummary; no credential or permission changes |
+| `remove_account` | `account_id`, `expected_device_ids` | Local cleanup result: `removed` or `pending`; inspect the inner error |
 | `refresh_account` | `account_id` | Account and retrieval/publication result; no login |
 | `list_devices` | None | Device array from local storage |
 | `discover` | None | Local Device array after selected-adapter discovery; Mock or model-scoped Meiju |
@@ -90,7 +91,7 @@ Prefer exact device IDs even where lookup accepts an alias. Resolve a capability
 | D01–D12, R01–R05: cards, search, rooms, local organization | Device/room methods above | Flutter filtering, loading/errors, accessibility and layouts. Metadata writes preserve routes and grants |
 | C01–C14: dynamic controls, history and outcomes | Describe/read/plan/execute/batch/receipt methods | Render exact capabilities; default Meiju discovery has read-only AC/fridge/dishwasher mappings; native power grants may admit experimental AC on/off. Other consequential real approvals remain unavailable |
 | A01–A08: device discovery and addition | Explicit selected-adapter `discover`, including saved-account Meiju cloud retrieval | Real pairing, mobile permissions and safe identity merge remain unavailable. No merge API exists |
-| P01–P13: platforms, accounts, authorization and removal | `list_accounts`, `get_account`, `rename_account`, `refresh_account`, and separate `homeverb_connect_account` | Flutter protected input, result/error presentation and phone secure stores; removal, revocation and recovery UI remain unavailable |
+| P01–P13: platforms, accounts, authorization and removal | `list_accounts`, `get_account`, `rename_account`, `remove_account`, `refresh_account`, and separate `homeverb_connect_account` | Flutter protected input, cleanup confirmation/recovery and phone secure stores; provider revocation remains unavailable |
 | H01–H16: nearby authorization sharing | No sharing methods in this version | Eligibility, peer discovery, code verification, scope, consent, conflict/import and transfer records require ADR-0008 implementation |
 | S02/S11: Window Light appearance | Flutter-owned private preferences | Persist `window_light`, fallback to it, and provide one preview; no native theme API or download capability is needed |
 | S03/S10, D07: sharing name and route choices | Flutter-owned private preferences plus explicit Command/ReadState `connection` | Store only nonsensitive display preferences. Resolve device > installation > `auto`; Core still enforces allowed routes. Do not add route fields to `set_device_preferences`. A saved sharing name does not start advertising |
@@ -230,9 +231,70 @@ callback instead of assuming the name stayed unchanged.
 
 The [account examples](../packages/native-contract/account-examples.json) include
 both request/result shapes. Libraries before 1.4 reject these new methods; check
-the method catalog before enabling the corresponding UI actions. Existing method
-payloads, seven C symbols, SQLite schema 3 and appliance execution are unchanged.
-Local removal and provider revocation remain separate, unavailable operations.
+the method catalog before enabling the corresponding UI actions. The API 1.4
+metadata additions preserved existing payloads, seven C symbols, SQLite schema 3
+and appliance execution.
+API 1.5 adds local removal below. Provider revocation remains unavailable.
+
+## Remove an account from this installation
+
+API 1.5.0 adds `remove_account` under [ADR-0028](adr/0028-local-account-removal.md).
+Use `get_account` to show the account and saved linked cards. Explain that local
+credentials, the account, those cards, their preferences and snapshots will be
+removed; rooms, operation receipts and replay-protection records remain. Other
+installations and provider authorization are unaffected. After user confirmation,
+send the exact reviewed set in `expected_device_ids`:
+
+```json
+{
+  "schema_version": "1.0",
+  "operation_id": "ui-remove-account-1",
+  "timeout_ms": 10000,
+  "request": {
+    "method": "remove_account",
+    "account_id": "00000000-0000-4000-8000-000000000001",
+    "expected_device_ids": ["00000000-0000-4000-8000-000000000002"]
+  }
+}
+```
+
+The set may be empty, contains at most 4096 distinct nonempty local IDs, and never
+expands implicitly. `ACCOUNT_SCOPE_CHANGED` requires reviewing and confirming the
+new scope; do not automatically replace the set and retry. A linked card with
+routes outside this account/provider returns `ACCOUNT_REMOVAL_UNSUPPORTED` without
+mutation. Account/registration lease contention returns `RESOURCE_BUSY`. Mock
+refuses the method; Meiju accepts only its admitted provider/region.
+
+Query data contains `account_id`, sorted `device_ids`, `status`,
+`remote_revocation: "not_attempted"`, and `error`:
+
+| Status | Meaning and next UI action |
+|---|---|
+| `removed`, null inner error | Local cleanup is complete. Reload cards/accounts; retain room and receipt views. |
+| `pending`, non-null inner error | Cleanup intent is saved, but credentials or metadata may remain. Display the error and offer **Retry local cleanup** explicitly. |
+| Outer query error | Admission or intent persistence failed; do not display success. Reload metadata after an interrupted caller. |
+
+After intent the account appears as `credential_state: "removing"`; ordinary session
+use and rename are refused. Local details remain readable without secrets. Pending
+cleanup may block new connections or cross-account inventory validation until it
+finishes. An explicit retry with the same scope checks the referenced secret before
+any deletion; an earlier successful but unconfirmed deletion is not repeated.
+Repeating completed removal returns its persisted result without opening the keyring.
+Startup never resumes deletion automatically. Background/cancel/close retains intent;
+forced termination promises no callback. Late discovery/cache saves cannot resurrect
+removed cards. Existing appliance receipts retain their outcomes and may still finish
+journal persistence after the account lease is released.
+
+Reconnecting after removal creates new local IDs, without recovering old aliases,
+room assignments or write grants. Removal is not secure erasure of backups, retained
+receipt metadata or OS storage pages. No provider-revocation option is supported.
+The [fictional examples](../packages/native-contract/account-examples.json) cover
+complete and pending results; English/Chinese catalogs provide scope and retry text.
+
+This version migrates SQLite 1/2/3 to 4 with a verified backup. Close older clients
+before opening the profile and update native/UI code together: schema-3 binaries
+refuse the upgrade, and strict older readers reject `removing`. The seven C symbols
+and appliance command/receipt schemas retain their meaning.
 
 ## Account connection and refresh
 
@@ -244,7 +306,7 @@ connection/refresh with `AUTH_FLOW_UNSUPPORTED`. Meiju currently admits mainland
 China only. No HomeVerb account or project server is involved.
 
 `list_accounts` returns local `id`, `provider`, `region`, `label`, `credential_state`
-(`pending` or `stored`) and `authorization: "not_checked"`. It never opens the secret
+(`pending`, `stored` or `removing`) and `authorization: "not_checked"`. It never opens the secret
 store or contacts the provider. A stored session is not proof of current authorization.
 No provider subject, credential reference, guessed masked login, permission scope
 or last-check timestamp is exposed. Display the local label as the account name.
@@ -324,9 +386,9 @@ inspect `retrieval.error`; an outer `error: null` does not mean devices were loa
 Core validates the complete descriptor batch before storage, but a later storage
 failure can leave earlier cards saved. Reload cards after errors; do not imply rollback.
 
-No account operation grants appliance writes, revokes a provider session, removes
-an account or enables sharing. Sharing and destructive cleanup still need their
-own reviewed contracts. Mobile secure stores and phone lifecycle remain unverified.
+Connection, refresh and local metadata methods grant no appliance writes or provider
+revocation. Only explicit removal cleans this installation's account. Sharing, mobile
+secure stores and phone lifecycle remain unverified.
 
 On October 15, 2026 a Linux C ABI run listed the owner's saved account and used
 `refresh_account` to publish six existing cards without login. All seven component
@@ -342,6 +404,6 @@ cargo test -p homeverb-host --test native_contract --offline --locked
 .venv/bin/python scripts/verify_native_contract.py
 ```
 
-The native suite calls all 26 catalog methods, checks their schemas, verifies closed-field rejection, null success, pre-admission errors, composite/batch results, all execution outcomes, cancellation, foreground gating and closed handles. It also validates the saved examples and Meiju startup/account admission guards, caller-buffer clearing, local detail/rename persistence and account counterexamples without a live account. `--write-examples` regenerates those examples only from a successful fictional run; review and commit the changes together with the contract. Existing full MVP tests still cover execution and persistence behavior.
+The native suite calls all 27 catalog methods, checks their schemas, verifies closed-field rejection, null success, pre-admission errors, composite/batch results, all execution outcomes, cancellation, foreground gating and closed handles. It also validates the saved examples and Meiju startup/account admission guards, caller-buffer clearing, local detail/rename persistence, removal admission/ledger replay and account counterexamples without a live account. `--write-examples` regenerates those examples only from a successful fictional run; review and commit the changes together with the contract. Existing full MVP tests still cover execution and persistence behavior.
 
 This is Linux native verification. Dart FFI allocation, worker scheduling, mobile library packaging, secure stores, system-browser lifecycle, and physical-phone behavior must be tested in the Flutter worktree. No Flutter build has been run for this delivery.

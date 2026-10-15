@@ -65,6 +65,7 @@ pub enum DiagnosticErrorCode {
     SecretStoreLocked,
     SecretStoreConflict,
     SecretStoreWriteUnknown,
+    AccountRemovalPending,
     DeviceNotFound,
     DeviceIdentityConflict,
     AmbiguousDevice,

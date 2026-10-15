@@ -161,7 +161,7 @@ fn migration_preserves_records_and_creates_a_consistent_version_one_backup() {
     let store = SqliteStore::open(&directory.0).unwrap();
     assert_eq!(
         migration::version(&store.connection.lock().unwrap()).unwrap(),
-        3
+        4
     );
     assert_eq!(store.devices().unwrap()[0].device.id, descriptor.device.id);
     assert_eq!(
@@ -242,7 +242,7 @@ fn schema_two_upgrade_preserves_organization_and_persists_a_random_profile_names
         .connection
         .lock()
         .unwrap()
-        .execute_batch("DROP TABLE accounts; DROP TABLE profile_namespace; PRAGMA user_version=2;")
+        .execute_batch("DROP TABLE accounts; DROP TABLE profile_namespace; DROP TABLE account_removals; PRAGMA user_version=2;")
         .unwrap();
     drop(store);
     let upgraded = SqliteStore::open(&directory.0).unwrap();
@@ -306,7 +306,7 @@ fn account_storage_rejects_rebinding_and_corrupt_references() {
 
 #[test]
 fn newer_or_foreign_databases_are_rejected_without_schema_changes() {
-    for version in [0, 4] {
+    for version in [0, 5] {
         let directory = Directory::new();
         let connection = Connection::open(directory.database()).unwrap();
         connection
@@ -421,5 +421,92 @@ fn retirement_bounds_receipts_keeps_replay_ids_and_preserves_active_writes() {
             .unwrap_err()
             .code,
         "REQUEST_RETIRED"
+    );
+}
+
+#[test]
+fn schema_three_migration_preserves_account_references_and_enables_durable_removal() {
+    use homeverb_core::{AccountRecord, AccountStore, CredentialRef, CredentialState};
+    let directory = Directory::new();
+    let store = SqliteStore::open(&directory.0).unwrap();
+    let namespace = store.profile_namespace().unwrap();
+    let mut account = AccountRecord {
+        id: uuid::Uuid::new_v4(),
+        provider: "midea.meiju".into(),
+        region: "CN".into(),
+        label: "Existing account".into(),
+        credential_ref: CredentialRef::new(),
+        credential_state: CredentialState::Pending,
+    };
+    store.insert_account(&account).unwrap();
+    store
+        .set_credential_state(account.id, CredentialState::Stored)
+        .unwrap();
+    account.credential_state = CredentialState::Stored;
+    store.create_room("kept-room", "Bedroom").unwrap();
+    drop(store);
+    let old = Connection::open(directory.database()).unwrap();
+    old.execute_batch(
+        "ALTER TABLE accounts RENAME TO newer_accounts;
+        CREATE TABLE accounts (id TEXT PRIMARY KEY, provider TEXT NOT NULL, region TEXT NOT NULL,
+        label TEXT NOT NULL, credential_ref TEXT NOT NULL UNIQUE,
+        credential_state TEXT NOT NULL CHECK(credential_state IN ('pending','stored')));
+        INSERT INTO accounts SELECT * FROM newer_accounts; DROP TABLE newer_accounts;
+        DROP TABLE account_removals; PRAGMA user_version=3;",
+    )
+    .unwrap();
+    let upgraded = SqliteStore::open(&directory.0).unwrap();
+    assert_eq!(upgraded.account(account.id).unwrap(), account);
+    assert_eq!(upgraded.profile_namespace().unwrap(), namespace);
+    assert_eq!(upgraded.rooms().unwrap().len(), 1);
+    assert!(upgraded.account_removal(account.id).unwrap().is_none());
+    upgraded.begin_account_removal(account.id, &[]).unwrap();
+    assert_eq!(
+        upgraded.account(account.id).unwrap().credential_state,
+        CredentialState::Removing
+    );
+    upgraded.finish_account_removal(account.id).unwrap();
+    assert!(
+        upgraded
+            .account_removal(account.id)
+            .unwrap()
+            .unwrap()
+            .completed
+    );
+    account.credential_state = CredentialState::Pending;
+    assert_eq!(
+        upgraded.insert_account(&account).unwrap_err().code,
+        "ACCOUNT_NOT_FOUND"
+    );
+    let backup_path = std::fs::read_dir(directory.0.join("backups"))
+        .unwrap()
+        .next()
+        .unwrap()
+        .unwrap()
+        .path();
+    let backup = Connection::open(backup_path).unwrap();
+    assert_eq!(migration::version(&backup).unwrap(), 3);
+    assert_eq!(
+        backup
+            .query_row("SELECT credential_state FROM accounts", [], |row| row
+                .get::<_, String>(0))
+            .unwrap(),
+        "stored"
+    );
+    assert_eq!(
+        backup
+            .query_row("SELECT credential_ref FROM accounts", [], |row| row
+                .get::<_, String>(0))
+            .unwrap(),
+        account.credential_ref.to_string()
+    );
+    assert_eq!(
+        backup
+            .query_row("SELECT namespace FROM profile_namespace", [], |row| row
+                .get::<_, String>(
+                0
+            ))
+            .unwrap(),
+        namespace.to_string()
     );
 }

@@ -86,7 +86,7 @@ Core implements room creation/rename/order/delete and device aliases, room assig
 
 `assign_devices_to_room` changes membership for 1-256 exact device IDs in one storage transaction, preserving all other preferences. The RoomAssignment destination is explicitly nullable, never omitted. Missing references and storage errors roll back the whole selection. `device_executions` reads one device's retained receipts with the device filter applied before the query limit; it neither refreshes state nor retransmits commands.
 
-The storage implementation upgrades schema 1 or 2 to 3 with a verified local backup and exclusive migration access. It retains 100 finalized detailed receipts plus active records, while keeping retired request IDs to prevent replay. The ID ledger can grow. See [storage](../storage.md) and [ADR-0009](../adr/0009-local-organization-and-retention.md). Organization, migration, retention, and fault-injected execution tests exercise these boundaries.
+The storage implementation upgrades schema 1, 2 or 3 to 4 with a verified local backup and exclusive migration access. It retains 100 finalized detailed receipts plus active records, while keeping retired request IDs to prevent replay. The ID ledger can grow. See [storage](../storage.md) and [ADR-0009](../adr/0009-local-organization-and-retention.md). Organization, migration, retention, and fault-injected execution tests exercise these boundaries.
 
 The Meiju native flow now uses the account vault. The next acceptance needs real account identity evidence, production host integration, and read-only device testing. Authorization sharing is governed separately by ADR-0008 and must remain disabled until its contract and security gates are satisfied.
 

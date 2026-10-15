@@ -11,6 +11,7 @@ use uuid::{Uuid, Variant};
 pub enum CredentialState {
     Pending,
     Stored,
+    Removing,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -65,11 +66,18 @@ pub trait AccountStore: Send + Sync {
     fn lock_account(&self, id: Uuid) -> Result<Box<dyn AccountLock>>;
     fn set_credential_state(&self, id: Uuid, state: CredentialState) -> Result<()>;
     fn rename_account(&self, id: Uuid, label: &str) -> Result<()>;
+    fn account_removal(&self, id: Uuid) -> Result<Option<crate::AccountRemoval>>;
+    fn begin_account_removal(
+        &self,
+        id: Uuid,
+        expected_devices: &[String],
+    ) -> Result<crate::AccountRemoval>;
+    fn finish_account_removal(&self, id: Uuid) -> Result<()>;
 }
 
 pub struct AccountVault {
-    store: Arc<dyn AccountStore>,
-    secrets: Arc<dyn SecretStore>,
+    pub(crate) store: Arc<dyn AccountStore>,
+    pub(crate) secrets: Arc<dyn SecretStore>,
 }
 
 impl AccountVault {
@@ -133,6 +141,9 @@ impl AccountVault {
                 valid_account_id(id)?;
                 let guard = self.store.lock_account(id)?;
                 let record = self.store.account(id)?;
+                if record.credential_state == CredentialState::Removing {
+                    return Err(crate::account_removal_pending());
+                }
                 Ok(AccountLease {
                     record,
                     store: self.store.clone(),

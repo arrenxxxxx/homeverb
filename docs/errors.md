@@ -22,6 +22,9 @@
 | AUTH_EXPIRED | Session cannot be refreshed safely | Request reauthorization |
 | AUTH_FLOW_UNSUPPORTED | Authentication requires an excluded backend | Mark blocked; do not add a hidden backend |
 | ACCOUNT_NOT_FOUND | Unknown local account reference | Reload local account records; do not select another account implicitly |
+| ACCOUNT_REMOVAL_PENDING | Account cleanup is incomplete; ordinary credential use or late publication is refused | Finish explicit local cleanup; never reconnect or restore the old account automatically |
+| ACCOUNT_SCOPE_CHANGED | The device set differs from the reviewed removal scope | Reload local details and obtain a new user confirmation before removal |
+| ACCOUNT_REMOVAL_UNSUPPORTED | A linked card has routes outside this account/provider | Preserve all data; shared-route detachment needs a separate supported identity flow |
 | ACCOUNT_SESSION_UNCONFIRMED | Credential persistence was not finalized, recovery bytes differ, or protected account state is invalid | Use trusted native validation/recovery or explicit reauthorization; do not reuse, reset or rewrite automatically |
 | ACCOUNT_IDENTITY_CONFLICT | Reauthorization identifies a different provider account | Keep the original session and device bindings; use the original account or a separately reviewed new-account flow |
 | SECRET_STORE_UNAVAILABLE | Secure credential storage unavailable | Fail explicitly; no plaintext fallback |
@@ -139,3 +142,13 @@ local publications does not roll them back. `SECRET_STORE_WRITE_UNKNOWN` can lea
 pending credentials; reload local metadata and require trusted recovery rather
 than recreating/resetting the account. General account listing never validates
 live authorization. See [the account contract](native-ui-contract.md#account-connection-and-refresh).
+
+`remove_account` uses an outer query error when refusal occurs before cleanup
+intent. Once intent is durable, cleanup errors are inside `data.error` with
+`data.status: pending`; query success alone is not removal success. Keep the
+account visible as `credential_state: removing` and offer explicit local-cleanup
+retry. An uncertain secret deletion is inspected before any later deletion attempt.
+`removed` requires completed local cleanup and a null inner error. Late descriptor
+saves for a completed removal return `ACCOUNT_NOT_FOUND`; the old local ID cannot
+be reused. Neither status
+establishes provider revocation; see [ADR-0028](adr/0028-local-account-removal.md).

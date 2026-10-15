@@ -124,6 +124,7 @@ impl Store for SqliteStore {
         let transaction = connection
             .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)
             .map_err(storage_error)?;
+        accounts::admit_connections(&transaction, &descriptor.device)?;
         let previous: Option<String> = transaction
             .query_row(
                 "SELECT descriptor FROM devices WHERE id=?1",
@@ -156,10 +157,30 @@ impl Store for SqliteStore {
         document.map(decode).transpose()
     }
     fn save_snapshot(&self, snapshot: &Snapshot) -> Result<()> {
-        self.connection.lock().map_err(storage_error)?.execute(
+        let mut connection = self.connection.lock().map_err(storage_error)?;
+        let transaction = connection
+            .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)
+            .map_err(storage_error)?;
+        let document: String = transaction
+            .query_row(
+                "SELECT descriptor FROM devices WHERE id=?1",
+                [&snapshot.device_id],
+                |row| row.get(0),
+            )
+            .optional()
+            .map_err(storage_error)?
+            .ok_or_else(|| {
+                Error::new(
+                    "DEVICE_NOT_FOUND",
+                    "The device is not present in this local profile.",
+                )
+            })?;
+        let descriptor: Descriptor = decode(document)?;
+        accounts::admit_connections(&transaction, &descriptor.device)?;
+        transaction.execute(
             "INSERT INTO snapshots VALUES (?1, ?2, ?3) ON CONFLICT(device, component) DO UPDATE SET snapshot=excluded.snapshot",
             params![snapshot.device_id, snapshot.component_id, encode(snapshot)?]).map_err(storage_error)?;
-        Ok(())
+        transaction.commit().map_err(storage_error)
     }
     fn lock_device(&self, device: &str) -> Result<Box<dyn DeviceLock>> {
         // Preserve existing lock names; only IDs that exceed a 255-byte filename

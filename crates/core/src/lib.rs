@@ -1,5 +1,6 @@
 //! Embedded execution policy shared by every host.
 
+mod account_removal;
 mod accounts;
 mod batch;
 mod descriptors;
@@ -9,6 +10,7 @@ mod observations;
 mod organization;
 mod policy;
 mod secrets;
+pub use account_removal::*;
 pub use accounts::*;
 pub use execution::Core;
 pub use policy::{Grant, Policy};
@@ -142,9 +144,10 @@ impl<T: Send> DeviceLock for T {}
 
 pub trait Store: Send + Sync {
     fn devices(&self) -> Result<Vec<Descriptor>>;
-    /// Compare established connection identities and save within one storage transaction.
+    /// Compare established identities and reject removed-account bindings in the save transaction.
     fn save_device(&self, descriptor: &Descriptor) -> Result<()>;
     fn snapshot(&self, device: &str, component: &str) -> Result<Option<Snapshot>>;
+    /// Require a still-present device and reject removed-account bindings in the save transaction.
     fn save_snapshot(&self, snapshot: &Snapshot) -> Result<()>;
     fn lock_device(&self, device: &str) -> Result<Box<dyn DeviceLock>>;
     fn execution(&self, request_id: &str) -> Result<Option<(Command, Execution)>>;

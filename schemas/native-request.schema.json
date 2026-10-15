@@ -474,6 +474,34 @@
             "label"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "remove_account"
+            },
+            "account_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "expected_device_ids": {
+              "type": "array",
+              "maxItems": 4096,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              }
+            }
+          },
+          "required": [
+            "method",
+            "account_id",
+            "expected_device_ids"
+          ],
+          "additionalProperties": false
         }
       ]
     }

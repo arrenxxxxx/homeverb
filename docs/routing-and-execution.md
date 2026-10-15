@@ -65,6 +65,22 @@ Execution uses groups of at most four borrowed futures and returns results in in
 
 Batch status equals the common item status when all items agree, otherwise `partial`. Evidence belongs to each device or composite child, never to a fabricated batch device. Only per-command receipts are persisted. A forced exit can leave later items unstarted and without records; inspect individual IDs and never automatically resubmit the batch. See [ADR-0017](adr/0017-bounded-device-batches.md).
 
+## Local account removal and late results
+
+Local account removal under [ADR-0028](adr/0028-local-account-removal.md) preserves
+execution receipts and retired IDs. It never rolls back or resends an appliance
+action. Meiju retains its account lease through network work; cleanup refuses a
+busy account. Receipts can still be finalized after the account lease is released,
+even when cleanup has removed the device metadata. Their known outcomes remain
+available through exact receipt lookup and global history.
+
+SQLite rejects descriptor/snapshot saves referencing an account with removal
+intent, including completed removal. Snapshot saves also require an existing
+device. These checks share the write transaction, preventing late inventory or
+read results from recreating cleaned data. They do not retract already delivered
+results or make a multi-device publication atomic. A cache-save failure after
+acceptance/verification follows the existing strongest-outcome preservation rules.
+
 ## Implemented Mock behavior
 
 Capability resolution includes the selected component. Shared definitions omit `component_id`; scoped definitions bind one exact component, and shared/scoped mixing of one capability ID is invalid. The same resolver supplies action parameters, risk/routes/verification policy, live and cached property constraints, and property freshness. A fridge grant cannot authorize its freezer. Both remain one physical device with one write lock and separate component snapshots. See [ADR-0018](adr/0018-component-capability-scopes.md).

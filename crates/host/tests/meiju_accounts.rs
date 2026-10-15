@@ -10,7 +10,7 @@ use std::{
     path::PathBuf,
     sync::{
         Arc, Mutex,
-        atomic::{AtomicBool, AtomicI32, Ordering},
+        atomic::{AtomicBool, AtomicI32, AtomicUsize, Ordering},
     },
 };
 use tokio_util::sync::CancellationToken;
@@ -61,10 +61,15 @@ struct Secrets {
     values: Mutex<HashMap<String, Vec<u8>>>,
     unavailable: AtomicBool,
     uncertain: AtomicBool,
+    reads: AtomicUsize,
+    deletes: AtomicUsize,
+    deletion: AtomicI32,
+    delete_started: tokio::sync::Notify,
 }
 #[async_trait]
 impl SecretStore for Secrets {
     async fn get(&self, key: &CredentialRef, op: &Operation) -> Result<Option<SecretBytes>> {
+        self.reads.fetch_add(1, Ordering::Relaxed);
         op.run(async {
             if self.unavailable.load(Ordering::Relaxed) {
                 return Err(Error::new(
@@ -97,8 +102,29 @@ impl SecretStore for Secrets {
         })
         .await
     }
-    async fn delete(&self, _: &CredentialRef, _: &Operation) -> Result<()> {
-        panic!("Connection must not delete credentials.")
+    async fn delete(&self, key: &CredentialRef, op: &Operation) -> Result<()> {
+        let mode = self.deletion.load(Ordering::Relaxed);
+        assert_ne!(mode, 0, "Connection must not delete credentials.");
+        op.run(async { Ok(()) }).await?;
+        self.deletes.fetch_add(1, Ordering::Relaxed);
+        if mode == 3 {
+            return Err(Error::new(
+                "SECRET_STORE_UNAVAILABLE",
+                "Synthetic unavailable store.",
+            ));
+        }
+        self.values.lock().unwrap().remove(&key.to_string());
+        if mode == 4 {
+            self.delete_started.notify_one();
+            let _: Result<()> = op.run(std::future::pending()).await;
+        }
+        if mode == 2 || mode == 4 {
+            return Err(Error::new(
+                "SECRET_STORE_WRITE_UNKNOWN",
+                "Synthetic unconfirmed deletion.",
+            ));
+        }
+        Ok(())
     }
 }
 
@@ -256,7 +282,11 @@ impl Fixture {
         let result = self.session.call(serde_json::from_value::<HostRequest>(json!({"schema_version":"1.0","operation_id":id,"timeout_ms":1000,"request":request})).unwrap()).await;
         if matches!(
             method.as_str(),
-            "list_accounts" | "refresh_account" | "get_account" | "rename_account"
+            "list_accounts"
+                | "refresh_account"
+                | "get_account"
+                | "rename_account"
+                | "remove_account"
         ) {
             validate_response(&result, &method);
         }
@@ -860,3 +890,6 @@ async fn native_power_background_cancel_and_close_preserve_unknown_and_release_a
         );
     }
 }
+
+#[path = "meiju_accounts/removal.rs"]
+mod removal;

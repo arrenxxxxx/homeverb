@@ -21,7 +21,7 @@ Start with the progressive development path. Reference documents define invarian
 - Entry points: [CLI](cli.md), [native SDK](sdk.md), [mobile requirements](mobile-app.md), [MCP](mcp.md).
 - Flutter handoff: [versioned native contract](native-ui-contract.md), [callable catalog and examples](../packages/native-contract/README.md), [native contract decision](adr/0019-native-ui-contract.md).
 - UI delivery: [Window Light prototype](../output/prototypes/homeverb-window-light-v1/index.html), [functional handoff](ui-functional-spec.md), [82-state inventory](ui-screen-inventory.md), [Flutter visual system and one-skin extension](ui-window-light.md).
-- Persistence/security: [storage](storage.md), [authentication](authentication.md), [native account vault](adr/0021-persistent-account-vault.md), [security/privacy](security-and-privacy.md).
+- Persistence/security: [storage](storage.md), [authentication](authentication.md), [native account vault](adr/0021-persistent-account-vault.md), [local account removal](adr/0028-local-account-removal.md), [security/privacy](security-and-privacy.md).
 - Delivery: [repository layout](repository.md), [testing](testing.md), [task status](task-breakdown.md), [roadmap](roadmap.md), [compatibility](compatibility.md), [commit conventions](commit-conventions.md), [private publishing](publishing.md).
 - Evidence: [references](references.md), [fictional examples](../examples/README.md), [diagrams](diagrams/README.md).
 

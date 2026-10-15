@@ -1,5 +1,5 @@
 {
-  "api_version": "1.4.0",
+  "api_version": "1.5.0",
   "provenance": "Fictional account DTO examples. Actual synthetic host responses are checked against the same schemas by crates/host/tests/meiju_accounts.rs. No live identities or credentials.",
   "connect_metadata": {
     "schema_version": "1.0",
@@ -214,6 +214,68 @@
           "label": "Family appliances",
           "credential_state": "stored",
           "authorization": "not_checked"
+        },
+        "warnings": [],
+        "error": null
+      }
+    },
+    {
+      "response_definition": "remove_account",
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "remove-removed",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "remove_account",
+          "account_id": "00000000-0000-4000-8000-000000000001",
+          "expected_device_ids": [
+            "00000000-0000-4000-8000-000000000002"
+          ]
+        }
+      },
+      "response": {
+        "schema_version": "1.0",
+        "data": {
+          "account_id": "00000000-0000-4000-8000-000000000001",
+          "device_ids": [
+            "00000000-0000-4000-8000-000000000002"
+          ],
+          "status": "removed",
+          "remote_revocation": "not_attempted",
+          "error": null
+        },
+        "warnings": [],
+        "error": null
+      }
+    },
+    {
+      "response_definition": "remove_account",
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "remove-pending",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "remove_account",
+          "account_id": "00000000-0000-4000-8000-000000000001",
+          "expected_device_ids": [
+            "00000000-0000-4000-8000-000000000002"
+          ]
+        }
+      },
+      "response": {
+        "schema_version": "1.0",
+        "data": {
+          "account_id": "00000000-0000-4000-8000-000000000001",
+          "device_ids": [
+            "00000000-0000-4000-8000-000000000002"
+          ],
+          "status": "pending",
+          "remote_revocation": "not_attempted",
+          "error": {
+            "code": "SECRET_STORE_WRITE_UNKNOWN",
+            "message": "Local credential deletion is unconfirmed.",
+            "retryable": false
+          }
         },
         "warnings": [],
         "error": null

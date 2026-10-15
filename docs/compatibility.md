@@ -141,6 +141,23 @@ compatible. Older libraries reject the two new methods. Check the catalog before
 enabling them; see the [local metadata contract](native-ui-contract.md#local-account-details-and-names).
 Account removal, provider revocation and mobile acceptance remain pending.
 
+## Local account removal contract 1.5
+
+API 1.5.0 adds `remove_account` with an exact reviewed device-ID set, bringing the
+ordinary catalog to 27 methods. SQLite upgrades from schema 1/2/3 to 4 with a
+verified backup. Close older clients before migration; schema-3 binaries refuse
+the upgraded profile. Strict older readers reject the new `removing` credential
+state. Upgrade UI/native code together; C symbols and appliance receipts are unchanged.
+
+Synthetic tests cover scoped cleanup, shared-route refusal, unavailable/uncertain
+secret deletion, explicit recovery across reopen, cancellation and dropped futures,
+transaction rollback, late discovery/cache refusal, retained rooms/receipts and
+completed-removal replay without secret access. ABI tests check admission failures
+and saved completion replay; the suite does not use the real keyring. No live
+account was deleted or appliance operated in this phase. Local cleanup does not
+revoke provider access. Remote revocation, shared-route detachment and mobile
+acceptance remain pending. See [ADR-0028](adr/0028-local-account-removal.md).
+
 ## Status definitions
 
 The native account vault under [ADR-0021](adr/0021-persistent-account-vault.md) adds SQLite schema 3 and internal Rust account APIs. Schema 1/2 upgrades preserve existing data and create verified backups; close older clients first. Schema-2 binaries reject the upgraded profile. Native UI API 1.0.0, its 22 methods, C symbols and execution semantics are unchanged. No public account operation or real-provider authentication is enabled by locally storing references.

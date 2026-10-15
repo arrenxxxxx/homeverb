@@ -84,5 +84,12 @@
   "error.MIDEA_LOGIN_INPUT_UNSUPPORTED": "This account or password format is not supported by the current connection method.",
   "account.authorization.notChecked": "Authorization has not been checked.",
   "account.connecting": "Connecting and retrieving devices...",
-  "account.connectedRetrievalFailed": "Account connection succeeded, but devices could not be loaded."
+  "account.connectedRetrievalFailed": "Account connection succeeded, but devices could not be loaded.",
+  "error.ACCOUNT_REMOVAL_PENDING": "Complete local cleanup before connecting this platform account again.",
+  "error.ACCOUNT_SCOPE_CHANGED": "The linked devices changed. Review the removal scope again.",
+  "error.ACCOUNT_REMOVAL_UNSUPPORTED": "A linked device has other connections. This account cannot be removed safely yet.",
+  "account.removal.confirm": "Remove this account and {count} linked device cards from this installation? Rooms and operation receipts will remain. Other installations and the platform account are unaffected.",
+  "account.removal.pending": "Local cleanup is incomplete. This local account is disabled.",
+  "account.removal.removed": "The account was removed from this installation. Platform authorization elsewhere was not revoked.",
+  "account.removal.retry": "Retry local cleanup"
 }

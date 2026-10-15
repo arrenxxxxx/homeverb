@@ -29,7 +29,7 @@ def main():
     responses = {name: validator('native-response', name) for name in [*api['methods'], 'open']}
     query_error = validator('native-response', 'query_error')
     info_example = {'schema_version': '1.0', 'data': copy.deepcopy(api), 'warnings': [], 'error': None}
-    info_example['data']['api_version'] = '1.5.0'
+    info_example['data']['api_version'] = '1.6.0'
     info_example['data']['methods']['future_query'] = {'response_kind': 'query'}
     responses['get_api_info'].validate(info_example)
     info_example['data']['api_version'] = '2.0.0'
@@ -108,6 +108,7 @@ def main():
             assert call(handle, 'list_accounts')['data'] == []
             assert call(handle, 'get_account', account_id='00000000-0000-4000-8000-000000000001')['error']['code'] == 'AUTH_FLOW_UNSUPPORTED'
             assert call(handle, 'rename_account', account_id='00000000-0000-4000-8000-000000000001', label='Family appliances')['error']['code'] == 'AUTH_FLOW_UNSUPPORTED'
+            assert call(handle, 'remove_account', account_id='00000000-0000-4000-8000-000000000001', expected_device_ids=[])['error']['code'] == 'AUTH_FLOW_UNSUPPORTED'
             assert call(handle, 'refresh_account', account_id='00000000-0000-4000-8000-000000000001')['error']['code'] == 'AUTH_FLOW_UNSUPPORTED'
             assert call(handle, 'list_device_cards')['data'] == []
             assert call(handle, 'list_rooms')['data'] == []
@@ -312,6 +313,16 @@ def main():
             responses['rename_account'].validate(failed)
             assert failed['error']['code'] == 'STORAGE_ERROR'
             assert raw(handle, envelope('get_account', account_id=account_id))['data']['account']['label'] == 'Family appliances'
+            assert raw(handle, envelope('remove_account', account_id=account_id, expected_device_ids=[]))['error']['code'] == 'ACCOUNT_SCOPE_CHANGED'
+            with sqlite3.connect(Path(directory) / 'homeverb.sqlite3') as database:
+                # Abort before intent is committed so the ABI test never opens a keyring.
+                database.execute("CREATE TRIGGER refuse_removal_intent BEFORE UPDATE OF credential_state ON accounts BEGIN SELECT RAISE(ABORT, 'synthetic'); END")
+            failed = raw(handle, envelope('remove_account', account_id=account_id, expected_device_ids=['linked']))
+            responses['remove_account'].validate(failed)
+            assert failed['error']['code'] == 'STORAGE_ERROR'
+            with sqlite3.connect(Path(directory) / 'homeverb.sqlite3') as database:
+                assert database.execute('SELECT COUNT(*) FROM account_removals').fetchone()[0] == 0
+                assert database.execute('SELECT credential_state FROM accounts').fetchone()[0] == 'pending'
         finally:
             library.homeverb_close(handle)
         handle = open_host(directory, allow=False, adapter='midea.meiju')
@@ -321,6 +332,35 @@ def main():
             assert persisted['data']['device_ids'] == ['linked']
         finally:
             library.homeverb_close(handle)
+
+    with tempfile.TemporaryDirectory(prefix='homeverb-ui-removed-account-') as directory:
+        handle = open_host(directory, allow=False, adapter='midea.meiju')
+        try:
+            account_id = '40000000-0000-4000-8000-000000000001'
+            # A completed fictional ledger tests actual ABI replay without any credential access.
+            record = {'account_id': account_id, 'provider': 'midea.meiju', 'region': 'CN',
+                      'device_ids': ['removed-card'], 'completed': True}
+            with sqlite3.connect(Path(directory) / 'homeverb.sqlite3') as database:
+                database.execute('INSERT INTO account_removals VALUES (?, ?)', (account_id, json.dumps(record)))
+            request = envelope('remove_account', account_id=account_id, expected_device_ids=['removed-card'])
+            result = raw(handle, request)
+            responses['remove_account'].validate(result)
+            assert result['data']['status'] == 'removed'
+            assert result['data']['remote_revocation'] == 'not_attempted'
+            assert result['data']['error'] is None
+            for field, value in [('expected_device_ids', ['removed-card', 'removed-card']),
+                                 ('expected_device_ids', ['']), ('expected_device_ids', None),
+                                 ('confirmed', True), ('revoke_remote', True)]:
+                bad = copy.deepcopy(request)
+                bad['request'][field] = value
+                assert not request_schema.is_valid(bad)
+                assert raw(handle, bad)['error']['code'] == 'INVALID_ARGUMENT'
+            assert raw(handle, envelope('remove_account', account_id=account_id, expected_device_ids=[]))['error']['code'] == 'ACCOUNT_SCOPE_CHANGED'
+            library.homeverb_set_foreground(handle, False)
+            assert raw(handle, request)['error']['code'] == 'HOST_BACKGROUND'
+        finally:
+            library.homeverb_close(handle)
+        assert raw(handle, request)['error']['code'] == 'HOST_CLOSED'
 
     for fields in [
         {'adapter': 'unknown'}, {'adapter': None},
@@ -427,6 +467,14 @@ def main():
         validator('native-response', case['response_definition']).validate(case['response'])
         if 'request' in case:
             request_schema.validate(case['request'])
+    removal_cases = [case for case in account_examples['cases'] if case['response_definition'] == 'remove_account']
+    for case in removal_cases:
+        bad = copy.deepcopy(case['response'])
+        bad['data']['status'] = 'pending' if bad['data']['status'] == 'removed' else 'removed'
+        assert not responses['remove_account'].is_valid(bad)
+        bad = copy.deepcopy(case['response'])
+        bad['data']['remote_revocation'] = 'revoked'
+        assert not responses['remove_account'].is_valid(bad)
     for path, value in [
         (('account', 'credential_ref'), 'FORBIDDEN'),
         (('account', 'authorization'), 'connected'),

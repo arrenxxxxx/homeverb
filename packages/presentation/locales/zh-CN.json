@@ -84,5 +84,12 @@
   "error.MIDEA_LOGIN_INPUT_UNSUPPORTED": "当前连接方式暂不支持此账号或密码格式。",
   "account.authorization.notChecked": "尚未检查授权是否有效。",
   "account.connecting": "正在连接账号并获取设备…",
-  "account.connectedRetrievalFailed": "账号连接成功，但设备获取失败。"
+  "account.connectedRetrievalFailed": "账号连接成功，但设备获取失败。",
+  "error.ACCOUNT_REMOVAL_PENDING": "请先完成本机账号清理，再重新连接平台账号。",
+  "error.ACCOUNT_SCOPE_CHANGED": "关联设备已变化，请重新核对移除范围。",
+  "error.ACCOUNT_REMOVAL_UNSUPPORTED": "关联设备还有其他连接，目前无法安全移除此账号。",
+  "account.removal.confirm": "从本机移除此账号及 {count} 张关联设备卡片？房间和操作回执会保留，其他设备上的授权和平台账号不受影响。",
+  "account.removal.pending": "本机清理尚未完成，此本地账号已停用。",
+  "account.removal.removed": "账号已从本机移除，未撤销其他设备上的平台授权。",
+  "account.removal.retry": "重试本机清理"
 }

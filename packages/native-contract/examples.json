@@ -1,5 +1,5 @@
 {
-  "api_version": "1.4.0",
+  "api_version": "1.5.0",
   "cases": [
     {
       "request": {
@@ -12,7 +12,7 @@
       },
       "response": {
         "data": {
-          "api_version": "1.4.0",
+          "api_version": "1.5.0",
           "limits": {
             "max_active_operations": 8,
             "max_request_bytes": 1048576,
@@ -80,6 +80,9 @@
               "response_kind": "query"
             },
             "refresh_account": {
+              "response_kind": "query"
+            },
+            "remove_account": {
               "response_kind": "query"
             },
             "rename_account": {
@@ -1808,7 +1811,7 @@
       },
       "response": {
         "data": {
-          "api_version": "1.4.0",
+          "api_version": "1.5.0",
           "limits": {
             "max_active_operations": 8,
             "max_request_bytes": 1048576,
@@ -1876,6 +1879,9 @@
               "response_kind": "query"
             },
             "refresh_account": {
+              "response_kind": "query"
+            },
+            "remove_account": {
               "response_kind": "query"
             },
             "rename_account": {
@@ -2475,6 +2481,28 @@
           "method": "rename_account",
           "account_id": "00000000-0000-4000-8000-000000000001",
           "label": "Family appliances"
+        }
+      },
+      "response": {
+        "data": null,
+        "error": {
+          "code": "AUTH_FLOW_UNSUPPORTED",
+          "message": "This host has no admitted account connection flow.",
+          "retryable": false
+        },
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-6",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "remove_account",
+          "account_id": "00000000-0000-4000-8000-000000000001",
+          "expected_device_ids": []
         }
       },
       "response": {

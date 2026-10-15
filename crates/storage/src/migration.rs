@@ -6,7 +6,7 @@ use rusqlite::{
 };
 use std::{fs::File, path::Path};
 
-pub const SCHEMA_VERSION: u32 = 3;
+pub const SCHEMA_VERSION: u32 = 4;
 
 pub fn unsupported() -> Error {
     Error::new(
@@ -62,21 +62,35 @@ pub fn upgrade(connection: &mut Connection, directory: &Path) -> Result<()> {
         CREATE TABLE retired_requests (request_id TEXT PRIMARY KEY);
         ").map_err(storage_error)?;
     }
-    transaction
-        .execute_batch(
-            "CREATE TABLE profile_namespace (
+    if version < 3 {
+        transaction
+            .execute_batch(
+                "CREATE TABLE profile_namespace (
             singleton INTEGER PRIMARY KEY CHECK(singleton=1), namespace TEXT NOT NULL UNIQUE);
         CREATE TABLE accounts (
             id TEXT PRIMARY KEY, provider TEXT NOT NULL, region TEXT NOT NULL,
             label TEXT NOT NULL, credential_ref TEXT NOT NULL UNIQUE,
-            credential_state TEXT NOT NULL CHECK(credential_state IN ('pending','stored')));
-        PRAGMA user_version=3;",
-        )
-        .map_err(storage_error)?;
+            credential_state TEXT NOT NULL CHECK(credential_state IN ('pending','stored')));",
+            )
+            .map_err(storage_error)?;
+        transaction
+            .execute(
+                "INSERT INTO profile_namespace VALUES (1, ?1)",
+                [uuid::Uuid::new_v4().to_string()],
+            )
+            .map_err(storage_error)?;
+    }
     transaction
-        .execute(
-            "INSERT INTO profile_namespace VALUES (1, ?1)",
-            [uuid::Uuid::new_v4().to_string()],
+        .execute_batch(
+            "CREATE TABLE accounts_v4 (
+        id TEXT PRIMARY KEY, provider TEXT NOT NULL, region TEXT NOT NULL,
+        label TEXT NOT NULL, credential_ref TEXT NOT NULL UNIQUE,
+        credential_state TEXT NOT NULL CHECK(credential_state IN ('pending','stored','removing')));
+        INSERT INTO accounts_v4 SELECT * FROM accounts;
+        DROP TABLE accounts;
+        ALTER TABLE accounts_v4 RENAME TO accounts;
+        CREATE TABLE account_removals (id TEXT PRIMARY KEY, record TEXT NOT NULL);
+        PRAGMA user_version=4;",
         )
         .map_err(storage_error)?;
     transaction.commit().map_err(storage_error)

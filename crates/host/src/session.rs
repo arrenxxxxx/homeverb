@@ -29,6 +29,10 @@ pub enum Request {
         account_id: uuid::Uuid,
         label: String,
     },
+    RemoveAccount {
+        account_id: uuid::Uuid,
+        expected_device_ids: Vec<String>,
+    },
     RefreshAccount {
         account_id: uuid::Uuid,
     },
@@ -268,6 +272,20 @@ impl Session {
                     .rename_account(account_id, &label, &operation)
                     .await?;
                 Ok(json!(crate::AccountSummary::from(account)))
+            }
+            Request::RemoveAccount {
+                account_id,
+                expected_device_ids,
+            } => {
+                let adapter = self
+                    .accounts
+                    .as_ref()
+                    .ok_or_else(crate::accounts::unsupported)?;
+                Ok(json!(
+                    adapter
+                        .remove_account(account_id, &expected_device_ids, &operation)
+                        .await?
+                ))
             }
             Request::RefreshAccount { account_id } => {
                 let adapter = self
