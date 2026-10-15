@@ -127,9 +127,11 @@ The same file may be selected by a trusted [MCP host](mcp.md). MCP captures its
 policy for the entire session; stop/restart that host to change grants. One-shot
 CLI commands reread the explicitly supplied file on each invocation.
 
-`schema_version` is `"1.0"`. Each independent list, `meiju_power_grants`,
-`meiju_fan_grants`, `meiju_mode_grants` and `meiju_temperature_grants`, permits at
-most 64 distinct entries.
+`schema_version` is `"1.0"`. The independent `meiju_power_grants`,
+`meiju_fan_grants` and `meiju_mode_grants` lists each permit at most 64 distinct
+entries. `meiju_temperature_grants` permits 256 entries starting with native API
+1.14.1; earlier binaries reject more than 64. The entire file still has a 32 KiB
+limit. Keep exact reviewed pairs and never silently truncate a list.
 Power entries name one local `device_id` and boolean `state`; fan entries name
 one local `device_id` and one `wind_speed` code: 20, 40, 60, 80, 100 or 102. These
 are vendor codes, not percentages. Mode entries name one local `device_id` and

@@ -8,7 +8,7 @@ Account-flow amendment, October 15, 2026: Midea Meiju authorization must automat
 
 This document expands [mobile requirements](mobile-app.md). The [embedded Core boundary](sdk.md), schemas, and ADRs remain authoritative for execution semantics. Preserve existing Core work; do not infer a new network service from this handoff. Native request details below are an integration snapshot of separate local implementation work, not code delivered by this UI documentation commit.
 
-The [native UI contract 1.14](native-ui-contract.md) supplies 31 callable methods, schemas, actual Mock request/response examples, version negotiation, and screen coverage. It includes account management, explicit pending-account reauthorization with intact protected identity, separate cache/history cleanup, and explicit saved-inventory inspection without provider traffic. Sharing, identity merge, provider revocation and full-profile deletion remain unavailable; UI previews must stay separate from production native state.
+The [native UI contract 1.14.1](native-ui-contract.md) supplies 31 callable methods, schemas, actual Mock request/response examples, version negotiation, and screen coverage. It includes account management, explicit pending-account reauthorization with intact protected identity, separate cache/history cleanup, and explicit saved-inventory inspection without provider traffic. Sharing, identity merge, provider revocation and full-profile deletion remain unavailable; UI previews must stay separate from production native state.
 
 ## Product boundary
 

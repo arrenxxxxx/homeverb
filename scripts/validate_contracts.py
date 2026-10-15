@@ -146,6 +146,11 @@ def main() -> int:
         bad = {"schema_version":"1.0", "meiju_temperature_grants":[
             {"device_id":"30000000-0000-4000-8000-000000000001", "target_temperature":value}]}
         negative.append((f"invalid CLI setpoint {value}", validators["cli-meiju-grants"], bad))
+    capacity = [{'device_id':f'30000000-0000-4000-8000-{index:012d}', 'target_temperature':26}
+                for index in range(1, 258)]
+    validators["cli-meiju-grants"].validate({"schema_version":"1.0", "meiju_temperature_grants":capacity[:256]})
+    negative.append(("257 distinct temperature grants", validators["cli-meiju-grants"],
+                     {"schema_version":"1.0", "meiju_temperature_grants":capacity}))
     for mode in [None, True, 1, "off", "fan_only", "COOL"]:
         bad = {"schema_version":"1.0", "meiju_mode_grants":[
             {"device_id":"30000000-0000-4000-8000-000000000001", "mode":mode}]}

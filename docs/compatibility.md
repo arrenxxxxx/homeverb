@@ -782,3 +782,34 @@ Physical/OEM Keystore behavior, successful provider login/session replacement,
 Flutter APK journeys, release shrinking, actual 16 KiB-page execution and real
 appliance operation remain unverified. No owner account, real device, separate
 Flutter worktree or published package was used in this phase.
+
+## Temperature grant capacity correction 1.14.1
+
+The original 64-entry startup limit rejected a four-AC configuration containing
+29 exact candidate targets per device (116 pairs). A host regression reproduced
+that refusal before the correction. API 1.14.1 permits 256 temperature pairs in
+native startup and explicit CLI/MCP grant files. Other grant limits remain 64;
+the CLI file limit remains 32 KiB. Each device's action constraints and protected
+product mapping still apply independently; candidate targets do not establish
+model support. There are no wildcard grants or changes to write outcomes.
+
+On October 16, 2026, the native C ABI accepted 116 and 256 entries and rejected
+257 distinct entries before profile creation. Planning all 116 candidate pairs
+across four fictional descriptors preserved different minimum and whole/half-degree
+step constraints. Actual CLI/MCP processes accepted the four-device configuration,
+retained independent power denial and refused a pending-account execution before
+sending. CLI also accepted 256 entries and rejected 257 before profile creation.
+
+Formatting, workspace Clippy, workspace/example builds and local validation passed:
+322 Rust tests with two explicitly ignored integration tests; 35 MVP runtime cases;
+31 native methods and 51 live fictional examples plus trusted approval/dishwasher
+checks; 33 Python tooling tests; six presentation tests; 18 schemas, 41 positive
+fixtures and 141 negative fixtures. All three Android AAR variants were rebuilt
+with eleven exports per ABI and 16 KiB ELF alignment checks. The prior isolated
+Android runtime acceptance was not rerun for this capacity correction.
+
+Clients must negotiate API 1.14.1 before supplying more than 64 temperature pairs;
+older libraries reject the larger configuration, so never silently truncate it.
+JSON shapes, methods, C exports, SQLite schema 4 and protected payload 3 are
+unchanged. No real account, appliance operation, Flutter worktree change, mobile
+runtime acceptance or package publication was performed in this phase.

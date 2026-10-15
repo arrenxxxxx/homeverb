@@ -69,6 +69,20 @@ This correction applies to read-only sessions without control grants and uses
 retained protected evidence without extra provider requests. It changes no public
 schema or storage version and does not make observations fresh or verify writes.
 
+## Capacity correction in API 1.14.1
+
+Increase only the temperature grant-list maximum from 64 to 256. Four ACs with
+29 candidate half-degree targets each require 116 exact entries, exceeding the
+original limit. Keep per-device, per-target grants, existing validation and the
+independent device action constraints; this correction adds no wildcard, range
+permission, implicit grant or ordinary request mutation. Other grant lists retain
+their 64-entry limits. CLI files still have an independent 32 KiB byte limit.
+
+Require API 1.14.1 before submitting more than 64 temperature entries. Older
+binaries reject the larger list; never silently truncate user-approved targets.
+Existing smaller configurations, native methods, C exports, command/response
+shapes, SQLite schema 4 and protected payload 3 are unchanged.
+
 ## Outcomes and verification
 
 One request contains only the encoded temperature field(s). Do not round invalid

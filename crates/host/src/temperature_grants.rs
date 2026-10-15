@@ -15,7 +15,7 @@ pub struct MeijuTemperatureGrant {
 }
 
 pub fn meiju_temperature_policy(grants: &[MeijuTemperatureGrant]) -> Result<Policy> {
-    if grants.len() > 64 {
+    if grants.len() > 256 {
         return Err(Error::invalid());
     }
     let mut seen = HashSet::new();

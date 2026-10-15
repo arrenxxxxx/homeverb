@@ -1280,6 +1280,72 @@ class RuntimeAcceptance(unittest.TestCase):
         self.assertEqual(process.returncode,0)
         self.assertEqual(process.stderr.read(),'')
 
+    def test_four_ac_temperature_grants_fit_cli_and_mcp_without_widening_authority(self):
+        path, _, target, other, database = self.seed_meiju_controls()
+        device_ids = [target, other, '30000000-0000-4000-8000-000000000003',
+                      '30000000-0000-4000-8000-000000000004']
+        capability = json.loads((ROOT / 'examples/capability.meiju-temperature.json').read_text())
+        with closing(sqlite3.connect(database)) as connection, connection:
+            original = json.loads(connection.execute('SELECT descriptor FROM devices WHERE id=?', (target,)).fetchone()[0])
+            for index, device_id in enumerate(device_ids):
+                descriptor = copy.deepcopy(original)
+                descriptor['device']['id'] = device_id
+                descriptor['device']['connections'][0].update(id=f'fictional-cloud-{index}', identity_ref=f'fictional-binding-{index}')
+                descriptor['device']['components'][0]['capabilities'].append('climate')
+                descriptor['capabilities'].append(capability)
+                connection.execute('INSERT OR REPLACE INTO devices VALUES (?, ?)', (device_id, json.dumps(descriptor)))
+        grants = [{'device_id':device_id, 'target_temperature':half / 2}
+                  for device_id in device_ids for half in range(32, 61)]
+        self.assertEqual(len(grants), 116)
+        config = {'schema_version':'1.0', 'meiju_temperature_grants':grants}
+        self.schema('cli-meiju-grants', config)
+        path.write_text(json.dumps(config, separators=(',', ':')))
+        self.assertLess(path.stat().st_size, 32 * 1024)
+        options = ['--meiju-grants',str(path)]
+        plans = []
+        for index, device_id in enumerate(device_ids):
+            args = ['device','execute',device_id,'--capability','climate','--action','set',
+                    '--arguments','{"target_temperature":26.5}']
+            plan = self.meiju(*options,'--request-id',f'fleet-{index}','--dry-run',*args,response_definition='plan')['data']
+            self.assertEqual(plan['transports'], ['cloud'])
+            plans.append(plan['command'])
+        denied = self.meiju(*options,'--request-id','fleet-power','--dry-run','power','set',target,'--on',expected=6)
+        self.assertEqual(denied['error']['code'], 'POLICY_DENIED')
+        base = [str(BINARY),'--adapter','midea.meiju','--data-dir',self.directory.name,'--profile','meiju',*options]
+        process, send, response = self.start_mcp(base)
+        send({'jsonrpc':'2.0','id':1,'method':'initialize'})
+        response()
+        send({'jsonrpc':'2.0','method':'notifications/initialized'})
+        for index, command in enumerate(plans):
+            send({'jsonrpc':'2.0','id':index + 2,'method':'tools/call',
+                  'params':{'name':'command_plan','arguments':{'command':command}}})
+            result = response()['result']
+            self.assertFalse(result['isError'])
+            validator('native-response','plan').validate(result['structuredContent'])
+            self.assertEqual(result['structuredContent']['data']['command'], command)
+        send({'jsonrpc':'2.0','id':6,'method':'tools/call',
+              'params':{'name':'command_execute','arguments':{'command':plans[-1]}}})
+        receipt = response()['result']['structuredContent']
+        self.schema('command-result', receipt)
+        self.assertEqual(receipt['error']['code'], 'ACCOUNT_SESSION_UNCONFIRMED')
+        self.assertEqual([attempt['phase'] for attempt in receipt['attempts']], ['not_sent'])
+        process.stdin.close()
+        process.wait(timeout=2)
+        self.assertEqual(process.returncode, 0)
+        self.assertEqual(process.stderr.read(), '')
+        capacity = [{'device_id':f'30000000-0000-4000-8000-{index:012d}', 'target_temperature':26}
+                    for index in range(1, 258)]
+        config['meiju_temperature_grants'] = capacity[:256]
+        self.schema('cli-meiju-grants', config)
+        path.write_text(json.dumps(config, separators=(',', ':')))
+        self.assertEqual(self.meiju(*options,'account','list',profile='capacity',response_definition='list_accounts')['data'], [])
+        config['meiju_temperature_grants'] = capacity
+        path.write_text(json.dumps(config, separators=(',', ':')))
+        self.assertLess(path.stat().st_size, 32 * 1024)
+        denied = self.meiju(*options,'account','list',profile='excess',expected=2)
+        self.assertEqual(denied['error']['code'], 'INVALID_ARGUMENT')
+        self.assertFalse((path.parent / 'excess').exists())
+
     def test_native_bridge_independence_and_foreground_lifecycle(self):
         library = ctypes.CDLL(str(LIBRARY))
         library.homeverb_open.argtypes = [ctypes.c_char_p]

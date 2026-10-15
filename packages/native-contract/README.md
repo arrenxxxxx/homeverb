@@ -1,6 +1,6 @@
 # HomeVerb native contract
 
-Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.14.0 has 31 callable JSON methods, one separate protected account-connection function and three separate trusted approval functions; the JSON envelope schema is 1.0.
+Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.14.1 has 31 callable JSON methods, one separate protected account-connection function and three separate trusted approval functions; the JSON envelope schema is 1.0.
 
 - [api.json](api.json) is compiled into the `get_api_info` response.
 - [examples.json](examples.json) contains fictional requests and actual Mock native responses, including failures and lifecycle states. It is preview/test data, never a production device database.
@@ -37,3 +37,10 @@ starts. [The contract](../../docs/native-ui-contract.md#profile-scoped-dishwashe
 requires separate trusted confirmation and descriptor-specific arguments. The
 startup union never establishes model capability. Ordinary methods, C functions
 and storage versions are unchanged; physical acceptance remains pending.
+
+API 1.14.1 increases only the exact temperature grant list capacity from 64 to
+256 entries, allowing a four-AC configuration with 116 exact candidate targets.
+The protected product mapping and action schema still restrict each device; this
+is not a universal temperature range. Negotiate 1.14.1 before supplying more than
+64 entries. Other grant limits, methods, C functions and storage versions are
+unchanged. CLI grant files retain their independent 32 KiB limit.

@@ -52,6 +52,21 @@ fn temperature_authority_is_exact_independent_and_never_supplies_missing_device_
 }
 
 #[test]
+fn four_air_conditioners_can_retain_every_reviewed_exact_temperature_grant() {
+    let grants: Vec<_> = (0..4)
+        .flat_map(|_| {
+            let device_id = Uuid::new_v4().to_string();
+            (32..=60).map(move |half| MeijuTemperatureGrant {
+                device_id: device_id.clone(),
+                target_temperature: f64::from(half) / 2.0,
+            })
+        })
+        .collect();
+    assert_eq!(grants.len(), 116);
+    assert_eq!(meiju_temperature_policy(&grants).unwrap().grants.len(), 116);
+}
+
+#[test]
 fn temperature_grants_refuse_invalid_targets_ids_duplicate_numeric_values_and_excess_entries() {
     let id = "abcdef00-1234-4567-89ab-123456abcdef";
     let grant = |device: &str, target| MeijuTemperatureGrant {
@@ -75,10 +90,10 @@ fn temperature_grants_refuse_invalid_targets_ids_duplicate_numeric_values_and_ex
     }
     let duplicates:Vec<MeijuTemperatureGrant>=serde_json::from_value(json!([{"device_id":id,"target_temperature":26},{"device_id":id,"target_temperature":26.0}])).unwrap();
     assert!(meiju_temperature_policy(&duplicates).is_err());
-    let mut grants: Vec<_> = (0..64)
+    let mut grants: Vec<_> = (0..256)
         .map(|_| grant(&Uuid::new_v4().to_string(), 26.0))
         .collect();
-    assert_eq!(meiju_temperature_policy(&grants).unwrap().grants.len(), 64);
+    assert_eq!(meiju_temperature_policy(&grants).unwrap().grants.len(), 256);
     grants.push(grant(&Uuid::new_v4().to_string(), 26.0));
     assert!(meiju_temperature_policy(&grants).is_err());
     for bad in [

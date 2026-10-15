@@ -16,7 +16,7 @@ The ten C functions in [homeverb.h](../crates/ffi/include/homeverb.h) remain the
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects saved-account cloud reads. `scenario` defaults to `normal`. Meiju requires `allow_mock_writes: false` and rejects any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms `homeverb.mock` or `midea.meiju`. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.14.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.14.1`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -646,8 +646,10 @@ A fictional configuration granting one exact target is:
 ```
 
 Each entry authorizes only `main / climate.set {target_temperature}` over cloud
-for that local device and exact Celsius value. At most 64 distinct canonical local
-UUID-v4/target pairs are allowed. The startup schema admits 16–30 in half-degree
+for that local device and exact Celsius value. API 1.14.1 permits at most 256
+distinct canonical local UUID-v4/target pairs. Negotiate API 1.14.1 or later before
+supplying more than 64 entries; earlier binaries reject the larger list. Never
+truncate a reviewed permission list silently. The startup schema admits 16–30 in half-degree
 increments as the union of reviewed targets; **this is not a universal device
 range**. No other temperature, power, mode or fan change is authorized. Empty or
 omitted lists grant nothing. Ordinary requests cannot edit authority. Obtain

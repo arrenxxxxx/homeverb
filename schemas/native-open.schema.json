@@ -125,7 +125,7 @@
     },
     "meiju_temperature_grants": {
       "type": "array",
-      "maxItems": 64,
+      "maxItems": 256,
       "uniqueItems": true,
       "default": [],
       "items": {

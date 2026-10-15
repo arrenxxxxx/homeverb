@@ -664,7 +664,13 @@ def main():
             assert not private.exists()
 
     temperature_grant = {'device_id':grant_id, 'target_temperature':26.5}
-    for grants in [[], [temperature_grant]]:
+    fleet_ids = [f'30000000-0000-4000-8000-{index:012d}' for index in range(1, 5)]
+    fleet_grants = [{'device_id':device_id, 'target_temperature':half / 2}
+                    for device_id in fleet_ids for half in range(32, 61)]
+    capacity_grants = [{'device_id':f'30000000-0000-4000-8000-{index:012d}', 'target_temperature':26.5}
+                       for index in range(1, 258)]
+    assert len(fleet_grants) == 116
+    for grants in [[], [temperature_grant], fleet_grants, capacity_grants[:256]]:
         with tempfile.TemporaryDirectory(prefix='homeverb-ui-temperature-') as directory:
             config = {'schema_version':'1.0', 'data_dir':directory, 'adapter':'midea.meiju',
                       'allow_mock_writes':False, 'meiju_temperature_grants':grants}
@@ -674,21 +680,29 @@ def main():
             handle = result['data']['handle']
             try:
                 assert raw(handle, envelope('discover'))['data'] == []
-                device = load('examples/device.json')
-                device.update(id=grant_id, model='KFR-35G/WF2', support_status='experimental',
-                              components=[{'id':'main','capabilities':['power','climate']}],
-                              connections=[{'id':'fictional-cloud','adapter':'midea.meiju','transport':'cloud',
-                                            'account_id':'40000000-0000-4000-8000-000000000001','identity_ref':'fictional-binding'}])
-                climate = load('examples/capability.meiju-temperature.json')
-                with sqlite3.connect(Path(directory) / 'homeverb.sqlite3') as database:
-                    database.execute('INSERT INTO devices VALUES (?, ?)',
-                                     (grant_id, json.dumps({'device':device, 'capabilities':[power,climate]})))
-                for value in [26,26.5,27]:
-                    request = command('temperature-plan',device_id=grant_id,capability='climate',action='set',
-                                      arguments={'target_temperature':value},connection='cloud')
-                    plan = raw(handle,envelope('plan',command=request))
-                    responses['plan'].validate(plan)
-                    assert (plan['error'] is None) == (bool(grants) and value == 26.5)
+                for index, device_id in enumerate(fleet_ids if grants == fleet_grants else [grant_id]):
+                    device = load('examples/device.json')
+                    device.update(id=device_id, model='KFR-35G/WF2', support_status='experimental',
+                                  components=[{'id':'main','capabilities':['power','climate']}],
+                                  connections=[{'id':f'fictional-cloud-{index}','adapter':'midea.meiju','transport':'cloud',
+                                                'account_id':'40000000-0000-4000-8000-000000000001','identity_ref':f'fictional-binding-{index}'}])
+                    climate = load('examples/capability.meiju-temperature.json')
+                    limits = climate['actions']['set']['parameters']['properties']['target_temperature']
+                    if index % 2:
+                        limits.update(minimum=16, multipleOf=1)
+                    with sqlite3.connect(Path(directory) / 'homeverb.sqlite3') as database:
+                        database.execute('INSERT INTO devices VALUES (?, ?)',
+                                         (device_id, json.dumps({'device':device, 'capabilities':[power,climate]})))
+                    for value in ([half / 2 for half in range(32, 61)] if grants == fleet_grants else [26,26.5,27]):
+                        request = command('temperature-plan',device_id=device_id,capability='climate',action='set',
+                                          arguments={'target_temperature':value},connection='cloud')
+                        plan = raw(handle,envelope('plan',command=request))
+                        responses['plan'].validate(plan)
+                        allowed = {'device_id':device_id, 'target_temperature':value} in grants
+                        valid = value >= limits['minimum'] and value % limits['multipleOf'] == 0
+                        assert (plan['error'] is None) == (allowed and valid), (device_id, value, plan)
+                        if not valid:
+                            assert plan['error']['code'] == 'INVALID_ARGUMENT'
                 denied = command('independent-power',device_id=grant_id,arguments={'state':True},connection='cloud')
                 assert raw(handle,envelope('plan',command=denied))['error']['code'] == 'POLICY_DENIED'
                 forged = envelope('list_devices')
@@ -697,7 +711,7 @@ def main():
                 assert raw(handle,forged)['error']['code'] == 'INVALID_ARGUMENT'
             finally:
                 library.homeverb_close(handle)
-    bad_temperatures = [None,True,{},[temperature_grant]*2,[temperature_grant]*65,
+    bad_temperatures = [None,True,{},[temperature_grant]*2,capacity_grants,
                         [{**temperature_grant,'device_id':'*'}],[{**temperature_grant,'confirmed':True}],
                         [{'device_id':grant_id,'target_temperature':26},{'device_id':grant_id,'target_temperature':26.0}]]
     bad_temperatures.extend([{**temperature_grant,'target_temperature':value}] for value in [None,True,'26',15.5,30.5,26.25])
