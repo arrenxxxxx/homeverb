@@ -145,58 +145,15 @@ class Blocks extends StatelessWidget {
           child: Column(
             children: List.generate(
               items.length,
-              (i) => Padding(
-                padding: const EdgeInsets.only(bottom: 9),
-                child: Semantics(
-                  selected: isSelected(i),
-                  child: Surface(
-                    radius: 16,
-                    border: isSelected(i) ? accent : null,
-                    borderWidth: isSelected(i) ? 1.2 : .6,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(16),
-                      onTap: () {
-                        choices[key] = multiple ? selected ^ (1 << i) : i;
-                        onAction('choice:${items[i]}');
-                        onChanged?.call();
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 15,
-                          vertical: 17,
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Copy(items[i], bold: isSelected(i)),
-                            ),
-                            const SizedBox(width: 12),
-                            Container(
-                              width: 18,
-                              height: 18,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: isSelected(i) ? accent : null,
-                                border: Border.all(
-                                  color: isSelected(i)
-                                      ? accent
-                                      : const Color(0xffb3b3ac),
-                                ),
-                              ),
-                              child: isSelected(i)
-                                  ? const Glyph(
-                                      'check',
-                                      size: 14,
-                                      color: Colors.white,
-                                    )
-                                  : null,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+              (i) => ChoiceTile(
+                label: items[i],
+                selected: isSelected(i),
+                multiple: multiple,
+                onTap: () {
+                  choices[key] = multiple ? selected ^ (1 << i) : i;
+                  onAction('choice:${items[i]}');
+                  onChanged?.call();
+                },
               ),
             ),
           ),

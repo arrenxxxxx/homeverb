@@ -1205,17 +1205,19 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       return Column(
         children: [
           for (final card in c.cards)
-            CheckboxListTile(
-              title: Text(card['device']['alias']),
-              value: c.selection.contains(card['device']['id']),
-              onChanged: (v) {
-                setState(() {
-                  if (v == true)
-                    c.selection.add(card['device']['id']);
-                  else
-                    c.selection.remove(card['device']['id']);
-                });
-              },
+            ChoiceTile(
+              key: ValueKey('select-device:${card['device']['id']}'),
+              label: card['device']['alias'],
+              selected: c.selection.contains(card['device']['id']),
+              multiple: true,
+              onTap: c.busy
+                  ? null
+                  : () {
+                      setState(() {
+                        final id = card['device']['id'] as String;
+                        if (!c.selection.remove(id)) c.selection.add(id);
+                      });
+                    },
             ),
           Blocks(
             screenFor(id)['blocks'] as List,

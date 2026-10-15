@@ -88,6 +88,57 @@ void main() {
       }
     },
   );
+  test('native room assignment rejects stale identities atomically', () async {
+    final dir = await Directory.systemTemp.createTemp('homeverb-assign-');
+    final core = await NativeClient.open(
+      dataDir: dir.path,
+      libraryPath: library,
+    );
+    final state = HomeController(
+      core,
+      LocalPreferences(File('${dir.path}/ui.json')),
+    );
+    try {
+      await state.discover();
+      await state.saveRoom('Study');
+      final room = state.rooms.single['id'] as String;
+      final device = state.cards.single['device']['id'] as String;
+      state.selectedDevice = device;
+      await state.saveDevice({'alias': 'Desk climate', 'favorite': true});
+      state.selection.addAll([device, 'missing-fixture-device']);
+      expect(await state.assign(room), false);
+      expect(state.selection, {device, 'missing-fixture-device'});
+      final unchanged = (await core.call('list_device_cards') as List).single;
+      expect(unchanged['preferences']['room_id'], null);
+      expect(unchanged['preferences']['alias'], 'Desk climate');
+      expect(unchanged['preferences']['favorite'], true);
+      state.selection.remove('missing-fixture-device');
+      await core.call('delete_room', {'room_id': room});
+      expect(await state.assign(room), false);
+      expect(state.selection, {device});
+      expect(
+        (await core.call('list_device_cards') as List)
+            .single['preferences']['room_id'],
+        null,
+      );
+      await state.initialize();
+      await state.saveRoom('Kitchen');
+      expect(await state.assign(state.rooms.single['id']), true);
+      expect(state.selection, isEmpty);
+      expect(
+        state.currentCard!['preferences']['room_id'],
+        state.rooms.single['id'],
+      );
+      expect(state.currentCard!['preferences']['alias'], 'Desk climate');
+      expect(state.currentCard!['preferences']['favorite'], true);
+      state.selection.add(device);
+      expect(await state.assign(null), true);
+      expect(state.currentCard!['preferences']['room_id'], null);
+    } finally {
+      await core.close();
+      await dir.delete(recursive: true);
+    }
+  });
   test('native room ordering reloads a concurrently changed list', () async {
     final dir = await Directory.systemTemp.createTemp('homeverb-order-');
     final core = await NativeClient.open(

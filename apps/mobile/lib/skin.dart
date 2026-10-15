@@ -257,6 +257,62 @@ class ActionButton extends StatelessWidget {
   );
 }
 
+class ChoiceTile extends StatelessWidget {
+  const ChoiceTile({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    this.multiple = false,
+    super.key,
+  });
+  final String label;
+  final bool selected, multiple;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 9),
+    child: Semantics(
+      selected: selected,
+      checked: multiple ? selected : null,
+      inMutuallyExclusiveGroup: !multiple,
+      enabled: onTap != null,
+      child: Surface(
+        radius: 16,
+        border: selected ? accent : null,
+        borderWidth: selected ? 1.2 : .6,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 17),
+            child: Row(
+              children: [
+                Expanded(child: Copy(label, bold: selected)),
+                const SizedBox(width: 12),
+                Container(
+                  width: 18,
+                  height: 18,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: selected ? accent : null,
+                    border: Border.all(
+                      color: selected ? accent : const Color(0xffb3b3ac),
+                    ),
+                  ),
+                  child: selected
+                      ? const Glyph('check', size: 14, color: Colors.white)
+                      : null,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 class Glyph extends StatelessWidget {
   const Glyph(this.name, {this.size = 24, this.color = ink, super.key});
   final String name;

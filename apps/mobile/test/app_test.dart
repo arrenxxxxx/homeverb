@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:homeverb_mobile/main.dart';
+import 'package:homeverb_mobile/skin.dart';
 import 'package:homeverb_mobile/controller.dart';
 import 'package:homeverb_mobile/native_client.dart';
 import 'package:homeverb_mobile/preferences.dart';
@@ -257,9 +258,7 @@ void main() {
         expect(controller.currentCard!['device']['alias'], 'Quiet AC');
         await tap('Room');
         expect(
-          tester
-              .widget<CheckboxListTile>(find.byType(CheckboxListTile).first)
-              .value,
+          tester.widget<ChoiceTile>(find.byType(ChoiceTile).first).selected,
           true,
         );
         expect(controller.selection, {controller.selectedDevice});
@@ -283,7 +282,11 @@ void main() {
         await tap('Select Devices');
         await tap('Apply to Selected Devices');
         expect((controller.error as NativeFailure).code, 'INVALID_ARGUMENT');
-        await tester.tap(find.byType(CheckboxListTile).first);
+        await tester.tap(
+          find.byKey(
+            ValueKey('select-device:${controller.cards.first['device']['id']}'),
+          ),
+        );
         await tester.pumpAndSettle();
         await tap('Apply to Selected Devices');
         expect(controller.error, isNull);
@@ -356,7 +359,11 @@ void main() {
         await tap('Move Devices');
         expect((controller.error as NativeFailure).code, 'INVALID_ARGUMENT');
         expect(app.currentState!.id, 'R03');
-        await tester.tap(find.byType(CheckboxListTile).first);
+        await tester.tap(
+          find.byKey(
+            ValueKey('select-device:${controller.cards.first['device']['id']}'),
+          ),
+        );
         await tester.pumpAndSettle();
         await tap('Move Devices');
         expect(
