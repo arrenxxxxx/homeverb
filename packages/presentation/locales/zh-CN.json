@@ -75,7 +75,7 @@
   "error.AUTH_REQUIRED": "请重新连接此平台账号后继续。",
   "error.ACCOUNT_NOT_FOUND": "此本地账号已不可用，请重新加载账号列表。",
   "error.ACCOUNT_SESSION_UNCONFIRMED": "已保存的会话需要验证，请重新连接此平台账号后继续。",
-  "error.MIDEA_RESPONSE_INVALID": "平台返回的设备列表格式暂不支持。",
-  "error.MIDEA_REQUEST_REJECTED": "平台拒绝了设备列表请求。",
-  "error.MIDEA_REQUEST_FAILED": "暂时无法获取平台设备列表。"
+  "error.MIDEA_RESPONSE_INVALID": "平台返回的数据格式暂不支持。",
+  "error.MIDEA_REQUEST_REJECTED": "平台拒绝了读取请求。",
+  "error.MIDEA_REQUEST_FAILED": "暂时无法获取平台数据。"
 }

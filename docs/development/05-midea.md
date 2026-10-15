@@ -4,7 +4,7 @@ The owner selected Midea and Hualing air conditioners, dishwashers, and refriger
 
 Daily cloud control is required in the first real integration. LAN is an additional route for the same physical devices, not a substitute for cloud control. The owner has physical products; exact models, firmware, app version, and account region remain to be recorded. This guide records requirements and source research on October 15, 2026, not implemented HomeVerb support or physical verification.
 
-The first native protocol stage is now implemented in [homeverb-midea](../../crates/midea/src/lib.rs): account-scoped home/appliance retrieval, code/data response validation, family classification, deduplication, partial failure, and cancellation. It uses an injected read transport and synthetic responses with the inspected wire fields. It has no live authentication, signing, HTTPS implementation, registered Core adapter, or enabled UI account method yet. See [ADR-0020](../adr/0020-midea-cloud-inventory.md).
+The native read protocols are implemented in [homeverb-midea](../../crates/midea/src/lib.rs): account-scoped home/appliance retrieval, code/data validation, deduplication, partial inventory failure, and bounded cloud-state decoding for the three selected families. They use an injected read transport and synthetic responses with the inspected wire fields. There is no live authentication, signing, HTTPS implementation, registered Core adapter, or enabled UI account method yet. See [ADR-0020](../adr/0020-midea-cloud-inventory.md) and [ADR-0023](../adr/0023-meiju-cloud-state-evidence.md).
 
 The native account vault now persists random local references, composes Linux secure storage, and coordinates session read/update work through account leases. Interrupted or uncertain credential updates remain pending until trusted validation and recovery. This supplies storage for the future provider flow; it does not establish Meiju login, provider identity or session validity. See [ADR-0021](../adr/0021-persistent-account-vault.md) and the [credential integration guide](04-add-adapter.md#integrate-native-credentials).
 
@@ -79,13 +79,31 @@ Default priority is air conditioner, dishwasher, then refrigerator; this is an i
 
 ## Develop the native inventory stage
 
-Run `cargo test -p homeverb-midea --offline --locked`. `ReadTransport` admits only home-list and home-appliance read endpoints, with the exact account credential reference and caller's Operation. A future signed HTTPS transport must validate its fixed vendor destination, cap received bytes before allocating an unbounded body, and return response bytes through `SecretBytes`. It must not retry or reauthenticate implicitly. The inventory layer additionally rejects bodies larger than 1 MiB and applies one shared deadline across the full sequence.
+Run `cargo test -p homeverb-midea --offline --locked`. `ReadTransport` admits only the reviewed home-list, home-appliance and appliance-state read endpoints, with the exact account credential reference and caller's Operation. A future signed HTTPS transport must validate its fixed vendor destination, cap received bytes before allocating an unbounded body, and return response bytes through `SecretBytes`. It must not retry or reauthenticate implicitly. The protocol layer additionally rejects bodies larger than 1 MiB and applies the caller's shared deadline.
 
 Inventory and `CloudId` are private native data: no Serialize implementation, no raw identifiers or appliance metadata in Debug/errors, and no direct SQLite/native JSON projection. Add encrypted identity mapping before converting them into stable local Device/Connection references. The returned family is only a protocol candidate. Preserve unknown families, and never translate `online_hint` into a verified state snapshot. Errors on individual homes remain explicit; session expiry stops subsequent requests; cancellation discards the return value without applying a partial replacement.
+
+## Develop cloud state reads
+
+`read_cloud_state` performs one explicit state query. `StateQuery::Default` sends an empty query object; `IndoorTemperature` sends the inspected AC query type and is rejected for other families. A future signed transport wraps that object as `command.query` beside the exact `applianceCode`, following `MeijuCloud.get_device_status` at the pinned revision. It must handle the new `ReadEndpoint::ApplianceState` variant. No automatic follow-up query, local Lua fallback or write is performed.
+
+The native [state decoder](../../crates/midea/src/state.rs) uses these limited source mappings:
+
+| Family / decoder component | Fields and projection | Boundary |
+|---|---|---|
+| [AC][ac-cloud-source] / `main` | `power` -> `power.state`; `indoor_temperature` -> current temperature; `temperature` plus `small_temperature` -> target temperature | Both target parts are required. Mode and wind-speed codes remain `vendor.midea.ac.*`; no universal fan enums or setter ranges |
+| [CA][ca-cloud-source] / `fridge`, `freezer` | `storage_*` / `freezing_*` power and target fields; `refrigeration_real_temperature` / `freezing_real_temperature` -> current values | Two decoder slots for one local device, not proof of physical compartment support. Other zones remain unmapped |
+| [E1][e1-cloud-source] / `main` | Program `mode`, `work_status`, `doorswitch`, lack flags, temperature and remaining minutes under `vendor.midea.dishwasher.*` | Preserve model-specific codes. In the inspected `7600016L` mapping, door code 1 means closed; do not manufacture a universal door-open or cycle-running boolean |
+
+Finite numeric strings are normalized inside the adapter. Missing/null values remain absent; malformed recognized fields reject the whole response. Unknown fields, including undocumented timestamps, are not exported. Explicit non-Celsius temperature units are unsupported until their wire semantics are established. Defaults and mappings alone do not authorize capabilities or controls.
+
+CloudState retains account/appliance identity privately and has redacted Debug with no Serialize implementation. `snapshot(local_device_id, component)` is for a trusted adapter after checking the encrypted identity binding and admitted component/property descriptors. It emits allowlisted readings with cloud provenance, a fixed local receipt time, null observation time, and `stale: true`. The inspected response does not establish freshness, so this evidence cannot verify a write. A valid empty response stays empty; it is not an online indicator. See [ADR-0023](../adr/0023-meiju-cloud-state-evidence.md). Authentication approval, actual transport, capability admission, physical testing and native UI account methods remain separate unfinished work.
 
 [cloud-integration]: https://github.com/sususweet/midea_auto_cloud/tree/ce0c4b88224def0f6b53714312c19f71aa9c2a50
 [meiju-cloud-source]: https://github.com/sususweet/midea_auto_cloud/blob/ce0c4b88224def0f6b53714312c19f71aa9c2a50/custom_components/midea_auto_cloud/core/cloud.py
 [ca-cloud-source]: https://github.com/sususweet/midea_auto_cloud/blob/ce0c4b88224def0f6b53714312c19f71aa9c2a50/custom_components/midea_auto_cloud/device_mapping/T0xCA.py
+[ac-cloud-source]: https://github.com/sususweet/midea_auto_cloud/blob/ce0c4b88224def0f6b53714312c19f71aa9c2a50/custom_components/midea_auto_cloud/device_mapping/T0xAC.py
+[e1-cloud-source]: https://github.com/sususweet/midea_auto_cloud/blob/ce0c4b88224def0f6b53714312c19f71aa9c2a50/custom_components/midea_auto_cloud/device_mapping/T0xE1.py
 [ha]: https://github.com/georgezhao2010/midea_ac_lan/blob/7c5231ca0588d364aa30e3bb2b887b37d4359719/README.md
 [library]: https://github.com/midea-lan/midea-local/tree/ef28169926914d15f40fe521b9cc3d3c2f553c59
 [ac-guide]: https://github.com/georgezhao2010/midea_ac_lan/blob/7c5231ca0588d364aa30e3bb2b887b37d4359719/doc/AC.md

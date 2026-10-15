@@ -1,4 +1,7 @@
-//! Meiju cloud inventory protocol. Live authentication and HTTPS are not registered yet.
+//! Meiju cloud read protocols. Live authentication and HTTPS are not registered yet.
+
+mod state;
+pub use state::{CloudState, StateQuery, read_cloud_state};
 
 use async_trait::async_trait;
 use homeverb_core::{CredentialRef, Operation, SecretBytes};
@@ -94,6 +97,10 @@ impl Inventory {
 pub enum ReadEndpoint<'a> {
     Homes,
     HomeAppliances(&'a CloudId),
+    ApplianceState {
+        appliance: &'a CloudId,
+        query: StateQuery,
+    },
 }
 
 impl ReadEndpoint<'_> {
@@ -101,6 +108,7 @@ impl ReadEndpoint<'_> {
         match self {
             Self::Homes => "/v1/homegroup/list/get",
             Self::HomeAppliances(_) => "/v1/appliance/home/list/get",
+            Self::ApplianceState { .. } => "/mjl/v1/device/status/lua/get",
         }
     }
 }
@@ -192,21 +200,21 @@ pub async fn retrieve_inventory(
 fn invalid() -> Error {
     Error::new(
         "MIDEA_RESPONSE_INVALID",
-        "The provider response does not match the supported inventory protocol.",
+        "The provider response does not match the supported read protocol.",
     )
 }
 
 fn sanitized(error: Error) -> Error {
     let message = match error.code.as_str() {
         "AUTH_REQUIRED" => "The platform account requires user-side authorization.",
-        "CANCELLED" => "The inventory operation was cancelled.",
-        "DEADLINE_EXCEEDED" => "The inventory operation exceeded its deadline.",
+        "CANCELLED" => "The cloud read was cancelled.",
+        "DEADLINE_EXCEEDED" => "The cloud read exceeded its deadline.",
         "MIDEA_RESPONSE_INVALID" => return invalid(),
-        "MIDEA_REQUEST_REJECTED" => "The provider rejected the inventory request.",
+        "MIDEA_REQUEST_REJECTED" => "The provider rejected the read request.",
         _ => {
             return Error::new(
                 "MIDEA_REQUEST_FAILED",
-                "The inventory request could not be completed.",
+                "The cloud read could not be completed.",
             );
         }
     };

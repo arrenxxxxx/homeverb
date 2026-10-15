@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Meiju cloud state decoding
+
+- Add bounded, explicit cloud state queries and selected AC/E1/CA field decoding behind the injected read transport.
+- Keep model-specific codes in vendor namespaces, separate refrigerator compartments, and omit missing values without defaults.
+- Mark unproven cloud observations stale, preserve local receipt time, and redact private source state; no live authentication, controls or native UI methods are enabled.
+
 ### Meiju authentication admission review
 
 - Verify the official developer-secret token flow and the separate community app-facing login requirements against primary sources.

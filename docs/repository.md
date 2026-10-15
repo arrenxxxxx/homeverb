@@ -7,7 +7,7 @@ crates/core/               # Local organization, policy, routing, execution, ver
 crates/storage/            # SQLite metadata/journal, migration, retention, and device locks
 crates/secret-store/       # Bounded Linux Secret Service access; other platforms fail closed
 crates/mock/               # Persistent fictional appliance and fault scenarios
-crates/midea/              # Meiju inventory protocol; live authentication/transport pending
+crates/midea/              # Meiju inventory/state protocols; live authentication/transport pending
 crates/host/               # Composition root and foreground session contract
 crates/ffi/                # Native in-process C ABI and public header
 packages/presentation/     # en-US/zh-CN catalogs and framework-neutral helpers

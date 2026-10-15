@@ -748,6 +748,7 @@ name = "homeverb-midea"
 version = "0.2.0"
 dependencies = [
  "async-trait",
+ "chrono",
  "homeverb-core",
  "homeverb-domain",
  "serde",

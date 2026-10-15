@@ -75,7 +75,7 @@
   "error.AUTH_REQUIRED": "Reconnect this platform account to continue.",
   "error.ACCOUNT_NOT_FOUND": "This local account is no longer available. Reload the account list.",
   "error.ACCOUNT_SESSION_UNCONFIRMED": "The saved session needs validation. Reconnect this platform account to continue.",
-  "error.MIDEA_RESPONSE_INVALID": "The platform returned an unsupported device-list response.",
-  "error.MIDEA_REQUEST_REJECTED": "The platform rejected the device-list request.",
-  "error.MIDEA_REQUEST_FAILED": "The platform device list could not be retrieved."
+  "error.MIDEA_RESPONSE_INVALID": "The platform returned an unsupported response.",
+  "error.MIDEA_REQUEST_REJECTED": "The platform rejected the read request.",
+  "error.MIDEA_REQUEST_FAILED": "The platform data could not be retrieved."
 }

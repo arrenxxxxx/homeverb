@@ -36,6 +36,7 @@ impl ReadTransport for Transport {
         let key = match endpoint {
             ReadEndpoint::Homes => "homes".to_owned(),
             ReadEndpoint::HomeAppliances(id) => id.expose().to_owned(),
+            ReadEndpoint::ApplianceState { .. } => panic!("Inventory must not query state."),
         };
         let count = {
             let mut calls = self.calls.lock().unwrap();
