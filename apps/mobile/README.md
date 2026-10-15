@@ -1,6 +1,40 @@
 # HomeVerb Flutter application
 
-The native application embeds Core using native UI contract 1.9. The separate visual preview contains fictional Window Light fixtures and never opens Core. This UI currently opens an isolated Mock profile; Meiju account input and Android startup wiring remain pending. Cache and history clearing are connected with separate confirmations. Nearby sharing and full-profile deletion remain unavailable. Their preview states are not live features.
+The native application embeds Core using native UI contract 1.9. The separate visual preview contains fictional Window Light fixtures and never opens Core. The default build opens an isolated Mock profile. Explicit Meiju builds provide protected account connection, local metadata, retrieval/recovery and scoped local removal; Android startup wiring and physical acceptance remain pending. Cache and history clearing are connected with separate confirmations. Nearby sharing and full-profile deletion remain unavailable. Their preview states are not live features.
+
+## Account integration
+
+The default adapter remains `homeverb.mock`. An explicit Linux development build
+can select the read-only Meiju session after reviewing the [native contract](../../docs/native-ui-contract.md):
+
+```sh
+fvm flutter run -d linux --dart-define=HOMEVERB_ADAPTER=midea.meiju
+```
+
+This uses a separate app-private `native-meiju` directory, never the default Mock
+`native` profile or an existing CLI profile. Opening the app lists local metadata
+only. Platforms > Add Platform > Meiju previews the mainland account flow before
+protected sign-in. The native connection automatically retrieves devices once;
+partial/failed retrieval remains distinct from authentication and storage success.
+Explicit Retrieve Devices uses the saved session without another login. Pending
+accounts offer recovery or, with API 1.8+, sign-in to the original account.
+
+Credential controllers clear on submission, backgrounding and disposal. Owned
+managed byte arrays and native allocations clear on every wrapper return path.
+Only nonsecret metadata enters JSON; credentials use the separate native function.
+This does not guarantee erasure of keyboard, OS or managed-string copies. Locked or
+unavailable system storage is an error, never a plaintext fallback. No real-device
+write grants are supplied by this UI.
+
+Account removal displays the exact local card scope, including entries whose
+metadata is unavailable, before confirmation. Pending cleanup and changed scope
+require explicit review/retry. Other installations and provider authorization are
+unaffected. Duplicate account labels include local identity suffixes. Unsupported
+retrieved models remain visible without reads or fabricated controls.
+
+Real account/secure-store and physical-device acceptance of these Flutter flows
+remains pending; the account tests use isolated fixtures and empty native profiles.
+Nearby sharing, provider revocation and full-profile deletion are unavailable.
 
 ## Development
 

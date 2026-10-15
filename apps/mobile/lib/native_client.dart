@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
+import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 
 typedef Json = Map<String, dynamic>;
@@ -46,6 +47,19 @@ abstract interface class CoreClient {
   Future<void> close();
 }
 
+abstract interface class AccountClient {
+  String get adapter;
+  bool get supportsAccountConnection;
+  bool get supportsPendingReauthorization;
+  // Takes ownership of the byte arrays and clears them on every return path.
+  Future<Json> connectAccount({
+    required Uint8List login,
+    required Uint8List password,
+    required String label,
+    String? accountId,
+  });
+}
+
 class NativeBindings {
   NativeBindings(String path)
     : library = path == 'process'
@@ -62,6 +76,53 @@ class NativeBindings {
         Pointer<Utf8> Function(Uint64, Pointer<Utf8>),
         Pointer<Utf8> Function(int, Pointer<Utf8>)
       >('homeverb_call');
+  late final connect = library
+      .lookupFunction<
+        Pointer<Utf8> Function(
+          Uint64,
+          Pointer<Utf8>,
+          Pointer<Uint8>,
+          Size,
+          Pointer<Uint8>,
+          Size,
+        ),
+        Pointer<Utf8> Function(
+          int,
+          Pointer<Utf8>,
+          Pointer<Uint8>,
+          int,
+          Pointer<Uint8>,
+          int,
+        )
+      >('homeverb_connect_account');
+
+  Json connectRequest(
+    int handle,
+    Json metadata,
+    int loginAddress,
+    int loginLength,
+    int passwordAddress,
+    int passwordLength,
+  ) {
+    final input = jsonEncode(metadata).toNativeUtf8();
+    Pointer<Utf8>? output;
+    try {
+      output = connect(
+        handle,
+        input,
+        Pointer<Uint8>.fromAddress(loginAddress),
+        loginLength,
+        Pointer<Uint8>.fromAddress(passwordAddress),
+        passwordLength,
+      );
+      if (output == nullptr) throw NativeFailure('NATIVE_ERROR', 'No response');
+      return jsonDecode(output.toDartString()) as Json;
+    } finally {
+      calloc.free(input);
+      if (output != null && output != nullptr) free(output);
+    }
+  }
+
   late final free = library
       .lookupFunction<
         Void Function(Pointer<Utf8>),
@@ -95,10 +156,25 @@ class NativeBindings {
   }
 }
 
-class NativeClient implements CoreClient {
-  NativeClient._(this.path, this.handle) : bindings = NativeBindings(path);
+class NativeClient implements CoreClient, AccountClient {
+  NativeClient._(this.path, this.handle, this.adapter)
+    : bindings = NativeBindings(path);
   final String path;
   final int handle;
+  @override
+  final String adapter;
+  String apiVersion = '';
+  bool apiAtLeast(int minor) =>
+      apiVersion.startsWith('1.') &&
+      (int.tryParse(apiVersion.split('.')[1]) ?? -1) >= minor;
+  @override
+  bool get supportsAccountConnection =>
+      apiAtLeast(2) &&
+      methods.contains('list_accounts') &&
+      methods.contains('refresh_account');
+  @override
+  bool get supportsPendingReauthorization =>
+      supportsAccountConnection && apiAtLeast(8);
   final NativeBindings bindings;
   final Set<String> active = {};
   Set<String> methods = {};
@@ -116,6 +192,7 @@ class NativeClient implements CoreClient {
     String? libraryPath,
     bool allowMockWrites = false,
     String scenario = 'normal',
+    String adapter = 'homeverb.mock',
   }) async {
     final path = libraryPath ?? defaultLibrary();
     final response = await Isolate.run(
@@ -124,10 +201,15 @@ class NativeClient implements CoreClient {
         'data_dir': dataDir,
         'allow_mock_writes': allowMockWrites,
         'scenario': scenario,
+        if (adapter != 'homeverb.mock') 'adapter': adapter,
       }),
     );
     final data = decodeResponse(response) as Json;
-    final client = NativeClient._(path, data['handle'] as int);
+    final client = NativeClient._(
+      path,
+      data['handle'] as int,
+      data['adapter'] as String? ?? 'homeverb.mock',
+    );
     try {
       final info = await client.call('get_api_info') as Json;
       if (!('${info['api_version']}').startsWith('1.')) {
@@ -136,26 +218,28 @@ class NativeClient implements CoreClient {
           'Native API major 1 is required.',
         );
       }
+      client.apiVersion = info['api_version'] as String;
       client.methods = (info['methods'] as Map).keys.cast<String>().toSet();
       return client;
-    } catch (_) {
+    } catch (error) {
       await client.close();
+      if (error is NativeFailure && error.code == 'INVALID_ARGUMENT') {
+        throw NativeFailure(
+          'API_UPGRADE_REQUIRED',
+          'A native library with API negotiation is required.',
+        );
+      }
       rethrow;
     }
   }
 
   @override
   Future<dynamic> call(String method, [Json fields = const {}]) async {
-    if (_closed) throw NativeFailure('HOST_CLOSED', 'Reopen the application.');
-    if (!_foreground || _suspended)
-      throw NativeFailure('HOST_BACKGROUND', 'Return to the foreground.');
+    final id = beginOperation(), libraryPath = path, nativeHandle = handle;
     if (methods.isNotEmpty && !methods.contains(method)) {
+      endOperation(id);
       throw NativeFailure('METHOD_UNAVAILABLE', method);
     }
-    if (active.length >= 8)
-      throw NativeFailure('BUSY', 'Wait for active operations.');
-    final id = uniqueId(), libraryPath = path, nativeHandle = handle;
-    active.add(id);
     final request = {
       'schema_version': '1.0',
       'operation_id': id,
@@ -171,11 +255,101 @@ class NativeClient implements CoreClient {
         ),
       );
     } finally {
-      active.remove(id);
-      if (active.isEmpty && _foreground && !_closed && _suspended) {
-        _suspended = false;
-        bindings.foreground(handle, true);
+      endOperation(id);
+    }
+  }
+
+  String beginOperation() {
+    if (_closed) throw NativeFailure('HOST_CLOSED', 'Reopen the application.');
+    if (!_foreground || _suspended) {
+      throw NativeFailure('HOST_BACKGROUND', 'Return to the foreground.');
+    }
+    if (active.length >= 8)
+      throw NativeFailure('BUSY', 'Wait for active operations.');
+    final id = uniqueId();
+    active.add(id);
+    return id;
+  }
+
+  void endOperation(String id) {
+    active.remove(id);
+    if (active.isEmpty && _foreground && !_closed && _suspended) {
+      _suspended = false;
+      bindings.foreground(handle, true);
+    }
+  }
+
+  @override
+  Future<Json> connectAccount({
+    required Uint8List login,
+    required Uint8List password,
+    required String label,
+    String? accountId,
+  }) async {
+    Pointer<Uint8>? loginMemory, passwordMemory;
+    String? id;
+    final loginLength = login.length, passwordLength = password.length;
+    try {
+      if (!supportsAccountConnection) {
+        throw NativeFailure(
+          'API_UPGRADE_REQUIRED',
+          'Protected account connection requires native API 1.2 or later.',
+        );
       }
+      if (loginLength < 1 ||
+          loginLength > 256 ||
+          passwordLength < 1 ||
+          passwordLength > 256 ||
+          login.any((b) => b < 33 || b > 126) ||
+          password.any((b) => b < 32 || b > 126)) {
+        throw NativeFailure(
+          'INVALID_ARGUMENT',
+          'Use 1–256 ASCII bytes for each credential.',
+        );
+      }
+      id = beginOperation();
+      loginMemory = calloc<Uint8>(loginLength);
+      passwordMemory = calloc<Uint8>(passwordLength);
+      loginMemory.asTypedList(loginLength).setAll(0, login);
+      passwordMemory.asTypedList(passwordLength).setAll(0, password);
+      login.fillRange(0, loginLength, 0);
+      password.fillRange(0, passwordLength, 0);
+      final loginAddress = loginMemory.address,
+          passwordAddress = passwordMemory.address;
+      final libraryPath = path, nativeHandle = handle;
+      final metadata = <String, dynamic>{
+        'schema_version': '1.0',
+        'operation_id': id,
+        'timeout_ms': 180000,
+        'label': label,
+        'account_id': accountId,
+      };
+      return decodeResponse(
+            await _connectOnWorker(
+              libraryPath,
+              nativeHandle,
+              metadata,
+              loginAddress,
+              loginLength,
+              passwordAddress,
+              passwordLength,
+            ),
+          )
+          as Json;
+    } finally {
+      login.fillRange(0, loginLength, 0);
+      password.fillRange(0, passwordLength, 0);
+      if (loginMemory != null) {
+        loginMemory.asTypedList(loginLength).fillRange(0, loginLength, 0);
+        calloc.free(loginMemory);
+      }
+      if (passwordMemory != null) {
+        passwordMemory
+            .asTypedList(passwordLength)
+            .fillRange(0, passwordLength, 0);
+        calloc.free(passwordMemory);
+      }
+      if (id != null) endOperation(id);
     }
   }
 
@@ -218,3 +392,23 @@ class NativeClient implements CoreClient {
     await Isolate.run(() => NativeBindings(libraryPath).close(nativeHandle));
   }
 }
+
+// Keep the worker closure in a scope without managed credential arrays.
+Future<Json> _connectOnWorker(
+  String path,
+  int handle,
+  Json metadata,
+  int loginAddress,
+  int loginLength,
+  int passwordAddress,
+  int passwordLength,
+) => Isolate.run(
+  () => NativeBindings(path).connectRequest(
+    handle,
+    metadata,
+    loginAddress,
+    loginLength,
+    passwordAddress,
+    passwordLength,
+  ),
+);

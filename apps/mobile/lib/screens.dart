@@ -258,7 +258,15 @@ class ScreenView extends StatelessWidget {
               Expanded(
                 child: Row(
                   children: [
-                    if (wide) _rail(root ?? 'Devices'),
+                    if (wide)
+                      _rail(
+                        root ??
+                            (id.startsWith('P')
+                                ? 'Platforms'
+                                : id.startsWith('S') || id.startsWith('H')
+                                ? 'Settings'
+                                : 'Devices'),
+                      ),
                     Expanded(
                       child: Column(
                         children: [

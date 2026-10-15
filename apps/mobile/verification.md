@@ -8,7 +8,7 @@ The application pins Flutter 3.47.7 through FVM 4.3.1. It loads the native libra
 
 The native Mock path provides first launch, three roots, local search, room filters, room create/rename/reorder/delete, atomic assignment, alias/pin/order, explicit discovery and reads, component-described climate controls, explicit selected-device power batches, exact receipts/history, local route/name/skin preferences and allowlisted diagnostics preview/export. Loading and failed local reads do not display fictional preview cards. Modal backgrounds use the selected native device state.
 
-All 82 atlas states have native-widget implementations in an isolated, visibly labelled preview. The 198 event buttons in that preview simulate atlas branches. They are **not 198 successful native operations**. Meiju accounts and authorization are now callable in Core but their Flutter input remains pending. Nearby sharing, identity merge and full-profile deletion remain unavailable. Native cache/history cleanup is implemented with separate scope confirmations. Non-climate native forms consume described scalar properties/actions. A selected component with one light, fan, media, sensor or cycle family now uses a dedicated Window Light layout; mixed families retain the descriptor list. These isolated fixtures are not registered native adapters or physical-device support. The multi-compartment overview now groups exact component readings and target controls. Strict layout equality remains pending.
+All 82 atlas states have native-widget implementations in an isolated, visibly labelled preview. The 198 event buttons in that preview simulate atlas branches. They are **not 198 successful native operations**. Flutter account metadata, protected input, automatic-retrieval results, pending-session recovery/reauthorization and scoped removal are implemented. Their successful provider flows are tested with isolated contract fixtures, not real credentials. Nearby sharing, identity merge and full-profile deletion remain unavailable. Native cache/history cleanup is implemented with separate scope confirmations. Non-climate native forms consume described scalar properties/actions. A selected component with one light, fan, media, sensor or cycle family now uses a dedicated Window Light layout; mixed families retain the descriptor list. These isolated fixtures are not registered native adapters or physical-device support. The multi-compartment overview now groups exact component readings and target controls. Strict layout equality remains pending.
 
 ## Executed verification
 
@@ -17,7 +17,7 @@ Commands below ran in the isolated worktree; Flutter commands used the pinned FV
 | Check | Evidence / result |
 |---|---|
 | `fvm flutter analyze` | No issues found |
-| `fvm flutter test --reporter expanded` | Full 52-test suite passed, including three new cleanup regressions and all 11 prior native/controller checks and the inline-stepper interaction check. Other coverage: one extended native click scenario, three native outcome scenarios, two component checks, four compartment-overview checks, five accessibility checks, three system-contrast checks, two receipt checks, two descriptor-control checks, six dedicated appliance-layout checks, three organization checks and seven screen/interaction/reflow checks |
+| `fvm flutter test --reporter expanded` | Full 59-test suite passed, including two native account and five synthetic account checks, three cleanup regressions and all 11 prior native/controller checks and the inline-stepper interaction check. Other coverage: one extended native click scenario, three native outcome scenarios, two component checks, four compartment-overview checks, five accessibility checks, three system-contrast checks, two receipt checks, two descriptor-control checks, six dedicated appliance-layout checks, three organization checks and seven screen/interaction/reflow checks |
 | `fvm flutter test integration_test/native_smoke_test.dart -d linux` under Xvfb | Actual Linux process loads the bundled Core library without a path override, discovers Mock, reads state, sets mode and verifies the returned receipt; process screenshot captured; the latest run also cancels and confirms cache cleanup and confirms history cleanup |
 | `fvm flutter build linux --release` | Linux bundle includes `libhomeverb_ffi.so`; the bundled Rust library is the checked debug build |
 | `fvm flutter build web -t lib/main_preview.dart` | Isolated preview compiles; web preview does not call native Core |
@@ -89,15 +89,15 @@ The command verifies the complete 82-file set, writes `output/flutter-verificati
 | UI-04 | Exact-component selection, capability references, cache isolation, climate bounds/enums and unknown/read-only values implemented. Isolated fridge/freezer fixture clicks verify distinct ranges and steps; Scalar non-climate action forms, stale/read-only properties, denied plans and cancellation are fixture-tested. Dedicated single-family layouts, numeric/enum fan controls, one-shot-action exclusion, unknown-value semantics and coupled-action fallback are fixture-tested. The combined overview, exact targets, partial-read recovery and compound target forms are fixture-tested. Pixel parity and physical multi-component acceptance remain pending. |
 | UI-05 | Native outcomes preserved, including nested partial results with per-item evidence navigation. Explicit batches plan before execution; no aggregate rollback/retry. Physical evidence unavailable. |
 | UI-06 | Explicit bounded Mock discovery implemented. Real permission, identity-merge and nearby-pairing paths unavailable. |
-| UI-07 | Core 1.9 account methods are integrated into this branch. Flutter protected account input is pending; isolated preview only. |
-| UI-08 | Core supports scoped local account removal, but Flutter account confirmation/recovery is pending. Provider revocation remains unavailable. |
+| UI-07 | Protected Dart FFI, exact-account selection, local rename, automatic/partial/failed/empty retrieval, explicit recovery/reauthorization, cancellation and field/buffer clearing are implemented. Fixture clicks and native rejection/empty-profile checks pass; successful real login, secure-store and mobile acceptance remain pending. |
+| UI-08 | Flutter confirms exact linked-card scope, distinguishes pending cleanup, refuses stale scope until review, and retains unrelated accounts/rooms. Synthetic clicks pass. Real account removal and provider revocation remain unverified/unavailable respectively. |
 | UI-09 | No current native sharing methods; no peer networking or credential transfer. |
 | UI-10 | Dart/native foreground, cancellation and rapid-resume checks passed. Component read sequences discard late results and stop before the next read after cancellation/backgrounding. Physical Android/iOS background and termination acceptance pending. |
 | UI-11 | One registered skin, local persistence/fallback and preview implemented and tested. |
 | UI-12 | Exact diagnostics preview/export and retained receipt navigation tested. Confirmed native cache/history cleanup, cancel, busy-journal refusal, local reload and request retirement are click/native-tested. Full-profile deletion and real OS save chooser acceptance remain pending. |
 | UI-13 | Reference phone/wide captures, 320-width/200% text, all-state landscape/150% text and all-form simulated keyboard checks passed. Field/control semantics, all-state tap labels and reduced-motion busy indicators tested. System high contrast passes the 82 initial-viewport text-contrast checks and all-state 320-width/200% layouts. Full zh-CN wiring, offscreen contrast, remaining animation behavior, screen-reader and physical-keyboard acceptance pending. |
 | UI-14 | Linux process and bundle verified. Android/iOS builds, phone profiling and pixel equality not passed. |
-| UI-15 | Meiju Core integration is present; Flutter account input/startup integration remains pending. P08 preview copy follows automatic retrieval; replacement authoritative artwork and real off-LAN acceptance pending. |
+| UI-15 | Meiju Core and explicit read-only Flutter startup/account integration are present; real account and off-LAN acceptance remain pending. P08 preview copy follows automatic retrieval; replacement authoritative artwork and real off-LAN acceptance pending. |
 
 ## Compatibility and environment
 
@@ -147,3 +147,54 @@ still reports **0/82 exact matches**, mean channel error **1.6798/255**; exit st
 1 is retained as a failed acceptance gate. This phase changes native data-backed
 views, not the fictional prototype raster references. The 88 native widget captures
 cover 27 screen IDs, including cleanup scope/cancel/completion states.
+
+## Protected account UI checkpoint
+
+The default app remains Mock. `HOMEVERB_ADAPTER=midea.meiju` explicitly selects a
+separate private read-only profile with no appliance grants. Native version/method
+checks precede protected-symbol use; pending reauthorization requires API 1.8.
+The separate worker closure receives native addresses and nonsecret metadata, not
+managed credential arrays. The caller retains native buffer ownership until the
+worker completes, then clears/frees both allocations on success or failure.
+
+Platforms now loads local summaries and details, displays actual credential states
+without inventing login identifiers/scopes/check times, renames by local ID, and
+shows saved linked cards. Duplicate labels have visible identity suffixes. Retrieval
+and recovery expose inner partial/failed results; empty inventory preserves saved
+cards. Sign-in uses the exact selected UUID for reauthorization and clears fields
+before awaiting completion, on backgrounding and disposal. Late callbacks do not
+navigate after cancellation. Unsupported models stay visible with a limitation
+and do not trigger cached or bulk live reads. Wide nested account/settings pages
+select their correct navigation section.
+
+Local removal displays the reviewed ID set, including missing-metadata entries,
+and sends that unchanged set after confirmation. Scope changes require another
+review. Pending cleanup is displayed with its error and explicit retry; successful
+removal reloads local cards/accounts without deleting rooms or receipts. No
+provider revocation or full-profile deletion is fabricated.
+
+Two actual native tests cover protected-buffer clearing on Mock refusal, invalid
+input, background, operation capacity, old version and queued pause/resume; plus
+empty read-only Meiju startup/local queries. Five account tests cover exact duplicate
+identities, rename validation, unsupported cards, partial/expired/empty retrieval,
+new-account automatic retrieval without a duplicate refresh, pending recovery and
+reauthorization at 320 logical width/200% text, secure-input lifecycle, late results,
+unknown outcomes, local removal cancel/scope-change/pending/success and preservation.
+The main account click scenario captures 26 states across eight screen IDs; the local gallery is `output/flutter-verification/accounts/index.html`.
+All account responses are fictional; no real provider or secret store is contacted.
+
+Final account-phase verification: all **59 Flutter tests** and static analysis passed.
+The actual Linux Flutter process opened an empty isolated Meiju profile, navigated
+the account catalog into protected input, refused empty submission, cleared fields
+through valid background/foreground transitions, and cancelled back to the setup
+page. No valid credentials were submitted. The existing actual-process Mock
+discovery/control/cache-history cleanup regression also passed. The default-Mock
+Linux release bundle built successfully. Actual account-process capture:
+`output/flutter-verification/accounts/linux-process.png`.
+
+Documentation, schema and repository validators passed. The complete strict
+comparison remains **0/82 exact**, mean channel error **1.6798/255**. No reference
+image was replaced and no tolerance was accepted. New protected-login and amended
+account outcome states have functional screenshot evidence but do not establish
+authoritative prototype parity. Android packaging/Keystore, iOS, physical account
+acceptance, localization and full accessibility remain unfinished.

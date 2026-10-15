@@ -6,6 +6,12 @@ The current design handoff is the [complete Window Light prototype](../../output
 
 ## Native boundary
 
+The [Flutter app](../../apps/mobile/README.md#account-integration) now has protected
+account input and local account/retrieval/recovery/removal pages. The default build
+remains Mock; an explicit Meiju build uses a separate read-only private profile.
+Fixture clicks and native admission checks do not establish real account, secure
+storage or phone acceptance. See the [verification report](../../apps/mobile/verification.md).
+
 API 1.4 adds local `get_account` and `rename_account` for platform details and names.
 Use the [account metadata contract](../native-ui-contract.md#local-account-details-and-names)
 to show saved linked devices without a refresh or secret-store access. Local names

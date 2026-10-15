@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:file_selector/file_selector.dart';
 import 'blocks.dart';
 import 'appliance_controls.dart';
+import 'account_views.dart';
 import 'compartment_controls.dart';
 import 'controller.dart';
 import 'controls.dart';
@@ -29,10 +30,16 @@ Future<void> main() async {
     final prefs = LocalPreferences(File('${directory.path}/presentation.json'));
     await prefs.load();
     const library = String.fromEnvironment('HOMEVERB_LIBRARY');
+    const adapter = String.fromEnvironment(
+      'HOMEVERB_ADAPTER',
+      defaultValue: 'homeverb.mock',
+    );
     final core = await NativeClient.open(
-      dataDir: '${directory.path}/native',
+      dataDir:
+          '${directory.path}/${adapter == 'homeverb.mock' ? 'native' : 'native-meiju'}',
+      adapter: adapter,
       libraryPath: library.isEmpty ? null : library,
-      allowMockWrites: true,
+      allowMockWrites: adapter == 'homeverb.mock',
     );
     runApp(
       NativeApp(catalog: catalog, controller: HomeController(core, prefs)),
@@ -92,6 +99,8 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   String? actionName;
   String? formError;
   LocalCleanup? cleanupScope;
+  bool editingAccountName = false;
+  String connectionLabel = 'Meiju account';
   bool _disposed = false;
   int navigation = 0;
   @override
@@ -149,6 +158,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     });
     if (['D01', 'P01', 'S01'].contains(target))
       await c.savePreferences({'root': target});
+    if (target == 'P01' && c.supports('list_accounts')) await c.loadAccounts();
     if (target == 'S05') await c.loadHistory(deviceOnly: deviceHistory);
     if (target == 'S07') await c.loadDiagnostics();
     if (target == 'S04' && c.cleanupNeedsReload) await c.initialize();
@@ -173,6 +183,89 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         return;
       }
       await go(history.isEmpty ? 'D01' : history.removeLast(), back: true);
+      return;
+    }
+    if (label.startsWith('account:')) {
+      await finish(c.selectAccount(label.substring('account:'.length)), 'P09');
+      return;
+    }
+    if ([
+      'Choose Meiju',
+      'Reauthorize',
+      'Sign In to the Original Account',
+    ].contains(label)) {
+      if (c.busy) return;
+      editingAccountName = false;
+      if (label == 'Choose Meiju') {
+        c.selectedAccount = null;
+        c.accountDetails = null;
+        c.accountReport = null;
+        c.accountRemoval = null;
+      }
+      await go(c.canSignIn ? 'P03' : 'P13');
+      return;
+    }
+    if (label == 'Continue to Sign In' || label == 'Save Account Name') {
+      if (c.busy) return;
+      final name = input('Account name').trim();
+      if (name.isEmpty ||
+          name.runes.length > 80 ||
+          RegExp(r'[\x00-\x1f\x7f]').hasMatch(name)) {
+        setState(
+          () => formError = 'Use 1–80 characters without control characters.',
+        );
+        return;
+      }
+      if (label == 'Save Account Name') {
+        await finish(c.renameAccount(name), 'P09');
+      } else {
+        connectionLabel = name;
+        await go('P04');
+      }
+      return;
+    }
+    if (label == 'Rename Account') {
+      if (c.busy || c.account?['credential_state'] == 'removing') return;
+      editingAccountName = true;
+      await go('P03');
+      return;
+    }
+    if (label == 'Reload Accounts') {
+      await finish(c.loadAccounts(), 'P01');
+      return;
+    }
+    if (label == 'Retrieve Devices' || label == 'Recover Saved Authorization') {
+      await finish(
+        c.retrieveAccount(recover: label == 'Recover Saved Authorization'),
+        'P08',
+      );
+      return;
+    }
+    if ([
+      'Remove From This Device',
+      'Retry local cleanup',
+      'Review removal scope',
+    ].contains(label)) {
+      await finish(c.reviewAccountRemoval(), 'P11');
+      return;
+    }
+    if (label == 'Remove Locally') {
+      final epoch = navigation;
+      if (await c.removeAccount() && mounted && navigation == epoch) {
+        await go(c.accountRemoval?['status'] == 'removed' ? 'P01' : 'P09');
+      }
+      return;
+    }
+    if (label == 'Back to Accounts') {
+      await go('P01');
+      return;
+    }
+    if (label == 'View Devices') {
+      await go('D01');
+      return;
+    }
+    if (label == 'Revoke Access · if supported') {
+      await go('P12');
       return;
     }
     if (label.startsWith('receipt:')) {
@@ -288,7 +381,9 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         await c.refresh();
       return;
     }
-    if (label == 'Discover Mock device' || label == 'Search Again') {
+    if (label == 'Discover Mock device' ||
+        label == 'Retrieve Saved Accounts' ||
+        label == 'Search Again') {
       await finish(c.discover(), 'D01');
       return;
     }
@@ -489,7 +584,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           builder: (context) => AlertDialog(
             title: const Text('Privacy'),
             content: const Text(
-              'Local data only. No telemetry or automatic uploads. Diagnostics are saved locally only when you choose Export. Platform authorization and sharing are unavailable in this build.',
+              'Explicit account connection and device retrieval can contact the admitted provider directly. No telemetry or diagnostic uploads. Credentials use the system secure store. Diagnostics are exported only when requested. Nearby sharing is unavailable.',
             ),
             actions: [
               TextButton(
@@ -603,20 +698,33 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     final original = widget.catalog.ui(id);
     final ui = Map<String, dynamic>.from(original);
     List<dynamic>? b;
-    if (id.startsWith('P') || id.startsWith('H')) {
+    if (id.startsWith('P')) {
+      b = accountBlocks(c, id);
+      if (id == 'P03' && editingAccountName) {
+        ui['header'] = 'Account name';
+        b = [
+          ['field', 'Account name', c.account?['label'] ?? ''],
+          [
+            'note',
+            'This changes only the local display name. Identity, credentials and permissions stay unchanged.',
+          ],
+          ['button', 'Save Account Name'],
+          ['button', 'Cancel', 'secondary'],
+        ];
+      }
+      if (id == 'P04') ui['header'] = 'Meiju sign-in';
+      if (id == 'P09' || id == 'P10') ui['header'] = 'Account details';
+      if (id == 'P08') ui['header'] = 'Account result';
+    }
+    if (id.startsWith('H')) {
       b = [
         [
           'status',
           'Unavailable',
-          id.startsWith('P')
-              ? 'Platform authorization is unavailable in this Mock session. Meiju account input is not connected to the UI yet.'
-              : 'Nearby sharing is unavailable in the current native contract.',
+          'Nearby sharing is unavailable in the current native contract.',
           'warning',
         ],
-        [
-          'note',
-          'No account is connected and no discovery, transfer or authorization has started.',
-        ],
+        ['note', 'No discovery, transfer or authorization has started.'],
         ['button', 'Compatibility Details', 'secondary'],
       ];
     }
@@ -764,6 +872,18 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         break;
       case 'C01':
         ui['header'] = device?['alias'] ?? 'Device';
+        if (device?['support_status'] == 'unsupported') {
+          b = [
+            [
+              'status',
+              'Unsupported model',
+              'This device was retrieved from the platform, but this model has no admitted readings or controls.',
+              'warning',
+            ],
+            ['button', 'Device Information', 'secondary'],
+          ];
+          break;
+        }
         ui['subtitle'] = applianceFamily(c) == null
             ? c.roomName(prefs?['room_id'])
             : '';
@@ -961,13 +1081,23 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         b = [
           [
             'status',
-            'Mock discovery',
-            'Only a fictional appliance can be discovered by this host.',
+            c.isMock ? 'Mock discovery' : 'Saved-account retrieval',
+            c.isMock
+                ? 'Only a fictional appliance can be discovered by this host.'
+                : 'Explicitly retrieve cloud inventory from saved Meiju accounts. No LAN scan or pairing is started.',
             'neutral',
           ],
-          ['button', 'Discover Mock device'],
+          [
+            'button',
+            c.isMock ? 'Discover Mock device' : 'Retrieve Saved Accounts',
+          ],
           ['button', 'Add Platform', 'secondary'],
-          ['note', 'No physical appliance or local network is scanned.'],
+          [
+            'note',
+            c.isMock
+                ? 'No physical appliance or local network is scanned.'
+                : 'New accounts connect from Add Platform and retrieve their devices automatically.',
+          ],
         ];
         break;
       case 'A05':
@@ -1090,7 +1220,12 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       case 'S08':
         b = [
           ['hero', 'home', 'HomeVerb', 'One language for your appliances.'],
-          ['note', '0.2.0 · Native Mock host · No real-device support'],
+          [
+            'note',
+            c.isMock
+                ? '0.2.0 · Native Mock host · Fictional devices'
+                : '0.2.0 · Experimental Meiju · Read-only session',
+          ],
           [
             'rows',
             [
@@ -1106,7 +1241,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           [
             'status',
             'Mock tested',
-            'Core contract 1.9 includes experimental Meiju reads and Android native storage. This UI currently opens Mock; account input and phone acceptance remain pending.',
+            'Core contract 1.9 includes experimental Meiju reads and protected account connection. Physical account and phone acceptance of this UI remain pending.',
             'neutral',
           ],
           [
@@ -1137,7 +1272,11 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         s?['observations']?['climate.target_temperature']?['value'] == null
             ? '—'
             : '${s!['observations']['climate.target_temperature']['value']}°C',
-        s == null ? 'Not read' : 'Saved observation',
+        d['support_status'] == 'unsupported'
+            ? 'Unsupported model'
+            : s == null
+            ? 'Not read'
+            : 'Saved observation',
       ];
     }).toList(),
     onAction: action,
@@ -1151,6 +1290,25 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   }
 
   Widget? specialFor(String id) {
+    if (id == 'P04') {
+      final epoch = navigation;
+      return AccountSignIn(
+        key: ValueKey('signin:$epoch'),
+        needsReload: c.accountNeedsReload,
+        busy: c.busy,
+        onSubmit: (login, password) async {
+          final success = await c.connectAccount(
+            login,
+            password,
+            connectionLabel,
+          );
+          if (success && mounted && epoch == navigation) await go('P08');
+        },
+        onCancel: () => action('Cancel'),
+        onReload: () => action('Reload Accounts'),
+      );
+    }
+
     if (['D01', 'D11', 'D12'].contains(id) && c.cards.isNotEmpty)
       return DeviceHome(
         mode: 'all',

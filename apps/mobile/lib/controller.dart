@@ -56,8 +56,20 @@ class HomeController extends ChangeNotifier {
     cards = (results[1] as List).cast<Json>();
   }
 
-  Future<bool> initialize() =>
-      perform(cleanupNeedsReload ? reloadAfterCleanup : loadLocal);
+  Future<bool> initialize() => perform(() async {
+    if (accountNeedsReload) {
+      await reloadAccountViews();
+      return;
+    }
+    if (cleanupNeedsReload) {
+      await reloadAfterCleanup();
+      return;
+    }
+    await loadLocal();
+    if (accountClient != null && supports('list_accounts')) {
+      accounts = (await core.call('list_accounts') as List).cast<Json>();
+    }
+  });
   Future<bool> discover() => perform(() async {
     await core.call('discover');
     await loadLocal();
@@ -120,6 +132,7 @@ class HomeController extends ChangeNotifier {
     snapshot = null;
     description = await core.call('describe_device', {'device': id}) as Json;
     component = components.first['id'] as String;
+    if (description!['device']['support_status'] == 'unsupported') return;
     await _loadComponentCache();
     if (hasCompartmentOverview) {
       for (final part in components.where((part) => part['id'] != component)) {
@@ -215,6 +228,7 @@ class HomeController extends ChangeNotifier {
   Future<bool> refreshCards() => perform(() async {
     for (final c in visibleCards) {
       final d = c['device'] as Json;
+      if (d['support_status'] == 'unsupported') continue;
       final result =
           await core.call('read_state', {
                 'device': d['id'],
@@ -345,6 +359,173 @@ class HomeController extends ChangeNotifier {
     receipt = await core.call('execute', {'command': command}) as Json;
     // Observations only change after an explicit read, never from a requested value.
   });
+  List<Json> accounts = [];
+  Json? accountDetails, accountReport, accountRemoval;
+  String? selectedAccount;
+  List<String>? removalScope;
+  bool accountNeedsReload = false;
+  AccountClient? get accountClient =>
+      core is AccountClient ? core as AccountClient : null;
+  bool get isMock => accountClient?.adapter != 'midea.meiju';
+  Json? get account => accountDetails?['account'] as Json?;
+  bool get canSignIn =>
+      !isMock &&
+      accountClient!.supportsAccountConnection &&
+      (account?['credential_state'] != 'pending' ||
+          accountClient!.supportsPendingReauthorization) &&
+      account?['credential_state'] != 'removing';
+  List<String> get accountDeviceIds =>
+      (accountDetails?['device_ids'] as List? ?? []).cast<String>();
+  List<Json> get accountCards => cards
+      .where((card) => accountDeviceIds.contains(card['device']['id']))
+      .toList();
+
+  Future<void> reloadAccountViews() async {
+    accounts = (await core.call('list_accounts') as List).cast<Json>();
+    await loadLocal();
+    if (selectedAccount != null) {
+      if (accounts.any((a) => a['id'] == selectedAccount)) {
+        accountDetails =
+            await core.call('get_account', {'account_id': selectedAccount})
+                as Json;
+      } else {
+        selectedAccount = null;
+        accountDetails = null;
+      }
+    }
+    final currentIds = cards.map((card) => card['device']['id']).toSet();
+    snapshots.removeWhere((id, _) => !currentIds.contains(id));
+    _componentSnapshots.removeWhere((key, _) => !currentIds.contains(key.$1));
+    _componentReadErrors.removeWhere((key, _) => !currentIds.contains(key.$1));
+    selection.removeWhere((id) => !currentIds.contains(id));
+    if (selectedDevice != null && !currentIds.contains(selectedDevice)) {
+      _readEpoch++;
+      selectedDevice = null;
+      description = null;
+      snapshot = null;
+    }
+    accountNeedsReload = false;
+  }
+
+  Future<bool> loadAccounts() => perform(reloadAccountViews);
+  Future<bool> selectAccount(String id) => perform(() async {
+    selectedAccount = id;
+    accountDetails = null;
+    accountReport = null;
+    accountRemoval = null;
+    removalScope = null;
+    accountDetails = await core.call('get_account', {'account_id': id}) as Json;
+    await loadLocal();
+  });
+
+  Future<bool> renameAccount(String label) => perform(() async {
+    accountNeedsReload = true;
+    await core.call('rename_account', {
+      'account_id': selectedAccount,
+      'label': label.trim(),
+    });
+    await reloadAccountViews();
+  });
+
+  Future<bool> retrieveAccount({bool recover = false}) => perform(() async {
+    accountNeedsReload = true;
+    accountReport = null;
+    accountReport =
+        await core.call(recover ? 'recover_account' : 'refresh_account', {
+              'account_id': selectedAccount,
+            })
+            as Json;
+    validateAccountReport(accountReport!);
+    await reloadAccountViews();
+  });
+
+  Future<bool> connectAccount(
+    Uint8List login,
+    Uint8List password,
+    String label,
+  ) async {
+    try {
+      return await perform(() async {
+        if (!canSignIn)
+          throw NativeFailure(
+            'AUTH_FLOW_UNSUPPORTED',
+            'This account flow is unavailable.',
+          );
+        accountNeedsReload = true;
+        accountReport = null;
+        accountReport = await accountClient!.connectAccount(
+          login: login,
+          password: password,
+          label: label,
+          accountId: selectedAccount,
+        );
+        validateAccountReport(accountReport!);
+        selectedAccount = accountReport!['account']['id'] as String;
+        await reloadAccountViews();
+      });
+    } finally {
+      login.fillRange(0, login.length, 0);
+      password.fillRange(0, password.length, 0);
+    }
+  }
+
+  void validateAccountReport(Json report) {
+    final retrieval = report['retrieval'] as Json;
+    if (!['complete', 'partial', 'failed'].contains(retrieval['status']) ||
+        !['succeeded', 'not_attempted'].contains(report['authentication']) ||
+        (retrieval['status'] == 'complete' && retrieval['error'] != null)) {
+      throw NativeFailure(
+        'UNSUPPORTED_OUTCOME',
+        'Unrecognized account result. Reload local accounts.',
+      );
+    }
+  }
+
+  Future<bool> reviewAccountRemoval() => perform(() async {
+    removalScope = null;
+    accountNeedsReload = true;
+    await reloadAccountViews();
+    if (selectedAccount == null)
+      throw NativeFailure(
+        'ACCOUNT_NOT_FOUND',
+        'The account is no longer saved.',
+      );
+    removalScope = List<String>.unmodifiable(accountDeviceIds);
+    accountRemoval = null;
+  });
+
+  Future<bool> removeAccount() => perform(() async {
+    final scope = removalScope;
+    if (scope == null || selectedAccount == null || accountNeedsReload) {
+      throw NativeFailure(
+        'INVALID_ARGUMENT',
+        'Review the local removal scope first.',
+      );
+    }
+    accountNeedsReload = true;
+    accountRemoval = null;
+    try {
+      accountRemoval =
+          await core.call('remove_account', {
+                'account_id': selectedAccount,
+                'expected_device_ids': scope,
+              })
+              as Json;
+      final status = accountRemoval!['status'];
+      if (!['removed', 'pending'].contains(status) ||
+          (status == 'removed' && accountRemoval!['error'] != null)) {
+        throw NativeFailure(
+          'UNSUPPORTED_OUTCOME',
+          'Unrecognized removal result. Reload local accounts.',
+        );
+      }
+      await reloadAccountViews();
+    } finally {
+      // Any new attempt must display and confirm a newly reviewed local scope.
+      removalScope = null;
+    }
+  });
+
   bool supports(String method) =>
       core is! NativeClient || (core as NativeClient).methods.contains(method);
   int? cleanupCount;
@@ -389,7 +570,10 @@ class HomeController extends ChangeNotifier {
     await loadLocal();
     history = (await core.call('recent_executions') as List).cast<Json>();
     // No cached-state miss ever falls through to a live read.
-    if (selectedDevice != null && currentCard != null && description != null) {
+    if (selectedDevice != null &&
+        currentCard != null &&
+        description != null &&
+        description!['device']['support_status'] != 'unsupported') {
       for (final part in components) {
         try {
           await readComponent(part['id'], cached: true);
