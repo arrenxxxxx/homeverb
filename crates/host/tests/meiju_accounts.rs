@@ -16,6 +16,9 @@ use std::{
 use tokio_util::sync::CancellationToken;
 use uuid::Uuid;
 
+#[path = "meiju_accounts/fan.rs"]
+mod fan;
+
 fn operation() -> Operation {
     Operation::new(1000, CancellationToken::new()).unwrap()
 }

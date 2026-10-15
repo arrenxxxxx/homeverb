@@ -19,12 +19,12 @@ The pinned [cloud client](https://github.com/sususweet/midea_auto_cloud/blob/ce0
 uses `/mjl/v1/device/lua/control` with `applianceCode` and
 `command.control`. Its [AC mapping](https://github.com/sususweet/midea_auto_cloud/blob/ce0c4b88224def0f6b53714312c19f71aa9c2a50/custom_components/midea_auto_cloud/device_mapping/T0xAC.py)
 selects `power`; [climate on/off](https://github.com/sususweet/midea_auto_cloud/blob/ce0c4b88224def0f6b53714312c19f71aa9c2a50/custom_components/midea_auto_cloud/climate.py)
-uses explicit on/off values. HomeVerb sends only `{"power":"on"}` or
+uses explicit on/off values. The power action sends only `{"power":"on"}` or
 `{"power":"off"}`. It neither toggles nor changes temperature/mode, copies stale
 state into the command, downloads Lua, or sends an automatic restoring command.
 No model-specific physical success follows from this source mapping.
 
-AC temperature/fan constraints, dishwasher program/start semantics, and refrigerator
+AC temperature constraints, further fan modes, dishwasher program/start semantics, and refrigerator
 compartment writes remain pending. The dishwasher mappings can require preserving
 other options when starting; the mere presence of an operator field does not admit
 a generic cycle command. Refrigerator cooling changes need separate risk review.
@@ -102,5 +102,23 @@ explicit read. Record model/firmware, action, receipt status and physical/app
 observations without private identifiers. Never label stale cloud data `verified`.
 Restoring the prior state is another physical action requiring permission.
 
-Off-LAN tests, mobile secure stores, Flutter consent UI, more AC settings
+Off-LAN tests, mobile secure-store acceptance, Flutter consent UI, more AC settings
 and the other appliance controls remain follow-up work. T10 is incomplete.
+
+## Native vendor fan controls
+
+API 1.9 adds [independent fan permissions](../native-ui-contract.md#scoped-experimental-ac-fan-startup).
+The same four exact AC models can expose `vendor.midea.ac.set_fan_speed` through
+`MeijuAdapter::with_ac_fan_control()`. A separate Core grant is still required.
+The pinned default AC mapping admits codes 20, 40, 60, 80, 100 and 102; this is an
+experimental candidate for those models, not physical or firmware certification.
+The separate action sends only `wind_speed`, reuses the outcome contract above,
+and leaves power, mode and temperature out of the request. It never retries or
+changes mode to force an effect. Unsupported codes and other models are refused.
+The power-only developer probe above is unchanged; native fan use is described in
+the handoff. Upstream's normal entity path also supplies cached `command.status`;
+HomeVerb omits that context. Physical tests must verify that the vendor encoder
+preserves power, mode and temperature without it; a single-field request alone
+does not prove that the appliance changes only that field. Offline tests cover exact bodies, protected identities, no cache
+changes, permission separation, receipts and cancellation. Real fan operations
+remain deferred by the owner.

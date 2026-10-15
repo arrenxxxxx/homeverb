@@ -1,6 +1,6 @@
-# Native UI contract 1.8
+# Native UI contract 1.9
 
-Status: implemented Linux native contract, October 15, 2026, with Mock, default read-only Meiju startup, protected account connection and scoped experimental AC power grants. Six real devices passed the native read path; phone packaging and complete provider/physical acceptance remain pending. See [ADR-0019](adr/0019-native-ui-contract.md).
+Status: implemented Linux native contract, October 15, 2026, with Mock, default read-only Meiju startup, protected account connection and scoped experimental AC power/fan grants. Six real devices passed the native read path; phone packaging and complete provider/physical acceptance remain pending. See [ADR-0019](adr/0019-native-ui-contract.md).
 
 ## Start here in a Flutter worktree
 
@@ -8,7 +8,7 @@ Branch from a commit containing both the Mock MVP and this contract. Put the Flu
 
 Read the [UI integration guide](development/03-ui-integration.md) for existing behavior and the [functional handoff](ui-functional-spec.md) for screens. Use [api.json](../packages/native-contract/api.json) as the callable-method catalog and [examples.json](../packages/native-contract/examples.json) as fictional request/response examples. The examples were obtained from the built native library. They contain temporary fictional IDs and observations, not defaults for a production device.
 
-Startup explicitly selects Mock or Meiju; Meiju remains read-only unless the trusted host supplies the scoped power grants below. Meiju uses an existing local account or the protected connection function below; opening the library alone does not establish connection or authorization. Preview-only refrigerator, dishwasher, and sharing screens can use isolated UI fixture repositories; never mix those records with a native installation or label them live.
+Startup explicitly selects Mock or Meiju; Meiju remains read-only unless the trusted host supplies the independently scoped power or fan grants below. Meiju uses an existing local account or the protected connection function below; opening the library alone does not establish connection or authorization. Preview-only refrigerator, dishwasher, and sharing screens can use isolated UI fixture repositories; never mix those records with a native installation or label them live.
 
 ## Startup, ownership, and version negotiation
 
@@ -16,7 +16,7 @@ The seven C functions in [homeverb.h](../crates/ffi/include/homeverb.h) remain t
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects saved-account cloud reads. `scenario` defaults to `normal`. Meiju requires `allow_mock_writes: false` and rejects any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms `homeverb.mock` or `midea.meiju`. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.8.1`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.9.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -92,7 +92,7 @@ Prefer exact device IDs even where lookup accepts an alias. Resolve a capability
 | UI scope | Current integration | Remaining work and boundary |
 |---|---|---|
 | D01–D12, R01–R05: cards, search, rooms, local organization | Device/room methods above | Flutter filtering, loading/errors, accessibility and layouts. Metadata writes preserve routes and grants |
-| C01–C14: dynamic controls, history and outcomes | Describe/read/plan/execute/batch/receipt methods | Render exact capabilities; default Meiju discovery has read-only AC/fridge/dishwasher mappings; native power grants may admit experimental AC on/off. Other consequential real approvals remain unavailable |
+| C01–C14: dynamic controls, history and outcomes | Describe/read/plan/execute/batch/receipt methods | Render exact capabilities; default Meiju discovery has read-only AC/fridge/dishwasher mappings; native power/fan grants may admit experimental AC on/off or vendor fan presets. Other consequential real approvals remain unavailable |
 | A01–A08: device discovery and addition | Explicit selected-adapter `discover`, including saved-account Meiju cloud retrieval | Real pairing, mobile permissions and safe identity merge remain unavailable. No merge API exists |
 | P01–P13: platforms, accounts, authorization and removal | `list_accounts`, `get_account`, `rename_account`, `remove_account`, `refresh_account`, `recover_account`, and separate `homeverb_connect_account` | Flutter protected input, cleanup confirmation/recovery and phone secure stores; provider revocation remains unavailable |
 | H01–H16: nearby authorization sharing | No sharing methods in this version | Eligibility, peer discovery, code verification, scope, consent, conflict/import and transfer records require ADR-0008 implementation |
@@ -516,6 +516,51 @@ ordinary connection flow. Labels, IDs, rooms, aliases, favorites and existing gr
 remain; login does not broaden control permission. Cancellation/backgrounding follows
 the same foreground rules. Only synthetic login/account evidence exists for this
 extension; real reauthorization and mobile acceptance remain unverified.
+
+## Scoped experimental AC fan startup
+
+API 1.9.0 adds independent `meiju_fan_grants` under
+[ADR-0034](adr/0034-scoped-meiju-ac-fan-control.md). Negotiate the version on a
+read-only handle first; older libraries reject this field. Trusted startup can
+supply up to 64 unique pairs:
+
+```json
+{
+  "schema_version": "1.0",
+  "data_dir": "/absolute/private/homeverb-data",
+  "adapter": "midea.meiju",
+  "allow_mock_writes": false,
+  "meiju_fan_grants": [
+    {"device_id": "30000000-0000-4000-8000-000000000001", "wind_speed": 40}
+  ]
+}
+```
+
+Each pair permits only `main / vendor.midea.ac.set_fan_speed` with that exact
+`wind_speed` and cloud route. The reviewed codes are 20, 40, 60, 80, 100 and 102,
+corresponding to the pinned source's silent, low, medium, high, full and auto
+presets. These are vendor codes, not percentages or universal fan enums. Only the
+four admitted AC models can expose the action after explicit discovery/refresh.
+See the fictional [capability](../examples/capability.meiju-fan.json) and
+[command](../examples/command.meiju-fan.json); a readable different code does not
+become a writable preset.
+
+Obtain explicit user consent before supplying grants. Fan permission never grants
+power/mode/temperature changes; power grants never grant fan changes. Empty lists
+grant neither action. Neither ordinary requests nor descriptors can provide or
+persist authority. Use the existing close/reopen procedure to change permissions.
+
+Render the action from capability metadata. The presentation catalogs provide
+`vendor.midea.ac.set_fan_speed`, `vendor.midea.ac.wind_speed` and code-suffixed value
+labels; unknown observations retain a fallback value. UI code must not infer
+controls from the brand or add other codes. Sending changes only the fan field,
+without powering on, changing mode or copying cached state. Devices may ignore it
+in off/auto/dry or other managed modes; do not send a second command to force it.
+Keep accepted/unknown receipts unverified and let the user explicitly refresh.
+Upstream's usual entity path supplies cached `command.status`; HomeVerb omits it.
+Physical acceptance must check that the vendor encoder preserves power, mode and
+temperature without that context. No physical fan control has been tested,
+including away from home.
 
 ## Verify the handoff
 

@@ -68,6 +68,7 @@ fn descriptors(
     binding: DeviceBinding,
     account: Uuid,
     ac_power: bool,
+    ac_fan: bool,
 ) -> Descriptor {
     let family = appliance
         .model
@@ -89,11 +90,17 @@ fn descriptors(
             }
             capabilities.push(power);
             capabilities.push(capability("main", "climate", &temperatures));
-            capabilities.push(capability(
+            let mut fan = capability(
                 "main",
                 "vendor.midea.ac",
                 &[("mode", "string", None), ("wind_speed", "integer", None)],
-            ));
+            );
+            if ac_fan {
+                fan.revision = 2;
+                fan.properties.get_mut("wind_speed").unwrap()["writable"] = json!(true);
+                fan.actions.insert("set_fan_speed".into(), fan_action());
+            }
+            capabilities.push(fan);
         }
         Some(ApplianceFamily::Refrigerator) => {
             for component in ["fridge", "freezer"] {
@@ -182,6 +189,7 @@ pub struct MeijuAdapter {
     transport: Arc<dyn CloudTransport>,
     clock: Arc<dyn Clock>,
     ac_power: bool,
+    ac_fan: bool,
 }
 
 impl MeijuAdapter {
@@ -195,6 +203,7 @@ impl MeijuAdapter {
             transport,
             clock,
             ac_power: false,
+            ac_fan: false,
         }
     }
 
@@ -202,6 +211,12 @@ impl MeijuAdapter {
     /// Core still requires an exact device/component/argument/cloud grant.
     pub fn with_ac_power_control(mut self) -> Self {
         self.ac_power = true;
+        self
+    }
+
+    /// Admit the reviewed vendor fan presets only; Core grants remain independently required.
+    pub fn with_ac_fan_control(mut self) -> Self {
+        self.ac_fan = true;
         self
     }
     /// Local metadata only; a stored credential is not proof of current authorization.
@@ -421,6 +436,7 @@ impl MeijuAdapter {
                         binding,
                         account.record().id,
                         self.ac_power,
+                        self.ac_fan,
                     ));
                 }
             }
@@ -490,15 +506,29 @@ impl Adapter for MeijuAdapter {
         operation: &Operation,
     ) -> Result<AdapterOutcome> {
         let command = validated.command();
-        if !self.ac_power
-            || command.component_id != "main"
-            || command.capability != "power"
-            || command.action != "set"
-        {
+        if command.component_id != "main" {
             return Err(crate::control::unsupported());
         }
         // Repeat the fixed adapter contract even if public stored metadata was modified.
-        power_action().validate_arguments(&command.arguments)?;
+        let control = match (command.capability.as_str(), command.action.as_str()) {
+            ("power", "set") if self.ac_power => {
+                power_action().validate_arguments(&command.arguments)?;
+                crate::control::AcControl::Power {
+                    power: if command.arguments["state"].as_bool().unwrap() {
+                        "on"
+                    } else {
+                        "off"
+                    },
+                }
+            }
+            ("vendor.midea.ac", "set_fan_speed") if self.ac_fan => {
+                fan_action().validate_arguments(&command.arguments)?;
+                crate::control::AcControl::FanSpeed {
+                    wind_speed: command.arguments["wind_speed"].as_f64().unwrap() as u8,
+                }
+            }
+            _ => return Err(crate::control::unsupported()),
+        };
         let id = connection
             .account_id
             .as_deref()
@@ -519,17 +549,22 @@ impl Adapter for MeijuAdapter {
             return Err(crate::control::unsupported());
         }
         let session = account.cloud_session(operation).await?;
-        crate::control::set_power(
+        crate::control::execute(
             &session,
             self.transport.as_ref(),
             &appliance.id,
-            command.arguments["state"]
-                .as_bool()
-                .expect("Validated boolean state."),
+            control,
             &progress,
             operation,
         )
         .await
+    }
+}
+
+fn fan_action() -> Action {
+    Action {
+        parameters: json!({"type":"object","properties":{"wind_speed":{"type":"integer","enum":crate::AC_FAN_SPEEDS}},"required":["wind_speed"],"additionalProperties":false}),
+        ..power_action()
     }
 }
 

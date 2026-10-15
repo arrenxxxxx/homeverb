@@ -248,3 +248,18 @@ The method count, request/response shapes, seven C symbols, schema 4 and protect
 payload are unchanged. Older libraries may remain pending on a failed credential
 read. No force flag, automatic erasure or provider revocation is added. See
 [ADR-0033](adr/0033-delete-unreadable-account-credentials.md).
+
+## Experimental AC fan contract 1.9
+
+The four exact AC models in the read table have a separate, opt-in vendor fan
+action for codes 20, 40, 60, 80, 100 and 102 from the pinned default AC mapping.
+This is an experimental candidate mapping; exact firmware behavior, managed modes
+and physical/off-LAN effects remain unverified. It is not brand-wide support or a
+universal fan-speed enum. Unsupported models gain no action.
+
+Native `meiju_fan_grants` permits exact-device/code cloud requests independently
+of power grants. Existing startup, 30 methods, seven C functions, execution
+outcomes and SQLite schema 4 are unchanged. Older libraries reject the new field;
+negotiate API 1.9 before supplying it. Synthetic tests cover exact fields, scope,
+identity, immutable permissions, uncertainty, replay and lifecycle behavior. No
+household action was sent. See [ADR-0034](adr/0034-scoped-meiju-ac-fan-control.md).

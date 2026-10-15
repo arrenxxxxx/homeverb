@@ -1,9 +1,10 @@
-//! Native Meiju accounts and model-scoped reads, with explicit experimental AC power control.
+//! Native Meiju accounts and model-scoped reads, with explicit experimental AC controls.
 
 mod auth;
 mod cloud;
 mod codec;
 mod control;
+pub use control::AC_FAN_SPEEDS;
 mod material;
 pub use auth::{LoginCredentials, MeijuSession, SessionReads, login};
 pub use cloud::{CloudEndpoint, CloudTransport, MeijuHttps, SignedRequest};

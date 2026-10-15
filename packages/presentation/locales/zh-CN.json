@@ -105,5 +105,13 @@
   "account.recovery.unrecoverable": "已保存的账号数据缺失或损坏，恢复或重新登录均无法安全还原设备绑定。移除后重新连接是另一个操作，会失去原有的设备整理信息。",
   "account.recovery.expired": "已保存的授权已过期。若原账号数据完整，可重新登录原账号并保留已有设备整理信息。",
   "account.reauthorization.action": "重新登录原账号",
-  "account.reauthorization.confirm": "重新登录此平台账号？只有保存的账号身份一致时，才会保留已有房间和设备名称。设备控制权限不会改变。"
+  "account.reauthorization.confirm": "重新登录此平台账号？只有保存的账号身份一致时，才会保留已有房间和设备名称。设备控制权限不会改变。",
+  "vendor.midea.ac.wind_speed": "风速",
+  "vendor.midea.ac.set_fan_speed": "设置风速",
+  "vendor.midea.ac.wind_speed.20": "静音",
+  "vendor.midea.ac.wind_speed.40": "低风",
+  "vendor.midea.ac.wind_speed.60": "中风",
+  "vendor.midea.ac.wind_speed.80": "高风",
+  "vendor.midea.ac.wind_speed.100": "强风",
+  "vendor.midea.ac.wind_speed.102": "自动"
 }

@@ -12,6 +12,8 @@ mod accounts;
 pub use accounts::{AccountConnection, AccountSummary, ConnectRequest};
 mod power_grants;
 pub use power_grants::{MeijuPowerGrant, meiju_power_policy};
+mod fan_grants;
+pub use fan_grants::{MeijuFanGrant, meiju_fan_policy};
 
 /// Compose a native account vault without reading credentials or starting authentication.
 pub fn open_accounts(directory: &Path) -> Result<homeverb_core::AccountVault> {
@@ -26,7 +28,7 @@ pub fn open_accounts(directory: &Path) -> Result<homeverb_core::AccountVault> {
 /// Compose the real read-only adapter without loading credentials or contacting the provider.
 /// Account connection is a separate trusted native operation; there are no write grants.
 pub fn open_meiju_read_only(directory: &Path) -> Result<Core> {
-    meiju_parts(directory, &[]).map(|(core, _)| core)
+    meiju_parts(directory, &[], &[]).map(|(core, _)| core)
 }
 
 /// Compose foreground account operations and the read-only Core with one adapter instance.
@@ -39,15 +41,26 @@ pub fn open_meiju_session_with_power_grants(
     directory: &Path,
     grants: &[MeijuPowerGrant],
 ) -> Result<Session> {
-    let (core, adapter) = meiju_parts(directory, grants)?;
+    open_meiju_session_with_control_grants(directory, grants, &[])
+}
+
+/// Trusted startup keeps exact power and vendor fan permissions independent.
+pub fn open_meiju_session_with_control_grants(
+    directory: &Path,
+    power: &[MeijuPowerGrant],
+    fan: &[MeijuFanGrant],
+) -> Result<Session> {
+    let (core, adapter) = meiju_parts(directory, power, fan)?;
     Ok(Session::with_accounts(core, adapter))
 }
 
 fn meiju_parts(
     directory: &Path,
     grants: &[MeijuPowerGrant],
+    fan: &[MeijuFanGrant],
 ) -> Result<(Core, Arc<homeverb_midea::MeijuAdapter>)> {
-    let policy = meiju_power_policy(grants)?;
+    let mut policy = meiju_power_policy(grants)?;
+    policy.grants.extend(meiju_fan_policy(fan)?.grants);
     let store = Arc::new(SqliteStore::open(directory)?);
     let vault = Arc::new(open_accounts(directory)?);
     let clock = Arc::new(SystemClock);
@@ -56,8 +69,11 @@ fn meiju_parts(
         Arc::new(homeverb_midea::MeijuHttps),
         clock.clone(),
     );
-    if !policy.grants.is_empty() {
+    if !grants.is_empty() {
         adapter = adapter.with_ac_power_control();
+    }
+    if !fan.is_empty() {
+        adapter = adapter.with_ac_fan_control();
     }
     let adapter = Arc::new(adapter);
     Ok((

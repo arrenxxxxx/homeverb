@@ -10,8 +10,9 @@ The native account vault now persists random local references, composes Linux se
 
 The next implemented phase adds an explicitly opted-in AC `power.set` path and
 [preview-first control probe](07-meiju-control.md). Its Core grants and TLS send
-progress are synthetic-tested. Real control acceptance, other AC settings,
-dishwasher/refrigerator writes and native UI write authorization remain pending.
+progress are synthetic-tested. Native API 1.9 also adds independent vendor fan controls with exact-device/code grants.
+Real control acceptance, temperature constraints, other settings, dishwasher/refrigerator
+writes and Flutter consent UI remain pending.
 
 ## Reuse the community protocol work
 

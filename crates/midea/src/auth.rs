@@ -307,35 +307,27 @@ struct RestoredSession {
 }
 
 impl MeijuSession {
-    pub(crate) fn ac_power_request(
+    pub(crate) fn ac_control_request(
         &self,
         appliance: &crate::CloudId,
-        state: bool,
+        control: crate::control::AcControl,
     ) -> Result<SignedRequest> {
         #[derive(Serialize)]
-        struct Power<'a> {
-            power: &'a str,
-        }
-        #[derive(Serialize)]
-        struct Control<'a> {
-            control: Power<'a>,
+        struct Control {
+            control: crate::control::AcControl,
         }
         #[derive(Serialize)]
         struct Target<'a> {
             #[serde(rename = "applianceCode")]
             appliance: &'a str,
-            command: Control<'a>,
+            command: Control,
         }
         SignedRequest::new(
             CloudEndpoint::ApplianceControl,
             &Request {
                 data: Target {
                     appliance: appliance.expose(),
-                    command: Control {
-                        control: Power {
-                            power: if state { "on" } else { "off" },
-                        },
-                    },
+                    command: Control { control },
                 },
                 request_id: Uuid::new_v4().simple().to_string(),
                 stamp: Local::now().format("%Y%m%d%H%M%S").to_string(),

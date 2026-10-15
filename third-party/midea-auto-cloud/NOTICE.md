@@ -15,7 +15,7 @@ license when distributing the derived portions; HomeVerb's release license remai
 
 HomeVerb modifications: a minimal Rust port of the Meiju password transforms,
 request signing, session-key decoding, login/read request shapes and explicit AC
-power control encoding, with bounded
+power and vendor fan-preset control encoding, with bounded
 operations, restricted HTTPS endpoints, conservative write outcomes, redacted native data and synthetic tests.
 No default appliance keys, SmartHome routing, executable Lua downloads, automatic
 reauthentication, retries, or background work are copied. The public compatibility

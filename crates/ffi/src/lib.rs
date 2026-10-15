@@ -2,7 +2,7 @@
 
 use homeverb_core::SecretBytes;
 use homeverb_domain::{Error, Query};
-use homeverb_host::{ConnectRequest, HostRequest, MeijuPowerGrant, Session};
+use homeverb_host::{ConnectRequest, HostRequest, MeijuFanGrant, MeijuPowerGrant, Session};
 use homeverb_mock::Scenario;
 use serde::Deserialize;
 use serde_json::{Value, json};
@@ -40,6 +40,8 @@ struct Config {
     allow_mock_writes: bool,
     #[serde(default)]
     meiju_power_grants: Vec<MeijuPowerGrant>,
+    #[serde(default)]
+    meiju_fan_grants: Vec<MeijuFanGrant>,
     #[serde(default)]
     scenario: Scenario,
 }
@@ -110,10 +112,12 @@ pub unsafe extern "C" fn homeverb_open(config: *const c_char) -> *mut c_char {
                 "Meiju startup does not accept Mock scenarios or grants.",
             );
         }
-        if config.adapter != AdapterMode::Meiju && !config.meiju_power_grants.is_empty() {
+        if config.adapter != AdapterMode::Meiju
+            && (!config.meiju_power_grants.is_empty() || !config.meiju_fan_grants.is_empty())
+        {
             return error(
                 "INVALID_ARGUMENT",
-                "Meiju power grants require the Meiju adapter.",
+                "Meiju control grants require the Meiju adapter.",
             );
         }
         let (adapter, session) = match config.adapter {
@@ -128,9 +132,10 @@ pub unsafe extern "C" fn homeverb_open(config: *const c_char) -> *mut c_char {
             ),
             AdapterMode::Meiju => (
                 "midea.meiju",
-                homeverb_host::open_meiju_session_with_power_grants(
+                homeverb_host::open_meiju_session_with_control_grants(
                     &config.data_dir,
                     &config.meiju_power_grants,
+                    &config.meiju_fan_grants,
                 ),
             ),
         };

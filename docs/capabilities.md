@@ -59,3 +59,11 @@ Risk levels are `low`, `elevated`, and `high`. Generic MCP writes for sensitive 
 ## Extension review
 
 A new standard capability needs equivalent semantics demonstrated across at least two heterogeneous adapters, with units, limits, errors, verification, and counterexamples. A single vendor's unusual mode belongs in its namespace first. Read-only support is valid; an unimplemented write must never return success.
+
+The experimental Meiju fan action illustrates this boundary:
+[`vendor.midea.ac.set_fan_speed`](../examples/capability.meiju-fan.json) uses six
+reviewed vendor codes for four exact AC models. The UI reads that action's schema
+and localized vendor labels; it must not reinterpret code 102 as a percentage or
+expose the presets on another model. Readable codes outside the action enum remain
+observable without becoming writable. Mode-dependent effects and physical support
+still require acceptance. See [ADR-0034](adr/0034-scoped-meiju-ac-fan-control.md).

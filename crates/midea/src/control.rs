@@ -3,7 +3,17 @@
 use crate::{CloudId, CloudTransport, MAX_RESPONSE_BYTES, MeijuSession};
 use homeverb_core::{AdapterOutcome, Operation, SecretBytes, WriteProgress};
 use homeverb_domain::{Error, Phase, Result};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
+
+// Pinned default AC mapping, admitted only for the explicitly reviewed model list.
+pub const AC_FAN_SPEEDS: [u8; 6] = [20, 40, 60, 80, 100, 102];
+
+#[derive(Serialize)]
+#[serde(untagged)]
+pub(crate) enum AcControl {
+    Power { power: &'static str },
+    FanSpeed { wind_speed: u8 },
+}
 
 #[derive(Deserialize)]
 #[serde(untagged)]
@@ -42,17 +52,17 @@ fn authorization_required() -> Error {
     )
 }
 
-pub(crate) async fn set_power(
+pub(crate) async fn execute(
     session: &MeijuSession,
     transport: &dyn CloudTransport,
     appliance: &CloudId,
-    state: bool,
+    control: AcControl,
     progress: &WriteProgress,
     operation: &Operation,
 ) -> Result<AdapterOutcome> {
     operation
         .run(async {
-            let request = session.ac_power_request(appliance, state)?;
+            let request = session.ac_control_request(appliance, control)?;
             let response = transport.send_control(&request, progress, operation).await;
             let (phase, error) = match response {
                 Ok(body) => match reply(&body) {
@@ -101,7 +111,7 @@ pub(crate) async fn set_power(
 pub(crate) fn unsupported() -> Error {
     Error::new(
         "CAPABILITY_UNSUPPORTED",
-        "This model or host has no admitted cloud power control.",
+        "This model or host has no admitted cloud control for this action.",
     )
 }
 
