@@ -114,7 +114,7 @@ seven component snapshots, with zero failures. All source timestamps remained
 unproven and every observation stale. Physical/app comparison and off-LAN tests
 remain pending. Native API 1.1.0 can open this same profile with explicit `adapter: "midea.meiju"`;
 see the [native startup contract](../native-ui-contract.md#real-meiju-read-only-startup).
-Flutter account input remains separate integration work.
+API 1.2 adds protected account connection and list/refresh methods; Flutter input UI remains separate integration work.
 
 ## Interpret failures and record evidence
 
@@ -141,7 +141,7 @@ Record only region, app version, device counts and fixed error codes for the ini
 read-only acceptance. Exact product models/firmware can be supplied separately
 without serial numbers. Then verify repeated retrieval, reconnection identity and
 an external-network run. Physical comparison, owner-authorized writes and
-Flutter/native account methods are subsequent stages. The [integration guide](05-midea.md)
+Flutter input UI and phone credential stores are subsequent stages. The [integration guide](05-midea.md)
 records real connect, saved-session refresh, protocol inspection and Core reads:
 four air conditioners, one dishwasher and one refrigerator. Physical model tests
 remain pending; synthetic tests do not establish them.

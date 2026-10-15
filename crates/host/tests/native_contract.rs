@@ -5,6 +5,7 @@ use serde_json::json;
 fn no_argument_methods_reject_undeclared_fields() {
     for method in [
         "get_api_info",
+        "list_accounts",
         "list_devices",
         "discover",
         "recent_executions",

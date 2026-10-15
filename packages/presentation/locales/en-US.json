@@ -75,9 +75,14 @@
   "error.AUTH_REQUIRED": "Reconnect this platform account to continue.",
   "error.ACCOUNT_NOT_FOUND": "This local account is no longer available. Reload the account list.",
   "error.ACCOUNT_IDENTITY_CONFLICT": "This is a different platform account. Reconnect the original account to keep its device bindings.",
-  "error.ACCOUNT_SESSION_UNCONFIRMED": "The saved session needs validation. Reconnect this platform account to continue.",
+  "error.ACCOUNT_SESSION_UNCONFIRMED": "The saved session needs trusted recovery before this account can be used again.",
   "error.MIDEA_RESPONSE_INVALID": "The platform returned an unsupported response.",
-  "error.MIDEA_REQUEST_REJECTED": "The platform rejected the read request.",
+  "error.MIDEA_REQUEST_REJECTED": "The platform rejected the request.",
   "error.MIDEA_REQUEST_FAILED": "The platform data could not be retrieved.",
-  "error.MIDEA_INVENTORY_PARTIAL": "Some platform devices could not be retrieved. Existing device cards were kept."
+  "error.MIDEA_INVENTORY_PARTIAL": "Some platform devices could not be retrieved. Existing device cards were kept.",
+  "error.AUTH_FLOW_UNSUPPORTED": "Account connection is not available in this host.",
+  "error.MIDEA_LOGIN_INPUT_UNSUPPORTED": "This account or password format is not supported by the current connection method.",
+  "account.authorization.notChecked": "Authorization has not been checked.",
+  "account.connecting": "Connecting and retrieving devices...",
+  "account.connectedRetrievalFailed": "Account connection succeeded, but devices could not be loaded."
 }

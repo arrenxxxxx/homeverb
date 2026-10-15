@@ -406,6 +406,35 @@
             "assignment"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "list_accounts"
+            }
+          },
+          "required": [
+            "method"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "refresh_account"
+            },
+            "account_id": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "required": [
+            "method",
+            "account_id"
+          ],
+          "additionalProperties": false
         }
       ]
     }

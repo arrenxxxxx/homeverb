@@ -93,7 +93,7 @@ return `ACCOUNT_SESSION_UNCONFIRMED`; no session is fabricated or reset.
 ## Meiju cloud read errors
 
 `MIDEA_INVENTORY_PARTIAL` means the Core adapter could not retrieve every accessible
-home. Discovery publishes none of that adapter's current batch; existing cards,
+home. A recognized expired-session failure instead preserves `AUTH_REQUIRED`. Discovery publishes none of that adapter's current batch; existing cards,
 preferences and caches remain. An explicit later retry may succeed. Private
 bindings already saved during retrieval remain stable. Duplicate appliance bindings
 across accounts, including historical bindings missing from today's inventory,
@@ -105,3 +105,19 @@ returns `DEVICE_IDENTITY_CONFLICT` before a request.
 The native read protocols use `MIDEA_RESPONSE_INVALID` for malformed/oversized, wrong-home/appliance responses or malformed recognized state fields, `MIDEA_REQUEST_REJECTED` for explicit nonzero provider codes other than recognized expired-session codes, and `MIDEA_REQUEST_FAILED` for transport failures. Provider messages, URLs and identifiers are never copied into these errors. Recognized session expiry returns `AUTH_REQUIRED` without automatic login/retry. It stops subsequent inventory requests; state queries return the error directly. Individual home failures remain explicit in a partial inventory; a failed top-level listing never becomes an empty account. Unsupported state families, query combinations, components or explicit temperature units return `CAPABILITY_UNSUPPORTED`. Cancellation/deadline stop the read flow. These errors do not establish any device-write outcome or real-platform support.
 
 The account-bound read path returns `DEVICE_IDENTITY_CONFLICT` before transport when the local device, selected connection or known model differs from the protected binding. Invalid components return `CAPABILITY_UNSUPPORTED`. Pending or unavailable credentials stop the request through the vault. Core rejects decoded but undeclared properties with `INVALID_OBSERVATION`; neither that rejection nor a protocol failure replaces the previous cache or triggers a retry.
+
+## Native account connection results
+
+`homeverb_connect_account` is separate from ordinary JSON and rejects invalid
+metadata with `INVALID_ARGUMENT`, unsupported hosts with `AUTH_FLOW_UNSUPPORTED`,
+and invalid native buffers with `MIDEA_LOGIN_INPUT_UNSUPPORTED`. Host foreground,
+closed, duplicate-ID and concurrency errors are shared with normal calls.
+
+After confirmed authentication/session storage, retrieval errors remain inside
+`data.retrieval.error` while `data.authentication` is `succeeded`; inspect both layers.
+`refresh_account` returns `not_attempted` authentication and never logs in.
+Partial retrieval preserves old cards. Cancellation or storage failure after some
+local publications does not roll them back. `SECRET_STORE_WRITE_UNKNOWN` can leave
+pending credentials; reload local metadata and require trusted recovery rather
+than recreating/resetting the account. General account listing never validates
+live authorization. See [the account contract](native-ui-contract.md#account-connection-and-refresh).

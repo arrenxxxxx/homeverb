@@ -1,0 +1,552 @@
+use async_trait::async_trait;
+use homeverb_core::*;
+use homeverb_domain::{Error, Result};
+use homeverb_host::{ConnectRequest, HostRequest, Session};
+use homeverb_midea::*;
+use homeverb_storage::SqliteStore;
+use serde_json::{Value, json};
+use std::{
+    collections::HashMap,
+    path::PathBuf,
+    sync::{
+        Arc, Mutex,
+        atomic::{AtomicBool, AtomicI32, Ordering},
+    },
+};
+use tokio_util::sync::CancellationToken;
+use uuid::Uuid;
+
+fn operation() -> Operation {
+    Operation::new(1000, CancellationToken::new()).unwrap()
+}
+fn bytes(value: Value) -> SecretBytes {
+    SecretBytes::new(serde_json::to_vec(&value).unwrap())
+}
+fn secret(value: &str) -> SecretBytes {
+    SecretBytes::new(value.as_bytes().to_vec())
+}
+
+fn validate_response(value: &Value, definition: &str) {
+    let root: Value =
+        serde_json::from_str(include_str!("../../../schemas/native-response.schema.json")).unwrap();
+    fn expand(value: &Value, root: &Value) -> Value {
+        if let Some(reference) = value.get("$ref").and_then(Value::as_str) {
+            let name = reference
+                .strip_prefix("urn:homeverb:schema:native-response#/$defs/")
+                .expect("Account responses use only local account definitions.");
+            return expand(&root["$defs"][name], root);
+        }
+        match value {
+            Value::Object(fields) => Value::Object(
+                fields
+                    .iter()
+                    .map(|(key, value)| (key.clone(), expand(value, root)))
+                    .collect(),
+            ),
+            Value::Array(values) => {
+                Value::Array(values.iter().map(|value| expand(value, root)).collect())
+            }
+            _ => value.clone(),
+        }
+    }
+    let schema = expand(&root["$defs"][definition], &root);
+    jsonschema::validator_for(&schema)
+        .unwrap()
+        .validate(value)
+        .unwrap();
+}
+
+#[derive(Default)]
+struct Secrets {
+    values: Mutex<HashMap<String, Vec<u8>>>,
+    unavailable: AtomicBool,
+    uncertain: AtomicBool,
+}
+#[async_trait]
+impl SecretStore for Secrets {
+    async fn get(&self, key: &CredentialRef, op: &Operation) -> Result<Option<SecretBytes>> {
+        op.run(async {
+            if self.unavailable.load(Ordering::Relaxed) {
+                return Err(Error::new(
+                    "SECRET_STORE_UNAVAILABLE",
+                    "Synthetic unavailable store.",
+                ));
+            }
+            Ok(self
+                .values
+                .lock()
+                .unwrap()
+                .get(&key.to_string())
+                .map(|v| SecretBytes::new(v.clone())))
+        })
+        .await
+    }
+    async fn put(&self, key: &CredentialRef, value: &SecretBytes, op: &Operation) -> Result<()> {
+        op.run(async {
+            self.values
+                .lock()
+                .unwrap()
+                .insert(key.to_string(), value.expose().to_vec());
+            if self.uncertain.load(Ordering::Relaxed) {
+                return Err(Error::new(
+                    "SECRET_STORE_WRITE_UNKNOWN",
+                    "Synthetic uncertain storage mutation.",
+                ));
+            }
+            Ok(())
+        })
+        .await
+    }
+    async fn delete(&self, _: &CredentialRef, _: &Operation) -> Result<()> {
+        panic!("Connection must not delete credentials.")
+    }
+}
+
+struct Wire {
+    subject: Mutex<String>,
+    calls: Mutex<Vec<CloudEndpoint>>,
+    inventory_code: AtomicI32,
+    homes_code: AtomicI32,
+    extra_device: AtomicBool,
+    delay: Mutex<Option<CloudEndpoint>>,
+    started: tokio::sync::Notify,
+}
+impl Default for Wire {
+    fn default() -> Self {
+        Self {
+            subject: Mutex::new("synthetic-login-001".into()),
+            calls: Mutex::new(vec![]),
+            inventory_code: AtomicI32::new(0),
+            homes_code: AtomicI32::new(0),
+            extra_device: AtomicBool::new(false),
+            delay: Mutex::new(None),
+            started: tokio::sync::Notify::new(),
+        }
+    }
+}
+#[async_trait]
+impl CloudTransport for Wire {
+    async fn send(&self, request: &SignedRequest, _: &Operation) -> Result<SecretBytes> {
+        self.calls.lock().unwrap().push(request.endpoint());
+        let delay = *self.delay.lock().unwrap() == Some(request.endpoint());
+        if delay {
+            self.started.notify_one();
+            std::future::pending::<()>().await;
+        }
+        let (code, mut data) = match request.endpoint() {
+            CloudEndpoint::LoginId => (0, json!({"loginId":*self.subject.lock().unwrap()})),
+            CloudEndpoint::Login => {
+                let vector: Value =
+                    serde_json::from_str(include_str!("../../midea/tests/fixtures/login.json"))
+                        .unwrap();
+                (
+                    0,
+                    json!({"mdata":{"accessToken":"SYNTHETIC-TOKEN"},"key":vector["wrapped_key"]}),
+                )
+            }
+            CloudEndpoint::Homes => (
+                self.homes_code.load(Ordering::Relaxed),
+                json!({"homeList":[{"homegroupId":"1"}]}),
+            ),
+            CloudEndpoint::HomeAppliances => (
+                self.inventory_code.load(Ordering::Relaxed),
+                json!({"homeList":[{"roomList":[{"applianceList":[
+                    {"applianceCode":"880000000000001","type":"AC","productModel":"KFR-35G/WF2","name":"Synthetic AC"},
+                    {"applianceCode":"880000000000002","type":"AC","productModel":"Unknown model","name":"Synthetic unknown"}
+                ]}]}]}),
+            ),
+            _ => panic!("Account connection must not request state or controls."),
+        };
+        if request.endpoint() == CloudEndpoint::HomeAppliances
+            && self.extra_device.load(Ordering::Relaxed)
+        {
+            data["homeList"][0]["roomList"][0]["applianceList"].as_array_mut().unwrap().push(json!({"applianceCode":"880000000000003","type":"AC","productModel":"KFR-35G/WF2"}));
+        }
+        Ok(bytes(
+            json!({"code":code,"data":data,"msg":"PRIVATE-PROVIDER-MESSAGE"}),
+        ))
+    }
+}
+
+struct Fixture {
+    session: Arc<Session>,
+    store: Arc<SqliteStore>,
+    vault: Arc<AccountVault>,
+    wire: Arc<Wire>,
+    secrets: Arc<Secrets>,
+    path: PathBuf,
+}
+impl Drop for Fixture {
+    fn drop(&mut self) {
+        let _ = std::fs::remove_dir_all(&self.path);
+    }
+}
+impl Fixture {
+    fn new() -> Self {
+        let path = std::env::temp_dir().join(format!("homeverb-account-host-{}", Uuid::new_v4()));
+        let store = Arc::new(SqliteStore::open(&path).unwrap());
+        let secrets = Arc::new(Secrets::default());
+        let vault = Arc::new(AccountVault::new(store.clone(), secrets.clone()));
+        let wire = Arc::new(Wire::default());
+        let clock = Arc::new(SystemClock);
+        let adapter = Arc::new(MeijuAdapter::new(
+            vault.clone(),
+            wire.clone(),
+            clock.clone(),
+        ));
+        let core = Core::new(
+            store.clone(),
+            vec![adapter.clone()],
+            clock,
+            Policy::default(),
+        );
+        let session = Arc::new(Session::with_accounts(core, adapter));
+        Self {
+            session,
+            store,
+            vault,
+            wire,
+            secrets,
+            path,
+        }
+    }
+    async fn call(&self, request: Value) -> Value {
+        self.call_id("query", request).await
+    }
+    async fn call_id(&self, id: &str, request: Value) -> Value {
+        let method = request["method"].as_str().unwrap().to_owned();
+        let result = self.session.call(serde_json::from_value::<HostRequest>(json!({"schema_version":"1.0","operation_id":id,"timeout_ms":1000,"request":request})).unwrap()).await;
+        if matches!(method.as_str(), "list_accounts" | "refresh_account") {
+            validate_response(&result, &method);
+        }
+        result
+    }
+    async fn connect(&self, existing: Option<Uuid>) -> Value {
+        let result = self
+            .session
+            .connect_account(
+                ConnectRequest {
+                    schema_version: "1.0".into(),
+                    operation_id: "connect".into(),
+                    timeout_ms: 1000,
+                    label: "Test account".into(),
+                    account_id: existing,
+                },
+                secret("owner@example.test"),
+                secret("Synthetic password 42!"),
+            )
+            .await;
+        validate_response(&result, "connect_account");
+        result
+    }
+    async fn refresh(&self, id: &str) -> Value {
+        self.call(json!({"method":"refresh_account","account_id":id}))
+            .await
+    }
+    fn calls(&self) -> Vec<CloudEndpoint> {
+        self.wire.calls.lock().unwrap().clone()
+    }
+}
+
+#[tokio::test]
+async fn connect_publishes_cards_once_and_reconnect_keeps_identity_and_preferences() {
+    let f = Fixture::new();
+    assert_eq!(
+        f.call(json!({"method":"list_accounts"})).await["data"],
+        json!([])
+    );
+    assert!(f.calls().is_empty());
+    let connected = f.connect(None).await;
+    assert_eq!(connected["error"], Value::Null);
+    assert_eq!(connected["data"]["authentication"], "succeeded");
+    assert_eq!(connected["data"]["retrieval"]["status"], "complete");
+    let id = connected["data"]["account"]["id"].as_str().unwrap();
+    assert_eq!(
+        connected["data"]["retrieval"]["device_ids"]
+            .as_array()
+            .unwrap()
+            .len(),
+        2
+    );
+    assert_eq!(
+        f.calls(),
+        vec![
+            CloudEndpoint::LoginId,
+            CloudEndpoint::Login,
+            CloudEndpoint::Homes,
+            CloudEndpoint::HomeAppliances
+        ]
+    );
+    let cards = f.call(json!({"method":"list_device_cards"})).await;
+    assert_eq!(cards["data"].as_array().unwrap().len(), 2);
+    assert!(
+        cards["data"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|c| c["device"]["support_status"] == "unsupported")
+    );
+    let device = &cards["data"][0]["device"]["id"];
+    let room = f
+        .call(json!({"method":"create_room","name":"Bedroom"}))
+        .await;
+    f.call(json!({"method":"set_device_preferences","device_id":device,"preferences":{"alias":"My AC","room_id":room["data"]["id"],"favorite":true}})).await;
+    let baseline = f.call(json!({"method":"list_device_cards"})).await;
+    let repeated = f.connect(Some(Uuid::parse_str(id).unwrap())).await;
+    assert_eq!(repeated["data"]["account"]["id"], id);
+    assert_eq!(
+        repeated["data"]["retrieval"]["device_ids"],
+        connected["data"]["retrieval"]["device_ids"]
+    );
+    assert_eq!(
+        f.call(json!({"method":"list_device_cards"})).await,
+        baseline
+    );
+    let refreshed = f.refresh(id).await;
+    assert_eq!(refreshed["data"]["authentication"], "not_attempted");
+    assert_eq!(refreshed["data"]["retrieval"]["status"], "complete");
+    assert_eq!(f.calls().len(), 10);
+    let before = f.calls();
+    f.secrets.unavailable.store(true, Ordering::Relaxed);
+    let listed = f.call(json!({"method":"list_accounts"})).await;
+    assert_eq!(listed["data"][0]["authorization"], "not_checked");
+    assert_eq!(listed["data"][0]["credential_state"], "stored");
+    assert_eq!(f.calls(), before);
+    for marker in [
+        "credential_ref",
+        "subject",
+        "SYNTHETIC-TOKEN",
+        "88000000000000",
+        "owner@example.test",
+        "Synthetic password",
+    ] {
+        assert!(!format!("{connected}{listed}{baseline}").contains(marker));
+    }
+}
+
+#[tokio::test]
+async fn failed_or_partial_retrieval_keeps_stored_authentication_and_retry_never_logs_in() {
+    for (code, expected) in [(999, "partial"), (7400, "failed")] {
+        let f = Fixture::new();
+        f.wire.inventory_code.store(code, Ordering::Relaxed);
+        let result = f.connect(None).await;
+        assert_eq!(result["data"]["authentication"], "succeeded");
+        assert_eq!(result["data"]["account"]["credential_state"], "stored");
+        assert_eq!(result["data"]["retrieval"]["status"], expected);
+        assert_eq!(result["data"]["retrieval"]["device_ids"], json!([]));
+        assert!(f.store.devices().unwrap().is_empty());
+        let id = result["data"]["account"]["id"].as_str().unwrap();
+        f.wire.inventory_code.store(0, Ordering::Relaxed);
+        assert_eq!(
+            f.refresh(id).await["data"]["retrieval"]["status"],
+            "complete"
+        );
+        assert_eq!(f.calls().len(), 6);
+        f.wire.homes_code.store(7400, Ordering::Relaxed);
+        let expired = f.refresh(id).await;
+        assert_eq!(expired["data"]["retrieval"]["status"], "failed");
+        assert_eq!(
+            expired["data"]["retrieval"]["error"]["code"],
+            "AUTH_REQUIRED"
+        );
+        assert_eq!(f.store.devices().unwrap().len(), 2);
+    }
+}
+
+#[tokio::test]
+async fn wrong_subject_and_cross_account_duplicates_never_replace_existing_cards() {
+    let f = Fixture::new();
+    let connected = f.connect(None).await;
+    let id = connected["data"]["account"]["id"].as_str().unwrap();
+    let baseline = f.call(json!({"method":"list_device_cards"})).await;
+    *f.wire.subject.lock().unwrap() = "different-subject".into();
+    assert_eq!(
+        f.connect(Some(Uuid::parse_str(id).unwrap())).await["error"]["code"],
+        "ACCOUNT_IDENTITY_CONFLICT"
+    );
+    assert_eq!(
+        f.call(json!({"method":"list_accounts"})).await["data"]
+            .as_array()
+            .unwrap()
+            .len(),
+        1
+    );
+    let duplicate = f.connect(None).await;
+    assert_eq!(duplicate["data"]["authentication"], "succeeded");
+    assert_eq!(duplicate["data"]["retrieval"]["status"], "failed");
+    assert_eq!(
+        duplicate["data"]["retrieval"]["error"]["code"],
+        "DEVICE_IDENTITY_CONFLICT"
+    );
+    assert_eq!(
+        f.call(json!({"method":"list_device_cards"})).await,
+        baseline
+    );
+}
+
+#[tokio::test]
+async fn uncertain_inventory_storage_returns_current_pending_state_without_resetting_bindings() {
+    let f = Fixture::new();
+    let connected = f.connect(None).await;
+    let id = connected["data"]["account"]["id"].as_str().unwrap();
+    f.wire.extra_device.store(true, Ordering::Relaxed);
+    f.secrets.uncertain.store(true, Ordering::Relaxed);
+    let refreshed = f.refresh(id).await;
+    assert_eq!(refreshed["data"]["account"]["credential_state"], "pending");
+    assert_eq!(
+        refreshed["data"]["retrieval"]["error"]["code"],
+        "SECRET_STORE_WRITE_UNKNOWN"
+    );
+    assert_eq!(f.store.devices().unwrap().len(), 2);
+    let calls = f.calls().len();
+    assert_eq!(
+        f.refresh(id).await["data"]["retrieval"]["error"]["code"],
+        "ACCOUNT_SESSION_UNCONFIRMED"
+    );
+    assert_eq!(f.calls().len(), calls);
+    assert_eq!(f.store.accounts().unwrap().len(), 1);
+}
+
+#[tokio::test]
+async fn unavailable_credentials_and_invalid_metadata_stop_before_login() {
+    let f = Fixture::new();
+    f.secrets.unavailable.store(true, Ordering::Relaxed);
+    assert_eq!(
+        f.connect(None).await["error"]["code"],
+        "SECRET_STORE_UNAVAILABLE"
+    );
+    assert!(f.calls().is_empty());
+    assert!(f.store.accounts().unwrap().is_empty());
+    f.secrets.unavailable.store(false, Ordering::Relaxed);
+    assert_eq!(
+        f.refresh(&Uuid::new_v4().to_string()).await["error"]["code"],
+        "ACCOUNT_NOT_FOUND"
+    );
+    assert!(f.calls().is_empty());
+    let metadata = json!({"schema_version":"1.0","operation_id":"connect","timeout_ms":1000,"label":"Test","password":"REFUSED"});
+    assert!(serde_json::from_value::<ConnectRequest>(metadata).is_err());
+    assert!(serde_json::from_value::<HostRequest>(json!({"schema_version":"1.0","operation_id":"a","timeout_ms":1000,"request":{"method":"connect_account","password":"REFUSED"}})).is_err());
+}
+
+#[tokio::test(start_paused = true)]
+async fn connection_shares_foreground_operation_ids_deadlines_and_lease_cleanup() {
+    for endpoint in [CloudEndpoint::Login, CloudEndpoint::HomeAppliances] {
+        for terminate in ["cancel", "background", "close", "deadline"] {
+            let f = Fixture::new();
+            *f.wire.delay.lock().unwrap() = Some(endpoint);
+            let pending = f.connect(None);
+            tokio::pin!(pending);
+            tokio::select! {
+                value = &mut pending => panic!("Unexpected completion: {value}"),
+                _ = f.wire.started.notified() => (),
+            }
+            assert_eq!(
+                f.call_id("connect", json!({"method":"list_accounts"}))
+                    .await["error"]["code"],
+                "RESOURCE_BUSY"
+            );
+            assert_eq!(
+                f.vault
+                    .lock_registration(&operation())
+                    .await
+                    .err()
+                    .unwrap()
+                    .code,
+                "RESOURCE_BUSY"
+            );
+            match terminate {
+                "cancel" => assert!(f.session.cancel("connect")),
+                "background" => f.session.set_foreground(false),
+                "close" => f.session.close(),
+                _ => tokio::time::advance(std::time::Duration::from_secs(2)).await,
+            }
+            let result = pending.await;
+            let error = if endpoint == CloudEndpoint::Login {
+                &result["error"]
+            } else {
+                assert_eq!(result["data"]["authentication"], "succeeded");
+                &result["data"]["retrieval"]["error"]
+            };
+            assert_eq!(
+                error["code"],
+                if terminate == "deadline" {
+                    "DEADLINE_EXCEEDED"
+                } else {
+                    "CANCELLED"
+                }
+            );
+            drop(f.vault.lock_registration(&operation()).await.unwrap());
+            for record in f.vault.list(&operation()).await.unwrap() {
+                drop(f.vault.lease(record.id, &operation()).await.unwrap());
+            }
+            assert!(f.store.devices().unwrap().is_empty());
+            let calls = f.calls().len();
+            if terminate == "background" || terminate == "close" {
+                assert_eq!(
+                    f.connect(None).await["error"]["code"],
+                    if terminate == "close" {
+                        "HOST_CLOSED"
+                    } else {
+                        "HOST_BACKGROUND"
+                    }
+                );
+                assert_eq!(f.calls().len(), calls);
+            }
+        }
+    }
+}
+
+#[tokio::test]
+async fn publication_refuses_unregistered_foreign_or_invalid_descriptor_batches() {
+    let f = Fixture::new();
+    let core = Core::new(
+        f.store.clone(),
+        vec![],
+        Arc::new(SystemClock),
+        Policy::default(),
+    );
+    assert_eq!(
+        core.publish_discovery("midea.meiju", &[], &operation())
+            .await
+            .unwrap_err()
+            .code,
+        "CAPABILITY_UNSUPPORTED"
+    );
+    assert!(f.store.devices().unwrap().is_empty());
+    assert_eq!(
+        f.connect(None).await["data"]["retrieval"]["status"],
+        "complete"
+    );
+    let baseline = serde_json::to_value(f.store.devices().unwrap()).unwrap();
+    let adapter = Arc::new(MeijuAdapter::new(
+        f.vault.clone(),
+        f.wire.clone(),
+        Arc::new(SystemClock),
+    ));
+    let core = Core::new(
+        f.store.clone(),
+        vec![adapter],
+        Arc::new(SystemClock),
+        Policy::default(),
+    );
+    for kind in ["foreign", "invalid", "duplicate"] {
+        let mut descriptors = f.store.devices().unwrap();
+        descriptors[0].device.alias = "Must not publish".into();
+        match kind {
+            "foreign" => descriptors[1].device.connections[0].adapter = "other.provider".into(),
+            "invalid" => descriptors[1].device.schema_version = "99.0".into(),
+            _ => descriptors[1].device.id = descriptors[0].device.id.clone(),
+        }
+        assert_eq!(
+            core.publish_discovery("midea.meiju", &descriptors, &operation())
+                .await
+                .unwrap_err()
+                .code,
+            "CAPABILITY_UNSUPPORTED"
+        );
+        assert_eq!(
+            serde_json::to_value(f.store.devices().unwrap()).unwrap(),
+            baseline
+        );
+    }
+}

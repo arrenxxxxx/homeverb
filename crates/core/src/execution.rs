@@ -68,37 +68,61 @@ impl Core {
     pub async fn discover(&self, operation: &Operation) -> Result<Vec<Device>> {
         for adapter in &self.adapters {
             let descriptors = operation.run(adapter.discover(operation)).await?;
-            let stored = operation.run(async { self.store.devices() }).await?;
-            let mut device_ids = std::collections::HashSet::new();
-            for descriptor in &descriptors {
-                operation
-                    .run(async { crate::descriptors::validate(descriptor) })
-                    .await?;
-                if !device_ids.insert(&descriptor.device.id) {
-                    return Err(crate::descriptors::invalid());
-                }
-                if descriptor
-                    .device
-                    .connections
-                    .iter()
-                    .any(|c| c.adapter != adapter.id())
-                {
-                    return Err(Error::new(
-                        "CAPABILITY_UNSUPPORTED",
-                        "The adapter returned a foreign connection.",
-                    ));
-                }
-                if let Some(previous) = stored.iter().find(|d| d.device.id == descriptor.device.id)
-                {
-                    previous.device.validate_rediscovery(&descriptor.device)?;
-                }
-            }
-            for descriptor in descriptors {
-                operation.run(async { Ok(()) }).await?;
-                self.store.save_device(&descriptor)?;
-            }
+            self.publish_discovery(adapter.id(), &descriptors, operation)
+                .await?;
         }
         self.list()
+    }
+
+    /// Admit a trusted, registered adapter's already-retrieved batch without fetching twice.
+    /// This is an in-process integration boundary, never a public JSON import operation.
+    pub async fn publish_discovery(
+        &self,
+        adapter_id: &str,
+        descriptors: &[Descriptor],
+        operation: &Operation,
+    ) -> Result<()> {
+        operation
+            .run(async {
+                if !self
+                    .adapters
+                    .iter()
+                    .any(|adapter| adapter.id() == adapter_id)
+                {
+                    return Err(crate::descriptors::invalid());
+                }
+                Ok(())
+            })
+            .await?;
+        let stored = operation.run(async { self.store.devices() }).await?;
+        let mut device_ids = std::collections::HashSet::new();
+        for descriptor in descriptors {
+            operation
+                .run(async { crate::descriptors::validate(descriptor) })
+                .await?;
+            if !device_ids.insert(&descriptor.device.id) {
+                return Err(crate::descriptors::invalid());
+            }
+            if descriptor
+                .device
+                .connections
+                .iter()
+                .any(|c| c.adapter != adapter_id)
+            {
+                return Err(Error::new(
+                    "CAPABILITY_UNSUPPORTED",
+                    "The adapter returned a foreign connection.",
+                ));
+            }
+            if let Some(previous) = stored.iter().find(|d| d.device.id == descriptor.device.id) {
+                previous.device.validate_rediscovery(&descriptor.device)?;
+            }
+        }
+        for descriptor in descriptors {
+            operation.run(async { Ok(()) }).await?;
+            self.store.save_device(descriptor)?;
+        }
+        Ok(())
     }
 
     fn routes(&self, device: &Device, route: Route, action: Option<&Action>) -> Vec<Connection> {

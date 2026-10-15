@@ -4,7 +4,7 @@ The owner selected Midea and Hualing air conditioners, dishwashers, and refriger
 
 Daily cloud control is required in the first real integration. LAN is an additional route for the same physical devices, not a substitute for cloud control. The owner has physical products; exact models, firmware, app version, and account region remain to be recorded. This guide records requirements and source research on October 15, 2026, not implemented HomeVerb support or physical verification.
 
-The native read protocols are implemented in [homeverb-midea](../../crates/midea/src/lib.rs): account-scoped home/appliance retrieval, code/data validation, deduplication, partial inventory failure, and bounded cloud-state decoding for the three selected families. The inventory/state decoders use an injected read transport and synthetic responses with the inspected wire fields. Native password login, signing, session-key decoding and restricted HTTPS are now implemented under ADR-0022 and tested against fictional responses and a local TLS server. One real mainland account has passed the read-only login/inventory probe below; the exact-model read-only Core adapter is available through `core-inspect`, and native API 1.1.0 startup selection. UI account methods remain pending. See [ADR-0020](../adr/0020-midea-cloud-inventory.md) and [ADR-0023](../adr/0023-meiju-cloud-state-evidence.md).
+The native read protocols are implemented in [homeverb-midea](../../crates/midea/src/lib.rs): account-scoped home/appliance retrieval, code/data validation, deduplication, partial inventory failure, and bounded cloud-state decoding for the three selected families. The inventory/state decoders use an injected read transport and synthetic responses with the inspected wire fields. Native password login, signing, session-key decoding and restricted HTTPS are now implemented under ADR-0022 and tested against fictional responses and a local TLS server. One real mainland account has passed the read-only login/inventory probe below; the exact-model read-only Core adapter is available through `core-inspect`, and native API 1.1.0 startup selection. Native API 1.2.0 also provides protected account connection and local list/refresh; Flutter input and mobile secure stores remain pending. See [ADR-0020](../adr/0020-midea-cloud-inventory.md) and [ADR-0023](../adr/0023-meiju-cloud-state-evidence.md).
 
 The native account vault now persists random local references, composes Linux secure storage, and coordinates session read/update work through account leases. Meiju's private account payload also preserves appliance-to-local-ID bindings with the session. Interrupted or uncertain updates remain pending until trusted validation and recovery. The explicit native connection coordinator now uses this storage and the admitted login client; real account identity and session validity still require live acceptance. See [ADR-0021](../adr/0021-persistent-account-vault.md), [ADR-0024](../adr/0024-meiju-private-device-bindings.md) and the [credential integration guide](04-add-adapter.md#integrate-native-credentials).
 
@@ -98,7 +98,7 @@ be failed or partial. `MeijuAccount::retrieve` supports a later explicit retry w
 the saved session, checks the encoded subject against the protected account and
 retains the original account lease. Neither operation registers capabilities,
 publishes Core cards, deduplicates appliances across accounts or authorizes writes.
-The existing native UI API remains unchanged.
+The original coordinator remains a Rust call; the additive native 1.2 account entry points are described in the [Flutter contract](../native-ui-contract.md#account-connection-and-refresh).
 
 The [local read-only probe](06-meiju-probe.md) exposes this flow to an interactive
 Linux terminal with hidden input and no credential arguments. Its output contains
@@ -126,7 +126,7 @@ real reauthorization and off-LAN acceptance remain to be recorded.
 
 ## Native account identity and device persistence
 
-`MeijuAccount` owns an AccountVault lease for one bounded operation. After admitted native authentication validates an account subject and session, `create(vault, region, label, subject, session, operation)` reserves a fresh local account and stores a private version-1 payload. For an existing account, acquire its lease and use `open`; it never initializes or resets an absent/corrupt map. `record()` exposes local metadata, and `session(operation)` returns protected native bytes. These are Rust library calls, not native UI methods.
+`MeijuAccount` owns an AccountVault lease for one bounded operation. After admitted native authentication validates an account subject and session, `create(vault, region, label, subject, session, operation)` reserves a fresh local account and stores a private version-1 payload. For an existing account, acquire its lease and use `open`; it never initializes or resets an absent/corrupt map. `record()` exposes local metadata, and `session(operation)` returns protected native bytes. These remain low-level Rust calls; the native UI exposes reviewed projections and operations through API 1.2 without returning private payloads.
 
 The opaque subject must come from reviewed provider evidence, not a nickname or mutable login spelling. The native login flow below binds a successful password proof to the exact server-issued login ID; the storage layer itself does not infer a provider field. `replace_session` requires that exact subject and keeps the bindings. A mismatch returns `ACCOUNT_IDENTITY_CONFLICT` without changing stored state. Neither opening a payload nor matching the subject proves live authorization.
 
@@ -243,3 +243,19 @@ CloudState retains account/appliance identity privately and has redacted Debug w
 [e1-source]: https://github.com/midea-lan/midea-local/blob/ef28169926914d15f40fe521b9cc3d3c2f553c59/midealocal/devices/e1/__init__.py
 [ca-source]: https://github.com/midea-lan/midea-local/blob/ef28169926914d15f40fe521b9cc3d3c2f553c59/midealocal/devices/ca/__init__.py
 [device-source]: https://github.com/midea-lan/midea-local/blob/ef28169926914d15f40fe521b9cc3d3c2f553c59/midealocal/device.py
+
+## Native account handoff
+
+API 1.2 uses the same adapter for Core reads and native account operations. After
+`connect_devices`, its already-retrieved inventory is checked against all protected
+historical account bindings and published through `Core::publish_discovery`.
+`refresh_devices` retrieves only the selected account, without login, and reports
+the credential state after any binding-store mutation. An uncertain mutation stays
+pending and blocks reuse. Partial retrieval preserves cards; recognized expired
+sessions retain `AUTH_REQUIRED` even when the failure occurred within a home list.
+
+The host returns public summaries and separate authentication/retrieval results.
+It does not expose private `AccountRecord.credential_ref`, provider subjects or
+appliance IDs. Native secret input, buffer ownership and frontend handling are
+specified in [ADR-0026](../adr/0026-native-account-connection.md) and the
+[account contract](../native-ui-contract.md#account-connection-and-refresh).

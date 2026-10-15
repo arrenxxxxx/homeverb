@@ -8,6 +8,8 @@ use std::{path::Path, sync::Arc};
 
 mod session;
 pub use session::{HostRequest, Request, Session};
+mod accounts;
+pub use accounts::{AccountConnection, AccountSummary, ConnectRequest};
 
 /// Compose a native account vault without reading credentials or starting authentication.
 pub fn open_accounts(directory: &Path) -> Result<homeverb_core::AccountVault> {
@@ -22,6 +24,16 @@ pub fn open_accounts(directory: &Path) -> Result<homeverb_core::AccountVault> {
 /// Compose the real read-only adapter without loading credentials or contacting the provider.
 /// Account connection is a separate trusted native operation; there are no write grants.
 pub fn open_meiju_read_only(directory: &Path) -> Result<Core> {
+    meiju_parts(directory).map(|(core, _)| core)
+}
+
+/// Compose foreground account operations and the read-only Core with one adapter instance.
+pub fn open_meiju_session(directory: &Path) -> Result<Session> {
+    let (core, adapter) = meiju_parts(directory)?;
+    Ok(Session::with_accounts(core, adapter))
+}
+
+fn meiju_parts(directory: &Path) -> Result<(Core, Arc<homeverb_midea::MeijuAdapter>)> {
     let store = Arc::new(SqliteStore::open(directory)?);
     let vault = Arc::new(open_accounts(directory)?);
     let clock = Arc::new(SystemClock);
@@ -30,7 +42,10 @@ pub fn open_meiju_read_only(directory: &Path) -> Result<Core> {
         Arc::new(homeverb_midea::MeijuHttps),
         clock.clone(),
     ));
-    Ok(Core::new(store, vec![adapter], clock, Policy::default()))
+    Ok((
+        Core::new(store, vec![adapter.clone()], clock, Policy::default()),
+        adapter,
+    ))
 }
 
 pub fn open_mock(directory: &Path, scenario: Scenario, allow_writes: bool) -> Result<Core> {

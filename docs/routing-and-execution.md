@@ -73,7 +73,9 @@ Operational lookup checks device/capability schema versions and shapes, unique i
 
 The experimental Meiju adapter additionally requires complete account inventory
 retrieval and checks current plus historical protected appliance bindings across
-all selected accounts before returning descriptors. Partial inventory and ambiguous
+all selected accounts before returning descriptors. Native account connect/refresh reuses
+`Core::publish_discovery` for the same registered-adapter, whole-batch validation
+without a second cloud inventory request; no public JSON imports descriptors. Partial inventory and ambiguous
 cross-account identity publish no new descriptor batch. Only explicitly reviewed
 exact model/family pairs expose read properties. Unknown models remain visible with
 unsupported status and no actions. Every Meiju observation remains stale while its

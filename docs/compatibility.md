@@ -73,8 +73,22 @@ startup objects preserve Mock behavior; explicit `midea.meiju` opens saved-accou
 read-only access and rejects Mock write grants/fault scenarios. Version 1.0 hosts
 reject the new startup field. The six C symbols, 22 request methods and SQLite
 schema 3 are unchanged. A live Linux C ABI run described six devices, read/cached
-seven components and preserved existing preferences. No UI login method, controls,
-mobile secure store or physical verification follows from this host integration.
+seven components and preserved existing preferences. That 1.1 host phase did not add UI login methods or controls.
+
+Native API 1.2.0 adds `list_accounts`, `refresh_account` and the separate
+`homeverb_connect_account` C symbol with bounded writable secret buffers. Existing
+startup/requests and SQLite schema 3 remain compatible; older libraries lack the
+new symbol/methods. Native account results separate authentication from retrieval;
+partial lists, expiry, cancellation, identity conflict and uncertain credential
+updates preserve their distinct outcomes. Synthetic host tests validate actual
+results against published schemas; C ABI tests verify secret-buffer clearing and
+admission refusal. No controls, mobile credential store or physical verification
+follows from these account operations.
+
+The new `list_accounts` and `refresh_account` methods were exercised on the same
+real Linux profile on October 15, 2026: six cards, seven successful read/cache
+pairs, preserved preferences, no repeated login and no controls. Reauthorization
+through the protected C symbol and phone acceptance remain unverified.
 
 ## Status definitions
 

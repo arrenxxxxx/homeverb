@@ -1,9 +1,13 @@
 //! Compile-time, model-scoped cloud reads. No appliance-control endpoint is registered.
 
-use crate::{Appliance, ApplianceFamily, CloudTransport, DeviceBinding, MeijuAccount};
+use crate::{
+    Appliance, ApplianceFamily, BoundInventory, CloudTransport, DeviceBinding, LoginCredentials,
+    MeijuAccount,
+};
 use async_trait::async_trait;
 use homeverb_core::{
-    AccountVault, Adapter, AdapterOutcome, Clock, Operation, ValidatedCommand, WriteProgress,
+    AccountRecord, AccountVault, Adapter, AdapterOutcome, Clock, Operation, ValidatedCommand,
+    WriteProgress,
 };
 use homeverb_domain::{
     Capability, Component, Connection, Descriptor, Device, Error, Result, Snapshot, Transport,
@@ -154,6 +158,12 @@ fn descriptors(appliance: &Appliance, binding: DeviceBinding, account: Uuid) -> 
     }
 }
 
+/// Native account result before Core publication; never serialize the private account record.
+pub struct AccountDiscovery {
+    pub account: AccountRecord,
+    pub descriptors: Result<Vec<Descriptor>>,
+}
+
 /// Foreground on-demand adapter. Construction and local Core queries perform no account work.
 pub struct MeijuAdapter {
     vault: Arc<AccountVault>,
@@ -173,15 +183,89 @@ impl MeijuAdapter {
             clock,
         }
     }
-}
-
-#[async_trait]
-impl Adapter for MeijuAdapter {
-    fn id(&self) -> &str {
-        PROVIDER
+    /// Local metadata only; a stored credential is not proof of current authorization.
+    pub async fn accounts(&self, operation: &Operation) -> Result<Vec<AccountRecord>> {
+        Ok(self
+            .vault
+            .list(operation)
+            .await?
+            .into_iter()
+            .filter(|record| record.provider == PROVIDER && record.region == "CN")
+            .collect())
     }
 
-    async fn discover(&self, operation: &Operation) -> Result<Vec<Descriptor>> {
+    pub async fn connect_devices(
+        &self,
+        credentials: LoginCredentials,
+        existing: Option<Uuid>,
+        label: &str,
+        operation: &Operation,
+    ) -> Result<AccountDiscovery> {
+        let report = crate::connect(
+            &self.vault,
+            self.transport.as_ref(),
+            credentials,
+            existing,
+            label,
+            operation,
+        )
+        .await?;
+        let descriptors = match report.retrieval {
+            Ok(bound) => {
+                self.discover_inner(Some(report.account.id), Some(bound), operation)
+                    .await
+            }
+            Err(error) => Err(error),
+        };
+        Ok(AccountDiscovery {
+            account: report.account,
+            descriptors,
+        })
+    }
+
+    pub async fn refresh_devices(
+        &self,
+        id: Uuid,
+        operation: &Operation,
+    ) -> Result<AccountDiscovery> {
+        self.accounts(operation)
+            .await?
+            .into_iter()
+            .find(|record| record.id == id)
+            .ok_or_else(|| {
+                Error::new(
+                    "ACCOUNT_NOT_FOUND",
+                    "The selected Meiju account does not exist.",
+                )
+            })?;
+        let (account, retrieval) = {
+            let _registration = self.vault.lock_registration(operation).await?;
+            let lease = self.vault.lease(id, operation).await?;
+            let record = lease.record().clone();
+            match MeijuAccount::open(lease, operation).await {
+                Ok(mut account) => {
+                    let retrieval = account.retrieve(self.transport.as_ref(), operation).await;
+                    (account.record().clone(), retrieval)
+                }
+                Err(error) => (record, Err(error)),
+            }
+        };
+        let descriptors = match retrieval {
+            Ok(bound) => self.discover_inner(Some(id), Some(bound), operation).await,
+            Err(error) => Err(error),
+        };
+        Ok(AccountDiscovery {
+            account,
+            descriptors,
+        })
+    }
+
+    async fn discover_inner(
+        &self,
+        target: Option<Uuid>,
+        mut prefetched: Option<BoundInventory>,
+        operation: &Operation,
+    ) -> Result<Vec<Descriptor>> {
         let _registration = self.vault.lock_registration(operation).await?;
         let mut output = Vec::new();
         let mut physical_ids = HashSet::new();
@@ -197,9 +281,40 @@ impl Adapter for MeijuAdapter {
         }
         // Hold every account lease through the identity check so concurrent retrieval cannot
         // change the protected map between accounts. No descriptors escape on any failure.
+        if let Some(id) = target
+            && !accounts.iter().any(|account| account.record().id == id)
+        {
+            return Err(Error::new(
+                "ACCOUNT_NOT_FOUND",
+                "The selected Meiju account does not exist.",
+            ));
+        }
         for account in &mut accounts {
-            let bound = account.retrieve(self.transport.as_ref(), operation).await?;
-            if !bound.inventory.is_complete() {
+            let selected = target.is_none_or(|id| account.record().id == id);
+            let bound = if selected {
+                Some(match prefetched.take() {
+                    Some(bound) => bound,
+                    None => account.retrieve(self.transport.as_ref(), operation).await?,
+                })
+            } else {
+                None
+            };
+            if bound
+                .as_ref()
+                .is_some_and(|bound| !bound.inventory.is_complete())
+            {
+                if bound.as_ref().is_some_and(|bound| {
+                    bound
+                        .inventory
+                        .failures
+                        .iter()
+                        .any(|failure| failure.error.code == "AUTH_REQUIRED")
+                }) {
+                    return Err(Error::new(
+                        "AUTH_REQUIRED",
+                        "The platform account requires user-side authorization.",
+                    ));
+                }
                 return Err(Error::new(
                     "MIDEA_INVENTORY_PARTIAL",
                     "Cloud retrieval was incomplete; existing device cards were preserved.",
@@ -213,11 +328,24 @@ impl Adapter for MeijuAdapter {
                     ));
                 }
             }
-            for (appliance, binding) in bound.inventory.appliances.iter().zip(bound.bindings) {
-                output.push(descriptors(appliance, binding, account.record().id));
+            if let Some(bound) = bound {
+                for (appliance, binding) in bound.inventory.appliances.iter().zip(bound.bindings) {
+                    output.push(descriptors(appliance, binding, account.record().id));
+                }
             }
         }
         operation.run(async { Ok(output) }).await
+    }
+}
+
+#[async_trait]
+impl Adapter for MeijuAdapter {
+    fn id(&self) -> &str {
+        PROVIDER
+    }
+
+    async fn discover(&self, operation: &Operation) -> Result<Vec<Descriptor>> {
+        self.discover_inner(None, None, operation).await
     }
 
     async fn read(

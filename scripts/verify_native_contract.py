@@ -28,7 +28,7 @@ def main():
     responses = {name: validator('native-response', name) for name in [*api['methods'], 'open']}
     query_error = validator('native-response', 'query_error')
     info_example = {'schema_version': '1.0', 'data': copy.deepcopy(api), 'warnings': [], 'error': None}
-    info_example['data']['api_version'] = '1.2.0'
+    info_example['data']['api_version'] = '1.3.0'
     info_example['data']['methods']['future_query'] = {'response_kind': 'query'}
     responses['get_api_info'].validate(info_example)
     info_example['data']['api_version'] = '2.0.0'
@@ -46,6 +46,12 @@ def main():
     library.homeverb_set_foreground.restype = None
     library.homeverb_close.argtypes = [ctypes.c_uint64]
     library.homeverb_close.restype = None
+    library.homeverb_connect_account.argtypes = [ctypes.c_uint64, ctypes.c_char_p,
+                                                ctypes.POINTER(ctypes.c_uint8), ctypes.c_size_t,
+                                                ctypes.POINTER(ctypes.c_uint8), ctypes.c_size_t]
+    library.homeverb_connect_account.restype = ctypes.c_void_p
+    connect_schema = validator('native-connect')
+    connect_response = validator('native-response', 'connect_account')
     examples = []
     sequence = 0
 
@@ -98,6 +104,8 @@ def main():
         try:
             assert call(handle, 'get_api_info')['data'] == api
             assert call(handle, 'list_devices')['data'] == []
+            assert call(handle, 'list_accounts')['data'] == []
+            assert call(handle, 'refresh_account', account_id='00000000-0000-4000-8000-000000000001')['error']['code'] == 'AUTH_FLOW_UNSUPPORTED'
             assert call(handle, 'list_device_cards')['data'] == []
             assert call(handle, 'list_rooms')['data'] == []
             devices = call(handle, 'discover')['data']
@@ -211,7 +219,7 @@ def main():
         handle = open_host(directory, allow=False, adapter='midea.meiju')
         try:
             assert not (Path(directory) / 'mock-appliance.sqlite3').exists()
-            for method in ['list_devices', 'list_device_cards', 'discover']:
+            for method in ['list_devices', 'list_device_cards', 'discover', 'list_accounts']:
                 result = raw(handle, envelope(method))
                 responses[method].validate(result)
                 assert result['error'] is None and result['data'] == []
@@ -219,9 +227,46 @@ def main():
             result = raw(handle, envelope('discover'))
             query_error.validate(result)
             assert result['error']['code'] == 'HOST_BACKGROUND'
+            metadata = {'schema_version': '1.0', 'operation_id': 'account-connect',
+                        'timeout_ms': 1000, 'label': 'Synthetic account', 'account_id': None}
+            connect_schema.validate(metadata)
+            # A foreground gate ensures these fictional credentials can never reach a provider.
+            def connect_check(expected, request=metadata, target=handle, login_length=None):
+                login = bytearray(b'owner@example.test')
+                password = bytearray(b'FICTIONAL-PASSWORD')
+                login_buffer = (ctypes.c_uint8 * len(login)).from_buffer(login)
+                password_buffer = (ctypes.c_uint8 * len(password)).from_buffer(password)
+                try:
+                    result = decode(library.homeverb_connect_account(
+                        target, json.dumps(request).encode(), login_buffer,
+                        len(login) if login_length is None else login_length,
+                        password_buffer, len(password)))
+                    connect_response.validate(result)
+                    assert result['error']['code'] == expected, result
+                    assert not any(password), 'The valid password buffer was not cleared.'
+                    if login_length is None:
+                        assert not any(login), 'The valid account buffer was not cleared.'
+                    assert 'FICTIONAL' not in json.dumps(result)
+                finally:
+                    login[:] = bytes(len(login))
+                    password[:] = bytes(len(password))
+            connect_check('HOST_BACKGROUND')
+            bad = {**metadata, 'password': 'FICTIONAL-REFUSED'}
+            assert not connect_schema.is_valid(bad)
+            connect_check('INVALID_ARGUMENT', request=bad)
+            connect_check('HOST_CLOSED', target=0)
+            connect_check('MIDEA_LOGIN_INPUT_UNSUPPORTED', login_length=0)
+            connect_check('MIDEA_LOGIN_INPUT_UNSUPPORTED', login_length=257)
         finally:
             library.homeverb_close(handle)
         assert raw(handle, envelope('list_devices'))['error']['code'] == 'HOST_CLOSED'
+
+    with tempfile.TemporaryDirectory(prefix='homeverb-ui-mock-account-') as directory:
+        handle = open_host(directory, allow=False)
+        try:
+            connect_check('AUTH_FLOW_UNSUPPORTED', target=handle)
+        finally:
+            library.homeverb_close(handle)
 
     for fields in [
         {'adapter': 'unknown'}, {'adapter': None},
@@ -248,8 +293,28 @@ def main():
         request_schema.validate(case['request'])
         responses[case['request']['request']['method']].validate(case['response'])
     assert {case['request']['request']['method'] for case in saved['cases']} == set(api['methods'])
+    account_examples = load('packages/native-contract/account-examples.json')
+    assert account_examples['api_version'] == api['api_version']
+    connect_schema.validate(account_examples['connect_metadata'])
+    for case in account_examples['cases']:
+        validator('native-response', case['response_definition']).validate(case['response'])
+    for path, value in [
+        (('account', 'credential_ref'), 'FORBIDDEN'),
+        (('account', 'authorization'), 'connected'),
+        (('account', 'id'), 'not-a-uuid'),
+        (('authentication',), 'not_attempted'),
+        (('retrieval', 'status'), 'unknown'),
+        (('retrieval', 'device_ids'), ['not-a-uuid']),
+        (('retrieval', 'error'), {'code': 'FAILED', 'message': 'Synthetic', 'retryable': False}),
+    ]:
+        bad = copy.deepcopy(account_examples['cases'][0]['response'])
+        target = bad['data']
+        for field in path[:-1]:
+            target = target[field]
+        target[path[-1]] = value
+        assert not connect_response.is_valid(bad), path
     print(f"PASS: {len(api['methods'])} native methods; {len(examples)} live examples; closed-field, error, outcome, and lifecycle checks.")
-    print('Mock and empty Meiju startup verified on Linux; no live accounts, Flutter/mobile or physical-device verification in this suite.')
+    print('Mock, empty Meiju startup and protected account-buffer guards verified on Linux; no live accounts, Flutter/mobile or physical-device verification in this suite.')
 
 
 if __name__ == '__main__':

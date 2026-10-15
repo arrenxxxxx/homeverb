@@ -1,8 +1,11 @@
-use homeverb_core::{Core, Operation};
+use homeverb_core::{Core, Operation, SecretBytes};
 use homeverb_domain::*;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use std::{collections::HashMap, sync::Mutex};
+use std::{
+    collections::HashMap,
+    sync::{Arc, Mutex},
+};
 use tokio_util::sync::CancellationToken;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -18,6 +21,10 @@ pub struct HostRequest {
 #[serde(tag = "method", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Request {
     GetApiInfo {},
+    ListAccounts {},
+    RefreshAccount {
+        account_id: uuid::Uuid,
+    },
     ListDevices {},
     Discover {},
     DescribeDevice {
@@ -84,6 +91,7 @@ struct State {
 
 pub struct Session {
     core: Core,
+    accounts: Option<Arc<homeverb_midea::MeijuAdapter>>,
     state: Mutex<State>,
 }
 
@@ -103,12 +111,43 @@ impl Session {
     pub fn new(core: Core) -> Self {
         Self {
             core,
+            accounts: None,
             state: Mutex::new(State {
                 foreground: true,
                 closed: false,
                 operations: HashMap::new(),
             }),
         }
+    }
+
+    pub fn with_accounts(core: Core, accounts: Arc<homeverb_midea::MeijuAdapter>) -> Self {
+        let mut session = Self::new(core);
+        session.accounts = Some(accounts);
+        session
+    }
+
+    /// Trusted native secret inputs only. The general JSON dispatcher has no login method.
+    pub async fn connect_account(
+        &self,
+        input: crate::ConnectRequest,
+        login: SecretBytes,
+        password: SecretBytes,
+    ) -> Value {
+        let result = async {
+            let (operation, _registration) =
+                self.register(&input.schema_version, input.operation_id, input.timeout_ms)?;
+            let adapter = self
+                .accounts
+                .as_ref()
+                .ok_or_else(crate::accounts::unsupported)?;
+            let credentials = homeverb_midea::LoginCredentials::new(login, password)?;
+            let report = adapter
+                .connect_devices(credentials, input.account_id, &input.label, &operation)
+                .await?;
+            Ok(crate::accounts::publish(&self.core, report, "succeeded", &operation).await)
+        }
+        .await;
+        json!(Query::from_result(result))
     }
 
     pub fn set_foreground(&self, foreground: bool) {
@@ -149,15 +188,17 @@ impl Session {
         }
     }
 
-    async fn call_inner(&self, input: HostRequest) -> Result<Value> {
-        if input.schema_version != SCHEMA_VERSION
-            || input.operation_id.is_empty()
-            || input.operation_id.len() > 256
-        {
+    fn register(
+        &self,
+        schema_version: &str,
+        operation_id: String,
+        timeout_ms: u64,
+    ) -> Result<(Operation, Registration<'_>)> {
+        if schema_version != SCHEMA_VERSION || operation_id.is_empty() || operation_id.len() > 256 {
             return Err(Error::invalid());
         }
         let token = CancellationToken::new();
-        let operation = Operation::new(input.timeout_ms, token.clone())?;
+        let operation = Operation::new(timeout_ms, token.clone())?;
         {
             let mut state = self
                 .state
@@ -172,21 +213,47 @@ impl Session {
                     "New operations require a foreground host.",
                 ));
             }
-            if state.operations.contains_key(&input.operation_id) || state.operations.len() >= 8 {
+            if state.operations.contains_key(&operation_id) || state.operations.len() >= 8 {
                 return Err(Error::new(
                     "RESOURCE_BUSY",
                     "The operation ID is active or the session has reached its operation limit.",
                 ));
             }
-            state
-                .operations
-                .insert(input.operation_id.clone(), token.clone());
+            state.operations.insert(operation_id.clone(), token.clone());
         }
-        let _registration = Registration {
+        let registration = Registration {
             state: &self.state,
-            id: input.operation_id,
+            id: operation_id,
         };
+        Ok((operation, registration))
+    }
+
+    async fn call_inner(&self, input: HostRequest) -> Result<Value> {
+        let (operation, _registration) =
+            self.register(&input.schema_version, input.operation_id, input.timeout_ms)?;
         let result = match input.request {
+            Request::ListAccounts {} => {
+                let accounts = match &self.accounts {
+                    Some(adapter) => adapter.accounts(&operation).await?,
+                    None => vec![],
+                };
+                Ok(json!(
+                    accounts
+                        .into_iter()
+                        .map(crate::AccountSummary::from)
+                        .collect::<Vec<_>>()
+                ))
+            }
+            Request::RefreshAccount { account_id } => {
+                let adapter = self
+                    .accounts
+                    .as_ref()
+                    .ok_or_else(crate::accounts::unsupported)?;
+                let report = adapter.refresh_devices(account_id, &operation).await?;
+                Ok(json!(
+                    crate::accounts::publish(&self.core, report, "not_attempted", &operation).await
+                ))
+            }
             Request::GetApiInfo {} => Ok(serde_json::from_str(include_str!(
                 "../../../packages/native-contract/api.json"
             ))

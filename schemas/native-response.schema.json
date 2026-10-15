@@ -328,6 +328,30 @@
                         "response_kind"
                       ],
                       "additionalProperties": true
+                    },
+                    "list_accounts": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "refresh_account": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": false
                     }
                   },
                   "required": [
@@ -352,7 +376,9 @@
                     "list_device_cards",
                     "set_device_preferences",
                     "reorder_devices",
-                    "assign_devices_to_room"
+                    "assign_devices_to_room",
+                    "list_accounts",
+                    "refresh_account"
                   ],
                   "additionalProperties": {
                     "type": "object",
@@ -1317,6 +1343,254 @@
         },
         {
           "$ref": "#/$defs/query_error"
+        }
+      ]
+    },
+    "account_summary": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "provider": {
+          "const": "midea.meiju"
+        },
+        "region": {
+          "const": "CN"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "credential_state": {
+          "enum": [
+            "pending",
+            "stored"
+          ]
+        },
+        "authorization": {
+          "const": "not_checked"
+        }
+      },
+      "required": [
+        "id",
+        "provider",
+        "region",
+        "label",
+        "credential_state",
+        "authorization"
+      ],
+      "additionalProperties": false
+    },
+    "account_retrieval": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "const": "complete"
+            },
+            "device_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "uniqueItems": true
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "status",
+            "device_ids",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "partial",
+                "failed"
+              ]
+            },
+            "device_ids": {
+              "type": "array",
+              "maxItems": 0
+            },
+            "error": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "message": {
+                  "type": "string"
+                },
+                "retryable": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "code",
+                "message",
+                "retryable"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "device_ids",
+            "error"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "list_accounts": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "type": "array",
+              "items": {
+                "$ref": "urn:homeverb:schema:native-response#/$defs/account_summary"
+              }
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "urn:homeverb:schema:native-response#/$defs/query_error"
+        }
+      ]
+    },
+    "refresh_account": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "account": {
+                  "$ref": "urn:homeverb:schema:native-response#/$defs/account_summary"
+                },
+                "authentication": {
+                  "const": "not_attempted"
+                },
+                "retrieval": {
+                  "$ref": "urn:homeverb:schema:native-response#/$defs/account_retrieval"
+                }
+              },
+              "required": [
+                "account",
+                "authentication",
+                "retrieval"
+              ],
+              "additionalProperties": false
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "urn:homeverb:schema:native-response#/$defs/query_error"
+        }
+      ]
+    },
+    "connect_account": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "account": {
+                  "$ref": "urn:homeverb:schema:native-response#/$defs/account_summary"
+                },
+                "authentication": {
+                  "const": "succeeded"
+                },
+                "retrieval": {
+                  "$ref": "urn:homeverb:schema:native-response#/$defs/account_retrieval"
+                }
+              },
+              "required": [
+                "account",
+                "authentication",
+                "retrieval"
+              ],
+              "additionalProperties": false
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "urn:homeverb:schema:native-response#/$defs/query_error"
         }
       ]
     }

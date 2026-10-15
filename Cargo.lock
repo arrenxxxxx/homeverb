@@ -854,12 +854,14 @@ dependencies = [
 name = "homeverb-ffi"
 version = "0.2.0"
 dependencies = [
+ "homeverb-core",
  "homeverb-domain",
  "homeverb-host",
  "homeverb-mock",
  "serde",
  "serde_json",
  "tokio",
+ "zeroize",
 ]
 
 [[package]]
@@ -874,6 +876,7 @@ dependencies = [
  "homeverb-mock",
  "homeverb-secrets",
  "homeverb-storage",
+ "jsonschema",
  "rusqlite",
  "serde",
  "serde_json",
