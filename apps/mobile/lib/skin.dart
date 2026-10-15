@@ -207,8 +207,9 @@ class Surface extends StatelessWidget {
           ? null
           : const [
               BoxShadow(
-                color: Color(0x192b2c2e),
-                blurRadius: 10,
+                color: Color(0x1a2b2c2e),
+                // The artwork uses sigma 10 at 2x scale (5 logical pixels).
+                blurRadius: (5 - .5) / .57735,
                 offset: Offset(0, 3),
               ),
             ],

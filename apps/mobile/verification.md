@@ -442,3 +442,29 @@ validators passed. The ordinary Android APK passed 16 KiB ZIP alignment; the loc
 delivery APK/hash manifest was updated. GPU comparison evidence is stored as
 `output/flutter-verification/android/gradient-gpu-check.json`, and
 `gradient-alignment-release-home.png` records the final cold launch.
+
+
+## Surface-shadow parameters
+
+The approved renderer uses a Gaussian standard deviation of 10 physical pixels
+at 2x scale, equivalent to 5 logical pixels. Flutter's `blurRadius: 10` converts
+to a larger standard deviation. Window Light now uses the inverse Flutter
+conversion and matches the reference's 26/255 shadow opacity. The RGB color and
+three-pixel vertical offset remain unchanged.
+
+All 82 screenshots were regenerated. Seventy-four screens improve and eight
+remain unchanged; no page regresses. Mean channel error drops from 1.5145 to
+1.4999/255. Card/reference crops were visually inspected, and both previously
+measured interior gradient regions remain pixel-identical. The strict whole-page
+gate still fails at **0/82 exact**, with unchanged reference artwork.
+
+Static analysis and all 10 screenshot/interaction/reflow/high-contrast checks
+passed, including 198 explicitly simulated atlas branches. Documentation,
+contract and repository validators passed. No native operation, widget geometry
+or interaction target changed.
+
+The ordinary Android release APK rebuilt, passed 16 KiB ZIP alignment, installed
+and cold-started on the isolated emulator. The final card/shadow screenshot was
+inspected, and the sampled gradient region remained free of anomalous black
+pixels. The local delivery APK/hash manifest and
+`shadow-alignment-release-home.png` were updated.
