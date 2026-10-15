@@ -121,6 +121,12 @@ returns `DEVICE_IDENTITY_CONFLICT` before a request.
 
 The native read protocols use `MIDEA_RESPONSE_INVALID` for malformed/oversized, wrong-home/appliance responses or malformed recognized state fields, `MIDEA_REQUEST_REJECTED` for explicit nonzero provider codes other than recognized expired-session codes, and `MIDEA_REQUEST_FAILED` for transport failures. Provider messages, URLs and identifiers are never copied into these errors. Recognized session expiry returns `AUTH_REQUIRED` without automatic login/retry. It stops subsequent inventory requests; state queries return the error directly. Individual home failures remain explicit in a partial inventory; a failed top-level listing never becomes an empty account. Unsupported state families, query combinations, components or explicit temperature units return `CAPABILITY_UNSUPPORTED`. Cancellation/deadline stop the read flow. These errors do not establish any device-write outcome or real-platform support.
 
+The pure [LAN discovery decoder](adr/0045-bounded-lan-discovery-decoding.md) also
+returns fixed `MIDEA_RESPONSE_INVALID` errors for unsupported envelopes, invalid
+source addresses, lengths, checksums, padding, IDs, ports or family fields. Errors
+contain no datagram bytes or identifiers. This is local parsing without network
+I/O, account access, retries or device admission; it establishes no write outcome.
+
 The account-bound read path returns `DEVICE_IDENTITY_CONFLICT` before transport when the local device, selected connection or known model differs from the protected binding. Invalid components return `CAPABILITY_UNSUPPORTED`. Pending or unavailable credentials stop the request through the vault. Core rejects decoded but undeclared properties with `INVALID_OBSERVATION`; neither that rejection nor a protocol failure replaces the previous cache or triggers a retry.
 
 Protected inventory membership is independent of historical identity. API 1.9.1

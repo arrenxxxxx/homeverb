@@ -813,3 +813,28 @@ older libraries reject the larger configuration, so never silently truncate it.
 JSON shapes, methods, C exports, SQLite schema 4 and protected payload 3 are
 unchanged. No real account, appliance operation, Flutter worktree change, mobile
 runtime acceptance or package publication was performed in this phase.
+
+## Bounded LAN discovery decoding
+
+[ADR-0045](adr/0045-bounded-lan-discovery-decoding.md) adds the fixed Midea probe
+and an offline V2/V3-wrapped discovery decoder. Eight independently generated
+positive vectors and fifteen negative vectors cover family hints, minimum and
+maximum sizes, checksums, padding, lengths and field validation. Every truncation
+boundary is rejected. The six-byte ID excludes adjacent reserved bytes; the
+endpoint uses the actual supplied datagram source. Candidates have redacted Debug
+and no serialization implementation, and retain no serial, MAC, SSID or model.
+
+The public wire key/checksum do not authenticate a device. No sockets, account
+access, pairing, identity merge, LAN route registration or control are implemented
+by this module. Native API 1.14.1, its 31 methods and eleven C/JNI exports, SQLite
+schema 4, protected payload 3 and cloud execution semantics remain unchanged.
+Bounded collection, protected reconciliation, V3 session authentication, TCP/model
+codecs and authorized physical/off-LAN acceptance remain separate gates. This
+phase does not complete T10 or establish support for a physical product.
+
+On October 16, 2026, formatting, workspace Clippy, workspace/example builds and
+local validators passed. Rust tests: 326 passed, two explicitly ignored; runtime
+acceptance: 35 passed; native contract: 31 methods/51 fictional examples plus
+approval checks; Python tooling: 33 passed; presentation: six passed. All three
+Android AAR variants passed build/export/16 KiB ELF checks. No real account,
+appliance, Flutter worktree or new Android runtime test was used in this phase.

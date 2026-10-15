@@ -6,6 +6,7 @@ mod codec;
 mod control;
 pub use control::{AC_FAN_SPEEDS, AC_MODES, AcMode};
 mod dishwasher;
+pub mod lan;
 mod material;
 mod product;
 mod temperature;

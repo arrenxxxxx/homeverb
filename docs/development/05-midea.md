@@ -246,6 +246,22 @@ The [LAN setup documentation][ha] describes cloud onboarding to retrieve Token/K
 
 Use one physical Device with cloud and, when established safely, LAN connections. Preserve existing [routing rules](../routing-and-execution.md): explicit cloud works independently of LAN, explicit LAN never falls back, and Auto chooses a permitted action-supported route with LAN preferred when available. Never race writes or replay a possibly-sent write on another route. A cloud API success is not physical verification; keep accepted or uncertain outcomes honest when fresh evidence is unavailable.
 
+### Offline discovery decoder
+
+`homeverb_midea::lan` implements the fixed discovery request and a pure, bounded
+V2/V3-wrapped response decoder under
+[ADR-0045](../adr/0045-bounded-lan-discovery-decoding.md). Independent fictional
+packets cover AC, E1, CA and unknown family hints. The decoder checks inner length,
+checksum, AES padding, the six-byte ID, TCP port and SSID family; datagrams are
+limited to 512 bytes. The endpoint uses the supplied datagram peer address.
+
+Candidates are native-only, redacted and unauthenticated. The public checksum and
+wire key do not prove identity; serial, MAC, SSID and model text are discarded.
+This module opens no sockets and does not add a LAN connection to a card. Next
+gates are bounded foreground collection, protected identity reconciliation, V3
+token/key retrieval and handshake, TCP framing and exact-model codecs. V1 XML,
+real LAN scanning and physical LAN acceptance remain unimplemented or unverified.
+
 ## Fit the embedded Core
 
 Reuse or port reviewed cloud requests, capability mappings, and LAN codecs into in-process Rust adapters. Keep the existing Core, capability contracts, and host architecture. There is no requirement to install HA, run a Python companion service, or call HA's control API.
