@@ -597,14 +597,34 @@ class _GlyphPainter extends CustomPainter {
       canvas.drawPath(path, p);
     }
 
-    void rect(double x, double y, double w, double h, double r) =>
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(
-            Rect.fromLTWH(x, y, w, h),
-            Radius.circular(r),
-          ),
-          p,
-        );
+    void rect(double x, double y, double w, double h, double r) {
+      // The reference outlines sit inside their supplied bounds.
+      final outline = Paint()
+        ..color = color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.6;
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(x, y, w, h).deflate(.8),
+          Radius.circular(math.max(0, r - .8)),
+        ),
+        outline,
+      );
+    }
+
+    void arc(double width, double start, double sweep) {
+      canvas.drawArc(
+        const Rect.fromLTWH(3, 3, 18, 18).deflate(width / 2),
+        start * math.pi / 180,
+        sweep * math.pi / 180,
+        false,
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = width,
+      );
+    }
+
     switch (name) {
       case 'drag':
         for (final y in [6.0, 12.0, 18.0]) {
@@ -651,10 +671,10 @@ class _GlyphPainter extends CustomPainter {
         rect(2, 2, 15, 15, 8);
         line(const [Offset(16, 16), Offset(23, 23)]);
       case 'refresh':
-        canvas.drawArc(const Rect.fromLTWH(3, 3, 18, 18), .7, 4.9, false, p);
+        arc(1.7, 40, 280);
         line(const [Offset(19, 1), Offset(21, 7), Offset(15, 7)]);
       case 'power':
-        canvas.drawArc(const Rect.fromLTWH(3, 3, 18, 18), -.87, 4.88, false, p);
+        arc(1.9, 310, 280);
         line(const [Offset(12, 1), Offset(12, 12)]);
       case 'phone':
         rect(6, 1, 13, 22, 3);

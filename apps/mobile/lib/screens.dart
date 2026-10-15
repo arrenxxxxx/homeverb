@@ -545,12 +545,16 @@ class ScreenView extends StatelessWidget {
               child: LayoutBuilder(
                 builder: (context, c) => Wrap(
                   spacing: 18,
-                  runSpacing: 20,
+                  runSpacing: 18,
                   children: [
                     for (final key in ['ac', 'lamp', 'tv', 'sensor'])
                       SizedBox(
                         width: (c.maxWidth - 36) / 3,
-                        child: DeviceTile(key, onAction: onAction),
+                        child: DeviceTile(
+                          key,
+                          onAction: onAction,
+                          compactHeight: 235,
+                        ),
                       ),
                   ],
                 ),

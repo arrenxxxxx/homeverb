@@ -345,3 +345,29 @@ click verification and independent screenshot comparison for the revised states.
 The ordinary Android release APK was rebuilt with the corrected catalog, passed
 16 KiB ZIP alignment, installed and cold-started on the isolated emulator. The
 local delivery APK/hash manifest and `p08-catalog-release-home.png` were refreshed.
+
+
+## Icon outlines and wide-card geometry
+
+Rounded icon outlines and power/refresh arcs now stay inside the bounds supplied
+by the prototype renderer, using its individual stroke widths and arc angles.
+The wide home grid uses the reference's 235-pixel card height and 18-pixel row gap;
+its value, subtitle and power control follow the corrected card bottom. Phone
+cards retain their 233-pixel height, and large-text cards continue to reflow.
+
+All 82 native-widget captures were regenerated. Against the preceding checkpoint,
+21 screens improve and 61 retain their previous metrics; none regresses. Mean
+channel error drops from 1.6529 to 1.6261/255. The original references remain
+unchanged, and the strict gate still fails at **0/82 exact**. W01 reference and
+actual card crops were also inspected side by side. These geometry corrections
+do not establish identical rasterization or resolve the pending P08 review.
+
+Static analysis and all 10 screen/reflow/high-contrast checks passed, including
+198 explicitly simulated atlas branches. Documentation, contract and repository
+validators passed. The change does not add native methods, alter operation
+outcomes or promote real-device compatibility.
+
+The ordinary Android release APK rebuilt, passed 16 KiB ZIP alignment, installed
+and cold-started on the isolated emulator. The delivery APK/hash manifest was
+updated; `icon-geometry-release-home.png` records the inspected launch. Earlier
+real OS keyboard and lifecycle evidence remains tied to its recorded checkpoint.

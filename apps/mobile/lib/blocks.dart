@@ -1065,10 +1065,12 @@ class DeviceTile extends StatelessWidget {
     required this.onAction,
     this.cached = false,
     this.large = false,
+    this.compactHeight = 233,
     this.data,
     super.key,
   });
   final String deviceKey;
+  final double compactHeight;
   final List<String>? data;
   final ActionHandler onAction;
   final bool cached, large;
@@ -1149,7 +1151,7 @@ class DeviceTile extends StatelessWidget {
                       ),
                     )
                   : SizedBox(
-                      height: large ? 197 : 233,
+                      height: large ? 197 : compactHeight,
                       child: Stack(
                         children: [
                           Positioned(
@@ -1202,12 +1204,12 @@ class DeviceTile extends StatelessWidget {
                             ),
                             textAt(143, Copy(d[1], size: 11, color: secondary)),
                             textAt(
-                              174,
+                              compactHeight - 59,
                               Copy(d[2], size: 24, bold: true, color: color),
                               right: 50,
                             ),
                             textAt(
-                              207,
+                              compactHeight - 26,
                               Copy(
                                 cached ? 'Cached · 2h ago' : d[3],
                                 size: 10,
