@@ -134,6 +134,14 @@ Use canonical locales `en-US` and `zh-CN`. `EnUs`/`ZhCN` aliases normalize to th
 
 [Locale catalogs](../../packages/presentation/locales/en-US.json) share identical keys and placeholders. The only permitted Chinese source text is [zh-CN.json](../../packages/presentation/locales/zh-CN.json). Native frontends can load these JSON resources directly. JavaScript-based designs can use [presentation helpers](../../packages/presentation/src/index.mjs); they have no framework dependency.
 
+For numeric and string observations, look up the exact `<property>.<value>` label
+before formatting an unknown value. For example, `vendor.midea.ac.wind_speed`
+value `102` displays the existing Auto label; the same number on a temperature
+property remains numeric. Unknown numeric codes use locale number formatting and
+unknown strings remain visible. Translation changes only the label, never the
+typed value, freshness or timestamps. A label does not admit a writable option;
+the component action schema remains authoritative.
+
 Render translation results as text, not raw HTML. Present requested values separately from observations. Missing/null state means unknown. `accepted` is unverified; `unknown` means it may have executed and should be refreshed. Display non-atomic receipts item by item, retaining their evidence and warnings. A partial receipt needs a refresh action when any child is accepted, unknown, or references a retired request. Refresh means an explicit state read, never automatic replay.
 
 The native ABI is verified through a Linux ctypes host that loads Core directly, executes a write, backgrounds the host, observes cancellation, and closes it. This does not establish Flutter, Android, or iOS support.
