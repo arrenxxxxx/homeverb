@@ -28,6 +28,8 @@ The [native UI contract](native-ui-contract.md) adds `get_api_info` and publishe
 
 ## Status definitions
 
+The Flutter application in `apps/mobile` is Mock-tested through the Linux native library and an actual Linux Flutter process. It pins Flutter 3.47.7 through FVM, packages the Linux library, and preserves native API 1.0, the existing C ABI and SQLite schema. Its isolated 82-state preview is fictional. Screenshot comparison still reports differences; Android/iOS native packaging, physical-phone lifecycle, full localization/accessibility and real-platform support are unverified. See the [Flutter verification report](../apps/mobile/verification.md). No platform row is promoted by the UI implementation.
+
 Foreground authorization sharing is also planned and unverified for every candidate. Login support alone does not establish transferability. Before enabling sharing, record provider-specific evidence for permission scope, device binding, refresh-token behavior across installations, expiry, and revocation under [ADR-0008](adr/0008-foreground-authorization-sharing.md).
 
 | Status | Meaning |

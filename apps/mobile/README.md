@@ -10,8 +10,7 @@ Use FVM 4.3.1 and Flutter 3.47.7, pinned in `.fvmrc`.
 fvm install
 fvm flutter pub get
 fvm flutter analyze
-fvm flutter test test/native_test.dart
-fvm flutter test test/screens_test.dart
+fvm flutter test --reporter expanded
 ```
 
 Build the library from the repository root before running native tests:
@@ -20,13 +19,16 @@ Build the library from the repository root before running native tests:
 cargo build -p homeverb-ffi --offline --locked
 ```
 
-Run a Linux native application with an absolute library path:
+Build and run a Linux native application after building the library:
 
 ```sh
-fvm flutter run -d linux --dart-define=HOMEVERB_LIBRARY=/absolute/path/to/libhomeverb_ffi.so
+fvm flutter build linux --release
+build/linux/x64/release/bundle/homeverb_mobile
 ```
 
-The explicit Mock host permits fictional writes only. Native metadata and presentation preferences live in the OS application support directory. Opening a page does not discover or refresh devices. Use Add Device to discover the Mock appliance and Refresh State to read it.
+The Linux CMake install step packages `target/debug/libhomeverb_ffi.so` in the bundle's `lib` directory. Set CMake `HOMEVERB_NATIVE_LIBRARY` to use another build. Keep the whole bundle together. A development override is available through `--dart-define=HOMEVERB_LIBRARY=/absolute/path/to/libhomeverb_ffi.so`. Linux builds require Flutter's standard CMake, Ninja, Clang and GTK development dependencies.
+
+The explicit Mock host permits fictional writes only. Native metadata and presentation preferences live in the OS application support directory. Opening a page does not discover or refresh devices. Use Add Device to discover the Mock appliance and Refresh State to read it. Device menu > Select Devices offers explicit batch power actions; results remain per item. Unsupported or ambiguous capabilities fail admission before execution.
 
 The isolated visual preview runs independently:
 
@@ -47,6 +49,14 @@ fvm flutter build web -t lib/main_preview.dart
 
 ## Verification boundary
 
-Seven Dart integration tests passed against the locally built Linux library: organization, persistence/reopen, validation, observations, receipts, foreground gating, outcome preservation and no write replay during refresh. This establishes fictional Linux integration, not a verified physical appliance.
+See [verification.md](verification.md) for executed checks and remaining acceptance gates. All 82 native-widget preview states render and all 198 simulated atlas event branches are clicked separately from the real Core tests. The actual Linux Flutter process also discovers, reads and writes the fictional Mock appliance through FFI. Screenshot equality has **not passed**; do not describe the application as a pixel-identical or phone-verified delivery.
+
+Generate the local comparison report from the repository root after screenshot tests:
+
+```sh
+python3 apps/mobile/tool/compare_screens.py --require-exact
+```
+
+The command generates `output/flutter-verification/index.html`, reference/actual/difference images and JSON metrics. `--require-exact` exits nonzero while any pixel differs. The generated image collection is ignored by Git; the reference remains unchanged.
 
 Android/iOS scaffolding alone does not establish native library packaging, secure-store integration, physical-phone lifecycle, accessibility or performance. No real provider is enabled. Project release licensing remains undecided. Bundled Inter fonts use the adjacent SIL Open Font License.

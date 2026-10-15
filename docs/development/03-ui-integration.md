@@ -1,8 +1,8 @@
 # 3. Connect the UI and localization
 
-Visual UI design is independent of this Core implementation. There is no production HTTP bridge or CLI-output parsing path. Flutter is the owner-selected mobile framework; its SDK, Android packaging, and physical-phone lifecycle verification are not completed here.
+Visual UI design is independent of this Core implementation. There is no production HTTP bridge or CLI-output parsing path. The [Flutter application](../../apps/mobile/README.md) uses an FVM-pinned SDK and direct Dart FFI, tested with the Linux Mock host. Android packaging and physical-phone lifecycle verification remain incomplete.
 
-The current design handoff is the [complete Window Light prototype](../../output/prototypes/homeverb-window-light-v1/index.html). Use its [functional specification](../ui-functional-spec.md), [82-state inventory](../ui-screen-inventory.md), and [Flutter visual/skin guide](../ui-window-light.md) alongside the native methods below. The one-option Appearance screen is planned UI, and the isolated Flutter visual reference is uncompiled; neither establishes platform authorization or nearby-sharing support.
+The current design handoff is the [complete Window Light prototype](../../output/prototypes/homeverb-window-light-v1/index.html). Use its [functional specification](../ui-functional-spec.md), [82-state inventory](../ui-screen-inventory.md), and [Flutter visual/skin guide](../ui-window-light.md) alongside the native methods below. The application implements the one-option Appearance screen and isolated native-widget preview. Neither establishes platform authorization or nearby-sharing support; [visual equality remains unverified](../../apps/mobile/verification.md).
 
 ## Native boundary
 
@@ -103,6 +103,6 @@ Use canonical locales `en-US` and `zh-CN`. `EnUs`/`ZhCN` aliases normalize to th
 
 Render translation results as text, not raw HTML. Present requested values separately from observations. Missing/null state means unknown. `accepted` is unverified; `unknown` means it may have executed and should be refreshed. Display non-atomic receipts item by item, retaining their evidence and warnings. A partial receipt needs a refresh action when any child is accepted, unknown, or references a retired request. Refresh means an explicit state read, never automatic replay.
 
-The native ABI is verified through a Linux ctypes host that loads Core directly, executes a write, backgrounds the host, observes cancellation, and closes it. This does not establish Flutter, Android, or iOS support.
+The native ABI is verified through a Linux ctypes host and the Flutter Linux application. Both load Core directly; Dart tests cover writes, cancellation, foreground gating and close. This does not establish Android or iOS support.
 
 Next: [Add a real adapter](04-add-adapter.md).

@@ -24,6 +24,20 @@ After dependencies are cached, add `--offline` to Cargo commands. Use a Python v
 
 ## Coverage
 
+Flutter development uses FVM and the version pin in `apps/mobile/.fvmrc`. Build `homeverb-ffi` first, then run from `apps/mobile`:
+
+```sh
+fvm install
+fvm flutter pub get
+fvm flutter analyze
+fvm flutter test --reporter expanded
+fvm flutter test integration_test/native_smoke_test.dart -d linux
+fvm flutter build linux --release
+fvm flutter build web -t lib/main_preview.dart
+```
+
+The Linux integration can run under Xvfb on a headless host and requires Flutter's Linux development dependencies. Native library packaging is handled by the Linux CMake install step. From the repository root, `python3 apps/mobile/tool/compare_screens.py --require-exact` compares all 82 captures to the untouched prototype and fails on any pixel difference. See [Flutter verification](../apps/mobile/verification.md) for actual results and unverified phone/localization/accessibility gates. Simulated preview branch clicks do not establish real provider behavior.
+
 | Layer | Evidence |
 |---|---|
 | Core integration | Real SQLite, invalid bounds/steps/enums, grants, hard routing, stale evidence, lost ACK, validation-inclusive and inherited host deadlines, cancellation, persisted/retired request IDs, locks, and composite results preserved across journal/cache failures |

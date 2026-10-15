@@ -51,7 +51,7 @@ Official sources checked for this design:
 - [Adaptive and responsive design](https://docs.flutter.dev/ui/adaptive-responsive/general): layouts that respond to available space and input.
 - [Performance best practices](https://docs.flutter.dev/perf/best-practices): avoid excessive offscreen layers, opacity/clipping costs; build lists/grids lazily and profile the result.
 
-The [isolated Flutter reference](../output/prototypes/homeverb-window-light-v1/flutter-reference/README.md) demonstrates the theme, background, device cards, navigation and one-option appearance flow using fictional local data. It is not the production app and does not implement all 82 states or call Core. Flutter SDK is unavailable in the current environment; compilation, analyzer results, mobile screenshots and frame-time measurements remain unverified.
+The earlier [isolated Flutter reference](../output/prototypes/homeverb-window-light-v1/flutter-reference/README.md) demonstrates the theme using fictional data. The subsequent [Flutter application](../apps/mobile/README.md) pins its SDK through FVM, implements all 82 isolated preview states, and integrates the Linux Mock Core. Compilation and Linux process tests are recorded in the [verification report](../apps/mobile/verification.md). Strict screenshot equality remains failed; physical-phone screenshots and frame-time measurements are unverified.
 
 ## One-skin extension contract
 
@@ -76,7 +76,7 @@ Later reviewed skins extend the registry and asset bundle, reuse the same compon
 ## Validation gates
 
 1. **Prototype completeness:** all 82 IDs rendered in Window Light; all 198 branches resolve; all 14 review journeys remain available. Appearance contains exactly one registered option.
-2. **Flutter compile and interaction:** install the SDK in the intended development environment, run dependency resolution and analysis, then build the reference and production UI. Check actual widget layout, dialogs, keyboard and navigation. No such build is claimed here.
+2. **Flutter compile and interaction:** use FVM, run dependency resolution and analysis, then build the preview and production UI. Linux and isolated web-preview checks are recorded in the application verification report. Phone builds, system dialogs and complete keyboard/accessibility acceptance remain pending.
 3. **Visual parity:** compare screenshots on narrow/regular phones and wide layouts against the approved home and representative control/platform/settings/share pages. Tune image fit and material tokens together.
 4. **Accessibility:** verify 100%, 150%, 200% text scaling, screen readers, long names, zh-CN/en-US, focus order, 48-pixel targets and contrast over the final composite background. Use an opaque readable surface when enhanced contrast requires it.
 5. **Performance:** use a profile build on representative physical phones; measure raster/UI frame time, memory and scrolling after images are decoded. Avoid claiming a frame-rate target from static artwork or desktop rendering.
