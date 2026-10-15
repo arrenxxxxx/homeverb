@@ -78,8 +78,16 @@ Native background/close invalidates pending previews and cancels in-flight work;
 direct Rust hosts must implement the same lifecycle. Invalidation cannot undo a
 sent command. Pending expiry/refusal stays unsent; expiry/cancellation after a
 possible send stays unknown. Inspect the original request receipt rather than
-creating an automatic retry. C/Flutter admission and physical action mappings
-remain separate work; the existing public JSON/C/CLI/MCP surfaces are unchanged.
+creating an automatic retry. [ADR-0043](adr/0043-native-trusted-approval-bridge.md)
+adds separate trusted C preparation/execution/dismissal functions. Session holds
+at most eight pending previews and prunes expired entries during preparation.
+A decoded execution consumes its matching ID before admission, including refusal;
+malformed undecodable input does not. Missing/consumed/foreign/pruned IDs return
+`APPROVAL_INVALID`; a retained expired preview returns `APPROVAL_EXPIRED`.
+Background/close clears the registry; a generation check prevents publishing a
+preview across a background/foreground race. No registry lock spans execution.
+Ordinary JSON/CLI/MCP remain unchanged. Flutter consent UI and physical action
+mappings remain separate work.
 
 ## Composite and batch operations
 

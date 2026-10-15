@@ -622,3 +622,53 @@ devices, temporary profiles, synthetic storage and local protocol fixtures were
 used. No owner account or appliance was accessed, and the separate Flutter
 worktree was untouched. Phone/Keystore/APK, physical/off-LAN and remote CI
 acceptance remain unverified. The full real-device MVP is still incomplete.
+
+## Trusted native single-command approval 1.13.0
+
+[ADR-0043](adr/0043-native-trusted-approval-bridge.md) extends the typed approval
+foundation with three separate trusted C functions: prepare an immutable preview,
+execute it after actual user consent, and discard it locally. Session retains at
+most eight previews with the existing 60-second monotonic expiry. Confirmation
+consumes a matching ID before admission; cross-handle, reused, discarded or pruned
+IDs fail. Background/close clears previews and cancels active work, and a
+lifecycle generation check rejects preparation spanning background/foreground.
+No registry lock spans execution or networking. Normal journaling, non-replay,
+uncertain outcomes and original-request receipt recovery remain unchanged.
+
+Native API 1.13.0 has ten C functions and still 31 ordinary JSON methods. Approval
+IDs are temporary trusted-controller state, never durable data, model arguments
+or proof of consent. No general JSON/CLI/MCP confirmation path was added. Existing
+clients can use the previous exports; new clients must negotiate 1.13 before
+resolving the added symbols. SQLite schema 4 and protected account payload 3 are
+unchanged. The new closed approval definition bundle, fictional inputs and native
+contract describe query errors versus admitted Execution receipts.
+
+The explicit Mock-only `approval-required` scenario adds a fictional elevated
+cycle and exact grant alongside the existing simulated setters. Its adapter
+requires Core's private approval marker even if cached risk metadata is weakened.
+The scenario is refused for Meiju before profile creation. Every real Meiju
+permission and mapping remains unchanged; no real account was opened or appliance
+operated. Actual Flutter consent UI, real consequential mappings, mobile secure
+store/runtime and physical/off-LAN acceptance remain pending.
+
+Validation performed on October 16, 2026:
+
+- `cargo fmt --all -- --check`, workspace Clippy with warnings denied, workspace
+  build and example build passed, using locked offline dependencies.
+- `cargo test --workspace --offline --locked`: 313 passed, 2 ignored. The approval
+  suite has 12 tests, including native capacity/pruning, retained expiry,
+  admission-failure consumption, cross-session isolation, concurrent confirmation
+  and a deterministic background/foreground preparation race.
+- `scripts/verify_mvp.py`: 34 runtime cases passed with local socket/signal access.
+- `scripts/verify_native_contract.py`: 31 methods and 51 live fictional examples
+  passed, plus actual calls of all three trusted exports. Dedicated checks cover
+  scope, duplicate/concurrent consumption, dismissal/capacity, closed input,
+  lifecycle, metadata changes, adapter marker enforcement and receipt lookup.
+  `scripts/verify_native_approval.py` also passed the Meiju scenario refusal.
+- Python tooling: 29 tests passed; presentation catalogs: 5 tests passed.
+  Contract validation: 18 schemas, 39 positive fixtures and 135 negative fixtures.
+  Documentation, repository hygiene and Conventional Commit checks passed.
+- The combined, arm64-v8a and x86_64 Android AARs were rebuilt using NDK r28c,
+  JDK 21 and API 35 stubs. Production archive contents, eleven exports per ABI
+  (ten C functions plus JNI), ELF architectures and 16 KiB alignment passed.
+  These are library artifacts, not APK, emulator, Keystore or phone acceptance.

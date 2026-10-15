@@ -285,6 +285,20 @@ def main() -> int:
     negative.append(("unbounded diagnostic receipts", validators["diagnostics"], bad))
     bad = load("examples/diagnostics.json"); bad["recent_receipts"][0]["attempts"] *= 33
     negative.append(("unbounded diagnostic attempts", validators["diagnostics"], bad))
+    # Resolve native definition references locally, without provider or network access.
+    from native_contract import validator as native_validator
+    approval = load("packages/native-contract/approval-examples.json")
+    assert approval["api_version"] == load("packages/native-contract/api.json")["api_version"]
+    for definition in ["prepare", "execute"]:
+        shape = native_validator("native-approval", definition)
+        shape.validate(approval[definition])
+        for field, value in [("approved", True), ("principal", "admin"),
+                             ("operation_id", ""), ("schema_version", "2.0")]:
+            bad = json.loads(json.dumps(approval[definition])); bad[field] = value
+            negative.append((f"approval {definition} rejects {field}", shape, bad))
+    for value in [0, -1, 18446744073709551616, "1", True]:
+        bad = dict(approval["execute"]); bad["approval_id"] = value
+        negative.append(("invalid native approval ID", native_validator("native-approval", "execute"), bad))
     for name, validator, data in negative:
         if validator.is_valid(data):
             raise AssertionError(f"Counterexample was not rejected: {name}")
@@ -292,7 +306,7 @@ def main() -> int:
     verified = load("examples/command-result.verified.json")
     assert verified["verification"]["received_at"] >= verified["started_at"]
     assert load("examples/device.json")["id"] == load("examples/command.json")["device_id"]
-    print(f"PASS: {len(validators)} schemas; {len(pairs)} positive fixtures; action arguments and observed values; {len(negative)} negative fixtures.")
+    print(f"PASS: {len(validators)} schemas; {len(pairs) + 2} positive fixtures; action arguments and observed values; {len(negative)} negative fixtures.")
     print("Only documentation contracts were validated; no device or application code was executed.")
     return 0
 if __name__ == "__main__":

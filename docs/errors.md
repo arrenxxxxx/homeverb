@@ -41,7 +41,7 @@
 | INVALID_ARGUMENT | Invalid range/enum or caller command identifier that is blank or exceeds 256 UTF-8 bytes | Correct using the schema and runtime identifier limits |
 | POLICY_DENIED | No complete matching grant/risk/route authority; ordinary calls deny elevated/high risk, and typed approval still denies high risk, automatic/ambiguous routes and decomposition | Trusted host policy change; no model-supplied bypass |
 | APPROVAL_EXPIRED | The typed trusted preview reached its 60-second monotonic expiry before execution | Review a new preview and obtain fresh user consent; never auto-confirm |
-| APPROVAL_INVALID | The prepared device descriptor, Core instance or approval generation changed | Review the current scope; no send occurred |
+| APPROVAL_INVALID | The prepared descriptor/Core/generation changed, or the native approval ID is missing, discarded, consumed, foreign or pruned | Review the current scope; no send occurred |
 | LAN_UNREACHABLE | LAN unavailable and write proven unsent | Use a reachable network |
 | CLOUD_UNREACHABLE | Cloud unavailable and write unsent | Check network/vendor availability |
 | RATE_LIMITED | Vendor rate limit | Honor budget and return retry guidance |
@@ -59,8 +59,13 @@ After possible transmission, prefer `WRITE_OUTCOME_UNKNOWN` over a misleading `L
 `verified` includes verification evidence. `failed` includes an explicit error. `unknown` explains uncertainty and must not suggest blind retries. Batch aggregation preserves every item; `partial` never hides successes or failures. Contract version changes require explicit coordinated documentation and migration; do not silently treat an incompatible envelope as valid.
 
 `APPROVAL_EXPIRED` and `APPROVAL_INVALID` are pre-send failures with no attempts
-or verification. Existing production JSON/C/CLI/MCP surfaces cannot issue or
-consume an approval; these errors belong to the typed trusted Rust path. A
+or verification. They belong to the typed Rust path and separate trusted C
+functions in [ADR-0043](adr/0043-native-trusted-approval-bridge.md), never ordinary
+JSON/CLI/MCP. Native missing/dismissed/consumed/foreign/pruned IDs return a query
+error before execution admission; a retained expired preview returns an Execution.
+Preparation at eight pending previews returns `RESOURCE_BUSY` until dismissal or
+expiry pruning. Decoded confirmation consumes a matching preview even on schema
+or operation-admission failure; malformed undecodable input does not. A
 cancelled/expired in-flight send still uses existing uncertainty semantics,
 not an approval-refusal claim. See [ADR-0042](adr/0042-trusted-single-command-approval.md).
 

@@ -108,6 +108,19 @@ These are required future checks, not results from the Mock suite. Follow the [i
 - Read and perform explicitly owner-authorized supported writes through cloud with the phone's Wi-Fi disabled, the appliances still connected to Midea, and no home computer/gateway. Repeat on an external network without LAN discovery or local-network permission. Verify each claimed capability independently.
 - Exercise stale cloud state, rejection, lost acknowledgements, cancellation/backgrounding, and forced termination. Preserve accepted/unknown outcomes and do not replay uncertain writes, including across routes. After completion or cancellation, leave no polling or background networking.
 
+## Trusted native approval checks
+
+The normal native contract suite also runs
+[verify_native_approval.py](../scripts/verify_native_approval.py). It exercises all
+three trusted C exports with temporary fictional Mock profiles: exact preview
+scope, ordinary denial, consumption/replay, concurrent confirmation, cross-handle
+isolation, capacity/dismissal, closed fields, null input, metadata/risk tampering,
+background and close. No real account or device is accessed.
+`cargo test -p homeverb-host --test user_approval --offline --locked` additionally
+covers monotonic expiry/pruning, admission failure, and a deterministic barrier-
+controlled background/foreground preparation race. The same tests cover typed
+approval send uncertainty and cancellation; no sleep-based expiry test is needed.
+
 ## Unverified release gates
 
 Physical-device authentication and control, real-provider account recovery and token rotation, actual Android Keystore, Android APK/iOS builds and phone lifecycle, a target AI host, dependency/security review, package installation, and licensing remain pending. The mainland read-only Meiju pilot and Android library builds do not establish these acceptance gates. Real writes require explicit device-owner authorization. Two different protocol families must demonstrate equivalent capability calls before cross-platform support is claimed.

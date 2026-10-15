@@ -17,8 +17,11 @@ under [ADR-0042](adr/0042-trusted-single-command-approval.md). A matching comple
 grant is still required. The opaque preview binds the immutable command, device
 descriptor, one explicit connection, Core instance and 60-second lifetime. Only
 trusted UI code may consume it after user consent. Native backgrounding/close
-invalidates pending previews and cancels active operations. Ordinary JSON, C ABI,
-CLI and MCP have no preparation/confirmation entry point in this phase. Adapters
+invalidates pending previews and cancels active operations. [ADR-0043](adr/0043-native-trusted-approval-bridge.md)
+adds separate trusted C preparation/execution/dismissal functions. Ordinary JSON,
+CLI and MCP have no preparation/confirmation entry point. Approval IDs stay in
+trusted UI memory, never logs, persistence or model tools; possession of an ID
+is not proof of consent. The separate execution call asserts user interaction. Adapters
 must independently require Core's approval marker for consequential actions.
 
 Generic AI tools do not expose high-risk actions initially. Future support requires trusted user interaction, short-lived approval, and auditable binding to the exact action. Model-supplied confirmation, special prompts, and generic `execute` cannot bypass policy.

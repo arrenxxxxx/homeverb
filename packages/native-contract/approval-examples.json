@@ -1,0 +1,26 @@
+{
+  "api_version": "1.13.0",
+  "prepare": {
+    "schema_version": "1.0",
+    "operation_id": "ui-prepare-cycle-1",
+    "command": {
+      "schema_version": "1.0",
+      "request_id": "fictional-cycle-approval",
+      "device_id": "dev-mock-ac",
+      "component_id": "main",
+      "capability": "vendor.example.cycle",
+      "action": "start",
+      "arguments": {
+        "program": "normal"
+      },
+      "connection": "cloud",
+      "timeout_ms": 10000,
+      "wait_for": "verified"
+    }
+  },
+  "execute": {
+    "schema_version": "1.0",
+    "operation_id": "ui-confirm-cycle-1",
+    "approval_id": 1
+  }
+}

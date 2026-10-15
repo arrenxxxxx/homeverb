@@ -2,7 +2,7 @@
 
 This package supplies the Java side of the Rust Android secret-store backend.
 It owns no Flutter views, account form, network service or background worker.
-The application still calls the seven functions in
+The application still calls the ten functions in
 [homeverb.h](../../crates/ffi/include/homeverb.h) directly.
 
 Use the [Android integration guide](../../docs/development/08-android-native.md)

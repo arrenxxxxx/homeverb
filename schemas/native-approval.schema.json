@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "native-approval",
+  "description": "Separate trusted C functions only. Never pass these payloads to homeverb_call or a model tool. An approval ID is not proof of user consent.",
+  "$defs": {
+    "prepare": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "operation_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "command": {
+          "$ref": "urn:homeverb:schema:command"
+        }
+      },
+      "required": [
+        "schema_version",
+        "operation_id",
+        "command"
+      ],
+      "additionalProperties": false
+    },
+    "execute": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "operation_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "approval_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 18446744073709551615
+        }
+      },
+      "required": [
+        "schema_version",
+        "operation_id",
+        "approval_id"
+      ],
+      "additionalProperties": false
+    },
+    "preview": {
+      "type": "object",
+      "properties": {
+        "approval_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 18446744073709551615
+        },
+        "command": {
+          "$ref": "urn:homeverb:schema:command"
+        },
+        "descriptor": {
+          "$ref": "urn:homeverb:schema:native-response#/$defs/describe_device/oneOf/0/properties/data"
+        },
+        "action": {
+          "$ref": "urn:homeverb:schema:capability#/properties/actions/additionalProperties"
+        },
+        "connection": {
+          "$ref": "urn:homeverb:schema:device#/properties/connections/items"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "approval_id",
+        "command",
+        "descriptor",
+        "action",
+        "connection",
+        "expires_at"
+      ],
+      "additionalProperties": false
+    },
+    "prepare_result": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "$ref": "#/$defs/preview"
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "urn:homeverb:schema:native-response#/$defs/query_error"
+        }
+      ]
+    },
+    "execute_result": {
+      "oneOf": [
+        {
+          "$ref": "urn:homeverb:schema:command-result"
+        },
+        {
+          "$ref": "urn:homeverb:schema:native-response#/$defs/query_error"
+        }
+      ]
+    }
+  }
+}

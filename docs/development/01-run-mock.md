@@ -84,6 +84,15 @@ Save this nonsecret example in a local file such as `/tmp/homeverb-batch.json` a
 
 The batch returns ordered `items`; this simulator has only one device. Dedicated integration tests exercise multiple devices and the four-device concurrency limit. Every selected device needs its own exact ID, request ID, and trusted grant. Reusing a recorded command returns its receipt, but a batch is not a durable job: after interruption, inspect individual IDs without automatically resubmitting missing items.
 
+## Native confirmation scenario
+
+Native startup with `scenario: "approval-required"` and `allow_mock_writes: true`
+adds a fictional elevated cycle for the separate trusted C functions. It requires
+explicit discovery and cloud routing. Ordinary CLI/MCP/JSON execution cannot
+approve it. Follow the [native contract](../native-ui-contract.md#trusted-single-command-approval-api-113)
+and run `scripts/verify_native_approval.py` after building the library. This is a
+consent-flow simulator, not a real dishwasher mapping.
+
 ## Verify
 
 Run the commands in [Testing](../testing.md). `scripts/verify_mvp.py` builds no artifacts itself: it exercises the compiled CLI, local MCP, and Linux native library in temporary directories. Its SIGINT test requires normal local signal delivery; a restrictive agent sandbox may need an approved test run outside that sandbox.

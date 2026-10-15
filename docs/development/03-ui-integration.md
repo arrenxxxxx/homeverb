@@ -6,6 +6,13 @@ The current design handoff is the [complete Window Light prototype](../../output
 
 ## Native boundary
 
+API 1.13 adds separate trusted C prepare/execute/discard functions for one elevated
+command. Follow the [confirmation contract](../native-ui-contract.md#trusted-single-command-approval-api-113)
+for immutable preview display, explicit consent, expiry and lifecycle handling.
+Use the fictional `approval-required` Mock scenario for integration. These are not
+ordinary JSON methods, and real Meiju elevated-action mappings remain pending.
+
+
 API 1.4 adds local `get_account` and `rename_account` for platform details and names.
 Use the [account metadata contract](../native-ui-contract.md#local-account-details-and-names)
 to show saved linked devices without a refresh or secret-store access. Local names

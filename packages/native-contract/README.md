@@ -1,6 +1,6 @@
 # HomeVerb native contract
 
-Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.12.1 has 31 callable JSON methods and one separate protected account-connection function; the JSON envelope schema is 1.0.
+Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.13.0 has 31 callable JSON methods, one separate protected account-connection function and three separate trusted approval functions; the JSON envelope schema is 1.0.
 
 - [api.json](api.json) is compiled into the `get_api_info` response.
 - [examples.json](examples.json) contains fictional requests and actual Mock native responses, including failures and lifecycle states. It is preview/test data, never a production device database.
@@ -21,3 +21,12 @@ API 1.11.1 preserves product mapping evidence only inside protected account payl
 API 1.12 adds independent `meiju_temperature_grants` for exact Celsius targets on ACs with reviewed protected product mappings. Negotiate the version before supplying this field. The action schema supplies device-specific write limits; startup grants never establish capability. See the [temperature startup contract](../../docs/native-ui-contract.md#scoped-experimental-ac-temperature-startup). Methods, C functions, SQLite schema 4 and protected payload 3 remain unchanged.
 
 API 1.12.1 fixes explicit AC target reads for the protected single-field temperature profile. It adds no method, schema, permission or storage migration; read-only sessions also benefit. Compound-profile reads retain their previous requirements.
+
+API 1.13 adds [three separate trusted approval functions](approval.json) with
+[closed schemas](../../schemas/native-approval.schema.json) and
+[fictional inputs](approval-examples.json). The controller must display the
+immutable returned scope and obtain explicit consent before execution. Keep
+process-local IDs out of persistence and model tools. The 31 JSON methods,
+SQLite schema 4 and protected payload 3 are unchanged; the fictional
+`approval-required` Mock scenario supports UI integration, while actual Flutter
+consent and real consequential appliance mappings remain pending.

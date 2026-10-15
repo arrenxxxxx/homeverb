@@ -497,3 +497,182 @@ async fn cancelled_or_unjournaled_approved_commands_never_reach_the_appliance() 
         assert_eq!(f.sends(), 0);
     }
 }
+
+async fn native_prepare(session: &Session) -> serde_json::Value {
+    session
+        .prepare_native_approval(homeverb_host::PrepareApprovalRequest {
+            schema_version: SCHEMA_VERSION.into(),
+            operation_id: uuid::Uuid::new_v4().to_string(),
+            command: command(),
+        })
+        .await
+}
+fn native_execute(id: u64) -> homeverb_host::ExecuteApprovalRequest {
+    homeverb_host::ExecuteApprovalRequest {
+        schema_version: SCHEMA_VERSION.into(),
+        operation_id: uuid::Uuid::new_v4().to_string(),
+        approval_id: id,
+    }
+}
+fn preview_id(value: &serde_json::Value) -> u64 {
+    assert!(value["error"].is_null(), "{value}");
+    value["data"]["approval_id"].as_u64().unwrap()
+}
+
+#[tokio::test(start_paused = true)]
+async fn native_registry_bounds_prunes_and_distinguishes_retained_expiry() {
+    let f = Fixture::new().await;
+    let session = Session::new(f.other_core());
+    let mut ids = Vec::new();
+    for _ in 0..8 {
+        ids.push(preview_id(&native_prepare(&session).await));
+    }
+    assert_eq!(
+        native_prepare(&session).await["error"]["code"],
+        "RESOURCE_BUSY"
+    );
+    assert!(session.discard_native_approval(ids[0]));
+    assert!(!session.discard_native_approval(ids[0]));
+    let retained = preview_id(&native_prepare(&session).await);
+    tokio::time::advance(std::time::Duration::from_secs(60)).await;
+    let expired = session
+        .execute_native_approved(native_execute(retained))
+        .await;
+    assert_eq!(expired["status"], "failed");
+    assert_eq!(expired["error"]["code"], "APPROVAL_EXPIRED");
+    assert_eq!(expired["attempts"], json!([]));
+    let fresh = preview_id(&native_prepare(&session).await);
+    assert_eq!(
+        session
+            .execute_native_approved(native_execute(ids[1]))
+            .await["error"]["code"],
+        "APPROVAL_INVALID"
+    );
+    assert_eq!(
+        session.execute_native_approved(native_execute(fresh)).await["status"],
+        "accepted"
+    );
+    assert_eq!(f.sends(), 1);
+}
+
+#[tokio::test]
+async fn native_registry_consumes_admission_failures_and_rejects_other_sessions() {
+    let f = Fixture::new().await;
+    let session = Session::new(f.other_core());
+    let foreign = Session::new(f.other_core());
+    let id = preview_id(&native_prepare(&session).await);
+    assert_eq!(
+        foreign.execute_native_approved(native_execute(id)).await["error"]["code"],
+        "APPROVAL_INVALID"
+    );
+    assert!(!foreign.discard_native_approval(id));
+    assert_eq!(
+        session.execute_native_approved(native_execute(id)).await["status"],
+        "accepted"
+    );
+    assert_eq!(
+        session.execute_native_approved(native_execute(id)).await["error"]["code"],
+        "APPROVAL_INVALID"
+    );
+    for failure in ["schema", "operation", "background", "close"] {
+        let session = Session::new(f.other_core());
+        let id = preview_id(&native_prepare(&session).await);
+        let mut input = native_execute(id);
+        let code = match failure {
+            "schema" => {
+                input.schema_version = "2.0".into();
+                "INVALID_ARGUMENT"
+            }
+            "operation" => {
+                input.operation_id.clear();
+                "INVALID_ARGUMENT"
+            }
+            "background" => {
+                session.set_foreground(false);
+                "HOST_BACKGROUND"
+            }
+            _ => {
+                session.close();
+                "HOST_CLOSED"
+            }
+        };
+        assert_eq!(
+            session.execute_native_approved(input).await["error"]["code"],
+            code
+        );
+        assert!(!session.discard_native_approval(id));
+        if failure != "close" {
+            session.set_foreground(true);
+            assert_eq!(
+                session.execute_native_approved(native_execute(id)).await["error"]["code"],
+                "APPROVAL_INVALID"
+            );
+        }
+    }
+    assert_eq!(f.sends(), 1);
+}
+
+#[tokio::test]
+async fn native_confirmation_race_consumes_once_without_holding_registry_lock() {
+    let f = Fixture::new().await;
+    let session = Session::new(f.other_core());
+    let id = preview_id(&native_prepare(&session).await);
+    f.appliance.fault.store(3, Ordering::SeqCst);
+    let input = native_execute(id);
+    let operation_id = input.operation_id.clone();
+    let work = session.execute_native_approved(input);
+    tokio::pin!(work);
+    tokio::select! { _=f.appliance.started.notified()=>(), result=&mut work=>panic!("Expected pending send: {result:?}") }
+    assert_eq!(
+        session.execute_native_approved(native_execute(id)).await["error"]["code"],
+        "APPROVAL_INVALID"
+    );
+    assert!(!session.discard_native_approval(id));
+    assert!(session.cancel(&operation_id));
+    let result = work.await;
+    assert_eq!(result["status"], "unknown");
+    assert_eq!(f.sends(), 1);
+}
+
+#[tokio::test]
+async fn native_preparation_cannot_publish_across_background_foreground_race() {
+    struct PausedClock {
+        entered: Arc<std::sync::Barrier>,
+        resume: Arc<std::sync::Barrier>,
+    }
+    impl Clock for PausedClock {
+        fn now(&self) -> chrono::DateTime<chrono::Utc> {
+            self.entered.wait();
+            self.resume.wait();
+            chrono::Utc::now()
+        }
+    }
+    let f = Fixture::new().await;
+    let entered = Arc::new(std::sync::Barrier::new(2));
+    let resume = Arc::new(std::sync::Barrier::new(2));
+    let session = Arc::new(Session::new(Core::new(
+        f.store.clone(),
+        vec![f.appliance.clone()],
+        Arc::new(PausedClock {
+            entered: entered.clone(),
+            resume: resume.clone(),
+        }),
+        f.policy.clone(),
+    )));
+    let worker = session.clone();
+    let task = std::thread::spawn(move || {
+        tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .unwrap()
+            .block_on(native_prepare(&worker))
+    });
+    entered.wait();
+    session.set_foreground(false);
+    session.set_foreground(true);
+    resume.wait();
+    let result = task.join().unwrap();
+    assert_eq!(result["error"]["code"], "APPROVAL_INVALID");
+    assert!(result["data"].is_null());
+    assert_eq!(f.sends(), 0);
+}

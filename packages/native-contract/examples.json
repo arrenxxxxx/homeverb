@@ -1,5 +1,5 @@
 {
-  "api_version": "1.12.1",
+  "api_version": "1.13.0",
   "cases": [
     {
       "request": {
@@ -12,7 +12,7 @@
       },
       "response": {
         "data": {
-          "api_version": "1.12.1",
+          "api_version": "1.13.0",
           "limits": {
             "max_active_operations": 8,
             "max_request_bytes": 1048576,
@@ -1823,7 +1823,7 @@
       },
       "response": {
         "data": {
-          "api_version": "1.12.1",
+          "api_version": "1.13.0",
           "limits": {
             "max_active_operations": 8,
             "max_request_bytes": 1048576,

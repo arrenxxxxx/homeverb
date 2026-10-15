@@ -12,11 +12,11 @@ Startup explicitly selects Mock or Meiju; Meiju remains read-only unless the tru
 
 ## Startup, ownership, and version negotiation
 
-The seven C functions in [homeverb.h](../crates/ffi/include/homeverb.h) remain the native boundary. There is no HTTP endpoint, port, CLI subprocess, or daemon.
+The ten C functions in [homeverb.h](../crates/ffi/include/homeverb.h) remain the native boundary. There is no HTTP endpoint, port, CLI subprocess, or daemon.
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects saved-account cloud reads. `scenario` defaults to `normal`. Meiju requires `allow_mock_writes: false` and rejects any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms `homeverb.mock` or `midea.meiju`. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.12.1`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.13.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -93,7 +93,7 @@ Prefer exact device IDs even where lookup accepts an alias. Resolve a capability
 | UI scope | Current integration | Remaining work and boundary |
 |---|---|---|
 | D01–D12, R01–R05: cards, search, rooms, local organization | Device/room methods above | Flutter filtering, loading/errors, accessibility and layouts. Metadata writes preserve routes and grants |
-| C01–C14: dynamic controls, history and outcomes | Describe/read/plan/execute/batch/receipt methods | Render exact capabilities; default Meiju discovery has read-only AC/fridge/dishwasher mappings; native grants may admit experimental AC on/off, vendor fan presets, explicit power-on with mode selection or profile-scoped temperature targets. Other consequential real approvals remain unavailable |
+| C01–C14: dynamic controls, history and outcomes | Describe/read/plan/execute/batch/receipt methods | Render exact capabilities; default Meiju discovery has read-only AC/fridge/dishwasher mappings; native grants may admit experimental AC on/off, vendor fan presets, explicit power-on with mode selection or profile-scoped temperature targets. Separate trusted approval exports support fictional elevated-action integration; consequential real mappings remain unavailable |
 | A01–A08: device discovery and addition | Explicit selected-adapter `discover`, including saved-account Meiju cloud retrieval | Real pairing, mobile permissions and safe identity merge remain unavailable. No merge API exists |
 | P01–P13: platforms, accounts, authorization and removal | `list_accounts`, `get_account`, `rename_account`, `remove_account`, `refresh_account`, `recover_account`, and separate `homeverb_connect_account` | Flutter protected input, cleanup confirmation/recovery and phone secure stores; provider revocation remains unavailable |
 | H01–H16: nearby authorization sharing | No sharing methods in this version | Eligibility, peer discovery, code verification, scope, consent, conflict/import and transfer records require ADR-0008 implementation |
@@ -674,16 +674,71 @@ still require physical acceptance. No real device was operated in this phase.
 The 31 JSON methods, seven C functions, SQLite schema 4 and protected payload 3
 are unchanged.
 
-## Consequential-action integration boundary
+## Trusted single-command approval (API 1.13)
 
-[ADR-0042](adr/0042-trusted-single-command-approval.md) implements a typed Rust
-Core/Session preparation and one-command approval path. It is not yet exposed
-through the seven C functions or 31 JSON methods. Do not add `confirmed`,
-`approved` or an approval identifier to ordinary request JSON, and do not infer
-that native dishwasher/refrigerator controls are available. The future trusted
-Flutter bridge must display the immutable prepared scope, consume it only after
-explicit user consent and preserve expiry/foreground invalidation. Existing
-native startup, methods, versions and outcomes are unchanged by this foundation.
+[ADR-0043](adr/0043-native-trusted-approval-bridge.md) exposes three separate C
+functions backed by the [typed Core foundation](adr/0042-trusted-single-command-approval.md).
+The 31 ordinary JSON methods are unchanged. Require major version 1 and minor
+version at least 13 before resolving these symbols; do not eagerly load them
+against an older library. See [approval.json](../packages/native-contract/approval.json),
+the closed [schema](../schemas/native-approval.schema.json) and
+[fictional inputs](../packages/native-contract/approval-examples.json).
+
+| Function | Input | Result |
+|---|---|---|
+| `homeverb_prepare_approval(handle, request_json)` | `schema_version`, unique `operation_id`, complete `command` | Query containing `approval_id`, immutable `command`, `descriptor`, `action`, `connection`, `expires_at` |
+| `homeverb_execute_approved(handle, request_json)` | `schema_version`, new `operation_id`, `approval_id` | Query error before admission; existing Execution receipt after admission |
+| `homeverb_discard_approval(handle, approval_id)` | Same handle and pending ID | Boolean indicating whether a pending preview was removed |
+
+Run these calls on a worker thread. The first two return owned UTF-8 strings;
+free each exactly once with `homeverb_string_free`. Dismissal returns a boolean,
+not a string. Normal command deadlines and the eight-active-operation limit apply.
+There is no outer `timeout_ms`: preparation and execution use the immutable
+command's timeout, with execution capped by the remaining approval lifetime.
+
+1. Prepare from trusted foreground UI code. A complete existing grant must match;
+   only elevated actions with one explicit route/connection are admitted. High
+   risk, independent-field decomposition and batches remain unavailable.
+2. Render the returned device, component, exact arguments, action effects, route
+   and expiry in the confirmation UI. Display the returned scope rather than
+   rebuilding it from editable form state. Preparation sends nothing and is not
+   evidence of permission or user consent. Live preconditions are not established.
+3. Only an explicit user confirmation may call `homeverb_execute_approved` with
+   that ID. Do not pass a replacement command, permission, principal or boolean.
+   Preserve the original command request ID to recover its receipt after an
+   interruption. Never automatically prepare/confirm again or replay a write.
+4. Dismissal calls `homeverb_discard_approval`. Background/close clears all pending
+   previews and cancels active work; returning to foreground does not restore
+   them. A generation check also rejects preparation spanning background/foreground.
+
+IDs are process-local unsigned 64-bit values scoped to one handle. Keep them only
+in trusted controller memory; do not log, persist or expose them through model
+tools, ordinary JSON, imported commands or plugins. An ID is not a credential or
+proof of consent; the trusted function call asserts actual user interaction.
+In-process callers remain trusted and are not sandboxed.
+
+Each session holds at most eight pending previews. Preparing another prunes
+expired previews before enforcing this limit; otherwise `RESOURCE_BUSY` requires
+dismissing a preview. Expiry is fixed at 60 seconds on a monotonic clock;
+`expires_at` is for display. Decoded execution consumes a matching ID even if
+schema, operation admission or later validation fails. Input rejected before
+request decoding does not consume it. Missing, discarded, consumed, foreign or
+pruned IDs return query error `APPROVAL_INVALID`. A still-retained expired preview
+returns a failed Execution with `APPROVAL_EXPIRED` and no attempts. Neither can
+send. Metadata changes likewise refuse before sending. A consumed action retains
+normal accepted/unknown/rejected outcomes, cancellation and receipt recovery;
+dismissal is not a physical rollback.
+
+For UI development, open Mock with `scenario: "approval-required"` and
+`allow_mock_writes: true`, then explicitly discover. It adds only fictional
+`vendor.example.cycle.start {program: "normal"}` on `dev-mock-ac`, component
+`main`, explicit `cloud`. Ordinary `plan`/`execute` remain denied for this action.
+The separate approved path returns `accepted`, with `VERIFICATION_PENDING` when
+verification is requested; it cannot claim physical completion. The Mock adapter
+also checks Core's private approval marker independently of cached risk metadata.
+This scenario is invalid for Meiju startup. Real dishwasher/refrigerator controls
+and the actual Flutter consent UI remain pending. Existing AC controls, SQLite
+schema 4 and protected account payload 3 are unchanged.
 
 ## Verify the handoff
 
@@ -693,7 +748,7 @@ cargo test -p homeverb-host --test native_contract --offline --locked
 .venv/bin/python scripts/verify_native_contract.py
 ```
 
-The native suite calls all 31 catalog methods, checks their schemas, verifies closed-field rejection, null success, pre-admission errors, composite/batch results, all execution outcomes, cancellation, foreground gating and closed handles. It also validates the saved examples and Meiju startup/account admission guards, caller-buffer clearing, local detail/rename persistence, removal admission/ledger replay, explicit cache/history clearing, retired-request refusal, recovery admission and account counterexamples without a live account. `--write-examples` regenerates those examples only from a successful fictional run; review and commit the changes together with the contract. Existing full MVP tests still cover execution and persistence behavior.
+The native suite also calls all three trusted approval exports using fictional data and checks exact scope, duplicate/concurrent consumption, cross-handle refusal, capacity, dismissal, lifecycle, metadata changes and independent adapter approval guards. Deterministic Rust tests cover expiry and background/foreground races. The native suite calls all 31 catalog methods, checks their schemas, verifies closed-field rejection, null success, pre-admission errors, composite/batch results, all execution outcomes, cancellation, foreground gating and closed handles. It also validates the saved examples and Meiju startup/account admission guards, caller-buffer clearing, local detail/rename persistence, removal admission/ledger replay, explicit cache/history clearing, retired-request refusal, recovery admission and account counterexamples without a live account. `--write-examples` regenerates those examples only from a successful fictional run; review and commit the changes together with the contract. Existing full MVP tests still cover execution and persistence behavior.
 
 This is Linux native verification. Dart FFI allocation, worker scheduling, mobile library packaging, secure stores, system-browser lifecycle, and physical-phone behavior must be tested in the Flutter worktree. No Flutter build has been run for this delivery.
 
@@ -770,7 +825,7 @@ account action and avoid polling. Ignore outdated callbacks after navigation,
 cancellation or backgrounding. A returned `listed` value can become outdated;
 Core rechecks protected membership and other admission rules before a live request.
 See the [fictional three-state example](../packages/native-contract/account-examples.json).
-The seven C functions and SQLite schema 4 are unchanged. Product mapping evidence
+The seven C functions at API 1.10 and SQLite schema 4 are unchanged. Product mapping evidence
 is deliberately absent from this public response.
 
 ## Protected product-profile migration

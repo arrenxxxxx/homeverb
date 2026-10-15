@@ -34,6 +34,7 @@ pub enum Scenario {
     StaleRead,
     Partial,
     CorrelatedCompletion,
+    ApprovalRequired,
 }
 
 pub struct MockAdapter {
@@ -126,6 +127,17 @@ impl Adapter for MockAdapter {
                 }
             }
         }
+        if self.scenario == Scenario::ApprovalRequired {
+            descriptor.device.components[0]
+                .capabilities
+                .push("vendor.example.cycle".into());
+            descriptor.capabilities.push(
+                serde_json::from_str(include_str!(
+                    "../../../examples/capability.approved-cycle.json"
+                ))
+                .expect("checked approval fixture"),
+            );
+        }
         Ok(vec![descriptor])
     }
     async fn read(
@@ -180,6 +192,20 @@ impl Adapter for MockAdapter {
         progress: WriteProgress,
         _operation: &Operation,
     ) -> Result<AdapterOutcome> {
+        let command = validated.command();
+        if command.capability == "vendor.example.cycle"
+            && (self.scenario != Scenario::ApprovalRequired
+                || !validated.has_user_approval()
+                || command.component_id != "main"
+                || command.action != "start"
+                || command.arguments != json!({"program":"normal"})
+                || connection.transport != Transport::Cloud)
+        {
+            return Err(Error::new(
+                "POLICY_DENIED",
+                "The fictional cycle requires its exact trusted approval.",
+            ));
+        }
         self.reachable(connection)?;
         if self.scenario == Scenario::SlowBeforeSend {
             tokio::time::sleep(Duration::from_secs(60)).await;
@@ -197,7 +223,7 @@ impl Adapter for MockAdapter {
             });
         }
         let command = validated.command();
-        if self.scenario != Scenario::AcceptOnly {
+        if self.scenario != Scenario::AcceptOnly && command.capability != "vendor.example.cycle" {
             let mut database = self.database.lock().map_err(failure)?;
             let transaction = database.transaction().map_err(failure)?;
             let text: String = transaction

@@ -25,7 +25,8 @@
         "slow-after-send",
         "stale-read",
         "partial",
-        "correlated-completion"
+        "correlated-completion",
+        "approval-required"
       ]
     },
     "adapter": {

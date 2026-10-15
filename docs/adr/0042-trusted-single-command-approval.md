@@ -1,7 +1,8 @@
 # ADR-0042: Bind trusted user approval to one prepared command
 
 Status: accepted for offline Core implementation; appliance admission and the
-Flutter/C bridge remain separate work.
+Flutter/C bridge remain separate work in this decision. The subsequent
+[ADR-0043](0043-native-trusted-approval-bridge.md) adds the trusted C bridge.
 
 ## Need
 

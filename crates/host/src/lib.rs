@@ -6,6 +6,8 @@ use homeverb_mock::{DEVICE_ID, MockAdapter, Scenario};
 use homeverb_storage::SqliteStore;
 use std::{path::Path, sync::Arc};
 
+mod native_approval;
+pub use native_approval::{ExecuteApprovalRequest, PrepareApprovalRequest};
 mod session;
 pub use session::{HostRequest, Request, Session};
 mod accounts;
@@ -170,7 +172,7 @@ pub fn open_mock(directory: &Path, scenario: Scenario, allow_writes: bool) -> Re
         clock.clone(),
         scenario,
     )?);
-    let grants = if allow_writes {
+    let mut grants: Vec<Grant> = if allow_writes {
         ["power", "climate"]
             .into_iter()
             .map(|capability| Grant {
@@ -185,5 +187,15 @@ pub fn open_mock(directory: &Path, scenario: Scenario, allow_writes: bool) -> Re
     } else {
         vec![]
     };
+    if allow_writes && scenario == Scenario::ApprovalRequired {
+        grants.push(Grant {
+            device_id: DEVICE_ID.into(),
+            component_id: "main".into(),
+            capability: "vendor.example.cycle".into(),
+            action: "start".into(),
+            transports: vec![Transport::Cloud],
+            argument_schema: serde_json::json!({"const":{"program":"normal"}}),
+        });
+    }
     Ok(Core::new(store, vec![adapter], clock, Policy { grants }))
 }

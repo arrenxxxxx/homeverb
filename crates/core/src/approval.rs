@@ -42,6 +42,11 @@ impl PendingApproval {
         self.expires_at
     }
 
+    /// Monotonic expiry for bounded host registries; never establishes permission.
+    pub fn is_expired(&self) -> bool {
+        Instant::now() >= self.deadline
+    }
+
     pub(crate) fn validate(&self, core: &Core, descriptor: &Descriptor) -> Result<()> {
         if !Arc::ptr_eq(&self.context, &core.approval_context)
             || self.generation != self.context.load(Ordering::SeqCst)
@@ -50,7 +55,7 @@ impl PendingApproval {
         {
             return Err(invalid());
         }
-        if Instant::now() >= self.deadline {
+        if self.is_expired() {
             return Err(Error::new(
                 "APPROVAL_EXPIRED",
                 "The prepared approval expired; review a new preview before confirming.",
