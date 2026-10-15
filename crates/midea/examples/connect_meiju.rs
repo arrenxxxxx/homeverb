@@ -1,10 +1,11 @@
 //! Explicit Linux read-only account probe. No device controls or public credential JSON.
 
 use clap::{Parser, Subcommand};
-use homeverb_core::{AccountRecord, Operation, SecretBytes};
+use homeverb_core::{AccountRecord, Operation, SecretBytes, SystemClock};
 use homeverb_domain::{Error, Result};
 use homeverb_midea::{
-    ApplianceFamily, BoundInventory, LoginCredentials, MeijuAccount, MeijuHttps, connect,
+    ApplianceFamily, BoundInventory, LoginCredentials, MeijuAccount, MeijuHttps, StateQuery,
+    connect, read_cloud_state,
 };
 use std::{
     io::{self, IsTerminal},
@@ -33,6 +34,8 @@ enum Command {
     },
     /// Retrieve devices with the saved session; never attempts login or automatic renewal.
     Refresh { account_id: Uuid },
+    /// Read mapped cloud state for the account inventory; never sends appliance controls.
+    Inspect { account_id: Uuid },
     /// List only local account references; no network requests or credential reads.
     List,
 }
@@ -138,6 +141,61 @@ async fn run(arguments: Arguments) -> Result<()> {
                         .await?;
                 let retrieval = account.retrieve(&MeijuHttps, &operation).await;
                 display(account.record(), retrieval)
+            }
+            Command::Inspect { account_id } => {
+                let mut account =
+                    MeijuAccount::open(vault.lease(account_id, &operation).await?, &operation)
+                        .await?;
+                let bound = account.retrieve(&MeijuHttps, &operation).await?;
+                let session = account.cloud_session(&operation).await?;
+                let reference = account.record().credential_ref;
+                let reads = session.reads(&MeijuHttps, reference);
+                let mut failures = bound.inventory.failures.len();
+                for (appliance, binding) in bound.inventory.appliances.iter().zip(&bound.bindings) {
+                    let family = match appliance.family {
+                        ApplianceFamily::AirConditioner => "air_conditioner",
+                        ApplianceFamily::Dishwasher => "dishwasher",
+                        ApplianceFamily::Refrigerator => "refrigerator",
+                        ApplianceFamily::Other(_) => "other",
+                    };
+                    let mut report = serde_json::json!({"family":family,"model":appliance.model,"physically_verified":false});
+                    match read_cloud_state(
+                        &reads,
+                        reference,
+                        appliance,
+                        StateQuery::Default,
+                        &SystemClock,
+                        &operation,
+                    )
+                    .await
+                    {
+                        Ok(state) => {
+                            let snapshots: Vec<_> = state
+                                .component_ids()
+                                .map(|component| {
+                                    state.snapshot(&binding.device_id.to_string(), component)
+                                })
+                                .collect::<Result<_>>()?;
+                            report["snapshots"] = serde_json::json!(snapshots);
+                        }
+                        Err(error) => {
+                            if matches!(error.code.as_str(), "CANCELLED" | "DEADLINE_EXCEEDED") {
+                                return Err(error);
+                            }
+                            failures += 1;
+                            report["error_code"] = serde_json::json!(error.code);
+                        }
+                    }
+                    println!("{report}");
+                }
+                if failures == 0 {
+                    Ok(())
+                } else {
+                    Err(Error::new(
+                        "MIDEA_REQUEST_FAILED",
+                        "Some inventory or state reads failed; no controls were sent.",
+                    ))
+                }
             }
             Command::List => {
                 let records = vault.list(&operation).await?;

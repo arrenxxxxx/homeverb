@@ -112,7 +112,14 @@ returned the same six-device counts and stored account reference without another
 login. This establishes one real-account persisted-session inventory path on Linux.
 Account names, local IDs, appliance identifiers and credentials are omitted here.
 
-This evidence does not establish model/firmware support, physical state/control,
+The subsequent explicit `inspect` probe returned mapped state for all six devices.
+Four ACs supplied power, current/target temperature, vendor mode and wind-speed
+code. The refrigerator supplied power and current/target temperature for both
+compartments. The dishwasher supplied all eight currently mapped vendor fields.
+No source observation timestamp was established; every projected value remained
+stale. See the exact [cloud-read evidence](../compatibility.md#observed-cloud-read-models).
+
+This evidence does not establish complete model/firmware support, physical state/control,
 relogin subject stability, phone packaging or operation away from the home network.
 Device binding/preference preservation remains covered by the synthetic suite;
 real reauthorization and off-LAN acceptance remain to be recorded.

@@ -73,6 +73,21 @@ and distinguishes the retrieval error; use an explicit refresh rather than blind
 logging in again. Partial inventories never remove earlier bindings. Unknown or
 unsupported appliance families receive private bindings, not invented controls.
 
+## Inspect mapped cloud state
+
+```bash
+./target/debug/examples/connect_meiju --data-dir "$HOME/.local/share/homeverb/meiju-pilot" inspect <local-account-id>
+```
+
+This explicit operation retrieves the inventory and queries each supported family's
+mapped cloud state once under the shared budget. Output contains product models,
+random local device IDs and validated mapped properties only. It does not print raw
+provider responses or appliance identifiers. Refrigerator compartments share one
+local device ID. Missing fields remain absent. All cloud observations retain an
+unavailable source timestamp and `stale: true`; a new response does not prove fresh
+physical state. This protocol probe does not register Core descriptors or enable
+controls. Per-device failures remain explicit; cancellation/deadline stop further work.
+
 ## Interpret failures and record evidence
 
 - `SECRET_STORE_UNAVAILABLE` / `SECRET_STORE_LOCKED`: restore access to the system

@@ -46,6 +46,11 @@ impl fmt::Debug for CloudState {
 }
 
 impl CloudState {
+    /// Protocol component slots, not a claim that a model supplied every reading.
+    pub fn component_ids(&self) -> impl Iterator<Item = &str> {
+        self.components.keys().copied()
+    }
+
     /// The adapter must first validate the local identity binding and component descriptor.
     /// Decoder component slots do not prove that a model supports those components.
     pub fn snapshot(&self, local_device_id: &str, component: &str) -> Result<Snapshot> {

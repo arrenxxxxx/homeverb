@@ -41,6 +41,27 @@ are not implemented. The protected native connection coordinator and local read-
 registered Core adapter, model capability, control permission or mobile support
 follows from this native library phase. Native API 1.0.0 and SQLite schema 3 are unchanged.
 
+## Observed cloud-read models
+
+The explicit read-only probe on October 15, 2026 returned the following mapped
+fields from the owner's six appliances. Model strings below use JSON escapes for
+non-ASCII characters to preserve the repository language policy. No account/device
+identifiers, raw responses or private state values are retained here.
+
+| Exact model string | Family | Observed mapped fields |
+|---|---|---|
+| `KFR-35G/N8HE1\u2161Pro` | AC | Power, current/target temperature, vendor mode and wind-speed code |
+| `KFR-35G/WF2` | AC | Same mapped fields |
+| `KFR-72G/N8HA1Pro` | AC | Same mapped fields |
+| `KFR-26G/N8VJC3` | AC | Same mapped fields |
+| `BCD-600WUFIPZM(E)` | Refrigerator | Separate fridge/freezer power and current/target temperature |
+| `GX1200Max \u5c0a\u4eab\u7248` | Dishwasher | Vendor mode, work status, door code, water/salt/brightener codes, temperature and remaining minutes |
+
+This is exercised cloud-read evidence, not `verified` physical-model support.
+Firmware, official-app comparison, trustworthy observation time, controls,
+reauthorization and off-LAN/mobile acceptance remain unverified. No Core model
+registration follows from the protocol probe itself.
+
 ## Status definitions
 
 The native account vault under [ADR-0021](adr/0021-persistent-account-vault.md) adds SQLite schema 3 and internal Rust account APIs. Schema 1/2 upgrades preserve existing data and create verified backups; close older clients first. Schema-2 binaries reject the upgraded profile. Native UI API 1.0.0, its 22 methods, C symbols and execution semantics are unchanged. No public account operation or real-provider authentication is enabled by locally storing references.
