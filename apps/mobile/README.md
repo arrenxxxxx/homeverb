@@ -50,7 +50,7 @@ fvm flutter build web -t lib/main_preview.dart
 - Described scalar actions use typed parameter forms, exact bounds/steps/enums and explicit submission. Read-only, unsupported and trusted-approval actions remain unavailable. Isolated non-climate fixtures do not register additional native adapters.
 - Single-family light/fan/media/sensor/cycle components use dedicated Window Light controls. Sliders and fan steppers use the described range and step; mixed or coupled actions retain explicit forms. Missing and stale observations remain labelled, and high-risk actions remain unavailable.
 - Diagnostics export only the exact report displayed in the preview.
-- Modal focus stays above the inactive backdrop; Tab/Enter and Escape support keyboard navigation. Fields, sliders and switches expose their purpose. Busy activity becomes static when the system requests reduced motion.
+- Modal focus stays above the inactive backdrop; Tab/Enter and Escape support keyboard navigation. Fields, sliders and switches expose their purpose. Busy activity becomes static when the system requests reduced motion. System high contrast uses solid surfaces, stronger outlines and larger semibold text; disabling it restores the original Window Light appearance.
 
 ## Verification boundary
 

@@ -590,7 +590,8 @@ class ScreenView extends StatelessWidget {
 
   Widget _nav(String root, BuildContext context) => Container(
     color: const Color(0xfff6f2ea),
-    height: MediaQuery.textScalerOf(context).scale(11) > 11 ? 72 : 58,
+    constraints: const BoxConstraints(minHeight: 58),
+    height: MediaQuery.textScalerOf(context).scale(11) > 11 ? null : 58,
     child: Row(
       children: List.generate(3, (i) {
         const labels = ['Devices', 'Platforms', 'Settings'],
@@ -628,8 +629,10 @@ class ScreenView extends StatelessWidget {
                       ],
                     )
                   : Column(
+                      mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        const SizedBox(height: 10),
                         Glyph(icons[i], size: 22, color: color),
                         const SizedBox(height: 6),
                         Copy(
@@ -637,7 +640,9 @@ class ScreenView extends StatelessWidget {
                           size: 11,
                           color: color,
                           bold: root == labels[i],
+                          center: true,
                         ),
+                        const SizedBox(height: 10),
                       ],
                     ),
             ),
@@ -1232,6 +1237,7 @@ class PreviewAppState extends State<PreviewApp> {
   Widget build(BuildContext context) => MaterialApp(
     debugShowCheckedModeBanner: false,
     theme: windowTheme(),
+    highContrastTheme: windowTheme(highContrast: true),
     home: Scaffold(
       body: Column(
         children: [

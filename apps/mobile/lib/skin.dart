@@ -20,29 +20,51 @@ class HomeVerbSkin extends ThemeExtension<HomeVerbSkin> {
 }
 
 const skinRegistry = {'window_light': HomeVerbSkin()};
-ThemeData windowTheme() => ThemeData(
+ThemeData windowTheme({bool highContrast = false}) => ThemeData(
   fontFamily: 'Inter',
   useMaterial3: true,
   scaffoldBackgroundColor: Colors.transparent,
   extensions: const [HomeVerbSkin()],
-  colorScheme: ColorScheme.fromSeed(
-    seedColor: accent,
-  ).copyWith(primary: accent, surface: const Color(0xfff6f2ea), onSurface: ink),
+  colorScheme: highContrast
+      ? const ColorScheme.highContrastLight(
+          primary: Colors.black,
+          onPrimary: Colors.white,
+          surface: Colors.white,
+          onSurface: Colors.black,
+        )
+      : ColorScheme.fromSeed(seedColor: accent).copyWith(
+          primary: accent,
+          surface: const Color(0xfff6f2ea),
+          onSurface: ink,
+        ),
   splashFactory: InkRipple.splashFactory,
   textSelectionTheme: const TextSelectionThemeData(cursorColor: accent),
   switchTheme: SwitchThemeData(
     padding: EdgeInsets.zero,
-    thumbColor: const WidgetStatePropertyAll(Color(0xfffffcf5)),
+    thumbColor: highContrast
+        ? WidgetStateProperty.resolveWith(
+            (states) => states.contains(WidgetState.selected)
+                ? Colors.white
+                : Colors.black,
+          )
+        : const WidgetStatePropertyAll(Color(0xfffffcf5)),
     thumbIcon: const WidgetStatePropertyAll(Icon(null)),
     trackColor: WidgetStateProperty.resolveWith(
       (states) => states.contains(WidgetState.selected)
-          ? accent
-          : const Color(0xffc2c4bc),
+          ? (highContrast ? Colors.black : accent)
+          : (highContrast ? Colors.white : const Color(0xffc2c4bc)),
     ),
-    trackOutlineWidth: const WidgetStatePropertyAll(0),
-    trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
+    trackOutlineWidth: WidgetStatePropertyAll(highContrast ? 1.5 : 0),
+    trackOutlineColor: WidgetStatePropertyAll(
+      highContrast ? Colors.black : Colors.transparent,
+    ),
   ),
 );
+
+Color readableInk(BuildContext context, Color color) =>
+    MediaQuery.highContrastOf(context)
+    ? (color.computeLuminance() >= .5 ? Colors.white : Colors.black)
+    : color;
 
 class Copy extends StatelessWidget {
   const Copy(
@@ -59,14 +81,19 @@ class Copy extends StatelessWidget {
   final bool bold, center;
   @override
   Widget build(BuildContext context) {
+    final textSize = MediaQuery.highContrastOf(context)
+        ? math.max(size, 12.0)
+        : size;
     final style = TextStyle(
       fontFamily: 'Inter',
-      fontSize: size,
+      fontSize: textSize,
       height: 1.4,
       letterSpacing: 0,
       wordSpacing: 0,
-      color: color,
-      fontWeight: bold ? FontWeight.w600 : FontWeight.w400,
+      color: readableInk(context, color),
+      fontWeight: bold || MediaQuery.highContrastOf(context)
+          ? FontWeight.w600
+          : FontWeight.w400,
     );
     final measure = TextPainter(
       text: TextSpan(text: text, style: style),
@@ -109,11 +136,13 @@ class LightBackground extends StatelessWidget {
     children: [
       Positioned.fill(
         child: ExcludeSemantics(
-          child: Image.asset(
-            'assets/window-light-background.png',
-            fit: BoxFit.fill,
-            filterQuality: FilterQuality.high,
-          ),
+          child: MediaQuery.highContrastOf(context)
+              ? const ColoredBox(color: Colors.white)
+              : Image.asset(
+                  'assets/window-light-background.png',
+                  fit: BoxFit.fill,
+                  filterQuality: FilterQuality.high,
+                ),
         ),
       ),
       child,
@@ -142,27 +171,38 @@ class Surface extends StatelessWidget {
   @override
   Widget build(BuildContext context) => DecoratedBox(
     decoration: BoxDecoration(
-      gradient: WindowSurfaceGradient(
-        bottomBleed: bottomBleed,
-        colors: dark
-            ? const [Color(0xff42413e), Color(0xff2b2e2f)]
-            : const [Color(0xfffdfaf3), Color(0xffeeefeb)],
-      ),
+      color: MediaQuery.highContrastOf(context)
+          ? (dark ? Colors.black : Colors.white)
+          : null,
+      gradient: MediaQuery.highContrastOf(context)
+          ? null
+          : WindowSurfaceGradient(
+              bottomBleed: bottomBleed,
+              colors: dark
+                  ? const [Color(0xff42413e), Color(0xff2b2e2f)]
+                  : const [Color(0xfffdfaf3), Color(0xffeeefeb)],
+            ),
       borderRadius: BorderRadius.vertical(
         top: Radius.circular(radius),
         bottom: Radius.circular(bottomBleed > 0 ? 0 : radius),
       ),
       border: Border.all(
-        color: border ?? (dark ? const Color(0xff5e605c) : Colors.white),
-        width: borderWidth,
+        color: MediaQuery.highContrastOf(context)
+            ? (dark ? Colors.white : Colors.black)
+            : border ?? (dark ? const Color(0xff5e605c) : Colors.white),
+        width: MediaQuery.highContrastOf(context)
+            ? math.max(borderWidth, 1.5)
+            : borderWidth,
       ),
-      boxShadow: const [
-        BoxShadow(
-          color: Color(0x192b2c2e),
-          blurRadius: 10,
-          offset: Offset(0, 3),
-        ),
-      ],
+      boxShadow: MediaQuery.highContrastOf(context)
+          ? null
+          : const [
+              BoxShadow(
+                color: Color(0x192b2c2e),
+                blurRadius: 10,
+                offset: Offset(0, 3),
+              ),
+            ],
     ),
     child: Padding(padding: padding, child: child),
   );
@@ -220,21 +260,29 @@ class ActionButton extends StatelessWidget {
       style: FilledButton.styleFrom(
         minimumSize: const Size(double.infinity, 48),
         disabledBackgroundColor: const Color(0xffe4e2dc),
-        disabledForegroundColor: const Color(0xff888781),
+        disabledForegroundColor: MediaQuery.highContrastOf(context)
+            ? Colors.black
+            : const Color(0xff888781),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-        backgroundColor: style == 'danger'
+        backgroundColor: MediaQuery.highContrastOf(context)
+            ? (style == '' ? Colors.black : Colors.white)
+            : style == 'danger'
             ? const Color(0xfffae7df)
             : style == ''
             ? accent
             : const Color(0xffeeebe3),
-        foregroundColor: style == 'danger'
+        foregroundColor: MediaQuery.highContrastOf(context)
+            ? (style == '' ? Colors.white : Colors.black)
+            : style == 'danger'
             ? const Color(0xff9e3421)
             : style == ''
             ? const Color(0xfffffaf5)
             : ink,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15),
-          side: style == 'secondary'
+          side: MediaQuery.highContrastOf(context)
+              ? const BorderSide(color: Colors.black, width: 1.5)
+              : style == 'secondary'
               ? const BorderSide(color: Color(0xffd7d6cf))
               : BorderSide.none,
         ),
@@ -364,8 +412,11 @@ class ValueSlider extends StatelessWidget {
         child: SliderTheme(
           data: SliderTheme.of(context).copyWith(
             trackHeight: 5,
-            activeTrackColor: accent,
-            inactiveTrackColor: const Color(0xffd5d6cf),
+            activeTrackColor: readableInk(context, accent),
+            inactiveTrackColor: MediaQuery.highContrastOf(context)
+                ? const Color(0xff666666)
+                : const Color(0xffd5d6cf),
+            thumbColor: readableInk(context, accent),
             thumbShape: const WindowSliderThumb(),
             padding: const EdgeInsets.symmetric(horizontal: 20),
             trackShape: const RoundedRectSliderTrackShape(),
@@ -485,7 +536,9 @@ class Glyph extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SizedBox.square(
     dimension: size,
-    child: CustomPaint(painter: _GlyphPainter(name, color)),
+    child: CustomPaint(
+      painter: _GlyphPainter(name, readableInk(context, color)),
+    ),
   );
 }
 
@@ -508,7 +561,11 @@ class WindowSliderThumb extends SliderComponentShape {
     required double textScaleFactor,
     required Size sizeWithOverflow,
   }) {
-    context.canvas.drawCircle(center, 10, Paint()..color = accent);
+    context.canvas.drawCircle(
+      center,
+      10,
+      Paint()..color = sliderTheme.thumbColor ?? accent,
+    );
     context.canvas.drawCircle(
       center,
       8,

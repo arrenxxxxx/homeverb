@@ -41,6 +41,7 @@ Future<void> main() async {
     runApp(
       MaterialApp(
         theme: windowTheme(),
+        highContrastTheme: windowTheme(highContrast: true),
         home: Scaffold(
           body: LightBackground(
             child: SafeArea(
@@ -1440,6 +1441,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     navigatorKey: navigator,
     debugShowCheckedModeBanner: false,
     theme: windowTheme(),
+    highContrastTheme: windowTheme(highContrast: true),
     home: PopScope(
       canPop: false,
       onPopInvokedWithResult: (popped, _) {
