@@ -147,7 +147,9 @@ live authorization. See [the account contract](native-ui-contract.md#account-con
 intent. Once intent is durable, cleanup errors are inside `data.error` with
 `data.status: pending`; query success alone is not removal success. Keep the
 account visible as `credential_state: removing` and offer explicit local-cleanup
-retry. An uncertain secret deletion is inspected before any later deletion attempt.
+retry. In API 1.8.1 the backend inspects the exact entry by reference before any
+deletion, including explicit retries, without requiring readable credential bytes.
+Locked/unavailable/ambiguous storage remains a refusal, not proof of absence.
 `removed` requires completed local cleanup and a null inner error. Late descriptor
 saves for a completed removal return `ACCOUNT_NOT_FOUND`; the old local ID cannot
 be reused. Neither status

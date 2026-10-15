@@ -233,6 +233,18 @@ Native API 1.8, seven C functions, 30 methods, SQLite schema 4 and protected Mei
 payloads are unchanged; Android adds a trusted platform-only JNI initializer.
 Default Linux behavior is unchanged; iOS still fails closed without a backend.
 Android OS/Keystore, APK, physical-phone and real account/control acceptance remain
-unverified. Unreadable protected entries leave ordinary account removal pending;
-no force-cleanup API is provided. See [ADR-0032](adr/0032-android-native-credential-storage.md) and the
+unverified. The initial unreadable-entry removal limitation is corrected in 1.8.1
+below. See [ADR-0032](adr/0032-android-native-credential-storage.md) and the
 [Android guide](development/08-android-native.md).
+
+## Local cleanup correction 1.8.1
+
+Explicit account removal delegates exact-entry inspection/deletion to the backend
+without decrypting credentials. Missing keys or damaged contents no longer block
+cleanup when the backend can delete that exact entry. Locked/unavailable/ambiguous
+storage and uncertain deletion still retain pending intent and metadata. Synthetic
+host and JVM tests cover these cases; no owner account or device was changed.
+The method count, request/response shapes, seven C symbols, schema 4 and protected
+payload are unchanged. Older libraries may remain pending on a failed credential
+read. No force flag, automatic erasure or provider revocation is added. See
+[ADR-0033](adr/0033-delete-unreadable-account-credentials.md).

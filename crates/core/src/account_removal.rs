@@ -96,16 +96,9 @@ impl AccountVault {
             .run(async { self.store.begin_account_removal(id, &expected) })
             .await?;
         let cleanup: Result<()> = async {
-            let present = self
-                .secrets
-                .get(&record.credential_ref, operation)
-                .await?
-                .is_some();
-            if present {
-                self.secrets
-                    .delete(&record.credential_ref, operation)
-                    .await?;
-            }
+            self.secrets
+                .delete(&record.credential_ref, operation)
+                .await?;
             operation
                 .run(async { self.store.finish_account_removal(id) })
                 .await

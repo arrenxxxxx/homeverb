@@ -84,6 +84,10 @@ public final class EncryptedEntriesTest {
             keys.unavailable = true;
             check(store.run(1, profile, reference, secret).status == CredentialResult.UNAVAILABLE);
             check(Arrays.equals(Files.readAllBytes(file), second));
+            check(store.run(2, otherProfile, reference, null).status == CredentialResult.OK);
+            check(!Files.exists(otherProfileFile));
+            check(Arrays.equals(Files.readAllBytes(file), second));
+            check(keys.created == 1);
             keys.unavailable = false;
             keys.values.clear();
             check(store.run(0, profile, reference, null).status == CredentialResult.UNAVAILABLE);

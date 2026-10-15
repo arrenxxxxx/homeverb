@@ -68,8 +68,10 @@ removal without secret access. Snapshot saves check device existence and the sam
 ledger in their write transaction, preventing late reads from recreating cache.
 Ledger entries grow with explicit removals and are not erased automatically.
 
-Cleanup errors leave visible intent; explicit retry reads the exact credential
-reference before any deletion. An absent secret needs no second delete. Startup
+Cleanup errors leave visible intent; removal and explicit retry delegate exact-entry
+inspection to the backend without reading/decrypting credentials. A confirmed absent
+entry needs no second mutation. Locked/unavailable/ambiguous storage is never treated
+as absence. See [ADR-0033](adr/0033-delete-unreadable-account-credentials.md). Startup
 never resumes cleanup. Removal does not revoke vendor grants, affect copies elsewhere
 or erase backups/retained receipts. Reconnecting receives new local IDs. See the
 [native removal contract](native-ui-contract.md#remove-an-account-from-this-installation).
@@ -105,7 +107,7 @@ Retired IDs and backups remain; no disk compaction or secure-erasure claim is ma
 
 [ADR-0032](adr/0032-android-native-credential-storage.md) adds a trusted JNI backend using Android Keystore keys and authenticated ciphertext in the app no-backup directory. Account pending-state and exact-byte recovery rules are unchanged. Java calls stay on the operation worker and retain its lease until returning; cancellation after dispatched mutation remains uncertain. OS calls cannot be preempted. No backend is installed through ordinary JSON, and no plaintext fallback exists. See the [integration and acceptance guide](development/08-android-native.md); synthetic JVM success does not verify Android Keystore.
 
-Ordinary account removal reads the credential before deleting it. A missing key or corrupt ciphertext returns a store error, leaving removal pending and retaining metadata. The backend's exact-file deletion capability does not expose a public force-cleanup path. Unreadable protected material must never be treated as absent or erased automatically.
+Native API 1.8.1 account removal delegates exact-entry deletion without decrypting credentials. Missing keys or corrupt ciphertext can be cleaned up only through explicit removal with the reviewed device set, while the native backend can access the exact encrypted file. A secure, unlocked device is still required. Storage refusal or uncertain deletion retains pending intent and metadata; there is no metadata-only or automatic cleanup fallback.
 
 ## Retention and migration
 

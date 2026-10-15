@@ -2,6 +2,9 @@
 
 Status: accepted for native implementation; real account deletion is not exercised.
 
+[ADR-0033](0033-delete-unreadable-account-credentials.md) replaces the original
+Core credential pre-read with backend exact-entry deletion in native API 1.8.1.
+
 ## Decision
 
 Native API 1.5 adds `remove_account(account_id, expected_device_ids)`. The caller
@@ -20,12 +23,13 @@ authentication, discovery and actual network use. Persist intent and `removing`
 before touching the secret store. Ordinary leases refuse this state. Do not undo
 intent or reactivate credentials automatically after a failure.
 
-SQLite and the secret service cannot form one transaction. After intent, inspect
-the exact credential reference, delete it once only when present, then atomically
-remove local metadata and mark the ledger complete. Any interruption/error before
+SQLite and the secret service cannot form one transaction. After intent, let the
+backend inspect the exact reference without reading/decrypting its content and
+delete it once only when present, then atomically remove local metadata and mark
+the ledger complete. Any interruption/error before
 finalization leaves a visible pending cleanup, with its specific error when the
-process can return one. An explicit retry first inspects the exact reference; an
-absent secret is not deleted again. Startup performs no cleanup. Forced termination
+process can return one. An explicit retry delegates exact-reference inspection to
+the backend; an absent secret is not deleted again. Startup performs no cleanup. Forced termination
 does not promise a callback. Repeating completed removal with the same scope returns
 the persisted completion without secret access. Changed scope is refused.
 

@@ -16,7 +16,7 @@ The seven C functions in [homeverb.h](../crates/ffi/include/homeverb.h) remain t
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects saved-account cloud reads. `scenario` defaults to `normal`. Meiju requires `allow_mock_writes: false` and rejects any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms `homeverb.mock` or `midea.meiju`. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.8.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.8.1`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -313,8 +313,13 @@ Query data contains `account_id`, sorted `device_ids`, `status`,
 After intent the account appears as `credential_state: "removing"`; ordinary session
 use and rename are refused. Local details remain readable without secrets. Pending
 cleanup may block new connections or cross-account inventory validation until it
-finishes. An explicit retry with the same scope checks the referenced secret before
-any deletion; an earlier successful but unconfirmed deletion is not repeated.
+finishes. Since API 1.8.1, removal and explicit retries delegate exact-reference
+inspection to the backend without reading/decrypting credentials. Missing keys or
+corrupt contents can therefore be removed when the backend can identify and delete
+that exact entry. Locked, unavailable or ambiguous storage still leaves cleanup
+pending; unreadable never means absent. A confirmed absent entry causes no deletion.
+See [ADR-0033](adr/0033-delete-unreadable-account-credentials.md). Earlier libraries
+can remain pending when the credential pre-read fails; offer a library update.
 Repeating completed removal returns its persisted result without opening the keyring.
 Startup never resumes deletion automatically. Background/cancel/close retains intent;
 forced termination promises no callback. Late discovery/cache saves cannot resurrect

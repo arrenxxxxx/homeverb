@@ -92,10 +92,12 @@ the device may subsequently lock or invalidate keys.
   of Core. Lock loss, missing keys or corrupt data cannot trigger automatic login,
   credential reset or device-ID regeneration. Removing local data does not revoke
   vendor authorization. Neither keys nor entries are an authorization-sharing format.
-- Ordinary account removal reads the protected entry before deleting it. Unreadable
-  ciphertext or a permanently lost key therefore leaves removal pending and keeps
-  the local metadata. There is no force-cleanup API; explicit cleanup of unreadable
-  entries needs a separate reviewed contract. Never interpret unreadable as absent.
+- API 1.8.1 account removal can delete the exact encrypted file without decrypting
+  it, after the user confirms the linked device set. Corrupt contents or a missing
+  key do not prevent this cleanup while the native store can access that file.
+  A secure, unlocked device is still required. Refused or uncertain deletion keeps
+  cleanup pending; there is no automatic erasure or metadata-only force flag. See
+  [ADR-0033](../adr/0033-delete-unreadable-account-credentials.md).
 
 Android documents unlocked-device key bugs on Android 12-14, including key loss
 after removing the secure screen lock and failures after some biometric unlocks.
@@ -105,7 +107,7 @@ See the [official Keystore API documentation](https://developer.android.com/refe
 
 ## Evidence and remaining acceptance
 
-Java compilation and 50 encrypted-entry assertions passed on the Linux JVM. The
+Java compilation and 54 encrypted-entry assertions passed on the Linux JVM. The
 actual JNI test passed with synthetic storage, including copied-array clearing,
 backend errors, pre-cancellation, deadline/cancellation after an OS-call stand-in,
 uncertain mutations and explicit rereading. This does not exercise Android Keystore.

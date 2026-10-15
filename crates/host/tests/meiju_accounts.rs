@@ -64,6 +64,7 @@ struct Secrets {
     reads: AtomicUsize,
     puts: AtomicUsize,
     deletes: AtomicUsize,
+    deleted_entries: AtomicUsize,
     deletion: AtomicI32,
     delete_started: tokio::sync::Notify,
 }
@@ -109,13 +110,26 @@ impl SecretStore for Secrets {
         assert_ne!(mode, 0, "Connection must not delete credentials.");
         op.run(async { Ok(()) }).await?;
         self.deletes.fetch_add(1, Ordering::Relaxed);
-        if mode == 3 {
+        if matches!(mode, 3 | 5 | 6) {
             return Err(Error::new(
-                "SECRET_STORE_UNAVAILABLE",
-                "Synthetic unavailable store.",
+                match mode {
+                    5 => "SECRET_STORE_LOCKED",
+                    6 => "SECRET_STORE_CONFLICT",
+                    _ => "SECRET_STORE_UNAVAILABLE",
+                },
+                "Synthetic store refusal.",
             ));
         }
-        self.values.lock().unwrap().remove(&key.to_string());
+        if self
+            .values
+            .lock()
+            .unwrap()
+            .remove(&key.to_string())
+            .is_none()
+        {
+            return Ok(());
+        }
+        self.deleted_entries.fetch_add(1, Ordering::Relaxed);
         if mode == 4 {
             self.delete_started.notify_one();
             let _: Result<()> = op.run(std::future::pending()).await;

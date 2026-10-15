@@ -1,5 +1,5 @@
 {
-  "api_version": "1.8.0",
+  "api_version": "1.8.1",
   "methods": {
     "get_api_info": {
       "response_kind": "query"

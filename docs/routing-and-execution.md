@@ -81,6 +81,11 @@ read results from recreating cleaned data. They do not retract already delivered
 results or make a multi-device publication atomic. A cache-save failure after
 acceptance/verification follows the existing strongest-outcome preservation rules.
 
+Under [ADR-0033](adr/0033-delete-unreadable-account-credentials.md), explicit account
+removal deletes the exact protected entry without reading/decrypting it. A confirmed
+absent entry causes no mutation; refused or uncertain deletion preserves pending
+cleanup and metadata. This local idempotence does not permit retrying appliance writes.
+
 ## Explicit history clearing
 
 [Local-data cleanup](adr/0029-local-cache-and-history-clearing.md) refuses history

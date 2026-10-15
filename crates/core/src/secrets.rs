@@ -97,7 +97,8 @@ pub trait SecretStore: Send + Sync {
         secret: &SecretBytes,
         operation: &Operation,
     ) -> Result<()>;
-    /// Deletes only local material; this does not revoke authorization at a provider.
+    /// Deletes the exact local entry without reading its secret; confirmed absence succeeds.
+    /// Reject unavailable, locked or ambiguous storage. This does not revoke provider access.
     async fn delete(&self, reference: &CredentialRef, operation: &Operation) -> Result<()>;
 }
 

@@ -24,6 +24,7 @@ Start with the progressive development path. Reference documents define invarian
 - UI delivery: [Window Light prototype](../output/prototypes/homeverb-window-light-v1/index.html), [functional handoff](ui-functional-spec.md), [82-state inventory](ui-screen-inventory.md), [Flutter visual system and one-skin extension](ui-window-light.md).
 - Persistence/security: [storage](storage.md), [authentication](authentication.md), [Android credential backend](adr/0032-android-native-credential-storage.md), [native account vault](adr/0021-persistent-account-vault.md), [local account removal](adr/0028-local-account-removal.md), [saved-session recovery](adr/0030-explicit-meiju-account-recovery.md), [pending-account reauthorization](adr/0031-pending-account-reauthorization.md), [cache/history clearing](adr/0029-local-cache-and-history-clearing.md), [security/privacy](security-and-privacy.md).
 - Delivery: [repository layout](repository.md), [testing](testing.md), [task status](task-breakdown.md), [roadmap](roadmap.md), [compatibility](compatibility.md), [commit conventions](commit-conventions.md), [private publishing](publishing.md).
+- Cleanup recovery: [remove unreadable local credentials](adr/0033-delete-unreadable-account-credentials.md) through the existing confirmed account-removal flow.
 - Evidence: [references](references.md), [fictional examples](../examples/README.md), [diagrams](diagrams/README.md).
 
 ## Decisions

@@ -6,6 +6,53 @@ fn removal_request(connection: &Value) -> Value {
 }
 
 #[tokio::test]
+async fn removal_of_unreadable_credentials_never_reads_secrets_or_changes_another_account() {
+    for state in [CredentialState::Stored, CredentialState::Pending] {
+        let f = Fixture::new();
+        let connected = f.connect(None).await;
+        let id = Uuid::parse_str(connected["data"]["account"]["id"].as_str().unwrap()).unwrap();
+        f.store.set_credential_state(id, state).unwrap();
+        let mut other = f
+            .vault
+            .prepare("other.provider", "CN", "Kept", &operation())
+            .await
+            .unwrap();
+        other
+            .store_session(&secret("FICTIONAL-KEPT-SESSION"), &operation())
+            .await
+            .unwrap();
+        let other_id = other.record().id;
+        let other_reference = other.record().credential_ref.to_string();
+        drop(other);
+        let calls = f.calls();
+        let reads = f.secrets.reads.load(Ordering::Relaxed);
+        let puts = f.secrets.puts.load(Ordering::Relaxed);
+        // Model unreadable encrypted data with an available exact-reference delete path.
+        f.secrets.unavailable.store(true, Ordering::Relaxed);
+        f.secrets.deletion.store(1, Ordering::Relaxed);
+        let request = removal_request(&connected);
+        let result = f.call(request.clone()).await;
+        assert_eq!(result["data"]["status"], "removed");
+        assert!(result["data"]["error"].is_null());
+        assert_eq!(f.secrets.reads.load(Ordering::Relaxed), reads);
+        assert_eq!(f.secrets.puts.load(Ordering::Relaxed), puts);
+        assert_eq!(f.secrets.deletes.load(Ordering::Relaxed), 1);
+        assert_eq!(f.store.accounts().unwrap().len(), 1);
+        assert_eq!(f.store.account(other_id).unwrap().label, "Kept");
+        assert!(f.store.devices().unwrap().is_empty());
+        {
+            let remaining = f.secrets.values.lock().unwrap();
+            assert_eq!(remaining.len(), 1);
+            assert_eq!(remaining[&other_reference], b"FICTIONAL-KEPT-SESSION");
+        }
+        assert_eq!(f.call(request).await, result);
+        assert_eq!(f.secrets.reads.load(Ordering::Relaxed), reads);
+        assert_eq!(f.secrets.deletes.load(Ordering::Relaxed), 1);
+        assert_eq!(f.calls(), calls);
+    }
+}
+
+#[tokio::test]
 async fn removal_keeps_receipts_and_rooms_and_refuses_late_discovery_and_cache() {
     let f = Fixture::new();
     let connected = f.connect(None).await;
@@ -86,7 +133,7 @@ async fn removal_keeps_receipts_and_rooms_and_refuses_late_discovery_and_cache()
 }
 
 #[tokio::test]
-async fn removal_pending_cleanup_is_visible_and_explicit_retry_checks_before_deleting() {
+async fn removal_pending_cleanup_is_visible_and_explicit_retry_delegates_exact_entry_check() {
     for mode in [2, 3] {
         let f = Fixture::new();
         let connected = f.connect(None).await;
@@ -142,10 +189,8 @@ async fn removal_pending_cleanup_is_visible_and_explicit_retry_checks_before_del
             .await
             .unwrap();
         assert_eq!(recovered.status, "removed");
-        assert_eq!(
-            f.secrets.deletes.load(Ordering::Relaxed),
-            if mode == 2 { 1 } else { 2 }
-        );
+        assert_eq!(f.secrets.deletes.load(Ordering::Relaxed), 2);
+        assert_eq!(f.secrets.deleted_entries.load(Ordering::Relaxed), 1);
         assert!(f.store.accounts().unwrap().is_empty());
     }
 }
@@ -240,7 +285,8 @@ async fn removal_metadata_failure_rolls_back_and_retry_does_not_repeat_secret_de
     }
     db.execute_batch("DROP TRIGGER refuse_removal").unwrap();
     assert_eq!(f.call(request).await["data"]["status"], "removed");
-    assert_eq!(f.secrets.deletes.load(Ordering::Relaxed), 1);
+    assert_eq!(f.secrets.deletes.load(Ordering::Relaxed), 2);
+    assert_eq!(f.secrets.deleted_entries.load(Ordering::Relaxed), 1);
 }
 
 #[tokio::test(start_paused = true)]
@@ -310,26 +356,43 @@ async fn dropped_removal_has_no_callback_or_startup_retry_and_can_resume_explici
             .status,
         "removed"
     );
-    assert_eq!(f.secrets.deletes.load(Ordering::Relaxed), 1);
+    assert_eq!(f.secrets.deletes.load(Ordering::Relaxed), 2);
+    assert_eq!(f.secrets.deleted_entries.load(Ordering::Relaxed), 1);
 }
 
 #[tokio::test]
-async fn unavailable_secret_reads_leave_intent_without_deletion_and_scope_retry_is_exact() {
-    let f = Fixture::new();
-    let connected = f.connect(None).await;
-    let request = removal_request(&connected);
-    f.secrets.unavailable.store(true, Ordering::Relaxed);
-    let pending = f.call(request.clone()).await;
-    assert_eq!(pending["data"]["status"], "pending");
-    assert_eq!(pending["data"]["error"]["code"], "SECRET_STORE_UNAVAILABLE");
-    assert_eq!(f.secrets.deletes.load(Ordering::Relaxed), 0);
-    let mut changed = request.clone();
-    changed["expected_device_ids"] = json!([]);
-    assert_eq!(
-        f.call(changed).await["error"]["code"],
-        "ACCOUNT_SCOPE_CHANGED"
-    );
-    f.secrets.unavailable.store(false, Ordering::Relaxed);
-    f.secrets.deletion.store(1, Ordering::Relaxed);
-    assert_eq!(f.call(request).await["data"]["status"], "removed");
+async fn deletion_refusals_leave_intent_without_erasure_and_scope_retry_is_exact() {
+    for (mode, error) in [
+        (3, "SECRET_STORE_UNAVAILABLE"),
+        (5, "SECRET_STORE_LOCKED"),
+        (6, "SECRET_STORE_CONFLICT"),
+    ] {
+        let f = Fixture::new();
+        let connected = f.connect(None).await;
+        let request = removal_request(&connected);
+        let reads = f.secrets.reads.load(Ordering::Relaxed);
+        let saved = f.secrets.values.lock().unwrap().clone();
+        let calls = f.calls();
+        f.secrets.unavailable.store(true, Ordering::Relaxed);
+        f.secrets.deletion.store(mode, Ordering::Relaxed);
+        let pending = f.call(request.clone()).await;
+        assert_eq!(pending["data"]["status"], "pending");
+        assert_eq!(pending["data"]["error"]["code"], error);
+        assert_eq!(f.secrets.reads.load(Ordering::Relaxed), reads);
+        assert_eq!(f.secrets.deletes.load(Ordering::Relaxed), 1);
+        assert_eq!(*f.secrets.values.lock().unwrap(), saved);
+        assert_eq!(f.store.devices().unwrap().len(), 2);
+        let mut changed = request.clone();
+        changed["expected_device_ids"] = json!([]);
+        assert_eq!(
+            f.call(changed).await["error"]["code"],
+            "ACCOUNT_SCOPE_CHANGED"
+        );
+        assert_eq!(f.secrets.deletes.load(Ordering::Relaxed), 1);
+        f.secrets.deletion.store(1, Ordering::Relaxed);
+        assert_eq!(f.call(request).await["data"]["status"], "removed");
+        assert_eq!(f.secrets.reads.load(Ordering::Relaxed), reads);
+        assert_eq!(f.secrets.deleted_entries.load(Ordering::Relaxed), 1);
+        assert_eq!(f.calls(), calls);
+    }
 }
