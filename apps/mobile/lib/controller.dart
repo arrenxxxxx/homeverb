@@ -675,7 +675,14 @@ class HomeController extends ChangeNotifier {
     receipt = await core.call('get_execution', {'request_id': id}) as Json;
   });
   Future<bool> loadDiagnostics() => perform(() async {
-    diagnostics = await core.call('diagnostics') as Json;
+    diagnostics = null;
+    final epoch = _readEpoch;
+    try {
+      final report = await core.call('diagnostics') as Json;
+      if (epoch == _readEpoch) diagnostics = report;
+    } catch (_) {
+      if (epoch == _readEpoch) rethrow;
+    }
   });
   Future<bool> savePreferences(Json changes) =>
       perform(() => preferences.save(changes));

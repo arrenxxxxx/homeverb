@@ -35,10 +35,16 @@ class Blocks extends StatelessWidget {
     final type = b[0];
     switch (type) {
       case 'note':
-        return Padding(
+        final note = Padding(
           padding: const EdgeInsets.fromLTRB(2, 2, 2, 10),
           child: Copy('${b[1]}', color: muted),
         );
+        return b.length > 2
+            ? Semantics(
+                button: true,
+                child: InkWell(onTap: () => onAction(b[2]), child: note),
+              )
+            : note;
       case 'section':
         return Padding(
           padding: const EdgeInsets.fromLTRB(3, 4, 3, 7),

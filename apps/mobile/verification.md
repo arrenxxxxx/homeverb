@@ -17,7 +17,7 @@ Commands below ran in the isolated worktree; Flutter commands used the pinned FV
 | Check | Evidence / result |
 |---|---|
 | `fvm flutter analyze` | No issues found |
-| `fvm flutter test --reporter expanded` | Full 65-test suite passed, including two saved-inventory checks, two native account and five synthetic account checks, three cleanup regressions and all 11 prior native/controller checks and the inline-stepper interaction check. Other coverage: one extended native click scenario, three native outcome scenarios, two component checks, four compartment-overview checks, five accessibility checks, three system-contrast checks, two receipt checks, two descriptor-control checks, six dedicated appliance-layout checks, three organization checks nine screen/interaction/reflow checks and two Android export-channel checks |
+| `fvm flutter test --reporter expanded` | Full 68-test suite passed, including two saved-inventory checks, two native account and five synthetic account checks, three cleanup regressions and all 11 prior native/controller checks and the inline-stepper interaction check. Other coverage: one extended native click scenario, three native outcome scenarios, two component checks, four compartment-overview checks, five accessibility checks, three system-contrast checks, two receipt checks, two descriptor-control checks, six dedicated appliance-layout checks, three organization checks, nine screen/interaction/reflow checks, two Android export-channel checks and three diagnostics-card checks |
 | `fvm flutter test integration_test/native_smoke_test.dart -d linux` under Xvfb | Actual Linux process loads the bundled Core library without a path override, discovers Mock, reads state, sets mode and verifies the returned receipt; process screenshot captured; the latest run also cancels and confirms cache cleanup and confirms history cleanup |
 | `fvm flutter build linux --release` | Linux bundle includes `libhomeverb_ffi.so`; the bundled Rust library is the checked debug build |
 | `fvm flutter build web -t lib/main_preview.dart` | Isolated preview compiles; web preview does not call native Core |
@@ -31,9 +31,9 @@ Commands below ran in the isolated worktree; Flutter commands used the pinned FV
 | `node packages/presentation/test/i18n.test.mjs` | 5 shared-catalog tests passed; this does not establish Flutter localization |
 | `python3 -m unittest discover -s tests -v` | 23 repository tests passed |
 
-The native click scenario exercises discovery, read, mode and target writes, quick power before/after reading, card long press, invalid target rejection, blank selection rejection, batch execution, blank/overlong/control-character/duplicate room rejection with retained input, room rename/drag/menu reorder/delete, exact-room assignment, All/custom/Unassigned filters, alias/pin/unpin, search/clear/exit, unchanged route persistence, sharing-name persistence, receipt refresh with no current device selection, history, diagnostics export cancel/save/failure, unavailable gates and foreground lifecycle. Room-menu assignment preselects its exact room and rejects empty device selection; device-menu assignment visibly selects the current device. Corrected input clears outdated validation messages before the next submission. The file picker is replaced by a controlled platform implementation; saved file bytes must equal the exact preview. The actual Linux integration separately exercises the real Flutter process, not the system save chooser.
+The native click scenario exercises discovery, read, mode and target writes, quick power before/after reading, card long press, invalid target rejection, blank selection rejection, batch execution, blank/overlong/control-character/duplicate room rejection with retained input, room rename/drag/menu reorder/delete, exact-room assignment, All/custom/Unassigned filters, alias/pin/unpin, search/clear/exit, unchanged route persistence, sharing-name persistence, receipt refresh with no current device selection, history, diagnostics full-report review and export cancel/save/failure/retry, unavailable gates and foreground lifecycle. Room-menu assignment preselects its exact room and rejects empty device selection; device-menu assignment visibly selects the current device. Corrected input clears outdated validation messages before the next submission. The file picker is replaced by a controlled platform implementation; saved file bytes must equal the exact preview. The actual Linux integration separately exercises the real Flutter process, not the system save chooser.
 
-The native widget click test now loads the bundled Inter/Material fonts and fails missed pointer targets. Its latest successful run saves 88 viewport captures across 27 screen IDs, including errors and intermediate states. Generate `output/flutter-verification/native-gallery.html` with `python3 apps/mobile/tool/native_gallery.py`. Entries identify clicks, drags and direct test navigation; all records are fictional native Mock data. Phone insets are simulated and OS status icons are absent. This is separate evidence from the 82-state isolated atlas and from the actual Linux-process screenshot. The native room page now uses the prototype's grouped rows and exposes assignment through its row menu; its drag handle and menu ordering are both exercised.
+The native widget click test now loads the bundled Inter/Material fonts and fails missed pointer targets. Its latest successful run saves 92 viewport captures across 27 screen IDs, including errors and intermediate states. Generate `output/flutter-verification/native-gallery.html` with `python3 apps/mobile/tool/native_gallery.py`. Entries identify clicks, drags and direct test navigation; all records are fictional native Mock data. Phone insets are simulated and OS status icons are absent. This is separate evidence from the 82-state isolated atlas and from the actual Linux-process screenshot. The native room page now uses the prototype's grouped rows and exposes assignment through its row menu; its drag handle and menu ordering are both exercised.
 
 Three additional click scenarios use the native `lost-ack`, `accept-only`, and `reject` fixtures. They click discovery, read, power, receipt refresh and history; assert the displayed `unknown`, `accepted`, or `failed` outcome; retain observations until an explicit read; and verify the original request ID and unchanged history count after refresh. These are fictional native operations, not physical-device evidence.
 
@@ -565,3 +565,47 @@ The delivery APK/hash manifest was refreshed. All 82 atlas metrics remain at the
 row-geometry checkpoint: 0/82 exact, mean channel error 1.4822/255, with its seven
 recorded visual regressions unresolved. iOS document export, physical devices and
 full prototype parity remain unverified.
+
+
+## Runtime diagnostics cards and complete report review
+
+The native S07 page now uses the prototype's six-row report summary and four-row
+latest-receipt card rather than displaying the entire JSON as the page body.
+Values come directly from the loaded allowlisted report. Generated time is shown
+in UTC; zero counts, uncertain outcomes and empty history are preserved. The last
+retained attempt is marked as retained when attempts were omitted, rather than
+being presented as complete evidence. Summary rows are read-only.
+
+The original review note now opens a selectable, scrollable full-report dialog.
+That view includes the unmodified report and all retained receipt summaries, not
+only the compact card. Export continues to serialize the same loaded snapshot;
+no new report is fetched when the dialog opens or the file picker returns. The
+Window Light surface color is used for the report dialog. Explicit export retry
+clears the previous export error, and loading/missing reports cannot be exported.
+Failed reloads clear the old report. Late success or failure after navigation
+cancellation/backgrounding cannot repopulate the report or publish a stale error.
+
+Three added checks use the versioned fictional diagnostics example to verify
+summary semantics, empty/truncated evidence, read-only rows, review clicks,
+320-pixel/200% layouts, and stale/failing load behavior. Two decoded fixture
+captures are in `apps/mobile/build/verification/diagnostics/`; their live data
+values differ from the atlas and they do not establish pixel equality. The full
+68-test Flutter suite and static analysis passed. The extended native Mock click
+journey opens/closes the full report, compares its exact text, and verifies
+cancel/save/failure/retry with the explicitly simulated picker. It now records
+92 captures across the same 27 screen IDs. The isolated 82-state atlas comparison
+remains 0/82 exact with mean channel error 1.4822/255; prior visual regressions and
+other unverified acceptance items remain unresolved.
+
+The final ordinary Android APK rebuilt, passed 16 KiB ZIP alignment, installed
+and cold-started on the isolated Android 15 emulator. Actual taps opened the
+summary cards, opened/closed full-report review, and saved through the local
+system document picker. The resulting 308-byte file exactly matches the dialog's
+captured text; summary values and the generated timestamp remain unchanged after
+return. The existing earlier export was retained under its original name.
+`output/flutter-verification/android/diagnostic-cards-check.json` records hashes,
+actions and screenshots. The delivery APK/hash manifest was refreshed.
+
+The owner's main-worktree native contract has advanced to API 1.14.1, while this
+verified frontend build remains pinned to API 1.10.0. Integration of that later
+contract is outstanding; this checkpoint does not claim current-main parity.

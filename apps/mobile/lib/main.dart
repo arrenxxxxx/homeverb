@@ -11,6 +11,7 @@ import 'account_views.dart';
 import 'compartment_controls.dart';
 import 'controller.dart';
 import 'diagnostics_export.dart';
+import 'diagnostics_view.dart';
 import 'controls.dart';
 import 'native_client.dart';
 import 'preferences.dart';
@@ -572,6 +573,27 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       return;
     }
     if (label == 'Remove Local Data') cleanupScope = null;
+    if (label == 'Review Full Report') {
+      if (c.diagnostics == null || c.busy) return;
+      final exact = const JsonEncoder.withIndent('  ').convert(c.diagnostics);
+      await showDialog<void>(
+        context: navigator.currentContext!,
+        builder: (context) => AlertDialog(
+          title: const Text('Diagnostic report'),
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          surfaceTintColor: Colors.transparent,
+          scrollable: true,
+          content: SelectableText(exact),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Close'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
     if (label == 'Export Redacted Report') {
       await export();
       return;
@@ -675,8 +697,9 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   }
 
   Future<void> export() async {
-    if (c.diagnostics == null || exporting) return;
+    if (c.diagnostics == null || c.busy || exporting) return;
     exporting = true;
+    c.error = null;
     changed();
     final exact = const JsonEncoder.withIndent('  ').convert(c.diagnostics);
     try {
@@ -1221,16 +1244,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             : receiptBlocks(r, receiptDeviceName(r));
         break;
       case 'S07':
-        b = [
-          [
-            'note',
-            c.diagnostics == null
-                ? 'No report loaded.'
-                : const JsonEncoder.withIndent('  ').convert(c.diagnostics),
-          ],
-          ['button', 'Export Redacted Report', exporting ? 'disabled' : ''],
-          ['button', 'Cancel', 'secondary'],
-        ];
+        b = diagnosticsBlocks(c.diagnostics, exporting: exporting || c.busy);
         break;
       case 'S08':
         b = [

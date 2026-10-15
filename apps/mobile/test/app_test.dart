@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:homeverb_mobile/main.dart';
 import 'package:homeverb_mobile/skin.dart';
+import 'package:homeverb_mobile/diagnostics_view.dart';
 import 'package:homeverb_mobile/controller.dart';
 import 'package:homeverb_mobile/native_client.dart';
 import 'package:homeverb_mobile/preferences.dart';
@@ -431,6 +432,14 @@ void main({bool deviceRun = false}) {
         final exact = const JsonEncoder.withIndent(
           '  ',
         ).convert(controller.diagnostics);
+        await tap(diagnosticReviewNote);
+        expect(find.byType(AlertDialog), findsOneWidget);
+        expect(
+          tester.widget<SelectableText>(find.byType(SelectableText)).data,
+          exact,
+        );
+        await tap('Close');
+        expect(find.byType(AlertDialog), findsNothing);
         picker.pending = Completer<void>();
         await tap('Export Redacted Report');
         expect(app.currentState!.exporting, isTrue);
@@ -447,6 +456,10 @@ void main({bool deviceRun = false}) {
         picker.fail = true;
         await tap('Export Redacted Report');
         expect((controller.error as NativeFailure).code, 'EXPORT_FAILED');
+        expect(File(picker.path!).readAsStringSync(), exact);
+        picker.fail = false;
+        await tap('Export Redacted Report');
+        expect(controller.error, isNull);
         expect(File(picker.path!).readAsStringSync(), exact);
         await route('S08');
         await tap('Privacy');
