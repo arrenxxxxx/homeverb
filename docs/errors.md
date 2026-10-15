@@ -80,6 +80,16 @@ Receipt lookup reports query failure for `REQUEST_NOT_FOUND` or `REQUEST_RETIRED
 
 Secret-store errors contain no raw backend error text. Before a credential mutation starts, cancellation and deadlines retain `CANCELLED` / `DEADLINE_EXCEEDED`. After it starts, any unconfirmed failure is conservatively `SECRET_STORE_WRITE_UNKNOWN`. Missing entries return `None` on read; deleting an absent reference succeeds. Local credential deletion never establishes vendor revocation. See [native credentials](storage.md#native-credential-storage).
 
+## Meiju native authentication errors
+
+`MIDEA_LOGIN_INPUT_UNSUPPORTED` rejects nonempty/length/ASCII credential violations
+before networking. The admitted community codec cannot claim untested Unicode
+password support. Login uses the fixed read-protocol error codes below for invalid
+responses, explicit rejection and transport failure. Unknown login challenges are
+rejected without bypass or retry. No provider message, account spelling, password
+hash, URL, token or session key is included. Invalid protected session encodings
+return `ACCOUNT_SESSION_UNCONFIRMED`; no session is fabricated or reset.
+
 ## Meiju cloud read errors
 
 The native read protocols use `MIDEA_RESPONSE_INVALID` for malformed/oversized, wrong-home/appliance responses or malformed recognized state fields, `MIDEA_REQUEST_REJECTED` for explicit nonzero provider codes other than recognized expired-session codes, and `MIDEA_REQUEST_FAILED` for transport failures. Provider messages, URLs and identifiers are never copied into these errors. Recognized session expiry returns `AUTH_REQUIRED` without automatic login/retry. It stops subsequent inventory requests; state queries return the error directly. Individual home failures remain explicit in a partial inventory; a failed top-level listing never becomes an empty account. Unsupported state families, query combinations, components or explicit temperature units return `CAPABILITY_UNSUPPORTED`. Cancellation/deadline stop the read flow. These errors do not establish any device-write outcome or real-platform support.

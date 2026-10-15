@@ -14,7 +14,7 @@ Brand names express user interest, not protocol boundaries. `midea-local` and Sm
 
 The owner selected Midea/Hualing air conditioners, dishwashers, and refrigerators on October 15, 2026, with automatic retrieval of existing Meiju-bound devices after authorization and daily cloud control at home or away. The [integration guide](development/05-midea.md) pins separate cloud and LAN sources. Source research is sufficient to start offline work; it does not establish HomeVerb support. Refrigerator writes are absent from the inspected LAN implementation, while cloud mappings declare compartment settings. Neither a mapping nor a dishwasher message class proves a verified model-specific action. No new real adapter is registered yet.
 
-`homeverb-midea` now implements the Meiju home/appliance inventory protocol behind an injected read transport, verified with synthetic responses. This is protocol implementation evidence only: live authentication, HTTPS, capability admission, actual provider identity evidence and physical tests remain pending. Existing native API version 1.0.0 and Mock behavior are unchanged. See [ADR-0020](adr/0020-midea-cloud-inventory.md).
+`homeverb-midea` now implements the Meiju home/appliance inventory protocol behind an injected read transport, verified with synthetic responses. This is protocol implementation evidence only: real authentication acceptance, capability admission, actual provider identity evidence and physical tests remain pending. Existing native API version 1.0.0 and Mock behavior are unchanged. See [ADR-0020](adr/0020-midea-cloud-inventory.md).
 
 The library also decodes selected AC/E1/CA cloud state fields under [ADR-0023](adr/0023-meiju-cloud-state-evidence.md). Returned cloud observation time is unproven; projected readings are stale and cannot verify writes. Vendor-specific mode, fan and dishwasher codes retain their meaning without invented common controls. The unreleased Rust endpoint enum gains an appliance-state variant; native API 1.0.0, SQLite schema 3 and registered adapters are unchanged. Synthetic decoding does not establish support for a physical model.
 
@@ -33,6 +33,13 @@ The [native UI contract](native-ui-contract.md) adds `get_api_info` and publishe
 The native Meiju account layer under [ADR-0024](adr/0024-meiju-private-device-bindings.md) adds protected subject/session/device-map persistence through the existing vault. Synthetic evidence covers stable local bindings across reopening, session replacement, partial inventories and descriptor rediscovery. It neither registers a real adapter nor establishes provider identity, cross-account deduplication or physical support. SQLite schema 3, native API 1.0.0 and its 22 methods remain unchanged.
 
 [ADR-0025](adr/0025-bound-meiju-core-reads.md) adds account-bound state reads with exact connection/model/component preflight and Core cache-validation coverage using fictional descriptors. The unreleased AccountLock Rust trait now requires Send + Sync; custom implementations must meet that bound. No real adapter is registered and no model support, controls, native methods or SQLite migration is added.
+
+The owner-approved community login codec and restricted HTTPS client are now
+implemented and synthetic-tested under ADR-0022. Only the mainland Meiju endpoint
+is admitted; SmartHome, automatic region routing and additional login challenges
+are not implemented. No real account was contacted. No public account method,
+registered Core adapter, model capability, control permission or mobile support
+follows from this native library phase. Native API 1.0.0 and SQLite schema 3 are unchanged.
 
 ## Status definitions
 

@@ -1,4 +1,11 @@
-//! Meiju cloud read protocols. Live authentication and HTTPS are not registered yet.
+//! Native Meiju login and cloud read protocols. No real Core adapter is registered yet.
+
+mod auth;
+mod cloud;
+mod codec;
+mod material;
+pub use auth::{LoginCredentials, MeijuSession, SessionReads, login};
+pub use cloud::{CloudEndpoint, CloudTransport, MeijuHttps, SignedRequest};
 
 mod account;
 pub use account::{DeviceBinding, MeijuAccount};

@@ -4,7 +4,7 @@ The owner selected Midea and Hualing air conditioners, dishwashers, and refriger
 
 Daily cloud control is required in the first real integration. LAN is an additional route for the same physical devices, not a substitute for cloud control. The owner has physical products; exact models, firmware, app version, and account region remain to be recorded. This guide records requirements and source research on October 15, 2026, not implemented HomeVerb support or physical verification.
 
-The native read protocols are implemented in [homeverb-midea](../../crates/midea/src/lib.rs): account-scoped home/appliance retrieval, code/data validation, deduplication, partial inventory failure, and bounded cloud-state decoding for the three selected families. They use an injected read transport and synthetic responses with the inspected wire fields. There is no live authentication, signing, HTTPS implementation, registered Core adapter, or enabled UI account method yet. See [ADR-0020](../adr/0020-midea-cloud-inventory.md) and [ADR-0023](../adr/0023-meiju-cloud-state-evidence.md).
+The native read protocols are implemented in [homeverb-midea](../../crates/midea/src/lib.rs): account-scoped home/appliance retrieval, code/data validation, deduplication, partial inventory failure, and bounded cloud-state decoding for the three selected families. The inventory/state decoders use an injected read transport and synthetic responses with the inspected wire fields. Native password login, signing, session-key decoding and restricted HTTPS are now implemented under ADR-0022 and tested against fictional responses and a local TLS server. No real account has been tested, and no Core adapter or UI account method is registered yet. See [ADR-0020](../adr/0020-midea-cloud-inventory.md) and [ADR-0023](../adr/0023-meiju-cloud-state-evidence.md).
 
 The native account vault now persists random local references, composes Linux secure storage, and coordinates session read/update work through account leases. Meiju's private account payload also preserves appliance-to-local-ID bindings with the session. Interrupted or uncertain updates remain pending until trusted validation and recovery. This supplies storage for the future provider flow; it does not establish Meiju login, provider identity or session validity. See [ADR-0021](../adr/0021-persistent-account-vault.md), [ADR-0024](../adr/0024-meiju-private-device-bindings.md) and the [credential integration guide](04-add-adapter.md#integrate-native-credentials).
 
@@ -47,11 +47,47 @@ The cloud sources include distinct Meiju and SmartHome login paths and app-speci
 
 The October 15 authentication review found that the official v3 token endpoint requires a developer secret; the Android SDK guide describes obtaining tokens through a third-party server. Those documented paths do not establish the required independent native flow. The community app-facing login uses shared app signing and decoding material. [ADR-0022](../adr/0022-meiju-community-cloud-admission.md) records the primary sources and the narrowly scoped community-protocol exception explicitly approved by the owner on October 15, 2026. Protocol implementation may now proceed; real account and model acceptance remain separate checks. No live login is implemented merely by accepting the decision.
 
+## Native login and restricted HTTPS
+
+`LoginCredentials` consumes protected native account/password bytes. The pinned
+community flow uses ASCII input; unsupported, empty or oversized inputs fail before
+network access with `MIDEA_LOGIN_INPUT_UNSUPPORTED`. `login` performs exactly one
+login-ID request and one password request under the same Operation. Rejection,
+additional challenges, cancellation or timeout never trigger automatic login or
+replay. Passwords and account spellings are not part of the stored session.
+
+`MeijuSession` holds the access token, decoded session key and an opaque subject
+`meiju.login-id.v1:<server-login-id>` in redacted native memory. The server login ID
+participates in the successful password proof. It is an exact-match reconnect
+guard, not a claim that all account aliases share an identity. Real-account tests
+must confirm its stability. Changed IDs require explicit recovery; never substitute
+a nickname, login spelling or guessed `userInfo` field. `encode`/`restore` are private
+credential-persistence operations, not public JSON DTOs. `reads` binds a session to
+one exact local credential reference for the existing inventory/state protocols.
+
+`MeijuHttps` admits only `https://mp-prod.smartmidea.net` and the five reviewed login,
+home, appliance and state endpoints. It exposes no configurable URL, proxy, region
+reroute, certificate bypass, control endpoint or executable download. TLS uses
+WebPKI roots; redirects and retries are disabled. Each call owns its client with no
+idle pool, checks a 1 MiB response limit while streaming, and shares cancellation
+and the total deadline. DNS/OS resolution and transient HTTP/TLS buffer copies
+remain library/platform responsibilities; no guarantee of complete memory erasure
+or preemptible system resolution is made. Provider errors and bodies never enter
+public diagnostics.
+
+The public compatibility material and codec are attributed in
+[third-party notices](../../third-party/midea-auto-cloud/NOTICE.md), including the
+upstream Apache-2.0 license. Independent Python hashlib/HMAC and OpenSSL synthetic
+vectors test the port. Local TLS tests cover exact request bytes, sensitive headers,
+redirect/retry refusal, certificate validation, oversized/truncated responses and
+socket closure on cancellation/deadline. These tests neither contact Meiju nor
+establish account, regional, mobile or physical-device support.
+
 ## Native account identity and device persistence
 
 `MeijuAccount` owns an AccountVault lease for one bounded operation. After admitted native authentication validates an account subject and session, `create(vault, region, label, subject, session, operation)` reserves a fresh local account and stores a private version-1 payload. For an existing account, acquire its lease and use `open`; it never initializes or resets an absent/corrupt map. `record()` exposes local metadata, and `session(operation)` returns protected native bytes. These are Rust library calls, not native UI methods.
 
-The opaque subject must come from future reviewed provider identity evidence, not a nickname or mutable login spelling. No particular Meiju login response field is assumed by this storage phase. `replace_session` requires that exact subject and keeps the bindings. A mismatch returns `ACCOUNT_IDENTITY_CONFLICT` without changing stored state. Neither opening a payload nor matching the subject proves live authorization.
+The opaque subject must come from reviewed provider evidence, not a nickname or mutable login spelling. The native login flow below binds a successful password proof to the exact server-issued login ID; the storage layer itself does not infer a provider field. `replace_session` requires that exact subject and keeps the bindings. A mismatch returns `ACCOUNT_IDENTITY_CONFLICT` without changing stored state. Neither opening a payload nor matching the subject proves live authorization.
 
 After retrieval, `bind_inventory` validates the inventory's credential reference and complete identity evidence before saving. It returns local device, cloud-connection and identity-reference UUIDs in inventory order only after confirmed persistence. Reuse those IDs when building descriptors. `resolve_device` returns a private appliance ID only for a device bound to that leased account. Keep the same lease for the future signed transport; do not acquire a second lease inside a request.
 

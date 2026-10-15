@@ -45,6 +45,7 @@ After dependencies are cached, add `--offline` to Cargo commands. Use a Python v
 | CLI runtime | Actual binary output validated against JSON Schemas, exit codes, room/preferences and state persistence, batch rollback after an injected second-device update failure, filtered history, schema-1 upgrade, injected SQLite journal failure, dry run, SIGINT, and forced termination/restart |
 | Native ABI | Linux library loaded directly, independent discovery/control, room/card requests, concurrent foreground cancellation, and explicit close |
 | Native UI contract | All 22 published methods called through the built C ABI, offline method-specific response validation, saved examples, closed-field rejection, null success, admission errors, all execution outcomes, explicit cancellation and foreground/closed-session refusal |
+| Meiju authentication/HTTPS | Fictional login/signing/session vectors, private input/session validation, exact request bodies and account binding, rejected challenges, no retries, cancellation/deadlines, redaction and local TLS certificate/redirect/body-limit/socket-closure checks; no real account test |
 | Meiju inventory | Synthetic code/data envelopes, nested homes/appliances, candidate and unknown families, deduplication/conflicts, account isolation, malformed/partial/auth-expired responses, shared deadline/cancellation, no retries, and redacted native data; no live transport or device claim |
 | Meiju state | Synthetic AC numeric/compound temperatures, fridge/freezer separation, vendor-specific dishwasher/AC codes, exact account/appliance/query routing, null/absent readings, malformed/oversized/rejected responses, unproven freshness, cancellation/deadlines, no retries, redaction and nonserializable source state; no live/model acceptance |
 | Meiju private bindings | Real SQLite with synthetic protected storage; stable device/connection/identity IDs across reopen and same-subject session replacement, preserved local preferences, partial/empty inventory retention, whole-update conflict refusal, account isolation, corrupt/missing payload refusal, no plaintext identifiers, uncertain-write recovery without regeneration, size limits and cancellation |
@@ -67,6 +68,15 @@ cargo test -p homeverb-secrets --offline --locked --test system_store linux_secr
 ```
 
 The probe passed locally on Linux with GNOME Secret Service. Locked collections, interactive service prompts, other implementations, and actual platform credentials were not integration-tested. Unit tests separately exercise sanitized locked/unavailable errors and deadline/cancellation outcomes without keyring access. The test cleans up on returned operation failures; forced process termination can still leave synthetic entries, just as it can interrupt an ordinary credential mutation.
+
+## Meiju native protocol and HTTPS tests
+
+`cargo test -p homeverb-midea --offline --locked` also starts generated local TLS
+fixtures. A sandbox that prohibits loopback listeners cannot run those cases;
+record the restriction and run with ordinary local socket access, rather than
+skipping certificate, redirect, body-limit or cancellation tests. All credentials
+in these tests are fictional. The known-answer fixture uses independent Python
+hashlib/HMAC and OpenSSL calculations; no test contacts a vendor endpoint.
 
 ## Midea account and remote-control acceptance
 

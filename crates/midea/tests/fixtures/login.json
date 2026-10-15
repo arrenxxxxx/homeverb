@@ -1,0 +1,14 @@
+{
+  "provenance": "Independent Python hashlib/hmac and OpenSSL AES known-answer vectors; all account material is fictional.",
+  "account": "owner@example.test",
+  "password": "Synthetic password 42!",
+  "login_id": "synthetic-login-001",
+  "body": "{\"loginAccount\":\"owner@example.test\",\"type\":\"1\",\"reqId\":\"00000000000040008000000000000001\",\"stamp\":\"20261015101010\"}",
+  "random": "1792030210",
+  "device_id": "5e318db55bb7cc81",
+  "iot_password": "0b1f1d97a011bbf4fa8ed36cc16f17e8b8eae4da721f5a85256f4ebbab7e39c7",
+  "iam_password": "4d233fb741c07c0fdc8924909ea0b539",
+  "signature": "fd3a8b0060421871238ea0332ef34e9664e85f678258f37b21920d08908173a1",
+  "session_key": "synthetic-key-01",
+  "wrapped_key": "4192a7dad8ea508b1dcd0daccf8f5c8a187c944f79041a1b4b632650e1b4aed9"
+}
