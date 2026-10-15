@@ -20,8 +20,25 @@ pub struct Grant {
 impl Policy {
     /// Return only routes authorized for the complete command by a matching grant.
     pub fn authorize(&self, command: &Command, action: &Action) -> Result<Vec<Transport>> {
+        self.authorize_risk(command, action, Risk::Low)
+    }
+
+    pub(crate) fn authorize_elevated(
+        &self,
+        command: &Command,
+        action: &Action,
+    ) -> Result<Vec<Transport>> {
+        self.authorize_risk(command, action, Risk::Elevated)
+    }
+
+    fn authorize_risk(
+        &self,
+        command: &Command,
+        action: &Action,
+        risk: Risk,
+    ) -> Result<Vec<Transport>> {
         let mut permitted = Vec::new();
-        if action.risk == Risk::Low {
+        if action.risk == risk {
             for grant in &self.grants {
                 if grant.device_id != command.device_id
                     || grant.component_id != command.component_id
@@ -48,7 +65,11 @@ impl Policy {
             }
         }
         if permitted.is_empty() {
-            return Err(denied());
+            return Err(if risk == Risk::Low {
+                denied()
+            } else {
+                crate::approval::denied()
+            });
         }
         Ok(permitted)
     }

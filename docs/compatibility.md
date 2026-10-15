@@ -575,3 +575,50 @@ SQLite schema 4 and protected payload 3 are unchanged. No real account,
 credential profile or appliance was accessed; the separate Flutter worktree was
 untouched. Physical/off-LAN, phone/Keystore/APK and remote CI acceptance remain
 unverified. Dishwasher and refrigerator controls remain incomplete.
+
+## Typed trusted single-command approval foundation
+
+[ADR-0042](adr/0042-trusted-single-command-approval.md) adds Rust Core/Session
+preparation and one-use execution for one elevated action. A complete matching
+grant, one explicit transport and exactly one registered connection remain
+required. The opaque preview binds its command, descriptor, Core instance,
+approval generation and 60-second monotonic lifetime. Preparation performs no
+adapter/credential/network work and does not constitute consent. Trusted UI code
+must display and confirm the immutable view before consuming it. Wrong-host,
+expired, changed or invalidated scopes refuse before sending; high-risk, batch
+and independently decomposed actions remain excluded.
+
+Core supplies an approval marker to adapters only on this validated path.
+Consequential adapters must check it independently of public risk metadata.
+Session background/close invalidates pending previews and cancels active tokens;
+a possible send still becomes unknown without replay or rollback. Existing
+journaling, device locking, retained receipts and request retirement remain
+in force. A fixed warning records approval for the exact journaled command.
+`APPROVAL_INVALID` and `APPROVAL_EXPIRED` are explicitly unsent in the shared
+receipt schemas and have English/Chinese presentation messages.
+
+This is a Rust integration foundation, not a new appliance capability. Native
+API 1.12.1, 31 JSON methods, seven C functions, startup grants, SQLite schema 4
+and protected payload 3 are unchanged. Existing JSON/C/CLI/MCP entry points cannot
+prepare or consume approval. The trusted C/Flutter bridge, UI consent and
+model-specific dishwasher/refrigerator preservation/control mappings remain
+incomplete; this phase does not admit household operation.
+
+Local verification on October 16, 2026 passed 309 Rust tests (two opt-in system
+probes ignored), formatting, Clippy with warnings denied, offline locked workspace
+and example builds, 34 runtime cases, the 31-method/51-example native ABI suite,
+29 Python tests and five presentation tests. The new eight-case Rust suite also
+validates actual typed receipts against the shared JSON schema. Tests cover exact
+scope/grants, risk and route refusal, ownership, expiry, descriptor changes,
+revocation, duplicate preparation/replay, retired IDs, journal failures, adapter
+marker enforcement, host lifecycle and uncertainty. Two compile-fail checks
+prevent cloning/serialization. Actual C calls reject invented approval methods
+and forged command fields. Contract checks passed 17 schemas, 37 positive and
+122 negative fixtures; document/repository/commit checks passed.
+
+All three API 28 Android AARs were rebuilt with NDK r28c, JDK 21 and API 35 stubs;
+archive contents, eight exports per ABI and 16 KiB alignment passed. Only fictional
+devices, temporary profiles, synthetic storage and local protocol fixtures were
+used. No owner account or appliance was accessed, and the separate Flutter
+worktree was untouched. Phone/Keystore/APK, physical/off-LAN and remote CI
+acceptance remain unverified. The full real-device MVP is still incomplete.

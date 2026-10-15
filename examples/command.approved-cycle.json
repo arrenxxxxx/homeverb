@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0",
+  "request_id": "fictional-cycle-approval",
+  "device_id": "30000000-0000-4000-8000-000000000001",
+  "component_id": "main",
+  "capability": "vendor.example.cycle",
+  "action": "start",
+  "arguments": {"program": "normal"},
+  "connection": "cloud",
+  "timeout_ms": 10000,
+  "wait_for": "verified"
+}

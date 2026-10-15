@@ -1,4 +1,4 @@
-use homeverb_core::{Core, Operation, SecretBytes};
+use homeverb_core::{Core, Operation, PendingApproval, SecretBytes};
 use homeverb_domain::*;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
@@ -173,6 +173,7 @@ impl Session {
         if let Ok(mut state) = self.state.lock() {
             state.foreground = foreground;
             if !foreground {
+                self.core.invalidate_user_approvals();
                 for token in state.operations.values() {
                     token.cancel();
                 }
@@ -194,10 +195,49 @@ impl Session {
     pub fn close(&self) {
         if let Ok(mut state) = self.state.lock() {
             state.closed = true;
+            self.core.invalidate_user_approvals();
             for token in state.operations.values() {
                 token.cancel();
             }
         }
+    }
+
+    /// Trusted in-process UI only; this is intentionally absent from ordinary JSON.
+    pub async fn prepare_user_approval(
+        &self,
+        operation_id: String,
+        command: Command,
+    ) -> Result<PendingApproval> {
+        let (operation, _registration) =
+            self.register(SCHEMA_VERSION, operation_id, command.timeout_ms)?;
+        let preview = operation
+            .run(async { self.core.prepare_user_approval(command) })
+            .await?;
+        let state = self
+            .state
+            .lock()
+            .map_err(|_| Error::new("HOST_CLOSED", "The host session is unavailable."))?;
+        if state.closed {
+            return Err(Error::new("HOST_CLOSED", "The host session is closed."));
+        }
+        if !state.foreground {
+            return Err(Error::new(
+                "HOST_BACKGROUND",
+                "New operations require a foreground host.",
+            ));
+        }
+        Ok(preview)
+    }
+
+    /// Call only after trusted UI consent to this immutable preview; consumes it once.
+    pub async fn execute_user_approved(
+        &self,
+        operation_id: String,
+        approval: PendingApproval,
+    ) -> Result<Execution> {
+        let (operation, _registration) =
+            self.register(SCHEMA_VERSION, operation_id, approval.command().timeout_ms)?;
+        Ok(self.core.execute_user_approved(approval, &operation).await)
     }
 
     pub async fn call(&self, input: HostRequest) -> Value {

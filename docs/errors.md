@@ -39,7 +39,9 @@
 | ROOM_NAME_CONFLICT | Room name already exists after lowercasing | Choose a distinct name |
 | CAPABILITY_UNSUPPORTED | Unsupported action/component, invalid descriptor shape/version/references or capability scopes, invalid property freshness limits, contradictory field-decomposition declarations, or an action schema that cannot compile locally | Stop before adapter calls; rediscover valid metadata or use supported capabilities |
 | INVALID_ARGUMENT | Invalid range/enum or caller command identifier that is blank or exceeds 256 UTF-8 bytes | Correct using the schema and runtime identifier limits |
-| POLICY_DENIED | No complete matching device/component/action/argument/route grant, or an elevated/high-risk action | Trusted host policy change; no model-supplied bypass |
+| POLICY_DENIED | No complete matching grant/risk/route authority; ordinary calls deny elevated/high risk, and typed approval still denies high risk, automatic/ambiguous routes and decomposition | Trusted host policy change; no model-supplied bypass |
+| APPROVAL_EXPIRED | The typed trusted preview reached its 60-second monotonic expiry before execution | Review a new preview and obtain fresh user consent; never auto-confirm |
+| APPROVAL_INVALID | The prepared device descriptor, Core instance or approval generation changed | Review the current scope; no send occurred |
 | LAN_UNREACHABLE | LAN unavailable and write proven unsent | Use a reachable network |
 | CLOUD_UNREACHABLE | Cloud unavailable and write unsent | Check network/vendor availability |
 | RATE_LIMITED | Vendor rate limit | Honor budget and return retry guidance |
@@ -55,6 +57,12 @@ After possible transmission, prefer `WRITE_OUTCOME_UNKNOWN` over a misleading `L
 ## Invariants
 
 `verified` includes verification evidence. `failed` includes an explicit error. `unknown` explains uncertainty and must not suggest blind retries. Batch aggregation preserves every item; `partial` never hides successes or failures. Contract version changes require explicit coordinated documentation and migration; do not silently treat an incompatible envelope as valid.
+
+`APPROVAL_EXPIRED` and `APPROVAL_INVALID` are pre-send failures with no attempts
+or verification. Existing production JSON/C/CLI/MCP surfaces cannot issue or
+consume an approval; these errors belong to the typed trusted Rust path. A
+cancelled/expired in-flight send still uses existing uncertainty semantics,
+not an approval-refusal claim. See [ADR-0042](adr/0042-trusted-single-command-approval.md).
 
 The separate BatchExecution envelope carries status, timestamps, and per-device Execution items; error and verification fields belong to those items. Invalid batch shape, duplicate device/caller IDs, missing permissions, unavailable routes, or an existing conflicting request fail whole-list preflight without sending. Collisions involving derived composite IDs use `REQUEST_CONFLICT`. Failures after admission remain per item, and independent devices continue within the shared deadline. A mixed batch returns `partial` even when different items met different requested wait conditions. See [batch semantics](routing-and-execution.md#composite-and-batch-operations).
 

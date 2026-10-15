@@ -28,7 +28,12 @@ Validate identity, permissions, arguments, routing, and risk before sending anyt
 
 Use `accepted`, `verified`, `failed`, and `unknown`; use per-item results and `partial` for batches. `verified` requires timestamped evidence and does not establish physical causality by itself. HTTP 200, stale cache entries, and optimistic state are not verification.
 
-When changing execution semantics, update `docs/routing-and-execution.md`, `docs/errors.md`, the corresponding schemas, and positive/negative fixtures. Cancelling an already-sent request is not a physical rollback.
+When changing execution semantics, update `docs/routing-and-execution.md`, `docs/errors.md`, the corresponding schemas, and positive/negative fixtures. Cancelling an already-sent request is not a physical rollback. Typed Rust elevated
+approval follows ADR-0042: retain the immutable preview, require actual trusted UI
+consent before consuming it, and invalidate/cancel on lifecycle changes. It is not
+available in ordinary JSON, C ABI, CLI or MCP; high-risk actions remain denied.
+Consequential adapters must check Core's approval marker independently of public
+risk metadata.
 
 ## Security
 

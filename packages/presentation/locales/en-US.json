@@ -127,5 +127,7 @@
   "vendor.midea.ac.mode.dry": "Dry",
   "vendor.midea.ac.mode.fan": "Fan",
   "vendor.midea.ac.activate_mode": "Turn on and set mode",
-  "vendor.midea.ac.activate_mode.confirm": "Turn on {device} and switch to {mode}?"
+  "vendor.midea.ac.activate_mode.confirm": "Turn on {device} and switch to {mode}?",
+  "error.APPROVAL_EXPIRED": "The confirmation expired. Review the command again before confirming.",
+  "error.APPROVAL_INVALID": "The device or confirmation context changed. Review the command again."
 }

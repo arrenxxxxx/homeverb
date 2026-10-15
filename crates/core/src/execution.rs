@@ -7,6 +7,7 @@ pub struct Core {
     adapters: Vec<Arc<dyn Adapter>>,
     pub(crate) clock: Arc<dyn Clock>,
     policy: Policy,
+    pub(crate) approval_context: Arc<std::sync::atomic::AtomicU64>,
 }
 
 impl Core {
@@ -21,6 +22,7 @@ impl Core {
             adapters,
             clock,
             policy,
+            approval_context: Arc::new(std::sync::atomic::AtomicU64::new(0)),
         }
     }
 
@@ -125,7 +127,12 @@ impl Core {
         Ok(())
     }
 
-    fn routes(&self, device: &Device, route: Route, action: Option<&Action>) -> Vec<Connection> {
+    pub(crate) fn routes(
+        &self,
+        device: &Device,
+        route: Route,
+        action: Option<&Action>,
+    ) -> Vec<Connection> {
         let mut connections: Vec<_> = device
             .connections
             .iter()
@@ -276,6 +283,18 @@ impl Core {
     }
 
     fn validate(&self, command: &Command) -> Result<(Descriptor, Action)> {
+        self.validate_command(command, false)
+    }
+
+    pub(crate) fn validate_elevated(&self, command: &Command) -> Result<(Descriptor, Action)> {
+        let (descriptor, action) = self.validate_command(command, true)?;
+        if action.independent_fields {
+            return Err(crate::approval::denied());
+        }
+        Ok((descriptor, action))
+    }
+
+    fn validate_command(&self, command: &Command, elevated: bool) -> Result<(Descriptor, Action)> {
         command.validate()?;
         let descriptor = self.describe(&command.device_id)?;
         // Commands use stable IDs. Alias resolution belongs to trusted entry points.
@@ -299,7 +318,11 @@ impl Core {
             .ok_or_else(unsupported)?
             .clone();
         action.validate_arguments(&command.arguments)?;
-        action.transports = self.policy.authorize(command, &action)?;
+        action.transports = if elevated {
+            self.policy.authorize_elevated(command, &action)?
+        } else {
+            self.policy.authorize(command, &action)?
+        };
         Ok((descriptor, action))
     }
 
@@ -351,11 +374,34 @@ impl Core {
         command: Command,
         operation: &Operation,
     ) -> Execution {
+        self.execute_authorized(command, operation, None).await
+    }
+
+    /// Trusted host only: consume exactly the preview the user confirmed.
+    pub async fn execute_user_approved(
+        &self,
+        approval: PendingApproval,
+        operation: &Operation,
+    ) -> Execution {
+        self.execute_authorized(approval.command().clone(), operation, Some(&approval))
+            .await
+    }
+
+    async fn execute_authorized(
+        &self,
+        command: Command,
+        operation: &Operation,
+        approval: Option<&PendingApproval>,
+    ) -> Execution {
         let mut execution = Execution::new(&command, self.clock.now());
         let result = async {
             let mut scoped = Operation::new(command.timeout_ms, operation.cancellation.clone())?;
             scoped.deadline = scoped.deadline.min(operation.deadline);
-            self.execute_inner(&command, &scoped, &mut execution).await
+            if let Some(approval) = approval {
+                scoped.deadline = scoped.deadline.min(approval.deadline);
+            }
+            self.execute_inner(&command, &scoped, &mut execution, approval)
+                .await
         }
         .await;
         if let Err(error) = result {
@@ -370,8 +416,15 @@ impl Core {
         command: &Command,
         operation: &Operation,
         execution: &mut Execution,
+        approval: Option<&PendingApproval>,
     ) -> Result<()> {
-        let (descriptor, action) = self.validate(command)?;
+        let (descriptor, action) = if let Some(approval) = approval {
+            let result = self.validate_elevated(command)?;
+            approval.validate(self, &result.0)?;
+            result
+        } else {
+            self.validate(command)?
+        };
         let _lock = self.store.lock_device(&descriptor.device.id)?;
         if let Some((previous_command, previous)) = self.store.execution(&command.request_id)? {
             if previous_command != *command {
@@ -382,6 +435,11 @@ impl Core {
             }
             *execution = previous;
             return Ok(());
+        }
+        if approval.is_some() {
+            execution
+                .warnings
+                .push("User approval was supplied for this exact command.".into());
         }
         let authorized_parts = self.authorized_parts(command, &action)?;
         if !authorized_parts.is_empty() {
@@ -412,7 +470,14 @@ impl Core {
                     ));
                 } else {
                     if let Err(error) = self
-                        .transmit(&part, &descriptor, &part_action, operation, &mut item)
+                        .transmit(
+                            &part,
+                            &descriptor,
+                            &part_action,
+                            operation,
+                            &mut item,
+                            false,
+                        )
                         .await
                     {
                         preserve_outcome(&mut item, error);
@@ -458,8 +523,15 @@ impl Core {
             }
             execution.items = Some(items);
         } else {
-            self.transmit(command, &descriptor, &action, operation, execution)
-                .await?;
+            self.transmit(
+                command,
+                &descriptor,
+                &action,
+                operation,
+                execution,
+                approval.is_some(),
+            )
+            .await?;
         }
         execution.completed_at = self.clock.now();
         self.store.finish_execution(command, execution)
@@ -472,6 +544,7 @@ impl Core {
         action: &Action,
         operation: &Operation,
         execution: &mut Execution,
+        user_approved: bool,
     ) -> Result<()> {
         let device = &descriptor.device;
         let routes = self.routes(device, command.connection, Some(action));
@@ -494,7 +567,10 @@ impl Core {
                 execution.attempts.last_mut().expect("attempt exists").phase = Phase::NotSent;
                 return Err(error);
             }
-            let validated = ValidatedCommand(command.clone());
+            let validated = ValidatedCommand {
+                command: command.clone(),
+                user_approved,
+            };
             let outcome = operation
                 .run(self.adapter(&connection).execute(
                     &validated,

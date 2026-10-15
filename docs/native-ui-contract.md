@@ -674,6 +674,17 @@ still require physical acceptance. No real device was operated in this phase.
 The 31 JSON methods, seven C functions, SQLite schema 4 and protected payload 3
 are unchanged.
 
+## Consequential-action integration boundary
+
+[ADR-0042](adr/0042-trusted-single-command-approval.md) implements a typed Rust
+Core/Session preparation and one-command approval path. It is not yet exposed
+through the seven C functions or 31 JSON methods. Do not add `confirmed`,
+`approved` or an approval identifier to ordinary request JSON, and do not infer
+that native dishwasher/refrigerator controls are available. The future trusted
+Flutter bridge must display the immutable prepared scope, consume it only after
+explicit user consent and preserve expiry/foreground invalidation. Existing
+native startup, methods, versions and outcomes are unchanged by this foundation.
+
 ## Verify the handoff
 
 ```bash

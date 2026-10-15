@@ -55,6 +55,32 @@ A timeout includes validation, local storage/lock work, connection, necessary se
 
 Persist a pending phase before transmission and update after acknowledgement. On restart, unresolved records permit a warning or explicit read-based verification, never automatic replay. There is no atomic transaction spanning local storage and the appliance.
 
+## Trusted single-command approval
+
+[ADR-0042](adr/0042-trusted-single-command-approval.md) adds typed Core/Session
+preparation and execution for one elevated action. Ordinary plan/execute remain
+restricted to low-risk grants. Preparation does not send, journal, authenticate
+or prove live preconditions. It requires a complete existing grant and one explicit
+transport with exactly one admitted connection. The immutable preview expires
+in 60 seconds; only the trusted UI may execute that same preview after consent.
+No batch, independent-field decomposition, automatic routing or high-risk action
+is admitted. No ordinary request field can supply approval.
+
+Execution consumes the preview even on failure, revalidates descriptor/authority
+and rejects a different Core, invalidated generation or expired preview before
+send. Its budget is capped by the monotonic expiry. Existing device locks and
+journaling prevent concurrent duplicate sends and preserve uncertainty on crashes.
+A fixed receipt warning records that approval was supplied for the exact command.
+The adapter receives Core's approval marker only on this path and must check it
+before consequential effects, independently of cached risk metadata.
+
+Native background/close invalidates pending previews and cancels in-flight work;
+direct Rust hosts must implement the same lifecycle. Invalidation cannot undo a
+sent command. Pending expiry/refusal stays unsent; expiry/cancellation after a
+possible send stays unknown. Inspect the original request receipt rather than
+creating an automatic retry. C/Flutter admission and physical action mappings
+remain separate work; the existing public JSON/C/CLI/MCP surfaces are unchanged.
+
 ## Composite and batch operations
 
 Treat multi-field `climate.set` as atomic only when the adapter declares it so. Split and track sub-steps only with an explicit `independent_fields: true` declaration, which requires a non-atomic `set_value` action. Otherwise pass the complete argument object to the adapter; absence of atomicity is not evidence that options may become separate commands. Batches return per-device outcomes with bounded concurrency. Do not compensate or roll back automatically: that would perform more physical changes without a reliable transaction boundary.

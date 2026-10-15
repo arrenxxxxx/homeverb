@@ -32,6 +32,7 @@ Start with the progressive development path. Reference documents define invarian
 - Protected product mapping evidence: [inventory and storage rules](adr/0040-protected-meiju-product-profiles.md).
 - Explicit power-on and mode selection: [scoped AC activation](adr/0039-explicit-meiju-mode-activation.md).
 - MCP control admission: [session-scoped Meiju Core access](adr/0038-scoped-meiju-mcp.md).
+- Consequential-action foundation: [trusted single-command approval](adr/0042-trusted-single-command-approval.md), currently typed Rust only.
 - Evidence: [references](references.md), [fictional examples](../examples/README.md), [diagrams](diagrams/README.md).
 
 ## Decisions

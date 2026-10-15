@@ -127,5 +127,7 @@
   "vendor.midea.ac.mode.dry": "除湿",
   "vendor.midea.ac.mode.fan": "送风",
   "vendor.midea.ac.activate_mode": "开机并切换模式",
-  "vendor.midea.ac.activate_mode.confirm": "开启{device}并切换为{mode}？"
+  "vendor.midea.ac.activate_mode.confirm": "开启{device}并切换为{mode}？",
+  "error.APPROVAL_EXPIRED": "确认已过期，请重新核对指令后确认。",
+  "error.APPROVAL_INVALID": "设备信息或确认上下文已变化，请重新核对指令。"
 }

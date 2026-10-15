@@ -176,6 +176,16 @@ def main():
             assert not request_schema.is_valid(bad)
             assert raw(handle, bad)['error']['code'] == 'INVALID_ARGUMENT'
             assert raw(handle, envelope('start_authentication'))['error']['code'] == 'INVALID_ARGUMENT'
+            # Typed trusted approvals must never become an ordinary JSON privilege path.
+            for name in ['prepare_user_approval', 'execute_user_approved']:
+                forged = envelope(name, command=load('examples/command.approved-cycle.json'))
+                assert not request_schema.is_valid(forged)
+                assert raw(handle, forged)['error']['code'] == 'INVALID_ARGUMENT'
+            for field in ['approved', 'user_approved', 'approval_id']:
+                forged = copy.deepcopy(by_method['execute'])
+                forged['request']['command'][field] = True
+                assert not request_schema.is_valid(forged)
+                assert raw(handle, forged)['error']['code'] == 'INVALID_ARGUMENT'
             assert not library.homeverb_cancel(handle, b'absent-operation')
             library.homeverb_set_foreground(handle, False)
             assert call(handle, 'get_api_info')['error']['code'] == 'HOST_BACKGROUND'

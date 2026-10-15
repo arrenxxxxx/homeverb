@@ -46,6 +46,8 @@ def main() -> int:
         ("capability", "capability.meiju-fan"), ("command", "command.meiju-fan"),
         ("capability", "capability.meiju-mode"), ("command", "command.meiju-mode"),
         ("capability", "capability.meiju-temperature"), ("command", "command.meiju-temperature"),
+        ("capability", "capability.approved-cycle"), ("command", "command.approved-cycle"),
+        ("command-result", "command-result.approval-expired"),
     ]
     validators = {}
     for path in (ROOT / "schemas").glob("*.schema.json"):
@@ -126,7 +128,19 @@ def main() -> int:
         fresh = load("examples/capability.climate.json")
         fresh["properties"]["target_temperature"]["max_age_ms"] = max_age_ms
         validators["capability"].validate(fresh)
+    approved_action = Draft202012Validator(load("examples/capability.approved-cycle.json")["actions"]["start"]["parameters"])
+    approved_action.validate(load("examples/command.approved-cycle.json")["arguments"])
     negative = []
+    for code in ["APPROVAL_INVALID", "APPROVAL_EXPIRED"]:
+        bad = load("examples/command-result.approval-expired.json")
+        bad["error"]["code"] = code
+        validators["command-result"].validate(bad)
+        bad["attempts"] = [{"transport":"cloud", "phase":"possibly_sent", "duration_ms":1}]
+        negative.append((f"sent {code} receipt", validators["command-result"], bad))
+    for field in ["approved", "user_approved", "approval_id"]:
+        bad = load("examples/command.approved-cycle.json")
+        bad[field] = True
+        negative.append((f"forged command approval {field}", validators["command"], bad))
     for value in [15.5, 30.5, 26.25, "26", True, None]:
         bad = {"schema_version":"1.0", "meiju_temperature_grants":[
             {"device_id":"30000000-0000-4000-8000-000000000001", "target_temperature":value}]}
