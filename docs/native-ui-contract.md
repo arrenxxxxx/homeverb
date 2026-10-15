@@ -86,7 +86,7 @@ Prefer exact device IDs even where lookup accepts an alias. Resolve a capability
 | UI scope | Current integration | Remaining work and boundary |
 |---|---|---|
 | D01–D12, R01–R05: cards, search, rooms, local organization | Device/room methods above | Flutter filtering, loading/errors, accessibility and layouts. Metadata writes preserve routes and grants |
-| C01–C14: dynamic controls, history and outcomes | Describe/read/plan/execute/batch/receipt methods | Render exact capabilities; Meiju has read-only AC/fridge/dishwasher mappings and no actions. Consequential real approvals remain unavailable |
+| C01–C14: dynamic controls, history and outcomes | Describe/read/plan/execute/batch/receipt methods | Render exact capabilities; default Meiju discovery has read-only AC/fridge/dishwasher mappings; the separate developer probe does not grant native write authority. Consequential real approvals remain unavailable |
 | A01–A08: device discovery and addition | Explicit selected-adapter `discover`, including saved-account Meiju cloud retrieval | Real pairing, mobile permissions and safe identity merge remain unavailable. No merge API exists |
 | P01–P13: platforms, accounts, authorization and removal | `list_accounts`, `refresh_account`, and separate `homeverb_connect_account` | Flutter protected input, result/error presentation and phone secure stores; removal, revocation and recovery UI remain unavailable |
 | H01–H16: nearby authorization sharing | No sharing methods in this version | Eligibility, peer discovery, code verification, scope, consent, conflict/import and transfer records require ADR-0008 implementation |
@@ -127,8 +127,8 @@ inventory does not delete cards. Partial retrieval preserves old cards and retur
 return `DEVICE_IDENTITY_CONFLICT`. No implicit reconciliation is available.
 
 Only the six [observed model/family pairs](compatibility.md#observed-cloud-read-models)
-are experimental; other models remain visible as unsupported. There are no real
-actions or writable properties. Cloud observations have no proven source timestamp
+are experimental; other models remain visible as unsupported. Default discovery
+advertises no actions or writable properties. Cloud observations have no proven source timestamp
 and remain stale, including after a successful live request. Show them as recent
 cloud responses with unknown freshness, not as verified physical state.
 
@@ -138,6 +138,12 @@ components through schema-validated responses. No appliance controls were sent.
 The automated suite separately checks empty-account startup/discovery, invalid
 mode/grant/scenario combinations, lifecycle gating and closed handles without
 vendor calls. Mobile secure stores and Android/iOS packaging remain unimplemented.
+
+The separate [AC developer probe](development/07-meiju-control.md) can persist
+experimental writable descriptors in a shared profile. Metadata is not authority:
+this native host retains no Meiju write grants and its default adapter refuses
+controls. A read-only discovery replaces those descriptors. No `allow_meiju_writes`
+JSON switch or user-supplied approval flag is admitted by API 1.2.0.
 
 ## Account connection and refresh
 

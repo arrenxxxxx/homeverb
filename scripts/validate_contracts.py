@@ -31,6 +31,8 @@ def main() -> int:
         ("state", "state"), ("command-result", "command-result.verified"),
         ("state", "state.live"),
         ("command-result", "command-result.accepted"),
+        ("command-result", "command-result.meiju-accepted"),
+        ("command-result", "command-result.meiju-unknown"),
         ("command-result", "command-result.unknown"),
         ("command-result", "command-result.partial"),
         ("command-result", "command-result.composite"),
@@ -95,6 +97,10 @@ def main() -> int:
         fresh["properties"]["target_temperature"]["max_age_ms"] = max_age_ms
         validators["capability"].validate(fresh)
     negative = []
+    for status in ("accepted", "unknown"):
+        bad = load(f"examples/command-result.meiju-{status}.json")
+        bad["status"] = "verified"
+        negative.append((f"cloud {status} promoted without evidence", validators["command-result"], bad))
     for scope in (None, True, 7, [], {}, ""):
         bad = load("examples/capability.fridge.json"); bad["component_id"] = scope
         negative.append((f"invalid capability component scope {scope}", validators["capability"], bad))

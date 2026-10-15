@@ -4,7 +4,7 @@
 
 HomeVerb is the owner-approved project name; `homeverb` is the executable and repository name.
 
-> **Status: 0.2.0 Mock MVP.** The Rust Core, persistent fictional appliance, CLI, read-only local MCP, and native UI bridge are implemented. An experimental Meiju adapter has read six actual appliances through Core and the native bridge; physical verification and controls remain pending. Android/iOS packaging and visual UI are separate work.
+> **Status: 0.2.0 Mock MVP.** The Rust Core, persistent fictional appliance, CLI, read-only local MCP, and native UI bridge are implemented. An experimental Meiju adapter has read six actual appliances through Core and the native bridge; physical verification and real control acceptance remain pending. Android/iOS packaging and visual UI are separate work.
 
 ## Run the MVP
 
@@ -37,6 +37,7 @@ This exits with code 11. Refresh state to inspect the result; do not blindly res
 - Schema-1/2 migration to schema 3 with a consistent backup, bounded detailed receipts, and retained request IDs that prevent replay after history is retired.
 - Explicit local diagnostic previews with allowlisted fields and bounded receipt summaries, available through CLI and the native UI bridge.
 - Persistent Mock power/climate operations and fault scenarios, including non-atomic partial outcomes.
+- Experimental Meiju AC power controls through an explicit [developer preview/probe](docs/development/07-meiju-control.md), with scoped grants and synthetic uncertainty tests. Default native sessions remain read-only; no physical control is verified.
 - Bounded correlated-completion verification with exact request/device/connection and timestamp checks; fictional evidence does not establish real protocol support.
 - Explicit device batches through Core, CLI files, and native requests, with whole-list preflight, four-device concurrency, shared deadlines, and per-device receipts.
 - Component-scoped capabilities for different constraints on one physical appliance, verified with fictional fridge/freezer fixtures.

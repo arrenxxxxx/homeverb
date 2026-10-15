@@ -898,6 +898,7 @@ dependencies = [
  "homeverb-domain",
  "homeverb-secrets",
  "homeverb-storage",
+ "jsonschema",
  "md-5",
  "rcgen",
  "reqwest",

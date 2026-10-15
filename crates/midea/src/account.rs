@@ -368,6 +368,41 @@ impl MeijuAccount {
         CloudId::parse(&serde_json::Value::String(binding.appliance_id.clone()))
     }
 
+    /// Resolve a control only from protected evidence, never a public provider identifier.
+    pub(crate) async fn control_appliance(
+        &self,
+        device_id: &str,
+        connection: &Connection,
+        operation: &Operation,
+    ) -> Result<Appliance> {
+        let payload = self.load(operation).await?;
+        let binding = payload
+            .bindings
+            .iter()
+            .find(|binding| binding.local.device_id.to_string() == device_id)
+            .ok_or_else(identity_conflict)?;
+        let expected = Connection {
+            id: binding.local.connection_id.to_string(),
+            adapter: PROVIDER.into(),
+            transport: Transport::Cloud,
+            account_id: Some(self.record().id.to_string()),
+            identity_ref: binding.local.identity_ref.to_string(),
+        };
+        if *connection != expected {
+            return Err(identity_conflict());
+        }
+        if binding.family != 0xac {
+            return Err(crate::control::unsupported());
+        }
+        Ok(Appliance {
+            id: CloudId::parse(&serde_json::Value::String(binding.appliance_id.clone()))?,
+            family: ApplianceFamily::AirConditioner,
+            name: None,
+            model: binding.model.clone(),
+            online_hint: None,
+        })
+    }
+
     /// Verify the selected local binding before one default cloud query. Core must still
     /// admit the descriptor and validate every returned property before caching the result.
     pub async fn read_bound_state(

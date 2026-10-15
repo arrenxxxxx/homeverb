@@ -82,6 +82,19 @@ unsupported status and no actions. Every Meiju observation remains stale while i
 source timestamp is unproven; it cannot verify a write. Construction, local queries
 and cached reads do no account or network work.
 
+An explicit trusted Meiju adapter opt-in additionally admits experimental AC
+`power.set` for the four exact read models. Default hosts retain read-only adapters
+and no Meiju write grants. Control repeats the fixed argument contract and protected
+account/device/connection/model checks before sending; public metadata cannot supply
+a provider target. The separate HTTPS control path marks possible transmission
+before executing the request. Only a valid code-zero envelope establishes acceptance;
+HTTP 401/403 and recognized authorization codes establish rejection. Other provider
+codes, malformed replies, HTTP failures and post-send cancellation remain unknown.
+No retry, route fallback or automatic login follows. Verification is unavailable,
+so accepted controls requested with `wait_for: verified` retain `VERIFICATION_PENDING`
+without a state read or cache mutation. Existing Execution schemas and replay rules
+apply unchanged; see the [control probe](development/07-meiju-control.md).
+
 The current Core attempts each permitted route at most once. Only a proven-unsent reachability failure allows the next write route. A possibly-sent write returns `unknown` immediately; an explicit later read does not silently rewrite its receipt. State-match verification performs one bounded live read. All live snapshots, including verification reads, must use schema 1.0, match the requested device/component, and have every observation sourced from the selected transport. A source observation cannot be later than its local receipt, and a live receipt cannot be in the future. Empty warning strings are invalid. The entire snapshot is checked before saving; a valid target field cannot hide malformed unrelated fields.
 
 The live-read rule applies to `state_match`. For `correlated_completion`, Core instead uses successful completion evidence returned by the same bounded adapter execution. The adapter validates protocol correlation; Core requires an exact match of request, device, component, and selected connection IDs. Receipt time must be at or after attempt start and no later than the current clock. If available, trustworthy completion time must be between attempt start and receipt. Evidence is used only after acceptance and when the caller requests verification. Missing or invalid evidence keeps `accepted` with `VERIFICATION_PENDING`, without a state-read fallback or another send. An enqueue acknowledgement is never completion.

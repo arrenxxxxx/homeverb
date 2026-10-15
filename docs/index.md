@@ -12,6 +12,7 @@ Start with the progressive development path. Reference documents define invarian
 | 4 | [Add a real adapter](development/04-add-adapter.md) | Authentication gate, contract tests, physical evidence |
 | 5 | [Integrate Midea/Hualing](development/05-midea.md) | Account-device retrieval, direct cloud control, additional LAN routes, and physical acceptance |
 | 6 | [Verify a Meiju account locally](development/06-meiju-probe.md) | Hidden-input read-only login, protected session and automatic inventory |
+| 7 | [Preview a Meiju AC control](development/07-meiju-control.md) | Exact-device power grant, tracked cloud outcomes and separately authorized physical acceptance |
 
 ## Reference
 

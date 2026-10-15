@@ -1,8 +1,8 @@
-//! Operation-scoped HTTPS for the admitted Meiju login and read endpoints.
+//! Operation-scoped HTTPS with a separate, transmission-tracked control path.
 
 use crate::{MAX_RESPONSE_BYTES, codec, invalid};
 use async_trait::async_trait;
-use homeverb_core::{Operation, SecretBytes};
+use homeverb_core::{Operation, SecretBytes, WriteProgress};
 use homeverb_domain::{Error, Result};
 use reqwest::{
     Client, StatusCode,
@@ -21,6 +21,7 @@ pub enum CloudEndpoint {
     Homes,
     HomeAppliances,
     ApplianceState,
+    ApplianceControl,
 }
 
 impl CloudEndpoint {
@@ -31,6 +32,7 @@ impl CloudEndpoint {
             Self::Homes => "/v1/homegroup/list/get",
             Self::HomeAppliances => "/v1/appliance/home/list/get",
             Self::ApplianceState => "/mjl/v1/device/status/lua/get",
+            Self::ApplianceControl => "/mjl/v1/device/lua/control",
         }
     }
 }
@@ -94,6 +96,24 @@ impl SignedRequest {
 pub trait CloudTransport: Send + Sync {
     /// Send once within the supplied operation. Never log headers, bodies or provider errors.
     async fn send(&self, request: &SignedRequest, operation: &Operation) -> Result<SecretBytes>;
+
+    /// Controls must never fall back to the read transport. Mark possible transmission
+    /// immediately before sending, with no retries, redirects or implicit login.
+    async fn send_control(
+        &self,
+        _: &SignedRequest,
+        _: &WriteProgress,
+        _: &Operation,
+    ) -> Result<SecretBytes> {
+        Err(control_unsupported())
+    }
+}
+
+fn control_unsupported() -> Error {
+    Error::new(
+        "CAPABILITY_UNSUPPORTED",
+        "The transport does not admit this control path.",
+    )
 }
 
 /// No URL, proxy, certificate or redirect overrides are exposed in production.
@@ -147,16 +167,35 @@ async fn send_once(
     request: &SignedRequest,
     operation: &Operation,
 ) -> Result<SecretBytes> {
+    if request.endpoint == CloudEndpoint::ApplianceControl {
+        return Err(control_unsupported());
+    }
+    transmit(client, url, request, None, operation).await
+}
+
+async fn transmit(
+    client: Client,
+    url: &str,
+    request: &SignedRequest,
+    progress: Option<&WriteProgress>,
+    operation: &Operation,
+) -> Result<SecretBytes> {
     operation
         .run(async {
             // TLS/HTTP libraries may make transient copies outside SecretBytes ownership.
-            let mut response = client
+            let outgoing = client
                 .post(url)
                 .headers(headers(request)?)
                 .body(request.body().to_vec())
-                .send()
-                .await
+                .build()
                 .map_err(|_| failed())?;
+            operation.run(async { Ok(()) }).await?;
+            // All synchronous preflight precedes this marker; connection errors after it
+            // do not establish that no bytes reached the vendor.
+            if let Some(progress) = progress {
+                progress.mark_sent();
+            }
+            let mut response = client.execute(outgoing).await.map_err(|_| failed())?;
             match response.status() {
                 StatusCode::UNAUTHORIZED | StatusCode::FORBIDDEN => {
                     return Err(Error::new(
@@ -193,6 +232,24 @@ impl CloudTransport for MeijuHttps {
                 let client = client_builder().build().map_err(|_| failed())?;
                 let url = format!("{ORIGIN}{}", request.endpoint.path());
                 send_once(client, &url, request, operation).await
+            })
+            .await
+    }
+
+    async fn send_control(
+        &self,
+        request: &SignedRequest,
+        progress: &WriteProgress,
+        operation: &Operation,
+    ) -> Result<SecretBytes> {
+        if request.endpoint != CloudEndpoint::ApplianceControl {
+            return Err(control_unsupported());
+        }
+        operation
+            .run(async {
+                let client = client_builder().build().map_err(|_| failed())?;
+                let url = format!("{ORIGIN}{}", request.endpoint.path());
+                transmit(client, &url, request, Some(progress), operation).await
             })
             .await
     }
@@ -320,6 +377,158 @@ mod tests {
     }
     fn operation(ms: u64) -> Operation {
         Operation::new(ms, CancellationToken::new()).unwrap()
+    }
+
+    fn control_request() -> SignedRequest {
+        SignedRequest::new(
+            CloudEndpoint::ApplianceControl,
+            &serde_json::json!({"applianceCode":"1","command":{"control":{"power":"off"}}}),
+            Some(&SecretBytes::new(b"FICTIONAL-TOKEN".to_vec())),
+            "1792030210".into(),
+        )
+        .unwrap()
+    }
+
+    #[tokio::test]
+    async fn control_transport_requires_explicit_path_and_keeps_preflight_unsent() {
+        let server = Server::start(vec![], false).await;
+        let mut request = control_request();
+        let progress = WriteProgress::default();
+        assert_eq!(
+            send_once(
+                server.client.clone(),
+                &server.url,
+                &request,
+                &operation(1000)
+            )
+            .await
+            .unwrap_err()
+            .code,
+            "CAPABILITY_UNSUPPORTED"
+        );
+        assert_eq!(
+            MeijuHttps
+                .send_control(&super::tests::request(), &progress, &operation(1000))
+                .await
+                .unwrap_err()
+                .code,
+            "CAPABILITY_UNSUPPORTED"
+        );
+        let cancelled = operation(1000);
+        cancelled.cancellation.cancel();
+        assert_eq!(
+            transmit(
+                server.client.clone(),
+                &server.url,
+                &request,
+                Some(&progress),
+                &cancelled
+            )
+            .await
+            .unwrap_err()
+            .code,
+            "CANCELLED"
+        );
+        request.token = Some(SecretBytes::new(b"invalid\nheader".to_vec()));
+        assert_eq!(
+            transmit(
+                server.client.clone(),
+                &server.url,
+                &request,
+                Some(&progress),
+                &operation(1000)
+            )
+            .await
+            .unwrap_err()
+            .code,
+            "MIDEA_RESPONSE_INVALID"
+        );
+        assert_eq!(progress.phase(), homeverb_domain::Phase::NotSent);
+        assert_eq!(server.connections.load(Ordering::SeqCst), 0);
+
+        struct ReadOnly;
+        #[async_trait]
+        impl CloudTransport for ReadOnly {
+            async fn send(&self, _: &SignedRequest, _: &Operation) -> Result<SecretBytes> {
+                panic!("Controls must not fall through to read transports.")
+            }
+        }
+        assert_eq!(
+            ReadOnly
+                .send_control(&control_request(), &progress, &operation(1000))
+                .await
+                .unwrap_err()
+                .code,
+            "CAPABILITY_UNSUPPORTED"
+        );
+    }
+
+    #[tokio::test]
+    async fn control_http_replies_errors_and_disconnects_remain_possibly_sent() {
+        for (wire, error) in [
+            ("HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\n{}".into(), None),
+            ("HTTP/1.1 302 Found\r\nLocation: SERVER_URL\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".into(), Some("MIDEA_REQUEST_FAILED")),
+            ("HTTP/1.1 503 Unavailable\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".into(), Some("MIDEA_REQUEST_FAILED")),
+            ("HTTP/1.1 401 Unauthorized\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".into(), Some("AUTH_REQUIRED")),
+            ("HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".into(), Some("AUTH_REQUIRED")),
+            (format!("HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n", MAX_RESPONSE_BYTES + 1), Some("MIDEA_RESPONSE_INVALID")),
+            ("HTTP/1.1 200 OK\r\nContent-Length: 10\r\nConnection: close\r\n\r\nshort".into(), Some("MIDEA_REQUEST_FAILED")),
+        ] {
+            let server = Server::start(wire.into_bytes(), false).await;
+            let progress = WriteProgress::default();
+            let result = transmit(server.client.clone(), &server.url, &control_request(), Some(&progress), &operation(2000)).await;
+            assert_eq!(result.err().map(|e| e.code), error.map(str::to_owned));
+            assert_eq!(progress.phase(), homeverb_domain::Phase::PossiblySent);
+            assert_eq!(server.connections.load(Ordering::SeqCst), 1);
+            assert_eq!(server.requests.lock().unwrap().len(), 1);
+        }
+    }
+
+    #[tokio::test]
+    async fn control_cancel_and_deadline_close_sockets_without_erasing_send_progress() {
+        for cancel in [false, true] {
+            let server = Server::start(
+                b"HTTP/1.1 200 OK\r\nContent-Length: 10\r\n\r\n".to_vec(),
+                true,
+            )
+            .await;
+            let progress = WriteProgress::default();
+            let request = control_request();
+            let op = operation(if cancel { 2000 } else { 200 });
+            let work = transmit(
+                server.client.clone(),
+                &server.url,
+                &request,
+                Some(&progress),
+                &op,
+            );
+            let stop = async {
+                if cancel {
+                    while server.requests.lock().unwrap().is_empty() {
+                        tokio::task::yield_now().await;
+                    }
+                    op.cancellation.cancel();
+                }
+            };
+            let (result, _) = tokio::join!(work, stop);
+            assert_eq!(
+                result.unwrap_err().code,
+                if cancel {
+                    "CANCELLED"
+                } else {
+                    "DEADLINE_EXCEEDED"
+                }
+            );
+            assert_eq!(progress.phase(), homeverb_domain::Phase::PossiblySent);
+            tokio::time::timeout(Duration::from_secs(1), async {
+                while server.closed.load(Ordering::SeqCst) == 0 {
+                    tokio::task::yield_now().await;
+                }
+            })
+            .await
+            .unwrap();
+            assert_eq!(server.connections.load(Ordering::SeqCst), 1);
+        }
     }
 
     #[tokio::test]

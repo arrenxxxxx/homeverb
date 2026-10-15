@@ -106,6 +106,19 @@ The native read protocols use `MIDEA_RESPONSE_INVALID` for malformed/oversized, 
 
 The account-bound read path returns `DEVICE_IDENTITY_CONFLICT` before transport when the local device, selected connection or known model differs from the protected binding. Invalid components return `CAPABILITY_UNSUPPORTED`. Pending or unavailable credentials stop the request through the vault. Core rejects decoded but undeclared properties with `INVALID_OBSERVATION`; neither that rejection nor a protocol failure replaces the previous cache or triggers a retry.
 
+## Meiju cloud control errors
+
+The explicit experimental AC control path uses existing execution codes and schema
+1.0. Unsupported model/action/host, invalid arguments, private binding conflicts and
+credential/preflight failures stop before transmission. HTTP 401/403 or recognized
+authorization codes 7400/40002 return a rejected `AUTH_REQUIRED`, with no automatic
+login or resend. Unlike read errors, arbitrary nonzero control codes do not prove
+rejection: these, invalid replies and failures after possible transmission become
+`WRITE_OUTCOME_UNKNOWN`. Provider text and transport details are never exported.
+An explicit code-zero acknowledgement remains accepted with `VERIFICATION_PENDING`
+when verification was requested; current cloud observations cannot verify it.
+See the [outcome table](development/07-meiju-control.md#outcome-contract).
+
 ## Native account connection results
 
 `homeverb_connect_account` is separate from ordinary JSON and rejects invalid

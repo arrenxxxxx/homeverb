@@ -2,11 +2,16 @@
 
 The owner selected Midea and Hualing air conditioners, dishwashers, and refrigerators as the first real-device scope. The primary journey uses appliances already bound in Midea Meiju: authorize that account inside HomeVerb, automatically retrieve its accessible devices, and read/control supported capabilities through Midea's cloud at home or away. HomeVerb has no account of its own. Re-pairing, manual IP/Token entry, and a home gateway are not prerequisites.
 
-Daily cloud control is required in the first real integration. LAN is an additional route for the same physical devices, not a substitute for cloud control. The owner has physical products; exact models, firmware, app version, and account region remain to be recorded. This guide records requirements and source research on October 15, 2026, not implemented HomeVerb support or physical verification.
+Daily cloud control is required in the first real integration. LAN is an additional route for the same physical devices, not a substitute for cloud control. The owner has physical products; exact models, firmware, app version, and account region remain to be recorded. This guide records scoped implementation and source evidence on October 15, 2026; no model is physically verified.
 
 The native read protocols are implemented in [homeverb-midea](../../crates/midea/src/lib.rs): account-scoped home/appliance retrieval, code/data validation, deduplication, partial inventory failure, and bounded cloud-state decoding for the three selected families. The inventory/state decoders use an injected read transport and synthetic responses with the inspected wire fields. Native password login, signing, session-key decoding and restricted HTTPS are now implemented under ADR-0022 and tested against fictional responses and a local TLS server. One real mainland account has passed the read-only login/inventory probe below; the exact-model read-only Core adapter is available through `core-inspect`, and native API 1.1.0 startup selection. Native API 1.2.0 also provides protected account connection and local list/refresh; Flutter input and mobile secure stores remain pending. See [ADR-0020](../adr/0020-midea-cloud-inventory.md) and [ADR-0023](../adr/0023-meiju-cloud-state-evidence.md).
 
 The native account vault now persists random local references, composes Linux secure storage, and coordinates session read/update work through account leases. Meiju's private account payload also preserves appliance-to-local-ID bindings with the session. Interrupted or uncertain updates remain pending until trusted validation and recovery. The explicit native connection coordinator now uses this storage and the admitted login client; real account identity and session validity still require live acceptance. See [ADR-0021](../adr/0021-persistent-account-vault.md), [ADR-0024](../adr/0024-meiju-private-device-bindings.md) and the [credential integration guide](04-add-adapter.md#integrate-native-credentials).
+
+The next implemented phase adds an explicitly opted-in AC `power.set` path and
+[preview-first control probe](07-meiju-control.md). Its Core grants and TLS send
+progress are synthetic-tested. Real control acceptance, other AC settings,
+dishwasher/refrigerator writes and native UI write authorization remain pending.
 
 ## Reuse the community protocol work
 

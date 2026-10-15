@@ -1,8 +1,9 @@
-//! Native Meiju login and model-scoped read-only Core adapter. No appliance controls.
+//! Native Meiju accounts and model-scoped reads, with explicit experimental AC power control.
 
 mod auth;
 mod cloud;
 mod codec;
+mod control;
 mod material;
 pub use auth::{LoginCredentials, MeijuSession, SessionReads, login};
 pub use cloud::{CloudEndpoint, CloudTransport, MeijuHttps, SignedRequest};

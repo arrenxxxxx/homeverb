@@ -90,6 +90,26 @@ real Linux profile on October 15, 2026: six cards, seven successful read/cache
 pairs, preserved preferences, no repeated login and no controls. Reauthorization
 through the protected C symbol and phone acceptance remain unverified.
 
+## Experimental AC control implementation
+
+A trusted Rust host can now opt into `power.set` for the four exact AC models above.
+The separate [control probe](development/07-meiju-control.md) defaults to preview
+and grants only one chosen local device/state over cloud. Core/TLS synthetic tests
+cover protected binding/model refusal, scoped policy, code-zero acceptance,
+authorization rejection, unknown provider errors, lost replies, cancellation,
+deadlines, cache preservation and request-ID replay without resending. None of
+these tests operates a real appliance. A real saved-account preview subsequently
+passed inventory/plan validation for `KFR-35G/WF2` with zero controls sent.
+Physical and off-LAN control acceptance remain unverified; dishwasher/refrigerator writes and other AC settings are pending.
+
+Native API 1.2.0, SQLite schema 3 and result schemas remain unchanged. Default native
+Meiju sessions still have no control admission or write grants. The unreleased Rust
+`CloudEndpoint` adds `ApplianceControl`; exhaustive transport implementations must
+handle or refuse it. `CloudTransport::send_control` defaults to refusal, never to
+`send`. The HTTPS read path independently refuses control endpoints. Opted-in AC
+power capability revision 2 is cloud-only and has unavailable verification. A
+read-only rediscovery returns revision 1; neither revision authorizes a write.
+
 ## Status definitions
 
 The native account vault under [ADR-0021](adr/0021-persistent-account-vault.md) adds SQLite schema 3 and internal Rust account APIs. Schema 1/2 upgrades preserve existing data and create verified backups; close older clients first. Schema-2 binaries reject the upgraded profile. Native UI API 1.0.0, its 22 methods, C symbols and execution semantics are unchanged. No public account operation or real-provider authentication is enabled by locally storing references.

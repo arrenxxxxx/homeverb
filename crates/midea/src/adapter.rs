@@ -1,4 +1,4 @@
-//! Compile-time, model-scoped cloud reads. No appliance-control endpoint is registered.
+//! Compile-time, model-scoped cloud mappings. Controls require explicit host admission.
 
 use crate::{
     Appliance, ApplianceFamily, BoundInventory, CloudTransport, DeviceBinding, LoginCredentials,
@@ -10,7 +10,8 @@ use homeverb_core::{
     WriteProgress,
 };
 use homeverb_domain::{
-    Capability, Component, Connection, Descriptor, Device, Error, Result, Snapshot, Transport,
+    Action, Capability, Component, Connection, Descriptor, Device, Error, Idempotency, Result,
+    Risk, Snapshot, Transport, VerificationMethod,
 };
 use serde_json::json;
 use std::{
@@ -62,7 +63,12 @@ fn capability(component: &str, id: &str, fields: &[(&str, &str, Option<&str>)]) 
     }
 }
 
-fn descriptors(appliance: &Appliance, binding: DeviceBinding, account: Uuid) -> Descriptor {
+fn descriptors(
+    appliance: &Appliance,
+    binding: DeviceBinding,
+    account: Uuid,
+    ac_power: bool,
+) -> Descriptor {
     let family = appliance
         .model
         .as_deref()
@@ -75,7 +81,13 @@ fn descriptors(appliance: &Appliance, binding: DeviceBinding, account: Uuid) -> 
     ];
     match family {
         Some(ApplianceFamily::AirConditioner) => {
-            capabilities.push(capability("main", "power", &[("state", "boolean", None)]));
+            let mut power = capability("main", "power", &[("state", "boolean", None)]);
+            if ac_power {
+                power.revision = 2;
+                power.properties.get_mut("state").unwrap()["writable"] = json!(true);
+                power.actions.insert("set".into(), power_action());
+            }
+            capabilities.push(power);
             capabilities.push(capability("main", "climate", &temperatures));
             capabilities.push(capability(
                 "main",
@@ -169,6 +181,7 @@ pub struct MeijuAdapter {
     vault: Arc<AccountVault>,
     transport: Arc<dyn CloudTransport>,
     clock: Arc<dyn Clock>,
+    ac_power: bool,
 }
 
 impl MeijuAdapter {
@@ -181,7 +194,15 @@ impl MeijuAdapter {
             vault,
             transport,
             clock,
+            ac_power: false,
         }
+    }
+
+    /// Trusted host opt-in to experimental descriptors; this grants no write authority.
+    /// Core still requires an exact device/component/argument/cloud grant.
+    pub fn with_ac_power_control(mut self) -> Self {
+        self.ac_power = true;
+        self
     }
     /// Local metadata only; a stored credential is not proof of current authorization.
     pub async fn accounts(&self, operation: &Operation) -> Result<Vec<AccountRecord>> {
@@ -330,7 +351,12 @@ impl MeijuAdapter {
             }
             if let Some(bound) = bound {
                 for (appliance, binding) in bound.inventory.appliances.iter().zip(bound.bindings) {
-                    output.push(descriptors(appliance, binding, account.record().id));
+                    output.push(descriptors(
+                        appliance,
+                        binding,
+                        account.record().id,
+                        self.ac_power,
+                    ));
                 }
             }
         }
@@ -393,14 +419,64 @@ impl Adapter for MeijuAdapter {
 
     async fn execute(
         &self,
-        _: &ValidatedCommand,
-        _: &Connection,
-        _: WriteProgress,
-        _: &Operation,
+        validated: &ValidatedCommand,
+        connection: &Connection,
+        progress: WriteProgress,
+        operation: &Operation,
     ) -> Result<AdapterOutcome> {
-        Err(Error::new(
-            "CAPABILITY_UNSUPPORTED",
-            "This adapter exposes read-only model mappings; appliance controls are unavailable.",
-        ))
+        let command = validated.command();
+        if !self.ac_power
+            || command.component_id != "main"
+            || command.capability != "power"
+            || command.action != "set"
+        {
+            return Err(crate::control::unsupported());
+        }
+        // Repeat the fixed adapter contract even if public stored metadata was modified.
+        power_action().validate_arguments(&command.arguments)?;
+        let id = connection
+            .account_id
+            .as_deref()
+            .and_then(|id| Uuid::parse_str(id).ok())
+            .ok_or_else(|| {
+                Error::new(
+                    "DEVICE_IDENTITY_CONFLICT",
+                    "The cloud connection has no valid local account binding.",
+                )
+            })?;
+        let account = MeijuAccount::open(self.vault.lease(id, operation).await?, operation).await?;
+        let appliance = account
+            .control_appliance(&command.device_id, connection, operation)
+            .await?;
+        if appliance.model.as_deref().and_then(model_family)
+            != Some(ApplianceFamily::AirConditioner)
+        {
+            return Err(crate::control::unsupported());
+        }
+        let session = account.cloud_session(operation).await?;
+        crate::control::set_power(
+            &session,
+            self.transport.as_ref(),
+            &appliance.id,
+            command.arguments["state"]
+                .as_bool()
+                .expect("Validated boolean state."),
+            &progress,
+            operation,
+        )
+        .await
+    }
+}
+
+fn power_action() -> Action {
+    Action {
+        parameters: json!({"type":"object","properties":{"state":{"type":"boolean"}},"required":["state"],"additionalProperties":false}),
+        transports: vec![Transport::Cloud],
+        idempotency: Idempotency::SetValue,
+        risk: Risk::Low,
+        atomic: false,
+        independent_fields: false,
+        // Cloud state has no trustworthy observation time or completion correlation.
+        verification: VerificationMethod::Unavailable,
     }
 }

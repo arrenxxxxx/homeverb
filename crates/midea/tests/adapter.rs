@@ -101,9 +101,59 @@ struct Wire {
     partial: AtomicBool,
     delay: AtomicBool,
     started: tokio::sync::Notify,
+    control_reply: Mutex<Option<Vec<u8>>>,
+    controls: Mutex<Vec<Value>>,
+    control_fault: AtomicUsize,
+    control_started: tokio::sync::Notify,
 }
 #[async_trait]
 impl CloudTransport for Wire {
+    async fn send_control(
+        &self,
+        request: &SignedRequest,
+        progress: &WriteProgress,
+        _: &Operation,
+    ) -> Result<SecretBytes> {
+        let fault = self.control_fault.load(Ordering::Relaxed);
+        if fault == 4 {
+            return Err(Error::new("AUTH_REQUIRED", "PRIVATE-TRANSPORT-DETAIL"));
+        }
+        if fault == 1 {
+            return Err(Error::new(
+                "MIDEA_REQUEST_FAILED",
+                "PRIVATE-TRANSPORT-DETAIL",
+            ));
+        }
+        assert_eq!(request.endpoint(), CloudEndpoint::ApplianceControl);
+        assert_eq!(request.endpoint().path(), "/mjl/v1/device/lua/control");
+        assert_eq!(request.token(), Some(b"FIRST".as_slice()));
+        progress.mark_sent();
+        self.controls
+            .lock()
+            .unwrap()
+            .push(serde_json::from_slice(request.body()).unwrap());
+        self.control_started.notify_one();
+        if fault == 5 {
+            return Err(Error::new("AUTH_REQUIRED", "PRIVATE-TRANSPORT-DETAIL"));
+        }
+        if fault == 2 {
+            return Err(Error::new(
+                "MIDEA_REQUEST_FAILED",
+                "PRIVATE-TRANSPORT-DETAIL",
+            ));
+        }
+        if fault == 3 {
+            std::future::pending::<()>().await;
+        }
+        Ok(SecretBytes::new(
+            self.control_reply
+                .lock()
+                .unwrap()
+                .clone()
+                .unwrap_or_else(|| b"{\"code\":0}".to_vec()),
+        ))
+    }
+
     async fn send(&self, request: &SignedRequest, _: &Operation) -> Result<SecretBytes> {
         self.calls.fetch_add(1, Ordering::Relaxed);
         self.started.notify_one();
@@ -159,6 +209,27 @@ impl Drop for Fixture {
     }
 }
 impl Fixture {
+    fn control_core(&self, device: &Device, state: bool) -> Core {
+        Core::new(
+            self.store.clone(),
+            vec![Arc::new(
+                MeijuAdapter::new(self.vault.clone(), self.wire.clone(), Arc::new(SystemClock))
+                    .with_ac_power_control(),
+            )],
+            Arc::new(SystemClock),
+            Policy {
+                grants: vec![Grant {
+                    device_id: device.id.clone(),
+                    component_id: "main".into(),
+                    capability: "power".into(),
+                    action: "set".into(),
+                    transports: vec![homeverb_domain::Transport::Cloud],
+                    argument_schema: json!({"type":"object","properties":{"state":{"const":state}},"required":["state"],"additionalProperties":false}),
+                }],
+            },
+        )
+    }
+
     async fn new(inventory: Vec<Value>) -> Self {
         let path = std::env::temp_dir().join(format!("homeverb-meiju-adapter-{}", Uuid::new_v4()));
         let store = Arc::new(SqliteStore::open(&path).unwrap());
@@ -502,4 +573,331 @@ async fn cancellation_deadline_and_busy_leases_stop_discovery_without_publicatio
     assert_eq!(fixture.calls(), 2);
     fixture.wire.delay.store(false, Ordering::Relaxed);
     assert_eq!(fixture.discover().await.len(), 6);
+}
+
+fn power_command(device: &Device, state: bool) -> Command {
+    serde_json::from_value(json!({
+        "schema_version":"1.0", "request_id":Uuid::new_v4().to_string(),
+        "device_id":device.id, "component_id":"main", "capability":"power", "action":"set",
+        "arguments":{"state":state}, "connection":"cloud", "timeout_ms":1000, "wait_for":"verified"
+    }))
+    .unwrap()
+}
+
+#[tokio::test]
+async fn control_admission_is_explicit_exact_model_scoped_and_separate_from_grants() {
+    let fixture = Fixture::new(appliances()).await;
+    let device = fixture
+        .discover()
+        .await
+        .into_iter()
+        .find(|d| d.model == MODELS[0].0)
+        .unwrap();
+    let command = power_command(&device, false);
+    assert_eq!(
+        fixture.core.plan(&command).unwrap_err().code,
+        "CAPABILITY_UNSUPPORTED"
+    );
+    let core = fixture.control_core(&device, false);
+    for device in core.discover(&operation()).await.unwrap() {
+        let descriptor = core.describe(&device.id).unwrap();
+        for capability in descriptor.capabilities {
+            let writable =
+                MODELS[..4].iter().any(|(m, _)| *m == device.model) && capability.id == "power";
+            assert_eq!(capability.actions.len(), usize::from(writable));
+            if writable {
+                assert_eq!(capability.revision, 2);
+                assert_eq!(
+                    capability.actions["set"].verification,
+                    homeverb_domain::VerificationMethod::Unavailable
+                );
+            }
+        }
+    }
+    fixture.secrets.unavailable.store(true, Ordering::Relaxed);
+    let calls = fixture.calls();
+    core.plan(&command).unwrap();
+    assert_eq!(fixture.calls(), calls);
+    assert!(fixture.wire.controls.lock().unwrap().is_empty());
+    assert_eq!(
+        fixture.core.plan(&command).unwrap_err().code,
+        "POLICY_DENIED"
+    );
+    for (mut invalid, code) in [
+        (power_command(&device, true), "POLICY_DENIED"),
+        (command.clone(), "POLICY_DENIED"),
+        (command.clone(), "INVALID_ARGUMENT"),
+    ]
+    .into_iter()
+    .enumerate()
+    .map(|(i, (mut c, code))| {
+        if i == 1 {
+            c.connection = Route::Lan;
+        }
+        if i == 2 {
+            c.arguments = json!({"state":false,"confirmed":true});
+        }
+        (c, code)
+    }) {
+        invalid.request_id = Uuid::new_v4().to_string();
+        assert_eq!(core.plan(&invalid).unwrap_err().code, code);
+    }
+    let failed = core.execute(command, CancellationToken::new()).await;
+    assert_eq!(failed.error.unwrap().code, "SECRET_STORE_UNAVAILABLE");
+    assert_eq!(failed.attempts[0].phase, homeverb_domain::Phase::NotSent);
+    assert!(fixture.wire.controls.lock().unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn controls_use_protected_target_and_never_promote_cloud_acknowledgement_to_verification() {
+    use homeverb_domain::{Phase, Status};
+    let fixture = Fixture::new(appliances()).await;
+    let device = fixture
+        .discover()
+        .await
+        .into_iter()
+        .find(|d| d.model == MODELS[0].0)
+        .unwrap();
+    let core = fixture.control_core(&device, false);
+    core.discover(&operation()).await.unwrap();
+    fixture.read(&device, "main", false).await.unwrap();
+    let cache = serde_json::to_value(fixture.store.snapshot(&device.id, "main").unwrap()).unwrap();
+    let calls = fixture.calls();
+    for (body, status, phase, error) in [
+        (
+            r#"{"code":0}"#,
+            Status::Accepted,
+            Phase::Accepted,
+            "VERIFICATION_PENDING",
+        ),
+        (
+            r#"{"code":"0","data":{"power":"off"}}"#,
+            Status::Accepted,
+            Phase::Accepted,
+            "VERIFICATION_PENDING",
+        ),
+        (
+            r#"{"code":7400,"msg":"PRIVATE-PROVIDER-MESSAGE"}"#,
+            Status::Failed,
+            Phase::Rejected,
+            "AUTH_REQUIRED",
+        ),
+        (
+            r#"{"code":"40002"}"#,
+            Status::Failed,
+            Phase::Rejected,
+            "AUTH_REQUIRED",
+        ),
+        (
+            r#"{"code":1306}"#,
+            Status::Unknown,
+            Phase::PossiblySent,
+            "WRITE_OUTCOME_UNKNOWN",
+        ),
+        (
+            r#"{"code":1014}"#,
+            Status::Unknown,
+            Phase::PossiblySent,
+            "WRITE_OUTCOME_UNKNOWN",
+        ),
+        (
+            r#"{"code":999}"#,
+            Status::Unknown,
+            Phase::PossiblySent,
+            "WRITE_OUTCOME_UNKNOWN",
+        ),
+        (
+            r#"{"power":"off"}"#,
+            Status::Unknown,
+            Phase::PossiblySent,
+            "WRITE_OUTCOME_UNKNOWN",
+        ),
+        (
+            r#"{"code":0,"code":7400}"#,
+            Status::Unknown,
+            Phase::PossiblySent,
+            "WRITE_OUTCOME_UNKNOWN",
+        ),
+        (
+            "broken",
+            Status::Unknown,
+            Phase::PossiblySent,
+            "WRITE_OUTCOME_UNKNOWN",
+        ),
+    ] {
+        *fixture.wire.control_reply.lock().unwrap() = Some(body.as_bytes().to_vec());
+        let command = power_command(&device, false);
+        let before = fixture.wire.controls.lock().unwrap().len();
+        let result = core
+            .execute(command.clone(), CancellationToken::new())
+            .await;
+        assert_eq!(result.status, status);
+        assert_eq!(result.error.as_ref().unwrap().code, error);
+        assert!(result.verification.is_none() && result.data.is_none());
+        assert_eq!(result.attempts.len(), 1);
+        assert_eq!(result.attempts[0].phase, phase);
+        assert_eq!(fixture.wire.controls.lock().unwrap().len(), before + 1);
+        let replay = fixture
+            .control_core(&device, false)
+            .execute(command, CancellationToken::new())
+            .await;
+        assert_eq!(
+            serde_json::to_value(replay).unwrap(),
+            serde_json::to_value(&result).unwrap()
+        );
+        assert_eq!(fixture.wire.controls.lock().unwrap().len(), before + 1);
+        let schema: Value =
+            serde_json::from_str(include_str!("../../../schemas/command-result.schema.json"))
+                .unwrap();
+        jsonschema::validator_for(&schema)
+            .unwrap()
+            .validate(&serde_json::to_value(&result).unwrap())
+            .unwrap();
+        let serialized = serde_json::to_string(&result).unwrap();
+        for marker in ["88000000000000", "FIRST", "synthetic-key", "PRIVATE"] {
+            assert!(!serialized.contains(marker));
+        }
+    }
+    assert_eq!(
+        fixture.calls(),
+        calls,
+        "No verification reads or implicit login."
+    );
+    assert_eq!(
+        serde_json::to_value(fixture.store.snapshot(&device.id, "main").unwrap()).unwrap(),
+        cache
+    );
+    for request in fixture.wire.controls.lock().unwrap().iter() {
+        assert_eq!(request["applianceCode"], "880000000000000");
+        assert_eq!(request["command"], json!({"control":{"power":"off"}}));
+        assert_eq!(request.as_object().unwrap().len(), 4);
+        assert_eq!(request["reqId"].as_str().unwrap().len(), 32);
+        assert_eq!(request["stamp"].as_str().unwrap().len(), 14);
+    }
+    let on = fixture.control_core(&device, true);
+    *fixture.wire.control_reply.lock().unwrap() = None;
+    let mut command = power_command(&device, true);
+    command.wait_for = homeverb_domain::WaitFor::Accepted;
+    let result = on.execute(command, CancellationToken::new()).await;
+    assert_eq!(result.status, Status::Accepted);
+    assert!(result.error.is_none());
+    assert_eq!(
+        fixture.wire.controls.lock().unwrap().last().unwrap()["command"],
+        json!({"control":{"power":"on"}})
+    );
+}
+
+#[tokio::test]
+async fn private_binding_mismatch_and_unreviewed_models_stop_controls_before_send() {
+    let fixture = Fixture::new(appliances()).await;
+    let device = fixture
+        .discover()
+        .await
+        .into_iter()
+        .find(|d| d.model == MODELS[0].0)
+        .unwrap();
+    let core = fixture.control_core(&device, false);
+    core.discover(&operation()).await.unwrap();
+    let baseline = fixture.secrets.values.lock().unwrap().clone();
+    for (field, value, code) in [
+        (
+            "connection",
+            json!(Uuid::new_v4()),
+            "DEVICE_IDENTITY_CONFLICT",
+        ),
+        (
+            "identity",
+            json!(Uuid::new_v4()),
+            "DEVICE_IDENTITY_CONFLICT",
+        ),
+        ("model", json!("Unreviewed AC"), "CAPABILITY_UNSUPPORTED"),
+        ("family", json!(0xca), "CAPABILITY_UNSUPPORTED"),
+    ] {
+        let mut changed = baseline.clone();
+        for bytes in changed.values_mut() {
+            let mut payload: Value = serde_json::from_slice(bytes).unwrap();
+            let binding = &mut payload["bindings"][0];
+            match field {
+                "connection" => binding["local"]["connection_id"] = value.clone(),
+                "identity" => binding["local"]["identity_ref"] = value.clone(),
+                field => binding[field] = value.clone(),
+            }
+            *bytes = serde_json::to_vec(&payload).unwrap();
+        }
+        *fixture.secrets.values.lock().unwrap() = changed;
+        let result = core
+            .execute(power_command(&device, false), CancellationToken::new())
+            .await;
+        assert_eq!(result.error.unwrap().code, code);
+        assert_eq!(result.attempts[0].phase, homeverb_domain::Phase::NotSent);
+        assert!(fixture.wire.controls.lock().unwrap().is_empty());
+    }
+    *fixture.secrets.values.lock().unwrap() = baseline;
+    let id = fixture.vault.list(&operation()).await.unwrap()[0].id;
+    let lease = fixture.vault.lease(id, &operation()).await.unwrap();
+    let busy = core
+        .execute(power_command(&device, false), CancellationToken::new())
+        .await;
+    assert_eq!(busy.error.unwrap().code, "RESOURCE_BUSY");
+    drop(lease);
+    assert!(fixture.wire.controls.lock().unwrap().is_empty());
+}
+
+#[tokio::test(start_paused = true)]
+async fn unsent_loss_cancellation_and_deadline_keep_distinct_phases_without_replay() {
+    use homeverb_domain::{Phase, Status};
+    let fixture = Fixture::new(appliances()).await;
+    let device = fixture
+        .discover()
+        .await
+        .into_iter()
+        .find(|d| d.model == MODELS[0].0)
+        .unwrap();
+    let core = fixture.control_core(&device, false);
+    core.discover(&operation()).await.unwrap();
+    for (fault, status, phase) in [
+        (1, Status::Failed, Phase::NotSent),
+        (2, Status::Unknown, Phase::PossiblySent),
+        (4, Status::Failed, Phase::NotSent),
+        (5, Status::Failed, Phase::Rejected),
+    ] {
+        fixture.wire.control_fault.store(fault, Ordering::Relaxed);
+        let result = core
+            .execute(power_command(&device, false), CancellationToken::new())
+            .await;
+        assert_eq!(result.status, status);
+        assert_eq!(result.attempts[0].phase, phase);
+        assert!(!serde_json::to_string(&result).unwrap().contains("PRIVATE"));
+    }
+    fixture.wire.control_fault.store(3, Ordering::Relaxed);
+    // Discard notifications from completed synthetic requests before observing this send.
+    fixture.wire.control_started.notified().await;
+    let active = operation();
+    let command = power_command(&device, false);
+    {
+        let work = core.execute_with_operation(command, &active);
+        tokio::pin!(work);
+        tokio::select! {
+            _ = fixture.wire.control_started.notified() => (),
+            _ = &mut work => panic!("Expected an in-flight control."),
+        }
+        active.cancellation.cancel();
+        let result = work.await;
+        assert_eq!(result.status, Status::Unknown);
+        assert_eq!(result.attempts[0].phase, Phase::PossiblySent);
+    }
+    let result = core
+        .execute(power_command(&device, false), CancellationToken::new())
+        .await;
+    assert_eq!(result.status, Status::Unknown);
+    let controls = fixture.wire.controls.lock().unwrap().len();
+    let cancelled = operation();
+    cancelled.cancellation.cancel();
+    let result = core
+        .execute_with_operation(power_command(&device, false), &cancelled)
+        .await;
+    assert_eq!(result.status, Status::Failed);
+    assert_eq!(fixture.wire.controls.lock().unwrap().len(), controls);
+    let id = fixture.vault.list(&operation()).await.unwrap()[0].id;
+    drop(fixture.vault.lease(id, &operation()).await.unwrap());
 }
