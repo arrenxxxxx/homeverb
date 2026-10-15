@@ -4,7 +4,7 @@
 
 | Candidate | Potential route | Evidence still required | Project status |
 |---|---|---|---|
-| Midea air conditioners, dishwashers, and refrigerators | Required Meiju cloud enumeration/read/control; additional AC/E1/CA LAN routes | Native account authentication, Rust implementation, exact model/app/region/version, physical and off-LAN tests | protocol-researched / models unverified |
+| Midea air conditioners, dishwashers, and refrigerators | Required Meiju cloud enumeration/read/control; additional AC/E1/CA LAN routes | Exact model/app/firmware, physical cloud reads/controls and off-LAN tests | One mainland account login/saved-session inventory verified on Linux; models unverified |
 | Hualing devices in the selected appliance scope | Meiju cloud and LAN paths only when actual account/protocol evidence matches | Confirm account visibility, family/version and supported cloud/LAN capabilities per device; do not infer from brand | protocol-researched / models unverified |
 | Samsung televisions | Candidate LAN protocol | Pairing, firmware, wake behavior, capabilities, authentication | planned / unverified |
 | SmartThings | Vendor cloud API | Backend-free native authorization, region, API permissions and cost | planned / auth gate pending |
@@ -37,7 +37,7 @@ The native Meiju account layer under [ADR-0024](adr/0024-meiju-private-device-bi
 The owner-approved community login codec and restricted HTTPS client are now
 implemented and synthetic-tested under ADR-0022. Only the mainland Meiju endpoint
 is admitted; SmartHome, automatic region routing and additional login challenges
-are not implemented. No real account was contacted. No public account method,
+are not implemented. The protected native connection coordinator and local read-only probe are also synthetic-tested, including reconnect identity and separate retrieval failures. One owner-run real login/inventory probe and an independently executed saved-session refresh returned four air conditioners, one dishwasher and one refrigerator on October 15, 2026. This is Linux account/inventory evidence only. No public account method,
 registered Core adapter, model capability, control permission or mobile support
 follows from this native library phase. Native API 1.0.0 and SQLite schema 3 are unchanged.
 

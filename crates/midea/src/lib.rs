@@ -8,7 +8,7 @@ pub use auth::{LoginCredentials, MeijuSession, SessionReads, login};
 pub use cloud::{CloudEndpoint, CloudTransport, MeijuHttps, SignedRequest};
 
 mod account;
-pub use account::{DeviceBinding, MeijuAccount};
+pub use account::{BoundInventory, ConnectReport, DeviceBinding, MeijuAccount, connect};
 mod state;
 pub use state::{CloudState, StateQuery, read_cloud_state};
 

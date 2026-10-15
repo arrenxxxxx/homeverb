@@ -1,8 +1,9 @@
-//! Private account/session storage and stable cloud-device bindings; no authentication.
+//! Private account/session storage and stable cloud-device bindings.
 
 use crate::{
-    Appliance, ApplianceFamily, CloudId, Inventory, MAX_RESPONSE_BYTES, ReadTransport, StateQuery,
-    read_cloud_state,
+    Appliance, ApplianceFamily, CloudId, CloudTransport, Inventory, LoginCredentials,
+    MAX_RESPONSE_BYTES, MeijuSession, ReadTransport, StateQuery, login, read_cloud_state,
+    retrieve_inventory,
 };
 use homeverb_core::{
     AccountLease, AccountRecord, AccountVault, Clock, CredentialRef, Operation, SecretBytes,
@@ -147,6 +148,39 @@ impl Payload {
 }
 
 impl MeijuAccount {
+    /// Load an admitted session and confirm its subject against the protected account binding.
+    pub async fn cloud_session(&self, operation: &Operation) -> Result<MeijuSession> {
+        if self.record().region != "CN" {
+            return Err(Error::new(
+                "AUTH_FLOW_UNSUPPORTED",
+                "Only mainland Meiju is admitted.",
+            ));
+        }
+        let payload = self.load(operation).await?;
+        let session = MeijuSession::restore(&SecretBytes::new(payload.session.clone()))?;
+        if session.subject().expose() != payload.subject {
+            return Err(unconfirmed());
+        }
+        Ok(session)
+    }
+
+    /// Explicit retrieval only. Keep partial failures and preserve existing bindings.
+    pub async fn retrieve(
+        &mut self,
+        transport: &dyn CloudTransport,
+        operation: &Operation,
+    ) -> Result<BoundInventory> {
+        let session = self.cloud_session(operation).await?;
+        let reference = self.record().credential_ref;
+        let inventory =
+            retrieve_inventory(&session.reads(transport, reference), reference, operation).await?;
+        let bindings = self.bind_inventory(&inventory, operation).await?;
+        Ok(BoundInventory {
+            inventory,
+            bindings,
+        })
+    }
+
     /// Native authentication must validate both inputs and their association before this call.
     /// Never use a display name, mutable login spelling, or unverified UI input as the subject.
     pub async fn create(
@@ -406,4 +440,97 @@ impl MeijuAccount {
             .await?;
         self.lease.store_session(&bytes, operation).await
     }
+}
+
+/// Private protocol inventory paired with stable local identifiers; not capability admission.
+#[derive(Debug)]
+pub struct BoundInventory {
+    pub inventory: Inventory,
+    pub bindings: Vec<DeviceBinding>,
+}
+
+/// Session persistence and retrieval are separate outcomes. No lease escapes this operation.
+#[derive(Debug)]
+pub struct ConnectReport {
+    pub account: AccountRecord,
+    pub retrieval: Result<BoundInventory>,
+}
+
+/// Explicit mainland Meiju connection. Reuse an exact subject match; never merge by login spelling.
+/// Consumes credentials so they are dropped before persistence and inventory work.
+pub async fn connect(
+    vault: &AccountVault,
+    transport: &dyn CloudTransport,
+    credentials: LoginCredentials,
+    existing: Option<Uuid>,
+    label: &str,
+    operation: &Operation,
+) -> Result<ConnectReport> {
+    let label = homeverb_domain::local_name(label)?;
+    let _registration = vault.lock_registration(operation).await?;
+    vault.check_secure_storage(operation).await?;
+    let mut selected = if let Some(id) = existing {
+        let account = MeijuAccount::open(vault.lease(id, operation).await?, operation).await?;
+        if account.record().region != "CN" {
+            return Err(Error::new(
+                "AUTH_FLOW_UNSUPPORTED",
+                "Only mainland Meiju is admitted.",
+            ));
+        }
+        Some(account)
+    } else {
+        None
+    };
+    let mut subjects = Vec::new();
+    if selected.is_none() {
+        for record in vault.list(operation).await? {
+            if record.provider != PROVIDER || record.region != "CN" {
+                continue;
+            }
+            let account =
+                MeijuAccount::open(vault.lease(record.id, operation).await?, operation).await?;
+            let mut payload = account.load(operation).await?;
+            subjects.push((
+                record.id,
+                SecretBytes::new(std::mem::take(&mut payload.subject)),
+            ));
+        }
+    }
+    let session = login(transport, &credentials, operation).await?;
+    drop(credentials);
+    if selected.is_none() {
+        let matches: Vec<_> = subjects
+            .iter()
+            .filter(|(_, subject)| subject.expose() == session.subject().expose())
+            .map(|(id, _)| *id)
+            .collect();
+        if matches.len() > 1 {
+            return Err(Error::new(
+                "ACCOUNT_IDENTITY_CONFLICT",
+                "Multiple local accounts require explicit identity reconciliation.",
+            ));
+        }
+        if let Some(id) = matches.first() {
+            selected =
+                Some(MeijuAccount::open(vault.lease(*id, operation).await?, operation).await?);
+        }
+    }
+    let encoded = session.encode()?;
+    let mut account = match selected {
+        Some(mut account) => {
+            account
+                .replace_session(session.subject(), &encoded, operation)
+                .await?;
+            account
+        }
+        None => {
+            MeijuAccount::create(vault, "CN", &label, session.subject(), &encoded, operation)
+                .await?
+        }
+    };
+    let retrieval = account.retrieve(transport, operation).await;
+    Ok(ConnectReport {
+        account: account.record().clone(),
+        retrieval,
+    })
 }

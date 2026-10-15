@@ -704,3 +704,391 @@ async fn cancelled_expired_and_oversized_inputs_never_start_a_mutation() {
     assert_eq!(fixture.puts(), 1);
     assert_eq!(fixture.store.accounts().unwrap().len(), 1);
 }
+
+struct LoginTransport {
+    replies: Mutex<std::collections::VecDeque<Value>>,
+    calls: AtomicUsize,
+}
+impl LoginTransport {
+    fn new(subject: &str, homes: Value) -> Self {
+        let vector: Value = serde_json::from_str(include_str!("fixtures/login.json")).unwrap();
+        Self {
+            replies: Mutex::new(vec![
+                json!({"code":0,"data":{"loginId":subject}}),
+                json!({"code":0,"data":{"mdata":{"accessToken":"PRIVATE-LOGIN-TOKEN"},"key":vector["wrapped_key"]}}),
+                homes,
+                json!({"code":0,"data":{"homeList":[{"roomList":[{"applianceList":[appliance("90123456789","AC"),appliance("22","CA")]}]}]}}),
+            ].into()),
+            calls: AtomicUsize::new(0),
+        }
+    }
+    fn complete(subject: &str) -> Self {
+        Self::new(
+            subject,
+            json!({"code":0,"data":{"homeList":[{"homegroupId":"19"}]}}),
+        )
+    }
+}
+#[async_trait]
+impl CloudTransport for LoginTransport {
+    async fn send(&self, _: &SignedRequest, _: &Operation) -> Result<SecretBytes> {
+        self.calls.fetch_add(1, Ordering::Relaxed);
+        Ok(SecretBytes::new(
+            serde_json::to_vec(
+                &self
+                    .replies
+                    .lock()
+                    .unwrap()
+                    .pop_front()
+                    .expect("No extra cloud requests are allowed."),
+            )
+            .unwrap(),
+        ))
+    }
+}
+fn login_credentials() -> LoginCredentials {
+    LoginCredentials::new(secret("fictional@example.test"), secret("PRIVATE-PASSWORD")).unwrap()
+}
+
+#[tokio::test]
+async fn connect_automatically_retrieves_and_reuses_account_device_ids_after_reopening() {
+    let f = Fixture::new();
+    let report = connect(
+        &f.vault,
+        &LoginTransport::complete("PRIVATE-LOGIN-ID"),
+        login_credentials(),
+        None,
+        "Home",
+        &operation(),
+    )
+    .await
+    .unwrap();
+    let first = report.retrieval.unwrap();
+    assert_eq!(first.bindings.len(), 2);
+    assert!(first.inventory.is_complete());
+    assert_eq!(report.account.credential_state, CredentialState::Stored);
+    let descriptor = descriptor(first.bindings[0], report.account.id);
+    f.store.save_device(&descriptor).unwrap();
+    f.store
+        .set_preferences(
+            &descriptor.device.id,
+            &PreferencesInput {
+                alias: Some("My AC".into()),
+                room_id: None,
+                favorite: true,
+            },
+        )
+        .unwrap();
+    let preferences = f.store.preferences().unwrap();
+    let vault = AccountVault::new(
+        Arc::new(SqliteStore::open(&f.directory.0).unwrap()),
+        f.secrets.clone(),
+    );
+    let second = connect(
+        &vault,
+        &LoginTransport::complete("PRIVATE-LOGIN-ID"),
+        login_credentials(),
+        None,
+        "Ignored reconnect label",
+        &operation(),
+    )
+    .await
+    .unwrap();
+    assert_eq!(second.account.id, report.account.id);
+    assert_eq!(second.account.credential_ref, report.account.credential_ref);
+    assert_eq!(second.account.label, "Home");
+    assert_eq!(second.retrieval.unwrap().bindings, first.bindings);
+    assert_eq!(f.store.accounts().unwrap().len(), 1);
+    assert_eq!(f.store.preferences().unwrap(), preferences);
+    let account = f.reopen(report.account.id).await.unwrap();
+    assert!(account.cloud_session(&operation()).await.is_ok());
+    let payload: Value = serde_json::from_slice(&f.bytes(report.account.credential_ref)).unwrap();
+    let bytes: Vec<u8> = serde_json::from_value(payload["session"].clone()).unwrap();
+    assert!(!String::from_utf8_lossy(&bytes).contains("PRIVATE-PASSWORD"));
+    assert!(!String::from_utf8_lossy(&bytes).contains("fictional@example.test"));
+    for filename in ["homeverb.sqlite3", "homeverb.sqlite3-wal"] {
+        if let Ok(bytes) = std::fs::read(f.directory.0.join(filename)) {
+            for marker in ["PRIVATE-LOGIN", "PRIVATE-PASSWORD", "90123456789"] {
+                assert!(
+                    !bytes
+                        .windows(marker.len())
+                        .any(|part| part == marker.as_bytes())
+                );
+            }
+        }
+    }
+}
+
+#[tokio::test]
+async fn successful_login_and_failed_or_partial_inventory_are_separate_outcomes() {
+    let f = Fixture::new();
+    let cloud = LoginTransport::new("PRIVATE-LOGIN-ID", json!({"code":40002}));
+    let report = connect(
+        &f.vault,
+        &cloud,
+        login_credentials(),
+        None,
+        "Home",
+        &operation(),
+    )
+    .await
+    .unwrap();
+    assert_eq!(report.account.credential_state, CredentialState::Stored);
+    assert_eq!(report.retrieval.unwrap_err().code, "AUTH_REQUIRED");
+    assert_eq!(cloud.calls.load(Ordering::Relaxed), 3);
+    let mut account = f.reopen(report.account.id).await.unwrap();
+    let cloud = LoginTransport::complete("unused");
+    cloud.replies.lock().unwrap().drain(..2);
+    let retry = account.retrieve(&cloud, &operation()).await.unwrap();
+    assert_eq!(retry.bindings.len(), 2);
+    assert_eq!(cloud.calls.load(Ordering::Relaxed), 2);
+    drop(account);
+    let partial = LoginTransport::complete("PRIVATE-LOGIN-ID");
+    partial.replies.lock().unwrap()[3] = json!({"code":123});
+    let report = connect(
+        &f.vault,
+        &partial,
+        login_credentials(),
+        Some(report.account.id),
+        "Home",
+        &operation(),
+    )
+    .await
+    .unwrap();
+    let listing = report.retrieval.unwrap();
+    assert!(!listing.inventory.is_complete());
+    assert!(listing.bindings.is_empty());
+    let account = f.reopen(report.account.id).await.unwrap();
+    assert_eq!(
+        account
+            .resolve_device(retry.bindings[0].device_id, &operation())
+            .await
+            .unwrap()
+            .expose(),
+        "90123456789"
+    );
+}
+
+#[tokio::test]
+async fn reconnect_refuses_changed_subject_without_overwriting_session_or_fetching_devices() {
+    let f = Fixture::new();
+    let first = connect(
+        &f.vault,
+        &LoginTransport::complete("PRIVATE-LOGIN-ID"),
+        login_credentials(),
+        None,
+        "Home",
+        &operation(),
+    )
+    .await
+    .unwrap();
+    let original = f.bytes(first.account.credential_ref);
+    let puts = f.puts();
+    let changed = LoginTransport::complete("OTHER-LOGIN-ID");
+    assert_eq!(
+        connect(
+            &f.vault,
+            &changed,
+            login_credentials(),
+            Some(first.account.id),
+            "Home",
+            &operation()
+        )
+        .await
+        .unwrap_err()
+        .code,
+        "ACCOUNT_IDENTITY_CONFLICT"
+    );
+    assert_eq!(f.puts(), puts);
+    assert_eq!(f.bytes(first.account.credential_ref), original);
+    assert_eq!(changed.calls.load(Ordering::Relaxed), 2);
+}
+
+#[tokio::test]
+async fn unavailable_storage_pending_state_and_registration_lock_prevent_login() {
+    let f = Fixture::new();
+    let cloud = LoginTransport::complete("PRIVATE-LOGIN-ID");
+    let unavailable = AccountVault::new(f.store.clone(), Arc::new(UnavailableSecretStore));
+    assert_eq!(
+        connect(
+            &unavailable,
+            &cloud,
+            login_credentials(),
+            None,
+            "Home",
+            &operation()
+        )
+        .await
+        .unwrap_err()
+        .code,
+        "SECRET_STORE_UNAVAILABLE"
+    );
+    assert!(f.store.accounts().unwrap().is_empty());
+    let guard = f.vault.lock_registration(&operation()).await.unwrap();
+    assert_eq!(
+        connect(
+            &f.vault,
+            &cloud,
+            login_credentials(),
+            None,
+            "Home",
+            &operation()
+        )
+        .await
+        .unwrap_err()
+        .code,
+        "RESOURCE_BUSY"
+    );
+    drop(guard);
+    let lease = f
+        .vault
+        .prepare("midea.meiju", "CN", "Pending", &operation())
+        .await
+        .unwrap();
+    drop(lease);
+    assert_eq!(
+        connect(
+            &f.vault,
+            &cloud,
+            login_credentials(),
+            None,
+            "Home",
+            &operation()
+        )
+        .await
+        .unwrap_err()
+        .code,
+        "ACCOUNT_SESSION_UNCONFIRMED"
+    );
+    assert_eq!(cloud.calls.load(Ordering::Relaxed), 0);
+}
+
+#[tokio::test]
+async fn interrupted_session_persistence_prevents_inventory_and_leaves_recoverable_account() {
+    let f = Fixture::new();
+    f.secrets.mode.store(2, Ordering::Relaxed);
+    let cloud = LoginTransport::complete("PRIVATE-LOGIN-ID");
+    assert_eq!(
+        connect(
+            &f.vault,
+            &cloud,
+            login_credentials(),
+            None,
+            "Home",
+            &operation()
+        )
+        .await
+        .unwrap_err()
+        .code,
+        "SECRET_STORE_WRITE_UNKNOWN"
+    );
+    assert_eq!(cloud.calls.load(Ordering::Relaxed), 2);
+    let records = f.store.accounts().unwrap();
+    assert_eq!(records.len(), 1);
+    assert_eq!(records[0].credential_state, CredentialState::Pending);
+    assert_eq!(f.puts(), 1);
+    let next = LoginTransport::complete("PRIVATE-LOGIN-ID");
+    assert_eq!(
+        connect(
+            &f.vault,
+            &next,
+            login_credentials(),
+            None,
+            "Home",
+            &operation()
+        )
+        .await
+        .unwrap_err()
+        .code,
+        "ACCOUNT_SESSION_UNCONFIRMED"
+    );
+    assert_eq!(next.calls.load(Ordering::Relaxed), 0);
+    assert!(f.vault.lock_registration(&operation()).await.is_ok());
+}
+
+#[tokio::test]
+async fn mismatched_encoded_session_subject_never_reaches_cloud() {
+    let f = Fixture::new();
+    let report = connect(
+        &f.vault,
+        &LoginTransport::complete("PRIVATE-LOGIN-ID"),
+        login_credentials(),
+        None,
+        "Home",
+        &operation(),
+    )
+    .await
+    .unwrap();
+    let mut payload: Value =
+        serde_json::from_slice(&f.bytes(report.account.credential_ref)).unwrap();
+    payload["subject"] = json!(b"another-subject".to_vec());
+    f.set_bytes(
+        report.account.credential_ref,
+        serde_json::to_vec(&payload).unwrap(),
+    );
+    let mut account = f.reopen(report.account.id).await.unwrap();
+    let cloud = LoginTransport::complete("unused");
+    assert_eq!(
+        account
+            .retrieve(&cloud, &operation())
+            .await
+            .unwrap_err()
+            .code,
+        "ACCOUNT_SESSION_UNCONFIRMED"
+    );
+    assert_eq!(cloud.calls.load(Ordering::Relaxed), 0);
+}
+
+struct WaitingCloud(AtomicUsize);
+#[async_trait]
+impl CloudTransport for WaitingCloud {
+    async fn send(&self, _: &SignedRequest, _: &Operation) -> Result<SecretBytes> {
+        self.0.fetch_add(1, Ordering::Relaxed);
+        std::future::pending().await
+    }
+}
+#[tokio::test]
+async fn cancelled_connect_releases_registration_without_creating_an_account() {
+    let f = Fixture::new();
+    let cloud = WaitingCloud(AtomicUsize::new(0));
+    let op = operation();
+    let cancel = async {
+        while cloud.0.load(Ordering::Relaxed) == 0 {
+            tokio::task::yield_now().await;
+        }
+        op.cancellation.cancel();
+    };
+    let (result, ()) = tokio::join!(
+        connect(&f.vault, &cloud, login_credentials(), None, "Home", &op),
+        cancel
+    );
+    assert_eq!(result.unwrap_err().code, "CANCELLED");
+    assert!(f.store.accounts().unwrap().is_empty());
+    assert!(f.vault.lock_registration(&operation()).await.is_ok());
+}
+
+#[tokio::test]
+async fn foreign_region_never_uses_the_mainland_endpoint() {
+    let f = Fixture::new();
+    let payload = json!({"version":1,"subject":"meiju.login-id.v1:test-id","token":"FICTIONAL","key":"synthetic-key-01"});
+    let mut account = MeijuAccount::create(
+        &f.vault,
+        "EU",
+        "Other",
+        &secret("meiju.login-id.v1:test-id"),
+        &SecretBytes::new(serde_json::to_vec(&payload).unwrap()),
+        &operation(),
+    )
+    .await
+    .unwrap();
+    let cloud = LoginTransport::complete("test-id");
+    assert_eq!(
+        account
+            .retrieve(&cloud, &operation())
+            .await
+            .unwrap_err()
+            .code,
+        "AUTH_FLOW_UNSUPPORTED"
+    );
+    assert_eq!(cloud.calls.load(Ordering::Relaxed), 0);
+}

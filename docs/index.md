@@ -11,6 +11,7 @@ Start with the progressive development path. Reference documents define invarian
 | 3 | [Connect the UI](development/03-ui-integration.md) | In-process requests, cancellation, en-US/zh-CN |
 | 4 | [Add a real adapter](development/04-add-adapter.md) | Authentication gate, contract tests, physical evidence |
 | 5 | [Integrate Midea/Hualing](development/05-midea.md) | Account-device retrieval, direct cloud control, additional LAN routes, and physical acceptance |
+| 6 | [Verify a Meiju account locally](development/06-meiju-probe.md) | Hidden-input read-only login, protected session and automatic inventory |
 
 ## Reference
 

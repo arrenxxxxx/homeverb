@@ -32,7 +32,7 @@ This exits with code 11. Refresh state to inspect the result; do not blindly res
 
 - Capability-driven validation, device/component/argument/route-scoped low-risk grants, shared deadlines, cancellation, and timestamped verification.
 - SQLite metadata/cache/execution journal, cross-process device locks, and request-ID replay protection.
-- A bounded Linux Secret Service library and native account vault with persisted profile/account references, leased session updates, redacted secret buffers, and no plaintext fallback. A native Meiju login/read client is synthetic-tested; real account acceptance, host integration and mobile stores remain pending.
+- A bounded Linux Secret Service library and native account vault with persisted profile/account references, leased session updates, redacted secret buffers, and no plaintext fallback. A native Meiju login/read client is synthetic-tested; protected connection and automatic inventory are available through a [local read-only probe](docs/development/06-meiju-probe.md). One real mainland account has passed login/inventory and saved-session refresh; production host integration, model support and mobile stores remain pending.
 - Local rooms, aliases, favorites, and card ordering through Core, CLI, and the native UI bridge; rediscovery preserves preferences.
 - Schema-1/2 migration to schema 3 with a consistent backup, bounded detailed receipts, and retained request IDs that prevent replay after history is retired.
 - Explicit local diagnostic previews with allowlisted fields and bounded receipt summaries, available through CLI and the native UI bridge.

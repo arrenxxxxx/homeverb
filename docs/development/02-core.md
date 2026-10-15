@@ -88,7 +88,7 @@ Core implements room creation/rename/order/delete and device aliases, room assig
 
 The storage implementation upgrades schema 1 or 2 to 3 with a verified local backup and exclusive migration access. It retains 100 finalized detailed receipts plus active records, while keeping retired request IDs to prevent replay. The ID ledger can grow. See [storage](../storage.md) and [ADR-0009](../adr/0009-local-organization-and-retention.md). Organization, migration, retention, and fault-injected execution tests exercise these boundaries.
 
-The next integration needs real native-authentication evidence, provider flows using the account vault, and read-only device testing. Authorization sharing is governed separately by ADR-0008 and must remain disabled until its contract and security gates are satisfied.
+The Meiju native flow now uses the account vault. The next acceptance needs real account identity evidence, production host integration, and read-only device testing. Authorization sharing is governed separately by ADR-0008 and must remain disabled until its contract and security gates are satisfied.
 
 ## Inspect recorded outcomes
 

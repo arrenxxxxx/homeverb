@@ -4,9 +4,9 @@ The owner selected Midea and Hualing air conditioners, dishwashers, and refriger
 
 Daily cloud control is required in the first real integration. LAN is an additional route for the same physical devices, not a substitute for cloud control. The owner has physical products; exact models, firmware, app version, and account region remain to be recorded. This guide records requirements and source research on October 15, 2026, not implemented HomeVerb support or physical verification.
 
-The native read protocols are implemented in [homeverb-midea](../../crates/midea/src/lib.rs): account-scoped home/appliance retrieval, code/data validation, deduplication, partial inventory failure, and bounded cloud-state decoding for the three selected families. The inventory/state decoders use an injected read transport and synthetic responses with the inspected wire fields. Native password login, signing, session-key decoding and restricted HTTPS are now implemented under ADR-0022 and tested against fictional responses and a local TLS server. No real account has been tested, and no Core adapter or UI account method is registered yet. See [ADR-0020](../adr/0020-midea-cloud-inventory.md) and [ADR-0023](../adr/0023-meiju-cloud-state-evidence.md).
+The native read protocols are implemented in [homeverb-midea](../../crates/midea/src/lib.rs): account-scoped home/appliance retrieval, code/data validation, deduplication, partial inventory failure, and bounded cloud-state decoding for the three selected families. The inventory/state decoders use an injected read transport and synthetic responses with the inspected wire fields. Native password login, signing, session-key decoding and restricted HTTPS are now implemented under ADR-0022 and tested against fictional responses and a local TLS server. One real mainland account has passed the read-only login/inventory probe below; no Core adapter or UI account method is registered yet. See [ADR-0020](../adr/0020-midea-cloud-inventory.md) and [ADR-0023](../adr/0023-meiju-cloud-state-evidence.md).
 
-The native account vault now persists random local references, composes Linux secure storage, and coordinates session read/update work through account leases. Meiju's private account payload also preserves appliance-to-local-ID bindings with the session. Interrupted or uncertain updates remain pending until trusted validation and recovery. This supplies storage for the future provider flow; it does not establish Meiju login, provider identity or session validity. See [ADR-0021](../adr/0021-persistent-account-vault.md), [ADR-0024](../adr/0024-meiju-private-device-bindings.md) and the [credential integration guide](04-add-adapter.md#integrate-native-credentials).
+The native account vault now persists random local references, composes Linux secure storage, and coordinates session read/update work through account leases. Meiju's private account payload also preserves appliance-to-local-ID bindings with the session. Interrupted or uncertain updates remain pending until trusted validation and recovery. The explicit native connection coordinator now uses this storage and the admitted login client; real account identity and session validity still require live acceptance. See [ADR-0021](../adr/0021-persistent-account-vault.md), [ADR-0024](../adr/0024-meiju-private-device-bindings.md) and the [credential integration guide](04-add-adapter.md#integrate-native-credentials).
 
 ## Reuse the community protocol work
 
@@ -45,7 +45,7 @@ Repeated retrieval and reauthorization preserve local IDs, aliases, rooms, favor
 
 The cloud sources include distinct Meiju and SmartHome login paths and app-specific signing material. Review their meaning and permitted native-client use before enabling login. An upstream hardcoded constant is not proof of public-client authorization. Only the pinned public Meiju app-compatibility constants are admitted under the owner-approved ADR-0022 exception. Do not copy default appliance keys, user credentials, or confidential developer secrets into HomeVerb. Account persistence and refresh use opaque references, system secret stores, and on-demand refresh coordination. Never ask for credentials in chat, command arguments, or ordinary diagnostic output.
 
-The October 15 authentication review found that the official v3 token endpoint requires a developer secret; the Android SDK guide describes obtaining tokens through a third-party server. Those documented paths do not establish the required independent native flow. The community app-facing login uses shared app signing and decoding material. [ADR-0022](../adr/0022-meiju-community-cloud-admission.md) records the primary sources and the narrowly scoped community-protocol exception explicitly approved by the owner on October 15, 2026. Protocol implementation may now proceed; real account and model acceptance remain separate checks. No live login is implemented merely by accepting the decision.
+The October 15 authentication review found that the official v3 token endpoint requires a developer secret; the Android SDK guide describes obtaining tokens through a third-party server. Those documented paths do not establish the required independent native flow. The community app-facing login uses shared app signing and decoding material. [ADR-0022](../adr/0022-meiju-community-cloud-admission.md) records the primary sources and the narrowly scoped community-protocol exception explicitly approved by the owner on October 15, 2026. Protocol implementation may now proceed; real account and model acceptance remain separate checks. Approval alone did not implement login; the separately tested native login and connection stages below now supply the implementation.
 
 ## Native login and restricted HTTPS
 
@@ -83,6 +83,40 @@ redirect/retry refusal, certificate validation, oversized/truncated responses an
 socket closure on cancellation/deadline. These tests neither contact Meiju nor
 establish account, regional, mobile or physical-device support.
 
+## Explicit connection and automatic retrieval
+
+`connect(vault, transport, credentials, existing_account, label, operation)` acquires
+a profile registration lock and checks secure-store access before login. With no
+explicit account it compares protected subjects in the same provider/region and
+reuses a unique exact match. An explicit account retains its lease through login
+and refuses a changed subject. Unconfirmed existing accounts fail before login;
+no reset, deletion or duplicate-account fallback is attempted.
+
+Successful login stores the session and then immediately retrieves/binds the
+inventory. `ConnectReport` separates account persistence from `retrieval`, which may
+be failed or partial. `MeijuAccount::retrieve` supports a later explicit retry with
+the saved session, checks the encoded subject against the protected account and
+retains the original account lease. Neither operation registers capabilities,
+publishes Core cards, deduplicates appliances across accounts or authorizes writes.
+The existing native UI API remains unchanged.
+
+The [local read-only probe](06-meiju-probe.md) exposes this flow to an interactive
+Linux terminal with hidden input and no credential arguments. Its output contains
+only local account references, family counts and fixed outcomes.
+
+On October 15, 2026, the owner ran the hidden-input connect flow and reported a
+stored session with complete retrieval: four air conditioners, one dishwasher,
+one refrigerator, no other families and zero failed homes. A subsequent independent
+probe process was executed against that exact local account with `refresh`; it
+returned the same six-device counts and stored account reference without another
+login. This establishes one real-account persisted-session inventory path on Linux.
+Account names, local IDs, appliance identifiers and credentials are omitted here.
+
+This evidence does not establish model/firmware support, physical state/control,
+relogin subject stability, phone packaging or operation away from the home network.
+Device binding/preference preservation remains covered by the synthetic suite;
+real reauthorization and off-LAN acceptance remain to be recorded.
+
 ## Native account identity and device persistence
 
 `MeijuAccount` owns an AccountVault lease for one bounded operation. After admitted native authentication validates an account subject and session, `create(vault, region, label, subject, session, operation)` reserves a fresh local account and stores a private version-1 payload. For an existing account, acquire its lease and use `open`; it never initializes or resets an absent/corrupt map. `record()` exposes local metadata, and `session(operation)` returns protected native bytes. These are Rust library calls, not native UI methods.
@@ -93,7 +127,7 @@ After retrieval, `bind_inventory` validates the inventory's credential reference
 
 Repeated inventories preserve IDs. Missing entries never remove mappings, including after a complete empty list. Names, vendor rooms and online hints do not affect identity. Known family/model conflicts reject the whole update; an absent model can become known. Unknown families receive bindings without gaining capabilities. Unchanged mappings require no secret-store write. This does not yet publish Core descriptors or deduplicate one appliance across different accounts; the discovery coordinator must resolve those cases before publishing cards.
 
-The protected payload contains the immutable local account binding, subject/session bytes and private appliance map. Limits are 1 MiB total, 1024 subject bytes, 65536 session bytes, 4096 bindings, and 256 UTF-8 bytes per model. The system secret store protects the payload; SQLite contains no provider identifiers or session data. Debug/errors are redacted. Pending writes need exact-byte recovery through the vault before `open` can succeed; never retry by resetting or recreating the account. Tests use synthetic secrets and real SQLite, including unchanged local preferences after descriptor rediscovery. Real authentication, keyring account-flow testing and phone support remain pending.
+The protected payload contains the immutable local account binding, subject/session bytes and private appliance map. Limits are 1 MiB total, 1024 subject bytes, 65536 session bytes, 4096 bindings, and 256 UTF-8 bytes per model. The system secret store protects the payload; SQLite contains no provider identifiers or session data. Debug/errors are redacted. Pending writes need exact-byte recovery through the vault before `open` can succeed; never retry by resetting or recreating the account. Tests use synthetic secrets and real SQLite, including unchanged local preferences after descriptor rediscovery. Real authentication acceptance, keyring account-flow testing and phone support remain pending.
 
 For a Core adapter's default state read, use `read_bound_state(transport, device, component, connection, clock, operation)` on the leased account. It checks the exact local device and full cloud connection against the protected map, known model evidence, and the requested component before issuing one request. The private appliance target comes from the map, not from UI arguments. Use an operation-scoped transport that already resolves the correct session under this lease; do not reacquire the account lock inside the transport. This helper does not discover capabilities or turn read properties into actions.
 

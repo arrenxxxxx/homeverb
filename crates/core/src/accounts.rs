@@ -81,6 +81,20 @@ impl AccountVault {
         operation.run(async { self.store.accounts() }).await
     }
 
+    /// Coordinate explicit account registration/reconnection across native hosts in this profile.
+    pub async fn lock_registration(&self, operation: &Operation) -> Result<Box<dyn AccountLock>> {
+        operation
+            .run(async { self.store.lock_account(self.store.profile_namespace()?) })
+            .await
+    }
+
+    /// Check secure-store access without creating an account or reading an existing credential.
+    /// A successful read preflight cannot guarantee that a later mutation will succeed.
+    pub async fn check_secure_storage(&self, operation: &Operation) -> Result<()> {
+        self.secrets.get(&CredentialRef::new(), operation).await?;
+        Ok(())
+    }
+
     /// Reserve stable local references before attempting a secure-store mutation.
     pub async fn prepare(
         &self,
