@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:file_selector/file_selector.dart';
 import 'blocks.dart';
 import 'controller.dart';
+import 'controls.dart';
 import 'native_client.dart';
 import 'preferences.dart';
 import 'receipts.dart';
@@ -84,6 +85,8 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   final Map<String, double> values = {};
   final navigator = GlobalKey<NavigatorState>();
   String? selectedMode;
+  Json? actionCapability;
+  String? actionName;
   String? formError;
   bool _disposed = false;
   int navigation = 0;
@@ -192,6 +195,16 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     }
     if (label == 'Reload local data') {
       await c.initialize();
+      return;
+    }
+    if (label.startsWith('control:')) {
+      if (c.busy) return;
+      final parts = label.split(':');
+      final index = int.tryParse(parts[1]);
+      if (index == null || index < 0 || index >= c.capabilities.length) return;
+      actionCapability = c.capabilities[index];
+      actionName = Uri.decodeComponent(parts[2]);
+      await go('C10');
       return;
     }
     if (label.startsWith('component:')) {
@@ -706,6 +719,13 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         ui['subtitle'] = c.roomName(prefs?['room_id']);
         final temperature = c.observed('climate.target_temperature');
         final targetAction = c.capability('climate')?['actions']?['set'];
+        final power = c.capability('power');
+        final powerAction = power?['actions']?['set'] as Json?;
+        final canEditPower =
+            powerAction != null &&
+            actionUnavailable(power!, powerAction) == null &&
+            powerAction['parameters']?['properties']?['state'] != null;
+
         final canEditTarget =
             targetAction?['risk'] == 'low' &&
             targetAction?['parameters']?['properties']?['target_temperature'] !=
@@ -735,25 +755,51 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             ],
           if (c.capability('climate') != null && !canEditTarget)
             ['note', 'Temperature is read-only here.'],
-          [
-            'rows',
-            [
-              if (c.capability('power') != null)
-                [
-                  'Power',
-                  c.observed('power.state') == null
-                      ? 'Unknown'
-                      : c.observed('power.state') == true
-                      ? 'On'
-                      : 'Off',
-                ],
-              if (c.capability(
+          if (power != null ||
+              targetAction?['parameters']?['properties']?['mode'] != null ||
+              c.capability(
                     'climate',
-                  )?['actions']?['set']?['parameters']?['properties']?['mode'] !=
-                  null)
-                ['Mode', '${c.observed('climate.mode') ?? 'Unknown'}  ›'],
+                  )?['properties']?['current_temperature']?['readable'] ==
+                  true)
+            [
+              'rows',
+              [
+                if (c.capability('power') != null)
+                  [
+                    'Power',
+                    c.observed('power.state') == null
+                        ? 'Unknown'
+                        : c.observed('power.state') == true
+                        ? 'On'
+                        : 'Off',
+                    canEditPower ? 'Power' : null,
+                  ],
+                if (c.capability(
+                      'climate',
+                    )?['actions']?['set']?['parameters']?['properties']?['mode'] !=
+                    null)
+                  [
+                    'Mode',
+                    '${c.observed('climate.mode') ?? 'Unknown'}  ›',
+                    targetAction?['risk'] == 'low' ? 'Mode' : null,
+                  ],
+                if (c.capability(
+                      'climate',
+                    )?['properties']?['current_temperature']?['readable'] ==
+                    true)
+                  [
+                    'Current temperature',
+                    propertyValue(
+                      c.observed('climate.current_temperature'),
+                      c.capability(
+                        'climate',
+                      )!['properties']['current_temperature'],
+                    ),
+                    null,
+                  ],
+              ],
             ],
-          ],
+          ...describedControls(c),
           ['button', 'Refresh State', 'secondary'],
           ['button', 'Device information', 'secondary'],
           ['button', 'Recent Operations', 'secondary'],
@@ -771,6 +817,16 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           ],
           ['button', 'Save Mode'],
           ['button', 'Cancel', 'secondary'],
+        ];
+        break;
+      case 'C10':
+        ui['base'] = 'C01';
+        ui['overlay'] = 'sheet';
+        ui['header'] = actionName == null
+            ? 'Action unavailable'
+            : '${controlLabel(actionCapability!['id'])} · ${controlLabel(actionName!)}';
+        b = [
+          ['note', 'Choose a supported action from the device page.'],
         ];
         break;
       case 'C12':
@@ -981,6 +1037,27 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             ? c.filter
             : c.roomName(c.filter),
       );
+    if (id == 'C10' && actionCapability != null && actionName != null) {
+      final epoch = navigation;
+      return CapabilityActionForm(
+        key: ValueKey('$epoch:${actionCapability!['id']}:$actionName'),
+        capability: actionCapability!,
+        action: actionName!,
+        observation: (property) =>
+            c.snapshot?['observations']?[property] as Json?,
+        error: () => c.error,
+        onCancel: () => action('Cancel'),
+        onSubmit: (arguments) async {
+          final success = await c.execute(
+            actionCapability!['id'],
+            actionName!,
+            arguments,
+          );
+          if (success && mounted && epoch == navigation) await go('S06');
+          return success;
+        },
+      );
+    }
     if (id == 'D03')
       return Column(
         children: [
@@ -1244,7 +1321,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           values: values,
           onChanged: changed,
           busy: c.busy,
-          error: c.error,
+          error: id == 'C10' && actionCapability != null ? null : c.error,
         ),
       ),
     ),
