@@ -65,7 +65,7 @@ Controller/FFI tests additionally cover persisted reopen, accepted/verified/fail
 
 The screenshot test captures every ID at the reference size: 780 x 1688, or 2048 x 1536 for W01/W02. It loads the licensed Inter fonts and approved product/background assets. All text, controls and semantics are widgets; complete screen images are never used as the app interface. Test status/navigation chrome is deterministic artwork, not a captured phone OS.
 
-The latest complete comparison has **0 of 82 exact matches**, with mean absolute channel error **1.6798 / 255**, down from 6.1482 before rendering refinements. Native switches now use the prototype's accent/gray tracks and light thumbs. A lower average alone does not establish correct states or layouts. These metrics measure differences, not an acceptance tolerance. Text rasterization, icons, surfaces, controls and layout still differ. P08 intentionally follows the amended automatic-retrieval contract; the approved atlas still depicts the superseded manual step.
+The latest complete comparison has **0 of 82 exact matches**, with mean absolute channel error **1.6514 / 255**, down from 6.1482 before rendering refinements. Native switches now use the prototype's accent/gray tracks and light thumbs. A lower average alone does not establish correct states or layouts. These metrics measure differences, not an acceptance tolerance. Text rasterization, icons, surfaces, controls and layout still differ. P08 intentionally follows the amended automatic-retrieval contract; the approved atlas still depicts the superseded manual step.
 
 The latest shared-widget refinement aligns the non-root header, raises button labels to the reference position, and measures actual label/value font widths before wrapping rows. Fan and refrigerator preview steppers now expose separate increase/decrease controls with explicit preview-only feedback. The added interaction check clicks all six controls without changing page or claiming a native write. All 29 Flutter tests, static analysis and the Linux release build passed after this refinement.
 
@@ -290,3 +290,30 @@ The updated ordinary Android release APK also rebuilt, passed both ABI/export an
 16 KiB ELF/ZIP checks, installed and cold-started on the isolated Android emulator.
 `inventory-release-home.png` records that launch. The full OS keyboard/Home/resume
 checks remain recorded against the preceding Android checkpoint `68fdaf6`.
+
+## Climate glyph alignment checkpoint
+
+Measured reference/Flutter ink bounds exposed a 2.5-logical-pixel vertical drift
+in the large observed-target value, and 10/5-pixel drift in the climate minus/plus
+glyphs. Their corrected ink bounds match the reference at the 780 x 1688 test
+viewport; this does not claim matching antialiasing. Inline steppers also align
+their glyphs without shrinking hit targets or changing action semantics.
+`output/flutter-verification/climate-ink-bounds.json` records the measured boxes.
+
+Only those glyph/control adjustments are retained. Shared divider and titled-row
+experiments were discarded because some individual screens regressed. The final
+82-state comparison improves C01, C02, C03, C04, C06, C08, C14 and W02; all other
+screens retain their previous metrics. Mean channel error drops from 1.6798 to
+1.6514/255. The strict gate remains **0/82 exact**, and references are unchanged.
+
+Static analysis and the full 61-test suite passed during the refinement. After
+restoring the original rows, all 10 screen/reflow/high-contrast checks passed,
+including 198 simulated atlas branches. All 82 captures were regenerated after
+the final half-pixel horizontal glyph adjustment. The Android actual-process Mock
+discovery/control/receipt/cache/history smoke test passed before the row rollback;
+no real provider or appliance was contacted. These tests supplement the prior
+native click coverage and do not establish physical-device or pixel acceptance.
+
+The final ordinary Android release APK rebuilt, passed 16 KiB ZIP alignment,
+installed and cold-started on the isolated emulator. The delivery APK and SHA-256
+manifest were updated; `visual-alignment-release-home.png` records the launch.

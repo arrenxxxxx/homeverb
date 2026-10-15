@@ -869,7 +869,7 @@ class Climate extends StatelessWidget {
                   ),
                 ),
                 Positioned(
-                  top: 52,
+                  top: 49.5,
                   left: 0,
                   right: 0,
                   child: InkWell(
@@ -899,12 +899,12 @@ class Climate extends StatelessWidget {
                 ),
                 Positioned(
                   top: 161,
-                  left: 30,
+                  left: 30.5,
                   child: _step('−', 'Decrease target', const Color(0xff535452)),
                 ),
                 Positioned(
                   top: 161,
-                  right: 30,
+                  right: 30.5,
                   child: _step(
                     '+',
                     'Increase target',
@@ -996,7 +996,10 @@ class Climate extends StatelessWidget {
             ),
             child: Padding(
               padding: const EdgeInsets.only(top: 6),
-              child: Copy(text, size: 24, color: Colors.white, center: true),
+              child: Transform.translate(
+                offset: Offset(text == '−' ? -.5 : .5, text == '−' ? -10 : -5),
+                child: Copy(text, size: 24, color: Colors.white, center: true),
+              ),
             ),
           ),
         ),

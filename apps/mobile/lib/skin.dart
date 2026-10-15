@@ -370,10 +370,13 @@ class InlineStepper extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                       child: ExcludeSemantics(
-                        child: Copy(
-                          increase ? '+' : '−',
-                          size: 16,
-                          center: true,
+                        child: Transform.translate(
+                          offset: Offset(0, increase ? -2.5 : -5),
+                          child: Copy(
+                            increase ? '+' : '−',
+                            size: 16,
+                            center: true,
+                          ),
                         ),
                       ),
                     ),
