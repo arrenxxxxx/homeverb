@@ -496,3 +496,35 @@ are `long-label-release-home.png`, `long-label-release-detail.png` and
 `long-label-release-info.png` under `output/flutter-verification/android/`.
 The local delivery APK and hash manifest were refreshed. No real account or
 appliance was used, and native operation semantics are unchanged.
+
+
+## Row-divider and title geometry
+
+The row separator previously straddled the row boundary and antialiased an extra
+physical pixel. It now paints a physical-pixel-aligned rectangular line beginning
+at that boundary, including the source renderer's final endpoint. Titled groups
+use a one-pixel bottom spacer: the measured 20-pixel title and 13-pixel top spacer
+now total the reference's 34 pixels instead of accumulating 0.4 pixels per group.
+Large-text content continues to flow, and row click regions are unchanged.
+
+All divider coordinates in A05, C08, P03 and S07 match the original references at
+780 x 1688. Image hashes and sampled scanlines are recorded in
+`output/flutter-verification/row-divider-samples.json`. This verifies coordinates,
+not complete pixel equality. The strict 82-page comparison remains **0/82 exact**.
+Mean channel error changes from 1.4999 to 1.4822/255: 41 pages improve, 34 stay
+unchanged, and seven regress (A01, A02, C06, C10, H07, S05 and S07). The regressions
+are retained as unresolved visual work; they are not waived by the lower mean.
+Chip hit-area spacing, dialog positioning and text rasterization still differ.
+The prototype images and strict comparison criteria are unchanged.
+
+Static analysis and the full 63-test Flutter suite passed, including the native
+Mock click journey and 198 explicitly simulated preview branches. Temporary
+layout probes were removed after measuring the offsets. No Core API, routing,
+permissions or appliance-operation semantics changed.
+
+The ordinary Android release APK rebuilt and passed 16 KiB ZIP alignment. A
+separate actual-process export check on the preceding `eb72306` APK reproduced
+`EXPORT_FAILED`: `file_selector_android` does not implement `getSaveLocation`.
+The earlier simulated-picker tests did not cover that platform limitation. Android
+system-document export is a confirmed remaining functional defect, not a passed
+acceptance item.

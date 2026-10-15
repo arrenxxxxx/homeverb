@@ -717,17 +717,16 @@ class Rows extends StatelessWidget {
         children: [
           if (title != null)
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 13, 16, 1.4),
+              padding: const EdgeInsets.fromLTRB(16, 13, 16, 1),
               child: Copy(title!, size: 14, bold: true),
             ),
           for (var i = 0; i < items.length; i++) ...[
             if (i > 0)
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Divider(
-                  height: 0,
-                  thickness: .6,
-                  color: Color(0xffdeded7),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: CustomPaint(
+                  painter: _RowDivider(MediaQuery.devicePixelRatioOf(context)),
+                  child: const SizedBox(height: 0, width: double.infinity),
                 ),
               ),
             Builder(
@@ -879,6 +878,28 @@ class Rows extends StatelessWidget {
       ),
     ),
   );
+}
+
+class _RowDivider extends CustomPainter {
+  const _RowDivider(this.pixelRatio);
+  final double pixelRatio;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final thickness =
+        (.6 * pixelRatio).round().clamp(1, double.infinity) / pixelRatio;
+    // The prototype line includes its endpoint and starts at the row boundary.
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.width + 1 / pixelRatio, thickness),
+      Paint()
+        ..color = const Color(0xffdeded7)
+        ..isAntiAlias = false,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_RowDivider oldDelegate) =>
+      oldDelegate.pixelRatio != pixelRatio;
 }
 
 class Climate extends StatelessWidget {
