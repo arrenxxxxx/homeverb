@@ -115,6 +115,7 @@ class Surface extends StatelessWidget {
     this.dark = false,
     this.radius = 22,
     this.border,
+    this.borderWidth = .6,
     this.bottomBleed = 0,
     this.padding = EdgeInsets.zero,
     super.key,
@@ -123,6 +124,7 @@ class Surface extends StatelessWidget {
   final bool dark;
   final double radius;
   final Color? border;
+  final double borderWidth;
   final double bottomBleed;
   final EdgeInsetsGeometry padding;
   @override
@@ -140,7 +142,7 @@ class Surface extends StatelessWidget {
       ),
       border: Border.all(
         color: border ?? (dark ? const Color(0xff5e605c) : Colors.white),
-        width: .6,
+        width: borderWidth,
       ),
       boxShadow: const [
         BoxShadow(

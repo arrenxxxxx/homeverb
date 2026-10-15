@@ -126,6 +126,16 @@ void main() {
       await tester.pumpAndSettle();
       await tap('Codes Do Not Match');
       expect(key.currentState!.id, 'H14');
+      key.currentState!.go('A04');
+      await tester.pumpAndSettle();
+      final selectedChoices = find.byWidgetPredicate(
+        (widget) => widget is Semantics && widget.properties.selected == true,
+      );
+      expect(selectedChoices, findsNWidgets(2));
+      await tap('Floor lamp · Local network');
+      expect(selectedChoices, findsOneWidget);
+      await tap('Bedroom AC · Possible duplicate');
+      expect(selectedChoices, findsNWidgets(2));
       tester.view.resetPhysicalSize();
       tester.view.resetDevicePixelRatio();
     },

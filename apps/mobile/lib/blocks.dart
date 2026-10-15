@@ -80,6 +80,7 @@ class Blocks extends StatelessWidget {
               Surface(
                 radius: 14,
                 border: b.length > 3 ? const Color(0xffae452d) : null,
+                borderWidth: b.length > 3 ? 1 : .6,
                 child: TextField(
                   controller: field,
                   key: ValueKey('field:$label'),
@@ -127,10 +128,18 @@ class Blocks extends StatelessWidget {
         final items = (b[1] as List).cast<String>();
         final key = items.join('|');
         final initial = b.length > 2 ? b[2] : 0;
+        final multiple = initial is List;
         final selected = choices.putIfAbsent(
           key,
-          () => initial is int ? initial : initial[0] as int,
+          () => multiple
+              ? initial.fold<int>(
+                  0,
+                  (mask, index) => mask | (1 << (index as int)),
+                )
+              : initial as int,
         );
+        bool isSelected(int index) =>
+            multiple ? (selected & (1 << index)) != 0 : selected == index;
         return Padding(
           padding: const EdgeInsets.only(bottom: 4),
           child: Column(
@@ -139,14 +148,15 @@ class Blocks extends StatelessWidget {
               (i) => Padding(
                 padding: const EdgeInsets.only(bottom: 9),
                 child: Semantics(
-                  selected: i == selected,
+                  selected: isSelected(i),
                   child: Surface(
                     radius: 16,
-                    border: i == selected ? accent : null,
+                    border: isSelected(i) ? accent : null,
+                    borderWidth: isSelected(i) ? 1.2 : .6,
                     child: InkWell(
                       borderRadius: BorderRadius.circular(16),
                       onTap: () {
-                        choices[key] = i;
+                        choices[key] = multiple ? selected ^ (1 << i) : i;
                         onAction('choice:${items[i]}');
                         onChanged?.call();
                       },
@@ -158,7 +168,7 @@ class Blocks extends StatelessWidget {
                         child: Row(
                           children: [
                             Expanded(
-                              child: Copy(items[i], bold: i == selected),
+                              child: Copy(items[i], bold: isSelected(i)),
                             ),
                             const SizedBox(width: 12),
                             Container(
@@ -166,14 +176,14 @@ class Blocks extends StatelessWidget {
                               height: 18,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: i == selected ? accent : null,
+                                color: isSelected(i) ? accent : null,
                                 border: Border.all(
-                                  color: i == selected
+                                  color: isSelected(i)
                                       ? accent
                                       : const Color(0xffb3b3ac),
                                 ),
                               ),
-                              child: i == selected
+                              child: isSelected(i)
                                   ? const Glyph(
                                       'check',
                                       size: 14,
@@ -199,7 +209,7 @@ class Blocks extends StatelessWidget {
             children: List.generate((b[1] as List).length, (i) {
               final label = b[1][i] as String;
               final selected = type == 'tabs'
-                  ? i == (choices['tabs'] ?? b[2])
+                  ? i == (b.length > 3 ? b[2] : choices['tabs'] ?? b[2])
                   : label == '3';
               final measure = TextPainter(
                 text: TextSpan(
@@ -218,8 +228,10 @@ class Blocks extends StatelessWidget {
                   height: 48,
                   child: InkWell(
                     onTap: () {
-                      choices['tabs'] = i;
-                      onAction(label);
+                      if (b.length <= 3) choices['tabs'] = i;
+                      onAction(
+                        type == 'tabs' && b.length > 3 ? b[3][i] : label,
+                      );
                       onChanged?.call();
                     },
                     child: Stack(
@@ -261,8 +273,9 @@ class Blocks extends StatelessWidget {
             runSpacing: 8,
             children: List.generate((b[1] as List).length, (i) {
               final label = b[1][i] as String;
-              final selected =
-                  choices['tabs'] ?? (type == 'tabs' ? b[2] as int : 2);
+              final selected = type == 'tabs' && b.length > 3
+                  ? b[2] as int
+                  : choices['tabs'] ?? (type == 'tabs' ? b[2] as int : 2);
               return Semantics(
                 selected: i == selected,
                 child: ActionChip(
@@ -276,8 +289,8 @@ class Blocks extends StatelessWidget {
                     color: i == selected ? Colors.white : muted,
                   ),
                   onPressed: () {
-                    choices['tabs'] = i;
-                    onAction(label);
+                    if (b.length <= 3) choices['tabs'] = i;
+                    onAction(type == 'tabs' && b.length > 3 ? b[3][i] : label);
                     onChanged?.call();
                   },
                 ),
@@ -575,6 +588,7 @@ class Blocks extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 16),
             child: Surface(
               border: accent,
+              borderWidth: 1.2,
               child: SizedBox(
                 height: 205,
                 child: Stack(
@@ -889,7 +903,9 @@ class Climate extends StatelessWidget {
                   left: 0,
                   right: 0,
                   child: InkWell(
-                    onTap: () => onAction('Target temperature'),
+                    onTap: enabled
+                        ? () => onAction('Target temperature')
+                        : null,
                     child: Copy(
                       target.isNaN
                           ? '—'
@@ -957,7 +973,7 @@ class Climate extends StatelessWidget {
             ),
             const SizedBox(height: 15),
             InkWell(
-              onTap: () => onAction('Target temperature'),
+              onTap: enabled ? () => onAction('Target temperature') : null,
               child: Copy(
                 target.isNaN
                     ? '—'
@@ -993,6 +1009,7 @@ class Climate extends StatelessWidget {
   Widget _step(String text, String label, Color color) => Semantics(
     label: label,
     button: true,
+    enabled: enabled,
     child: SizedBox(
       width: 48,
       height: 48,

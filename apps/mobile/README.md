@@ -45,6 +45,7 @@ fvm flutter build web -t lib/main_preview.dart
 - Every call has a fresh operation ID; every write has a separate durable request ID. The UI plans before executing and never automatically replays a write.
 - Execution envelopes retain errors, evidence and nested outcomes. Requested values never replace observations. Explicit refresh only reads.
 - Core owns metadata. Presentation preferences contain only skin, root, sharing display name and route choices. Save failures retain previous preferences.
+- Component selection uses exact IDs and each component's capability references. Observations are cached separately per device/component; a secondary compartment never replaces the primary card observation. Unsupported temperature actions remain read-only.
 - Diagnostics export only the exact report displayed in the preview.
 
 ## Verification boundary

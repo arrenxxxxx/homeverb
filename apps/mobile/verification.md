@@ -17,7 +17,7 @@ Commands below ran in the isolated worktree; Flutter commands used the pinned FV
 | Check | Evidence / result |
 |---|---|
 | `fvm flutter analyze` | No issues found |
-| `fvm flutter test --reporter expanded` | 19 tests: 9 native/controller tests, one extended native widget click scenario, three native outcome click scenarios, six screen/interaction/reflow checks |
+| `fvm flutter test --reporter expanded` | 21 tests: 9 native/controller tests, one extended native widget click scenario, three native outcome click scenarios, two isolated component fixture checks, six screen/interaction/reflow checks |
 | `fvm flutter test integration_test/native_smoke_test.dart -d linux` under Xvfb | Actual Linux process loads the bundled Core library without a path override, discovers Mock, reads state, sets mode and verifies the returned receipt; process screenshot captured |
 | `fvm flutter build linux --release` | Linux bundle includes `libhomeverb_ffi.so`; the bundled Rust library is the checked debug build |
 | `fvm flutter build web -t lib/main_preview.dart` | Isolated preview compiles; web preview does not call native Core |
@@ -35,13 +35,15 @@ The native click scenario exercises discovery, read, mode and target writes, inv
 
 Three additional click scenarios use the native `lost-ack`, `accept-only`, and `reject` fixtures. They click discovery, read, power, receipt refresh and history; assert the displayed `unknown`, `accepted`, or `failed` outcome; retain observations until an explicit read; and verify the original request ID and unchanged history count after refresh. These are fictional native operations, not physical-device evidence.
 
+Two isolated contract-fixture tests load the repository's refrigerator and compartment capability examples. They verify independent cached observations, exact component references, absence of unrelated shared capabilities, blocked selection changes while busy, distinct cold-storage ranges and steps, plan-before-execute, and disabled read-only temperature controls. The fixture exists only in tests; it is not a registered native adapter. The real native Mock host still exposes one climate appliance. Multi-selection preview rows also retain every selected item and support independent selection/deselection.
+
 Controller/FFI tests additionally cover persisted reopen, accepted/verified/failed/unknown results, nested partial batch decoding, no write replay on read, numeric bounds/steps/component scopes, preference corruption and rapid background/resume races. The Mock host exposes only one appliance. Multi-device mixed outcomes use native fixtures; no physical multi-device batch was performed.
 
 ## Visual gate: failed
 
 The screenshot test captures every ID at the reference size: 780 x 1688, or 2048 x 1536 for W01/W02. It loads the licensed Inter fonts and approved product/background assets. All text, controls and semantics are widgets; complete screen images are never used as the app interface. Test status/navigation chrome is deterministic artwork, not a captured phone OS.
 
-The latest complete comparison has **0 of 82 exact matches**, with mean absolute channel error **1.9512 / 255**, down from 6.1482 before this refinement. These metrics measure differences, not an acceptance tolerance. Text rasterization, icons, surfaces, controls and layout still differ. P08 intentionally follows the amended automatic-retrieval contract; the approved atlas still depicts the superseded manual step.
+The latest complete comparison has **0 of 82 exact matches**, with mean absolute channel error **1.9533 / 255**, down from 6.1482 before rendering refinements. The multi-selection and outline correction changed this aggregate from 1.9512 to 1.9533; a lower average alone does not establish correct selected states. These metrics measure differences, not an acceptance tolerance. Text rasterization, icons, surfaces, controls and layout still differ. P08 intentionally follows the amended automatic-retrieval contract; the approved atlas still depicts the superseded manual step.
 
 This refinement aligns the surface gradient, text spacing, root navigation, form heights, sheet corners, sliders, climate panel, large cards and skin miniature. The bottom sheet no longer applies the keyboard inset a second time after Scaffold resizing. All 82 states also render at 844 x 390 logical pixels with 150% text; all phone states render at 320 logical width with 200% text. Every atlas form accepts edited text while its input remains above a simulated 280-logical-pixel keyboard. These widget checks do not establish physical keyboard or screen-reader behavior.
 
@@ -60,7 +62,7 @@ The command verifies the complete 82-file set, writes `output/flutter-verificati
 | UI-01 | 82 states and 198 simulated branches covered; native available routes clicked. System-owned authorization/permission transitions unavailable. |
 | UI-02 | Native first launch, three roots, search/clear, card versus quick control, accessible menu and order buttons implemented. Full keyboard/screen-reader audit pending. |
 | UI-03 | Native room/card CRUD, sorting, assignment and preservation tested. Blank, overlong, control-character and duplicate room names are click-tested with retained input. Stale permutations and multi-device conflict cases still require broader Flutter coverage. |
-| UI-04 | Exact-component climate bounds/enums and unknown values implemented; non-climate illustrations remain isolated preview. General multi-component appliance UI acceptance pending. |
+| UI-04 | Exact-component selection, capability references, cache isolation, climate bounds/enums and unknown/read-only values implemented. Isolated fridge/freezer fixture clicks verify distinct ranges and steps; non-climate control forms and physical multi-component acceptance remain pending. |
 | UI-05 | Native outcomes preserved, including nested partial results. Explicit batches plan before execution; no aggregate rollback/retry. Physical evidence unavailable. |
 | UI-06 | Explicit bounded Mock discovery implemented. Real permission, identity-merge and nearby-pairing paths unavailable. |
 | UI-07 | Unavailable under native contract 1.0; isolated preview only. |

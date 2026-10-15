@@ -9,6 +9,7 @@ class HomeController extends ChangeNotifier {
   List<Json> rooms = [], cards = [], history = [];
   Json? description, snapshot, receipt, diagnostics, batchResult;
   final Map<String, Json> snapshots = {};
+  final Map<(String, String), Json> _componentSnapshots = {};
   String? selectedDevice, selectedRoom, editingRoom;
   String component = 'main', filter = 'All', search = '';
   final Set<String> selection = {};
@@ -65,9 +66,19 @@ class HomeController extends ChangeNotifier {
       cards.where((c) => c['device']['id'] == selectedDevice).firstOrNull;
   dynamic observed(String property) =>
       snapshot?['observations']?[property]?['value'];
+  List<Json> get components =>
+      ((description?['device']?['components'] as List?) ?? []).cast<Json>();
+  Json? get selectedComponent =>
+      components.where((part) => part['id'] == component).firstOrNull;
   List<Json> get capabilities => ((description?['capabilities'] as List?) ?? [])
       .cast<Json>()
-      .where((c) => c['component_id'] == null || c['component_id'] == component)
+      .where(
+        (c) =>
+            (c['component_id'] == null || c['component_id'] == component) &&
+            (selectedComponent?['capabilities'] as List? ?? []).contains(
+              c['id'],
+            ),
+      )
       .toList();
   Json? capability(String id) =>
       capabilities.where((c) => c['id'] == id).firstOrNull;
@@ -76,14 +87,25 @@ class HomeController extends ChangeNotifier {
     description = null;
     snapshot = null;
     description = await core.call('describe_device', {'device': id}) as Json;
-    component = description!['device']['components'][0]['id'] as String;
-    snapshot = snapshots[id];
+    component = components.first['id'] as String;
+    await _loadComponentCache();
+  });
+  Future<bool> selectComponent(String id) => perform(() async {
+    if (!components.any((part) => part['id'] == id)) {
+      throw NativeFailure('INVALID_ARGUMENT', 'Select an available component.');
+    }
+    component = id;
+    await _loadComponentCache();
+  });
+  Future<void> _loadComponentCache() async {
+    snapshot = _componentSnapshots[(selectedDevice!, component)];
     try {
       await read(cached: true);
     } on NativeFailure catch (e) {
       if (!['STATE_UNAVAILABLE', 'CACHE_MISS'].contains(e.code)) rethrow;
     }
-  });
+  }
+
   Future<void> read({bool cached = false}) async {
     final next =
         await core.call('read_state', {
@@ -94,7 +116,8 @@ class HomeController extends ChangeNotifier {
             })
             as Json;
     snapshot = next;
-    snapshots[selectedDevice!] = next;
+    _componentSnapshots[(selectedDevice!, component)] = next;
+    if (component == components.first['id']) snapshots[selectedDevice!] = next;
   }
 
   Future<bool> refresh() => perform(() => read());
@@ -117,6 +140,7 @@ class HomeController extends ChangeNotifier {
                 'cached': false,
               })
               as Json;
+      _componentSnapshots[(device, part['id'] as String)] = result;
       if (part['id'] == descriptor['device']['components'][0]['id']) {
         snapshots[device] = result;
       }
@@ -127,7 +151,7 @@ class HomeController extends ChangeNotifier {
   Future<bool> refreshCards() => perform(() async {
     for (final c in visibleCards) {
       final d = c['device'] as Json;
-      snapshots[d['id']] =
+      final result =
           await core.call('read_state', {
                 'device': d['id'],
                 'component': d['components'][0]['id'],
@@ -135,6 +159,15 @@ class HomeController extends ChangeNotifier {
                 'cached': false,
               })
               as Json;
+      snapshots[d['id']] = result;
+      _componentSnapshots[(
+            d['id'] as String,
+            d['components'][0]['id'] as String,
+          )] =
+          result;
+      if (selectedDevice == d['id'] && component == d['components'][0]['id']) {
+        snapshot = result;
+      }
     }
   });
   Future<bool> saveRoom(String name, {String? id}) => perform(() async {

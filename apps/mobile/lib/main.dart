@@ -167,6 +167,12 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       await c.initialize();
       return;
     }
+    if (label.startsWith('component:')) {
+      if (c.busy) return;
+      clearFields();
+      await c.selectComponent(label.substring('component:'.length));
+      return;
+    }
     if (label.startsWith('room:')) {
       final name = label.substring(5);
       c.filter = name == 'All' || name == 'Unassigned'
@@ -653,6 +659,11 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         ui['header'] = device?['alias'] ?? 'Device';
         ui['subtitle'] = c.roomName(prefs?['room_id']);
         final temperature = c.observed('climate.target_temperature');
+        final targetAction = c.capability('climate')?['actions']?['set'];
+        final canEditTarget =
+            targetAction?['risk'] == 'low' &&
+            targetAction?['parameters']?['properties']?['target_temperature'] !=
+                null;
         values['observed_target'] = temperature is num
             ? temperature.toDouble()
             : double.nan;
@@ -661,13 +672,23 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                 .text =
             '${c.observed('climate.mode') ?? 'Not available'}';
         b = [
+          if (c.components.length > 1)
+            [
+              'tabs',
+              c.components.map((part) => '${part['id']}').toList(),
+              c.components.indexWhere((part) => part['id'] == c.component),
+              c.components.map((part) => 'component:${part['id']}').toList(),
+            ],
           if (c.capability('climate') != null)
             [
               'climate',
               c.snapshot == null
                   ? 'No reading'
                   : '${c.snapshot!['from_cache'] == true ? 'Cached' : 'Read'} observation',
+              canEditTarget,
             ],
+          if (c.capability('climate') != null && !canEditTarget)
+            ['note', 'Temperature is read-only here.'],
           [
             'rows',
             [
