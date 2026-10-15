@@ -510,3 +510,108 @@ fn schema_three_migration_preserves_account_references_and_enables_durable_remov
         namespace.to_string()
     );
 }
+
+#[test]
+fn history_clearing_refuses_active_composites_and_keeps_replay_protection_after_reopen() {
+    let directory = Directory::new();
+    let store = SqliteStore::open(&directory.0).unwrap();
+    let lock = store.lock_device("fictional-device").unwrap();
+    let (parent, receipt) = command("parent", "fictional-device");
+    let (child, mut child_receipt) = command("parent:0", "fictional-device");
+    child_receipt.status = Status::Unknown;
+    store.save_execution(&parent, &receipt).unwrap();
+    store.finish_execution(&child, &child_receipt).unwrap();
+    let concurrent = SqliteStore::open(&directory.0).unwrap();
+    assert_eq!(
+        concurrent.clear_execution_history().unwrap_err().code,
+        "RESOURCE_BUSY"
+    );
+    assert_eq!(store.recent_executions().unwrap().len(), 2);
+    assert_eq!(
+        store
+            .execution(&child.request_id)
+            .unwrap()
+            .unwrap()
+            .1
+            .status,
+        Status::Unknown
+    );
+    store.finish_execution(&parent, &receipt).unwrap();
+    assert_eq!(concurrent.clear_execution_history().unwrap(), 2);
+    assert_eq!(concurrent.clear_execution_history().unwrap(), 0);
+    drop(lock);
+    let reopened = SqliteStore::open(&directory.0).unwrap();
+    assert!(reopened.recent_executions().unwrap().is_empty());
+    for (command, receipt) in [(&parent, &receipt), (&child, &child_receipt)] {
+        assert_eq!(
+            reopened.execution(&command.request_id).unwrap_err().code,
+            "REQUEST_RETIRED"
+        );
+        assert_eq!(
+            reopened.save_execution(command, receipt).unwrap_err().code,
+            "REQUEST_RETIRED"
+        );
+        assert_eq!(
+            reopened
+                .finish_execution(command, receipt)
+                .unwrap_err()
+                .code,
+            "REQUEST_RETIRED"
+        );
+    }
+    let (new_command, new_receipt) = command("new-explicit-request", "fictional-device");
+    reopened
+        .finish_execution(&new_command, &new_receipt)
+        .unwrap();
+    assert_eq!(reopened.recent_executions().unwrap().len(), 1);
+}
+
+#[test]
+fn cleanup_storage_failures_roll_back_cache_history_and_retirement_together() {
+    let directory = Directory::new();
+    let store = SqliteStore::open(&directory.0).unwrap();
+    let (command, receipt) = command("kept-receipt", "fictional-device");
+    store.finish_execution(&command, &receipt).unwrap();
+    let descriptor = Descriptor {
+        device: serde_json::from_str(include_str!("../../../examples/device.json")).unwrap(),
+        capabilities: vec![],
+    };
+    store.save_device(&descriptor).unwrap();
+    let snapshot: Snapshot =
+        serde_json::from_str(include_str!("../../../examples/state.json")).unwrap();
+    store.save_snapshot(&snapshot).unwrap();
+    let db = Connection::open(directory.database()).unwrap();
+    db.execute_batch("INSERT INTO retired_requests VALUES ('already-retired');
+        CREATE TRIGGER refuse_history BEFORE DELETE ON executions BEGIN SELECT RAISE(ABORT, 'synthetic'); END;
+        CREATE TRIGGER refuse_cache BEFORE DELETE ON snapshots BEGIN SELECT RAISE(ABORT, 'synthetic'); END;").unwrap();
+    assert_eq!(
+        store.clear_execution_history().unwrap_err().code,
+        "STORAGE_ERROR"
+    );
+    assert_eq!(
+        store.clear_cached_state().unwrap_err().code,
+        "STORAGE_ERROR"
+    );
+    assert!(store.execution(&command.request_id).unwrap().is_some());
+    assert!(
+        store
+            .snapshot(&snapshot.device_id, &snapshot.component_id)
+            .unwrap()
+            .is_some()
+    );
+    assert_eq!(
+        db.query_row("SELECT COUNT(*) FROM retired_requests", [], |row| row
+            .get::<_, usize>(0))
+            .unwrap(),
+        1
+    );
+    db.execute_batch("DROP TRIGGER refuse_history; DROP TRIGGER refuse_cache;")
+        .unwrap();
+    assert_eq!(store.clear_execution_history().unwrap(), 1);
+    assert_eq!(store.clear_cached_state().unwrap(), 1);
+    assert_eq!(
+        store.execution("already-retired").unwrap_err().code,
+        "REQUEST_RETIRED"
+    );
+    assert_eq!(store.devices().unwrap().len(), 1);
+}

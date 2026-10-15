@@ -91,5 +91,10 @@
   "account.removal.confirm": "从本机移除此账号及 {count} 张关联设备卡片？房间和操作回执会保留，其他设备上的授权和平台账号不受影响。",
   "account.removal.pending": "本机清理尚未完成，此本地账号已停用。",
   "account.removal.removed": "账号已从本机移除，未撤销其他设备上的平台授权。",
-  "account.removal.retry": "重试本机清理"
+  "account.removal.retry": "重试本机清理",
+  "cleanup.cache.confirm": "清除此设备上的状态缓存？账号、房间和操作回执会保留，正在进行的读取可能产生新缓存。",
+  "cleanup.cache.done": "已清除 {count} 条状态快照。",
+  "cleanup.history.confirm": "清除详细操作历史（包括结果未确定的记录）？请求编号会保留以防重复执行，设备和状态缓存会保留。",
+  "cleanup.history.done": "已清除 {count} 条操作回执。",
+  "cleanup.history.busy": "有操作仍在记录中，请等待完成后再重试清除历史。"
 }

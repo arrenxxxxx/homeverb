@@ -94,6 +94,14 @@ To inspect a known operation, call `{"method":"get_execution","request_id":"save
 
 These are local queries, with no refresh, replay, or background work. Filtering does not preserve more history: the profile still has a shared finalized-receipt retention limit, so older records may already be retired. Do not describe an empty view as proof that the device was never operated.
 
+## Explicit local-data cleanup
+
+Settings can call `clear_cached_state` or `clear_execution_history` after a separate
+scope confirmation. Use the [cleanup contract](../native-ui-contract.md#clear-local-cache-or-history)
+for counts, active-journal refusal, interrupted calls and replay protection.
+Neither operation removes accounts, grants or room/card organization. Full-profile
+deletion remains unavailable; do not implement it by deleting SQLite files.
+
 ## Diagnostic preview and export
 
 Settings calls `{"method":"diagnostics"}` in the normal host envelope. The query result's data matches [Diagnostics](../../schemas/diagnostics.schema.json). Render a preview, then save that same report only after the user's explicit action. Do not build an export by combining raw `describe_device`, `read_state`, or `recent_executions` results. This method does not accept extra fields or a request to include secrets, and it does not upload anything.

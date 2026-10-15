@@ -60,6 +60,8 @@ pub enum Request {
         batch: BatchCommand,
     },
     RecentExecutions {},
+    ClearCachedState {},
+    ClearExecutionHistory {},
     GetExecution {
         request_id: String,
     },
@@ -334,6 +336,16 @@ impl Session {
                 ));
             }
             Request::RecentExecutions {} => self.core.recent_executions().map(|v| json!(v)),
+            Request::ClearCachedState {} => self
+                .core
+                .clear_cached_state(&operation)
+                .await
+                .map(|count| json!({"removed_snapshots": count})),
+            Request::ClearExecutionHistory {} => self
+                .core
+                .clear_execution_history(&operation)
+                .await
+                .map(|count| json!({"removed_receipts": count})),
             Request::GetExecution { request_id } => self
                 .core
                 .execution(&request_id, &operation)

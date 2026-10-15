@@ -1,4 +1,4 @@
-use homeverb_core::{Core, Operation, Policy, Store, SystemClock};
+use homeverb_core::{Clock, Core, Operation, Policy, Store, SystemClock};
 use homeverb_domain::*;
 use homeverb_mock::{DEVICE_ID, MockAdapter, Scenario};
 use homeverb_storage::SqliteStore;
@@ -442,4 +442,162 @@ async fn device_history_filters_before_the_query_limit_and_never_reads_an_adapte
     );
     assert_eq!(p.adapter.reads.load(Ordering::SeqCst), 0);
     assert_eq!(p.adapter.sends.load(Ordering::SeqCst), 0);
+}
+
+#[tokio::test]
+async fn clearing_cache_preserves_local_metadata_and_cached_reads_never_refill_it() {
+    use homeverb_core::{AccountRecord, AccountStore, CredentialRef, CredentialState};
+    let p = Profile::new().await;
+    let operation = Operation::new(10000, CancellationToken::new()).unwrap();
+    let account = AccountRecord {
+        id: uuid::Uuid::new_v4(),
+        provider: "fictional.provider".into(),
+        region: "CN".into(),
+        label: "Kept account".into(),
+        credential_ref: CredentialRef::new(),
+        credential_state: CredentialState::Pending,
+    };
+    p.store.insert_account(&account).unwrap();
+    let room = p.core.create_room("Kept room").unwrap();
+    p.core
+        .set_device_preferences(
+            DEVICE_ID,
+            PreferencesInput {
+                alias: Some("Kept name".into()),
+                room_id: Some(room.id),
+                favorite: true,
+            },
+        )
+        .unwrap();
+    let before = serde_json::to_value(p.core.list_device_cards().unwrap()).unwrap();
+    let snapshot = p
+        .core
+        .read(DEVICE_ID, "main", Route::Auto, false, &operation)
+        .await
+        .unwrap();
+    let reads = p.adapter.reads.load(Ordering::SeqCst);
+    let mut second = MockAdapter::descriptor();
+    second.device.id = "second-local-card".into();
+    p.store.save_device(&second).unwrap();
+    let mut second_snapshot = snapshot;
+    second_snapshot.device_id = second.device.id;
+    p.store.save_snapshot(&second_snapshot).unwrap();
+    assert_eq!(p.core.clear_cached_state(&operation).await.unwrap(), 2);
+    assert_eq!(
+        p.core
+            .read(DEVICE_ID, "main", Route::Auto, true, &operation)
+            .await
+            .unwrap_err()
+            .code,
+        "CACHE_MISS"
+    );
+    assert_eq!(p.adapter.reads.load(Ordering::SeqCst), reads);
+    assert_eq!(p.adapter.sends.load(Ordering::SeqCst), 0);
+    assert_eq!(p.store.account(account.id).unwrap(), account);
+    assert_eq!(p.core.list_rooms().unwrap().len(), 1);
+    let cards = serde_json::to_value(p.core.list_device_cards().unwrap()).unwrap();
+    assert_eq!(cards[0], before[0]);
+    assert_eq!(p.core.clear_cached_state(&operation).await.unwrap(), 0);
+    let reopened = SqliteStore::open(&p.path).unwrap();
+    assert!(reopened.snapshot(DEVICE_ID, "main").unwrap().is_none());
+    p.core
+        .read(DEVICE_ID, "main", Route::Auto, false, &operation)
+        .await
+        .unwrap();
+    assert!(reopened.snapshot(DEVICE_ID, "main").unwrap().is_some());
+}
+
+#[tokio::test(start_paused = true)]
+async fn cleanup_checks_cancellation_and_deadline_before_mutating_local_data() {
+    let p = Profile::new().await;
+    let operation = Operation::new(10000, CancellationToken::new()).unwrap();
+    p.core
+        .read(DEVICE_ID, "main", Route::Auto, false, &operation)
+        .await
+        .unwrap();
+    let command: Command =
+        serde_json::from_str(include_str!("../../../examples/command.json")).unwrap();
+    let receipt = Execution::new(&command, SystemClock.now());
+    p.store.finish_execution(&command, &receipt).unwrap();
+    for (cancelled, expected) in [(true, "CANCELLED"), (false, "DEADLINE_EXCEEDED")] {
+        let token = CancellationToken::new();
+        let expired = Operation::new(1, token.clone()).unwrap();
+        if cancelled {
+            token.cancel();
+        } else {
+            tokio::time::advance(std::time::Duration::from_millis(2)).await;
+        }
+        assert_eq!(
+            p.core.clear_cached_state(&expired).await.unwrap_err().code,
+            expected
+        );
+        assert_eq!(
+            p.core
+                .clear_execution_history(&expired)
+                .await
+                .unwrap_err()
+                .code,
+            expected
+        );
+        assert!(p.store.snapshot(DEVICE_ID, "main").unwrap().is_some());
+        assert!(p.store.execution(&command.request_id).unwrap().is_some());
+    }
+}
+
+#[tokio::test(start_paused = true)]
+async fn history_cleanup_cannot_disrupt_an_inflight_write_or_enable_its_replay() {
+    use homeverb_core::Grant;
+    let p = Profile::new().await;
+    let clock = Arc::new(SystemClock);
+    let adapter = Arc::new(
+        MockAdapter::open(
+            &p.path.join("mock.sqlite3"),
+            clock.clone(),
+            Scenario::SlowAfterSend,
+        )
+        .unwrap(),
+    );
+    let core = Core::new(
+        p.store.clone(),
+        vec![adapter.clone()],
+        clock,
+        Policy {
+            grants: vec![Grant {
+                device_id: DEVICE_ID.into(),
+                component_id: "main".into(),
+                capability: "power".into(),
+                action: "set".into(),
+                transports: vec![Transport::Lan, Transport::Cloud],
+                argument_schema: serde_json::json!({"type":"object"}),
+            }],
+        },
+    );
+    let command: Command = serde_json::from_value(serde_json::json!({
+        "schema_version":"1.0", "request_id":"inflight-cleanup", "device_id":DEVICE_ID,
+        "component_id":"main", "capability":"power", "action":"set", "arguments":{"state":true},
+        "connection":"auto", "timeout_ms":10000, "wait_for":"verified",
+    }))
+    .unwrap();
+    let token = CancellationToken::new();
+    let work = core.execute(command.clone(), token.clone());
+    tokio::pin!(work);
+    tokio::select! {
+        _ = async { while adapter.sends.load(Ordering::SeqCst) == 0 { tokio::task::yield_now().await; } } => (),
+        _ = &mut work => panic!("Expected an in-flight synthetic write."),
+    }
+    let concurrent = SqliteStore::open(&p.path).unwrap();
+    assert_eq!(
+        concurrent.clear_execution_history().unwrap_err().code,
+        "RESOURCE_BUSY"
+    );
+    assert!(concurrent.execution(&command.request_id).unwrap().is_some());
+    token.cancel();
+    let receipt = work.await;
+    assert_eq!(receipt.status, Status::Unknown);
+    let operation = Operation::new(10000, CancellationToken::new()).unwrap();
+    assert_eq!(core.clear_execution_history(&operation).await.unwrap(), 1);
+    let replay = core.execute(command, CancellationToken::new()).await;
+    assert_eq!(replay.error.unwrap().code, "REQUEST_RETIRED");
+    assert!(replay.attempts.is_empty());
+    assert_eq!(adapter.sends.load(Ordering::SeqCst), 1);
 }

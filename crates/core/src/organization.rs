@@ -1,7 +1,19 @@
-use crate::Core;
+use crate::{Core, Operation};
 use homeverb_domain::*;
 
 impl Core {
+    pub async fn clear_cached_state(&self, operation: &Operation) -> Result<usize> {
+        operation
+            .run(async { self.store.clear_cached_state() })
+            .await
+    }
+
+    pub async fn clear_execution_history(&self, operation: &Operation) -> Result<usize> {
+        operation
+            .run(async { self.store.clear_execution_history() })
+            .await
+    }
+
     pub fn list_rooms(&self) -> Result<Vec<Room>> {
         self.store.rooms()
     }

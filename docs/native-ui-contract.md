@@ -1,4 +1,4 @@
-# Native UI contract 1.5
+# Native UI contract 1.6
 
 Status: implemented Linux native contract, October 15, 2026, with Mock, default read-only Meiju startup, protected account connection and scoped experimental AC power grants. Six real devices passed the native read path; phone packaging and complete provider/physical acceptance remain pending. See [ADR-0019](adr/0019-native-ui-contract.md).
 
@@ -16,7 +16,7 @@ The seven C functions in [homeverb.h](../crates/ffi/include/homeverb.h) remain t
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects saved-account cloud reads. `scenario` defaults to `normal`. Meiju requires `allow_mock_writes: false` and rejects any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms `homeverb.mock` or `midea.meiju`. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.5.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.6.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -55,6 +55,8 @@ All rows use query envelopes except the two execution methods. The schemas and a
 | Method | Inner request fields after `method` | Successful result |
 |---|---|---|
 | `get_api_info` | None | API version, method response kinds, native limits |
+| `clear_cached_state` | None | `{removed_snapshots}` from this profile |
+| `clear_execution_history` | None | `{removed_receipts}`; active journals refuse cleanup |
 | `list_accounts` | None | Local account summaries; no credentials or network work |
 | `get_account` | `account_id` | `{account, device_ids}` from local metadata; no authorization check |
 | `rename_account` | `account_id`, `label` | Updated local AccountSummary; no credential or permission changes |
@@ -95,12 +97,45 @@ Prefer exact device IDs even where lookup accepts an alias. Resolve a capability
 | H01–H16: nearby authorization sharing | No sharing methods in this version | Eligibility, peer discovery, code verification, scope, consent, conflict/import and transfer records require ADR-0008 implementation |
 | S02/S11: Window Light appearance | Flutter-owned private preferences | Persist `window_light`, fallback to it, and provide one preview; no native theme API or download capability is needed |
 | S03/S10, D07: sharing name and route choices | Flutter-owned private preferences plus explicit Command/ReadState `connection` | Store only nonsensitive display preferences. Resolve device > installation > `auto`; Core still enforces allowed routes. Do not add route fields to `set_device_preferences`. A saved sharing name does not start advertising |
-| S04/S09: clear cache/history/all data | No cleanup method in this version | Disable destructive native actions until scoped APIs handle active journals, retired IDs, credentials, and partial failures; never delete SQLite files from Flutter |
+| S04/S09: clear cache/history/all data | `clear_cached_state`, `clear_execution_history`; separate confirmations | Reload local views after completion. Full-profile deletion remains unavailable; never delete SQLite files from Flutter |
 | S05/S06: recent operations | Local receipt queries | Appliance receipts work; transfer history remains unavailable |
 | S07/S08/S12: diagnostics, export and About | `diagnostics`, API metadata, repository compatibility/licenses | Flutter OS export/chooser, cancel/failure handling, accurate build labels. Export the previewed allowlist only |
 | W01/W02 and all screens | Same contract at all sizes | Flutter navigation, text scaling, semantics, focus, system permissions and lifecycle binding |
 
 Flutter-owned preferences contain no credentials and grant no authority. Room/card organization remains owned by Core. Route controls must reflect actual connections and action capabilities, not brand labels. Localization uses the shared `en-US`/`zh-CN` catalogs; IDs, arguments and outcomes stay English. Preserve unknown error codes and use a generic localized fallback instead of mapping them to success.
+
+## Clear local cache or history
+
+API 1.6 adds two separate no-argument methods under
+[ADR-0029](adr/0029-local-cache-and-history-clearing.md). After showing the scope and
+obtaining user confirmation, send a normal request envelope with either
+`{"method":"clear_cached_state"}` or `{"method":"clear_execution_history"}`.
+Neither request accepts a `force` option or resets the installation.
+
+- Cache clearing returns `{"removed_snapshots": N}`. N counts stored device/component
+  snapshots, not properties. Clear the UI's matching cached views and show missing
+  readings as unknown. Cached reads return `CACHE_MISS`; do not silently fall back
+  to the network. An explicit or already-running live read/verification may save
+  new snapshots after cleanup.
+- History clearing returns `{"removed_receipts": N}`. N counts detailed receipt
+  rows, including composite parents and children. Any unfinalized journal returns
+  `RESOURCE_BUSY` without mutation; wait for the operation to finish and offer an
+  explicit retry. Every removed request ID remains reserved. `get_execution` and
+  attempted reuse then return `REQUEST_RETIRED`, never permission to send again.
+  Explain before confirmation that detailed uncertain outcomes are also removed.
+
+Both results are query envelopes. On storage failure the corresponding transaction
+rolls back. Counts describe that transaction; subsequent work can add data again.
+Do not retry automatically after an interrupted caller: reload local views first.
+A cancelled/expired operation is refused before mutation, but synchronous SQLite
+work cannot be rolled back by a later cancellation or forced process termination.
+
+These operations retain accounts, credentials, cards, rooms, preferences, grants,
+retired IDs and account-removal ledgers. Cache clearing retains receipt evidence;
+history clearing retains snapshots. Backups and allocated SQLite pages are not
+securely erased. No adapter or secret-store call is made. Full-profile deletion
+and provider revocation remain unavailable. The seven C symbols and schema 4 stay
+unchanged; older libraries reject the new methods.
 
 ## Real Meiju read-only startup
 
@@ -404,6 +439,6 @@ cargo test -p homeverb-host --test native_contract --offline --locked
 .venv/bin/python scripts/verify_native_contract.py
 ```
 
-The native suite calls all 27 catalog methods, checks their schemas, verifies closed-field rejection, null success, pre-admission errors, composite/batch results, all execution outcomes, cancellation, foreground gating and closed handles. It also validates the saved examples and Meiju startup/account admission guards, caller-buffer clearing, local detail/rename persistence, removal admission/ledger replay and account counterexamples without a live account. `--write-examples` regenerates those examples only from a successful fictional run; review and commit the changes together with the contract. Existing full MVP tests still cover execution and persistence behavior.
+The native suite calls all 29 catalog methods, checks their schemas, verifies closed-field rejection, null success, pre-admission errors, composite/batch results, all execution outcomes, cancellation, foreground gating and closed handles. It also validates the saved examples and Meiju startup/account admission guards, caller-buffer clearing, local detail/rename persistence, removal admission/ledger replay, explicit cache/history clearing, retired-request refusal and account counterexamples without a live account. `--write-examples` regenerates those examples only from a successful fictional run; review and commit the changes together with the contract. Existing full MVP tests still cover execution and persistence behavior.
 
 This is Linux native verification. Dart FFI allocation, worker scheduling, mobile library packaging, secure stores, system-browser lifecycle, and physical-phone behavior must be tested in the Flutter worktree. No Flutter build has been run for this delivery.

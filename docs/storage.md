@@ -86,6 +86,21 @@ A `request_id` provides local deduplication and correlation, not device-side ide
 
 Device batches reuse these individual command journals and device locks. No aggregate batch record or durable queue is created. A returned batch preserves every item's result, but forced termination may leave later items unstarted and unrecorded. Inspect the original command IDs through receipt lookup. Never treat a missing item as automatic permission to rerun the batch; see [ADR-0017](adr/0017-bounded-device-batches.md).
 
+## Explicit cache and history clearing
+
+Under [ADR-0029](adr/0029-local-cache-and-history-clearing.md), cache clearing deletes
+snapshots in one immediate transaction. It does not cancel in-flight reads, which
+may repopulate cache. History clearing refuses any `finalized=0` row, protecting
+active composite parents and their child receipts across store instances. Otherwise,
+it inserts all request IDs into `retired_requests` and deletes detailed receipts in
+one transaction. Any error rolls back that cleanup; success returns the removed row
+count. No cleanup needs a device/account lease, provider request or credential access.
+New writes admitted after the transaction can create new history normally.
+
+Cache and history have separate explicit methods; clearing one preserves the other.
+Both preserve organization, account records/removal ledgers, credentials and grants.
+Retired IDs and backups remain; no disk compaction or secure-erasure claim is made.
+
 ## Retention and migration
 
 The store retains at most 100 finalized detailed receipts plus active records. Retention and the recent-record query use first-insertion order, not completion time. Composite parents and children each occupy a receipt row. Retired IDs remain in `retired_requests` without arguments or outcomes. Reuse returns `REQUEST_RETIRED` before transmission; it does not establish whether the original action succeeded. The ID ledger grows with distinct requests, and SQLite may retain allocated pages. This is a detailed-history limit, not a fixed disk-size guarantee.

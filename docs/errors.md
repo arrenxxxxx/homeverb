@@ -152,3 +152,10 @@ retry. An uncertain secret deletion is inspected before any later deletion attem
 saves for a completed removal return `ACCOUNT_NOT_FOUND`; the old local ID cannot
 be reused. Neither status
 establishes provider revocation; see [ADR-0028](adr/0028-local-account-removal.md).
+
+`clear_execution_history` returns `RESOURCE_BUSY` without deleting any receipt if
+an execution journal is active. Explicit cleanup otherwise returns a query result
+with a removed row count; a storage error rolls back that transaction. Cleared
+history uses the existing `REQUEST_RETIRED` outcome, while cleared cached reads use
+`CACHE_MISS` without a network fallback. Interrupted callers reload local views and
+must not automatically repeat cleanup or appliance commands.

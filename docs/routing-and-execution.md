@@ -81,6 +81,16 @@ read results from recreating cleaned data. They do not retract already delivered
 results or make a multi-device publication atomic. A cache-save failure after
 acceptance/verification follows the existing strongest-outcome preservation rules.
 
+## Explicit history clearing
+
+[Local-data cleanup](adr/0029-local-cache-and-history-clearing.md) refuses history
+clearing while any journal is active, including a composite parent. Completed
+receipt details are retired atomically with their request IDs preserved. Clearing
+a finalized unknown receipt does not resolve uncertainty or authorize a replay.
+`REQUEST_RETIRED` still prevents sending after reopen. Cache clearing is independent:
+it removes snapshots without cancelling or rolling back device operations, and a
+concurrent read/verification may save new observations after the transaction.
+
 ## Implemented Mock behavior
 
 Capability resolution includes the selected component. Shared definitions omit `component_id`; scoped definitions bind one exact component, and shared/scoped mixing of one capability ID is invalid. The same resolver supplies action parameters, risk/routes/verification policy, live and cached property constraints, and property freshness. A fridge grant cannot authorize its freezer. Both remain one physical device with one write lock and separate component snapshots. See [ADR-0018](adr/0018-component-capability-scopes.md).

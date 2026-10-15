@@ -9,6 +9,8 @@ fn no_argument_methods_reject_undeclared_fields() {
         "list_devices",
         "discover",
         "recent_executions",
+        "clear_cached_state",
+        "clear_execution_history",
         "list_rooms",
         "list_device_cards",
         "diagnostics",

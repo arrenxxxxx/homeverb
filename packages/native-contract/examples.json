@@ -1,5 +1,5 @@
 {
-  "api_version": "1.5.0",
+  "api_version": "1.6.0",
   "cases": [
     {
       "request": {
@@ -12,7 +12,7 @@
       },
       "response": {
         "data": {
-          "api_version": "1.5.0",
+          "api_version": "1.6.0",
           "limits": {
             "max_active_operations": 8,
             "max_request_bytes": 1048576,
@@ -20,6 +20,12 @@
           },
           "methods": {
             "assign_devices_to_room": {
+              "response_kind": "query"
+            },
+            "clear_cached_state": {
+              "response_kind": "query"
+            },
+            "clear_execution_history": {
               "response_kind": "query"
             },
             "create_room": {
@@ -1811,7 +1817,7 @@
       },
       "response": {
         "data": {
-          "api_version": "1.5.0",
+          "api_version": "1.6.0",
           "limits": {
             "max_active_operations": 8,
             "max_request_bytes": 1048576,
@@ -1819,6 +1825,12 @@
           },
           "methods": {
             "assign_devices_to_room": {
+              "response_kind": "query"
+            },
+            "clear_cached_state": {
+              "response_kind": "query"
+            },
+            "clear_execution_history": {
               "response_kind": "query"
             },
             "create_room": {
@@ -2512,6 +2524,42 @@
           "message": "This host has no admitted account connection flow.",
           "retryable": false
         },
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-35",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "clear_cached_state"
+        }
+      },
+      "response": {
+        "data": {
+          "removed_snapshots": 1
+        },
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-37",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "clear_execution_history"
+        }
+      },
+      "response": {
+        "data": {
+          "removed_receipts": 4
+        },
+        "error": null,
         "schema_version": "1.0",
         "warnings": []
       }

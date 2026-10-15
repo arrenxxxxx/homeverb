@@ -183,3 +183,13 @@ Brand, exact model, category, firmware, region, vendor app, account type, transp
 The October 15 Meiju review found a developer-secret requirement in the official v3 API and shared app material in the pinned community login path. The owner explicitly approved the narrow community-material exception in [ADR-0022](adr/0022-meiju-community-cloud-admission.md) on October 15, 2026. The official developer-secret path remains excluded. Approval permits implementation of the scoped community flow; it establishes neither official approval nor physical support.
 
 Do not skip authentication feasibility merely because another feature works. Label cloud-only operation `cloud-required`. Separate cloud-dependent onboarding from daily LAN operation. Platform support does not imply every product sold under that brand is supported.
+
+## Explicit local-data cleanup contract 1.6
+
+API 1.6.0 adds `clear_cached_state` and `clear_execution_history`, bringing the
+ordinary catalog to 29 methods. The seven C symbols and SQLite schema 4 are
+unchanged. Older hosts reject the new methods; check the published catalog.
+Synthetic SQLite/Core and actual Linux C ABI tests cover cache misses, preserved
+metadata, active/composite journal refusal, atomic rollback, retired-ID protection,
+reopening and lifecycle admission. This does not add device controls, full-profile
+removal, credential revocation, secure erasure or phone acceptance.

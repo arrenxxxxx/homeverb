@@ -91,5 +91,10 @@
   "account.removal.confirm": "Remove this account and {count} linked device cards from this installation? Rooms and operation receipts will remain. Other installations and the platform account are unaffected.",
   "account.removal.pending": "Local cleanup is incomplete. This local account is disabled.",
   "account.removal.removed": "The account was removed from this installation. Platform authorization elsewhere was not revoked.",
-  "account.removal.retry": "Retry local cleanup"
+  "account.removal.retry": "Retry local cleanup",
+  "cleanup.cache.confirm": "Clear cached device state from this installation? Accounts, rooms and operation receipts will remain. Active reads may save new snapshots.",
+  "cleanup.cache.done": "Cleared {count} cached snapshots.",
+  "cleanup.history.confirm": "Clear detailed operation history, including uncertain outcomes? Request IDs will remain reserved to prevent replay. Devices and cached state will remain.",
+  "cleanup.history.done": "Cleared {count} operation receipts.",
+  "cleanup.history.busy": "An operation is still being recorded. Wait for it to finish, then retry clearing history."
 }

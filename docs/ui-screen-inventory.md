@@ -694,6 +694,16 @@ Visible content: Auto — prefer local when available / Local network only — n
 
 ### S04 — Local data
 
+API 1.6 amendment: Clear Cached State and Clear Recent Operations call separate
+native cleanup methods after scope confirmation. Report removed snapshot/receipt
+counts. Active journals block history clearing with `RESOURCE_BUSY`; retain the
+view and offer an explicit retry. Clearing history includes detailed unknown
+outcomes but keeps request-ID replay protection. Cached state may reappear from an
+already-running read. Reload local views after interrupted calls. Full Remove Local
+Data remains unavailable. These confirmation/busy/error/result variants are a
+functional amendment, not newly rendered or visually verified atlas states.
+
+
 [Rendered state](../output/prototypes/homeverb-window-light-v1/screens/S04.png) · Nested screen
 
 Back Local Data. Sections Device organization / Rooms and names; Cached device state / Last read snapshots; Recent operations / Latest 100 records. Clear Cached State and Clear Recent Operations distinct actions. Full Remove Local Data action at bottom, privacy note Authorizations are stored securely. No export token option.

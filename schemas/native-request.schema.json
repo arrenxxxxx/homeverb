@@ -502,6 +502,30 @@
             "expected_device_ids"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "clear_cached_state"
+            }
+          },
+          "required": [
+            "method"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "clear_execution_history"
+            }
+          },
+          "required": [
+            "method"
+          ],
+          "additionalProperties": false
         }
       ]
     }

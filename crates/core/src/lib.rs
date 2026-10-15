@@ -149,11 +149,15 @@ pub trait Store: Send + Sync {
     fn snapshot(&self, device: &str, component: &str) -> Result<Option<Snapshot>>;
     /// Require a still-present device and reject removed-account bindings in the save transaction.
     fn save_snapshot(&self, snapshot: &Snapshot) -> Result<()>;
+    /// Delete currently cached snapshots without cancelling concurrent reads.
+    fn clear_cached_state(&self) -> Result<usize>;
     fn lock_device(&self, device: &str) -> Result<Box<dyn DeviceLock>>;
     fn execution(&self, request_id: &str) -> Result<Option<(Command, Execution)>>;
     fn save_execution(&self, command: &Command, execution: &Execution) -> Result<()>;
     fn finish_execution(&self, command: &Command, execution: &Execution) -> Result<()>;
     fn recent_executions(&self) -> Result<Vec<Execution>>;
+    /// Refuse active journals; atomically retire all detailed receipts and preserve request IDs.
+    fn clear_execution_history(&self) -> Result<usize>;
     fn device_executions(&self, device_id: &str) -> Result<Vec<Execution>>;
     fn rooms(&self) -> Result<Vec<Room>>;
     fn create_room(&self, id: &str, name: &str) -> Result<Room>;

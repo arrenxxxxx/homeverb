@@ -182,6 +182,20 @@ impl Store for SqliteStore {
             params![snapshot.device_id, snapshot.component_id, encode(snapshot)?]).map_err(storage_error)?;
         transaction.commit().map_err(storage_error)
     }
+    fn clear_cached_state(&self) -> Result<usize> {
+        let mut connection = self.connection.lock().map_err(storage_error)?;
+        let transaction = connection
+            .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)
+            .map_err(storage_error)?;
+        let removed = transaction
+            .execute("DELETE FROM snapshots", [])
+            .map_err(storage_error)?;
+        transaction.commit().map_err(storage_error)?;
+        Ok(removed)
+    }
+    fn clear_execution_history(&self) -> Result<usize> {
+        self.retire_all_executions()
+    }
     fn lock_device(&self, device: &str) -> Result<Box<dyn DeviceLock>> {
         // Preserve existing lock names; only IDs that exceed a 255-byte filename
         // after hex encoding need a bounded, stable digest name.

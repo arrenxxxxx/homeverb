@@ -29,7 +29,7 @@ def main():
     responses = {name: validator('native-response', name) for name in [*api['methods'], 'open']}
     query_error = validator('native-response', 'query_error')
     info_example = {'schema_version': '1.0', 'data': copy.deepcopy(api), 'warnings': [], 'error': None}
-    info_example['data']['api_version'] = '1.6.0'
+    info_example['data']['api_version'] = '1.7.0'
     info_example['data']['methods']['future_query'] = {'response_kind': 'query'}
     responses['get_api_info'].validate(info_example)
     info_example['data']['api_version'] = '2.0.0'
@@ -148,6 +148,13 @@ def main():
             bad_batch = {'schema_version': '1.0', 'commands': [forbidden]}
             query_error.validate(call(handle, 'execute_batch', batch=bad_batch))
 
+            assert call(handle, 'clear_cached_state')['data'] == {'removed_snapshots': 1}
+            assert raw(handle, envelope('read_state', device='dev-mock-ac', component='main', connection='auto', cached=True))['error']['code'] == 'CACHE_MISS'
+            assert call(handle, 'clear_execution_history')['data'] == {'removed_receipts': 4}
+            for request_id in ['compound-example', 'compound-example:0', 'compound-example:1', 'batch-example']:
+                assert raw(handle, envelope('get_execution', request_id=request_id))['error']['code'] == 'REQUEST_RETIRED'
+            assert raw(handle, envelope('execute', command=composite))['error']['code'] == 'REQUEST_RETIRED'
+
             # Reuse the validated input shapes, not a second handwritten method list.
             by_method = {item['request']['request']['method']: item['request'] for item in examples}
             assert set(by_method) == set(api['methods'])
@@ -170,11 +177,47 @@ def main():
             assert not library.homeverb_cancel(handle, b'absent-operation')
             library.homeverb_set_foreground(handle, False)
             assert call(handle, 'get_api_info')['error']['code'] == 'HOST_BACKGROUND'
+            for method in ['clear_cached_state', 'clear_execution_history']:
+                assert raw(handle, envelope(method))['error']['code'] == 'HOST_BACKGROUND'
             library.homeverb_set_foreground(handle, True)
             assert call(handle, 'get_api_info')['data'] == api
         finally:
             library.homeverb_close(handle)
         assert call(handle, 'list_devices')['error']['code'] == 'HOST_CLOSED'
+        for method in ['clear_cached_state', 'clear_execution_history']:
+            assert raw(handle, envelope(method))['error']['code'] == 'HOST_CLOSED'
+
+    with tempfile.TemporaryDirectory(prefix='homeverb-ui-clear-history-') as directory:
+        handle = open_host(directory, 'lost-ack')
+        try:
+            raw(handle, envelope('discover'))
+            item = command('uncertain-cleared')
+            assert raw(handle, envelope('execute', command=item))['status'] == 'unknown'
+            with sqlite3.connect(Path(directory) / 'homeverb.sqlite3') as database:
+                database.execute('UPDATE executions SET finalized=0')
+            busy = raw(handle, envelope('clear_execution_history'))
+            responses['clear_execution_history'].validate(busy)
+            assert busy['error']['code'] == 'RESOURCE_BUSY'
+            assert raw(handle, envelope('get_execution', request_id=item['request_id']))['data']['status'] == 'unknown'
+            with sqlite3.connect(Path(directory) / 'homeverb.sqlite3') as database:
+                database.execute('UPDATE executions SET finalized=1')
+            cleared = raw(handle, envelope('clear_execution_history'))
+            responses['clear_execution_history'].validate(cleared)
+            assert cleared['data'] == {'removed_receipts': 1}
+            for count in [-1, None, '1']:
+                invalid = copy.deepcopy(cleared)
+                invalid['data']['removed_receipts'] = count
+                assert not responses['clear_execution_history'].is_valid(invalid)
+        finally:
+            library.homeverb_close(handle)
+        handle = open_host(directory)
+        try:
+            replay = raw(handle, envelope('execute', command=item))
+            responses['execute'].validate(replay)
+            assert replay['error']['code'] == 'REQUEST_RETIRED' and replay['attempts'] == []
+            assert raw(handle, envelope('recent_executions'))['data'] == []
+        finally:
+            library.homeverb_close(handle)
 
     # Obtain uncertainty examples from the real simulator path, not UI-invented success.
     for scenario, outcome in [('accept-only', 'accepted'), ('lost-ack', 'unknown'), ('reject', 'failed'), ('partial', 'partial')]:

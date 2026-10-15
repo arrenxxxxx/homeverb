@@ -8,7 +8,7 @@ Account-flow amendment, October 15, 2026: Midea Meiju authorization must automat
 
 This document expands [mobile requirements](mobile-app.md). The [embedded Core boundary](sdk.md), schemas, and ADRs remain authoritative for execution semantics. Preserve existing Core work; do not infer a new network service from this handoff. Native request details below are an integration snapshot of separate local implementation work, not code delivered by this UI documentation commit.
 
-The [native UI contract 1.0](native-ui-contract.md) now supplies a committed integration baseline: 22 callable methods, schemas, actual Mock request/response examples, version negotiation, and screen coverage. Use it when starting the Flutter worktree. Account, sharing, identity-merge and destructive-cleanup APIs remain unavailable; UI previews must stay separate from production native state.
+The [native UI contract 1.6](native-ui-contract.md) supplies 29 callable methods, schemas, actual Mock request/response examples, version negotiation, and screen coverage. It includes account management and separate cache/history cleanup. Sharing, identity merge, provider revocation and full-profile deletion remain unavailable; UI previews must stay separate from production native state.
 
 ## Product boundary
 
@@ -63,7 +63,7 @@ These statuses were checked against `crates/host/src/session.rs` and `docs/devel
 | Account catalog/authentication/removal/revocation | Native protected connection and automatic Core card publication; `list_accounts`, `get_account`, `rename_account`, `remove_account`, `refresh_account`; Linux secure storage | Flutter account and cleanup confirmation/recovery UI, native mobile secure stores, provider revocation evidence, and cloud control acceptance away from home. P01–P13 remain application acceptance work. |
 | Nearby authorization sharing | [ADR-0008](adr/0008-foreground-authorization-sharing.md) requirements | Reviewed protocol, eligible adapters, trusted peer verification, bilateral consent, encrypted transfer, atomic secure import, records and interruption handling. No real sharing implementation is implied. |
 | Appearance, sharing name, connection preference | Flutter-owned private preferences under the [native handoff](native-ui-contract.md); explicit read/command route choice exists | Implement Flutter preference persistence. Resolve device > installation > Auto without broadening allowed routes; do not add route fields to Core's device-preference payload or start sharing from a saved name. |
-| Cache/history/full-data clearing | Retention and storage contracts exist | Define safe scoped cleanup entry points, active-operation guards, secure-store removal and partial failure reporting. Do not delete journals or retired-ID safeguards by treating a UI history-clear action as a raw database deletion. |
+| Cache/history/full-data clearing | `clear_cached_state` and `clear_execution_history`; active-journal refusal and atomic request-ID retirement | Separate confirmations, removed counts, busy/storage errors and local-view reload. Preserve replay safeguards. Full-profile deletion remains unavailable; do not delete SQLite files from Flutter. |
 | Localization | en-US and zh-CN catalogs and presentation helpers | Add approved missing UI keys; keep public IDs and stored outcomes unchanged. Prototype copy is English. Match locale parity/placeholders before release. |
 
 ## Loading, empty, error, and navigation rules
