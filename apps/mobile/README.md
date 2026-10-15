@@ -60,4 +60,12 @@ python3 apps/mobile/tool/compare_screens.py --require-exact
 
 The command generates `output/flutter-verification/index.html`, reference/actual/difference images and JSON metrics. `--require-exact` exits nonzero while any pixel differs. The generated image collection is ignored by Git; the reference remains unchanged.
 
+The native widget click test also captures its actual Mock-backed views using the bundled fonts, simulated phone insets and strict pointer hit checks. Build a separate gallery after that test passes:
+
+```sh
+python3 apps/mobile/tool/native_gallery.py
+```
+
+The generated `output/flutter-verification/native-gallery.html` labels clicks, drag gestures and direct test navigation separately. Its reference column uses different sample data; this gallery does not replace strict pixel comparison or physical-phone acceptance.
+
 Android/iOS scaffolding alone does not establish native library packaging, secure-store integration, physical-phone lifecycle, accessibility or performance. No real provider is enabled. Project release licensing remains undecided. Bundled Inter fonts use the adjacent SIL Open Font License.

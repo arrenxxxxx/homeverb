@@ -30,6 +30,18 @@ ThemeData windowTheme() => ThemeData(
   ).copyWith(primary: accent, surface: const Color(0xfff6f2ea), onSurface: ink),
   splashFactory: InkRipple.splashFactory,
   textSelectionTheme: const TextSelectionThemeData(cursorColor: accent),
+  switchTheme: SwitchThemeData(
+    padding: EdgeInsets.zero,
+    thumbColor: const WidgetStatePropertyAll(Color(0xfffffcf5)),
+    thumbIcon: const WidgetStatePropertyAll(Icon(null)),
+    trackColor: WidgetStateProperty.resolveWith(
+      (states) => states.contains(WidgetState.selected)
+          ? accent
+          : const Color(0xffc2c4bc),
+    ),
+    trackOutlineWidth: const WidgetStatePropertyAll(0),
+    trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
+  ),
 );
 
 class Copy extends StatelessWidget {

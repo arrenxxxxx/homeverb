@@ -266,6 +266,14 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       return;
     }
     if (label == 'Move Devices') {
+      if (c.selection.isEmpty) {
+        c.error = NativeFailure(
+          'INVALID_ARGUMENT',
+          'Select at least one device to move.',
+        );
+        changed();
+        return;
+      }
       final index = choice();
       await finish(
         c.assign(index < c.rooms.length ? c.rooms[index]['id'] : null),
@@ -455,6 +463,13 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       'Done': 'D01',
     };
     if (routes[label] != null) {
+      if (routes[label] == 'R03') {
+        c.selectedRoom = c.currentCard?['preferences']?['room_id'];
+        c.selection.clear();
+        if (['D05', 'D06'].contains(id) && c.selectedDevice != null) {
+          c.selection.add(c.selectedDevice!);
+        }
+      }
       await go(routes[label]!);
       return;
     }
@@ -649,7 +664,11 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           [
             'choices',
             [...c.rooms.map((r) => r['name']), 'Unassigned'],
-            0,
+            c.selectedRoom == null
+                ? 0
+                : c.rooms
+                      .indexWhere((room) => room['id'] == c.selectedRoom)
+                      .clamp(0, c.rooms.length),
           ],
           ['button', 'Move Devices'],
           ['button', 'Add Room', 'secondary'],
@@ -920,6 +939,13 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     onAction: action,
   );
   Widget? special() => specialFor(id);
+  String roomDeviceCount(String? room) {
+    final count = c.cards
+        .where((card) => card['preferences']['room_id'] == room)
+        .length;
+    return '$count ${count == 1 ? 'device' : 'devices'}';
+  }
+
   Widget? specialFor(String id) {
     if (['D01', 'D11', 'D12'].contains(id) && c.cards.isNotEmpty)
       return DeviceHome(
@@ -955,48 +981,126 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       );
     if (id == 'R01')
       return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (final r in c.rooms)
+          if (c.rooms.isNotEmpty)
             Surface(
-              child: ListTile(
-                title: Text(r['name']),
-                subtitle: Text(
-                  '${c.cards.where((v) => v['preferences']['room_id'] == r['id']).length} devices',
-                ),
-                trailing: PopupMenuButton<String>(
-                  tooltip: 'Room actions ${r['name']}',
-                  onSelected: (v) async {
-                    c.editingRoom = r['id'];
-                    if (v == 'Rename')
-                      await go('R05');
-                    else if (v == 'Delete')
-                      await go('R04');
-                    else {
-                      final ids = c.rooms
-                              .map((e) => e['id'] as String)
-                              .toList(),
-                          i = c.rooms.indexOf(r),
-                          j = v == 'Move up' ? i - 1 : i + 1;
-                      if (j >= 0 && j < ids.length) {
-                        ids.removeAt(i);
-                        ids.insert(j, r['id']);
-                        await c.reorderRooms(ids);
-                      }
-                    }
-                  },
-                  itemBuilder: (_) =>
-                      ['Rename', 'Delete', 'Move up', 'Move down']
-                          .map((v) => PopupMenuItem(value: v, child: Text(v)))
-                          .toList(),
-                ),
+              radius: 18,
+              child: ReorderableListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: EdgeInsets.zero,
+                buildDefaultDragHandles: false,
+                itemCount: c.rooms.length,
+                onReorderItem: (from, to) async {
+                  if (c.busy) return;
+                  final ids = c.rooms
+                      .map((room) => room['id'] as String)
+                      .toList();
+                  ids.insert(to, ids.removeAt(from));
+                  await c.reorderRooms(ids);
+                },
+                itemBuilder: (context, index) {
+                  final r = c.rooms[index];
+                  return Column(
+                    key: ValueKey('room:${r['id']}'),
+                    children: [
+                      if (index > 0)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          child: Divider(
+                            height: 0,
+                            thickness: .6,
+                            color: Color(0xffdeded7),
+                          ),
+                        ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 16, right: 6),
+                        child: Row(
+                          children: [
+                            Expanded(child: Copy(r['name'])),
+                            const SizedBox(width: 10),
+                            Copy(
+                              roomDeviceCount(r['id']),
+                              size: 12,
+                              color: muted,
+                            ),
+                            ReorderableDragStartListener(
+                              index: index,
+                              child: SizedBox(
+                                width: 34,
+                                height: 44,
+                                child: PopupMenuButton<String>(
+                                  tooltip: 'Room actions ${r['name']}',
+                                  padding: EdgeInsets.zero,
+                                  icon: const Glyph(
+                                    'drag',
+                                    size: 16,
+                                    color: muted,
+                                  ),
+                                  onSelected: (v) async {
+                                    c.editingRoom = r['id'];
+                                    if (v == 'Rename')
+                                      await go('R05');
+                                    else if (v == 'Delete')
+                                      await go('R04');
+                                    else if (v == 'Move devices') {
+                                      c.selection.clear();
+                                      c.selectedRoom = r['id'];
+                                      await go('R03');
+                                    } else {
+                                      final ids = c.rooms
+                                              .map((e) => e['id'] as String)
+                                              .toList(),
+                                          i = c.rooms.indexOf(r),
+                                          j = v == 'Move up' ? i - 1 : i + 1;
+                                      if (j >= 0 && j < ids.length) {
+                                        ids.removeAt(i);
+                                        ids.insert(j, r['id']);
+                                        await c.reorderRooms(ids);
+                                      }
+                                    }
+                                  },
+                                  itemBuilder: (_) =>
+                                      [
+                                            'Rename',
+                                            'Delete',
+                                            'Move devices',
+                                            'Move up',
+                                            'Move down',
+                                          ]
+                                          .map(
+                                            (v) => PopupMenuItem(
+                                              value: v,
+                                              child: Text(v),
+                                            ),
+                                          )
+                                          .toList(),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
+          Rows(
+            [
+              ['Unassigned', roomDeviceCount(null)],
+            ],
+            onAction: (_) async {
+              c.filter = 'Unassigned';
+              await go('D01');
+            },
+          ),
           ActionButton('Add Room', onPressed: () => action('Add Room')),
-          ActionButton(
-            'Move Existing Devices',
-            style: 'secondary',
-            onPressed: () => go('R03'),
+          const Copy(
+            'Drag to reorder. Use a row menu to rename or delete.',
+            color: muted,
           ),
         ],
       );

@@ -1,7 +1,10 @@
 import 'dart:io';
 import 'dart:convert';
+import 'dart:ui' as ui;
 import 'package:file_selector_platform_interface/file_selector_platform_interface.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:homeverb_mobile/main.dart';
 import 'package:homeverb_mobile/controller.dart';
@@ -26,11 +29,28 @@ class SavePicker extends FileSelectorPlatform {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  setUpAll(() async {
+    await (FontLoader('Inter')
+          ..addFont(rootBundle.load('assets/fonts/Inter-Regular.otf'))
+          ..addFont(rootBundle.load('assets/fonts/Inter-SemiBold.otf')))
+        .load();
+    await (FontLoader(
+      'MaterialIcons',
+    )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
+  });
   testWidgets(
     'click real native discovery, control, organization, preferences and unavailable gates',
     (tester) async {
       tester.view.physicalSize = const Size(780, 1688);
       tester.view.devicePixelRatio = 2;
+      tester.view.padding = const FakeViewPadding(top: 88, bottom: 28);
+      debugDisableShadows = false;
+      WidgetController.hitTestWarningShouldBeFatal = true;
+      addTearDown(() {
+        debugDisableShadows = true;
+        WidgetController.hitTestWarningShouldBeFatal = false;
+        tester.view.resetPadding();
+      });
       final directory = Directory.systemTemp.createTempSync(
         'homeverb-ui-click-',
       );
@@ -52,6 +72,28 @@ void main() {
         );
       });
       final app = GlobalKey<NativeAppState>();
+      final boundary = GlobalKey();
+      final captures = <Map<String, String>>[];
+      final output = Directory('build/verification/native');
+      output.createSync(recursive: true);
+      Future<void> capture(String trigger) async {
+        final id = app.currentState!.id;
+        final filename =
+            '${(captures.length + 1).toString().padLeft(3, '0')}-$id.png';
+        await tester.runAsync(() async {
+          final image =
+              await (boundary.currentContext!.findRenderObject()
+                      as RenderRepaintBoundary)
+                  .toImage(pixelRatio: 2);
+          final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+          File(
+            '${output.path}/$filename',
+          ).writeAsBytesSync(bytes!.buffer.asUint8List());
+          image.dispose();
+        });
+        captures.add({'file': filename, 'screen': id, 'trigger': trigger});
+      }
+
       final originalPicker = FileSelectorPlatform.instance;
       final picker = SavePicker();
       FileSelectorPlatform.instance = picker;
@@ -76,20 +118,45 @@ void main() {
           await Future<void>.delayed(const Duration(milliseconds: 80));
         });
         await settle();
+        await capture('Click: $label');
       }
 
       Future<void> route(String id) async {
         await tester.runAsync(() => app.currentState!.go(id));
         await settle();
+        await capture('Test navigation: $id');
       }
 
       try {
         await tester.runAsync(
           () => tester.pumpWidget(
-            NativeApp(key: app, catalog: catalog, controller: controller),
+            RepaintBoundary(
+              key: boundary,
+              child: NativeApp(
+                key: app,
+                catalog: catalog,
+                controller: controller,
+              ),
+            ),
           ),
         );
         await settle();
+        await tester.runAsync(() async {
+          for (final asset in [
+            'window-light-background',
+            'ac',
+            'lamp',
+            'tv',
+            'sensor',
+          ]) {
+            await precacheImage(
+              AssetImage('assets/$asset.png'),
+              tester.element(find.byType(NativeApp)),
+            );
+          }
+        });
+        await tester.pumpAndSettle();
+        await capture('Initial native launch');
         expect(find.text('Your home, together'), findsOneWidget);
         controller.busy = true;
         controller.notifyListeners();
@@ -103,11 +170,34 @@ void main() {
         await settle();
         await tap('Discover Mock device');
         expect(controller.cards.length, 1);
+        await tester.runAsync(
+          () => tester.tap(find.byTooltip('Power mock-ac')),
+        );
+        await settle();
+        expect((controller.error as NativeFailure).code, 'STATE_UNAVAILABLE');
+        expect(app.currentState!.id, 'D01');
+        await capture('Click quick power before reading state');
+        await tap('Dismiss error');
         await tester.runAsync(() => tester.tap(find.text('mock-ac').first));
         await settle();
         expect(app.currentState!.id, 'C01');
         await tap('Refresh State');
         expect(controller.snapshot, isNotNull);
+        await route('D01');
+        await tester.runAsync(
+          () => tester.tap(find.byTooltip('Power mock-ac')),
+        );
+        await settle();
+        expect(app.currentState!.id, 'S06');
+        expect(controller.receipt!['status'], 'verified');
+        await capture('Click quick power after reading state');
+        await route('D01');
+        await tester.longPress(find.text('mock-ac').first);
+        await settle();
+        expect(app.currentState!.id, 'D05');
+        await capture('Long press device card');
+        await tap('Close');
+        await tap('mock-ac');
         await tap('Mode');
         expect(find.text('Bedroom AC'), findsNothing);
         await tap('heat');
@@ -165,14 +255,24 @@ void main() {
         );
         await tap('Save Name');
         expect(controller.currentCard!['device']['alias'], 'Quiet AC');
-        await route('R03');
-        await tester.tap(find.byType(CheckboxListTile).first);
-        await tester.pumpAndSettle();
+        await tap('Room');
+        expect(
+          tester
+              .widget<CheckboxListTile>(find.byType(CheckboxListTile).first)
+              .value,
+          true,
+        );
+        expect(controller.selection, {controller.selectedDevice});
         await tap('Move Devices');
         expect(
           controller.currentCard!['preferences']['room_id'],
           controller.rooms.single['id'],
         );
+        await tap('Unassigned');
+        expect(controller.visibleCards, isEmpty);
+        await tap('Study');
+        expect(controller.visibleCards, hasLength(1));
+        await tap('All');
         await route('D05');
         await tap('Pin to Top');
         expect(controller.currentCard!['preferences']['favorite'], true);
@@ -228,10 +328,42 @@ void main() {
           'Bedroom',
         );
         await tap('Save Room');
+        final handle = find.byTooltip('Room actions Bedroom');
+        await tester.ensureVisible(handle);
+        final drag = await tester.startGesture(tester.getCenter(handle));
+        await tester.pump();
+        await drag.moveBy(const Offset(0, -30));
+        await tester.pump(const Duration(milliseconds: 300));
+        await drag.moveBy(const Offset(0, -40));
+        await tester.pump(const Duration(milliseconds: 300));
+        await drag.up();
+        await settle();
+        expect(controller.error, isNull);
+        expect(controller.rooms.first['name'], 'Bedroom');
+        await capture('Drag Bedroom above Office');
+        await tester.tap(find.byTooltip('Room actions Bedroom'));
+        await tester.pumpAndSettle();
+        await tap('Move down');
+        expect(controller.rooms.last['name'], 'Bedroom');
         await tester.tap(find.byTooltip('Room actions Bedroom'));
         await tester.pumpAndSettle();
         await tap('Move up');
         expect(controller.rooms.first['name'], 'Bedroom');
+        await tester.tap(find.byTooltip('Room actions Office'));
+        await tester.pumpAndSettle();
+        await tap('Move devices');
+        expect(app.currentState!.choices.values.single, 1);
+        await tap('Move Devices');
+        expect((controller.error as NativeFailure).code, 'INVALID_ARGUMENT');
+        expect(app.currentState!.id, 'R03');
+        await tester.tap(find.byType(CheckboxListTile).first);
+        await tester.pumpAndSettle();
+        await tap('Move Devices');
+        expect(
+          controller.currentCard!['preferences']['room_id'],
+          controller.selectedRoom,
+        );
+        await route('R01');
         await tester.tap(find.byTooltip('Room actions Office'));
         await tester.pumpAndSettle();
         await tap('Delete');
@@ -297,7 +429,21 @@ void main() {
           AppLifecycleState.resumed,
         );
         expect(controller.cards.length, 1);
+        expect(captures.length, greaterThan(40));
+        await tester.runAsync(() async {
+          File('${output.path}/manifest.json').writeAsStringSync(
+            const JsonEncoder.withIndent('  ').convert({
+              'source':
+                  'Native Mock via FFI; fictional data; widget viewport captures',
+              'size': [780, 1688],
+              'system_chrome':
+                  'Insets simulated; OS status icons are not captured',
+              'captures': captures,
+            }),
+          );
+        });
       } finally {
+        debugDisableShadows = true;
         FileSelectorPlatform.instance = originalPicker;
         await tester.pumpWidget(const SizedBox());
         await tester.runAsync(() => core.close());
