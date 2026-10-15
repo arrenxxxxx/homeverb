@@ -543,6 +543,23 @@
             "account_id"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "inspect_account_inventory"
+            },
+            "account_id": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "required": [
+            "method",
+            "account_id"
+          ],
+          "additionalProperties": false
         }
       ]
     }

@@ -183,6 +183,12 @@ pub struct AccountDiscovery {
     pub descriptors: Result<Vec<Descriptor>>,
 }
 
+/// Protected local evidence for one account, not live discovery or permission.
+pub struct AccountInventory {
+    pub account: AccountRecord,
+    pub devices: Vec<crate::DeviceInventoryMembership>,
+}
+
 /// Foreground on-demand adapter. Construction and local Core queries perform no account work.
 pub struct MeijuAdapter {
     vault: Arc<AccountVault>,
@@ -242,6 +248,21 @@ impl MeijuAdapter {
                     "The selected Meiju account does not exist.",
                 )
             })
+    }
+
+    /// Read only the selected account under its lease; never refresh or publish descriptors.
+    pub async fn inspect_inventory(
+        &self,
+        id: Uuid,
+        operation: &Operation,
+    ) -> Result<AccountInventory> {
+        self.account(id, operation).await?;
+        let account = MeijuAccount::open(self.vault.lease(id, operation).await?, operation).await?;
+        let devices = account.inspect_inventory(operation).await?;
+        Ok(AccountInventory {
+            account: account.record().clone(),
+            devices,
+        })
     }
 
     /// Change only local presentation metadata, even when secure storage is unavailable.

@@ -27,6 +27,13 @@ pub struct DeviceBinding {
     pub identity_ref: Uuid,
 }
 
+/// Saved membership evidence only; no provider identifiers or operational authority.
+pub struct DeviceInventoryMembership {
+    pub device_id: Uuid,
+    pub connection_id: Uuid,
+    pub listed: Option<bool>,
+}
+
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct StoredBinding {
@@ -323,6 +330,28 @@ impl MeijuAccount {
 
     pub fn record(&self) -> &AccountRecord {
         self.lease.record()
+    }
+
+    pub(crate) async fn inspect_inventory(
+        &self,
+        operation: &Operation,
+    ) -> Result<Vec<DeviceInventoryMembership>> {
+        let payload = self.load(operation).await?;
+        operation
+            .run(async {
+                let mut devices: Vec<_> = payload
+                    .bindings
+                    .iter()
+                    .map(|binding| DeviceInventoryMembership {
+                        device_id: binding.local.device_id,
+                        connection_id: binding.local.connection_id,
+                        listed: binding.listed,
+                    })
+                    .collect();
+                devices.sort_by_key(|entry| entry.device_id);
+                Ok(devices)
+            })
+            .await
     }
 
     pub async fn session(&self, operation: &Operation) -> Result<SecretBytes> {

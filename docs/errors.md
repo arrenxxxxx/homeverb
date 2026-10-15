@@ -182,3 +182,13 @@ be repaired by login; preserve it. Changed protected bytes during login return
 `ACCOUNT_SESSION_UNCONFIRMED` without replacement; a different login subject returns
 `ACCOUNT_IDENTITY_CONFLICT`. Uncertain persistence uses the existing storage errors.
 Reload local metadata after interruption. No error permits automatic login or an appliance retry.
+
+## Saved inventory inspection errors
+
+`inspect_account_inventory` uses existing account/vault errors: `ACCOUNT_NOT_FOUND`
+for missing/foreign scope, `RESOURCE_BUSY` for a held account lease,
+`ACCOUNT_SESSION_UNCONFIRMED` for pending/corrupt material, and
+`ACCOUNT_REMOVAL_PENDING` during removal. Secure-store errors, cancellation,
+deadline and host foreground/closed-session gates retain their existing meanings.
+No error causes cloud fallback or mutation. Unconfirmed legacy membership is a
+successful saved-evidence result; it does not make a live read/control admissible.

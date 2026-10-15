@@ -10,9 +10,11 @@ pub use auth::{LoginCredentials, MeijuSession, SessionReads, login};
 pub use cloud::{CloudEndpoint, CloudTransport, MeijuHttps, SignedRequest};
 
 mod account;
-pub use account::{BoundInventory, ConnectReport, DeviceBinding, MeijuAccount, connect};
+pub use account::{
+    BoundInventory, ConnectReport, DeviceBinding, DeviceInventoryMembership, MeijuAccount, connect,
+};
 mod adapter;
-pub use adapter::{AccountDiscovery, MeijuAdapter};
+pub use adapter::{AccountDiscovery, AccountInventory, MeijuAdapter};
 mod state;
 pub use state::{CloudState, StateQuery, read_cloud_state};
 

@@ -25,6 +25,9 @@ pub enum Request {
     GetAccount {
         account_id: uuid::Uuid,
     },
+    InspectAccountInventory {
+        account_id: uuid::Uuid,
+    },
     RenameAccount {
         account_id: uuid::Uuid,
         label: String,
@@ -267,6 +270,16 @@ impl Session {
                     .ok_or_else(crate::accounts::unsupported)?;
                 let account = adapter.account(account_id, &operation).await?;
                 crate::accounts::details(&self.core, account, &operation).await
+            }
+            Request::InspectAccountInventory { account_id } => {
+                let adapter = self
+                    .accounts
+                    .as_ref()
+                    .ok_or_else(crate::accounts::unsupported)?;
+                let inspection = adapter.inspect_inventory(account_id, &operation).await?;
+                operation
+                    .run(async { Ok(crate::accounts::inventory(inspection)) })
+                    .await
             }
             Request::RenameAccount { account_id, label } => {
                 let adapter = self

@@ -268,3 +268,13 @@ It does not expose private `AccountRecord.credential_ref`, provider subjects or
 appliance IDs. Native secret input, buffer ownership and frontend handling are
 specified in [ADR-0026](../adr/0026-native-account-connection.md) and the
 [account contract](../native-ui-contract.md#account-connection-and-refresh).
+
+## Inspect saved membership for the UI
+
+`MeijuAdapter::inspect_inventory(account_id, operation)` reads only the selected
+account's protected map under its lease. The native `inspect_account_inventory`
+query projects sorted local IDs and membership without provider identifiers.
+Use it for explicit inspection of saved evidence; it performs no retrieval,
+reauthorization, publication or write. See the [native handoff](../native-ui-contract.md#inspect-saved-account-inventory).
+Existing local account details remain available without protected-store access.
+Inspection failures must not start a network fallback or clear historical cards.

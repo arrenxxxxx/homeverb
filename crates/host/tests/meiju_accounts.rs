@@ -19,6 +19,9 @@ use uuid::Uuid;
 #[path = "meiju_accounts/fan.rs"]
 mod fan;
 
+#[path = "meiju_accounts/inventory.rs"]
+mod inventory;
+
 fn operation() -> Operation {
     Operation::new(1000, CancellationToken::new()).unwrap()
 }
@@ -68,6 +71,8 @@ struct Secrets {
     puts: AtomicUsize,
     deletes: AtomicUsize,
     deleted_entries: AtomicUsize,
+    read_delay: AtomicBool,
+    read_started: tokio::sync::Notify,
     deletion: AtomicI32,
     delete_started: tokio::sync::Notify,
 }
@@ -76,6 +81,10 @@ impl SecretStore for Secrets {
     async fn get(&self, key: &CredentialRef, op: &Operation) -> Result<Option<SecretBytes>> {
         self.reads.fetch_add(1, Ordering::Relaxed);
         op.run(async {
+            if self.read_delay.load(Ordering::Relaxed) {
+                self.read_started.notify_one();
+                std::future::pending::<()>().await;
+            }
             if self.unavailable.load(Ordering::Relaxed) {
                 return Err(Error::new(
                     "SECRET_STORE_UNAVAILABLE",
@@ -318,6 +327,7 @@ impl Fixture {
                 | "refresh_account"
                 | "recover_account"
                 | "get_account"
+                | "inspect_account_inventory"
                 | "rename_account"
                 | "remove_account"
         ) {

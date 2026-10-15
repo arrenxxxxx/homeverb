@@ -115,5 +115,9 @@
   "vendor.midea.ac.wind_speed.100": "Full",
   "vendor.midea.ac.wind_speed.102": "Auto",
   "error.MIDEA_DEVICE_NOT_LISTED": "This device was missing from the last complete platform list. Refresh the account before trying again.",
-  "error.MIDEA_INVENTORY_REQUIRED": "Refresh this platform account to confirm its device list before reading or controlling devices."
+  "error.MIDEA_INVENTORY_REQUIRED": "Refresh this platform account to confirm its device list before reading or controlling devices.",
+  "account.inventory.inspect": "Inspect saved device list",
+  "inventory.membership.listed": "Present in last complete list",
+  "inventory.membership.not_listed": "Missing from last complete list",
+  "inventory.membership.unconfirmed": "Device list needs confirmation"
 }

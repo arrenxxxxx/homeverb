@@ -1,5 +1,5 @@
 {
-  "api_version": "1.9.1",
+  "api_version": "1.10.0",
   "provenance": "Fictional account DTO examples. Actual synthetic host responses are checked against the same schemas by crates/host/tests/meiju_accounts.rs. No live identities or credentials.",
   "connect_metadata": {
     "schema_version": "1.0",
@@ -439,6 +439,50 @@
             "duration_ms": 0
           }
         ]
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "inspect-saved-inventory",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "inspect_account_inventory",
+          "account_id": "00000000-0000-4000-8000-000000000001"
+        }
+      },
+      "response_definition": "inspect_account_inventory",
+      "response": {
+        "schema_version": "1.0",
+        "data": {
+          "account": {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "provider": "midea.meiju",
+            "region": "CN",
+            "label": "Example account",
+            "credential_state": "stored",
+            "authorization": "not_checked"
+          },
+          "devices": [
+            {
+              "device_id": "00000000-0000-4000-8000-000000000002",
+              "connection_id": "00000000-0000-4000-8000-000000000012",
+              "membership": "listed"
+            },
+            {
+              "device_id": "00000000-0000-4000-8000-000000000003",
+              "connection_id": "00000000-0000-4000-8000-000000000013",
+              "membership": "not_listed"
+            },
+            {
+              "device_id": "00000000-0000-4000-8000-000000000004",
+              "connection_id": "00000000-0000-4000-8000-000000000014",
+              "membership": "unconfirmed"
+            }
+          ]
+        },
+        "warnings": [],
+        "error": null
       }
     }
   ],

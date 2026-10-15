@@ -286,3 +286,25 @@ system probes ignored), Clippy with warnings denied, formatting/build checks,
 five presentation tests, and docs/contracts/repository checks. The Android arm64
 AAR was rebuilt and passed export/archive/16 KiB alignment checks. No remote CI,
 Flutter/APK, physical-phone, actual Keystore or appliance test was performed.
+
+## Saved inventory inspection 1.10
+
+`inspect_account_inventory` adds one native JSON method (31 total). It returns
+sorted local device/connection IDs and saved membership for one selected account,
+including historical, unsupported and unpublished bindings. It reads protected
+material under a lease, without cloud work, mutation, descriptor publication or
+permission changes. It never upgrades listed membership to online/authorized.
+
+Existing metadata-only `get_account` behavior, seven C functions, SQLite schema 4
+and protected payload version 2 remain unchanged. Legacy bindings are returned as
+unconfirmed without migration. Older libraries reject the method; negotiate it
+through the catalog. Synthetic host and Linux ABI coverage is described in
+[testing](testing.md). Flutter rendering and physical/provider acceptance remain
+unverified. No real account was inspected during this phase.
+
+Local verification passed 261 Rust workspace tests (two opt-in system probes
+ignored), Clippy/format/build checks, 24 Mock runtime cases, all 31 Linux native
+methods with 51 examples, 23 Python tests, five presentation tests and contract,
+document and repository checks. The rebuilt Android arm64 AAR passed export,
+archive and 16 KiB alignment inspection; no APK, physical-phone, actual Keystore
+or remote CI acceptance is claimed.

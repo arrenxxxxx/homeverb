@@ -29,7 +29,7 @@ def main():
     responses = {name: validator('native-response', name) for name in [*api['methods'], 'open']}
     query_error = validator('native-response', 'query_error')
     info_example = {'schema_version': '1.0', 'data': copy.deepcopy(api), 'warnings': [], 'error': None}
-    info_example['data']['api_version'] = '1.10.0'
+    info_example['data']['api_version'] = '1.11.0'
     info_example['data']['methods']['future_query'] = {'response_kind': 'query'}
     responses['get_api_info'].validate(info_example)
     info_example['data']['api_version'] = '2.0.0'
@@ -107,6 +107,7 @@ def main():
             assert call(handle, 'list_devices')['data'] == []
             assert call(handle, 'list_accounts')['data'] == []
             assert call(handle, 'get_account', account_id='00000000-0000-4000-8000-000000000001')['error']['code'] == 'AUTH_FLOW_UNSUPPORTED'
+            assert call(handle, 'inspect_account_inventory', account_id='00000000-0000-4000-8000-000000000001')['error']['code'] == 'AUTH_FLOW_UNSUPPORTED'
             assert call(handle, 'rename_account', account_id='00000000-0000-4000-8000-000000000001', label='Family appliances')['error']['code'] == 'AUTH_FLOW_UNSUPPORTED'
             assert call(handle, 'remove_account', account_id='00000000-0000-4000-8000-000000000001', expected_device_ids=[])['error']['code'] == 'AUTH_FLOW_UNSUPPORTED'
             assert call(handle, 'refresh_account', account_id='00000000-0000-4000-8000-000000000001')['error']['code'] == 'AUTH_FLOW_UNSUPPORTED'
@@ -273,7 +274,17 @@ def main():
                 result = raw(handle, envelope(method))
                 responses[method].validate(result)
                 assert result['error'] is None and result['data'] == []
+            inspection = envelope('inspect_account_inventory', account_id='00000000-0000-4000-8000-000000000001')
+            result = raw(handle, inspection)
+            responses['inspect_account_inventory'].validate(result)
+            assert result['error']['code'] == 'ACCOUNT_NOT_FOUND'
+            for field, value in [('listed', True), ('refresh', True), ('credential_ref', 'FORBIDDEN')]:
+                bad = copy.deepcopy(inspection)
+                bad['request'][field] = value
+                assert not request_schema.is_valid(bad)
+                assert raw(handle, bad)['error']['code'] == 'INVALID_ARGUMENT'
             library.homeverb_set_foreground(handle, False)
+            assert raw(handle, inspection)['error']['code'] == 'HOST_BACKGROUND'
             result = raw(handle, envelope('discover'))
             query_error.validate(result)
             assert result['error']['code'] == 'HOST_BACKGROUND'
@@ -316,6 +327,7 @@ def main():
         finally:
             library.homeverb_close(handle)
         assert raw(handle, envelope('list_devices'))['error']['code'] == 'HOST_CLOSED'
+        assert raw(handle, inspection)['error']['code'] == 'HOST_CLOSED'
 
     with tempfile.TemporaryDirectory(prefix='homeverb-ui-mock-account-') as directory:
         handle = open_host(directory, allow=False)
@@ -604,6 +616,16 @@ def main():
         validator('native-response', case['response_definition']).validate(case['response'])
         if 'request' in case:
             request_schema.validate(case['request'])
+        if case['response_definition'] == 'inspect_account_inventory':
+            for field, value in [('membership', 'online'), ('membership', True),
+                                 ('device_id', 'not-a-uuid'), ('connection_id', None),
+                                 ('appliance_id', 'PRIVATE'), ('online', True)]:
+                bad = copy.deepcopy(case['response'])
+                bad['data']['devices'][0][field] = value
+                assert not responses['inspect_account_inventory'].is_valid(bad), (field, value)
+            bad = copy.deepcopy(case['response'])
+            del bad['data']['devices'][0]['membership']
+            assert not responses['inspect_account_inventory'].is_valid(bad)
     removal_cases = [case for case in account_examples['cases'] if case['response_definition'] == 'remove_account']
     for case in removal_cases:
         bad = copy.deepcopy(case['response'])
