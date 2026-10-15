@@ -14,7 +14,7 @@ Read `README.md`, `docs/product-requirements.md`, `docs/architecture.md`, `docs/
 4. The app performs foreground, on-demand work only. Leaving the foreground cancels networking and closes subscriptions. Unconfirmed writes are recorded as `unknown`. Do not promise a callback after a forced termination.
 5. Do not implement remote HTTP MCP, public control APIs, device relays, cloud sync, or background automation. Changing this boundary requires an explicit owner decision and a new ADR. Do not reintroduce these features under an "optional" label.
 6. Local SQLite and system secret stores do not require a self-hosted service. Temporary loopback authentication callbacks and short-lived protocol UDP sockets are allowed only within a bounded operation.
-7. A platform requiring a confidential shared client secret, private server callback, or persistent relay is incompatible unless it has a viable native-client alternative. Never embed a backend secret in an app to claim support.
+7. A platform requiring a confidential shared client secret, private server callback, or persistent relay is incompatible unless it has a viable native-client alternative. Never embed a backend secret in an app to claim support. The owner-approved ADR-0022 exception permits only the pinned public Meiju community app-compatibility material for the personal MVP; it does not permit confidential developer secrets, publication, or real-device writes.
 
 ## Layering rules
 

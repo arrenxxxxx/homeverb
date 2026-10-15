@@ -1,6 +1,6 @@
 # ADR-0024: Persist Meiju device bindings with the protected account session
 
-Status: accepted for offline native implementation. ADR-0022 remains proposed.
+Status: accepted for offline native implementation. ADR-0022 was subsequently approved; this storage phase remains offline evidence.
 
 ## Decision
 

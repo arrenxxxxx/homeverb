@@ -1,6 +1,6 @@
 # ADR-0025: Validate protected Meiju bindings before Core state reads
 
-Status: accepted for offline native integration. Live authentication remains gated by ADR-0022.
+Status: accepted for offline native integration. ADR-0022 was subsequently approved; this Core phase does not establish live authentication.
 
 ## Decision
 

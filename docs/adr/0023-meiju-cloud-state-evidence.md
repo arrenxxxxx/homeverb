@@ -1,6 +1,6 @@
 # ADR-0023: Decode Meiju cloud state without inventing freshness or capabilities
 
-Status: accepted for offline protocol implementation. Authentication admission remains subject to proposed ADR-0022.
+Status: accepted for offline protocol implementation. Authentication admission was subsequently approved in ADR-0022; this state-decoding phase remains offline evidence.
 
 ## Decision
 

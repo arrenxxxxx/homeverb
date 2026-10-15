@@ -56,6 +56,6 @@ Brand, exact model, category, firmware, region, vendor app, account type, transp
 
 ## Independent native-client gate
 
-The October 15 Meiju review found a developer-secret requirement in the official v3 API and shared app material in the pinned community login path. Neither is currently admitted as HomeVerb live authentication. Proposed [ADR-0022](adr/0022-meiju-community-cloud-admission.md) requires an owner decision before adopting the community material; no official approval or physical support follows from that proposal. Device models are not the missing evidence for this gate.
+The October 15 Meiju review found a developer-secret requirement in the official v3 API and shared app material in the pinned community login path. The owner explicitly approved the narrow community-material exception in [ADR-0022](adr/0022-meiju-community-cloud-admission.md) on October 15, 2026. The official developer-secret path remains excluded. Approval permits implementation of the scoped community flow; it establishes neither official approval nor physical support.
 
 Do not skip authentication feasibility merely because another feature works. Label cloud-only operation `cloud-required`. Separate cloud-dependent onboarding from daily LAN operation. Platform support does not imply every product sold under that brand is supported.
