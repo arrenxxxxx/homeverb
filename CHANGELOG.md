@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Meiju authentication admission review
+
+- Verify the official developer-secret token flow and the separate community app-facing login requirements against primary sources.
+- Record proposed ADR-0022 for a scoped owner decision on community signing material; preserve the current no-backend rule and disabled live authentication until admission is resolved.
+
 ### Persistent account vault
 
 - Upgrade SQLite schema 1/2 to 3 with a verified backup, persisting random profile/account/credential references without session bytes or provider identifiers.
