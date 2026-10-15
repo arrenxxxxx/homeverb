@@ -1005,3 +1005,6 @@ mod reauthorization;
 
 #[path = "meiju_accounts/product.rs"]
 mod product;
+
+#[path = "meiju_accounts/temperature.rs"]
+mod temperature;

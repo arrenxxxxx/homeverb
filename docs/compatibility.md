@@ -498,3 +498,48 @@ JDK 21 and API 35 stubs; production archive contents, eight exports per ABI and
 account/profile, appliance or remote CI acceptance was performed. The separate
 Flutter worktree was untouched. Model-specific temperature/program constraints,
 physical/off-LAN controls and the complete mobile journey remain incomplete.
+
+## Profile-scoped AC temperature 1.12
+
+Native API 1.12.0 adds independent `meiju_temperature_grants` for one exact local
+AC and Celsius target under [ADR-0041](adr/0041-profile-scoped-ac-temperature.md).
+Native, CLI and MCP use the same startup-only policy; ordinary commands cannot
+change authority. The startup target union never overrides the selected action's
+bounds/step. Existing Rust host helpers remain compatible wrappers around the
+new borrowed `MeijuControlGrants` bundle. Older native binaries reject the new
+field. The 31 JSON methods, seven C functions, SQLite schema 4 and protected
+account payload 3 remain unchanged.
+
+Only the four existing experimental AC models with reviewed protected product
+evidence expose `main / climate.set {target_temperature}` after explicit refresh
+or discovery. Selection preserves subtype/product/category priority, normalized
+category spellings and explicit unsupported overrides, including fresh-air product
+26096947. Missing evidence never selects a generic family default. Retained
+profiles survive later omitted inventory fields and are used without another
+provider request. Public descriptors contain selected constraints, not raw
+product evidence. Writable limits do not suppress valid historical observations.
+
+The adapter reselects the protected mapping before transport and sends only exact
+whole/half-degree temperature field(s). It does not round invalid input, include
+power/mode/fan or cached status, update optimistic state, read after acceptance,
+retry, fall back or restore settings. Cloud acknowledgement remains accepted;
+uncertain transmission remains unknown. Source mappings do not prove physical
+support or preservation of unrelated settings without upstream status context.
+
+Local verification on October 16, 2026 passed 296 Rust tests (two opt-in system
+probes ignored), formatting, Clippy with warnings denied, workspace and example
+builds using `--offline --locked`, 34 runtime cases, the 31-method/51-example
+native ABI suite, 29 Python tests and five presentation tests. Contract checks
+passed 17 schemas, 34 positive and 117 negative fixtures; document, repository
+and commit checks passed. Rust/runtime suites used ordinary local socket and
+signal access. Tests cover all reviewed selector groups, missing/conflicting
+admission conditions, exact encoding, weakened descriptors, independent policy,
+protected membership, receipts/replay and foreground interruption.
+
+The API 28 arm64, x86_64 and combined Android AARs were rebuilt with NDK r28c,
+JDK 21 and API 35 stubs. Production archive contents, eight exports per ABI and
+16 KiB ELF alignment passed. This phase used fictional profiles and synthetic
+storage/transport only. No owner account, credential profile or appliance was
+accessed; the separate Flutter worktree was untouched. APK/emulator/Keystore/phone,
+physical/off-LAN controls, dishwasher/refrigerator writes and remote CI remain
+unverified. The full real-device MVP remains incomplete.

@@ -121,6 +121,33 @@
         "additionalProperties": false
       },
       "description": "Trusted startup-only permission to turn on one exact local AC and activate one reviewed vendor mode over cloud. This includes power-on; it grants no independent power, fan or temperature action."
+    },
+    "meiju_temperature_grants": {
+      "type": "array",
+      "maxItems": 64,
+      "uniqueItems": true,
+      "default": [],
+      "items": {
+        "type": "object",
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "target_temperature": {
+            "type": "number",
+            "minimum": 16,
+            "maximum": 30,
+            "multipleOf": 0.5
+          }
+        },
+        "required": [
+          "device_id",
+          "target_temperature"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Trusted startup-only permission for one exact local AC and Celsius target over cloud. This union of reviewed setpoints does not define device capability bounds; the protected product mapping and action schema must also admit the target. No power, mode, fan or other target authority."
     }
   },
   "required": [
@@ -129,7 +156,7 @@
     "allow_mock_writes"
   ],
   "additionalProperties": false,
-  "description": "Trusted native startup. data_dir must be an absolute private OS path. adapter defaults to homeverb.mock; scenario defaults to normal. Meiju defaults to read-only; optional meiju_power_grants, meiju_fan_grants and meiju_mode_grants separately admit exact-device power, fan and explicit power-on/mode activation over cloud. Meiju rejects Mock grants or fault scenarios. Opening never authenticates, discovers or controls.",
+  "description": "Trusted native startup. data_dir must be an absolute private OS path. adapter defaults to homeverb.mock; scenario defaults to normal. Meiju defaults to read-only; optional meiju_power_grants, meiju_fan_grants, meiju_mode_grants and meiju_temperature_grants separately admit exact-device power, fan, explicit power-on/mode activation and profile-scoped temperature targets over cloud. Meiju rejects Mock grants or fault scenarios. Opening never authenticates, discovers or controls.",
   "allOf": [
     {
       "if": {
@@ -161,6 +188,9 @@
             "maxItems": 0
           },
           "meiju_mode_grants": {
+            "maxItems": 0
+          },
+          "meiju_temperature_grants": {
             "maxItems": 0
           }
         }

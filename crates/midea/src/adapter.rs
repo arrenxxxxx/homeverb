@@ -70,6 +70,7 @@ fn descriptors(
     ac_power: bool,
     ac_fan: bool,
     ac_mode: bool,
+    temperature: Option<crate::temperature::TemperatureProfile>,
 ) -> Descriptor {
     let family = appliance
         .model
@@ -90,7 +91,15 @@ fn descriptors(
                 power.actions.insert("set".into(), power_action());
             }
             capabilities.push(power);
-            capabilities.push(capability("main", "climate", &temperatures));
+            let mut climate = capability("main", "climate", &temperatures);
+            if let Some(profile) = temperature {
+                climate.revision = 2;
+                climate.properties.get_mut("target_temperature").unwrap()["writable"] = json!(true);
+                climate
+                    .actions
+                    .insert("set".into(), temperature_action(profile));
+            }
+            capabilities.push(climate);
             let mut fan = capability(
                 "main",
                 "vendor.midea.ac",
@@ -203,6 +212,7 @@ pub struct MeijuAdapter {
     ac_power: bool,
     ac_fan: bool,
     ac_mode: bool,
+    ac_temperature: bool,
 }
 
 impl MeijuAdapter {
@@ -218,6 +228,7 @@ impl MeijuAdapter {
             ac_power: false,
             ac_fan: false,
             ac_mode: false,
+            ac_temperature: false,
         }
     }
 
@@ -239,6 +250,12 @@ impl MeijuAdapter {
         self.ac_mode = true;
         self
     }
+    /// Admit only temperature mappings selected from retained protected product evidence.
+    pub fn with_ac_temperature_control(mut self) -> Self {
+        self.ac_temperature = true;
+        self
+    }
+
     /// Local metadata only; a stored credential is not proof of current authorization.
     pub async fn accounts(&self, operation: &Operation) -> Result<Vec<AccountRecord>> {
         Ok(self
@@ -465,6 +482,11 @@ impl MeijuAdapter {
                 }
             }
             if let Some(bound) = bound {
+                let profiles = if self.ac_temperature {
+                    account.product_profiles(operation).await?
+                } else {
+                    Default::default()
+                };
                 for (appliance, binding) in bound.inventory.appliances.iter().zip(bound.bindings) {
                     output.push(descriptors(
                         appliance,
@@ -473,6 +495,9 @@ impl MeijuAdapter {
                         self.ac_power,
                         self.ac_fan,
                         self.ac_mode,
+                        profiles
+                            .get(&binding.device_id)
+                            .and_then(crate::ProductProfile::temperature),
                     ));
                 }
             }
@@ -549,28 +574,29 @@ impl Adapter for MeijuAdapter {
         let control = match (command.capability.as_str(), command.action.as_str()) {
             ("power", "set") if self.ac_power => {
                 power_action().validate_arguments(&command.arguments)?;
-                crate::control::AcControl::Power {
+                Some(crate::control::AcControl::Power {
                     power: if command.arguments["state"].as_bool().unwrap() {
                         "on"
                     } else {
                         "off"
                     },
-                }
+                })
             }
             ("vendor.midea.ac", "set_fan_speed") if self.ac_fan => {
                 fan_action().validate_arguments(&command.arguments)?;
-                crate::control::AcControl::FanSpeed {
+                Some(crate::control::AcControl::FanSpeed {
                     wind_speed: command.arguments["wind_speed"].as_f64().unwrap() as u8,
-                }
+                })
             }
             ("vendor.midea.ac", "activate_mode") if self.ac_mode => {
                 mode_action().validate_arguments(&command.arguments)?;
-                crate::control::AcControl::ActivateMode {
+                Some(crate::control::AcControl::ActivateMode {
                     power: "on",
                     mode: serde_json::from_value(command.arguments["mode"].clone())
                         .map_err(|_| Error::invalid())?,
-                }
+                })
             }
+            ("climate", "set") if self.ac_temperature => None,
             _ => return Err(crate::control::unsupported()),
         };
         let id = connection
@@ -592,6 +618,17 @@ impl Adapter for MeijuAdapter {
         {
             return Err(crate::control::unsupported());
         }
+        let control = match control {
+            Some(control) => control,
+            None => {
+                let profile = appliance
+                    .product_profile
+                    .temperature()
+                    .ok_or_else(crate::control::unsupported)?;
+                temperature_action(profile).validate_arguments(&command.arguments)?;
+                profile.control(&command.arguments["target_temperature"])?
+            }
+        };
         let session = account.cloud_session(operation).await?;
         crate::control::execute(
             &session,
@@ -602,6 +639,13 @@ impl Adapter for MeijuAdapter {
             operation,
         )
         .await
+    }
+}
+
+fn temperature_action(profile: crate::temperature::TemperatureProfile) -> Action {
+    Action {
+        parameters: json!({"type":"object","properties":{"target_temperature":profile.parameter()},"required":["target_temperature"],"additionalProperties":false}),
+        ..power_action()
     }
 }
 

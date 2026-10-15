@@ -144,13 +144,20 @@ when verification was requested; current cloud observations cannot verify it.
 See the [outcome table](development/07-meiju-control.md#outcome-contract).
 
 Native startup rejects malformed, duplicate, excessive, noncanonical or wrong-adapter
-`meiju_power_grants` (API 1.3), `meiju_fan_grants` (API 1.9) or
-`meiju_mode_grants` (API 1.11) with `INVALID_ARGUMENT` before profile creation.
+`meiju_power_grants` (API 1.3), `meiju_fan_grants` (API 1.9),
+`meiju_mode_grants` (API 1.11) or `meiju_temperature_grants` (API 1.12) with `INVALID_ARGUMENT` before profile creation.
 A valid startup grants only the listed local devices and exact power states, fan
-codes or combined power-on/mode actions over cloud. Activation accepts only
+codes, combined power-on/mode actions or exact temperature targets over cloud. Activation accepts only
 `cool`, `heat`, `auto`, `dry` and `fan`; `off`, aliases and extra fields are invalid.
 Power/fan grants cannot authorize activation or vice versa. Other values/routes still return
 `POLICY_DENIED`; no implicit grant expansion is allowed.
+Temperature startup values must be finite numbers from 16 to 30 in half-degree
+increments; this admission union does not override the device action's narrower
+bounds/step. Invalid targets, extra fields or duplicate numeric targets such as
+26 and 26.0 return `INVALID_ARGUMENT`. Missing or unsupported protected mappings
+return `CAPABILITY_UNSUPPORTED`; invalid action values return `INVALID_ARGUMENT`
+before transmission. Protected identity/membership checks still apply. Neither
+grant admission nor a successful plan proves physical temperature support.
 
 The Linux CLI applies the same validation to an explicit `--meiju-grants` startup
 file. Relative paths and malformed contents return `INVALID_ARGUMENT`. Unreadable,

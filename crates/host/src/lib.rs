@@ -16,6 +16,17 @@ mod fan_grants;
 pub use fan_grants::{MeijuFanGrant, meiju_fan_policy};
 mod mode_grants;
 pub use mode_grants::{MeijuModeGrant, meiju_mode_policy};
+mod temperature_grants;
+pub use temperature_grants::{MeijuTemperatureGrant, meiju_temperature_policy};
+
+/// Trusted startup configuration only; ordinary requests cannot deserialize it.
+#[derive(Default)]
+pub struct MeijuControlGrants<'a> {
+    pub power: &'a [MeijuPowerGrant],
+    pub fan: &'a [MeijuFanGrant],
+    pub mode: &'a [MeijuModeGrant],
+    pub temperature: &'a [MeijuTemperatureGrant],
+}
 
 /// Compose a native account vault without reading credentials or starting authentication.
 pub fn open_accounts(directory: &Path) -> Result<homeverb_core::AccountVault> {
@@ -49,7 +60,20 @@ pub fn open_meiju_with_scoped_grants(
     fan: &[MeijuFanGrant],
     mode: &[MeijuModeGrant],
 ) -> Result<Core> {
-    meiju_parts(directory, power, fan, mode).map(|(core, _)| core)
+    open_meiju_with_grants(
+        directory,
+        MeijuControlGrants {
+            power,
+            fan,
+            mode,
+            ..Default::default()
+        },
+    )
+}
+
+/// Compose exact independent control permissions before any profile or credential access.
+pub fn open_meiju_with_grants(directory: &Path, grants: MeijuControlGrants<'_>) -> Result<Core> {
+    meiju_parts(directory, grants).map(|(core, _)| core)
 }
 
 /// Compose foreground account operations and the read-only Core with one adapter instance.
@@ -81,19 +105,36 @@ pub fn open_meiju_session_with_scoped_grants(
     fan: &[MeijuFanGrant],
     mode: &[MeijuModeGrant],
 ) -> Result<Session> {
-    let (core, adapter) = meiju_parts(directory, power, fan, mode)?;
+    open_meiju_session_with_grants(
+        directory,
+        MeijuControlGrants {
+            power,
+            fan,
+            mode,
+            ..Default::default()
+        },
+    )
+}
+
+/// Capture trusted startup permissions for one foreground native session.
+pub fn open_meiju_session_with_grants(
+    directory: &Path,
+    grants: MeijuControlGrants<'_>,
+) -> Result<Session> {
+    let (core, adapter) = meiju_parts(directory, grants)?;
     Ok(Session::with_accounts(core, adapter))
 }
 
 fn meiju_parts(
     directory: &Path,
-    grants: &[MeijuPowerGrant],
-    fan: &[MeijuFanGrant],
-    mode: &[MeijuModeGrant],
+    grants: MeijuControlGrants<'_>,
 ) -> Result<(Core, Arc<homeverb_midea::MeijuAdapter>)> {
-    let mut policy = meiju_power_policy(grants)?;
-    policy.grants.extend(meiju_fan_policy(fan)?.grants);
-    policy.grants.extend(meiju_mode_policy(mode)?.grants);
+    let mut policy = meiju_power_policy(grants.power)?;
+    policy.grants.extend(meiju_fan_policy(grants.fan)?.grants);
+    policy.grants.extend(meiju_mode_policy(grants.mode)?.grants);
+    policy
+        .grants
+        .extend(meiju_temperature_policy(grants.temperature)?.grants);
     let store = Arc::new(SqliteStore::open(directory)?);
     let vault = Arc::new(open_accounts(directory)?);
     let clock = Arc::new(SystemClock);
@@ -102,14 +143,17 @@ fn meiju_parts(
         Arc::new(homeverb_midea::MeijuHttps),
         clock.clone(),
     );
-    if !grants.is_empty() {
+    if !grants.power.is_empty() {
         adapter = adapter.with_ac_power_control();
     }
-    if !fan.is_empty() {
+    if !grants.fan.is_empty() {
         adapter = adapter.with_ac_fan_control();
     }
-    if !mode.is_empty() {
+    if !grants.mode.is_empty() {
         adapter = adapter.with_ac_mode_control();
+    }
+    if !grants.temperature.is_empty() {
+        adapter = adapter.with_ac_temperature_control();
     }
     let adapter = Arc::new(adapter);
     Ok((

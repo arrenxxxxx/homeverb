@@ -1,6 +1,6 @@
-# Native UI contract 1.11
+# Native UI contract 1.12
 
-Status: implemented Linux native contract, October 16, 2026, with Mock, default read-only Meiju startup, protected account connection and scoped experimental AC power, fan and mode activation grants. Six real devices passed the native read path; phone packaging and complete provider/physical acceptance remain pending. See [ADR-0019](adr/0019-native-ui-contract.md).
+Status: implemented Linux native contract, October 16, 2026, with Mock, default read-only Meiju startup, protected account connection and scoped experimental AC power, fan, mode activation and profile-scoped temperature grants. Six real devices passed the native read path; phone packaging and complete provider/physical acceptance remain pending. See [ADR-0019](adr/0019-native-ui-contract.md).
 
 ## Start here in a Flutter worktree
 
@@ -8,7 +8,7 @@ Branch from a commit containing both the Mock MVP and this contract. Put the Flu
 
 Read the [UI integration guide](development/03-ui-integration.md) for existing behavior and the [functional handoff](ui-functional-spec.md) for screens. Use [api.json](../packages/native-contract/api.json) as the callable-method catalog and [examples.json](../packages/native-contract/examples.json) as fictional request/response examples. The examples were obtained from the built native library. They contain temporary fictional IDs and observations, not defaults for a production device.
 
-Startup explicitly selects Mock or Meiju; Meiju remains read-only unless the trusted host supplies the independently scoped power, fan or mode activation grants below. Meiju uses an existing local account or the protected connection function below; opening the library alone does not establish connection or authorization. Preview-only refrigerator, dishwasher, and sharing screens can use isolated UI fixture repositories; never mix those records with a native installation or label them live.
+Startup explicitly selects Mock or Meiju; Meiju remains read-only unless the trusted host supplies the independently scoped power, fan, mode activation or temperature grants below. Meiju uses an existing local account or the protected connection function below; opening the library alone does not establish connection or authorization. Preview-only refrigerator, dishwasher, and sharing screens can use isolated UI fixture repositories; never mix those records with a native installation or label them live.
 
 ## Startup, ownership, and version negotiation
 
@@ -16,7 +16,7 @@ The seven C functions in [homeverb.h](../crates/ffi/include/homeverb.h) remain t
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects saved-account cloud reads. `scenario` defaults to `normal`. Meiju requires `allow_mock_writes: false` and rejects any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms `homeverb.mock` or `midea.meiju`. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.11.1`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.12.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -93,7 +93,7 @@ Prefer exact device IDs even where lookup accepts an alias. Resolve a capability
 | UI scope | Current integration | Remaining work and boundary |
 |---|---|---|
 | D01–D12, R01–R05: cards, search, rooms, local organization | Device/room methods above | Flutter filtering, loading/errors, accessibility and layouts. Metadata writes preserve routes and grants |
-| C01–C14: dynamic controls, history and outcomes | Describe/read/plan/execute/batch/receipt methods | Render exact capabilities; default Meiju discovery has read-only AC/fridge/dishwasher mappings; native power, fan and mode activation grants may admit experimental AC on/off, vendor fan presets or explicit power-on with mode selection. Other consequential real approvals remain unavailable |
+| C01–C14: dynamic controls, history and outcomes | Describe/read/plan/execute/batch/receipt methods | Render exact capabilities; default Meiju discovery has read-only AC/fridge/dishwasher mappings; native grants may admit experimental AC on/off, vendor fan presets, explicit power-on with mode selection or profile-scoped temperature targets. Other consequential real approvals remain unavailable |
 | A01–A08: device discovery and addition | Explicit selected-adapter `discover`, including saved-account Meiju cloud retrieval | Real pairing, mobile permissions and safe identity merge remain unavailable. No merge API exists |
 | P01–P13: platforms, accounts, authorization and removal | `list_accounts`, `get_account`, `rename_account`, `remove_account`, `refresh_account`, `recover_account`, and separate `homeverb_connect_account` | Flutter protected input, cleanup confirmation/recovery and phone secure stores; provider revocation remains unavailable |
 | H01–H16: nearby authorization sharing | No sharing methods in this version | Eligibility, peer discovery, code verification, scope, consent, conflict/import and transfer records require ADR-0008 implementation |
@@ -224,7 +224,7 @@ Older native libraries reject this new field. After deliberately opening a grant
 session, perform an explicit `refresh_account` or `discover`, describe the selected
 device and call `plan` before `execute`. The existing command methods and payloads
 are unchanged. Unsupported models, ungranted states/components/actions and LAN-only
-routes are refused; `auto` can use only cloud. These experimental grants admit no
+routes are refused; `auto` can use only cloud. These power grants admit no
 temperature, dishwasher, refrigerator or elevated/high-risk controls.
 
 An accepted code-zero cloud reply is not verified physical state. For
@@ -611,6 +611,64 @@ deferred. The 31 JSON methods, seven C functions and SQLite schema 4 remain
 unchanged. See the protected product-profile migration below before downgrading
 a library.
 
+## Scoped experimental AC temperature startup
+
+API 1.12.0 adds independent `meiju_temperature_grants` under
+[ADR-0041](adr/0041-profile-scoped-ac-temperature.md). Negotiate API 1.12 or later
+on a read-only handle before supplying this field; older binaries reject it.
+A fictional configuration granting one exact target is:
+
+```json
+{
+  "schema_version": "1.0",
+  "data_dir": "/absolute/private/homeverb",
+  "adapter": "midea.meiju",
+  "allow_mock_writes": false,
+  "meiju_temperature_grants": [
+    {"device_id": "30000000-0000-4000-8000-000000000001", "target_temperature": 26.5}
+  ]
+}
+```
+
+Each entry authorizes only `main / climate.set {target_temperature}` over cloud
+for that local device and exact Celsius value. At most 64 distinct canonical local
+UUID-v4/target pairs are allowed. The startup schema admits 16–30 in half-degree
+increments as the union of reviewed targets; **this is not a universal device
+range**. No other temperature, power, mode or fan change is authorized. Empty or
+omitted lists grant nothing. Ordinary requests cannot edit authority. Obtain
+user permission in the trusted controller and close/reopen to change grants,
+following the same lifecycle and receipt rules as the other control lists.
+
+After explicit discovery/account refresh, climate revision 2 exposes `set` only
+for one of the four admitted AC models with a supported protected product profile.
+The adapter selects subtype first, then exact product code, then an explicitly
+supported category; missing evidence and unsupported higher-priority mappings
+never become a generic family default. Exact mapping ranges, steps and exclusions
+are listed in ADR-0041. Profile evidence remains private: Flutter renders the
+returned action, without branching on brand, model or product code.
+
+Read `actions.set.parameters.properties.target_temperature` for writable minimum,
+maximum and `multipleOf`, together with the property's Celsius unit. Do not use
+read-property limits to construct this input: a valid historical observation may
+be outside today's writable range. Validate before `plan`, keep requested values
+separate from observations, and hide the setter when the action is absent.
+A grant cannot supply missing capability or permit a half-degree value on a
+whole-degree profile. See the fictional [capability](../examples/capability.meiju-temperature.json)
+and [command](../examples/command.meiju-temperature.json). Existing standard climate
+labels in both presentation catalogs apply; no vendor-specific screen is needed.
+
+The adapter reselects the protected profile and checks arguments before sending.
+One request contains only `temperature` and, where required, `small_temperature`;
+it never rounds an invalid input, sends power/mode/fan fields, copies cached status,
+or performs an automatic read, retry, fallback or restoring command. Both
+`atomic` and `independent_fields` are false. Code-zero acknowledgement remains
+`accepted`, with `VERIFICATION_PENDING` when requested; possible transmission
+remains `unknown`. Cached observations are unchanged. Preservation of other settings
+without upstream status context, model/firmware behavior and off-LAN operation
+still require physical acceptance. No real device was operated in this phase.
+The 31 JSON methods, seven C functions, SQLite schema 4 and protected payload 3
+are unchanged.
+
 ## Verify the handoff
 
 ```bash
@@ -716,5 +774,5 @@ profile fields do not erase known evidence; conflicting values return
 `DEVICE_IDENTITY_CONFLICT` before binding/card publication. Malformed fields make
 that home's inventory invalid; incomplete retrieval preserves existing cards and
 membership. Uncertain protected saves use the existing pending/recovery flow.
-The adapter still needs reviewed model-specific mappings and physical acceptance
-before claiming temperature or appliance-cycle support.
+API 1.12 uses this protected evidence for the reviewed temperature mappings above.
+Physical temperature acceptance and appliance-cycle support remain outstanding.

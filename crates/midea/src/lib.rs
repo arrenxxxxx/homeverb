@@ -7,6 +7,7 @@ mod control;
 pub use control::{AC_FAN_SPEEDS, AC_MODES, AcMode};
 mod material;
 mod product;
+mod temperature;
 pub use auth::{LoginCredentials, MeijuSession, SessionReads, login};
 pub use cloud::{CloudEndpoint, CloudTransport, MeijuHttps, SignedRequest};
 pub use product::ProductProfile;

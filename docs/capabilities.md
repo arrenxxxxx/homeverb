@@ -56,6 +56,14 @@ Idempotency categories are `read_only`, `set_value`, `non_idempotent`, and `unkn
 
 Risk levels are `low`, `elevated`, and `high`. Generic MCP writes for sensitive heating, door-lock, or similar actions are excluded from the first release. Adding them requires trusted user approval and risk tests. Model-supplied `confirmed=true` is not approval.
 
+Write-input controls use the selected action's `parameters` schema for bounds,
+step, required fields and enums. A property's readable domain can be wider; valid
+historical observations must not disappear merely because they are not writable.
+The experimental [Meiju temperature action](../examples/capability.meiju-temperature.json)
+illustrates profile-specific write limits with an unconstrained numeric observation
+domain. Only protected supported product evidence selects that action, and a
+separate exact-target grant is required. See [ADR-0041](adr/0041-profile-scoped-ac-temperature.md).
+
 ## Extension review
 
 A new standard capability needs equivalent semantics demonstrated across at least two heterogeneous adapters, with units, limits, errors, verification, and counterexamples. A single vendor's unusual mode belongs in its namespace first. Read-only support is valid; an unimplemented write must never return success.

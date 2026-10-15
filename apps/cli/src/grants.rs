@@ -2,8 +2,8 @@
 
 use homeverb_domain::{Error, Result};
 use homeverb_host::{
-    MeijuFanGrant, MeijuModeGrant, MeijuPowerGrant, meiju_fan_policy, meiju_mode_policy,
-    meiju_power_policy,
+    MeijuControlGrants, MeijuFanGrant, MeijuModeGrant, MeijuPowerGrant, MeijuTemperatureGrant,
+    meiju_fan_policy, meiju_mode_policy, meiju_power_policy, meiju_temperature_policy,
 };
 use serde::Deserialize;
 use std::path::Path;
@@ -20,6 +20,8 @@ pub struct Grants {
     pub meiju_fan_grants: Vec<MeijuFanGrant>,
     #[serde(default)]
     pub meiju_mode_grants: Vec<MeijuModeGrant>,
+    #[serde(default)]
+    pub meiju_temperature_grants: Vec<MeijuTemperatureGrant>,
 }
 
 impl Default for Grants {
@@ -29,15 +31,26 @@ impl Default for Grants {
             meiju_power_grants: vec![],
             meiju_fan_grants: vec![],
             meiju_mode_grants: vec![],
+            meiju_temperature_grants: vec![],
         }
     }
 }
 
 impl Grants {
+    pub fn controls(&self) -> MeijuControlGrants<'_> {
+        MeijuControlGrants {
+            power: &self.meiju_power_grants,
+            fan: &self.meiju_fan_grants,
+            mode: &self.meiju_mode_grants,
+            temperature: &self.meiju_temperature_grants,
+        }
+    }
+
     pub fn is_empty(&self) -> bool {
         self.meiju_power_grants.is_empty()
             && self.meiju_fan_grants.is_empty()
             && self.meiju_mode_grants.is_empty()
+            && self.meiju_temperature_grants.is_empty()
     }
 
     pub fn load(path: Option<&Path>) -> Result<Self> {
@@ -82,6 +95,7 @@ impl Grants {
             meiju_power_policy(&grants.meiju_power_grants)?;
             meiju_fan_policy(&grants.meiju_fan_grants)?;
             meiju_mode_policy(&grants.meiju_mode_grants)?;
+            meiju_temperature_policy(&grants.meiju_temperature_grants)?;
             Ok(grants)
         }
         #[cfg(not(target_os = "linux"))]
@@ -195,6 +209,27 @@ mod tests {
         assert_eq!(grants.meiju_mode_grants.len(), 1);
         value["meiju_mode_grants"][0]["mode"] = serde_json::json!("off");
         write(&path, &value.to_string());
+        assert_eq!(
+            Grants::load(Some(&path)).err().unwrap().code,
+            "INVALID_ARGUMENT"
+        );
+    }
+
+    #[test]
+    fn temperature_only_files_capture_exact_targets_without_other_authority() {
+        let directory = tempfile::tempdir().unwrap();
+        let path = directory.path().join("grants.json");
+        let value = serde_json::json!({"schema_version":"1.0", "meiju_temperature_grants":[
+            {"device_id":"30000000-0000-4000-8000-000000000001", "target_temperature":26.5}]});
+        write(&path, &value.to_string());
+        let grants = Grants::load(Some(&path)).unwrap();
+        assert!(!grants.is_empty());
+        let controls = grants.controls();
+        assert_eq!(controls.temperature[0].target_temperature, 26.5);
+        assert!(controls.power.is_empty() && controls.fan.is_empty() && controls.mode.is_empty());
+        let mut invalid = value;
+        invalid["meiju_temperature_grants"][0]["target_temperature"] = serde_json::json!(26.25);
+        write(&path, &invalid.to_string());
         assert_eq!(
             Grants::load(Some(&path)).err().unwrap().code,
             "INVALID_ARGUMENT"

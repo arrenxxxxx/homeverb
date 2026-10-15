@@ -11,7 +11,10 @@ use homeverb_core::{
 };
 use homeverb_domain::{Connection, Device, Error, Result, Snapshot, Transport};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashSet, fmt};
+use std::{
+    collections::{HashMap, HashSet},
+    fmt,
+};
 use uuid::Uuid;
 use zeroize::Zeroize;
 
@@ -373,6 +376,24 @@ impl MeijuAccount {
             .iter()
             .map(|binding| CloudId::parse(&serde_json::Value::String(binding.appliance_id.clone())))
             .collect()
+    }
+
+    /// Retained product evidence for explicitly opted-in descriptor construction.
+    pub(crate) async fn product_profiles(
+        &self,
+        operation: &Operation,
+    ) -> Result<HashMap<Uuid, ProductProfile>> {
+        let payload = self.load(operation).await?;
+        Ok(payload
+            .bindings
+            .iter()
+            .map(|binding| {
+                (
+                    binding.local.device_id,
+                    ProductProfile::from_stored(&binding.product_profile),
+                )
+            })
+            .collect())
     }
 
     /// Model admission must agree with protected evidence, not only public device metadata.

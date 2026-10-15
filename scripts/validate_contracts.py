@@ -45,6 +45,7 @@ def main() -> int:
         ("capability", "capability.fridge"), ("capability", "capability.freezer"),
         ("capability", "capability.meiju-fan"), ("command", "command.meiju-fan"),
         ("capability", "capability.meiju-mode"), ("command", "command.meiju-mode"),
+        ("capability", "capability.meiju-temperature"), ("command", "command.meiju-temperature"),
     ]
     validators = {}
     for path in (ROOT / "schemas").glob("*.schema.json"):
@@ -53,7 +54,7 @@ def main() -> int:
         validators[path.name.removesuffix(".schema.json")] = Draft202012Validator(sch, format_checker=formats)
     for sch, fixture in pairs:
         validators[sch].validate(load(f"examples/{fixture}.json"))
-    for key in ("meiju_power_grants", "meiju_fan_grants", "meiju_mode_grants"):
+    for key in ("meiju_power_grants", "meiju_fan_grants", "meiju_mode_grants", "meiju_temperature_grants"):
         assert load("schemas/cli-meiju-grants.schema.json")["properties"][key] == load("schemas/native-open.schema.json")["properties"][key]
     validators["cli-meiju-grants"].validate({"schema_version": "1.0"})
     assert load("schemas/batch-command.schema.json")["$defs"]["command"] == load("schemas/command.schema.json")
@@ -75,6 +76,12 @@ def main() -> int:
     action_validator.validate(load("examples/command.json")["arguments"])
     fan_validator = Draft202012Validator(load("examples/capability.meiju-fan.json")["actions"]["set_fan_speed"]["parameters"])
     fan_validator.validate(load("examples/command.meiju-fan.json")["arguments"])
+    temperature_validator = Draft202012Validator(load("examples/capability.meiju-temperature.json")["actions"]["set"]["parameters"])
+    temperature_validator.validate(load("examples/command.meiju-temperature.json")["arguments"])
+    for value in [16, 30.5, 26.25, "26", True, None]:
+        assert not temperature_validator.is_valid({"target_temperature":value})
+    for arguments in [{}, {"target_temperature":26, "mode":"cool"}, {"target_temperature":26, "state":True}]:
+        assert not temperature_validator.is_valid(arguments)
     mode_validator = Draft202012Validator(load("examples/capability.meiju-mode.json")["actions"]["activate_mode"]["parameters"])
     mode_validator.validate(load("examples/command.meiju-mode.json")["arguments"])
     for mode in ["cool", "heat", "auto", "dry", "fan"]:
@@ -120,6 +127,10 @@ def main() -> int:
         fresh["properties"]["target_temperature"]["max_age_ms"] = max_age_ms
         validators["capability"].validate(fresh)
     negative = []
+    for value in [15.5, 30.5, 26.25, "26", True, None]:
+        bad = {"schema_version":"1.0", "meiju_temperature_grants":[
+            {"device_id":"30000000-0000-4000-8000-000000000001", "target_temperature":value}]}
+        negative.append((f"invalid CLI setpoint {value}", validators["cli-meiju-grants"], bad))
     for mode in [None, True, 1, "off", "fan_only", "COOL"]:
         bad = {"schema_version":"1.0", "meiju_mode_grants":[
             {"device_id":"30000000-0000-4000-8000-000000000001", "mode":mode}]}

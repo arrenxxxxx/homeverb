@@ -30,9 +30,21 @@ pub const AC_MODES: [AcMode; 5] = [
 #[derive(Serialize)]
 #[serde(untagged)]
 pub(crate) enum AcControl {
-    Power { power: &'static str },
-    FanSpeed { wind_speed: u8 },
-    ActivateMode { power: &'static str, mode: AcMode },
+    Power {
+        power: &'static str,
+    },
+    FanSpeed {
+        wind_speed: u8,
+    },
+    ActivateMode {
+        power: &'static str,
+        mode: AcMode,
+    },
+    Temperature {
+        temperature: u8,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        small_temperature: Option<f64>,
+    },
 }
 
 #[derive(Deserialize)]

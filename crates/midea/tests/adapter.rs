@@ -910,3 +910,6 @@ async fn unsent_loss_cancellation_and_deadline_keep_distinct_phases_without_repl
     let id = fixture.vault.list(&operation()).await.unwrap()[0].id;
     drop(fixture.vault.lease(id, &operation()).await.unwrap());
 }
+
+#[path = "adapter/temperature.rs"]
+mod temperature;

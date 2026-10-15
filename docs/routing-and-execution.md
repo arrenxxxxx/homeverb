@@ -144,6 +144,18 @@ accepted/unknown handling, protected checks and replay rules remain unchanged.
 It neither copies cached status nor writes temperature/fan values. Model behavior
 and preservation of unrelated settings remain unverified without physical evidence.
 
+API 1.12 adds profile-scoped `climate.set {target_temperature}` under
+[ADR-0041](adr/0041-profile-scoped-ac-temperature.md). After explicit discovery,
+only admitted AC models with reviewed protected product evidence expose the action.
+Its parameters carry the selected Celsius bounds and step; property observation
+domains stay readable outside write limits. Authority names one device and exact
+target. The adapter rechecks the protected selector and arguments before transport,
+even when public descriptors were weakened. It sends only the selected temperature
+field(s), without rounding, cached status, extra provider reads, optimistic cache
+updates, replay or restoration. Missing evidence and explicit unsupported overrides
+refuse before send. Atomicity/independent fields stay false; accepted/unknown
+outcomes and physical-preservation limitations are unchanged.
+
 The Linux CLI can supply these same independent grants through an explicit
 owner-controlled file under [ADR-0037](adr/0037-cli-meiju-control-grants.md).
 It requires explicit request IDs for single writes and previews, and never

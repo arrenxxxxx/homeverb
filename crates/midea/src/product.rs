@@ -74,6 +74,14 @@ fn text(value: Option<&Value>) -> Result<Option<&str>> {
 }
 
 impl ProductProfile {
+    pub(crate) fn temperature(&self) -> Option<crate::temperature::TemperatureProfile> {
+        crate::temperature::select(
+            self.0.subtype.as_deref(),
+            self.0.sn8.as_deref(),
+            self.0.category.as_deref(),
+        )
+    }
+
     pub(crate) fn parse(entry: &Value) -> Result<Self> {
         let sn8 = text(entry.get("sn8"))?.filter(|value| *value != "00000000");
         if sn8.is_some_and(|value| !valid_code(value)) {

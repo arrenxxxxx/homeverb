@@ -1,7 +1,7 @@
 # CLI contract
 
 Status: Mock commands, local organization, diagnostics and the experimental mainland
-Meiju account/read flow and scoped power, fan and mode activation controls are implemented. Select `--mock` or `--adapter midea.meiju`
+Meiju account/read flow and scoped power, fan, mode activation and profile-scoped temperature controls are implemented. Select `--mock` or `--adapter midea.meiju`
 explicitly. Meiju uses the same native Host/Core as the app bridge; no example
 executable, HA or service is required. Real CLI login/read/control acceptance remains
 separate from the earlier [developer probe](development/06-meiju-probe.md).
@@ -115,7 +115,8 @@ opening the profile. MCP can reuse this profile through explicit
 ## Scoped Meiju controls
 
 On Linux, `--adapter midea.meiju --meiju-grants <absolute-path>` loads a trusted
-startup file for the experimental AC power, vendor fan and combined power-on/mode actions. The
+startup file for experimental AC power, vendor fan, combined power-on/mode and
+profile-scoped temperature actions. The
 owner must review each local device ID and allowed value. The file is never loaded
 automatically, saved into the profile or accepted inside ordinary command JSON.
 It has the closed [CLI grant schema](../schemas/cli-meiju-grants.schema.json); see
@@ -127,7 +128,8 @@ policy for the entire session; stop/restart that host to change grants. One-shot
 CLI commands reread the explicitly supplied file on each invocation.
 
 `schema_version` is `"1.0"`. Each independent list, `meiju_power_grants`,
-`meiju_fan_grants` and `meiju_mode_grants`, permits at most 64 distinct entries.
+`meiju_fan_grants`, `meiju_mode_grants` and `meiju_temperature_grants`, permits at
+most 64 distinct entries.
 Power entries name one local `device_id` and boolean `state`; fan entries name
 one local `device_id` and one `wind_speed` code: 20, 40, 60, 80, 100 or 102. These
 are vendor codes, not percentages. Mode entries name one local `device_id` and
@@ -137,8 +139,15 @@ Power/fan grants do not authorize activation. Older binaries reject the new mode
 list; see [ADR-0039](adr/0039-explicit-meiju-mode-activation.md).
 Omitted/empty lists grant nothing. No wildcard, provider identifier,
 arbitrary action, credential or approval flag is accepted. Only the existing
-exact-model AC mappings and cloud route are admitted; temperature, dishwasher and
-refrigerator controls remain unsupported.
+exact-model AC mappings and cloud route are admitted; dishwasher and refrigerator
+controls remain unsupported.
+
+Temperature entries name one local `device_id` and exact Celsius
+`target_temperature`. The startup union is 16–30 in half-degree increments, but
+the selected protected product mapping and action schema must also admit the
+value. There is no family-wide range or fallback for missing product evidence.
+Temperature grants never authorize power, mode, fan or another target. Older
+binaries reject this list; see [ADR-0041](adr/0041-profile-scoped-ac-temperature.md).
 
 Store the file outside the repository at an absolute path, owned by the current
 OS user and not writable by group/others; mode `0600` is recommended. The loader
@@ -168,7 +177,11 @@ with the reviewed request ID. For a fan preview, use the same options with
 --arguments '{"wind_speed":40}'`. For a combined power-on and mode preview, use
 `device execute <local-device-id> --capability vendor.midea.ac --action activate_mode
 --arguments '{"mode":"cool"}'` with a matching mode grant. Review both effects
-before sending; this is not a mode-only setter.
+before sending; this is not a mode-only setter. For a temperature-only preview,
+use `climate set <local-device-id> --temperature 26.5` with an exact matching
+`meiju_temperature_grants` entry and the same startup, request ID and dry-run
+options. Read the described action's bounds and step before choosing a value;
+no implicit power or mode change is included.
 
 Execution repeats Core and protected-account checks. Cloud acceptance remains
 `accepted`, never physical verification; the default verified wait exits 12 when

@@ -92,11 +92,38 @@
         "additionalProperties": false
       },
       "description": "Trusted startup-only permission to turn on one exact local AC and activate one reviewed vendor mode over cloud. This includes power-on; it grants no independent power, fan or temperature action."
+    },
+    "meiju_temperature_grants": {
+      "type": "array",
+      "maxItems": 64,
+      "uniqueItems": true,
+      "default": [],
+      "items": {
+        "type": "object",
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "target_temperature": {
+            "type": "number",
+            "minimum": 16,
+            "maximum": 30,
+            "multipleOf": 0.5
+          }
+        },
+        "required": [
+          "device_id",
+          "target_temperature"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Trusted startup-only permission for one exact local AC and Celsius target over cloud. This union of reviewed setpoints does not define device capability bounds; the protected product mapping and action schema must also admit the target. No power, mode, fan or other target authority."
     }
   },
   "required": [
     "schema_version"
   ],
   "additionalProperties": false,
-  "description": "Explicit trusted Linux CLI startup grants. The owner-controlled file contains only exact local device IDs and allowed values, including explicit power-on/mode activation; no credentials, wildcard permissions or ordinary request approval flags. Missing or empty lists grant nothing."
+  "description": "Explicit trusted Linux CLI startup grants. The owner-controlled file contains only exact local device IDs and allowed values, including explicit power-on/mode activation and exact temperature targets; no credentials, wildcard permissions or ordinary request approval flags. Missing or empty lists grant nothing."
 }
