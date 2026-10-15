@@ -4,6 +4,8 @@ The owner selected Midea and Hualing air conditioners, dishwashers, and refriger
 
 Daily cloud control is required in the first real integration. LAN is an additional route for the same physical devices, not a substitute for cloud control. The owner has physical products; exact models, firmware, app version, and account region remain to be recorded. This guide records requirements and source research on October 15, 2026, not implemented HomeVerb support or physical verification.
 
+The first native protocol stage is now implemented in [homeverb-midea](../../crates/midea/src/lib.rs): account-scoped home/appliance retrieval, code/data response validation, family classification, deduplication, partial failure, and cancellation. It uses an injected read transport and synthetic responses with the inspected wire fields. It has no live authentication, signing, HTTPS implementation, registered Core adapter, or enabled UI account method yet. See [ADR-0020](../adr/0020-midea-cloud-inventory.md).
+
 ## Reuse the community protocol work
 
 The Home Assistant integration [Midea Auto Cloud][cloud-integration] demonstrates account-device enumeration and daily cloud control, and lists the `AC`, `E1`, and `CA` families. Its root license is Apache-2.0. The integration [Midea AC LAN][ha] lists Midea and Wahin/Hualing among its brands and includes all three requested families. [midea-local][library] is the Python LAN protocol library extracted from that project; both LAN repositories carry the MIT license. Preserve applicable license notices and attribution when adapting code, including Apache-2.0 modification/NOTICE requirements where applicable. HomeVerb's own release license decision remains separate.
@@ -70,6 +72,12 @@ Every HTTP request and socket belongs to the current operation. A foreground rea
 The complete flow must demonstrate an existing Meiju account's devices appearing without re-pairing or manual device credentials, preserved organization after reauthorization, honest unsupported/offline/partial states, and permitted cloud reads/writes away from home. Cloud failure must remain visible; cached state or a working LAN path alone does not pass the remote-control gate.
 
 Default priority is air conditioner, dishwasher, then refrigerator; this is an implementation order, not a model-support claim. Exact model information may change the order or reveal an unsupported protocol. Do not block source research, offline protocol tests, or adapter foundations solely because model details are pending. Preserve specific blockers for actual credentials, network access, and physical verification.
+
+## Develop the native inventory stage
+
+Run `cargo test -p homeverb-midea --offline --locked`. `ReadTransport` admits only home-list and home-appliance read endpoints, with the exact account credential reference and caller's Operation. A future signed HTTPS transport must validate its fixed vendor destination, cap received bytes before allocating an unbounded body, and return response bytes through `SecretBytes`. It must not retry or reauthenticate implicitly. The inventory layer additionally rejects bodies larger than 1 MiB and applies one shared deadline across the full sequence.
+
+Inventory and `CloudId` are private native data: no Serialize implementation, no raw identifiers or appliance metadata in Debug/errors, and no direct SQLite/native JSON projection. Add encrypted identity mapping before converting them into stable local Device/Connection references. The returned family is only a protocol candidate. Preserve unknown families, and never translate `online_hint` into a verified state snapshot. Errors on individual homes remain explicit; session expiry stops subsequent requests; cancellation discards the return value without applying a partial replacement.
 
 [cloud-integration]: https://github.com/sususweet/midea_auto_cloud/tree/ce0c4b88224def0f6b53714312c19f71aa9c2a50
 [meiju-cloud-source]: https://github.com/sususweet/midea_auto_cloud/blob/ce0c4b88224def0f6b53714312c19f71aa9c2a50/custom_components/midea_auto_cloud/core/cloud.py

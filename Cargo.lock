@@ -742,6 +742,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "homeverb-midea"
+version = "0.2.0"
+dependencies = [
+ "async-trait",
+ "homeverb-core",
+ "homeverb-domain",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tokio-util",
+]
+
+[[package]]
 name = "homeverb-mock"
 version = "0.2.0"
 dependencies = [

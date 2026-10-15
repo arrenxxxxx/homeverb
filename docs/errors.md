@@ -76,3 +76,7 @@ Receipt lookup reports query failure for `REQUEST_NOT_FOUND` or `REQUEST_RETIRED
 `REQUEST_RETIRED` is a failed new invocation, not proof that the original command failed. Display a refresh action and never automatically assign a new request ID and resend. `RESOURCE_BUSY` also covers exclusive migration access; close other profile users before upgrading.
 
 Secret-store errors contain no raw backend error text. Before a credential mutation starts, cancellation and deadlines retain `CANCELLED` / `DEADLINE_EXCEEDED`. After it starts, any unconfirmed failure is conservatively `SECRET_STORE_WRITE_UNKNOWN`. Missing entries return `None` on read; deleting an absent reference succeeds. Local credential deletion never establishes vendor revocation. See [native credentials](storage.md#native-credential-storage).
+
+## Meiju inventory errors
+
+The native inventory library uses `MIDEA_RESPONSE_INVALID` for malformed/oversized or wrong-home responses, `MIDEA_REQUEST_REJECTED` for explicit nonzero provider codes other than recognized expired-session codes, and `MIDEA_REQUEST_FAILED` for transport failures. Provider messages, URLs and identifiers are never copied into these errors. Recognized session expiry returns `AUTH_REQUIRED` and stops further home requests without automatic login/retry. Individual home failures remain explicit in a partial inventory; a failed top-level listing never becomes an empty account. Cancellation/deadline stop the whole read flow. These errors do not establish any device-write outcome or real-platform support.

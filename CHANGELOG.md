@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Meiju inventory protocol
+
+- Add the native Midea cloud home/appliance inventory protocol with an injected read transport, account-scoped deduplication, unknown-family retention, partial errors, and shared cancellation/deadlines.
+- Keep provider identifiers and response bodies out of serializable DTOs and Debug/error output; do not register live authentication or device control without the remaining evidence.
+
 ### Native UI contract
 
 - Publish API version 1.0.0 with a local `get_api_info` query, 22 method schemas, actual Mock examples, and screen-to-interface coverage for independent Flutter work.
