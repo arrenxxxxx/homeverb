@@ -135,6 +135,15 @@ are ignored within the datagram limit. A completed five-second window is an
 observation report, not proof that every device responded; `limit_reached` marks
 early bounded completion. Errors publish no partial candidates or device changes.
 
+The [V3 wire codec](adr/0046-bounded-v3-lan-codec.md) uses `INVALID_ARGUMENT` for
+unsupported credential lengths or outgoing payload sizes, `AUTH_REQUIRED` for
+an explicit handshake rejection or failed key confirmation, and fixed
+`MIDEA_RESPONSE_INVALID` for malformed frames or failed response digests. Its
+`AUTH_REQUIRED` does not establish cloud session expiry or authorize automatic
+reauthentication. OS randomness failure is `MIDEA_REQUEST_FAILED`; request-counter
+exhaustion is `RESOURCE_BUSY`, with no wrap or automatic reconnection. None of
+these codec-only results establishes a device-write outcome or permits a retry.
+
 The account-bound read path returns `DEVICE_IDENTITY_CONFLICT` before transport when the local device, selected connection or known model differs from the protected binding. Invalid components return `CAPABILITY_UNSUPPORTED`. Pending or unavailable credentials stop the request through the vault. Core rejects decoded but undeclared properties with `INVALID_OBSERVATION`; neither that rejection nor a protocol failure replaces the previous cache or triggers a retry.
 
 Protected inventory membership is independent of historical identity. API 1.9.1

@@ -28,6 +28,7 @@ Start with the progressive development path. Reference documents define invarian
 - Inventory inspection: [foreground saved account evidence](adr/0036-local-account-inventory-inspection.md) for the native UI.
 - Inventory admission: [retain identity while gating live Meiju requests](adr/0035-meiju-inventory-membership.md).
 - LAN foundation: [bounded discovery decoding and collection](adr/0045-bounded-lan-discovery-decoding.md), with unauthenticated native candidates, fictional loopback evidence and no route registration.
+- V3 LAN framing: [protected handshake and bounded wire codec](adr/0046-bounded-v3-lan-codec.md), with independent fictional vectors and no TCP or identity admission.
 - CLI control admission: [explicit owner-controlled Meiju startup grants](adr/0037-cli-meiju-control-grants.md).
 - Profile-scoped AC temperature: [selection, exact targets and physical evidence limits](adr/0041-profile-scoped-ac-temperature.md).
 - Protected product mapping evidence: [inventory and storage rules](adr/0040-protected-meiju-product-profiles.md).

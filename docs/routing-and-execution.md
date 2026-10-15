@@ -261,3 +261,10 @@ peer. A normal or limited report is not a complete inventory and must not remove
 cards, merge identities, add routes or authorize TCP connections. CLI, native
 JSON and MCP do not invoke this foundation yet. Public request/result schemas,
 cloud routing and write outcome semantics remain unchanged.
+
+The [V3 codec](adr/0046-bounded-v3-lan-codec.md) supplies only handshake and frame
+processing. Key confirmation does not authenticate an advertised appliance ID or
+authorize endpoint reuse. A valid response digest/sequence is not fresh state or
+command acknowledgement. A future TCP adapter must retain identity, account
+membership, operation lifetime, request correlation and write-progress checks;
+codec success cannot change routing or replay an uncertain command.

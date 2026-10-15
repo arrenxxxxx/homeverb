@@ -267,9 +267,25 @@ They are not complete account inventories and never remove existing cards.
 
 Loopback tests cover the collector; no real LAN scan has been performed. No native
 JSON method, startup scan or LAN connection is registered. Host network selection
-and consent, protected identity reconciliation, V3 token/key retrieval and
-handshake, TCP framing and exact-model codecs remain next gates. V1 XML is
+and consent, protected identity reconciliation, token/key retrieval, TCP session
+ownership and inner packet/model codecs remain next gates. V1 XML is
 unsupported, and physical LAN acceptance remains unverified.
+
+### V3 handshake and frame codec
+
+[ADR-0046](../adr/0046-bounded-v3-lan-codec.md) implements native `V3Handshake`,
+`V3Session` and the bounded `v3_frame_len` helper. Explicit protected token/key
+buffers produce a handshake request; one valid response derives a session key.
+The session encodes type-6 requests and checks type-3 responses before releasing
+plaintext, including aligned payloads where the digest must still count toward
+frame length. Frames are capped at 4096 bytes, and request counters never wrap
+within a session. Keys and packet contents are excluded from Debug and JSON.
+
+Independent fictional vectors cover the wire codec. It opens no TCP socket and
+does not fetch, persist or guess credentials. Key confirmation and response
+sequence numbers do not prove device identity, freshness or physical execution.
+Next work must bind protected account credentials to the selected device, own a
+bounded TCP session, correlate responses and validate inner packet/model evidence.
 
 ## Fit the embedded Core
 

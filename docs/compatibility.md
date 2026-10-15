@@ -866,3 +866,31 @@ acceptance: 35 passed; native contract: 31 methods/51 fictional examples plus
 approval checks; Python tooling: 33 passed; presentation: six passed. All three
 Android AAR variants passed build/export/16 KiB ELF checks. No Android network
 runtime, real account, appliance operation or separate Flutter worktree was used.
+
+## Bounded V3 LAN wire codec
+
+[ADR-0046](adr/0046-bounded-v3-lan-codec.md) adds protected native handshake and
+session codecs. Independent OpenSSL/hashlib vectors cover handshake key
+confirmation and twelve aligned/unaligned encrypted request/response frames.
+Malformed, truncated, oversized, wrong-direction and failed-digest inputs expose
+no plaintext. Outgoing counters stop before wrap; the 4096-byte frame limit and
+credential sizes are scoped admission limits, not physical compatibility claims.
+
+The encoder includes digest bytes in the declared length even when no random
+padding is required. Keys and plaintext use protected buffers and enabled CBC/AES
+cleanup features; constant-time digest checks and OS randomness reuse existing
+locked dependencies. No dependency version changed. Native API 1.14.1, JSON
+methods, C exports, SQLite schema 4 and protected payload 3 are unchanged.
+
+No TCP connection, live credential retrieval, persistence, route admission or
+appliance operation is implemented by this codec. A valid digest/sequence does
+not establish device identity, freshness, anti-replay or physical execution.
+Protected identity/credentials, bounded TCP transport, inner packet/model checks
+and physical acceptance remain separate gates.
+
+On October 16, 2026, formatting, workspace Clippy, workspace/example builds and
+local validators passed. Rust tests: 340 passed, two explicitly ignored; runtime
+acceptance: 35 passed; native contract: 31 methods/51 fictional examples plus
+approval checks; Python tooling: 33 passed; presentation: six passed. All three
+Android AAR variants passed build/export/16 KiB ELF checks. No Android network
+runtime, real account, appliance operation or separate Flutter worktree was used.
