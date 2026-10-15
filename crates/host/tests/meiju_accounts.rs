@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use homeverb_core::*;
 use homeverb_domain::{Error, Result};
-use homeverb_host::{ConnectRequest, HostRequest, Session};
+use homeverb_host::{ConnectRequest, HostRequest, MeijuPowerGrant, Session, meiju_power_policy};
 use homeverb_midea::*;
 use homeverb_storage::SqliteStore;
 use serde_json::{Value, json};
@@ -106,6 +106,7 @@ struct Wire {
     subject: Mutex<String>,
     calls: Mutex<Vec<CloudEndpoint>>,
     inventory_code: AtomicI32,
+    control_code: AtomicI32,
     homes_code: AtomicI32,
     extra_device: AtomicBool,
     delay: Mutex<Option<CloudEndpoint>>,
@@ -117,6 +118,7 @@ impl Default for Wire {
             subject: Mutex::new("synthetic-login-001".into()),
             calls: Mutex::new(vec![]),
             inventory_code: AtomicI32::new(0),
+            control_code: AtomicI32::new(0),
             homes_code: AtomicI32::new(0),
             extra_device: AtomicBool::new(false),
             delay: Mutex::new(None),
@@ -126,6 +128,24 @@ impl Default for Wire {
 }
 #[async_trait]
 impl CloudTransport for Wire {
+    async fn send_control(
+        &self,
+        request: &SignedRequest,
+        progress: &WriteProgress,
+        _: &Operation,
+    ) -> Result<SecretBytes> {
+        assert_eq!(request.endpoint(), CloudEndpoint::ApplianceControl);
+        progress.mark_sent();
+        self.calls.lock().unwrap().push(request.endpoint());
+        if *self.delay.lock().unwrap() == Some(CloudEndpoint::ApplianceControl) {
+            self.started.notify_one();
+            std::future::pending::<()>().await;
+        }
+        Ok(bytes(
+            json!({"code":self.control_code.load(Ordering::Relaxed)}),
+        ))
+    }
+
     async fn send(&self, request: &SignedRequest, _: &Operation) -> Result<SecretBytes> {
         self.calls.lock().unwrap().push(request.endpoint());
         let delay = *self.delay.lock().unwrap() == Some(request.endpoint());
@@ -210,6 +230,24 @@ impl Fixture {
             path,
         }
     }
+    fn reopen_with_power_grants(&mut self, grants: &[MeijuPowerGrant]) {
+        self.session.close();
+        let policy = meiju_power_policy(grants).unwrap();
+        let mut adapter =
+            MeijuAdapter::new(self.vault.clone(), self.wire.clone(), Arc::new(SystemClock));
+        if !policy.grants.is_empty() {
+            adapter = adapter.with_ac_power_control();
+        }
+        let adapter = Arc::new(adapter);
+        let core = Core::new(
+            self.store.clone(),
+            vec![adapter.clone()],
+            Arc::new(SystemClock),
+            policy,
+        );
+        self.session = Arc::new(Session::with_accounts(core, adapter));
+    }
+
     async fn call(&self, request: Value) -> Value {
         self.call_id("query", request).await
     }
@@ -547,6 +585,157 @@ async fn publication_refuses_unregistered_foreign_or_invalid_descriptor_batches(
         assert_eq!(
             serde_json::to_value(f.store.devices().unwrap()).unwrap(),
             baseline
+        );
+    }
+}
+
+fn power_command(device: &str, state: bool) -> Value {
+    json!({"schema_version":"1.0","request_id":Uuid::new_v4().to_string(),
+        "device_id":device,"component_id":"main","capability":"power","action":"set",
+        "arguments":{"state":state},"connection":"cloud","timeout_ms":1000,"wait_for":"verified"})
+}
+
+#[tokio::test]
+async fn native_power_grants_scope_actual_session_plans_outcomes_and_reopening() {
+    let mut f = Fixture::new();
+    let connected = f.connect(None).await;
+    let account = connected["data"]["account"]["id"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    let device = f
+        .store
+        .devices()
+        .unwrap()
+        .into_iter()
+        .find(|d| d.device.model == "KFR-35G/WF2")
+        .unwrap()
+        .device
+        .id;
+    f.reopen_with_power_grants(&[MeijuPowerGrant {
+        device_id: device.clone(),
+        state: false,
+    }]);
+    f.refresh(&account).await;
+    let before = f.calls();
+    let command = power_command(&device, false);
+    assert!(f.call(json!({"method":"plan","command":command})).await["error"].is_null());
+    assert_eq!(f.calls(), before);
+    assert_eq!(
+        f.call(json!({"method":"plan","command":power_command(&device,true)}))
+            .await["error"]["code"],
+        "POLICY_DENIED"
+    );
+    let mut lan = power_command(&device, false);
+    lan["connection"] = json!("lan");
+    assert_eq!(
+        f.call(json!({"method":"plan","command":lan})).await["error"]["code"],
+        "POLICY_DENIED"
+    );
+    let result = f.call(json!({"method":"execute","command":command})).await;
+    assert_eq!(result["status"], "accepted");
+    assert_eq!(result["error"]["code"], "VERIFICATION_PENDING");
+    assert!(result["verification"].is_null());
+    let schema: Value =
+        serde_json::from_str(include_str!("../../../schemas/command-result.schema.json")).unwrap();
+    jsonschema::validator_for(&schema)
+        .unwrap()
+        .validate(&result)
+        .unwrap();
+    assert_eq!(f.calls().len(), before.len() + 1);
+    assert_eq!(
+        f.call(json!({"method":"execute","command":command})).await,
+        result
+    );
+    assert_eq!(f.calls().len(), before.len() + 1);
+    f.wire.control_code.store(1306, Ordering::Relaxed);
+    let unknown = f
+        .call(json!({"method":"execute","command":power_command(&device,false)}))
+        .await;
+    assert_eq!(unknown["status"], "unknown");
+    jsonschema::validator_for(&schema)
+        .unwrap()
+        .validate(&unknown)
+        .unwrap();
+    let before = f.calls();
+    f.reopen_with_power_grants(&[]);
+    assert_eq!(
+        f.call(json!({"method":"execute","command":power_command(&device,false)}))
+            .await["error"]["code"],
+        "POLICY_DENIED"
+    );
+    let receipt = f
+        .call(json!({"method":"get_execution","request_id":command["request_id"]}))
+        .await;
+    assert_eq!(receipt["data"], result);
+    assert_eq!(f.calls(), before);
+}
+
+#[tokio::test]
+async fn native_power_background_cancel_and_close_preserve_unknown_and_release_account() {
+    let mut f = Fixture::new();
+    let connected = f.connect(None).await;
+    let account = connected["data"]["account"]["id"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    let device = f
+        .store
+        .devices()
+        .unwrap()
+        .into_iter()
+        .find(|d| d.device.model == "KFR-35G/WF2")
+        .unwrap()
+        .device
+        .id;
+    let grants = [MeijuPowerGrant {
+        device_id: device.clone(),
+        state: false,
+    }];
+    for stop in ["background", "cancel", "close"] {
+        f.reopen_with_power_grants(&grants);
+        *f.wire.delay.lock().unwrap() = None;
+        f.refresh(&account).await;
+        *f.wire.delay.lock().unwrap() = Some(CloudEndpoint::ApplianceControl);
+        let command = power_command(&device, false);
+        {
+            let work = f.call_id("power", json!({"method":"execute","command":command}));
+            tokio::pin!(work);
+            tokio::select! {
+                _ = f.wire.started.notified() => (),
+                _ = &mut work => panic!("Expected an in-flight control."),
+            }
+            match stop {
+                "background" => f.session.set_foreground(false),
+                "cancel" => {
+                    assert!(f.session.cancel("power"));
+                }
+                _ => f.session.close(),
+            }
+            let result = work.await;
+            assert_eq!(result["status"], "unknown");
+            assert_eq!(result["attempts"][0]["phase"], "possibly_sent");
+        }
+        let before = f.calls();
+        if stop != "cancel" {
+            let result = f
+                .call(json!({"method":"execute","command":power_command(&device,false)}))
+                .await;
+            assert_eq!(
+                result["error"]["code"],
+                if stop == "close" {
+                    "HOST_CLOSED"
+                } else {
+                    "HOST_BACKGROUND"
+                }
+            );
+        }
+        assert_eq!(f.calls(), before);
+        drop(
+            f.vault
+                .lease(Uuid::parse_str(&account).unwrap(), &operation())
+                .await
+                .unwrap(),
         );
     }
 }

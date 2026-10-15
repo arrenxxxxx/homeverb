@@ -84,7 +84,9 @@ and cached reads do no account or network work.
 
 An explicit trusted Meiju adapter opt-in additionally admits experimental AC
 `power.set` for the four exact read models. Default hosts retain read-only adapters
-and no Meiju write grants. Control repeats the fixed argument contract and protected
+and no Meiju write grants. Native API 1.3 can receive exact-device/state power grants
+only from trusted startup under [ADR-0027](adr/0027-native-power-grants.md); ordinary
+requests cannot change them. Control repeats the fixed argument contract and protected
 account/device/connection/model checks before sending; public metadata cannot supply
 a provider target. The separate HTTPS control path marks possible transmission
 before executing the request. Only a valid code-zero envelope establishes acceptance;

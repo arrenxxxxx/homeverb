@@ -119,6 +119,11 @@ An explicit code-zero acknowledgement remains accepted with `VERIFICATION_PENDIN
 when verification was requested; current cloud observations cannot verify it.
 See the [outcome table](development/07-meiju-control.md#outcome-contract).
 
+Native API 1.3 startup rejects malformed, duplicate, excessive, noncanonical or
+wrong-adapter `meiju_power_grants` with `INVALID_ARGUMENT` before profile creation.
+A valid startup grants only the listed local devices/states over cloud. Other
+states/routes still return `POLICY_DENIED`; no implicit grant expansion is allowed.
+
 ## Native account connection results
 
 `homeverb_connect_account` is separate from ordinary JSON and rejects invalid

@@ -110,6 +110,22 @@ handle or refuse it. `CloudTransport::send_control` defaults to refusal, never t
 power capability revision 2 is cloud-only and has unavailable verification. A
 read-only rediscovery returns revision 1; neither revision authorizes a write.
 
+## Native power permission contract 1.3
+
+API 1.3.0 adds optional startup-only `meiju_power_grants` for exact local AC
+IDs/states over cloud. Default behavior remains read-only. The seven C symbols,
+24 methods, JSON command/result contracts and SQLite schema 3 are unchanged;
+older libraries reject the new startup field. Grants never authorize arbitrary
+commands, other models or other transports, and are not persisted. See
+[ADR-0027](adr/0027-native-power-grants.md).
+
+Synthetic host tests exercise actual plan/execute/receipt paths, denied states and
+routes, read-only reopening, cancellation/background/close, and account-lease
+release. Linux ABI tests validate startup and reject malformed/forged permission
+fields before profile creation. No real account or device was used in this phase:
+the owner explicitly deferred household operation. Physical control, off-LAN and
+mobile acceptance remain pending.
+
 ## Status definitions
 
 The native account vault under [ADR-0021](adr/0021-persistent-account-vault.md) adds SQLite schema 3 and internal Rust account APIs. Schema 1/2 upgrades preserve existing data and create verified backups; close older clients first. Schema-2 binaries reject the upgraded profile. Native UI API 1.0.0, its 22 methods, C symbols and execution semantics are unchanged. No public account operation or real-provider authentication is enabled by locally storing references.

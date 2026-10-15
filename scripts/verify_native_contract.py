@@ -7,6 +7,7 @@ import argparse
 import copy
 import ctypes
 import json
+import sqlite3
 from pathlib import Path
 import tempfile
 import threading
@@ -28,7 +29,7 @@ def main():
     responses = {name: validator('native-response', name) for name in [*api['methods'], 'open']}
     query_error = validator('native-response', 'query_error')
     info_example = {'schema_version': '1.0', 'data': copy.deepcopy(api), 'warnings': [], 'error': None}
-    info_example['data']['api_version'] = '1.3.0'
+    info_example['data']['api_version'] = '1.4.0'
     info_example['data']['methods']['future_query'] = {'response_kind': 'query'}
     responses['get_api_info'].validate(info_example)
     info_example['data']['api_version'] = '2.0.0'
@@ -284,6 +285,79 @@ def main():
             assert result['error']['code'] == 'INVALID_ARGUMENT'
             assert not private.exists(), 'Invalid startup must fail before profile creation.'
 
+    grant_id = '30000000-0000-4000-8000-000000000001'
+    grant = {'device_id': grant_id, 'state': False}
+    for grants in [[], [grant], [grant, {'device_id': grant_id, 'state': True}]]:
+        with tempfile.TemporaryDirectory(prefix='homeverb-ui-power-grants-') as directory:
+            config = {'schema_version': '1.0', 'data_dir': directory, 'adapter': 'midea.meiju',
+                      'allow_mock_writes': False, 'meiju_power_grants': grants}
+            open_schema.validate(config)
+            result = decode(library.homeverb_open(json.dumps(config).encode()))
+            responses['open'].validate(result)
+            assert result['error'] is None, result
+            handle = result['data']['handle']
+            try:
+                info = raw(handle, envelope('get_api_info'))
+                assert info['data']['api_version'] == api['api_version']
+                assert raw(handle, envelope('list_accounts'))['data'] == []
+                assert raw(handle, envelope('discover'))['data'] == []
+                # Fictional metadata makes the actual ABI policy observable without secrets or sends.
+                device = load('examples/device.json')
+                device.update(id=grant_id, model='KFR-35G/WF2', support_status='experimental',
+                              components=[{'id': 'main', 'capabilities': ['power']}],
+                              connections=[{'id': 'fictional-cloud', 'adapter': 'midea.meiju',
+                                            'transport': 'cloud', 'account_id': '40000000-0000-4000-8000-000000000001',
+                                            'identity_ref': 'fictional-binding'}])
+                power = {'schema_version': '1.0', 'id': 'power', 'component_id': 'main', 'revision': 2,
+                         'properties': {'state': {'type': 'boolean', 'readable': True, 'writable': True}},
+                         'actions': {'set': {'parameters': {'type': 'object', 'properties': {'state': {'type': 'boolean'}},
+                                                           'required': ['state'], 'additionalProperties': False},
+                                             'transports': ['cloud'], 'idempotency': 'set_value', 'risk': 'low',
+                                             'atomic': False, 'verification': 'unavailable'}}, 'events': {}}
+                with sqlite3.connect(Path(directory) / 'homeverb.sqlite3') as database:
+                    database.execute('INSERT INTO devices (id, descriptor) VALUES (?, ?)',
+                                     (grant_id, json.dumps({'device': device, 'capabilities': [power]})))
+                for state in [False, True]:
+                    plan = raw(handle, envelope('plan', command=command('native-power-plan', device_id=grant_id,
+                                                                        arguments={'state': state}, connection='cloud')))
+                    responses['plan'].validate(plan)
+                    permitted = any(item['state'] == state for item in grants)
+                    assert (plan['error'] is None) == permitted
+                    if permitted:
+                        assert plan['data']['transports'] == ['cloud']
+                    else:
+                        assert plan['error']['code'] == 'POLICY_DENIED'
+                forged = envelope('list_devices')
+                forged['request']['meiju_power_grants'] = [grant]
+                assert not request_schema.is_valid(forged)
+                assert raw(handle, forged)['error']['code'] == 'INVALID_ARGUMENT'
+            finally:
+                library.homeverb_close(handle)
+
+    for grants in [None, True, {}, [grant, grant], [grant] * 65,
+                   [{'device_id': '*', 'state': False}],
+                   [{'device_id': grant_id}], [{'device_id': grant_id, 'state': 'false'}],
+                   [{'device_id': grant_id, 'state': False, 'confirmed': True}],
+                   [{'device_id': '00000000-0000-0000-0000-000000000000', 'state': False}],
+                   [{'device_id': grant_id.replace('-', ''), 'state': False}]]:
+        with tempfile.TemporaryDirectory(prefix='homeverb-ui-bad-grants-') as directory:
+            private = Path(directory) / 'must-not-create'
+            config = {'schema_version': '1.0', 'data_dir': str(private), 'adapter': 'midea.meiju',
+                      'allow_mock_writes': False, 'meiju_power_grants': grants}
+            assert not open_schema.is_valid(config)
+            assert decode(library.homeverb_open(json.dumps(config).encode()))['error']['code'] == 'INVALID_ARGUMENT'
+            assert not private.exists()
+    for adapter in [None, 'homeverb.mock']:
+        with tempfile.TemporaryDirectory(prefix='homeverb-ui-mock-grants-') as directory:
+            private = Path(directory) / 'must-not-create'
+            config = {'schema_version': '1.0', 'data_dir': str(private),
+                      'allow_mock_writes': False, 'meiju_power_grants': [grant]}
+            if adapter:
+                config['adapter'] = adapter
+            assert not open_schema.is_valid(config)
+            assert decode(library.homeverb_open(json.dumps(config).encode()))['error']['code'] == 'INVALID_ARGUMENT'
+            assert not private.exists()
+
     example_path = ROOT / 'packages/native-contract/examples.json'
     if args.write_examples:
         example_path.write_text(json.dumps({'api_version': api['api_version'], 'cases': examples}, indent=2) + '\n')
@@ -314,7 +388,7 @@ def main():
         target[path[-1]] = value
         assert not connect_response.is_valid(bad), path
     print(f"PASS: {len(api['methods'])} native methods; {len(examples)} live examples; closed-field, error, outcome, and lifecycle checks.")
-    print('Mock, empty Meiju startup and protected account-buffer guards verified on Linux; no live accounts, Flutter/mobile or physical-device verification in this suite.')
+    print('Mock, empty Meiju startup, scoped power-grant admission and protected account-buffer guards verified on Linux; no live accounts, Flutter/mobile or physical-device verification in this suite.')
 
 
 if __name__ == '__main__':

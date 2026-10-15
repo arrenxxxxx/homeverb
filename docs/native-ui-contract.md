@@ -1,6 +1,6 @@
-# Native UI contract 1.2
+# Native UI contract 1.3
 
-Status: implemented Linux native contract, October 15, 2026, with Mock, experimental Meiju read-only startup and protected account connection. Six real devices passed the native read path; phone packaging and complete provider/physical acceptance remain pending. See [ADR-0019](adr/0019-native-ui-contract.md).
+Status: implemented Linux native contract, October 15, 2026, with Mock, default read-only Meiju startup, protected account connection and scoped experimental AC power grants. Six real devices passed the native read path; phone packaging and complete provider/physical acceptance remain pending. See [ADR-0019](adr/0019-native-ui-contract.md).
 
 ## Start here in a Flutter worktree
 
@@ -8,7 +8,7 @@ Branch from a commit containing both the Mock MVP and this contract. Put the Flu
 
 Read the [UI integration guide](development/03-ui-integration.md) for existing behavior and the [functional handoff](ui-functional-spec.md) for screens. Use [api.json](../packages/native-contract/api.json) as the callable-method catalog and [examples.json](../packages/native-contract/examples.json) as fictional request/response examples. The examples were obtained from the built native library. They contain temporary fictional IDs and observations, not defaults for a production device.
 
-Startup explicitly selects Mock or the read-only Meiju adapter. Meiju uses an existing local account or the protected connection function below; opening the library alone does not establish connection or authorization. Preview-only refrigerator, dishwasher, and sharing screens can use isolated UI fixture repositories; never mix those records with a native installation or label them live.
+Startup explicitly selects Mock or Meiju; Meiju remains read-only unless the trusted host supplies the scoped power grants below. Meiju uses an existing local account or the protected connection function below; opening the library alone does not establish connection or authorization. Preview-only refrigerator, dishwasher, and sharing screens can use isolated UI fixture repositories; never mix those records with a native installation or label them live.
 
 ## Startup, ownership, and version negotiation
 
@@ -16,7 +16,7 @@ The seven C functions in [homeverb.h](../crates/ffi/include/homeverb.h) remain t
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects saved-account cloud reads. `scenario` defaults to `normal`. Meiju requires `allow_mock_writes: false` and rejects any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms `homeverb.mock` or `midea.meiju`. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.2.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.3.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -86,7 +86,7 @@ Prefer exact device IDs even where lookup accepts an alias. Resolve a capability
 | UI scope | Current integration | Remaining work and boundary |
 |---|---|---|
 | D01–D12, R01–R05: cards, search, rooms, local organization | Device/room methods above | Flutter filtering, loading/errors, accessibility and layouts. Metadata writes preserve routes and grants |
-| C01–C14: dynamic controls, history and outcomes | Describe/read/plan/execute/batch/receipt methods | Render exact capabilities; default Meiju discovery has read-only AC/fridge/dishwasher mappings; the separate developer probe does not grant native write authority. Consequential real approvals remain unavailable |
+| C01–C14: dynamic controls, history and outcomes | Describe/read/plan/execute/batch/receipt methods | Render exact capabilities; default Meiju discovery has read-only AC/fridge/dishwasher mappings; native power grants may admit experimental AC on/off. Other consequential real approvals remain unavailable |
 | A01–A08: device discovery and addition | Explicit selected-adapter `discover`, including saved-account Meiju cloud retrieval | Real pairing, mobile permissions and safe identity merge remain unavailable. No merge API exists |
 | P01–P13: platforms, accounts, authorization and removal | `list_accounts`, `refresh_account`, and separate `homeverb_connect_account` | Flutter protected input, result/error presentation and phone secure stores; removal, revocation and recovery UI remain unavailable |
 | H01–H16: nearby authorization sharing | No sharing methods in this version | Eligibility, peer discovery, code verification, scope, consent, conflict/import and transfer records require ADR-0008 implementation |
@@ -141,9 +141,59 @@ vendor calls. Mobile secure stores and Android/iOS packaging remain unimplemente
 
 The separate [AC developer probe](development/07-meiju-control.md) can persist
 experimental writable descriptors in a shared profile. Metadata is not authority:
-this native host retains no Meiju write grants and its default adapter refuses
-controls. A read-only discovery replaces those descriptors. No `allow_meiju_writes`
-JSON switch or user-supplied approval flag is admitted by API 1.2.0.
+a default native host has no Meiju write grants and its adapter refuses controls.
+A read-only discovery replaces those descriptors. No `allow_meiju_writes` switch
+or ordinary request-supplied approval flag is admitted.
+
+## Scoped experimental AC power startup
+
+API 1.3.0 adds the optional startup field under
+[ADR-0027](adr/0027-native-power-grants.md). This fictional configuration authorizes
+only turning off one local AC through cloud:
+
+```json
+{
+  "schema_version": "1.0",
+  "data_dir": "/absolute/private/homeverb-profile",
+  "adapter": "midea.meiju",
+  "allow_mock_writes": false,
+  "meiju_power_grants": [
+    {"device_id": "30000000-0000-4000-8000-000000000001", "state": false}
+  ]
+}
+```
+
+Use the actual random local device ID obtained from this profile's cards. Each
+entry permits exactly `main / power.set {state: <value>}` over cloud. To permit
+both on and off, supply two distinct entries. The closed schema accepts at most 64
+pairs; UUIDs are canonical lowercase v4 and duplicate pairs are invalid. Missing or
+empty lists preserve read-only behavior. Mock cannot receive nonempty Meiju grants.
+There is no arbitrary action/argument schema or wildcard. Invalid lists fail before
+opening/creating the profile. Opening never logs in, refreshes or sends a control.
+
+Flutter's trusted controller must obtain the user's device/state permission before
+supplying this list. Never derive it from a model-controlled request or react to
+`POLICY_DENIED` by silently adding a grant. Ordinary requests cannot select or edit
+permissions. The list is immutable for this handle and is not saved in SQLite.
+Revoke/change it by stopping submissions, closing the old handle and opening a new
+one with the intended list. Backgrounding cancels work but does not revoke the
+handle's grants; close it when revocation is intended.
+
+Read `get_api_info` on the default read-only session and require API 1.3 or later.
+Older native libraries reject this new field. After deliberately opening a granted
+session, perform an explicit `refresh_account` or `discover`, describe the selected
+device and call `plan` before `execute`. The existing command methods and payloads
+are unchanged. Unsupported models, ungranted states/components/actions and LAN-only
+routes are refused; `auto` can use only cloud. These experimental grants admit no
+temperature, dishwasher, refrigerator or elevated/high-risk controls.
+
+An accepted code-zero cloud reply is not verified physical state. For
+`wait_for: verified`, show `accepted` plus `VERIFICATION_PENDING`. Lost or ambiguous
+replies remain `unknown`; no automatic new request ID or retry is permitted. Use
+`get_execution` to inspect retained receipts, including after reopening read-only.
+Handle foreground cancellation/close as specified above. Consent UI, phone builds,
+and real control acceptance remain unverified; this phase used synthetic controls
+only because the owner deferred household operation.
 
 ## Account connection and refresh
 

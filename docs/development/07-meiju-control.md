@@ -1,8 +1,9 @@
 # 7. Preview and authorize one Meiju AC power control
 
 Status: experimental implementation with synthetic Core and local TLS tests. No
-real control has been sent or physically verified by this phase. Native UI API
-1.2.0 continues to use read-only Meiju sessions. This developer probe is a separate
+real control has been sent or physically verified by this phase. Native UI sessions
+default to read-only; API 1.3 adds separately configured
+[scoped power permissions](../native-ui-contract.md#scoped-experimental-ac-power-startup). This developer probe is a separate
 trusted Core host, not a production CLI dependency for Flutter.
 
 ## Admitted scope and evidence
@@ -76,7 +77,7 @@ metadata writes; it is not offline. Only the chosen target/state receives a gran
 It has a shared 20-second budget, no login, and Ctrl+C cancellation.
 
 Experimental power descriptors remain in this profile until read-only rediscovery
-replaces them. They never grant native/MCP write permission: those hosts have no
+replaces them. They never grant native/MCP write permission: default hosts have no
 Meiju grants and the default adapter refuses controls independently. Merely showing
 a writable property in cached metadata must not be interpreted as authorization.
 
@@ -101,5 +102,5 @@ explicit read. Record model/firmware, action, receipt status and physical/app
 observations without private identifiers. Never label stale cloud data `verified`.
 Restoring the prior state is another physical action requiring permission.
 
-Off-LAN tests, mobile secure stores, Flutter write authorization, more AC settings
+Off-LAN tests, mobile secure stores, Flutter consent UI, more AC settings
 and the other appliance controls remain follow-up work. T10 is incomplete.
