@@ -9,6 +9,7 @@ import 'blocks.dart';
 import 'controller.dart';
 import 'native_client.dart';
 import 'preferences.dart';
+import 'receipts.dart';
 import 'screens.dart' hide Json;
 import 'skin.dart';
 
@@ -77,6 +78,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   HomeController get c => widget.controller;
   String id = 'D01';
   final List<String> history = [];
+  final List<Json> receiptParents = [];
   final Map<String, TextEditingController> fields = {};
   final Map<String, int> choices = {};
   final Map<String, double> values = {};
@@ -131,6 +133,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     c.core.cancelAll();
     setState(() {
       navigation++;
+      receiptParents.clear();
       if (!back) history.add(id);
       id = target;
       clearFields();
@@ -155,7 +158,31 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         label == 'Cancel' ||
         label == 'Close' ||
         label == 'Not Now') {
+      if (id == 'S06' && receiptParents.isNotEmpty) {
+        c.receipt = receiptParents.removeLast();
+        changed();
+        return;
+      }
       await go(history.isEmpty ? 'D01' : history.removeLast(), back: true);
+      return;
+    }
+    if (label.startsWith('receipt:')) {
+      await finish(c.loadReceipt(label.substring('receipt:'.length)), 'S06');
+      return;
+    }
+    if (label.startsWith('receipt-item:') || label.startsWith('batch-item:')) {
+      final nested = label.startsWith('receipt-item:');
+      final source = nested ? c.receipt : c.batchResult;
+      final index = int.tryParse(label.substring(label.indexOf(':') + 1));
+      final items = source?['items'] as List? ?? [];
+      if (index == null || index < 0 || index >= items.length || c.busy) return;
+      if (nested) receiptParents.add(c.receipt!);
+      c.receipt = items[index] as Json;
+      if (nested) {
+        changed();
+      } else {
+        await go('S06');
+      }
       return;
     }
     if (label == 'Dismiss error') {
@@ -767,13 +794,24 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             : [
                 [
                   'status',
-                  '${c.batchResult!['status']}',
+                  outcomeLabel(c.batchResult!['status']),
                   'Inspect each item. Completed actions are not rolled back.',
-                  'neutral',
+                  outcomeColor(c.batchResult!['status']),
                 ],
                 [
-                  'note',
-                  const JsonEncoder.withIndent('  ').convert(c.batchResult),
+                  'rows',
+                  [
+                    for (
+                      var i = 0;
+                      i < (c.batchResult!['items'] as List).length;
+                      i++
+                    )
+                      [
+                        receiptDeviceName(c.batchResult!['items'][i]),
+                        outcomeLabel(c.batchResult!['items'][i]['status']),
+                        'batch-item:$i',
+                      ],
+                  ],
                 ],
                 ['button', 'View Operations', 'secondary'],
                 ['button', 'Done'],
@@ -851,25 +889,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             ? [
                 ['note', 'No retained receipt selected.'],
               ]
-            : [
-                [
-                  'status',
-                  '${r['status']}',
-                  '${r['error']?['code'] ?? 'Inspect timestamped evidence below.'}',
-                  r['status'] == 'verified'
-                      ? 'success'
-                      : r['status'] == 'failed'
-                      ? 'error'
-                      : 'warning',
-                ],
-                ['note', const JsonEncoder.withIndent('  ').convert(r)],
-                [
-                  'note',
-                  'State matching does not establish physical causality. Refresh never repeats this write.',
-                ],
-                ['button', 'Refresh State', 'secondary'],
-                ['button', 'View Operations', 'secondary'],
-              ];
+            : receiptBlocks(r, receiptDeviceName(r));
         break;
       case 'S07':
         b = [
@@ -1166,26 +1186,37 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       );
     if (id == 'S05')
       return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (c.history.isEmpty)
             const Copy(
               'No retained operations. This does not prove that no past action occurred.',
-            ),
-          for (final receipt in c.history)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Surface(
-                child: ListTile(
-                  title: Text('${receipt['status']}'),
-                  subtitle: Text('${receipt['completed_at']}'),
-                  onTap: () =>
-                      finish(c.loadReceipt(receipt['request_id']), 'S06'),
-                ),
-              ),
-            ),
+            )
+          else
+            Rows([
+              for (final receipt in c.history)
+                [
+                  receiptDeviceName(receipt),
+                  '${outcomeLabel(receipt['status'])} · ${receiptTime(receipt['completed_at'], compact: true)}',
+                  'receipt:${receipt['request_id']}',
+                ],
+            ], onAction: action),
+          const Copy(
+            'Select an operation to inspect its retained evidence. Sharing history is unavailable.',
+            color: muted,
+          ),
         ],
       );
     return null;
+  }
+
+  String receiptDeviceName(Json receipt) {
+    for (final card in c.cards) {
+      if (card['device']['id'] == receipt['device_id']) {
+        return card['preferences']['alias'] ?? card['device']['alias'];
+      }
+    }
+    return 'Retained device';
   }
 
   @override
@@ -1200,6 +1231,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       },
       child: Scaffold(
         body: ScreenView(
+          key: id == 'S06' ? ObjectKey(c.receipt) : null,
           id: id,
           catalog: widget.catalog,
           screenOverride: screen,

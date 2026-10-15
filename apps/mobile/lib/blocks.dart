@@ -781,11 +781,15 @@ class Rows extends StatelessWidget {
             Builder(
               builder: (context) {
                 final label = '${items[i][0]}', value = '${items[i][1]}';
+                final action = items[i].length > 2
+                    ? items[i][2] as String?
+                    : label;
                 final toggle =
                     ['Power', 'Oscillation', 'Muted'].contains(label) &&
                     ['On', 'Off'].contains(value);
                 return InkWell(
-                  onTap: () => onAction(label),
+                  key: action == null ? null : ValueKey(action),
+                  onTap: action == null ? null : () => onAction(action),
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(minHeight: 44),
                     child: Padding(
@@ -799,6 +803,21 @@ class Rows extends StatelessWidget {
                               MediaQuery.textScalerOf(context).scale(13) / 13;
                           final estimate =
                               (label.length * 6.8 + value.length * 6.2) * scale;
+                          final measurement = TextPainter(
+                            text: TextSpan(
+                              text: value,
+                              style: const TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                                letterSpacing: 0,
+                              ),
+                            ),
+                            textDirection: Directionality.of(context),
+                            textScaler: MediaQuery.textScalerOf(context),
+                          )..layout();
+                          final valueWidth = measurement.width;
+                          measurement.dispose();
                           final leading = Copy(label);
                           final trailing = toggle
                               ? Row(
@@ -812,7 +831,9 @@ class Rows extends StatelessWidget {
                                       child: FittedBox(
                                         child: Switch(
                                           value: value == 'On',
-                                          onChanged: (_) => onAction(label),
+                                          onChanged: action == null
+                                              ? null
+                                              : (_) => onAction(action),
                                         ),
                                       ),
                                     ),
@@ -832,7 +853,9 @@ class Rows extends StatelessWidget {
                                   ],
                                 )
                               : Copy(value, size: 12, color: muted);
-                          if (!toggle && estimate > c.maxWidth - 18)
+                          if (!toggle &&
+                              (estimate > c.maxWidth - 18 ||
+                                  valueWidth > c.maxWidth - 18))
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [

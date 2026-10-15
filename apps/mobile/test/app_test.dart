@@ -379,7 +379,13 @@ void main() {
         expect(controller.preferences.sharingName, 'Study phone');
         await route('S05');
         expect(controller.history, isNotEmpty);
-        await tester.runAsync(() => tester.tap(find.byType(ListTile).first));
+        await tester.runAsync(
+          () => tester.tap(
+            find.byKey(
+              ValueKey('receipt:${controller.history.first['request_id']}'),
+            ),
+          ),
+        );
         await settle();
         expect(app.currentState!.id, 'S06');
         controller.selectedDevice = null;

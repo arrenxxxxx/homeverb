@@ -17,7 +17,7 @@ Commands below ran in the isolated worktree; Flutter commands used the pinned FV
 | Check | Evidence / result |
 |---|---|
 | `fvm flutter analyze` | No issues found |
-| `fvm flutter test --reporter expanded` | 21 tests: 9 native/controller tests, one extended native widget click scenario, three native outcome click scenarios, two isolated component fixture checks, six screen/interaction/reflow checks |
+| `fvm flutter test --reporter expanded` | 23 tests: 9 native/controller tests, one extended native widget click scenario, three native outcome click scenarios, two isolated component fixture checks, two receipt fixture checks, six screen/interaction/reflow checks |
 | `fvm flutter test integration_test/native_smoke_test.dart -d linux` under Xvfb | Actual Linux process loads the bundled Core library without a path override, discovers Mock, reads state, sets mode and verifies the returned receipt; process screenshot captured |
 | `fvm flutter build linux --release` | Linux bundle includes `libhomeverb_ffi.so`; the bundled Rust library is the checked debug build |
 | `fvm flutter build web -t lib/main_preview.dart` | Isolated preview compiles; web preview does not call native Core |
@@ -38,6 +38,8 @@ The native widget click test now loads the bundled Inter/Material fonts and fail
 Three additional click scenarios use the native `lost-ack`, `accept-only`, and `reject` fixtures. They click discovery, read, power, receipt refresh and history; assert the displayed `unknown`, `accepted`, or `failed` outcome; retain observations until an explicit read; and verify the original request ID and unchanged history count after refresh. These are fictional native operations, not physical-device evidence.
 
 Two isolated contract-fixture tests load the repository's refrigerator and compartment capability examples. They verify independent cached observations, exact component references, absence of unrelated shared capabilities, blocked selection changes while busy, distinct cold-storage ranges and steps, plan-before-execute, and disabled read-only temperature controls. The fixture exists only in tests; it is not a registered native adapter. The real native Mock host still exposes one climate appliance. Multi-selection preview rows also retain every selected item and support independent selection/deselection.
+
+History and batch results now use grouped rows with readable outcomes and UTC timestamps. Receipt details separate returned values, recorded attempts, errors, warnings and timestamped verification evidence; they do not invent original request arguments or claim that returned values are current observations. Exact request IDs select retained history, and returned nested items open directly without requiring a separately retrievable child receipt. Back restores the parent receipt or batch. Two isolated receipt-fixture checks exercise duplicate device aliases, exact item selection, correlated completion, missing evidence, storage warnings, skipped steps, parent navigation and read-only refresh without execution. These pages also render at 320 logical pixels with 200% text. The three native outcome checks and extended native screenshot scenario were rerun after the final receipt copy change.
 
 Controller/FFI tests additionally cover persisted reopen, accepted/verified/failed/unknown results, nested partial batch decoding, no write replay on read, numeric bounds/steps/component scopes, preference corruption and rapid background/resume races. The Mock host exposes only one appliance. Multi-device mixed outcomes use native fixtures; no physical multi-device batch was performed.
 
@@ -65,7 +67,7 @@ The command verifies the complete 82-file set, writes `output/flutter-verificati
 | UI-02 | Native first launch, three roots, search/clear, separate card/quick-control clicks, long press and room filters tested with actual fonts and strict pointer hits. Full keyboard/screen-reader audit pending. |
 | UI-03 | Native room/card CRUD, room drag/menu sorting, exact-room assignment and preservation tested. Empty device selection and blank, overlong, control-character and duplicate room names are click-tested with retained input. Stale permutations and multi-device conflict cases still require broader Flutter coverage. |
 | UI-04 | Exact-component selection, capability references, cache isolation, climate bounds/enums and unknown/read-only values implemented. Isolated fridge/freezer fixture clicks verify distinct ranges and steps; non-climate control forms and physical multi-component acceptance remain pending. |
-| UI-05 | Native outcomes preserved, including nested partial results. Explicit batches plan before execution; no aggregate rollback/retry. Physical evidence unavailable. |
+| UI-05 | Native outcomes preserved, including nested partial results with per-item evidence navigation. Explicit batches plan before execution; no aggregate rollback/retry. Physical evidence unavailable. |
 | UI-06 | Explicit bounded Mock discovery implemented. Real permission, identity-merge and nearby-pairing paths unavailable. |
 | UI-07 | Unavailable under native contract 1.0; isolated preview only. |
 | UI-08 | Unavailable under native contract 1.0; no raw storage deletion or fabricated revocation. |

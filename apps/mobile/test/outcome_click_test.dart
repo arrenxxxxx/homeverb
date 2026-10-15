@@ -1,14 +1,22 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:homeverb_mobile/controller.dart';
 import 'package:homeverb_mobile/main.dart';
 import 'package:homeverb_mobile/native_client.dart';
 import 'package:homeverb_mobile/preferences.dart';
+import 'package:homeverb_mobile/receipts.dart';
 import 'package:homeverb_mobile/screens.dart' hide Json;
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  setUpAll(() async {
+    await (FontLoader('Inter')
+          ..addFont(rootBundle.load('assets/fonts/Inter-Regular.otf'))
+          ..addFont(rootBundle.load('assets/fonts/Inter-SemiBold.otf')))
+        .load();
+  });
   for (final scenario in {
     'lost-ack': 'unknown',
     'accept-only': 'accepted',
@@ -72,7 +80,7 @@ void main() {
         final before = controller.observed('power.state');
         await tap('Power');
         expect(app.currentState!.id, 'S06');
-        expect(find.text(scenario.value), findsOneWidget);
+        expect(find.text(outcomeLabel(scenario.value)), findsOneWidget);
         expect(controller.receipt!['status'], scenario.value);
         expect(controller.observed('power.state'), before);
         final request = controller.receipt!['request_id'];
@@ -85,7 +93,10 @@ void main() {
         expect(controller.receipt!['status'], scenario.value);
         await tap('View Operations');
         expect(controller.history.length, count);
-        expect(find.text(scenario.value), findsOneWidget);
+        expect(
+          find.textContaining(outcomeLabel(scenario.value)),
+          findsOneWidget,
+        );
         expect(controller.history.single['request_id'], request);
       } finally {
         await tester.pumpWidget(const SizedBox());
