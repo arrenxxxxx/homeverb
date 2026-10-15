@@ -1,0 +1,5228 @@
+{
+  "boards": [
+    {
+      "slug": "01-devices",
+      "title": "Everyday devices",
+      "subtitle": "Open, browse rooms, search, start without an account",
+      "screens": [
+        {
+          "id": "D01",
+          "title": "All devices",
+          "description": "HomeVerb header with search and plus icons. Room chips All (selected), Living Room, Bedroom, Bathroom; small manage icon. Two-column four-card grid: Bedroom AC / Cooling / 24 C / On; Floor lamp / 65% / On; Living room TV / Off; Air sensor / 22 C / 46%. Small freshness line Updated just now; subtle Refresh action. Separate terracotta quick power targets on writable cards, sensor has none. Bottom nav Devices (selected), Platforms, Settings. No profile avatar.",
+          "image": "screens/D01.png",
+          "board": "01-devices",
+          "ui": {
+            "header": "HomeVerb",
+            "blocks": [
+              [
+                "home",
+                "all"
+              ]
+            ],
+            "root": "Devices",
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "D02",
+          "title": "Room filter",
+          "description": "Same device home; Living Room chip selected. Only Floor lamp and Living room TV cards, room-specific pin ordering. Subtle count 2 devices and empty breathing space. Plus and room management available. Bottom navigation unchanged.",
+          "image": "screens/D02.png",
+          "board": "01-devices",
+          "ui": {
+            "header": "HomeVerb",
+            "blocks": [
+              [
+                "home",
+                "living"
+              ]
+            ],
+            "root": "Devices",
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "D03",
+          "title": "Find a device",
+          "description": "Search screen with back, focused search field containing lamp and clear icon. One matching card Floor lamp with room Living Room and state On. Recent searches AC and TV, unobtrusive. No fake keyboard occupying the screen. Search is local and has Cancel.",
+          "image": "screens/D03.png",
+          "board": "01-devices",
+          "ui": {
+            "header": "Find a device",
+            "blocks": [
+              [
+                "field",
+                "Search devices",
+                "lamp"
+              ],
+              [
+                "note",
+                "Searches local device names and rooms."
+              ],
+              [
+                "devices",
+                [
+                  "lamp"
+                ]
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Recent searches",
+                    "AC \u00b7 TV"
+                  ]
+                ]
+              ],
+              [
+                "button",
+                "Cancel",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "D04",
+          "title": "First launch",
+          "description": "HomeVerb header and three-tab navigation. Calm outlined house/device illustration, title Your home, together. Text Add a platform to find your appliances. Primary Add Platform and secondary Receive Authorization. Small text No HomeVerb account needed. No sign-in form, carousel, avatar or marketing hero.",
+          "image": "screens/D04.png",
+          "board": "01-devices",
+          "ui": {
+            "header": "HomeVerb",
+            "blocks": [
+              [
+                "hero",
+                "home",
+                "Your home, together",
+                "Add a platform to find your appliances."
+              ],
+              [
+                "button",
+                "Add Platform"
+              ],
+              [
+                "button",
+                "Receive Authorization",
+                "secondary"
+              ],
+              [
+                "note",
+                "No HomeVerb account needed."
+              ]
+            ],
+            "root": "Devices",
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        }
+      ],
+      "image": "boards/01-devices.png",
+      "thumbnail": "boards/01-devices-thumb.jpg",
+      "dimensions": [
+        1820,
+        1160
+      ]
+    },
+    {
+      "slug": "02-rooms",
+      "title": "Make room for your home",
+      "subtitle": "Create, organize, move and safely delete rooms",
+      "screens": [
+        {
+          "id": "R01",
+          "title": "Room management",
+          "description": "Back header Rooms with plus icon. Reorderable list Living Room / 2 devices, Primary Bedroom / 2 devices, Bathroom / 1 device, Study / 0 devices. Each row has drag handle and overflow. Unassigned / 1 device below separated without delete. Hint Drag to reorder.",
+          "image": "screens/R01.png",
+          "board": "02-rooms",
+          "ui": {
+            "header": "Rooms",
+            "blocks": [
+              [
+                "rows",
+                [
+                  [
+                    "Living Room",
+                    "2 devices  \u2261"
+                  ],
+                  [
+                    "Primary Bedroom",
+                    "2 devices  \u2261"
+                  ],
+                  [
+                    "Bathroom",
+                    "1 device  \u2261"
+                  ],
+                  [
+                    "Study",
+                    "0 devices  \u2261"
+                  ]
+                ]
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Unassigned",
+                    "1 device"
+                  ]
+                ]
+              ],
+              [
+                "button",
+                "Add Room"
+              ],
+              [
+                "note",
+                "Drag to reorder. Use a row menu to rename or delete."
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "R02",
+          "title": "Create a room",
+          "description": "Room management dimmed behind a rounded bottom sheet Add Room. Labeled Room name field containing Kitchen, optional suggested chips Balcony, Nursery. Primary Save Room, secondary Cancel. No mandatory preset list.",
+          "image": "screens/R02.png",
+          "board": "02-rooms",
+          "ui": {
+            "header": "Add Room",
+            "blocks": [
+              [
+                "field",
+                "Room name",
+                "Kitchen"
+              ],
+              [
+                "chips",
+                [
+                  "Balcony",
+                  "Nursery"
+                ]
+              ],
+              [
+                "button",
+                "Save Room"
+              ],
+              [
+                "button",
+                "Cancel",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": "R01",
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "R03",
+          "title": "Move devices",
+          "description": "Back header Move to Room. Two selected devices Bedroom AC and Air sensor. Radio options Living Room, Primary Bedroom (selected), Bathroom, Study, Unassigned; Add Room link. Primary Move 2 Devices at bottom. Show organization only, no permission scope controls.",
+          "image": "screens/R03.png",
+          "board": "02-rooms",
+          "ui": {
+            "header": "Move to Room",
+            "blocks": [
+              [
+                "note",
+                "Selected: Bedroom AC and Air sensor"
+              ],
+              [
+                "choices",
+                [
+                  "Living Room",
+                  "Primary Bedroom",
+                  "Bathroom",
+                  "Study",
+                  "Unassigned"
+                ],
+                1
+              ],
+              [
+                "link",
+                "Add Room"
+              ],
+              [
+                "button",
+                "Move 2 Devices"
+              ],
+              [
+                "note",
+                "Rooms organize devices locally; access stays the same."
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "R04",
+          "title": "Delete a room",
+          "description": "Rooms dimmed behind centered confirmation Delete Study? Text Devices move to Unassigned. No devices or platform accounts are deleted. Buttons Cancel and Delete Room, destructive muted red. No scary full-screen warning.",
+          "image": "screens/R04.png",
+          "board": "02-rooms",
+          "ui": {
+            "header": "Delete Study?",
+            "blocks": [
+              [
+                "note",
+                "Devices move to Unassigned. No devices or platform accounts are deleted."
+              ],
+              [
+                "button",
+                "Delete Room",
+                "danger"
+              ],
+              [
+                "button",
+                "Cancel",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": "R01",
+            "overlay": "dialog"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        }
+      ],
+      "image": "boards/02-rooms.png",
+      "thumbnail": "boards/02-rooms-thumb.jpg",
+      "dimensions": [
+        1820,
+        1160
+      ]
+    },
+    {
+      "slug": "03-device-details",
+      "title": "A place for every device",
+      "subtitle": "Card actions, local details and connection choices",
+      "screens": [
+        {
+          "id": "D05",
+          "title": "Card actions",
+          "description": "Device home dimmed behind bottom sheet Floor lamp. Menu Rename, Move to Room, Pin to Top, Reorder Devices, Device Information. Clear icons, drag handle, close. No Delete Platform or credential controls.",
+          "image": "screens/D05.png",
+          "board": "03-device-details",
+          "ui": {
+            "header": "Floor lamp",
+            "blocks": [
+              [
+                "rows",
+                [
+                  [
+                    "Rename",
+                    "\u203a"
+                  ],
+                  [
+                    "Move to Room",
+                    "\u203a"
+                  ],
+                  [
+                    "Pin to Top",
+                    "\u203a"
+                  ],
+                  [
+                    "Reorder Devices",
+                    "\u203a"
+                  ],
+                  [
+                    "Device Information",
+                    "\u203a"
+                  ]
+                ]
+              ],
+              [
+                "button",
+                "Close",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": "D01",
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "D06",
+          "title": "Device information",
+          "description": "Back header Device Information. Simple lamp icon; Floor lamp. Grouped rows Name / Floor lamp, Room / Living Room, Platform / Example Home, Model / Demo Light, Connection / Auto. Supported capabilities Power, Brightness, Color temperature. Local name and room have chevrons, no exposed serials or live network identifiers.",
+          "image": "screens/D06.png",
+          "board": "03-device-details",
+          "ui": {
+            "header": "Device information",
+            "blocks": [
+              [
+                "hero",
+                "lamp",
+                "Floor lamp",
+                "Living Room"
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Name",
+                    "Floor lamp  \u203a"
+                  ],
+                  [
+                    "Room",
+                    "Living Room  \u203a"
+                  ],
+                  [
+                    "Platform",
+                    "Example Home"
+                  ],
+                  [
+                    "Model",
+                    "Demo Light"
+                  ],
+                  [
+                    "Connection",
+                    "Auto  \u203a"
+                  ]
+                ]
+              ],
+              [
+                "note",
+                "Supported: Power \u00b7 Brightness \u00b7 Color temperature"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "D07",
+          "title": "Rename a device",
+          "description": "Device Information dimmed with bottom sheet Rename Device. Editable field Floor lamp, helper This name is saved on this device. Primary Save Name, Cancel. Small muted text Device access stays the same.",
+          "image": "screens/D07.png",
+          "board": "03-device-details",
+          "ui": {
+            "header": "Rename Device",
+            "blocks": [
+              [
+                "field",
+                "Local name",
+                "Floor lamp"
+              ],
+              [
+                "note",
+                "Saved on this installation. Device access stays the same."
+              ],
+              [
+                "button",
+                "Save Name"
+              ],
+              [
+                "button",
+                "Cancel",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": "D06",
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "D08",
+          "title": "Connection choice",
+          "description": "Back header Connection. Radio list Auto (selected) / Prefer local when available; Local network only / No cloud fallback; Platform cloud / Requires internet. Connection support applies to this device. Primary Save Preference. Keep user-facing text, no protocol jargon.",
+          "image": "screens/D08.png",
+          "board": "03-device-details",
+          "ui": {
+            "header": "Connection",
+            "blocks": [
+              [
+                "choices",
+                [
+                  "Auto \u2014 prefer local when available",
+                  "Local network only \u2014 no cloud fallback",
+                  "Platform cloud \u2014 requires internet"
+                ],
+                0
+              ],
+              [
+                "note",
+                "Only routes supported by this device are available."
+              ],
+              [
+                "button",
+                "Save Preference"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        }
+      ],
+      "image": "boards/03-device-details.png",
+      "thumbnail": "boards/03-device-details-thumb.jpg",
+      "dimensions": [
+        1820,
+        1160
+      ]
+    },
+    {
+      "slug": "04-climate",
+      "title": "Comfort, clearly controlled",
+      "subtitle": "Adjust the target without confusing it with observed state",
+      "screens": [
+        {
+          "id": "C01",
+          "title": "Climate control",
+          "description": "Back header Bedroom AC, info icon. Primary Bedroom subtitle. Large airy central 24 C target with minus and plus, terracotta arc; smaller Room 26 C / Updated just now. Power switch On. Rows Mode / Cool and Fan / Auto and Refresh State. No universal min/max text. Main focal area large and clean.",
+          "image": "screens/C01.png",
+          "board": "04-climate",
+          "ui": {
+            "header": "Bedroom AC",
+            "blocks": [
+              [
+                "climate"
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Power",
+                    "On"
+                  ],
+                  [
+                    "Mode",
+                    "Cool  \u203a"
+                  ],
+                  [
+                    "Fan",
+                    "Auto  \u203a"
+                  ]
+                ]
+              ],
+              [
+                "button",
+                "Refresh State",
+                "secondary"
+              ],
+              [
+                "link",
+                "Device information \u00b7 Recent operations"
+              ]
+            ],
+            "root": null,
+            "subtitle": "Primary Bedroom",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "C02",
+          "title": "Choose a mode",
+          "description": "Same climate screen dimmed with Choose Mode bottom sheet. Radio options Cool (selected), Heat, Dry, Fan only; Save Mode button. Only device-supported options. Keep currently observed temperature visible behind sheet.",
+          "image": "screens/C02.png",
+          "board": "04-climate",
+          "ui": {
+            "header": "Choose Mode",
+            "blocks": [
+              [
+                "choices",
+                [
+                  "Cool",
+                  "Heat",
+                  "Dry",
+                  "Fan only"
+                ],
+                0
+              ],
+              [
+                "note",
+                "Options come from this device\u2019s capabilities."
+              ],
+              [
+                "button",
+                "Save Mode"
+              ],
+              [
+                "button",
+                "Cancel",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": "C01",
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "C03",
+          "title": "Accepted, awaiting state",
+          "description": "Climate screen observed target 24 C remains visible. Distinct small pending card Requested 23 C with spinner and status Accepted; not yet confirmed. Supporting text Checking device state. Primary control temporarily subdued to prevent accidental repeated writes. No success tick yet.",
+          "image": "screens/C03.png",
+          "board": "04-climate",
+          "ui": {
+            "header": "Bedroom AC",
+            "blocks": [
+              [
+                "climate",
+                "Read 09:41:03",
+                false
+              ],
+              [
+                "status",
+                "Accepted; not yet confirmed",
+                "Requested 23\u00b0C. Observed target remains 24\u00b0C.",
+                "warning"
+              ],
+              [
+                "progress",
+                0.4,
+                "Waiting for an updated reading"
+              ],
+              [
+                "note",
+                "The pending request has not replaced the last observation."
+              ]
+            ],
+            "root": null,
+            "subtitle": "Primary Bedroom",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "C04",
+          "title": "Unknown outcome",
+          "description": "Climate screen with observed target 24 C and Last read 2 min ago. Amber rounded status card Result unknown / The change may have happened. Primary Refresh State, secondary View Details. No Retry Command, no automatic reroute button. Calm useful tone.",
+          "image": "screens/C04.png",
+          "board": "04-climate",
+          "ui": {
+            "header": "Bedroom AC",
+            "blocks": [
+              [
+                "climate",
+                "Read 2 min ago",
+                false
+              ],
+              [
+                "status",
+                "Result unknown",
+                "The change may have happened. Last read: 2 min ago.",
+                "warning"
+              ],
+              [
+                "button",
+                "Refresh State"
+              ],
+              [
+                "button",
+                "View Details",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "Primary Bedroom",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        }
+      ],
+      "image": "boards/04-climate.png",
+      "thumbnail": "boards/04-climate-thumb.jpg",
+      "dimensions": [
+        1820,
+        1160
+      ]
+    },
+    {
+      "slug": "05-capability-controls",
+      "title": "Controls that fit the appliance",
+      "subtitle": "Different controls, one visual language",
+      "screens": [
+        {
+          "id": "C05",
+          "title": "Lighting",
+          "description": "Back Floor lamp. Living Room. Power On. Large simple warm lamp illustration. Brightness 65% slider and Color temperature 3000 K slider, subtle warm-to-cool track. Updated just now and Refresh. No temperature claims for all brands.",
+          "image": "screens/C05.png",
+          "board": "05-capability-controls",
+          "ui": {
+            "header": "Floor lamp",
+            "blocks": [
+              [
+                "hero",
+                "lamp",
+                "On",
+                "Living Room"
+              ],
+              [
+                "slider",
+                "Brightness",
+                "65%",
+                0.65
+              ],
+              [
+                "slider",
+                "Color temperature",
+                "3000 K",
+                0.35
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Power",
+                    "On"
+                  ]
+                ]
+              ],
+              [
+                "note",
+                "Updated just now \u00b7 Limits come from this device."
+              ],
+              [
+                "button",
+                "Refresh State",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "C06",
+          "title": "Fan",
+          "description": "Back Bedroom fan. Primary Bedroom. Simple fan icon, Power On, Speed 3 stepper with device-supported marks 1 through 5. Oscillation On switch, preset Normal selection. No unrelated temperature controls.",
+          "image": "screens/C06.png",
+          "board": "05-capability-controls",
+          "ui": {
+            "header": "Bedroom fan",
+            "blocks": [
+              [
+                "hero",
+                "fan",
+                "Power on",
+                "Primary Bedroom"
+              ],
+              [
+                "stepper",
+                "Speed",
+                "3"
+              ],
+              [
+                "chips",
+                [
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5"
+                ]
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Oscillation",
+                    "On"
+                  ],
+                  [
+                    "Preset",
+                    "Normal  \u203a"
+                  ]
+                ]
+              ],
+              [
+                "button",
+                "Refresh State",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "C07",
+          "title": "Media",
+          "description": "Back Living room TV. Large TV icon, state Paused, source HDMI 1 with selector. Accessible play/pause control, Volume 25 slider, Muted Off toggle, Power On. No streaming artwork or cloud subscriptions.",
+          "image": "screens/C07.png",
+          "board": "05-capability-controls",
+          "ui": {
+            "header": "Living room TV",
+            "blocks": [
+              [
+                "hero",
+                "tv",
+                "Paused",
+                "Living Room"
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Source",
+                    "HDMI 1  \u203a"
+                  ],
+                  [
+                    "Power",
+                    "On"
+                  ],
+                  [
+                    "Muted",
+                    "Off"
+                  ]
+                ]
+              ],
+              [
+                "button",
+                "Play",
+                "secondary"
+              ],
+              [
+                "slider",
+                "Volume",
+                "25",
+                0.25
+              ],
+              [
+                "button",
+                "Refresh State",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "C08",
+          "title": "Components and sensors",
+          "description": "Back Refrigerator. Two large section cards Fridge / Current 4 C / Target 4 C with stepper and Freezer / Current -18 C / Target -18 C with stepper. Secondary read-only Door / Closed. Freshness visible. Components stay within one physical device, not two separate fridge tiles.",
+          "image": "screens/C08.png",
+          "board": "05-capability-controls",
+          "ui": {
+            "header": "Refrigerator",
+            "blocks": [
+              [
+                "card",
+                "Fridge",
+                [
+                  [
+                    "Current",
+                    "4\u00b0C"
+                  ],
+                  [
+                    "Target",
+                    "\u2212  4\u00b0C  +"
+                  ]
+                ]
+              ],
+              [
+                "card",
+                "Freezer",
+                [
+                  [
+                    "Current",
+                    "\u221218\u00b0C"
+                  ],
+                  [
+                    "Target",
+                    "\u2212  \u221218\u00b0C  +"
+                  ]
+                ]
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Door",
+                    "Closed"
+                  ],
+                  [
+                    "Updated",
+                    "Just now"
+                  ]
+                ]
+              ],
+              [
+                "note",
+                "One appliance, separate components. Each uses its own supported limits."
+              ],
+              [
+                "button",
+                "Refresh State",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        }
+      ],
+      "image": "boards/05-capability-controls.png",
+      "thumbnail": "boards/05-capability-controls-thumb.jpg",
+      "dimensions": [
+        1820,
+        1160
+      ]
+    },
+    {
+      "slug": "06-actions-results",
+      "title": "Know what happened",
+      "subtitle": "Confirm consequential actions and read honest results",
+      "screens": [
+        {
+          "id": "C09",
+          "title": "Appliance cycle",
+          "description": "Back Washing machine, Bathroom. Large simple washer icon. State Ready. Program selector Cotton, duration 58 min as device estimate. Primary Start Cycle. No background automation or scheduling controls.",
+          "image": "screens/C09.png",
+          "board": "06-actions-results",
+          "ui": {
+            "header": "Washing machine",
+            "blocks": [
+              [
+                "hero",
+                "washer",
+                "Ready",
+                "Bathroom"
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Program",
+                    "Cotton  \u203a"
+                  ],
+                  [
+                    "Estimated duration",
+                    "58 min"
+                  ]
+                ]
+              ],
+              [
+                "button",
+                "Start Cycle"
+              ],
+              [
+                "note",
+                "Estimate reported by this appliance."
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "C10",
+          "title": "Confirm a cycle",
+          "description": "Washer screen dimmed behind clear confirmation Start Cotton cycle? Device Washing machine / Bathroom. Text The appliance continues if you close HomeVerb. Primary Start Cycle, secondary Cancel. Specific action and target, no generic confirmed checkbox.",
+          "image": "screens/C10.png",
+          "board": "06-actions-results",
+          "ui": {
+            "header": "Start Cotton cycle?",
+            "blocks": [
+              [
+                "rows",
+                [
+                  [
+                    "Device",
+                    "Washing machine"
+                  ],
+                  [
+                    "Room",
+                    "Bathroom"
+                  ]
+                ]
+              ],
+              [
+                "note",
+                "The appliance continues if you close HomeVerb."
+              ],
+              [
+                "button",
+                "Start Cycle"
+              ],
+              [
+                "button",
+                "Cancel",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": "C09",
+            "overlay": "dialog"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "C11",
+          "title": "Verified state",
+          "description": "Washer device page with terracotta checked result State verified. Current state Running / Program Cotton / Updated 09:42. Small action View Evidence. Pause and Stop are distinct device-supported actions. No claim of guaranteed causality or exactly-once.",
+          "image": "screens/C11.png",
+          "board": "06-actions-results",
+          "ui": {
+            "header": "Washing machine",
+            "blocks": [
+              [
+                "status",
+                "State verified",
+                "Current state matches the requested state.",
+                "success"
+              ],
+              [
+                "hero",
+                "washer",
+                "Running",
+                "Cotton \u00b7 Updated 09:42"
+              ],
+              [
+                "button",
+                "View Evidence",
+                "secondary"
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Pause",
+                    "Supported action  \u203a"
+                  ],
+                  [
+                    "Stop",
+                    "Supported action  \u203a"
+                  ]
+                ]
+              ],
+              [
+                "note",
+                "State matching alone does not prove causality."
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "C12",
+          "title": "Partial result",
+          "description": "Back Operation Results. Header 3 devices / Partially completed. Separate rows Floor lamp / Verified / On, Bedroom AC / Accepted / Waiting for state, TV / Failed / Permission denied. View Details per row and Done at bottom. No global success or Roll Back button.",
+          "image": "screens/C12.png",
+          "board": "06-actions-results",
+          "ui": {
+            "header": "Operation results",
+            "blocks": [
+              [
+                "status",
+                "Partially completed",
+                "3 devices \u00b7 Outcomes remain separate.",
+                "warning"
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Floor lamp",
+                    "Verified \u00b7 On"
+                  ],
+                  [
+                    "Bedroom AC",
+                    "Accepted \u00b7 Awaiting state"
+                  ],
+                  [
+                    "Living room TV",
+                    "Failed \u00b7 Permission denied"
+                  ]
+                ]
+              ],
+              [
+                "note",
+                "Open an item for its evidence. Completed actions are not rolled back."
+              ],
+              [
+                "button",
+                "Done"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        }
+      ],
+      "image": "boards/06-actions-results.png",
+      "thumbnail": "boards/06-actions-results-thumb.jpg",
+      "dimensions": [
+        1820,
+        1160
+      ]
+    },
+    {
+      "slug": "07-add-devices",
+      "title": "Bring appliances together",
+      "subtitle": "Select a path, permit local access, discover and choose",
+      "screens": [
+        {
+          "id": "A01",
+          "title": "Choose an add method",
+          "description": "Back Add Device. Two large concise option cards From a Platform / Choose a connected account and Nearby Devices / Discover on your local network. Link Add Another Platform. No gateway address, backend setup, or HomeVerb login.",
+          "image": "screens/A01.png",
+          "board": "07-add-devices",
+          "ui": {
+            "header": "Add device",
+            "blocks": [
+              [
+                "card",
+                "From a Platform",
+                [
+                  [
+                    "Account",
+                    "Choose a connected account  \u203a"
+                  ]
+                ]
+              ],
+              [
+                "card",
+                "Nearby Devices",
+                [
+                  [
+                    "Discovery",
+                    "Use your local network  \u203a"
+                  ]
+                ]
+              ],
+              [
+                "button",
+                "Add Another Platform",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "A02",
+          "title": "Local permission",
+          "description": "Add Device background with pre-permission panel Find devices nearby. Text Local network access lets HomeVerb discover compatible appliances while you use this screen. Primary Continue; secondary Not Now. Small system-style local network dialog preview could be avoided; only this app explanation.",
+          "image": "screens/A02.png",
+          "board": "07-add-devices",
+          "ui": {
+            "header": "Find devices nearby",
+            "blocks": [
+              [
+                "note",
+                "Local network access lets HomeVerb discover compatible appliances while you use this screen."
+              ],
+              [
+                "button",
+                "Continue"
+              ],
+              [
+                "button",
+                "Not Now",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": "A01",
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "A03",
+          "title": "Discovering",
+          "description": "Back Nearby Devices. Simple terracotta scanning ring with device icon, Searching nearby / 6 seconds remaining. Already found Floor lamp and Living room TV appear as selectable rows; remaining scanning indicator. Cancel action visible. No endless scan or background toggle.",
+          "image": "screens/A03.png",
+          "board": "07-add-devices",
+          "ui": {
+            "header": "Nearby devices",
+            "blocks": [
+              [
+                "hero",
+                "search",
+                "Searching nearby",
+                "6 seconds remaining"
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Floor lamp",
+                    "Found"
+                  ],
+                  [
+                    "Living room TV",
+                    "Found"
+                  ]
+                ]
+              ],
+              [
+                "progress",
+                0.6,
+                "Searching on your local network"
+              ],
+              [
+                "button",
+                "Cancel",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "A04",
+          "title": "Select discovered devices",
+          "description": "Back Found Devices. Three checkbox rows Floor lamp / Local network (selected), Living room TV / Pairing required (selected), Bedroom AC / Possible duplicate (not selected). Room dropdown Unassigned. Primary Add 2 Devices. Secondary Review Duplicate. Clear count and no automatic merging.",
+          "image": "screens/A04.png",
+          "board": "07-add-devices",
+          "ui": {
+            "header": "Found devices",
+            "blocks": [
+              [
+                "choices",
+                [
+                  "Floor lamp \u00b7 Local network",
+                  "Living room TV \u00b7 Pairing required",
+                  "Bedroom AC \u00b7 Possible duplicate"
+                ],
+                [
+                  0,
+                  1
+                ]
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Room",
+                    "Unassigned  \u203a"
+                  ]
+                ]
+              ],
+              [
+                "button",
+                "Add 2 Devices"
+              ],
+              [
+                "button",
+                "Review Duplicate",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        }
+      ],
+      "image": "boards/07-add-devices.png",
+      "thumbnail": "boards/07-add-devices-thumb.jpg",
+      "dimensions": [
+        1820,
+        1160
+      ]
+    },
+    {
+      "slug": "08-discovery-recovery",
+      "title": "Finish adding, or recover",
+      "subtitle": "Keep identities clear and offer one useful next step",
+      "screens": [
+        {
+          "id": "A05",
+          "title": "Resolve a possible duplicate",
+          "description": "Back Possible Duplicate. Two comparison cards Existing Bedroom AC and Found Bedroom AC, each with masked evidence labels Model and Connection, no raw identifiers. Text Names alone do not prove a match. Buttons Keep Separate and Confirm Same Device. No preselected merge.",
+          "image": "screens/A05.png",
+          "board": "08-discovery-recovery",
+          "ui": {
+            "header": "Possible duplicate",
+            "blocks": [
+              [
+                "card",
+                "Existing Bedroom AC",
+                [
+                  [
+                    "Model",
+                    "Demo AC"
+                  ],
+                  [
+                    "Connection",
+                    "Saved connection"
+                  ]
+                ]
+              ],
+              [
+                "card",
+                "Found Bedroom AC",
+                [
+                  [
+                    "Model",
+                    "Demo AC"
+                  ],
+                  [
+                    "Connection",
+                    "Discovered connection"
+                  ]
+                ]
+              ],
+              [
+                "note",
+                "Names alone do not prove a match."
+              ],
+              [
+                "button",
+                "Keep Separate",
+                "secondary"
+              ],
+              [
+                "button",
+                "Confirm Same Device"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "A06",
+          "title": "Devices added",
+          "description": "Back Devices Added. Terracotta check and title 2 devices added. Rows Floor lamp / Living Room (editable room dropdown) and TV / Living Room (editable). Primary Open Living Room, secondary Add More. Fresh state is not fabricated.",
+          "image": "screens/A06.png",
+          "board": "08-discovery-recovery",
+          "ui": {
+            "header": "Devices added",
+            "blocks": [
+              [
+                "status",
+                "2 devices added",
+                "You can change their local rooms.",
+                "success"
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Floor lamp",
+                    "Living Room  \u203a"
+                  ],
+                  [
+                    "Living room TV",
+                    "Living Room  \u203a"
+                  ]
+                ]
+              ],
+              [
+                "button",
+                "Open Living Room"
+              ],
+              [
+                "button",
+                "Add More",
+                "secondary"
+              ],
+              [
+                "note",
+                "Device state is read only when requested."
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "A07",
+          "title": "Nothing found",
+          "description": "Back Nearby Devices. Minimal disconnected-device line illustration. Title No devices found. Helpful checks Same reachable network and Device is ready to pair. Primary Search Again, secondary Choose a Platform. No running spinner after timeout.",
+          "image": "screens/A07.png",
+          "board": "08-discovery-recovery",
+          "ui": {
+            "header": "Nearby devices",
+            "blocks": [
+              [
+                "hero",
+                "search",
+                "No devices found",
+                "The search has ended."
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Check",
+                    "Same reachable network"
+                  ],
+                  [
+                    "Check",
+                    "Device is ready to pair"
+                  ]
+                ]
+              ],
+              [
+                "button",
+                "Search Again"
+              ],
+              [
+                "button",
+                "Choose a Platform",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "A08",
+          "title": "Permission denied",
+          "description": "Back Nearby Devices. Restrained permission icon. Title Local access is off. Text Enable local network access in system settings to discover nearby devices. Primary Open System Settings, secondary Back. No silent switch to a cloud route.",
+          "image": "screens/A08.png",
+          "board": "08-discovery-recovery",
+          "ui": {
+            "header": "Nearby devices",
+            "blocks": [
+              [
+                "status",
+                "Local access is off",
+                "Enable local network access in system settings to discover nearby devices.",
+                "warning"
+              ],
+              [
+                "button",
+                "Open System Settings"
+              ],
+              [
+                "button",
+                "Back",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        }
+      ],
+      "image": "boards/08-discovery-recovery.png",
+      "thumbnail": "boards/08-discovery-recovery-thumb.jpg",
+      "dimensions": [
+        1820,
+        1160
+      ]
+    },
+    {
+      "slug": "09-platforms",
+      "title": "Connect your appliance platforms",
+      "subtitle": "Consumer language, multiple accounts, native authorization",
+      "screens": [
+        {
+          "id": "P01",
+          "title": "Platform accounts",
+          "description": "Root header Smart Appliance Platforms, plus icon. Cards Example Home / Home account / 6 devices / Checked today, Example Home / Studio account / 2 devices / Sign-in needed (amber), Example TV / Living room / 1 device / Checked yesterday. Generic letter icons. Three bottom tabs with Platforms selected. No Data Sources wording.",
+          "image": "screens/P01.png",
+          "board": "09-platforms",
+          "ui": {
+            "header": "Smart Appliance Platforms",
+            "blocks": [
+              [
+                "card",
+                "Example Home",
+                [
+                  [
+                    "Home account",
+                    "6 devices \u00b7 Checked today"
+                  ]
+                ]
+              ],
+              [
+                "card",
+                "Example Home",
+                [
+                  [
+                    "Studio account",
+                    "2 devices \u00b7 Sign-in needed"
+                  ]
+                ]
+              ],
+              [
+                "card",
+                "Example TV",
+                [
+                  [
+                    "Living room",
+                    "1 device \u00b7 Checked yesterday"
+                  ]
+                ]
+              ],
+              [
+                "button",
+                "Add Platform"
+              ],
+              [
+                "note",
+                "Illustrative accounts. Compatibility is model-specific."
+              ]
+            ],
+            "root": "Platforms",
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "P02",
+          "title": "Select a platform",
+          "description": "Back Add Platform, Search platforms field. List Example Home / Browser authorization, Example TV / Device pairing, Example Climate / Not available yet with disabled badge. Regions and compatibility details available. Tiny footer Illustrative platforms in this design, not actual compatibility claims.",
+          "image": "screens/P02.png",
+          "board": "09-platforms",
+          "ui": {
+            "header": "Add platform",
+            "blocks": [
+              [
+                "field",
+                "Search platforms",
+                ""
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Example Home",
+                    "Browser authorization  \u203a"
+                  ],
+                  [
+                    "Example TV",
+                    "Device pairing  \u203a"
+                  ],
+                  [
+                    "Example Climate",
+                    "Not available yet"
+                  ]
+                ]
+              ],
+              [
+                "link",
+                "Regions and compatibility"
+              ],
+              [
+                "note",
+                "Fictional platform names; not support claims."
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "P03",
+          "title": "Choose region and account",
+          "description": "Back Connect Example Home. Region selector Europe, local Account name field Home account. Concise permission preview Read devices and Control supported appliances. Primary Continue to Authorization; Cancel. No HomeVerb signup or password field.",
+          "image": "screens/P03.png",
+          "board": "09-platforms",
+          "ui": {
+            "header": "Connect Example Home",
+            "blocks": [
+              [
+                "rows",
+                [
+                  [
+                    "Region",
+                    "Europe  \u203a"
+                  ]
+                ]
+              ],
+              [
+                "field",
+                "Account name",
+                "Home account"
+              ],
+              [
+                "card",
+                "Requested access",
+                [
+                  [
+                    "Read",
+                    "Device state"
+                  ],
+                  [
+                    "Control",
+                    "Supported appliances"
+                  ]
+                ]
+              ],
+              [
+                "button",
+                "Continue to Authorization"
+              ],
+              [
+                "button",
+                "Cancel",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "P04",
+          "title": "Native browser consent",
+          "description": "System browser-style view example.invalid (fictional) and close icon. Example Home title Allow HomeVerb access? Read device state and Control supported devices listed. Masked account h***@example.invalid. Allow and Cancel. Visibly a third-party authorization page, not HomeVerb account registration.",
+          "image": "screens/P04.png",
+          "board": "09-platforms",
+          "ui": {
+            "header": "example.invalid",
+            "blocks": [
+              [
+                "hero",
+                "platform",
+                "Example Home",
+                "Third-party authorization"
+              ],
+              [
+                "note",
+                "Allow HomeVerb access?"
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Account",
+                    "h***@example.invalid"
+                  ],
+                  [
+                    "Permission",
+                    "Read device state"
+                  ],
+                  [
+                    "Permission",
+                    "Control supported devices"
+                  ]
+                ]
+              ],
+              [
+                "button",
+                "Allow"
+              ],
+              [
+                "button",
+                "Cancel",
+                "secondary"
+              ],
+              [
+                "note",
+                "Provider-owned browser page; its appearance may differ."
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        }
+      ],
+      "image": "boards/09-platforms.png",
+      "thumbnail": "boards/09-platforms-thumb.jpg",
+      "dimensions": [
+        1820,
+        1160
+      ]
+    },
+    {
+      "slug": "10-authentication",
+      "title": "Authorization, step by step",
+      "subtitle": "Only show the flow supported by each platform",
+      "screens": [
+        {
+          "id": "P05",
+          "title": "Verification code",
+          "description": "Back Verify Example Home. Text Enter the code from your platform, masked destination ***42. Six clear code boxes with fictional 4 8 2 1 empty empty. Resend in 00:28. Continue disabled until complete; Cancel. No real phone number or credential.",
+          "image": "screens/P05.png",
+          "board": "10-authentication",
+          "ui": {
+            "header": "Verify Example Home",
+            "blocks": [
+              [
+                "note",
+                "Enter the code from your platform. Sent to ***42."
+              ],
+              [
+                "code",
+                "4  8  2  1  _  _"
+              ],
+              [
+                "note",
+                "Resend in 00:28"
+              ],
+              [
+                "button",
+                "Continue",
+                "disabled"
+              ],
+              [
+                "button",
+                "Cancel",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "P06",
+          "title": "Approve on the appliance",
+          "description": "Back Pair Living room TV. Simple TV illustration displaying code 482 196 (fictional). Text Confirm this code on your TV. Waiting for approval / 01:20 remaining and Cancel. No universal QR login claim.",
+          "image": "screens/P06.png",
+          "board": "10-authentication",
+          "ui": {
+            "header": "Pair living room TV",
+            "blocks": [
+              [
+                "hero",
+                "tv",
+                "482 196",
+                "Confirm this fictional code on your TV."
+              ],
+              [
+                "status",
+                "Waiting for approval",
+                "01:20 remaining",
+                "neutral"
+              ],
+              [
+                "button",
+                "Cancel",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "P07",
+          "title": "Authorization expired",
+          "description": "Back Connect Example Home. Calm amber clock icon, Authorization expired / Start again to request a new authorization. Primary Start Again, secondary Cancel. No endless automatic login loop.",
+          "image": "screens/P07.png",
+          "board": "10-authentication",
+          "ui": {
+            "header": "Connect Example Home",
+            "blocks": [
+              [
+                "status",
+                "Authorization expired",
+                "Start again to request a new authorization.",
+                "warning"
+              ],
+              [
+                "button",
+                "Start Again"
+              ],
+              [
+                "button",
+                "Cancel",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "P08",
+          "title": "Platform connected",
+          "description": "Back Platform Connected. Terracotta check, Example Home / Home account / Europe. Text Authorization saved securely. Primary Find Devices, secondary Done. No invented devices until discovery; no raw token display.",
+          "image": "screens/P08.png",
+          "board": "10-authentication",
+          "ui": {
+            "header": "Platform connected",
+            "blocks": [
+              [
+                "status",
+                "Authorization saved securely",
+                "Example Home \u00b7 Home account \u00b7 Europe",
+                "success"
+              ],
+              [
+                "button",
+                "Find Devices"
+              ],
+              [
+                "button",
+                "Done",
+                "secondary"
+              ],
+              [
+                "note",
+                "Devices are listed after explicit discovery."
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        }
+      ],
+      "image": "boards/10-authentication.png",
+      "thumbnail": "boards/10-authentication-thumb.jpg",
+      "dimensions": [
+        1820,
+        1160
+      ]
+    },
+    {
+      "slug": "11-platform-details",
+      "title": "Manage access deliberately",
+      "subtitle": "Check, reconnect, remove locally, revoke remotely",
+      "screens": [
+        {
+          "id": "P09",
+          "title": "Platform details",
+          "description": "Back Example Home. Home account, masked h***@example.invalid, Europe. Rows Devices / 6, Permissions / Read and control, Last checked / Today 09:40. Actions Check Connection, Reauthorize. Secondary Remove From This Device. Remote Revoke Access action distinct at bottom with provider-supported note.",
+          "image": "screens/P09.png",
+          "board": "11-platform-details",
+          "ui": {
+            "header": "Example Home",
+            "blocks": [
+              [
+                "note",
+                "Home account \u00b7 h***@example.invalid"
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Region",
+                    "Europe"
+                  ],
+                  [
+                    "Devices",
+                    "6"
+                  ],
+                  [
+                    "Permissions",
+                    "Read and control"
+                  ],
+                  [
+                    "Last checked",
+                    "Today 09:40"
+                  ]
+                ]
+              ],
+              [
+                "button",
+                "Check Connection"
+              ],
+              [
+                "button",
+                "Reauthorize",
+                "secondary"
+              ],
+              [
+                "link",
+                "Remove From This Device"
+              ],
+              [
+                "link",
+                "Revoke Access \u00b7 if supported"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "P10",
+          "title": "Reconnect needed",
+          "description": "Same account detail with amber Sign-in needed / Your platform authorization has expired. Cached device count remains labelled Last known. Primary Reauthorize. Secondary View Devices and Remove From This Device. No other account auto-selection.",
+          "image": "screens/P10.png",
+          "board": "11-platform-details",
+          "ui": {
+            "header": "Example Home",
+            "blocks": [
+              [
+                "status",
+                "Sign-in needed",
+                "Your platform authorization has expired.",
+                "warning"
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Devices",
+                    "6 \u00b7 Last known"
+                  ]
+                ]
+              ],
+              [
+                "button",
+                "Reauthorize"
+              ],
+              [
+                "button",
+                "View Devices",
+                "secondary"
+              ],
+              [
+                "link",
+                "Remove From This Device"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "P11",
+          "title": "Remove local account",
+          "description": "Account detail dimmed, confirmation Remove from this device? Text Local authorization and associated cached data will be removed. Access on other devices is not revoked. Cancel and Remove Locally. No false global logout claim.",
+          "image": "screens/P11.png",
+          "board": "11-platform-details",
+          "ui": {
+            "header": "Remove from this device?",
+            "blocks": [
+              [
+                "note",
+                "Local authorization and associated cached data will be removed. Access on other devices is not revoked."
+              ],
+              [
+                "button",
+                "Remove Locally",
+                "danger"
+              ],
+              [
+                "button",
+                "Cancel",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": "P09",
+            "overlay": "dialog"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "P12",
+          "title": "Revoke provider access",
+          "description": "Account detail dimmed, confirmation Revoke platform access? Text Example Home supports revoking this grant. Other installations using this grant may lose access. Cancel and Revoke Access. An explicit provider action, not a local delete.",
+          "image": "screens/P12.png",
+          "board": "11-platform-details",
+          "ui": {
+            "header": "Revoke platform access?",
+            "blocks": [
+              [
+                "note",
+                "Example Home supports revoking this grant. Other installations using it may lose access."
+              ],
+              [
+                "button",
+                "Revoke Access",
+                "danger"
+              ],
+              [
+                "button",
+                "Cancel",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": "P09",
+            "overlay": "dialog"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        }
+      ],
+      "image": "boards/11-platform-details.png",
+      "thumbnail": "boards/11-platform-details-thumb.jpg",
+      "dimensions": [
+        1820,
+        1160
+      ]
+    },
+    {
+      "slug": "12-settings",
+      "title": "Quiet, practical settings",
+      "subtitle": "Sharing is a setting, not a destination",
+      "screens": [
+        {
+          "id": "S01",
+          "title": "Settings home",
+          "description": "Root Settings. No avatar or profile. Groups: Home / Rooms; Authorization Sharing / Send Authorization and Receive Authorization; Preferences / Appearance, This Device, Connections; Data & Support / Recent Operations, Local Data, Diagnostics, About. Three bottom tabs, Settings selected. Spacious but all key groups visible.",
+          "image": "screens/S01.png",
+          "board": "12-settings",
+          "ui": {
+            "header": "Settings",
+            "blocks": [
+              [
+                "section",
+                "HOME"
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Rooms",
+                    "\u203a"
+                  ]
+                ]
+              ],
+              [
+                "section",
+                "AUTHORIZATION SHARING"
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Send Authorization",
+                    "\u203a"
+                  ],
+                  [
+                    "Receive Authorization",
+                    "\u203a"
+                  ]
+                ]
+              ],
+              [
+                "section",
+                "PREFERENCES"
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Appearance",
+                    "Window Light  \u203a"
+                  ],
+                  [
+                    "This Device",
+                    "\u203a"
+                  ],
+                  [
+                    "Connections",
+                    "Auto  \u203a"
+                  ]
+                ]
+              ],
+              [
+                "section",
+                "DATA & SUPPORT"
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Recent Operations",
+                    "\u203a"
+                  ],
+                  [
+                    "Local Data",
+                    "\u203a"
+                  ],
+                  [
+                    "Diagnostics",
+                    "\u203a"
+                  ],
+                  [
+                    "About",
+                    "\u203a"
+                  ]
+                ]
+              ]
+            ],
+            "root": "Settings",
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "S02",
+          "title": "Appearance and skin",
+          "description": "Settings > Appearance contains exactly one skin option, Window Light, marked Current. A preview opens S11. No alternate skins, download store, custom wallpaper, dark or system-mode selector ships in this release. Text follows system accessibility settings. The stable local skin identifier is window_light; later reviewed skins can extend the registry.",
+          "image": "screens/S02.png",
+          "board": "12-settings",
+          "ui": {
+            "header": "Appearance",
+            "blocks": [
+              [
+                "note",
+                "Skin"
+              ],
+              [
+                "skin"
+              ],
+              [
+                "note",
+                "Window Light is the only included skin and is already selected."
+              ],
+              [
+                "button",
+                "Preview Skin",
+                "secondary"
+              ],
+              [
+                "link",
+                "Text size and accessibility"
+              ],
+              [
+                "note",
+                "Text follows system accessibility settings."
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "S03",
+          "title": "Connection preferences",
+          "description": "Back Connections. Default route Auto selected, Local network only and Platform cloud options with short explanations. Local network permission / Allowed with Open Settings action. Hint A device-specific choice takes priority. No daemon, keep-alive, or background scan switch.",
+          "image": "screens/S03.png",
+          "board": "12-settings",
+          "ui": {
+            "header": "Connections",
+            "blocks": [
+              [
+                "choices",
+                [
+                  "Auto \u2014 prefer local when available",
+                  "Local network only \u2014 no cloud fallback",
+                  "Platform cloud \u2014 requires internet"
+                ],
+                0
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Local network permission",
+                    "Allowed"
+                  ]
+                ]
+              ],
+              [
+                "button",
+                "Open Settings",
+                "secondary"
+              ],
+              [
+                "note",
+                "A device-specific preference takes priority. No background scanning."
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "S04",
+          "title": "Local data",
+          "description": "Back Local Data. Sections Device organization / Rooms and names; Cached device state / Last read snapshots; Recent operations / Latest 100 records. Clear Cached State and Clear Recent Operations distinct actions. Full Remove Local Data action at bottom, privacy note Authorizations are stored securely. No export token option.",
+          "image": "screens/S04.png",
+          "board": "12-settings",
+          "ui": {
+            "header": "Local data",
+            "blocks": [
+              [
+                "rows",
+                [
+                  [
+                    "Device organization",
+                    "Rooms and names"
+                  ],
+                  [
+                    "Cached device state",
+                    "Last-read snapshots"
+                  ],
+                  [
+                    "Recent operations",
+                    "Latest 100 records"
+                  ]
+                ]
+              ],
+              [
+                "button",
+                "Clear Cached State",
+                "secondary"
+              ],
+              [
+                "button",
+                "Clear Recent Operations",
+                "secondary"
+              ],
+              [
+                "button",
+                "Remove Local Data",
+                "danger"
+              ],
+              [
+                "note",
+                "Authorizations are held in secure storage. Local removal does not revoke remote access."
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        }
+      ],
+      "image": "boards/12-settings.png",
+      "thumbnail": "boards/12-settings-thumb.jpg",
+      "dimensions": [
+        1820,
+        1160
+      ]
+    },
+    {
+      "slug": "13-send-authorization",
+      "title": "Send access nearby",
+      "subtitle": "Choose the account, verify the person, review scope",
+      "screens": [
+        {
+          "id": "H01",
+          "title": "Choose authorization",
+          "description": "Back Send Authorization. Eligible Home account / Example Home / Full account access selected. Studio account / Example Home / Sign-in needed disabled. Example TV / Device-bound / Cannot share disabled. Primary Find Recipient. Short permissions note Actual access depends on the platform.",
+          "image": "screens/H01.png",
+          "board": "13-send-authorization",
+          "ui": {
+            "header": "Send authorization",
+            "blocks": [
+              [
+                "choices",
+                [
+                  "Home account \u00b7 Full account access",
+                  "Studio account \u00b7 Sign-in needed",
+                  "Example TV \u00b7 Device-bound"
+                ],
+                0
+              ],
+              [
+                "note",
+                "Only the first account is eligible. Actual access depends on the platform."
+              ],
+              [
+                "button",
+                "Find Recipient"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "H02",
+          "title": "Find a recipient",
+          "description": "Back Select Recipient. This device / Home phone. Nearby receiver card Alex phone / Ready to receive, simple terracotta device icon; another Morgan tablet / Ready to receive. Select Alex phone. Small text Ask the recipient to open Receive Authorization. Scanning countdown and Cancel.",
+          "image": "screens/H02.png",
+          "board": "13-send-authorization",
+          "ui": {
+            "header": "Select recipient",
+            "blocks": [
+              [
+                "note",
+                "This device: Home phone"
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Alex phone",
+                    "Ready to receive"
+                  ],
+                  [
+                    "Morgan tablet",
+                    "Ready to receive"
+                  ]
+                ]
+              ],
+              [
+                "note",
+                "Ask the recipient to open Receive Authorization."
+              ],
+              [
+                "progress",
+                0.45,
+                "Scanning \u00b7 01:20 remaining"
+              ],
+              [
+                "button",
+                "Cancel",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "H03",
+          "title": "Verify the recipient",
+          "description": "Back Verify Recipient. Alex phone and Home phone simple device icons linked by a line. Large pairing code 482 196. Text Compare this code on both devices. Primary Codes Match and secondary Codes Do Not Match. No credentials sent yet.",
+          "image": "screens/H03.png",
+          "board": "13-send-authorization",
+          "ui": {
+            "header": "Verify recipient",
+            "blocks": [
+              [
+                "note",
+                "Home phone \u2192 Alex phone"
+              ],
+              [
+                "code",
+                "482 196"
+              ],
+              [
+                "note",
+                "Compare this code on both devices. No authorization has been sent."
+              ],
+              [
+                "button",
+                "Codes Match"
+              ],
+              [
+                "button",
+                "Codes Do Not Match",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "H04",
+          "title": "Review before sending",
+          "description": "Back Review Authorization. Recipient Alex phone; Platform Example Home; Account Home account. Scope card Read and control all 6 devices. Text This grant cannot be limited to selected devices. Expiry / Set by platform. Revocation / Platform account settings. Primary Send Authorization, Cancel. No fake custom expiry or per-device restriction toggles.",
+          "image": "screens/H04.png",
+          "board": "13-send-authorization",
+          "ui": {
+            "header": "Review authorization",
+            "blocks": [
+              [
+                "rows",
+                [
+                  [
+                    "Recipient",
+                    "Alex phone"
+                  ],
+                  [
+                    "Platform",
+                    "Example Home"
+                  ],
+                  [
+                    "Account",
+                    "Home account"
+                  ],
+                  [
+                    "Scope",
+                    "Read and control all 6 devices"
+                  ],
+                  [
+                    "Expiry",
+                    "Not provided by platform"
+                  ],
+                  [
+                    "Revocation",
+                    "Platform account settings"
+                  ]
+                ]
+              ],
+              [
+                "note",
+                "This grant cannot be limited to selected devices."
+              ],
+              [
+                "button",
+                "Send Authorization"
+              ],
+              [
+                "button",
+                "Cancel",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        }
+      ],
+      "image": "boards/13-send-authorization.png",
+      "thumbnail": "boards/13-send-authorization-thumb.jpg",
+      "dimensions": [
+        1820,
+        1160
+      ]
+    },
+    {
+      "slug": "14-receive-authorization",
+      "title": "Receive and connect independently",
+      "subtitle": "Consent, resolve conflicts, import, then verify",
+      "screens": [
+        {
+          "id": "H05",
+          "title": "Ready to receive",
+          "description": "Back Receive Authorization. Large calm terracotta receiver ring. This device / Alex phone; Visible for 01:48. Text Keep this screen open on the same local network. Primary Stop Receiving. No always-on toggle or sharing bottom tab.",
+          "image": "screens/H05.png",
+          "board": "14-receive-authorization",
+          "ui": {
+            "header": "Receive authorization",
+            "blocks": [
+              [
+                "hero",
+                "phone",
+                "Ready to receive",
+                "Alex phone \u00b7 Visible for 01:48"
+              ],
+              [
+                "note",
+                "Keep this screen open on the same reachable local network."
+              ],
+              [
+                "button",
+                "Stop Receiving",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "H06",
+          "title": "Review incoming access",
+          "description": "Back Incoming Authorization. From Home phone. Pairing code 482 196, compare-code instruction. Example Home / Home account / Read and control all 6 devices. Primary Accept Authorization, secondary Decline. Clear sender, actual permissions and local secure storage statement.",
+          "image": "screens/H06.png",
+          "board": "14-receive-authorization",
+          "ui": {
+            "header": "Incoming authorization",
+            "blocks": [
+              [
+                "note",
+                "From Home phone"
+              ],
+              [
+                "code",
+                "482 196"
+              ],
+              [
+                "note",
+                "Compare this code with the sender."
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Platform",
+                    "Example Home"
+                  ],
+                  [
+                    "Account",
+                    "Home account"
+                  ],
+                  [
+                    "Scope",
+                    "Read and control all 6 devices"
+                  ]
+                ]
+              ],
+              [
+                "note",
+                "Import requires system secure storage."
+              ],
+              [
+                "button",
+                "Accept Authorization"
+              ],
+              [
+                "button",
+                "Decline",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "H07",
+          "title": "Existing account conflict",
+          "description": "Back Account Already Exists. Existing Home account / Example Home and incoming Home account / Example Home shown. Text Your saved authorization will not be overwritten automatically. Actions Keep Existing and Replace After Checking. No silent merge, no overwrite by default.",
+          "image": "screens/H07.png",
+          "board": "14-receive-authorization",
+          "ui": {
+            "header": "Account already exists",
+            "blocks": [
+              [
+                "card",
+                "Existing authorization",
+                [
+                  [
+                    "Account",
+                    "Home account \u00b7 Example Home"
+                  ]
+                ]
+              ],
+              [
+                "card",
+                "Incoming authorization",
+                [
+                  [
+                    "Account",
+                    "Home account \u00b7 Example Home"
+                  ]
+                ]
+              ],
+              [
+                "note",
+                "Your saved authorization will not be overwritten automatically."
+              ],
+              [
+                "button",
+                "Keep Existing",
+                "secondary"
+              ],
+              [
+                "button",
+                "Replace After Checking"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "H08",
+          "title": "Import result",
+          "description": "Back Authorization Received. Checklist Transferred (check), Imported securely (check), Authorization validated (check). Example Home / Home account. Text This phone now connects independently. Primary Choose Devices, secondary Done. Room assignment happens next; not a permission restriction.",
+          "image": "screens/H08.png",
+          "board": "14-receive-authorization",
+          "ui": {
+            "header": "Authorization received",
+            "blocks": [
+              [
+                "status",
+                "Authorization validated",
+                "This phone now connects independently.",
+                "success"
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Transferred",
+                    "Complete"
+                  ],
+                  [
+                    "Imported securely",
+                    "Complete"
+                  ],
+                  [
+                    "Authorization check",
+                    "Validated"
+                  ]
+                ]
+              ],
+              [
+                "button",
+                "Choose Devices"
+              ],
+              [
+                "button",
+                "Done",
+                "secondary"
+              ],
+              [
+                "note",
+                "Room assignment organizes devices; it does not restrict this grant."
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        }
+      ],
+      "image": "boards/14-receive-authorization.png",
+      "thumbnail": "boards/14-receive-authorization-thumb.jpg",
+      "dimensions": [
+        1820,
+        1160
+      ]
+    },
+    {
+      "slug": "15-transfer-states",
+      "title": "Make sharing outcomes explicit",
+      "subtitle": "Progress, unavailable storage, unsupported transfer, lost receipt",
+      "screens": [
+        {
+          "id": "H09",
+          "title": "Transferring",
+          "description": "Back Sending Authorization. Home phone to Alex phone, simple icons. Linear progress 62%, text Encrypted transfer. Stages Transfer active, Import waiting, Check waiting. Cancel Transfer button and Keep both apps open text. No credential strings or decorative charts.",
+          "image": "screens/H09.png",
+          "board": "15-transfer-states",
+          "ui": {
+            "header": "Sending authorization",
+            "blocks": [
+              [
+                "note",
+                "Home phone \u2192 Alex phone"
+              ],
+              [
+                "progress",
+                0.62,
+                "Encrypted transfer \u00b7 62%"
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Transfer",
+                    "Active"
+                  ],
+                  [
+                    "Secure import",
+                    "Waiting"
+                  ],
+                  [
+                    "Authorization check",
+                    "Waiting"
+                  ]
+                ]
+              ],
+              [
+                "note",
+                "Keep both apps open."
+              ],
+              [
+                "button",
+                "Cancel Transfer",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "H10",
+          "title": "Secure storage unavailable",
+          "description": "Back Receive Authorization. Restrained lock icon. Title Secure storage unavailable. Text Authorization was not imported. Enable secure storage before trying again. Primary Open Settings, secondary Cancel. No Save as File or plaintext fallback.",
+          "image": "screens/H10.png",
+          "board": "15-transfer-states",
+          "ui": {
+            "header": "Receive authorization",
+            "blocks": [
+              [
+                "status",
+                "Secure storage unavailable",
+                "Authorization was not imported. Enable secure storage before trying again.",
+                "warning"
+              ],
+              [
+                "button",
+                "Open Settings"
+              ],
+              [
+                "button",
+                "Cancel",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "H11",
+          "title": "Cannot share this account",
+          "description": "Back Send Authorization. Example TV / Living room. Title This authorization cannot be shared. Text It is tied to the original device. The recipient is instructed to open Platforms and complete pairing on their own device. Primary Back to Accounts. No remote pairing, bypass or extraction action.",
+          "image": "screens/H11.png",
+          "board": "15-transfer-states",
+          "ui": {
+            "header": "Send authorization",
+            "blocks": [
+              [
+                "status",
+                "This account cannot be shared",
+                "Example TV \u00b7 Living room",
+                "warning"
+              ],
+              [
+                "note",
+                "Authorization is tied to the original device. The recipient must open Platforms and pair on their own device."
+              ],
+              [
+                "button",
+                "Back to Accounts"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "H12",
+          "title": "Receipt not confirmed",
+          "description": "Back Transfer Result. Amber outlined status Unconfirmed. Text The recipient may have imported the authorization. Ask them to check their result. Timeline Sent / Import confirmation unavailable / Authorization check unavailable. Primary Done, secondary View Local Record. No Retry or automatic resend.",
+          "image": "screens/H12.png",
+          "board": "15-transfer-states",
+          "ui": {
+            "header": "Transfer result",
+            "blocks": [
+              [
+                "status",
+                "Unconfirmed",
+                "The recipient may have imported the authorization. Ask them to check their result.",
+                "warning"
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Sent",
+                    "Complete"
+                  ],
+                  [
+                    "Import confirmation",
+                    "Unavailable"
+                  ],
+                  [
+                    "Authorization check",
+                    "Unavailable"
+                  ]
+                ]
+              ],
+              [
+                "button",
+                "Done"
+              ],
+              [
+                "button",
+                "View Local Record",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        }
+      ],
+      "image": "boards/15-transfer-states.png",
+      "thumbnail": "boards/15-transfer-states-thumb.jpg",
+      "dimensions": [
+        1820,
+        1160
+      ]
+    },
+    {
+      "slug": "16-activity-support",
+      "title": "Understand and recover",
+      "subtitle": "Useful records and diagnostics without private data",
+      "screens": [
+        {
+          "id": "S05",
+          "title": "Recent operations",
+          "description": "Back Recent Operations. Filter chips All, Devices, Sharing. Rows Bedroom AC / Result unknown / 09:42; Floor lamp / Verified / 09:40; TV / Failed / Permission denied; Home account sharing / Imported / 09:38. Distinct status text and subtle icon colors, chevrons for details.",
+          "image": "screens/S05.png",
+          "board": "16-activity-support",
+          "ui": {
+            "header": "Recent operations",
+            "blocks": [
+              [
+                "tabs",
+                [
+                  "All",
+                  "Devices",
+                  "Sharing"
+                ],
+                0
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Bedroom AC",
+                    "Unknown \u00b7 09:42"
+                  ],
+                  [
+                    "Floor lamp",
+                    "Verified \u00b7 09:40"
+                  ],
+                  [
+                    "Living room TV",
+                    "Failed \u00b7 Permission denied"
+                  ],
+                  [
+                    "Authorization sharing",
+                    "Imported \u00b7 09:38"
+                  ]
+                ]
+              ],
+              [
+                "note",
+                "Select a record to inspect the evidence."
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "S06",
+          "title": "Operation evidence",
+          "description": "Back Operation Details. Floor lamp / Set power On. Status Verified. Requested On at 09:40:01, Observed On at 09:40:02, Source Local network. Explanation State matches the request; this alone does not prove causality. Refresh State and Done. No raw secrets or network identifiers.",
+          "image": "screens/S06.png",
+          "board": "16-activity-support",
+          "ui": {
+            "header": "Operation details",
+            "blocks": [
+              [
+                "status",
+                "Verified",
+                "Floor lamp \u00b7 Set power On",
+                "success"
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Requested",
+                    "On \u00b7 09:40:01"
+                  ],
+                  [
+                    "Observed",
+                    "On \u00b7 09:40:02"
+                  ],
+                  [
+                    "Source",
+                    "Local network"
+                  ]
+                ]
+              ],
+              [
+                "note",
+                "State matches the request; this alone does not prove causality."
+              ],
+              [
+                "button",
+                "Refresh State"
+              ],
+              [
+                "button",
+                "Done",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "S07",
+          "title": "Diagnostic preview",
+          "description": "Diagnostics preview uses the current allowlisted Core report: version, generation time, local profile counts, route counts, retention limits and receipt summaries. The pictured summary is abbreviated; production exposes every exported field before saving exactly the previewed report. No raw account or device identifiers, automatic upload or credential payloads.",
+          "image": "screens/S07.png",
+          "board": "16-activity-support",
+          "ui": {
+            "header": "Diagnostics",
+            "blocks": [
+              [
+                "rows",
+                [
+                  [
+                    "App version",
+                    "0.2.0 \u00b7 Illustrative"
+                  ],
+                  [
+                    "Generated",
+                    "Today 09:42"
+                  ],
+                  [
+                    "Local scope",
+                    "This profile"
+                  ],
+                  [
+                    "Devices / rooms",
+                    "4 / 3"
+                  ],
+                  [
+                    "LAN / cloud routes",
+                    "4 / 2"
+                  ],
+                  [
+                    "Receipt / attempt limits",
+                    "100 / 32"
+                  ]
+                ]
+              ],
+              [
+                "card",
+                "Latest receipt",
+                [
+                  [
+                    "Outcome",
+                    "Unknown"
+                  ],
+                  [
+                    "Error",
+                    "WRITE_OUTCOME_UNKNOWN"
+                  ],
+                  [
+                    "Phase",
+                    "Possibly sent \u00b7 LAN"
+                  ],
+                  [
+                    "Attempts omitted",
+                    "0"
+                  ]
+                ]
+              ],
+              [
+                "note",
+                "Review before saving. Account and device identifiers are excluded."
+              ],
+              [
+                "button",
+                "Export Redacted Report"
+              ],
+              [
+                "button",
+                "Cancel",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "S08",
+          "title": "About and compatibility",
+          "description": "Back About. HomeVerb wordmark, One language for your appliances. Design preview label. Rows Version, Compatibility, Privacy, Licenses. Compatibility note Support varies by platform, model and region. No claims that preview platforms are verified, no login or subscription upsell.",
+          "image": "screens/S08.png",
+          "board": "16-activity-support",
+          "ui": {
+            "header": "About",
+            "blocks": [
+              [
+                "hero",
+                "home",
+                "HomeVerb",
+                "One language for your appliances."
+              ],
+              [
+                "note",
+                "Design preview"
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Version",
+                    "Preview"
+                  ],
+                  [
+                    "Compatibility",
+                    "\u203a"
+                  ],
+                  [
+                    "Privacy",
+                    "\u203a"
+                  ],
+                  [
+                    "Licenses",
+                    "\u203a"
+                  ]
+                ]
+              ],
+              [
+                "note",
+                "Support varies by platform, model and region."
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        }
+      ],
+      "image": "boards/16-activity-support.png",
+      "thumbnail": "boards/16-activity-support-thumb.jpg",
+      "dimensions": [
+        1820,
+        1160
+      ]
+    },
+    {
+      "slug": "17-sharing-recovery",
+      "title": "Recover without repeating secrets",
+      "subtitle": "No peers, mismatched codes, interrupted sessions and invalid grants",
+      "screens": [
+        {
+          "id": "H13",
+          "title": "No recipient found",
+          "description": "Back Select Recipient. Simple two phone outline, No nearby recipients. Checks Same reachable network and Recipient opened Receive Authorization. Search ended. Primary Search Again, secondary Back. No cloud invite or persistent listener.",
+          "image": "screens/H13.png",
+          "board": "17-sharing-recovery",
+          "ui": {
+            "header": "Select recipient",
+            "blocks": [
+              [
+                "hero",
+                "phone",
+                "No nearby recipients",
+                "The search has ended."
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Check",
+                    "Same reachable network"
+                  ],
+                  [
+                    "Check",
+                    "Recipient opened Receive"
+                  ]
+                ]
+              ],
+              [
+                "button",
+                "Search Again"
+              ],
+              [
+                "button",
+                "Back",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "H14",
+          "title": "Codes do not match",
+          "description": "Back Verification Stopped. Restrained red shield outline. Text Codes did not match. No authorization was sent. Primary Start a New Session, secondary Cancel. No Continue Anyway.",
+          "image": "screens/H14.png",
+          "board": "17-sharing-recovery",
+          "ui": {
+            "header": "Verification stopped",
+            "blocks": [
+              [
+                "status",
+                "Codes did not match",
+                "No authorization was sent.",
+                "error"
+              ],
+              [
+                "button",
+                "Start a New Session"
+              ],
+              [
+                "button",
+                "Cancel",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "H15",
+          "title": "Session stopped",
+          "description": "Back Sharing Session Ended. Text HomeVerb left the foreground. Nearby discovery and transfer have stopped. Additional short note If sending had started, check the recipient before sending again. Primary Done, secondary View Local Record. No automatic resume.",
+          "image": "screens/H15.png",
+          "board": "17-sharing-recovery",
+          "ui": {
+            "header": "Sharing session ended",
+            "blocks": [
+              [
+                "status",
+                "Foreground session stopped",
+                "Nearby discovery and transfer have stopped.",
+                "warning"
+              ],
+              [
+                "note",
+                "If sending had started, check the recipient before sending again."
+              ],
+              [
+                "button",
+                "Done"
+              ],
+              [
+                "button",
+                "View Local Record",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "H16",
+          "title": "Imported, needs authorization",
+          "description": "Back Authorization Received. Checklist Transferred (check), Imported securely (check), Authorization validation failed (amber). Text The platform requires a new sign-in. Primary Reauthorize, secondary Remove Imported Authorization. Do not show overall success or fake ready device state.",
+          "image": "screens/H16.png",
+          "board": "17-sharing-recovery",
+          "ui": {
+            "header": "Authorization received",
+            "blocks": [
+              [
+                "rows",
+                [
+                  [
+                    "Transferred",
+                    "Complete"
+                  ],
+                  [
+                    "Imported securely",
+                    "Complete"
+                  ],
+                  [
+                    "Authorization check",
+                    "Failed"
+                  ]
+                ]
+              ],
+              [
+                "status",
+                "A new sign-in is required",
+                "Imported authorization is not ready for use.",
+                "warning"
+              ],
+              [
+                "button",
+                "Reauthorize"
+              ],
+              [
+                "button",
+                "Remove Imported Authorization",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        }
+      ],
+      "image": "boards/17-sharing-recovery.png",
+      "thumbnail": "boards/17-sharing-recovery-thumb.jpg",
+      "dimensions": [
+        1820,
+        1160
+      ]
+    },
+    {
+      "slug": "18-edge-states",
+      "title": "Small details that keep it simple",
+      "subtitle": "Validation, empty rooms, compatibility and local data removal",
+      "screens": [
+        {
+          "id": "R05",
+          "title": "Room name validation",
+          "description": "Rooms dimmed under Rename Room sheet. Room name field Living Room with red underline and inline A room with this name already exists. Save disabled, Cancel available. Accessible error text, no generic crash or alert.",
+          "image": "screens/R05.png",
+          "board": "18-edge-states",
+          "ui": {
+            "header": "Rename Room",
+            "blocks": [
+              [
+                "field",
+                "Room name",
+                "Living Room",
+                "A room with this name already exists."
+              ],
+              [
+                "button",
+                "Save Room",
+                "disabled"
+              ],
+              [
+                "button",
+                "Cancel",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": "R01",
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "D09",
+          "title": "An empty room",
+          "description": "HomeVerb device home with Study room chip selected. Quiet desk outline, No devices in Study. Primary Move Existing Devices and secondary Add Device. Bottom nav Devices, Platforms, Settings. Room management remains available.",
+          "image": "screens/D09.png",
+          "board": "18-edge-states",
+          "ui": {
+            "header": "HomeVerb",
+            "blocks": [
+              [
+                "tabs",
+                [
+                  "All",
+                  "Living Room",
+                  "Bedroom",
+                  "Study"
+                ],
+                3
+              ],
+              [
+                "hero",
+                "home",
+                "No devices in Study",
+                "Make room for the devices you already have."
+              ],
+              [
+                "button",
+                "Move Existing Devices"
+              ],
+              [
+                "button",
+                "Add Device",
+                "secondary"
+              ]
+            ],
+            "root": "Devices",
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "P13",
+          "title": "Platform unavailable",
+          "description": "Back Example Climate. Unavailable badge. Text This platform has no supported native authorization path yet. Primary Back to Platforms. Secondary Compatibility Details. No browser-secret input, backend setup or misleading Connect button.",
+          "image": "screens/P13.png",
+          "board": "18-edge-states",
+          "ui": {
+            "header": "Example Climate",
+            "blocks": [
+              [
+                "status",
+                "Unavailable",
+                "No supported native authorization path is available yet.",
+                "warning"
+              ],
+              [
+                "button",
+                "Back to Platforms"
+              ],
+              [
+                "button",
+                "Compatibility Details",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "S09",
+          "title": "Clear local data confirmation",
+          "description": "Local Data dimmed behind confirmation Remove local data? Checklist explains Rooms, device names, snapshots and local authorizations will be removed. Other installations and platform access are not revoked. Buttons Cancel and Remove Local Data. Destructive action explicit and scoped.",
+          "image": "screens/S09.png",
+          "board": "18-edge-states",
+          "ui": {
+            "header": "Remove local data?",
+            "blocks": [
+              [
+                "note",
+                "Rooms, device names, snapshots and local authorizations will be removed. Other installations and platform access are not revoked."
+              ],
+              [
+                "button",
+                "Remove Local Data",
+                "danger"
+              ],
+              [
+                "button",
+                "Cancel",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": "S04",
+            "overlay": "dialog"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        }
+      ],
+      "image": "boards/18-edge-states.png",
+      "thumbnail": "boards/18-edge-states-thumb.jpg",
+      "dimensions": [
+        1820,
+        1160
+      ]
+    },
+    {
+      "slug": "19-preferences-order",
+      "title": "Make it feel like yours",
+      "subtitle": "Local identity, Window Light preview, compatibility and card order",
+      "screens": [
+        {
+          "id": "S10",
+          "title": "This device",
+          "description": "Back This Device. Simple phone icon; editable Sharing name field Alex phone. Helper This name is shown only during nearby sharing. Primary Save Name. No registration, real person identity, phone number or cloud profile.",
+          "image": "screens/S10.png",
+          "board": "19-preferences-order",
+          "ui": {
+            "header": "This device",
+            "blocks": [
+              [
+                "field",
+                "Sharing name",
+                "Alex phone"
+              ],
+              [
+                "note",
+                "Shown only during an explicit nearby sharing session."
+              ],
+              [
+                "button",
+                "Save Name"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "S11",
+          "title": "Window Light skin preview",
+          "description": "Preview the currently selected Window Light skin using the same device home. Show Current skin and Included locally. Back returns to Appearance. The only skin remains window_light; previewing does not alter accounts, device state or rooms. This replaces the earlier dark-appearance reference.",
+          "image": "screens/S11.png",
+          "board": "19-preferences-order",
+          "ui": {
+            "header": "Window Light",
+            "blocks": [
+              [
+                "skin_preview"
+              ],
+              [
+                "status",
+                "Current skin",
+                "Window Light \u00b7 Included locally",
+                "success"
+              ],
+              [
+                "note",
+                "Soft window light, porcelain surfaces and warm terracotta controls."
+              ],
+              [
+                "button",
+                "Back to Appearance",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "S12",
+          "title": "Compatibility",
+          "description": "Back Compatibility. Explanatory text Support is specific to platform, region and model. Fictional examples Example Home / Planned, Example TV / Pairing research, Example Climate / Authorization blocked. Mock devices / Preview only. Tap a row for evidence details. No fake verified badge or promised whole-brand support.",
+          "image": "screens/S12.png",
+          "board": "19-preferences-order",
+          "ui": {
+            "header": "Compatibility",
+            "blocks": [
+              [
+                "note",
+                "Support is specific to platform, region and model."
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Example Home",
+                    "Planned"
+                  ],
+                  [
+                    "Example TV",
+                    "Pairing research"
+                  ],
+                  [
+                    "Example Climate",
+                    "Authorization blocked"
+                  ],
+                  [
+                    "Mock devices",
+                    "Preview only"
+                  ]
+                ]
+              ],
+              [
+                "note",
+                "Open a row for evidence and limitations. No real platform is verified by these mockups."
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "D10",
+          "title": "Reorder device cards",
+          "description": "Reorder Devices shows the current room and a list of device names, pin state and drag handles. Done saves the complete device permutation after merging the visible reorder with hidden IDs. Room membership and authority stay unchanged. Provide accessible move actions as well as drag.",
+          "image": "screens/D10.png",
+          "board": "19-preferences-order",
+          "ui": {
+            "header": "Reorder devices",
+            "blocks": [
+              [
+                "note",
+                "Living Room \u00b7 Drag handles change the visible order."
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Floor lamp",
+                    "Pinned \u00b7 \u2261"
+                  ],
+                  [
+                    "Living room TV",
+                    "\u2261"
+                  ],
+                  [
+                    "Air sensor",
+                    "\u2261"
+                  ]
+                ]
+              ],
+              [
+                "note",
+                "Room membership stays unchanged. Hidden devices retain their position."
+              ],
+              [
+                "button",
+                "Done"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        }
+      ],
+      "image": "boards/19-preferences-order.png",
+      "thumbnail": "boards/19-preferences-order-thumb.jpg",
+      "dimensions": [
+        1820,
+        1160
+      ]
+    },
+    {
+      "slug": "20-adaptive-layouts",
+      "title": "The same home, with more space",
+      "subtitle": "Flutter tablet layouts preserve the same three destinations",
+      "screens": [
+        {
+          "id": "W01",
+          "title": "Tablet device home",
+          "description": "Wide HomeVerb tablet Devices page. A compact left navigation rail contains exactly Devices selected, Platforms, Settings. Main area header HomeVerb with Search and Add Device. Horizontal room chips All selected, Living Room, Primary Bedroom, Bathroom. Spacious three-column device cards Bedroom AC, Floor lamp, TV, Air sensor, Washer, Fridge. Status and separate power action targets. No fourth share tab, side dashboards or analytics.",
+          "image": "screens/W01.png",
+          "board": "20-adaptive-layouts",
+          "ui": {
+            "header": "HomeVerb",
+            "blocks": [
+              [
+                "tablet_home"
+              ]
+            ],
+            "root": "Devices",
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            2048,
+            1536
+          ]
+        },
+        {
+          "id": "W02",
+          "title": "Tablet device controls",
+          "description": "Wide tablet with identical left three-item navigation rail, Devices selected. Main area split into a narrow local device list (Bedroom AC selected, Floor lamp, TV) and roomy Bedroom AC control panel with 24 C target minus/plus, Room 26 C, Power On, Mode Cool, Fan Auto, Refresh State and information button. Back to Devices in header. This is the same capability control flow adapted to width, not a different feature set.",
+          "image": "screens/W02.png",
+          "board": "20-adaptive-layouts",
+          "ui": {
+            "header": "Bedroom AC",
+            "blocks": [
+              [
+                "tablet_climate"
+              ]
+            ],
+            "root": "Devices",
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            2048,
+            1536
+          ]
+        }
+      ],
+      "image": "boards/20-adaptive-layouts.png",
+      "thumbnail": "boards/20-adaptive-layouts-thumb.jpg",
+      "dimensions": [
+        2160,
+        1050
+      ]
+    },
+    {
+      "slug": "21-state-accessibility",
+      "title": "Clear even when information is missing",
+      "subtitle": "Cached snapshots, unknown readings, validation and larger text",
+      "screens": [
+        {
+          "id": "D11",
+          "title": "Cached device state",
+          "description": "HomeVerb root device page with All selected and exactly three bottom tabs Devices, Platforms, Settings. A subtle banner Saved state / Last read 4 hours ago with Refresh button. Bedroom AC card shows 24 C marked Cached; Floor lamp shows On marked Cached; Air sensor shows Unknown, not zero. Text Connection not checked. Do NOT label devices offline merely because state is old. Search and add remain available.",
+          "image": "screens/D11.png",
+          "board": "21-state-accessibility",
+          "ui": {
+            "header": "HomeVerb",
+            "blocks": [
+              [
+                "home",
+                "cached"
+              ]
+            ],
+            "root": "Devices",
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "C13",
+          "title": "Unknown sensor reading",
+          "description": "Back Air sensor, Living Room. Read-only screen with Temperature / Not available and Humidity / Not available. Use a dash as placeholder, not 0, 0% or Off. Small Previous read / Yesterday 20:14, Refresh State button. No power switch or writable sensor controls. Brief message No current reading. No bottom navigation.",
+          "image": "screens/C13.png",
+          "board": "21-state-accessibility",
+          "ui": {
+            "header": "Air sensor",
+            "blocks": [
+              [
+                "hero",
+                "sensor",
+                "No current reading",
+                "Living Room"
+              ],
+              [
+                "rows",
+                [
+                  [
+                    "Temperature",
+                    "\u2014  Not available"
+                  ],
+                  [
+                    "Humidity",
+                    "\u2014  Not available"
+                  ],
+                  [
+                    "Previous read",
+                    "Yesterday 20:14"
+                  ]
+                ]
+              ],
+              [
+                "note",
+                "This device is read-only. Missing readings are not zero."
+              ],
+              [
+                "button",
+                "Refresh State"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "C14",
+          "title": "Invalid control value",
+          "description": "Back Bedroom AC, compact control page with observed target 24 C / Read just now. Bottom sheet Set Temperature with numeric field 23.5 C, red inline error Use whole degrees for this device. Save disabled, Cancel enabled. Helper Supported step: 1 C for this device. Requested invalid input does not replace observed 24 C. No universal temperature range, no bottom navigation.",
+          "image": "screens/C14.png",
+          "board": "21-state-accessibility",
+          "ui": {
+            "header": "Set Temperature",
+            "blocks": [
+              [
+                "note",
+                "Observed target remains 24\u00b0C \u00b7 Read just now"
+              ],
+              [
+                "field",
+                "Target temperature",
+                "23.5\u00b0C",
+                "Use whole degrees for this device."
+              ],
+              [
+                "note",
+                "Supported step: 1\u00b0C for this fictional device."
+              ],
+              [
+                "button",
+                "Save",
+                "disabled"
+              ],
+              [
+                "button",
+                "Cancel",
+                "secondary"
+              ]
+            ],
+            "root": null,
+            "subtitle": "",
+            "base": "C01",
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        },
+        {
+          "id": "D12",
+          "title": "Larger text layout",
+          "description": "HomeVerb root device page with genuinely larger type and ONE-COLUMN stacked device cards instead of two columns. Room filters horizontally scroll, All selected. Visible cards Bedroom AC / Primary Bedroom / Cooling 24 C and Floor lamp / Living Room / On 65%, with generous power buttons. Freshness line Updated just now. Exactly three bottom nav labels Devices, Platforms, Settings. No clipped or overlapping text. Preserve content hierarchy and accessible touch targets.",
+          "image": "screens/D12.png",
+          "board": "21-state-accessibility",
+          "ui": {
+            "header": "HomeVerb",
+            "blocks": [
+              [
+                "home",
+                "large"
+              ]
+            ],
+            "root": "Devices",
+            "subtitle": "",
+            "base": null,
+            "overlay": "sheet"
+          },
+          "dimensions": [
+            780,
+            1688
+          ]
+        }
+      ],
+      "image": "boards/21-state-accessibility.png",
+      "thumbnail": "boards/21-state-accessibility-thumb.jpg",
+      "dimensions": [
+        1820,
+        1160
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "title": "Everyday use",
+      "screens": [
+        "D04",
+        "P01",
+        "D01",
+        "D02",
+        "D03",
+        "D05",
+        "D10"
+      ]
+    },
+    {
+      "title": "Rooms and organization",
+      "screens": [
+        "R01",
+        "R02",
+        "R05",
+        "D09",
+        "R03",
+        "R04"
+      ]
+    },
+    {
+      "title": "Device information",
+      "screens": [
+        "D05",
+        "D06",
+        "D07",
+        "D08"
+      ]
+    },
+    {
+      "title": "Climate and uncertainty",
+      "screens": [
+        "C01",
+        "C02",
+        "C03",
+        "C04"
+      ]
+    },
+    {
+      "title": "Capability controls",
+      "screens": [
+        "C05",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C12"
+      ]
+    },
+    {
+      "title": "Discover and add",
+      "screens": [
+        "A01",
+        "A02",
+        "A03",
+        "A04",
+        "A05",
+        "A06",
+        "A07",
+        "A08"
+      ]
+    },
+    {
+      "title": "Connect platforms",
+      "screens": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P05",
+        "P06",
+        "P07",
+        "P08",
+        "P13"
+      ]
+    },
+    {
+      "title": "Manage platform access",
+      "screens": [
+        "P09",
+        "P10",
+        "P11",
+        "P12"
+      ]
+    },
+    {
+      "title": "Send authorization",
+      "screens": [
+        "S01",
+        "H01",
+        "H02",
+        "H03",
+        "H04",
+        "H09",
+        "H12"
+      ]
+    },
+    {
+      "title": "Receive authorization",
+      "screens": [
+        "S01",
+        "H05",
+        "H06",
+        "H07",
+        "H08",
+        "A04",
+        "A06"
+      ]
+    },
+    {
+      "title": "Sharing recovery",
+      "screens": [
+        "H10",
+        "H11",
+        "H13",
+        "H14",
+        "H15",
+        "H16"
+      ]
+    },
+    {
+      "title": "Settings and support",
+      "screens": [
+        "S01",
+        "S02",
+        "S11",
+        "S10",
+        "S03",
+        "S04",
+        "S09",
+        "S05",
+        "S06",
+        "S07",
+        "S08",
+        "S12"
+      ]
+    },
+    {
+      "title": "Adaptive layouts",
+      "screens": [
+        "W01",
+        "W02"
+      ]
+    },
+    {
+      "title": "State clarity and accessibility",
+      "screens": [
+        "D11",
+        "C13",
+        "C14",
+        "D12"
+      ]
+    }
+  ],
+  "interactions": [
+    {
+      "source": "D01",
+      "action": "Select a room",
+      "target": "D02"
+    },
+    {
+      "source": "D01",
+      "action": "Search",
+      "target": "D03"
+    },
+    {
+      "source": "D01",
+      "action": "Add device",
+      "target": "A01"
+    },
+    {
+      "source": "D01",
+      "action": "Manage rooms",
+      "target": "R01"
+    },
+    {
+      "source": "D01",
+      "action": "Open AC",
+      "target": "C01"
+    },
+    {
+      "source": "D01",
+      "action": "Open lamp",
+      "target": "C05"
+    },
+    {
+      "source": "D01",
+      "action": "Card menu",
+      "target": "D05"
+    },
+    {
+      "source": "D01",
+      "action": "Platforms",
+      "target": "P01"
+    },
+    {
+      "source": "D01",
+      "action": "Settings",
+      "target": "S01"
+    },
+    {
+      "source": "D02",
+      "action": "Open lamp",
+      "target": "C05"
+    },
+    {
+      "source": "D02",
+      "action": "Reorder cards",
+      "target": "D10"
+    },
+    {
+      "source": "D02",
+      "action": "All devices",
+      "target": "D01"
+    },
+    {
+      "source": "D03",
+      "action": "Open result",
+      "target": "C05"
+    },
+    {
+      "source": "D03",
+      "action": "Clear and close",
+      "target": "D01"
+    },
+    {
+      "source": "D04",
+      "action": "Add Platform",
+      "target": "P02"
+    },
+    {
+      "source": "D04",
+      "action": "Receive Authorization",
+      "target": "H05"
+    },
+    {
+      "source": "D05",
+      "action": "Rename",
+      "target": "D07"
+    },
+    {
+      "source": "D05",
+      "action": "Move devices",
+      "target": "R03"
+    },
+    {
+      "source": "D05",
+      "action": "Reorder",
+      "target": "D10"
+    },
+    {
+      "source": "D05",
+      "action": "Device Information",
+      "target": "D06"
+    },
+    {
+      "source": "D06",
+      "action": "Rename",
+      "target": "D07"
+    },
+    {
+      "source": "D06",
+      "action": "Move to Room",
+      "target": "R03"
+    },
+    {
+      "source": "D06",
+      "action": "Connection",
+      "target": "D08"
+    },
+    {
+      "source": "D06",
+      "action": "Platform",
+      "target": "P09"
+    },
+    {
+      "source": "D07",
+      "action": "Save name",
+      "target": "D06"
+    },
+    {
+      "source": "D07",
+      "action": "Cancel",
+      "target": "D06"
+    },
+    {
+      "source": "D08",
+      "action": "Save preference",
+      "target": "D06"
+    },
+    {
+      "source": "D09",
+      "action": "Move Existing Devices",
+      "target": "R03"
+    },
+    {
+      "source": "D09",
+      "action": "Add Device",
+      "target": "A01"
+    },
+    {
+      "source": "D10",
+      "action": "Done",
+      "target": "D02"
+    },
+    {
+      "source": "R01",
+      "action": "Add Room",
+      "target": "R02"
+    },
+    {
+      "source": "R01",
+      "action": "Rename: invalid name",
+      "target": "R05"
+    },
+    {
+      "source": "R01",
+      "action": "Move devices",
+      "target": "R03"
+    },
+    {
+      "source": "R01",
+      "action": "Delete room",
+      "target": "R04"
+    },
+    {
+      "source": "R02",
+      "action": "See empty-room pattern",
+      "target": "D09"
+    },
+    {
+      "source": "R02",
+      "action": "Cancel",
+      "target": "R01"
+    },
+    {
+      "source": "R03",
+      "action": "Move selected devices",
+      "target": "D02"
+    },
+    {
+      "source": "R03",
+      "action": "Create another room",
+      "target": "R02"
+    },
+    {
+      "source": "R04",
+      "action": "Delete Room",
+      "target": "D01"
+    },
+    {
+      "source": "R04",
+      "action": "Cancel",
+      "target": "R01"
+    },
+    {
+      "source": "R05",
+      "action": "Correct the name",
+      "target": "R02"
+    },
+    {
+      "source": "R05",
+      "action": "Cancel",
+      "target": "R01"
+    },
+    {
+      "source": "C01",
+      "action": "Choose mode",
+      "target": "C02"
+    },
+    {
+      "source": "C01",
+      "action": "Submit target",
+      "target": "C03"
+    },
+    {
+      "source": "C01",
+      "action": "Device-information pattern",
+      "target": "D06"
+    },
+    {
+      "source": "C02",
+      "action": "Save mode",
+      "target": "C03"
+    },
+    {
+      "source": "C02",
+      "action": "Cancel",
+      "target": "C01"
+    },
+    {
+      "source": "C03",
+      "action": "Confirmation unavailable",
+      "target": "C04"
+    },
+    {
+      "source": "C03",
+      "action": "View operations",
+      "target": "S05"
+    },
+    {
+      "source": "C04",
+      "action": "Refresh state",
+      "target": "C01"
+    },
+    {
+      "source": "C04",
+      "action": "View operations",
+      "target": "S05"
+    },
+    {
+      "source": "C05",
+      "action": "Device information",
+      "target": "D06"
+    },
+    {
+      "source": "C05",
+      "action": "View operation evidence",
+      "target": "S06"
+    },
+    {
+      "source": "C06",
+      "action": "Back to devices",
+      "target": "D01"
+    },
+    {
+      "source": "C07",
+      "action": "Pair this TV",
+      "target": "P06"
+    },
+    {
+      "source": "C07",
+      "action": "Back to devices",
+      "target": "D01"
+    },
+    {
+      "source": "C08",
+      "action": "Back to devices",
+      "target": "D01"
+    },
+    {
+      "source": "C09",
+      "action": "Start Cycle",
+      "target": "C10"
+    },
+    {
+      "source": "C10",
+      "action": "Confirm start",
+      "target": "C11"
+    },
+    {
+      "source": "C10",
+      "action": "Cancel",
+      "target": "C09"
+    },
+    {
+      "source": "C11",
+      "action": "View operations",
+      "target": "S05"
+    },
+    {
+      "source": "C11",
+      "action": "Back to devices",
+      "target": "D01"
+    },
+    {
+      "source": "C12",
+      "action": "View operation details",
+      "target": "S06"
+    },
+    {
+      "source": "C12",
+      "action": "Done",
+      "target": "D01"
+    },
+    {
+      "source": "A01",
+      "action": "From a Platform",
+      "target": "P01"
+    },
+    {
+      "source": "A01",
+      "action": "Nearby Devices",
+      "target": "A02"
+    },
+    {
+      "source": "A01",
+      "action": "Add Another Platform",
+      "target": "P02"
+    },
+    {
+      "source": "A02",
+      "action": "Allow local discovery",
+      "target": "A03"
+    },
+    {
+      "source": "A02",
+      "action": "Deny permission",
+      "target": "A08"
+    },
+    {
+      "source": "A02",
+      "action": "Not Now",
+      "target": "A01"
+    },
+    {
+      "source": "A03",
+      "action": "Discovery completes",
+      "target": "A04"
+    },
+    {
+      "source": "A03",
+      "action": "No results before deadline",
+      "target": "A07"
+    },
+    {
+      "source": "A03",
+      "action": "Cancel",
+      "target": "A01"
+    },
+    {
+      "source": "A04",
+      "action": "Add selected devices",
+      "target": "A06"
+    },
+    {
+      "source": "A04",
+      "action": "Review Duplicate",
+      "target": "A05"
+    },
+    {
+      "source": "A04",
+      "action": "Choose room",
+      "target": "R03"
+    },
+    {
+      "source": "A05",
+      "action": "Keep Separate",
+      "target": "A04"
+    },
+    {
+      "source": "A05",
+      "action": "Confirm Same Device",
+      "target": "A04"
+    },
+    {
+      "source": "A06",
+      "action": "Open room",
+      "target": "D02"
+    },
+    {
+      "source": "A06",
+      "action": "Add More",
+      "target": "A01"
+    },
+    {
+      "source": "A07",
+      "action": "Search Again",
+      "target": "A03"
+    },
+    {
+      "source": "A07",
+      "action": "Choose a Platform",
+      "target": "P02"
+    },
+    {
+      "source": "A08",
+      "action": "Return after system permission change",
+      "target": "A02"
+    },
+    {
+      "source": "A08",
+      "action": "Back",
+      "target": "A01"
+    },
+    {
+      "source": "P01",
+      "action": "Add platform",
+      "target": "P02"
+    },
+    {
+      "source": "P01",
+      "action": "Account details",
+      "target": "P09"
+    },
+    {
+      "source": "P01",
+      "action": "Reauthorize expired account",
+      "target": "P10"
+    },
+    {
+      "source": "P01",
+      "action": "Devices",
+      "target": "D01"
+    },
+    {
+      "source": "P01",
+      "action": "Settings",
+      "target": "S01"
+    },
+    {
+      "source": "P02",
+      "action": "Example Home",
+      "target": "P03"
+    },
+    {
+      "source": "P02",
+      "action": "Example TV",
+      "target": "P06"
+    },
+    {
+      "source": "P02",
+      "action": "Unavailable platform",
+      "target": "P13"
+    },
+    {
+      "source": "P03",
+      "action": "Continue to Authorization",
+      "target": "P04"
+    },
+    {
+      "source": "P03",
+      "action": "Cancel",
+      "target": "P02"
+    },
+    {
+      "source": "P04",
+      "action": "Allow",
+      "target": "P08"
+    },
+    {
+      "source": "P04",
+      "action": "Code challenge where supported",
+      "target": "P05"
+    },
+    {
+      "source": "P04",
+      "action": "Cancel",
+      "target": "P02"
+    },
+    {
+      "source": "P05",
+      "action": "Complete valid code",
+      "target": "P08"
+    },
+    {
+      "source": "P05",
+      "action": "Code expires",
+      "target": "P07"
+    },
+    {
+      "source": "P05",
+      "action": "Cancel",
+      "target": "P02"
+    },
+    {
+      "source": "P06",
+      "action": "Approve on TV",
+      "target": "P08"
+    },
+    {
+      "source": "P06",
+      "action": "Deadline expires",
+      "target": "P07"
+    },
+    {
+      "source": "P06",
+      "action": "Cancel",
+      "target": "P02"
+    },
+    {
+      "source": "P07",
+      "action": "Start Again",
+      "target": "P03"
+    },
+    {
+      "source": "P07",
+      "action": "Cancel",
+      "target": "P01"
+    },
+    {
+      "source": "P08",
+      "action": "Find Devices",
+      "target": "A04"
+    },
+    {
+      "source": "P08",
+      "action": "Done",
+      "target": "P01"
+    },
+    {
+      "source": "P09",
+      "action": "Expired check result",
+      "target": "P10"
+    },
+    {
+      "source": "P09",
+      "action": "Reauthorize",
+      "target": "P03"
+    },
+    {
+      "source": "P09",
+      "action": "Remove locally",
+      "target": "P11"
+    },
+    {
+      "source": "P09",
+      "action": "Revoke grant",
+      "target": "P12"
+    },
+    {
+      "source": "P10",
+      "action": "Reauthorize",
+      "target": "P03"
+    },
+    {
+      "source": "P10",
+      "action": "View cached devices",
+      "target": "D01"
+    },
+    {
+      "source": "P10",
+      "action": "Remove locally",
+      "target": "P11"
+    },
+    {
+      "source": "P11",
+      "action": "Remove Locally",
+      "target": "P01"
+    },
+    {
+      "source": "P11",
+      "action": "Cancel",
+      "target": "P09"
+    },
+    {
+      "source": "P12",
+      "action": "Revoke Access",
+      "target": "P01"
+    },
+    {
+      "source": "P12",
+      "action": "Cancel",
+      "target": "P09"
+    },
+    {
+      "source": "P13",
+      "action": "Back to Platforms",
+      "target": "P02"
+    },
+    {
+      "source": "P13",
+      "action": "Compatibility Details",
+      "target": "S12"
+    },
+    {
+      "source": "S01",
+      "action": "Rooms",
+      "target": "R01"
+    },
+    {
+      "source": "S01",
+      "action": "Send Authorization",
+      "target": "H01"
+    },
+    {
+      "source": "S01",
+      "action": "Receive Authorization",
+      "target": "H05"
+    },
+    {
+      "source": "S01",
+      "action": "Appearance",
+      "target": "S02"
+    },
+    {
+      "source": "S01",
+      "action": "This Device",
+      "target": "S10"
+    },
+    {
+      "source": "S01",
+      "action": "Connections",
+      "target": "S03"
+    },
+    {
+      "source": "S01",
+      "action": "Recent Operations",
+      "target": "S05"
+    },
+    {
+      "source": "S01",
+      "action": "Local Data",
+      "target": "S04"
+    },
+    {
+      "source": "S01",
+      "action": "Diagnostics",
+      "target": "S07"
+    },
+    {
+      "source": "S01",
+      "action": "About",
+      "target": "S08"
+    },
+    {
+      "source": "S02",
+      "action": "Preview Window Light",
+      "target": "S11"
+    },
+    {
+      "source": "S02",
+      "action": "Back",
+      "target": "S01"
+    },
+    {
+      "source": "S03",
+      "action": "Back",
+      "target": "S01"
+    },
+    {
+      "source": "S04",
+      "action": "Confirm removal",
+      "target": "S09"
+    },
+    {
+      "source": "S04",
+      "action": "Back",
+      "target": "S01"
+    },
+    {
+      "source": "S05",
+      "action": "Read evidence",
+      "target": "S06"
+    },
+    {
+      "source": "S05",
+      "action": "Partial batch result",
+      "target": "C12"
+    },
+    {
+      "source": "S05",
+      "action": "Unconfirmed transfer",
+      "target": "H12"
+    },
+    {
+      "source": "S06",
+      "action": "Back to operations",
+      "target": "S05"
+    },
+    {
+      "source": "S07",
+      "action": "Cancel preview",
+      "target": "S01"
+    },
+    {
+      "source": "S08",
+      "action": "Compatibility",
+      "target": "S12"
+    },
+    {
+      "source": "S08",
+      "action": "Back",
+      "target": "S01"
+    },
+    {
+      "source": "S09",
+      "action": "Remove local data",
+      "target": "D04"
+    },
+    {
+      "source": "S09",
+      "action": "Cancel",
+      "target": "S04"
+    },
+    {
+      "source": "S10",
+      "action": "Save Name",
+      "target": "S01"
+    },
+    {
+      "source": "S11",
+      "action": "Back to Appearance",
+      "target": "S02"
+    },
+    {
+      "source": "S11",
+      "action": "Settings",
+      "target": "S01"
+    },
+    {
+      "source": "S12",
+      "action": "Unsupported example",
+      "target": "P13"
+    },
+    {
+      "source": "S12",
+      "action": "Back",
+      "target": "S08"
+    },
+    {
+      "source": "H01",
+      "action": "Find Recipient",
+      "target": "H02"
+    },
+    {
+      "source": "H01",
+      "action": "Cannot share",
+      "target": "H11"
+    },
+    {
+      "source": "H02",
+      "action": "Choose Alex phone",
+      "target": "H03"
+    },
+    {
+      "source": "H02",
+      "action": "No peers found",
+      "target": "H13"
+    },
+    {
+      "source": "H02",
+      "action": "Cancel",
+      "target": "S01"
+    },
+    {
+      "source": "H03",
+      "action": "Codes Match",
+      "target": "H04"
+    },
+    {
+      "source": "H03",
+      "action": "Codes Do Not Match",
+      "target": "H14"
+    },
+    {
+      "source": "H04",
+      "action": "Send Authorization",
+      "target": "H09"
+    },
+    {
+      "source": "H04",
+      "action": "Cancel",
+      "target": "S01"
+    },
+    {
+      "source": "H05",
+      "action": "Incoming request",
+      "target": "H06"
+    },
+    {
+      "source": "H05",
+      "action": "Stop Receiving",
+      "target": "S01"
+    },
+    {
+      "source": "H05",
+      "action": "Leave foreground",
+      "target": "H15"
+    },
+    {
+      "source": "H06",
+      "action": "Accept",
+      "target": "H08"
+    },
+    {
+      "source": "H06",
+      "action": "Existing account found",
+      "target": "H07"
+    },
+    {
+      "source": "H06",
+      "action": "Storage unavailable",
+      "target": "H10"
+    },
+    {
+      "source": "H06",
+      "action": "Decline",
+      "target": "H05"
+    },
+    {
+      "source": "H06",
+      "action": "Imported grant rejected by platform",
+      "target": "H16"
+    },
+    {
+      "source": "H07",
+      "action": "Keep Existing",
+      "target": "P09"
+    },
+    {
+      "source": "H07",
+      "action": "Replace After Checking",
+      "target": "H08"
+    },
+    {
+      "source": "H08",
+      "action": "Choose Devices",
+      "target": "A04"
+    },
+    {
+      "source": "H08",
+      "action": "Done",
+      "target": "P01"
+    },
+    {
+      "source": "H09",
+      "action": "Receiver confirms import",
+      "target": "H08"
+    },
+    {
+      "source": "H09",
+      "action": "Receipt missing",
+      "target": "H12"
+    },
+    {
+      "source": "H09",
+      "action": "Interrupted or cancelled",
+      "target": "H15"
+    },
+    {
+      "source": "H10",
+      "action": "Cancel",
+      "target": "S01"
+    },
+    {
+      "source": "H11",
+      "action": "Review recipient pairing pattern",
+      "target": "P06"
+    },
+    {
+      "source": "H11",
+      "action": "Back to Accounts",
+      "target": "H01"
+    },
+    {
+      "source": "H12",
+      "action": "View Local Record",
+      "target": "S05"
+    },
+    {
+      "source": "H12",
+      "action": "Done",
+      "target": "S01"
+    },
+    {
+      "source": "H13",
+      "action": "Search Again",
+      "target": "H02"
+    },
+    {
+      "source": "H13",
+      "action": "Back",
+      "target": "S01"
+    },
+    {
+      "source": "H14",
+      "action": "Start a New Session",
+      "target": "H02"
+    },
+    {
+      "source": "H14",
+      "action": "Cancel",
+      "target": "S01"
+    },
+    {
+      "source": "H15",
+      "action": "View Local Record",
+      "target": "S05"
+    },
+    {
+      "source": "H15",
+      "action": "Done",
+      "target": "S01"
+    },
+    {
+      "source": "H16",
+      "action": "Reauthorize",
+      "target": "P03"
+    },
+    {
+      "source": "H16",
+      "action": "Remove Imported Authorization",
+      "target": "P11"
+    },
+    {
+      "source": "W01",
+      "action": "Open AC",
+      "target": "W02"
+    },
+    {
+      "source": "W01",
+      "action": "Mobile layout",
+      "target": "D01"
+    },
+    {
+      "source": "W02",
+      "action": "Back to Devices",
+      "target": "W01"
+    },
+    {
+      "source": "D01",
+      "action": "Inspect cached state",
+      "target": "D11"
+    },
+    {
+      "source": "D11",
+      "action": "Refresh obtains current data",
+      "target": "D01"
+    },
+    {
+      "source": "D11",
+      "action": "Inspect missing sensor data",
+      "target": "C13"
+    },
+    {
+      "source": "C13",
+      "action": "Back to devices",
+      "target": "D01"
+    },
+    {
+      "source": "C01",
+      "action": "Enter an invalid target",
+      "target": "C14"
+    },
+    {
+      "source": "C14",
+      "action": "Cancel invalid input",
+      "target": "C01"
+    },
+    {
+      "source": "C14",
+      "action": "Correct input and submit",
+      "target": "C03"
+    },
+    {
+      "source": "S02",
+      "action": "Larger text layout",
+      "target": "D12"
+    },
+    {
+      "source": "D12",
+      "action": "Standard text layout",
+      "target": "D01"
+    }
+  ],
+  "version": "2.0-window-light",
+  "status": "Complete visual prototype; fictional behavior only",
+  "method": "Local deterministic composition",
+  "skin": {
+    "default": "window_light",
+    "available": [
+      {
+        "id": "window_light",
+        "name": "Window Light"
+      }
+    ]
+  },
+  "actual_resolution_note": "Locally rendered at 2x logical size. No Flutter build or physical-device verification is implied."
+}
