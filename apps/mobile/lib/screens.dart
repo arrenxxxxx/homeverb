@@ -1,0 +1,999 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'blocks.dart';
+import 'skin.dart';
+
+typedef Json = Map<String, dynamic>;
+
+class ScreenCatalog {
+  ScreenCatalog(Json data) {
+    for (final board in data['boards']) {
+      for (final s in board['screens']) {
+        screens[s['id']] = s as Json;
+      }
+    }
+    branches = (data['interactions'] as List).cast<Json>();
+  }
+  final Map<String, Json> screens = {};
+  late final List<Json> branches;
+  static Future<ScreenCatalog> load() async => ScreenCatalog(
+    jsonDecode(await rootBundle.loadString('assets/prototype.json')) as Json,
+  );
+  Json ui(String id) => screens[id]!['ui'] as Json;
+}
+
+class ScreenView extends StatelessWidget {
+  const ScreenView({
+    required this.id,
+    required this.catalog,
+    required this.onAction,
+    required this.fields,
+    required this.choices,
+    required this.values,
+    this.onChanged,
+    this.screenOverride,
+    this.home,
+    this.resolveScreen,
+    this.resolveHome,
+    this.testChrome = false,
+    this.preview = false,
+    this.busy = false,
+    this.error,
+    super.key,
+  });
+  final String id;
+  final ScreenCatalog catalog;
+  final ActionHandler onAction;
+  final Map<String, TextEditingController> fields;
+  final Map<String, int> choices;
+  final Map<String, double> values;
+  final VoidCallback? onChanged;
+  final Json? screenOverride;
+  final Widget? home;
+  final Json Function(String id)? resolveScreen;
+  final Widget? Function(String id)? resolveHome;
+  final bool testChrome, preview, busy;
+  final Object? error;
+  Widget blocks(List b) => Blocks(
+    b,
+    onAction: onAction,
+    fields: fields,
+    choices: choices,
+    values: values,
+    onChanged: onChanged,
+    skinPreview: id == 'S11'
+        ? ScreenView(
+            id: 'D01',
+            catalog: catalog,
+            onAction: (_) {},
+            fields: {},
+            choices: {},
+            values: {},
+            testChrome: true,
+          )
+        : null,
+  );
+  @override
+  Widget build(BuildContext context) {
+    final ui = screenOverride ?? catalog.ui(id),
+        root = ui['root'] as String?,
+        base = ui['base'] as String?;
+    return LightBackground(
+      child: LayoutBuilder(
+        builder: (context, c) {
+          final wide = c.maxWidth >= 800;
+          if (wide &&
+              id.startsWith('W') &&
+              MediaQuery.textScalerOf(context).scale(13) <= 17)
+            return wideReference(c.maxWidth);
+          final header = ui['header'] as String;
+          final content =
+              home ??
+              ((ui['blocks'] as List).firstOrNull?[0] == 'home'
+                  ? DeviceHome(mode: ui['blocks'][0][1], onAction: onAction)
+                  : blocks(ui['blocks'] as List));
+          if (base != null) {
+            final dialog = ui['overlay'] == 'dialog';
+            return Stack(
+              children: [
+                ExcludeSemantics(
+                  child: IgnorePointer(
+                    child: ScreenView(
+                      id: base,
+                      catalog: catalog,
+                      screenOverride: resolveScreen?.call(base),
+                      home: resolveHome?.call(base),
+                      resolveScreen: resolveScreen,
+                      resolveHome: resolveHome,
+                      onAction: (_) {},
+                      fields: resolveScreen == null ? {} : fields,
+                      choices: {},
+                      values: resolveScreen == null ? {} : values,
+                      testChrome: testChrome,
+                    ),
+                  ),
+                ),
+                ModalBarrier(
+                  color: const Color(0x5f14181b),
+                  dismissible: true,
+                  onDismiss: () => onAction('Back'),
+                  semanticsLabel: 'Dismiss $header',
+                ),
+                Align(
+                  alignment: dialog ? Alignment.center : Alignment.bottomCenter,
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      dialog ? 26 : 0,
+                      dialog ? 0 : 80,
+                      dialog ? 26 : 0,
+                      MediaQuery.viewInsetsOf(context).bottom,
+                    ),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: wide ? 520 : double.infinity,
+                        maxHeight: c.maxHeight - 100,
+                      ),
+                      child: Surface(
+                        radius: dialog ? 25 : 28,
+                        padding: EdgeInsets.fromLTRB(
+                          20,
+                          dialog ? 25 : 11,
+                          20,
+                          dialog ? 16 : 24,
+                        ),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              if (!dialog) ...[
+                                Center(
+                                  child: Container(
+                                    width: 36,
+                                    height: 4,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xffbbbcb5),
+                                      borderRadius: BorderRadius.circular(2),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                              ],
+                              Copy(header, size: dialog ? 22 : 23, bold: true),
+                              const SizedBox(height: 21),
+                              content,
+                              if (error != null)
+                                Copy('$error', color: const Color(0xff9e3421)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                if (busy)
+                  const Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: LinearProgressIndicator(),
+                  ),
+              ],
+            );
+          }
+          return Column(
+            children: [
+              if (testChrome && !wide)
+                SizedBox(
+                  height: 44,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+                    child: Row(
+                      children: [
+                        const Copy('9:41', size: 12, bold: true),
+                        const Spacer(),
+                        const Icon(Icons.signal_cellular_alt, size: 18),
+                        const SizedBox(width: 7),
+                        const Icon(Icons.battery_full, size: 20),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                SizedBox(height: MediaQuery.paddingOf(context).top),
+              if (preview && !testChrome)
+                InkWell(
+                  onTap: () => onAction('Preview catalog'),
+                  child: Container(
+                    width: double.infinity,
+                    color: const Color(0xfff8ead9),
+                    padding: const EdgeInsets.all(4),
+                    child: const Copy(
+                      'UI preview · Tap to browse states · No native operations',
+                      size: 11,
+                      center: true,
+                    ),
+                  ),
+                ),
+              Expanded(
+                child: Row(
+                  children: [
+                    if (wide) _rail(root ?? 'Devices'),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          if (root == null)
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 0, 12, 0),
+                              child: Row(
+                                children: [
+                                  IconAction(
+                                    'back',
+                                    'Back',
+                                    () => onAction('Back'),
+                                  ),
+                                  const Spacer(),
+                                  const Copy(
+                                    'HomeVerb',
+                                    size: 11,
+                                    color: muted,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              key: ValueKey('scroll:$id'),
+                              padding: EdgeInsets.fromLTRB(
+                                wide ? 30 : 20,
+                                root != null ? (id == 'P01' ? 13 : 16) : 8,
+                                wide ? 30 : 20,
+                                20,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Copy(
+                                          header,
+                                          size: root != null
+                                              ? (id == 'P01' ? 28 : 30)
+                                              : 25,
+                                          bold: true,
+                                        ),
+                                      ),
+                                      if (root == 'Devices') ...[
+                                        SizedBox(
+                                          height: 36,
+                                          width: 45,
+                                          child: IconAction(
+                                            'search',
+                                            'Search',
+                                            () => onAction('Search'),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 36,
+                                          width: 45,
+                                          child: IconAction(
+                                            'plus',
+                                            'Add device',
+                                            () => onAction('Add device'),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: root == 'Devices'
+                                        ? (id == 'D04' ? 16 : 8)
+                                        : 22,
+                                  ),
+                                  if (ui['subtitle'] != '' &&
+                                      ui['subtitle'] != null) ...[
+                                    Copy(ui['subtitle'], color: muted),
+                                    const SizedBox(height: 9),
+                                  ],
+                                  if (busy)
+                                    const Padding(
+                                      padding: EdgeInsets.only(bottom: 12),
+                                      child: LinearProgressIndicator(),
+                                    ),
+                                  if (error != null) ...[
+                                    blocks([
+                                      [
+                                        'status',
+                                        'Could not complete this operation',
+                                        '$error',
+                                        'error',
+                                      ],
+                                    ]),
+                                    ActionButton(
+                                      'Dismiss error',
+                                      style: 'secondary',
+                                      onPressed: () =>
+                                          onAction('Dismiss error'),
+                                    ),
+                                  ],
+                                  if (wide && id == 'W02')
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(
+                                          width: 276,
+                                          child: Rows(const [
+                                            ['Bedroom AC', 'Selected'],
+                                            ['Floor lamp', 'Living Room'],
+                                            ['Living room TV', 'Living Room'],
+                                            ['Air sensor', 'Living Room'],
+                                          ], onAction: onAction),
+                                        ),
+                                        const SizedBox(width: 36),
+                                        Expanded(
+                                          child: Column(
+                                            children: [
+                                              Climate(onAction: onAction),
+                                              Rows(const [
+                                                ['Power', 'On'],
+                                                ['Mode', 'Cool  ›'],
+                                                ['Fan', 'Auto  ›'],
+                                              ], onAction: onAction),
+                                              ActionButton(
+                                                'Refresh State',
+                                                style: 'secondary',
+                                                onPressed: () =>
+                                                    onAction('Refresh State'),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  else if (id == 'W01')
+                                    DeviceHome(mode: 'all', onAction: onAction)
+                                  else
+                                    content,
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (root != null && !wide) _nav(root),
+              if (testChrome && !wide)
+                Container(
+                  color: root != null ? const Color(0xfff6f2ea) : null,
+                  height: 20,
+                  alignment: Alignment.center,
+                  child: Container(
+                    width: 92,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: ink,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                )
+              else
+                SizedBox(height: MediaQuery.paddingOf(context).bottom),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget wideReference(double width) {
+    final detail = id == 'W02';
+    final panelWidth = width - 474;
+    return Stack(
+      children: [
+        Positioned(left: 0, top: 0, bottom: 0, child: _rail('Devices')),
+        const Positioned(
+          left: 118,
+          top: 37,
+          child: Copy('HomeVerb', size: 28, bold: true),
+        ),
+        const Positioned(left: 118, top: 83, child: Copy('My home', size: 16)),
+        if (!detail) ...[
+          Positioned(
+            right: 63,
+            top: 28,
+            child: IconAction('search', 'Search', () => onAction('Search')),
+          ),
+          Positioned(
+            right: 16,
+            top: 27,
+            child: IconAction(
+              'plus',
+              'Add device',
+              () => onAction('Add device'),
+            ),
+          ),
+          Positioned(
+            right: 16,
+            top: 72,
+            child: IconAction(
+              'settings',
+              'Manage rooms',
+              () => onAction('Manage rooms'),
+              color: muted,
+            ),
+          ),
+          Positioned(
+            left: 118,
+            top: 127,
+            right: 78,
+            child: blocks([
+              [
+                'tabs',
+                ['All', 'Living Room', 'Primary Bedroom', 'Bathroom'],
+                0,
+              ],
+            ]),
+          ),
+          const Positioned(
+            left: 118,
+            top: 183,
+            child: Copy('4 devices · Updated just now', size: 13, color: muted),
+          ),
+          Positioned(
+            left: 118,
+            right: 78,
+            top: 215,
+            bottom: 0,
+            child: SingleChildScrollView(
+              child: LayoutBuilder(
+                builder: (context, c) => Wrap(
+                  spacing: 18,
+                  runSpacing: 20,
+                  children: [
+                    for (final key in ['ac', 'lamp', 'tv', 'sensor'])
+                      SizedBox(
+                        width: (c.maxWidth - 36) / 3,
+                        child: DeviceTile(key, onAction: onAction),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ] else ...[
+          Positioned(
+            left: 118,
+            top: 138,
+            width: 276,
+            child: Rows(const [
+              ['Bedroom AC', 'Selected'],
+              ['Floor lamp', 'Living Room'],
+              ['Living room TV', 'Living Room'],
+              ['Air sensor', 'Living Room'],
+            ], onAction: onAction),
+          ),
+          const Positioned(
+            left: 430,
+            top: 137,
+            child: Copy('Bedroom AC', size: 27, bold: true),
+          ),
+          const Positioned(
+            left: 430,
+            top: 178,
+            child: Copy('Primary Bedroom', size: 14, color: muted),
+          ),
+          Positioned(
+            left: 430,
+            top: 216,
+            width: panelWidth,
+            child: Climate(onAction: onAction),
+          ),
+          Positioned(
+            left: 430,
+            top: 459,
+            width: panelWidth,
+            child: Rows(const [
+              ['Power', 'On'],
+              ['Mode', 'Cool  ›'],
+              ['Fan', 'Auto  ›'],
+            ], onAction: onAction),
+          ),
+          Positioned(
+            left: 430,
+            top: 620,
+            width: panelWidth,
+            child: ActionButton(
+              'Refresh State',
+              style: 'secondary',
+              onPressed: () => onAction('Refresh State'),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _nav(String root) => Container(
+    color: const Color(0xfff6f2ea),
+    height: 58,
+    child: Row(
+      children: List.generate(3, (i) {
+        const labels = ['Devices', 'Platforms', 'Settings'],
+            icons = ['home', 'platform', 'settings'];
+        final color = root == labels[i] ? accent : muted;
+        return Expanded(
+          child: Semantics(
+            selected: root == labels[i],
+            child: InkWell(
+              onTap: () => onAction(labels[i]),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Glyph(icons[i], size: 22, color: color),
+                  const SizedBox(height: 6),
+                  Copy(
+                    labels[i],
+                    size: 11,
+                    color: color,
+                    bold: root == labels[i],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }),
+    ),
+  );
+  Widget _rail(String root) => Container(
+    width: 88,
+    color: const Color(0xfff4f0e8),
+    child: Column(
+      children: [
+        const SizedBox(height: 26),
+        const Glyph('home', size: 28, color: accent),
+        const SizedBox(height: 64),
+        for (final entry in const {
+          'Devices': 'home',
+          'Platforms': 'platform',
+          'Settings': 'settings',
+        }.entries)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: InkWell(
+              onTap: () => onAction(entry.key),
+              child: Container(
+                width: 64,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: root == entry.key ? const Color(0xffe7d3c4) : null,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Glyph(
+                      entry.value,
+                      color: root == entry.key ? accent : muted,
+                    ),
+                    const SizedBox(height: 8),
+                    Copy(
+                      entry.key,
+                      size: 10,
+                      color: root == entry.key ? accent : muted,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+      ],
+    ),
+  );
+}
+
+class DeviceHome extends StatelessWidget {
+  const DeviceHome({
+    required this.mode,
+    required this.onAction,
+    this.cards,
+    this.roomNames,
+    this.filter = 'All',
+    super.key,
+  });
+  final String mode, filter;
+  final ActionHandler onAction;
+  final Widget? cards;
+  final List<String>? roomNames;
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Row(
+        children: [
+          const Copy('My home', size: 16, bold: true),
+          const SizedBox(width: 8),
+          const Icon(Icons.keyboard_arrow_down, size: 16),
+          const Spacer(),
+          SizedBox(
+            height: 32,
+            child: IconAction(
+              'settings',
+              'Manage rooms',
+              () => onAction('Manage rooms'),
+              color: muted,
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 14),
+      SizedBox(
+        height: 28 + MediaQuery.textScalerOf(context).scale(13),
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          children: [
+            for (final label
+                in roomNames ??
+                    const ['All', 'Living Room', 'Bedroom', 'Bathroom'])
+              Padding(
+                padding: const EdgeInsets.only(right: 18),
+                child: InkWell(
+                  onTap: () => onAction('room:$label'),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Copy(
+                        label,
+                        color:
+                            label == (mode == 'living' ? 'Living Room' : filter)
+                            ? ink
+                            : muted,
+                        bold:
+                            label ==
+                            (mode == 'living' ? 'Living Room' : filter),
+                      ),
+                      const SizedBox(height: 12),
+                      if (label == (mode == 'living' ? 'Living Room' : filter))
+                        Container(
+                          height: 3,
+                          width: label.length < 4 ? 18 : 58,
+                          decoration: BoxDecoration(
+                            color: accent,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+      Row(
+        children: [
+          Copy(
+            cards != null
+                ? 'Devices'
+                : mode == 'living'
+                ? '2 devices'
+                : '4 devices',
+            size: 11,
+            color: muted,
+          ),
+          const Spacer(),
+          Flexible(
+            child: InkWell(
+              onTap: () => onAction('Inspect cached state'),
+              child: Copy(
+                cards != null
+                    ? 'Saved locally'
+                    : mode == 'cached'
+                    ? 'Cached · 2h ago'
+                    : 'Updated just now',
+                size: 11,
+                color: muted,
+              ),
+            ),
+          ),
+          SizedBox(
+            width: 26,
+            height: 26,
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              tooltip: 'Refresh State',
+              onPressed: () => onAction('Refresh State'),
+              icon: const Glyph('refresh', size: 16, color: muted),
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 10),
+      cards ??
+          DeviceGrid(
+            keys: mode == 'living'
+                ? const ['lamp', 'tv']
+                : const ['ac', 'lamp', 'tv', 'sensor'],
+            onAction: onAction,
+            cached: mode == 'cached',
+            large: mode == 'large',
+          ),
+    ],
+  );
+}
+
+/// Isolated, explicitly labelled visual fixtures. Never constructed with a native client.
+class PreviewApp extends StatefulWidget {
+  const PreviewApp({
+    required this.catalog,
+    this.initial = 'D01',
+    this.testChrome = false,
+    super.key,
+  });
+  final ScreenCatalog catalog;
+  final String initial;
+  final bool testChrome;
+  @override
+  State<PreviewApp> createState() => PreviewAppState();
+}
+
+class PreviewAppState extends State<PreviewApp> {
+  late String id = widget.initial;
+  final List<String> history = [];
+  final Map<String, TextEditingController> fields = {};
+  final Map<String, int> choices = {};
+  final Map<String, double> values = {};
+  String? message;
+  bool showCatalog = false;
+  void go(String target) {
+    setState(() {
+      showCatalog = false;
+      history.add(id);
+      id = target;
+      for (final field in fields.values) {
+        field.dispose();
+      }
+      fields.clear();
+      choices.clear();
+      values.clear();
+    });
+  }
+
+  void action(String label) {
+    if (label == 'Preview catalog') {
+      setState(() => showCatalog = !showCatalog);
+      return;
+    }
+    if (label == 'Back' || label == 'Cancel' || label == 'Close') {
+      setState(() {
+        id = history.isEmpty
+            ? (widget.catalog.ui(id)['base'] ?? 'D01')
+            : history.removeLast();
+      });
+      return;
+    }
+    const direct = {
+      'Devices': 'D01',
+      'Platforms': 'P01',
+      'Settings': 'S01',
+      'Search': 'D03',
+      'Add device': 'A01',
+      'Add Device': 'A01',
+      'Manage rooms': 'R01',
+      'Appearance': 'S02',
+      'Rooms': 'R01',
+      'This Device': 'S10',
+      'Connections': 'S03',
+      'Recent Operations': 'S05',
+      'Local Data': 'S04',
+      'Diagnostics': 'S07',
+      'About': 'S08',
+      'open:ac': 'C01',
+      'open:lamp': 'C05',
+      'open:tv': 'C07',
+      'open:sensor': 'C13',
+      'room:Living Room': 'D02',
+      'room:All': 'D01',
+      'room:Bathroom': 'D09',
+      'room:Bedroom': 'D02',
+      'Rename': 'D07',
+      'Name': 'D07',
+      'Move to Room': 'R03',
+      'Room': 'R03',
+      'Reorder Devices': 'D10',
+      'Device Information': 'D06',
+      'Connection': 'D08',
+      'Mode': 'C02',
+      'Target temperature': 'C14',
+      'Increase target': 'C03',
+      'Decrease target': 'C03',
+      'Save Mode': 'C03',
+      'Save': 'C03',
+      'View Details': 'S05',
+      'View Evidence': 'S06',
+      'Preview Skin': 'S11',
+      'Text size and accessibility': 'D12',
+      'Account': 'P01',
+      'Discovery': 'A02',
+      'Continue': 'A03',
+      'Add 2 Devices': 'A06',
+      'Open Living Room': 'D02',
+      'Save Room': 'D09',
+      'Move 2 Devices': 'D02',
+      'Save Preference': 'D06',
+      'Clear Cached State': 'S04',
+      'Clear Recent Operations': 'S04',
+      'Remove Local Data': 'S09',
+      'Device information · Recent operations': 'D06',
+      'Home account': 'P09',
+      'Studio account': 'P10',
+      'Living room': 'P09',
+      'Example Climate': 'P13',
+      'Regions and compatibility': 'S12',
+      'Compatibility': 'S12',
+      'Remove From This Device': 'P11',
+      'Revoke Access · if supported': 'P12',
+      'Check Connection': 'P10',
+      'View Devices': 'D01',
+      'Back to Accounts': 'H01',
+      'Alex phone': 'H03',
+      'Morgan tablet': 'H03',
+      'Accept Authorization': 'H08',
+      'Cancel Transfer': 'H15',
+      'Remove Imported Authorization': 'P11',
+    };
+    if (label.startsWith('menu:')) {
+      go('D05');
+      return;
+    }
+    if (label.startsWith('power:')) {
+      setState(() => message = 'Preview only: no command was sent.');
+      return;
+    }
+    if (label == 'Refresh State') {
+      if (id == 'C04' || id == 'C03') {
+        go('C01');
+      } else if (id == 'D11') {
+        go('D01');
+      } else {
+        setState(() => message = 'Preview only: no device was contacted.');
+      }
+      return;
+    }
+    if (label == 'Save Name') {
+      go(id == 'S10' ? 'S01' : 'D06');
+      return;
+    }
+    if (label == 'Start Cycle') {
+      go(id == 'C10' ? 'C11' : 'C10');
+      return;
+    }
+    if (label == 'Remove Local Data' && id == 'S09') {
+      go('D04');
+      return;
+    }
+    final matching = widget.catalog.branches
+        .where(
+          (b) =>
+              b['source'] == id &&
+              ('${b['action']}').toLowerCase() == label.toLowerCase(),
+        )
+        .firstOrNull;
+    if (matching != null) {
+      go(matching['target']);
+      return;
+    }
+    if (direct[label] != null) {
+      go(direct[label]!);
+      return;
+    }
+    if (label.startsWith('choice:')) return;
+    setState(
+      () =>
+          message = 'Preview only: $label. No native operation was performed.',
+    );
+  }
+
+  @override
+  void dispose() {
+    for (final f in fields.values) {
+      f.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+    debugShowCheckedModeBanner: false,
+    theme: windowTheme(),
+    home: Scaffold(
+      body: Column(
+        children: [
+          if (!widget.testChrome)
+            Material(
+              color: const Color(0xfff8ead9),
+              child: InkWell(
+                onTap: () => action('Preview catalog'),
+                child: const Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Copy(
+                    'UI preview · Tap to browse states · No native operations',
+                    size: 11,
+                    center: true,
+                  ),
+                ),
+              ),
+            ),
+          Expanded(
+            child: ScreenView(
+              id: id,
+              catalog: widget.catalog,
+              onAction: action,
+              fields: fields,
+              choices: choices,
+              values: values,
+              onChanged: () => setState(() {}),
+              testChrome: widget.testChrome,
+              preview: false,
+            ),
+          ),
+        ],
+      ),
+      bottomSheet: showCatalog
+          ? Material(
+              child: SizedBox(
+                height: 420,
+                child: ListView(
+                  children: [
+                    ListTile(
+                      title: const Text('Isolated preview scenarios'),
+                      subtitle: const Text('Simulated events never call Core.'),
+                      trailing: IconButton(
+                        tooltip: 'Close catalog',
+                        icon: const Icon(Icons.close),
+                        onPressed: () => setState(() => showCatalog = false),
+                      ),
+                    ),
+                    for (final branch in widget.catalog.branches.where(
+                      (b) => b['source'] == id,
+                    ))
+                      ListTile(
+                        key: ValueKey(
+                          'branch:${branch['source']}:${branch['action']}',
+                        ),
+                        title: Text('${branch['action']}'),
+                        subtitle: Text('Simulate event → ${branch['target']}'),
+                        onTap: () => go(branch['target']),
+                      ),
+                    const Divider(),
+                    for (final screen in widget.catalog.screens.values)
+                      ListTile(
+                        title: Text('${screen['id']} · ${screen['title']}'),
+                        onTap: () => go(screen['id']),
+                      ),
+                  ],
+                ),
+              ),
+            )
+          : message == null
+          ? null
+          : Material(
+              child: ListTile(
+                title: Text(message!),
+                trailing: IconButton(
+                  tooltip: 'Dismiss',
+                  onPressed: () => setState(() => message = null),
+                  icon: const Icon(Icons.close),
+                ),
+              ),
+            ),
+    ),
+  );
+}

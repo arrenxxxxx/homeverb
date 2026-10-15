@@ -102,7 +102,7 @@ class NativeClient implements CoreClient {
   final NativeBindings bindings;
   final Set<String> active = {};
   Set<String> methods = {};
-  bool _foreground = true, _closed = false;
+  bool _foreground = true, _closed = false, _suspended = false;
   static String defaultLibrary() => Platform.isIOS
       ? 'process'
       : Platform.isMacOS
@@ -147,7 +147,7 @@ class NativeClient implements CoreClient {
   @override
   Future<dynamic> call(String method, [Json fields = const {}]) async {
     if (_closed) throw NativeFailure('HOST_CLOSED', 'Reopen the application.');
-    if (!_foreground)
+    if (!_foreground || _suspended)
       throw NativeFailure('HOST_BACKGROUND', 'Return to the foreground.');
     if (methods.isNotEmpty && !methods.contains(method)) {
       throw NativeFailure('METHOD_UNAVAILABLE', method);
@@ -172,17 +172,33 @@ class NativeClient implements CoreClient {
       );
     } finally {
       active.remove(id);
+      if (active.isEmpty && _foreground && !_closed && _suspended) {
+        _suspended = false;
+        bindings.foreground(handle, true);
+      }
     }
   }
 
   @override
   void foreground(bool value) {
     _foreground = value;
-    if (!_closed) bindings.foreground(handle, value);
+    if (_closed) return;
+    if (!value) {
+      _suspended = true;
+      bindings.foreground(handle, false);
+    } else if (active.isEmpty) {
+      _suspended = false;
+      bindings.foreground(handle, true);
+    }
   }
 
   @override
   void cancelAll() {
+    // Hold the native gate closed until even not-yet-started isolates drain.
+    if (active.isNotEmpty && !_closed) {
+      _suspended = true;
+      bindings.foreground(handle, false);
+    }
     for (final id in active.toList()) {
       final input = id.toNativeUtf8();
       try {

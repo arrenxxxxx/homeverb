@@ -1955,22 +1955,23 @@
             "blocks": [
               [
                 "status",
-                "Authorization saved securely",
-                "Example Home \u00b7 Home account \u00b7 Europe",
-                "success"
+                "Retrieving account devices",
+                "Authorization finished. Bound devices are retrieved automatically.",
+                "neutral"
               ],
               [
-                "button",
-                "Find Devices"
-              ],
-              [
-                "button",
-                "Done",
-                "secondary"
+                "progress",
+                0.4,
+                "Retrieving supported appliances"
               ],
               [
                 "note",
-                "Devices are listed after explicit discovery."
+                "No LAN scan or second Find Devices step is required. Preview only."
+              ],
+              [
+                "button",
+                "Cancel",
+                "secondary"
               ]
             ],
             "root": null,
@@ -4748,8 +4749,8 @@
     },
     {
       "source": "P08",
-      "action": "Find Devices",
-      "target": "A04"
+      "action": "Device retrieval completes",
+      "target": "A06"
     },
     {
       "source": "P08",

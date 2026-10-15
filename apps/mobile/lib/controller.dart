@@ -7,7 +7,7 @@ class HomeController extends ChangeNotifier {
   final CoreClient core;
   final LocalPreferences preferences;
   List<Json> rooms = [], cards = [], history = [];
-  Json? description, snapshot, receipt, diagnostics;
+  Json? description, snapshot, receipt, diagnostics, batchResult;
   final Map<String, Json> snapshots = {};
   String? selectedDevice, selectedRoom, editingRoom;
   String component = 'main', filter = 'All', search = '';
@@ -73,6 +73,8 @@ class HomeController extends ChangeNotifier {
       capabilities.where((c) => c['id'] == id).firstOrNull;
   Future<bool> selectDevice(String id) => perform(() async {
     selectedDevice = id;
+    description = null;
+    snapshot = null;
     description = await core.call('describe_device', {'device': id}) as Json;
     component = description!['device']['components'][0]['id'] as String;
     snapshot = snapshots[id];
@@ -96,6 +98,32 @@ class HomeController extends ChangeNotifier {
   }
 
   Future<bool> refresh() => perform(() => read());
+  Future<bool> refreshReceipt() => perform(() async {
+    final device = receipt?['device_id'] as String?;
+    if (device == null) {
+      throw NativeFailure(
+        'STATE_UNAVAILABLE',
+        'Select a device receipt to refresh.',
+      );
+    }
+    final descriptor =
+        await core.call('describe_device', {'device': device}) as Json;
+    for (final part in descriptor['device']['components'] as List) {
+      final result =
+          await core.call('read_state', {
+                'device': device,
+                'component': part['id'],
+                'connection': preferences.route(device),
+                'cached': false,
+              })
+              as Json;
+      if (part['id'] == descriptor['device']['components'][0]['id']) {
+        snapshots[device] = result;
+      }
+      if (selectedDevice == device && component == part['id'])
+        snapshot = result;
+    }
+  });
   Future<bool> refreshCards() => perform(() async {
     for (final c in visibleCards) {
       final d = c['device'] as Json;
@@ -199,6 +227,50 @@ class HomeController extends ChangeNotifier {
                 )
                 as List)
             .cast<Json>();
+  });
+  Future<bool> executeSelectedPower(bool on) => perform(() async {
+    if (selection.isEmpty || selection.length > 32) {
+      throw NativeFailure('INVALID_ARGUMENT', 'Select 1–32 distinct devices.');
+    }
+    final commands = <Json>[];
+    for (final device in selection) {
+      final descriptor =
+          await core.call('describe_device', {'device': device}) as Json;
+      final candidates = <Json>[];
+      for (final part in descriptor['device']['components'] as List) {
+        for (final capability in descriptor['capabilities'] as List) {
+          if (capability['id'] == 'power' &&
+              (capability['component_id'] == null ||
+                  capability['component_id'] == part['id']) &&
+              capability['actions']?['set']?['risk'] == 'low' &&
+              capability['actions']?['set']?['parameters']?['properties']?['state']?['type'] ==
+                  'boolean') {
+            candidates.add({'component': part['id']});
+          }
+        }
+      }
+      if (candidates.length != 1) {
+        throw NativeFailure(
+          'CAPABILITY_UNSUPPORTED',
+          'Selection requires one unambiguous low-risk power control per device.',
+        );
+      }
+      commands.add({
+        'schema_version': '1.0',
+        'request_id': uniqueId(),
+        'device_id': device,
+        'component_id': candidates.single['component'],
+        'capability': 'power',
+        'action': 'set',
+        'arguments': {'state': on},
+        'connection': preferences.route(device),
+        'timeout_ms': 10000,
+        'wait_for': 'verified',
+      });
+    }
+    final batch = {'schema_version': '1.0', 'commands': commands};
+    await core.call('plan_batch', {'batch': batch});
+    batchResult = await core.call('execute_batch', {'batch': batch}) as Json;
   });
   Future<bool> loadReceipt(String id) => perform(() async {
     receipt = await core.call('get_execution', {'request_id': id}) as Json;

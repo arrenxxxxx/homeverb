@@ -8,8 +8,8 @@ import unicodedata
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SKIP_PARTS = {'.git', '.venv', 'venv', '__pycache__', 'node_modules', 'target', 'build'}
-TEXT_SUFFIXES = {'.md', '.mmd', '.svg', '.json', '.yml', '.yaml', '.py', '.sh', '.txt', '.toml', '.rs', '.h', '.mjs'}
+SKIP_PARTS = {'.git', '.venv', 'venv', '__pycache__', 'node_modules', 'target', 'build', '.dart_tool', '.fvm', '.idea', 'ephemeral'}
+TEXT_SUFFIXES = {'.md', '.mmd', '.svg', '.json', '.yml', '.yaml', '.py', '.sh', '.txt', '.toml', '.rs', '.h', '.mjs', '.dart'}
 TEXT_NAMES = {'.gitignore', '.gitattributes', '.editorconfig', 'commit-msg'}
 
 

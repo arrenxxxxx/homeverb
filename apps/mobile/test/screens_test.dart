@@ -1,0 +1,206 @@
+import 'dart:io';
+import 'dart:ui' as ui;
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:homeverb_mobile/screens.dart';
+
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  late ScreenCatalog catalog;
+  setUpAll(() async {
+    final font = FontLoader('Inter')
+      ..addFont(rootBundle.load('assets/fonts/Inter-Regular.otf'))
+      ..addFont(rootBundle.load('assets/fonts/Inter-SemiBold.otf'));
+    await font.load();
+    await (FontLoader(
+      'MaterialIcons',
+    )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
+    catalog = await ScreenCatalog.load();
+  });
+  testWidgets('all 82 states render native widgets and capture screenshots', (
+    tester,
+  ) async {
+    debugDisableShadows = false;
+    addTearDown(() => debugDisableShadows = true);
+    final output = Directory('build/verification/screens');
+    output.createSync(recursive: true);
+    final boundary = GlobalKey();
+    for (final id in catalog.screens.keys) {
+      final wide = id.startsWith('W');
+      tester.view.devicePixelRatio = 2;
+      tester.view.physicalSize = wide
+          ? const Size(2048, 1536)
+          : const Size(780, 1688);
+      await tester.pumpWidget(
+        RepaintBoundary(
+          key: boundary,
+          child: PreviewApp(
+            key: ValueKey(id),
+            catalog: catalog,
+            initial: id,
+            testChrome: true,
+          ),
+        ),
+      );
+      await tester.runAsync(() async {
+        for (final asset in [
+          'window-light-background',
+          'ac',
+          'lamp',
+          'tv',
+          'sensor',
+        ]) {
+          await precacheImage(
+            AssetImage('assets/$asset.png'),
+            tester.element(find.byType(PreviewApp)),
+          );
+        }
+      });
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull, reason: id);
+      await tester.runAsync(() async {
+        final image =
+            await (boundary.currentContext!.findRenderObject()
+                    as RenderRepaintBoundary)
+                .toImage(pixelRatio: 2);
+        final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+        File(
+          '${output.path}/$id.png',
+        ).writeAsBytesSync(bytes!.buffer.asUint8List());
+        image.dispose();
+      });
+      expect(
+        find.byType(Text),
+        findsWidgets,
+        reason: '$id must contain real text widgets',
+      );
+    }
+    tester.view.resetPhysicalSize();
+    tester.view.resetDevicePixelRatio();
+    debugDisableShadows = true;
+  });
+  testWidgets(
+    'root navigation, sheets, actual input, selection and caller back',
+    (tester) async {
+      tester.view.physicalSize = const Size(780, 1688);
+      tester.view.devicePixelRatio = 2;
+      final key = GlobalKey<PreviewAppState>();
+      await tester.pumpWidget(
+        PreviewApp(key: key, catalog: catalog, testChrome: true),
+      );
+      await tester.pumpAndSettle();
+      Future<void> tap(String text) async {
+        final target = find.text(text).last;
+        await tester.ensureVisible(target);
+        await tester.tap(target);
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+      }
+
+      await tap('Settings');
+      expect(key.currentState!.id, 'S01');
+      await tap('Appearance');
+      expect(key.currentState!.id, 'S02');
+      await tap('Preview Skin');
+      expect(key.currentState!.id, 'S11');
+      await tap('Back to Appearance');
+      expect(key.currentState!.id, 'S02');
+      await tester.tap(find.byTooltip('Back'));
+      await tester.pumpAndSettle();
+      key.currentState!.go('R02');
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'Kitchen edited');
+      expect(find.text('Kitchen edited'), findsOneWidget);
+      await tap('Cancel');
+      key.currentState!.go('C01');
+      await tester.pumpAndSettle();
+      await tap('Mode');
+      expect(key.currentState!.id, 'C02');
+      await tap('Heat');
+      expect(key.currentState!.choices.values.single, 1);
+      await tap('Save Mode');
+      expect(key.currentState!.id, 'C03');
+      key.currentState!.go('H03');
+      await tester.pumpAndSettle();
+      await tap('Codes Do Not Match');
+      expect(key.currentState!.id, 'H14');
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    },
+  );
+  testWidgets('all screens reflow at 320 width and 200 percent text', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(640, 1688);
+    tester.view.devicePixelRatio = 2;
+    for (final id in catalog.screens.keys.where((id) => !id.startsWith('W'))) {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+          child: PreviewApp(
+            key: ValueKey('large-$id'),
+            catalog: catalog,
+            initial: id,
+            testChrome: true,
+          ),
+        ),
+      );
+      await tester.runAsync(() async {
+        for (final asset in [
+          'window-light-background',
+          'ac',
+          'lamp',
+          'tv',
+          'sensor',
+        ]) {
+          await precacheImage(
+            AssetImage('assets/$asset.png'),
+            tester.element(find.byType(PreviewApp)),
+          );
+        }
+      });
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull, reason: id);
+    }
+    tester.view.resetPhysicalSize();
+    tester.view.resetDevicePixelRatio();
+  });
+  testWidgets('click all 198 explicitly simulated atlas branches', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(780, 1688);
+    tester.view.devicePixelRatio = 2;
+    final key = GlobalKey<PreviewAppState>();
+    await tester.pumpWidget(PreviewApp(key: key, catalog: catalog));
+    await tester.pumpAndSettle();
+    expect(catalog.branches.length, 198);
+    for (final branch in catalog.branches) {
+      key.currentState!.go(branch['source']);
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.text('UI preview · Tap to browse states · No native operations'),
+      );
+      await tester.pumpAndSettle();
+      final button = find.byKey(
+        ValueKey('branch:${branch['source']}:${branch['action']}'),
+      );
+      await tester.scrollUntilVisible(
+        button,
+        160,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+      expect(
+        key.currentState!.id,
+        branch['target'],
+        reason: '${branch['source']}: ${branch['action']}',
+      );
+      expect(tester.takeException(), isNull);
+    }
+    tester.view.resetPhysicalSize();
+    tester.view.resetDevicePixelRatio();
+  });
+}

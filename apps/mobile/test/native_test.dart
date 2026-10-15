@@ -181,4 +181,93 @@ void main() {
       await dir.delete(recursive: true);
     }
   });
+  test(
+    'rapid background and resume drains queued calls before reopening admission',
+    () async {
+      final dir = await Directory.systemTemp.createTemp('homeverb-lifecycle-');
+      final core = await NativeClient.open(
+        dataDir: dir.path,
+        libraryPath: library,
+        allowMockWrites: true,
+        scenario: 'slow-before-send',
+      );
+      try {
+        final devices = await core.call('discover') as List;
+        final command = {
+          'schema_version': '1.0',
+          'request_id': uniqueId(),
+          'device_id': devices.single['id'],
+          'component_id': 'main',
+          'capability': 'power',
+          'action': 'set',
+          'arguments': {'state': true},
+          'connection': 'auto',
+          'timeout_ms': 10000,
+          'wait_for': 'verified',
+        };
+        final call = core.call('execute', {'command': command});
+        core.foreground(false);
+        core.foreground(true);
+        try {
+          final result = await call as Json;
+          expect(result['status'], 'failed');
+        } on NativeFailure catch (e) {
+          expect(['HOST_BACKGROUND', 'CANCELLED'].contains(e.code), true);
+        }
+        expect(core.active, isEmpty);
+        expect(await core.call('list_devices'), isNotEmpty);
+        final receipts = await core.call('recent_executions') as List;
+        expect(
+          receipts.every(
+            (r) =>
+                (r['attempts'] as List).every((a) => a['phase'] == 'not_sent'),
+          ),
+          true,
+        );
+      } finally {
+        await core.close();
+        await dir.delete(recursive: true);
+      }
+    },
+  );
+  test(
+    'batch envelopes and nested partial results survive Dart decoding',
+    () async {
+      final dir = await Directory.systemTemp.createTemp('homeverb-batch-');
+      final core = await NativeClient.open(
+        dataDir: dir.path,
+        libraryPath: library,
+        allowMockWrites: true,
+        scenario: 'partial',
+      );
+      try {
+        final device = (await core.call('discover') as List).single;
+        final command = {
+          'schema_version': '1.0',
+          'request_id': uniqueId(),
+          'device_id': device['id'],
+          'component_id': 'main',
+          'capability': 'climate',
+          'action': 'set',
+          'arguments': {'mode': 'heat', 'target_temperature': 25},
+          'connection': 'auto',
+          'timeout_ms': 10000,
+          'wait_for': 'verified',
+        };
+        final batch = {
+          'schema_version': '1.0',
+          'commands': [command],
+        };
+        expect(await core.call('plan_batch', {'batch': batch}), isNotNull);
+        final receipt =
+            await core.call('execute_batch', {'batch': batch}) as Json;
+        expect(receipt['status'], 'partial');
+        expect(receipt['items'].single['status'], 'partial');
+        expect(receipt['items'].single['items'].length, 2);
+      } finally {
+        await core.close();
+        await dir.delete(recursive: true);
+      }
+    },
+  );
 }
