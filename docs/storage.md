@@ -6,7 +6,7 @@
 |---|---|---|
 | Configuration | Profiles, route defaults, UI preferences | Passwords or tokens |
 | SQLite | Random profile/account/credential references, device descriptors, local rooms/preferences, latest snapshots, bounded detailed receipts, retired request IDs | Plaintext credentials, provider account identifiers, or continuous device history |
-| System secret store | Account sessions, refresh tokens, pairing keys | Ordinary diagnostic logs |
+| System secret store | Account sessions, refresh tokens, pairing keys, private provider identity/device bindings | Ordinary diagnostic logs |
 | Diagnostic logs | Redacted errors, request IDs, durations | Full vendor responses or Authorization headers |
 
 Hosts inject paths following platform application-directory conventions. Do not hardcode a user's home directory. Desktop CLI/MCP may share storage for the same explicit user/profile. Mobile sandboxes remain independent; there is no automatic sync.
@@ -30,7 +30,7 @@ The SQLite `user_version` records the schema version. Each profile has its own d
 
 Batch room assignments resolve every selected device and destination inside one immediate transaction, then update only `room_id`. Any failure rolls back all selected devices. Responses follow request order without changing stored card order. No additional table or schema upgrade is needed.
 
-Account records contain only local references, provider/region, a local label, and `pending` or `stored` credential state. The profile namespace and account/credential references are random UUIDs persisted before credential writes. Account ID, provider, region, and credential reference cannot be rebound; rename changes only the label. Provider identity matching and real device persistence remain pending. JSON columns are not permission to hide secrets in the database. Export using explicit allowlists. See [ADR-0021](adr/0021-persistent-account-vault.md).
+Account records contain only local references, provider/region, a local label, and `pending` or `stored` credential state. The profile namespace and account/credential references are random UUIDs persisted before credential writes. Account ID, provider, region, and credential reference cannot be rebound; rename changes only the label. Meiju's internal protected payload now stores exact subject matching and appliance-to-local-ID bindings; live provider identity evidence and descriptor publication remain pending. JSON columns are not permission to hide secrets in the database. Export using explicit allowlists. See [ADR-0021](adr/0021-persistent-account-vault.md).
 
 ## Native credential storage
 
@@ -47,6 +47,8 @@ The local synthetic test verifies create/read/reopen/replace, profile isolation,
 Hold the account lease across session read, any future provider refresh, and replacement. `store_session` persists `pending` before calling the secure store, then records `stored` only after confirmed success. An interruption before finalization leaves pending and ordinary reads return `ACCOUNT_SESSION_UNCONFIRMED`. If the initial metadata update fails, no secret write starts. `stored` proves local persistence only; the adapter must still check expiry, provider identity and validity. A missing referenced secret returns `AUTH_REQUIRED`.
 
 Trusted recovery uses `inspect_session`, validates those exact bytes with the provider while retaining the lease, then calls `confirm_session`. Confirmation rereads and compares the bytes before marking stored, without repeating the secret mutation. A mismatch or absent entry remains unconfirmed. There is no automatic recovery, refresh, credential deletion, or public account method. Actual provider rotation and mobile stores remain pending.
+
+The [Meiju private account layer](../crates/midea/src/account.rs) stores its versioned session and identity map together under the leased credential reference. A complete payload is bound to the immutable local account/provider/region/reference. New appliance IDs receive random local device, cloud-connection and identity-reference IDs before descriptor publication. Reauthorization requires the same provider-validated subject; no subject or appliance identifier is written to SQLite. Every changed map uses the same pending/stored transition as session replacement. Uncertain saves return no generated bindings and require explicit recovery; unchanged maps do not rewrite credentials. Missing or malformed protected state cannot be reset through an existing lease. See [ADR-0024](adr/0024-meiju-private-device-bindings.md) for account scope and remaining cross-account identity work.
 
 ## Concurrency
 

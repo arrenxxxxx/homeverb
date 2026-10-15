@@ -1,5 +1,7 @@
 //! Meiju cloud read protocols. Live authentication and HTTPS are not registered yet.
 
+mod account;
+pub use account::{DeviceBinding, MeijuAccount};
 mod state;
 pub use state::{CloudState, StateQuery, read_cloud_state};
 

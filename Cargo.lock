@@ -751,10 +751,13 @@ dependencies = [
  "chrono",
  "homeverb-core",
  "homeverb-domain",
+ "homeverb-storage",
  "serde",
  "serde_json",
  "tokio",
  "tokio-util",
+ "uuid",
+ "zeroize",
 ]
 
 [[package]]

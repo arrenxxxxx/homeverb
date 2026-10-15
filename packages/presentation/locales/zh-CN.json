@@ -74,6 +74,7 @@
   "error.REQUEST_NOT_FOUND": "当前配置中未找到此回执，无法据此判断设备是否已执行，请勿自动重发。",
   "error.AUTH_REQUIRED": "请重新连接此平台账号后继续。",
   "error.ACCOUNT_NOT_FOUND": "此本地账号已不可用，请重新加载账号列表。",
+  "error.ACCOUNT_IDENTITY_CONFLICT": "当前授权的不是原平台账号，请重新连接原账号以保留设备绑定。",
   "error.ACCOUNT_SESSION_UNCONFIRMED": "已保存的会话需要验证，请重新连接此平台账号后继续。",
   "error.MIDEA_RESPONSE_INVALID": "平台返回的数据格式暂不支持。",
   "error.MIDEA_REQUEST_REJECTED": "平台拒绝了读取请求。",

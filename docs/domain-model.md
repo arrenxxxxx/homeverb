@@ -30,7 +30,7 @@ Deduplicate using strong vendor correlation IDs or verified protocol mappings. M
 
 ## Local organization
 
-The trusted native account vault persists immutable random account and credential references within a random profile namespace. Only its local label can be renamed. Credential state is `pending` or `stored`; neither establishes provider identity or current authorization. A lease coordinates session reads and updates. Account summaries, provider identity matching and UI authentication methods remain separate future contracts; see [ADR-0021](adr/0021-persistent-account-vault.md).
+The trusted native account vault persists immutable random account and credential references within a random profile namespace. Only its local label can be renamed. Credential state is `pending` or `stored`; neither establishes provider identity or current authorization. A lease coordinates session reads and updates. Meiju's protected payload retains an exact native-validated subject and stable per-account appliance bindings under [ADR-0024](adr/0024-meiju-private-device-bindings.md). Actual provider identity evidence, cross-account deduplication, account summaries and UI authentication methods remain separate future work; see [ADR-0021](adr/0021-persistent-account-vault.md).
 
 Room IDs are generated locally. Names are trimmed, limited to 80 characters, and unique after Unicode lowercasing. Device preferences survive rediscovery. Deleting a room unassigns its devices without removing them or changing their permissions. Null alias restores the adapter's label. Duplicate aliases are allowed, so ambiguous selection requires an exact device ID. Renaming or moving a device never changes its identity, routes, credentials, or capabilities.
 

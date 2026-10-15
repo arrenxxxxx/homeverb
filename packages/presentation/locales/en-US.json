@@ -74,6 +74,7 @@
   "error.REQUEST_NOT_FOUND": "No receipt was found in this profile. This does not establish whether the device acted; do not automatically resend.",
   "error.AUTH_REQUIRED": "Reconnect this platform account to continue.",
   "error.ACCOUNT_NOT_FOUND": "This local account is no longer available. Reload the account list.",
+  "error.ACCOUNT_IDENTITY_CONFLICT": "This is a different platform account. Reconnect the original account to keep its device bindings.",
   "error.ACCOUNT_SESSION_UNCONFIRMED": "The saved session needs validation. Reconnect this platform account to continue.",
   "error.MIDEA_RESPONSE_INVALID": "The platform returned an unsupported response.",
   "error.MIDEA_REQUEST_REJECTED": "The platform rejected the read request.",

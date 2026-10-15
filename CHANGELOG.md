@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Meiju private account and device bindings
+
+- Persist the provider-validated subject, opaque session and stable account-scoped appliance bindings in one protected vault payload.
+- Preserve local IDs across retrieval and session replacement; reject identity conflicts and retain mappings missing from partial or empty lists.
+- Return new bindings only after confirmed storage, keep uncertain updates pending, and refuse implicit resets of missing/corrupt protected state.
+- Add synthetic SQLite/secret-store coverage and progressive integration guidance; native API 1.0.0 and live authentication admission are unchanged.
+
 ### Meiju cloud state decoding
 
 - Add bounded, explicit cloud state queries and selected AC/E1/CA field decoding behind the injected read transport.
