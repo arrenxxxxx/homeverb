@@ -327,3 +327,16 @@ passed. No Flutter worktree, real account or appliance was accessed by this phas
 Emulator startup, APK integration, Android Keystore and physical/off-LAN acceptance
 remain unverified; no emulator was available in the inspected SDK. See the
 [Android build and startup guide](development/08-android-native.md).
+
+## Android file-lock portability
+
+The first Android 15 x86_64 app launch exposed unsupported standard-library file
+locking in Rust 1.96. An isolated Android executable reproduced `Unsupported` for
+shared, exclusive and unlock operations. The storage implementation now uses
+Bionic `flock` only on Android, retaining nonblocking migration, device and account
+leases and release on close. Other targets retain their existing locking calls.
+All 13 storage tests passed on Linux and an Android 15 x86_64 emulator, including
+shared/exclusive contention, release, migrations, rollback and replay retention.
+There is no lock-free fallback or change to SQLite schema 4, the native API, lock
+filenames, write authority or outcome semantics. See the app's
+[verification report](../apps/mobile/verification.md) for runtime results.

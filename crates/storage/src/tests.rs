@@ -114,9 +114,9 @@ fn lock_names_preserve_legacy_paths_and_bound_long_utf8_identifiers() {
             .write(true)
             .open(directory.0.join("locks").join(filename))
             .unwrap();
-        assert!(file.try_lock().is_err());
+        assert!(file_lock::exclusive(&file).is_err());
         drop(lock);
-        file.try_lock().unwrap();
+        file_lock::exclusive(&file).unwrap();
     }
 }
 
@@ -614,4 +614,43 @@ fn cleanup_storage_failures_roll_back_cache_history_and_retirement_together() {
         "REQUEST_RETIRED"
     );
     assert_eq!(store.devices().unwrap().len(), 1);
+}
+
+#[test]
+fn file_locks_share_readers_exclude_writers_and_release_on_close() {
+    let directory = Directory::new();
+    let open = || {
+        OpenOptions::new()
+            .read(true)
+            .write(true)
+            .create(true)
+            .truncate(false)
+            .open(directory.0.join("lease"))
+            .unwrap()
+    };
+    let first = open();
+    let second = open();
+    file_lock::shared(&first).unwrap();
+    file_lock::shared(&second).unwrap();
+    let writer = open();
+    assert_eq!(
+        file_lock::exclusive(&writer).unwrap_err().kind(),
+        std::io::ErrorKind::WouldBlock
+    );
+    file_lock::unlock(&first).unwrap();
+    assert!(file_lock::exclusive(&writer).is_err());
+    drop(second);
+    file_lock::exclusive(&writer).unwrap();
+    assert_eq!(
+        file_lock::shared(&first).unwrap_err().kind(),
+        std::io::ErrorKind::WouldBlock
+    );
+    assert_eq!(
+        file_lock::exclusive(&first).unwrap_err().kind(),
+        std::io::ErrorKind::WouldBlock
+    );
+    drop(writer);
+    file_lock::exclusive(&first).unwrap();
+    file_lock::unlock(&first).unwrap();
+    file_lock::shared(&first).unwrap();
 }

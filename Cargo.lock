@@ -972,6 +972,7 @@ version = "0.2.0"
 dependencies = [
  "homeverb-core",
  "homeverb-domain",
+ "libc",
  "rusqlite",
  "serde",
  "serde_json",
