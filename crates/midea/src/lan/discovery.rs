@@ -44,7 +44,19 @@ impl DiscoveryNetwork {
         Ipv4Addr::from(u32::from(self.address) | !self.mask)
     }
 
-    fn admits(&self, source: Ipv4Addr) -> bool {
+    pub(super) fn local_address(&self) -> Ipv4Addr {
+        self.address
+    }
+
+    #[cfg(test)]
+    pub(super) fn loopback() -> Self {
+        Self {
+            address: Ipv4Addr::LOCALHOST,
+            mask: 0xffff_ff00,
+        }
+    }
+
+    pub(super) fn admits(&self, source: Ipv4Addr) -> bool {
         let network = u32::from(self.address) & self.mask;
         u32::from(source) & self.mask == network
             && u32::from(source) != network

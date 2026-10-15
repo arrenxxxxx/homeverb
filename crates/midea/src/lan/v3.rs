@@ -133,7 +133,7 @@ pub struct V3Response {
     pub payload: SecretBytes,
 }
 
-fn padding_for(size: usize) -> Result<usize> {
+pub(super) fn padding_for(size: usize) -> Result<usize> {
     if size == 0 || size > MAX_FRAME {
         return Err(Error::invalid());
     }

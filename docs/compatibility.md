@@ -894,3 +894,32 @@ acceptance: 35 passed; native contract: 31 methods/51 fictional examples plus
 approval checks; Python tooling: 33 passed; presentation: six passed. All three
 Android AAR variants passed build/export/16 KiB ELF checks. No Android network
 runtime, real account, appliance operation or separate Flutter worktree was used.
+
+## Operation-owned V3 TCP exchange
+
+The transport follow-up to [ADR-0046](adr/0046-bounded-v3-lan-codec.md) adds one
+scoped TCP connection, handshake and command exchange within the inherited
+Operation. Header-first reads bound allocation and preserve frame boundaries.
+Preflight rejects out-of-scope/self/broadcast/network endpoints, port zero,
+invalid payload sizes and reused transmission markers. There is no reconnect,
+retry, pooling, background worker or connection returned to the caller.
+
+Eight loopback tests cover exact fictional handshake/command bytes, fragmented
+and coalesced frames, connection and handshake refusal, malformed/lost responses,
+and socket closure before/after command transmission on cancellation, deadline
+and dropped futures. Handshake failures leave the command not sent; starting its
+write marks possible transmission, which errors cannot clear. A valid response
+does not mark acceptance or prove identity, freshness or physical execution.
+
+On October 16, 2026, formatting, workspace Clippy, workspace/example builds and
+local validators passed. Rust tests: 348 passed, two explicitly ignored; runtime
+acceptance: 35 passed; native contract: 31 methods/51 fictional examples plus
+approval checks; Python tooling: 33 passed; presentation: six passed. All three
+Android AAR variants passed build/export/16 KiB ELF checks. Android network runtime
+and physical device acceptance were not exercised.
+
+Native API 1.14.1, JSON methods, exports, SQLite schema 4, protected payload 3 and
+cloud behavior are unchanged. No adapter/entry point invokes this low-level
+helper yet. Protected identity/credentials, current membership, grants, model
+admission and inner response evidence must gate future real LAN access. No real
+account, household endpoint or separate Flutter worktree was accessed.

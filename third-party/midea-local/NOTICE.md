@@ -18,8 +18,10 @@ window, response limits and cancellation. No upstream network loops, credential
 caches, device logging or automatic discovery are copied.
 The V3 port uses protected handshake/session buffers, bounded complete frames,
 fixed errors, strict direction/digest checks and nonwrapping request counters.
-It includes digest bytes in declared lengths even for aligned plaintext. It
-neither fetches credentials nor opens TCP connections or copies default keys.
+It includes digest bytes in declared lengths even for aligned plaintext. An
+operation-owned TCP helper replaces persistent/reconnecting upstream transport
+with one scoped exchange, bounded exact frame reads and command-send tracking.
+It neither fetches credentials nor copies default keys or automatic retries.
 Public fixed wire constants do not authenticate a device or protect HomeVerb
 credentials. LAN session authentication and physical compatibility are not
 established by this port.

@@ -268,3 +268,13 @@ authorize endpoint reuse. A valid response digest/sequence is not fresh state or
 command acknowledgement. A future TCP adapter must retain identity, account
 membership, operation lifetime, request correlation and write-progress checks;
 codec success cannot change routing or replay an uncertain command.
+
+The native `exchange_v3` helper now owns one socket for one inherited Operation.
+It rejects invalid subnet endpoints/payloads and reused progress markers before
+network access, then performs one handshake and command exchange with no retries.
+Only the command write marks `possibly_sent`; connection/handshake failures leave
+it unsent. Valid framing does not mark acceptance. Disconnects, cancellation,
+deadline and future drop close the socket while preserving transmission evidence.
+No adapter or entry point invokes this helper yet, so public schemas and cloud
+write behavior remain unchanged; protected identity, grants and model evidence
+still gate future route admission.

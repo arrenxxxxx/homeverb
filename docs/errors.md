@@ -144,6 +144,15 @@ reauthentication. OS randomness failure is `MIDEA_REQUEST_FAILED`; request-count
 exhaustion is `RESOURCE_BUSY`, with no wrap or automatic reconnection. None of
 these codec-only results establishes a device-write outcome or permits a retry.
 
+The bounded V3 TCP exchange returns fixed `MIDEA_REQUEST_FAILED` for socket/I/O
+failure and retains the codec errors for malformed or unconfirmed protocol data.
+Preflight scope, payload and reused-marker refusal is `INVALID_ARGUMENT`.
+Cancellation/deadline retain their operation errors. Always inspect the existing
+transmission marker: handshake or connection failure precedes the appliance
+command; a command write begins `possibly_sent`, including partial writes and
+later response failures. A transport error never resets that marker or authorizes
+a retry/fallback. Raw errors, addresses, credentials and packets remain excluded.
+
 The account-bound read path returns `DEVICE_IDENTITY_CONFLICT` before transport when the local device, selected connection or known model differs from the protected binding. Invalid components return `CAPABILITY_UNSUPPORTED`. Pending or unavailable credentials stop the request through the vault. Core rejects decoded but undeclared properties with `INVALID_OBSERVATION`; neither that rejection nor a protocol failure replaces the previous cache or triggers a retry.
 
 Protected inventory membership is independent of historical identity. API 1.9.1

@@ -5,6 +5,8 @@ mod discovery;
 pub use discovery::{DiscoveryNetwork, DiscoveryReport, discover};
 mod v3;
 pub use v3::{V3Handshake, V3Response, V3Session, v3_frame_len};
+mod transport;
+pub use transport::exchange_v3;
 
 use crate::{ApplianceFamily, CloudId};
 use aes::{

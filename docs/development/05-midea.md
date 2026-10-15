@@ -267,8 +267,8 @@ They are not complete account inventories and never remove existing cards.
 
 Loopback tests cover the collector; no real LAN scan has been performed. No native
 JSON method, startup scan or LAN connection is registered. Host network selection
-and consent, protected identity reconciliation, token/key retrieval, TCP session
-ownership and inner packet/model codecs remain next gates. V1 XML is
+and consent, protected identity reconciliation, token/key retrieval and inner
+packet/model codecs remain next gates. V1 XML is
 unsupported, and physical LAN acceptance remains unverified.
 
 ### V3 handshake and frame codec
@@ -284,8 +284,25 @@ within a session. Keys and packet contents are excluded from Debug and JSON.
 Independent fictional vectors cover the wire codec. It opens no TCP socket and
 does not fetch, persist or guess credentials. Key confirmation and response
 sequence numbers do not prove device identity, freshness or physical execution.
-Next work must bind protected account credentials to the selected device, own a
-bounded TCP session, correlate responses and validate inner packet/model evidence.
+Protected account binding, response correlation and inner packet/model evidence
+remain required before route admission.
+
+### Operation-owned TCP exchange
+
+`exchange_v3` performs one direct TCP connection, handshake, request and response
+within the supplied Operation, then releases the socket. The endpoint must be a
+non-self host in the selected subnet with a nonzero port. Header-first bounded
+reads preserve fragmented/coalesced frame boundaries. No step resets the budget,
+and no reconnect, retry, background worker or retained connection is introduced.
+
+The helper marks possible command transmission only after the handshake and before
+writing the command frame. Handshake failures remain command-not-sent; later
+failures retain possible transmission. Even a valid response does not establish
+acceptance, device identity, freshness or physical execution. Protected identity,
+membership, grants and exact-model admission must precede this low-level native
+call. Fictional loopback tests verify transport behavior; no real LAN route or
+native JSON method is enabled. Credential retrieval, identity reconciliation,
+inner packet/model validation and physical acceptance remain pending.
 
 ## Fit the embedded Core
 

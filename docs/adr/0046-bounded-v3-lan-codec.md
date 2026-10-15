@@ -1,4 +1,4 @@
-# ADR-0046: Bound the Midea V3 LAN wire codec
+# ADR-0046: Bound Midea V3 LAN sessions
 
 Status: accepted for synthetic implementation within the additional-LAN scope.
 
@@ -43,10 +43,10 @@ verification or proof of a successful write. Keep protected identity, membership
 permission, model, observation and write-progress checks in their existing layers.
 Do not use decode success to authorize another route or retry an uncertain write.
 
-This phase opens no TCP socket, fetches or persists no device credentials, and
-adds no native JSON method, route or control. Protected token/key retrieval,
-identity reconciliation, bounded TCP session ownership, inner packet/model codecs
-and actual device acceptance remain required. The frame limit and credential
+The codec itself opens no TCP socket, fetches or persists no device credentials,
+and adds no native JSON method, route or control. Protected token/key retrieval,
+identity reconciliation, inner packet/model codecs and actual device acceptance
+remain required. The transport follow-up below has synthetic evidence only. The frame limit and credential
 lengths are this implementation's admission limits, not universal model claims.
 
 ## Verification
@@ -56,3 +56,35 @@ the handshake, derived session traffic, both frame directions, aligned/unaligned
 payloads, every truncation boundary, changed keys and corrupted data. Tests cover
 coalesced prefixes, bounded lengths, counter exhaustion, constructor refusal,
 redaction and compile-fail serialization. No real credential or appliance is used.
+
+## Follow-up: one operation-owned TCP exchange
+
+`exchange_v3` binds an outbound IPv4 socket to the selected local address and
+connects once to a supplied endpoint in that private/link-local subnet. Reject
+network/broadcast/self addresses, port zero, invalid outgoing payload sizes and
+reused transmission markers before connecting. There is no DNS, proxy, public
+network, automatic endpoint selection, reconnect, retry, worker or pooled socket.
+The trusted native caller must validate protected identity, current membership,
+permissions, exact model and payload before invoking this low-level function.
+No entry point or registered adapter invokes it yet.
+
+One inherited Operation owns connection, handshake, one command frame, one response
+frame and cleanup. No step resets its deadline. Read exact six-byte headers before
+allocating the bounded remainder; reject unexpected kinds and handshake lengths
+early. Fragmented reads are completed within the same budget, and coalesced bytes
+are not consumed past the selected frame. No connection escapes the call.
+
+Handshake traffic does not transmit an appliance command. Immediately before the
+first command write, set `WriteProgress` to `possibly_sent`; preserve that marker
+on partial writes, disconnect, malformed responses, cancellation or future drop.
+Never mark a response `accepted` or `verified` here. Framing, digest and sequence
+validation do not correlate an appliance acknowledgement or establish freshness;
+the future adapter must validate inner protocol and model evidence. Do not replay
+a command, reconnect or switch routes because this function returned an error.
+
+Loopback-only tests cover fragmented/coalesced frames, exact synthetic handshake
+and command bytes, connection refusal, preflight guards, rejected/corrupt/truncated
+handshakes, invalid/lost command responses and socket closure before/after command
+transmission on cancellation, deadline and dropped futures. Clock tests wait for
+actual peer I/O before advancing time. No household endpoint or real credentials
+are accessed; TCP integration does not establish physical compatibility.
