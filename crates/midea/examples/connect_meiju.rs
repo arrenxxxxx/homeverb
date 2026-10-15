@@ -1,15 +1,16 @@
 //! Explicit Linux read-only account probe. No device controls or public credential JSON.
 
 use clap::{Parser, Subcommand};
-use homeverb_core::{AccountRecord, Operation, SecretBytes, SystemClock};
-use homeverb_domain::{Error, Result};
+use homeverb_core::{AccountRecord, Core, Operation, Policy, SecretBytes, SystemClock};
+use homeverb_domain::{Error, Result, Route};
 use homeverb_midea::{
-    ApplianceFamily, BoundInventory, LoginCredentials, MeijuAccount, MeijuHttps, StateQuery,
-    connect, read_cloud_state,
+    ApplianceFamily, BoundInventory, LoginCredentials, MeijuAccount, MeijuAdapter, MeijuHttps,
+    StateQuery, connect, read_cloud_state,
 };
 use std::{
     io::{self, IsTerminal},
     path::PathBuf,
+    sync::Arc,
 };
 use tokio_util::sync::CancellationToken;
 use uuid::Uuid;
@@ -36,6 +37,8 @@ enum Command {
     Refresh { account_id: Uuid },
     /// Read mapped cloud state for the account inventory; never sends appliance controls.
     Inspect { account_id: Uuid },
+    /// Publish read-only device cards and read their components through Core for saved accounts.
+    CoreInspect,
     /// List only local account references; no network requests or credential reads.
     List,
 }
@@ -100,7 +103,7 @@ async fn main() {
 }
 
 async fn run(arguments: Arguments) -> Result<()> {
-    let vault = homeverb_host::open_accounts(&arguments.data_dir)?;
+    let vault = Arc::new(homeverb_host::open_accounts(&arguments.data_dir)?);
     let credentials = if matches!(arguments.command, Command::Connect { .. }) {
         if !io::stdin().is_terminal() || !io::stderr().is_terminal() {
             return Err(Error::new(
@@ -123,6 +126,63 @@ async fn run(arguments: Arguments) -> Result<()> {
     let operation = Operation::new(180_000, CancellationToken::new())?;
     let work = async {
         match arguments.command {
+            Command::CoreInspect => {
+                let clock = Arc::new(SystemClock);
+                let core = Core::new(
+                    Arc::new(homeverb_storage::SqliteStore::open(&arguments.data_dir)?),
+                    vec![Arc::new(MeijuAdapter::new(
+                        vault.clone(),
+                        Arc::new(MeijuHttps),
+                        clock.clone(),
+                    ))],
+                    clock,
+                    Policy::default(),
+                );
+                let devices = core.discover(&operation).await?;
+                let mut failures = 0;
+                let mut components_read = 0;
+                for device in &devices {
+                    for component in &device.components {
+                        let mut report = serde_json::json!({"model":device.model,"component":component.id,"support_status":device.support_status});
+                        match core
+                            .read(&device.id, &component.id, Route::Cloud, false, &operation)
+                            .await
+                        {
+                            Ok(snapshot) => {
+                                components_read += 1;
+                                // Report property names and evidence quality, not private state values.
+                                report["properties"] = serde_json::json!(
+                                    snapshot.observations.keys().collect::<Vec<_>>()
+                                );
+                                report["all_stale"] = serde_json::json!(
+                                    snapshot.observations.values().all(|value| value.stale)
+                                );
+                            }
+                            Err(error) => {
+                                if matches!(error.code.as_str(), "CANCELLED" | "DEADLINE_EXCEEDED")
+                                {
+                                    return Err(error);
+                                }
+                                failures += 1;
+                                report["error_code"] = serde_json::json!(error.code);
+                            }
+                        }
+                        println!("{report}");
+                    }
+                }
+                println!(
+                    "{}",
+                    serde_json::json!({"devices":devices.len(),"components_read":components_read,"failures":failures,"physically_verified":false})
+                );
+                if failures == 0 {
+                    Ok(())
+                } else {
+                    Err(Error::new(
+                        "MIDEA_REQUEST_FAILED",
+                        "Some Core reads failed; no controls were sent.",
+                    ))
+                }
+            }
             Command::Connect { account_id } => {
                 let report = connect(
                     &vault,

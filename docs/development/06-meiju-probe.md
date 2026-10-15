@@ -4,7 +4,8 @@ This is an explicit read-only developer probe for the owner-approved personal MV
 under [ADR-0022](../adr/0022-meiju-community-cloud-admission.md). It signs requests
 directly to the mainland Meiju service, stores the session in Linux Secret Service,
 and automatically retrieves existing bound appliances. It never sends appliance
-controls, registers capabilities, publishes device cards or installs a service.
+controls or installs a service. The explicit `core-inspect` command additionally
+publishes model-scoped read-only device cards and caches validated Core snapshots.
 
 ## Prerequisites
 
@@ -88,6 +89,32 @@ unavailable source timestamp and `stale: true`; a new response does not prove fr
 physical state. This protocol probe does not register Core descriptors or enable
 controls. Per-device failures remain explicit; cancellation/deadline stop further work.
 
+## Publish read-only cards and inspect through Core
+
+```bash
+./target/debug/examples/connect_meiju --data-dir "$HOME/.local/share/homeverb/meiju-pilot" core-inspect
+```
+
+This explicit command composes the production `MeijuAdapter` with Core, discovers
+all saved mainland Meiju accounts, admits descriptors and reads every component
+through Core's validation/cache path. It publishes local cards and cached state in
+this profile; it does not log in. Output includes only models, component/property
+names, support status, stale flags and fixed errors, without private state values.
+There is one shared 180-second budget and no automatic retries or controls.
+
+The six [observed models](../compatibility.md#observed-cloud-read-models) have
+experimental read-only mappings. Other models remain visible as unsupported;
+no brand-wide support, temperature limits or writable controls are inferred.
+Partial discovery preserves existing cards with `MIDEA_INVENTORY_PARTIAL`.
+Conflicting cross-account bindings require explicit reconciliation, including
+historical bindings whose appliance is missing from the latest inventory.
+
+On October 15, 2026 this command published six real cards and successfully read
+seven component snapshots, with zero failures. All source timestamps remained
+unproven and every observation stale. Physical/app comparison and off-LAN tests
+remain pending. The standard C ABI host still opens Mock; Flutter account input
+and real-host selection are separate integration work.
+
 ## Interpret failures and record evidence
 
 - `SECRET_STORE_UNAVAILABLE` / `SECRET_STORE_LOCKED`: restore access to the system
@@ -98,6 +125,10 @@ controls. Per-device failures remain explicit; cancellation/deadline stop furthe
   expose the raw provider response to diagnose it.
 - `MIDEA_REQUEST_FAILED` / `MIDEA_RESPONSE_INVALID`: transport/protocol failure.
   Report only the fixed error code; the exact provider response is not logged.
+- `MIDEA_INVENTORY_PARTIAL`: a Core discovery did not receive every home; existing
+  cards were preserved. Retry explicitly when the account/network issue is resolved.
+- `DEVICE_IDENTITY_CONFLICT`: review conflicting protected device evidence; never
+  reset or merge bindings just to create a card.
 - `ACCOUNT_IDENTITY_CONFLICT`: reconnect to the correct existing local account or
   review identity evidence. Never reset bindings to force a match.
 - `ACCOUNT_SESSION_UNCONFIRMED` / `SECRET_STORE_WRITE_UNKNOWN`: an interrupted or
@@ -108,5 +139,8 @@ controls. Per-device failures remain explicit; cancellation/deadline stop furthe
 Record only region, app version, device counts and fixed error codes for the initial
 read-only acceptance. Exact product models/firmware can be supplied separately
 without serial numbers. Then verify repeated retrieval, reconnection identity and
-an external-network run. Physical reads, capability admission, owner-authorized
-writes and Flutter/native account methods are subsequent stages. The [integration guide](05-midea.md) separately records the first real account connect and independent saved-session refresh: four air conditioners, one dishwasher and one refrigerator. Physical model tests remain pending; synthetic tests do not establish them.
+an external-network run. Physical comparison, owner-authorized writes and
+Flutter/native account methods are subsequent stages. The [integration guide](05-midea.md)
+records real connect, saved-session refresh, protocol inspection and Core reads:
+four air conditioners, one dishwasher and one refrigerator. Physical model tests
+remain pending; synthetic tests do not establish them.

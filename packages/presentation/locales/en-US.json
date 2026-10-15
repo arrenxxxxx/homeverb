@@ -78,5 +78,6 @@
   "error.ACCOUNT_SESSION_UNCONFIRMED": "The saved session needs validation. Reconnect this platform account to continue.",
   "error.MIDEA_RESPONSE_INVALID": "The platform returned an unsupported response.",
   "error.MIDEA_REQUEST_REJECTED": "The platform rejected the read request.",
-  "error.MIDEA_REQUEST_FAILED": "The platform data could not be retrieved."
+  "error.MIDEA_REQUEST_FAILED": "The platform data could not be retrieved.",
+  "error.MIDEA_INVENTORY_PARTIAL": "Some platform devices could not be retrieved. Existing device cards were kept."
 }

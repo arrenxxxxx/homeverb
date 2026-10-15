@@ -4,7 +4,7 @@ The owner selected Midea and Hualing air conditioners, dishwashers, and refriger
 
 Daily cloud control is required in the first real integration. LAN is an additional route for the same physical devices, not a substitute for cloud control. The owner has physical products; exact models, firmware, app version, and account region remain to be recorded. This guide records requirements and source research on October 15, 2026, not implemented HomeVerb support or physical verification.
 
-The native read protocols are implemented in [homeverb-midea](../../crates/midea/src/lib.rs): account-scoped home/appliance retrieval, code/data validation, deduplication, partial inventory failure, and bounded cloud-state decoding for the three selected families. The inventory/state decoders use an injected read transport and synthetic responses with the inspected wire fields. Native password login, signing, session-key decoding and restricted HTTPS are now implemented under ADR-0022 and tested against fictional responses and a local TLS server. One real mainland account has passed the read-only login/inventory probe below; no Core adapter or UI account method is registered yet. See [ADR-0020](../adr/0020-midea-cloud-inventory.md) and [ADR-0023](../adr/0023-meiju-cloud-state-evidence.md).
+The native read protocols are implemented in [homeverb-midea](../../crates/midea/src/lib.rs): account-scoped home/appliance retrieval, code/data validation, deduplication, partial inventory failure, and bounded cloud-state decoding for the three selected families. The inventory/state decoders use an injected read transport and synthetic responses with the inspected wire fields. Native password login, signing, session-key decoding and restricted HTTPS are now implemented under ADR-0022 and tested against fictional responses and a local TLS server. One real mainland account has passed the read-only login/inventory probe below; the exact-model read-only Core adapter is available through `core-inspect`, while UI account methods and real C ABI host selection remain pending. See [ADR-0020](../adr/0020-midea-cloud-inventory.md) and [ADR-0023](../adr/0023-meiju-cloud-state-evidence.md).
 
 The native account vault now persists random local references, composes Linux secure storage, and coordinates session read/update work through account leases. Meiju's private account payload also preserves appliance-to-local-ID bindings with the session. Interrupted or uncertain updates remain pending until trusted validation and recovery. The explicit native connection coordinator now uses this storage and the admitted login client; real account identity and session validity still require live acceptance. See [ADR-0021](../adr/0021-persistent-account-vault.md), [ADR-0024](../adr/0024-meiju-private-device-bindings.md) and the [credential integration guide](04-add-adapter.md#integrate-native-credentials).
 
@@ -132,13 +132,49 @@ The opaque subject must come from reviewed provider evidence, not a nickname or 
 
 After retrieval, `bind_inventory` validates the inventory's credential reference and complete identity evidence before saving. It returns local device, cloud-connection and identity-reference UUIDs in inventory order only after confirmed persistence. Reuse those IDs when building descriptors. `resolve_device` returns a private appliance ID only for a device bound to that leased account. Keep the same lease for the future signed transport; do not acquire a second lease inside a request.
 
-Repeated inventories preserve IDs. Missing entries never remove mappings, including after a complete empty list. Names, vendor rooms and online hints do not affect identity. Known family/model conflicts reject the whole update; an absent model can become known. Unknown families receive bindings without gaining capabilities. Unchanged mappings require no secret-store write. This does not yet publish Core descriptors or deduplicate one appliance across different accounts; the discovery coordinator must resolve those cases before publishing cards.
+Repeated inventories preserve IDs. Missing entries never remove mappings, including after a complete empty list. Names, vendor rooms and online hints do not affect identity. Known family/model conflicts reject the whole update; an absent model can become known. Unknown families receive bindings without gaining capabilities. Unchanged mappings require no secret-store write. This storage helper does not publish Core descriptors. The read-only adapter checks protected current and historical bindings across accounts before publishing; ambiguity fails without silently merging devices.
 
-The protected payload contains the immutable local account binding, subject/session bytes and private appliance map. Limits are 1 MiB total, 1024 subject bytes, 65536 session bytes, 4096 bindings, and 256 UTF-8 bytes per model. The system secret store protects the payload; SQLite contains no provider identifiers or session data. Debug/errors are redacted. Pending writes need exact-byte recovery through the vault before `open` can succeed; never retry by resetting or recreating the account. Tests use synthetic secrets and real SQLite, including unchanged local preferences after descriptor rediscovery. Real authentication acceptance, keyring account-flow testing and phone support remain pending.
+The protected payload contains the immutable local account binding, subject/session bytes and private appliance map. Limits are 1 MiB total, 1024 subject bytes, 65536 session bytes, 4096 bindings, and 256 UTF-8 bytes per model. The system secret store protects the payload; SQLite contains no provider identifiers or session data. Debug/errors are redacted. Pending writes need exact-byte recovery through the vault before `open` can succeed; never retry by resetting or recreating the account. Tests use synthetic secrets and real SQLite, including unchanged local preferences after descriptor rediscovery. The Linux connect/refresh probe has exercised real account persistence; reauthorization and phone support remain pending.
 
 For a Core adapter's default state read, use `read_bound_state(transport, device, component, connection, clock, operation)` on the leased account. It checks the exact local device and full cloud connection against the protected map, known model evidence, and the requested component before issuing one request. The private appliance target comes from the map, not from UI arguments. Use an operation-scoped transport that already resolves the correct session under this lease; do not reacquire the account lock inside the transport. This helper does not discover capabilities or turn read properties into actions.
 
 Core must admit the model's descriptor before using this path and validate all resulting observations before caching. The test-only adapter supplies fictional read-only descriptors for AC/E1/CA; it does not register real models. Undeclared fields fail Core validation, malformed fields fail decoding, and both preserve the previous cache. Cached reads remain local even when the secret store is unavailable. Cancellation or expiry drops the pending read and releases its lease when the adapter operation exits. AccountLock now requires Send + Sync so these immutable account reads satisfy Core's existing Send future contract. See [ADR-0025](../adr/0025-bound-meiju-core-reads.md).
+
+## Model-scoped read-only Core adapter
+
+`MeijuAdapter::new(vault, transport, clock)` performs no I/O. Explicit Core discovery
+loads saved mainland Meiju accounts, retrieves complete inventories, and publishes
+read-only descriptors for the six exact [observed model/family pairs](../compatibility.md#observed-cloud-read-models).
+Unknown or mismatched models remain visible with unsupported status and an empty
+`vendor.midea.inventory` capability. Brand is unknown until there is evidence;
+names do not select semantics. AC mode/fan codes and all dishwasher fields remain
+vendor properties. Refrigerator fridge/freezer components share one device ID.
+There are no actions, writable properties, inferred enums or temperature limits.
+
+Discovery holds the profile registration lock and all selected account leases
+through retrieval and identity comparison. Current plus historical private bindings
+must be unique across accounts. Conflicts return `DEVICE_IDENTITY_CONFLICT` without
+merging. Any incomplete inventory returns `MIDEA_INVENTORY_PARTIAL` before the
+adapter returns descriptors; Core keeps existing cards/preferences/cache. Private
+bindings saved before an error remain stable, not rolled back. Complete empty
+inventory also does not remove existing cards. Cross-account reconciliation and
+explicit retirement remain future work.
+
+Reads check the exact admitted model/family against protected evidence and then
+use the full bound connection/component validation above. Core validates and saves
+the complete snapshot; failed responses preserve the previous cache. Every value
+remains stale because provider observation time is unproven. Cached reads, local
+cards and descriptions do not need credentials or network work. All operations
+retain the caller's deadline and cancellation token; there is no login, refresh or
+polling while idle.
+
+The [core-inspect probe](06-meiju-probe.md#publish-read-only-cards-and-inspect-through-core)
+exercised the production adapter on October 15, 2026: six real cards and seven Core
+component reads succeeded with zero failures. No controls were sent. Unit/integration
+tests separately cover exact and unsupported models, forged admission, partial and
+empty retrieval, historical cross-account conflicts, preserved preferences/cache,
+secure-store unavailability, cancellation/deadlines and lease release. Native UI
+API 1.0.0 and SQLite schema 3 are unchanged; standard host startup remains Mock.
 
 ## Daily cloud control and the additional LAN route
 

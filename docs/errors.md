@@ -92,6 +92,16 @@ return `ACCOUNT_SESSION_UNCONFIRMED`; no session is fabricated or reset.
 
 ## Meiju cloud read errors
 
+`MIDEA_INVENTORY_PARTIAL` means the Core adapter could not retrieve every accessible
+home. Discovery publishes none of that adapter's current batch; existing cards,
+preferences and caches remain. An explicit later retry may succeed. Private
+bindings already saved during retrieval remain stable. Duplicate appliance bindings
+across accounts, including historical bindings missing from today's inventory,
+return `DEVICE_IDENTITY_CONFLICT`; no implicit merge or new duplicate card is allowed.
+An unsupported or unreviewed exact model returns `CAPABILITY_UNSUPPORTED` before a
+state request. Public model admission that disagrees with the protected model/family
+returns `DEVICE_IDENTITY_CONFLICT` before a request.
+
 The native read protocols use `MIDEA_RESPONSE_INVALID` for malformed/oversized, wrong-home/appliance responses or malformed recognized state fields, `MIDEA_REQUEST_REJECTED` for explicit nonzero provider codes other than recognized expired-session codes, and `MIDEA_REQUEST_FAILED` for transport failures. Provider messages, URLs and identifiers are never copied into these errors. Recognized session expiry returns `AUTH_REQUIRED` without automatic login/retry. It stops subsequent inventory requests; state queries return the error directly. Individual home failures remain explicit in a partial inventory; a failed top-level listing never becomes an empty account. Unsupported state families, query combinations, components or explicit temperature units return `CAPABILITY_UNSUPPORTED`. Cancellation/deadline stop the read flow. These errors do not establish any device-write outcome or real-platform support.
 
 The account-bound read path returns `DEVICE_IDENTITY_CONFLICT` before transport when the local device, selected connection or known model differs from the protected binding. Invalid components return `CAPABILITY_UNSUPPORTED`. Pending or unavailable credentials stop the request through the vault. Core rejects decoded but undeclared properties with `INVALID_OBSERVATION`; neither that rejection nor a protocol failure replaces the previous cache or triggers a retry.

@@ -1,10 +1,10 @@
 # Platform and device compatibility matrix
 
-> The fictional `homeverb.mock` adapter is implemented and Mock-tested on Linux. Every real-platform row below remains a candidate, not an implemented support claim. No physical-device verification records exist.
+> The fictional `homeverb.mock` adapter is implemented and Mock-tested on Linux. The six listed Meiju models have experimental cloud reads; real-platform rows do not claim verified physical support. No physical-device verification records exist.
 
 | Candidate | Potential route | Evidence still required | Project status |
 |---|---|---|---|
-| Midea air conditioners, dishwashers, and refrigerators | Required Meiju cloud enumeration/read/control; additional AC/E1/CA LAN routes | Exact model/app/firmware, physical cloud reads/controls and off-LAN tests | One mainland account login/saved-session inventory verified on Linux; models unverified |
+| Midea air conditioners, dishwashers, and refrigerators | Required Meiju cloud enumeration/read/control; additional AC/E1/CA LAN routes | Exact model/app/firmware, physical cloud reads/controls and off-LAN tests | One mainland account and six exact model mappings exercised through read-only Core; physical acceptance pending |
 | Hualing devices in the selected appliance scope | Meiju cloud and LAN paths only when actual account/protocol evidence matches | Confirm account visibility, family/version and supported cloud/LAN capabilities per device; do not infer from brand | protocol-researched / models unverified |
 | Samsung televisions | Candidate LAN protocol | Pairing, firmware, wake behavior, capabilities, authentication | planned / unverified |
 | SmartThings | Vendor cloud API | Backend-free native authorization, region, API permissions and cost | planned / auth gate pending |
@@ -12,9 +12,9 @@
 
 Brand names express user interest, not protocol boundaries. `midea-local` and SmartThings CLI provide protocol/API references, but do not prove native authentication, mobile embedding, or model support in this project. [R5 and R6](references.md)
 
-The owner selected Midea/Hualing air conditioners, dishwashers, and refrigerators on October 15, 2026, with automatic retrieval of existing Meiju-bound devices after authorization and daily cloud control at home or away. The [integration guide](development/05-midea.md) pins separate cloud and LAN sources. Source research is sufficient to start offline work; it does not establish HomeVerb support. Refrigerator writes are absent from the inspected LAN implementation, while cloud mappings declare compartment settings. Neither a mapping nor a dishwasher message class proves a verified model-specific action. No new real adapter is registered yet.
+The owner selected Midea/Hualing air conditioners, dishwashers, and refrigerators on October 15, 2026, with automatic retrieval of existing Meiju-bound devices after authorization and daily cloud control at home or away. The [integration guide](development/05-midea.md) pins separate cloud and LAN sources. Source research is sufficient to start offline work; it does not establish HomeVerb support. Refrigerator writes are absent from the inspected LAN implementation, while cloud mappings declare compartment settings. Neither a mapping nor a dishwasher message class proves a verified model-specific action. A model-scoped read-only Meiju adapter is now available through the explicit developer probe; standard C ABI startup remains Mock.
 
-`homeverb-midea` now implements the Meiju home/appliance inventory protocol behind an injected read transport, verified with synthetic responses. This is protocol implementation evidence only: real authentication acceptance, capability admission, actual provider identity evidence and physical tests remain pending. Existing native API version 1.0.0 and Mock behavior are unchanged. See [ADR-0020](adr/0020-midea-cloud-inventory.md).
+`homeverb-midea` now implements the Meiju home/appliance inventory protocol behind an injected read transport, verified with synthetic responses. Synthetic protocol coverage is supplemented by the scoped live evidence below; full account/model/physical acceptance remains pending. Existing native API version 1.0.0 and Mock behavior are unchanged. See [ADR-0020](adr/0020-midea-cloud-inventory.md).
 
 The library also decodes selected AC/E1/CA cloud state fields under [ADR-0023](adr/0023-meiju-cloud-state-evidence.md). Returned cloud observation time is unproven; projected readings are stale and cannot verify writes. Vendor-specific mode, fan and dishwasher codes retain their meaning without invented common controls. The unreleased Rust endpoint enum gains an appliance-state variant; native API 1.0.0, SQLite schema 3 and registered adapters are unchanged. Synthetic decoding does not establish support for a physical model.
 
@@ -32,14 +32,13 @@ The [native UI contract](native-ui-contract.md) adds `get_api_info` and publishe
 
 The native Meiju account layer under [ADR-0024](adr/0024-meiju-private-device-bindings.md) adds protected subject/session/device-map persistence through the existing vault. Synthetic evidence covers stable local bindings across reopening, session replacement, partial inventories and descriptor rediscovery. It neither registers a real adapter nor establishes provider identity, cross-account deduplication or physical support. SQLite schema 3, native API 1.0.0 and its 22 methods remain unchanged.
 
-[ADR-0025](adr/0025-bound-meiju-core-reads.md) adds account-bound state reads with exact connection/model/component preflight and Core cache-validation coverage using fictional descriptors. The unreleased AccountLock Rust trait now requires Send + Sync; custom implementations must meet that bound. No real adapter is registered and no model support, controls, native methods or SQLite migration is added.
+[ADR-0025](adr/0025-bound-meiju-core-reads.md) adds account-bound state reads with exact connection/model/component preflight and Core cache-validation coverage using fictional descriptors. The unreleased AccountLock Rust trait now requires Send + Sync; custom implementations must meet that bound. That bound-read phase alone did not register a real adapter or add controls, native methods or a SQLite migration; the current model-scoped adapter is described below.
 
 The owner-approved community login codec and restricted HTTPS client are now
 implemented and synthetic-tested under ADR-0022. Only the mainland Meiju endpoint
 is admitted; SmartHome, automatic region routing and additional login challenges
 are not implemented. The protected native connection coordinator and local read-only probe are also synthetic-tested, including reconnect identity and separate retrieval failures. One owner-run real login/inventory probe and an independently executed saved-session refresh returned four air conditioners, one dishwasher and one refrigerator on October 15, 2026. This is Linux account/inventory evidence only. No public account method,
-registered Core adapter, model capability, control permission or mobile support
-follows from this native library phase. Native API 1.0.0 and SQLite schema 3 are unchanged.
+control permission or mobile support follows from that native connection phase. Native API 1.0.0 and SQLite schema 3 are unchanged.
 
 ## Observed cloud-read models
 
@@ -59,8 +58,16 @@ identifiers, raw responses or private state values are retained here.
 
 This is exercised cloud-read evidence, not `verified` physical-model support.
 Firmware, official-app comparison, trustworthy observation time, controls,
-reauthorization and off-LAN/mobile acceptance remain unverified. No Core model
-registration follows from the protocol probe itself.
+reauthorization and off-LAN/mobile acceptance remain unverified.
+
+The subsequent production `MeijuAdapter` admits these exact model/family pairs as
+experimental read-only descriptors. The explicit `core-inspect` run published all
+six cards and read seven component snapshots through Core with zero failures.
+Every observation remains stale. Unknown/missing/mismatched models stay visible as
+unsupported without read requests or actions. Complete discovery checks current
+and historical protected bindings across accounts and refuses ambiguous duplicates.
+Partial retrieval preserves existing cards. This phase adds no controls, public
+native methods, C ABI startup mode or SQLite migration.
 
 ## Status definitions
 

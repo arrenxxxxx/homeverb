@@ -1,4 +1,4 @@
-//! Native Meiju login and cloud read protocols. No real Core adapter is registered yet.
+//! Native Meiju login and model-scoped read-only Core adapter. No appliance controls.
 
 mod auth;
 mod cloud;
@@ -9,6 +9,8 @@ pub use cloud::{CloudEndpoint, CloudTransport, MeijuHttps, SignedRequest};
 
 mod account;
 pub use account::{BoundInventory, ConnectReport, DeviceBinding, MeijuAccount, connect};
+mod adapter;
+pub use adapter::MeijuAdapter;
 mod state;
 pub use state::{CloudState, StateQuery, read_cloud_state};
 

@@ -78,5 +78,6 @@
   "error.ACCOUNT_SESSION_UNCONFIRMED": "已保存的会话需要验证，请重新连接此平台账号后继续。",
   "error.MIDEA_RESPONSE_INVALID": "平台返回的数据格式暂不支持。",
   "error.MIDEA_REQUEST_REJECTED": "平台拒绝了读取请求。",
-  "error.MIDEA_REQUEST_FAILED": "暂时无法获取平台数据。"
+  "error.MIDEA_REQUEST_FAILED": "暂时无法获取平台数据。",
+  "error.MIDEA_INVENTORY_PARTIAL": "部分平台设备获取失败，已保留原有设备卡片。"
 }

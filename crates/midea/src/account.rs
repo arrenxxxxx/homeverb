@@ -234,6 +234,34 @@ impl MeijuAccount {
         Ok(SecretBytes::new(std::mem::take(&mut payload.session)))
     }
 
+    /// Include historical bindings when checking cross-account ambiguity before publication.
+    pub(crate) async fn bound_appliances(&self, operation: &Operation) -> Result<Vec<CloudId>> {
+        let payload = self.load(operation).await?;
+        payload
+            .bindings
+            .iter()
+            .map(|binding| CloudId::parse(&serde_json::Value::String(binding.appliance_id.clone())))
+            .collect()
+    }
+
+    /// Model admission must agree with protected evidence, not only public device metadata.
+    pub(crate) async fn validate_read_model(
+        &self,
+        device: &Device,
+        family: ApplianceFamily,
+        operation: &Operation,
+    ) -> Result<()> {
+        let payload = self.load(operation).await?;
+        if !payload.bindings.iter().any(|binding| {
+            binding.local.device_id.to_string() == device.id
+                && binding.model.as_deref() == Some(device.model.as_str())
+                && binding.family == family_code(family)
+        }) {
+            return Err(identity_conflict());
+        }
+        Ok(())
+    }
+
     /// Replace only after native provider validation; keep every established device binding.
     pub async fn replace_session(
         &mut self,
