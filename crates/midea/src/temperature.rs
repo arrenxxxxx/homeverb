@@ -1,6 +1,6 @@
 //! Reviewed AC setpoint mappings from the pinned product profiles.
 
-use crate::control::AcControl;
+use crate::control::CloudControl;
 use homeverb_domain::{Error, Result};
 use serde_json::{Value, json};
 
@@ -16,7 +16,7 @@ impl TemperatureProfile {
         json!({"type":"number","minimum":self.minimum,"maximum":30,"multipleOf":self.step})
     }
 
-    pub(crate) fn control(self, value: &Value) -> Result<AcControl> {
+    pub(crate) fn control(self, value: &Value) -> Result<CloudControl> {
         let value = value.as_f64().ok_or_else(Error::invalid)?;
         if !value.is_finite()
             || value < f64::from(self.minimum)
@@ -25,7 +25,7 @@ impl TemperatureProfile {
         {
             return Err(Error::invalid());
         }
-        Ok(AcControl::Temperature {
+        Ok(CloudControl::Temperature {
             temperature: value as u8,
             small_temperature: self.fractional_field.then_some(value.fract()),
         })

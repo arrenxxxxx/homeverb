@@ -29,7 +29,7 @@ pub const AC_MODES: [AcMode; 5] = [
 
 #[derive(Serialize)]
 #[serde(untagged)]
-pub(crate) enum AcControl {
+pub(crate) enum CloudControl {
     Power {
         power: &'static str,
     },
@@ -39,6 +39,12 @@ pub(crate) enum AcControl {
     ActivateMode {
         power: &'static str,
         mode: AcMode,
+    },
+    DishwasherStart {
+        work_status: &'static str,
+        mode: String,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        additional: Option<u8>,
     },
     Temperature {
         temperature: u8,
@@ -88,13 +94,13 @@ pub(crate) async fn execute(
     session: &MeijuSession,
     transport: &dyn CloudTransport,
     appliance: &CloudId,
-    control: AcControl,
+    control: CloudControl,
     progress: &WriteProgress,
     operation: &Operation,
 ) -> Result<AdapterOutcome> {
     operation
         .run(async {
-            let request = session.ac_control_request(appliance, control)?;
+            let request = session.control_request(appliance, control)?;
             let response = transport.send_control(&request, progress, operation).await;
             let (phase, error) = match response {
                 Ok(body) => match reply(&body) {

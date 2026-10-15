@@ -1,6 +1,6 @@
 # HomeVerb native contract
 
-Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.13.0 has 31 callable JSON methods, one separate protected account-connection function and three separate trusted approval functions; the JSON envelope schema is 1.0.
+Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.14.0 has 31 callable JSON methods, one separate protected account-connection function and three separate trusted approval functions; the JSON envelope schema is 1.0.
 
 - [api.json](api.json) is compiled into the `get_api_info` response.
 - [examples.json](examples.json) contains fictional requests and actual Mock native responses, including failures and lifecycle states. It is preview/test data, never a production device database.
@@ -29,4 +29,11 @@ immutable returned scope and obtain explicit consent before execution. Keep
 process-local IDs out of persistence and model tools. The 31 JSON methods,
 SQLite schema 4 and protected payload 3 are unchanged; the fictional
 `approval-required` Mock scenario supports UI integration, while actual Flutter
-consent and real consequential appliance mappings remain pending.
+consent and physical acceptance remain pending; API 1.14 adds the reviewed
+dishwasher mappings below.
+
+API 1.14 adds exact `meiju_dishwasher_grants` for reviewed profile-scoped elevated
+starts. [The contract](../../docs/native-ui-contract.md#profile-scoped-dishwasher-starts-api-114)
+requires separate trusted confirmation and descriptor-specific arguments. The
+startup union never establishes model capability. Ordinary methods, C functions
+and storage versions are unchanged; physical acceptance remains pending.

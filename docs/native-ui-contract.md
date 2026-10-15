@@ -16,7 +16,7 @@ The ten C functions in [homeverb.h](../crates/ffi/include/homeverb.h) remain the
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects saved-account cloud reads. `scenario` defaults to `normal`. Meiju requires `allow_mock_writes: false` and rejects any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms `homeverb.mock` or `midea.meiju`. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.13.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.14.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -93,7 +93,7 @@ Prefer exact device IDs even where lookup accepts an alias. Resolve a capability
 | UI scope | Current integration | Remaining work and boundary |
 |---|---|---|
 | D01–D12, R01–R05: cards, search, rooms, local organization | Device/room methods above | Flutter filtering, loading/errors, accessibility and layouts. Metadata writes preserve routes and grants |
-| C01–C14: dynamic controls, history and outcomes | Describe/read/plan/execute/batch/receipt methods | Render exact capabilities; default Meiju discovery has read-only AC/fridge/dishwasher mappings; native grants may admit experimental AC on/off, vendor fan presets, explicit power-on with mode selection or profile-scoped temperature targets. Separate trusted approval exports support fictional elevated-action integration; consequential real mappings remain unavailable |
+| C01–C14: dynamic controls, history and outcomes | Describe/read/plan/execute/batch/receipt methods | Render exact capabilities; default Meiju discovery has read-only AC/fridge/dishwasher mappings; native grants may admit experimental AC on/off, vendor fan presets, explicit power-on with mode selection or profile-scoped temperature targets. Separate trusted approval exports support fictional elevated-action integration; API 1.14 additionally admits reviewed experimental dishwasher starts through separate trusted confirmation; physical acceptance and refrigerator writes remain pending |
 | A01–A08: device discovery and addition | Explicit selected-adapter `discover`, including saved-account Meiju cloud retrieval | Real pairing, mobile permissions and safe identity merge remain unavailable. No merge API exists |
 | P01–P13: platforms, accounts, authorization and removal | `list_accounts`, `get_account`, `rename_account`, `remove_account`, `refresh_account`, `recover_account`, and separate `homeverb_connect_account` | Flutter protected input, cleanup confirmation/recovery and phone secure stores; provider revocation remains unavailable |
 | H01–H16: nearby authorization sharing | No sharing methods in this version | Eligibility, peer discovery, code verification, scope, consent, conflict/import and transfer records require ADR-0008 implementation |
@@ -736,9 +736,66 @@ For UI development, open Mock with `scenario: "approval-required"` and
 The separate approved path returns `accepted`, with `VERIFICATION_PENDING` when
 verification is requested; it cannot claim physical completion. The Mock adapter
 also checks Core's private approval marker independently of cached risk metadata.
-This scenario is invalid for Meiju startup. Real dishwasher/refrigerator controls
-and the actual Flutter consent UI remain pending. Existing AC controls, SQLite
+This scenario is invalid for Meiju startup. API 1.14 adds the separate reviewed
+dishwasher mapping below; actual Flutter consent UI, refrigerator controls and
+physical acceptance remain pending. Existing AC controls, SQLite
 schema 4 and protected account payload 3 are unchanged.
+
+## Profile-scoped dishwasher starts (API 1.14)
+
+[ADR-0044](adr/0044-profile-scoped-dishwasher-start.md) adds optional trusted startup
+`meiju_dishwasher_grants`. Each entry contains a canonical local device UUID-v4 and
+an exact `arguments` object. At most 64 distinct pairs are accepted. For example:
+
+```json
+{
+  "device_id": "30000000-0000-4000-8000-000000000001",
+  "arguments": {"program": "eco_wash", "additional": 0}
+}
+```
+
+This example grants only `main / vendor.midea.dishwasher.start_cycle` over cloud.
+It does not establish capability or approve a particular invocation. Negotiate
+API 1.14 before supplying the field; older libraries reject it. Missing/empty
+lists preserve read-only dishwasher behavior, and nonempty lists are invalid for
+Mock. Existing AC permissions remain independent. CLI/MCP grant files do not
+accept the new list because those entry points cannot obtain trusted UI approval.
+
+After explicit discovery/refresh, render `start_cycle` only if the descriptor
+contains it. Program options and required fields come from that action's schema,
+not the union admitted by startup. Some products use short wire names; others
+use suffixed names or have fewer options. Product 760Y0026 requires the explicit
+additional option; other admitted profiles forbid it. Never insert a default,
+copy a stale observation, or infer that an unknown product uses the family default.
+The reviewed exact model and protected product evidence are both necessary.
+7600016L remains unavailable until its wash-region/door-preservation domains are
+reviewed. The owner's actual product-code match has not been checked in this phase.
+
+Use the separate [trusted approval functions](#trusted-single-command-approval-api-113).
+The action is elevated and non-idempotent: ordinary `plan`/`execute` still deny it.
+Prepare the exact chosen arguments, display the returned immutable scope, and
+state that confirmation starts washing and may consume water/heat. When present,
+show that `additional` will be explicitly set, not preserved from current state.
+Both locale catalogs provide `vendor.midea.dishwasher` program/option labels and
+confirmation templates. UI must never reinterpret those vendor program identifiers
+as universal appliance semantics. No duration, door state or ability to start is
+inferred from cloud inventory or a prior read.
+
+See the [example capability](../examples/capability.meiju-dishwasher.json) and
+[command](../examples/command.meiju-dishwasher.json). They demonstrate the profile
+with an explicit additional option; other descriptors have different schemas.
+The adapter rechecks protected identity, membership, model/family, mapping and
+arguments, and independently requires Core's approval marker before account
+access. One cloud request contains `work_status: work`, the reviewed mode and only
+the required explicit additional field. There is no pre/post read, automatic retry,
+restore or cache update. An acknowledgement remains `accepted`, with
+`VERIFICATION_PENDING` when requested; a possible send with no known outcome is
+`unknown`. Recover by original request ID, never automatically start another cycle.
+
+All 31 ordinary methods, ten C functions, SQLite schema 4 and protected payload 3
+remain unchanged. Offline tests establish encoding and refusal behavior only.
+Real account/device/off-LAN operation, setting preservation and Flutter/phone
+consent acceptance remain outstanding; this phase performed no real access.
 
 ## Verify the handoff
 

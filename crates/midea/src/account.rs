@@ -606,12 +606,14 @@ impl MeijuAccount {
             return Err(identity_conflict());
         }
         binding.require_listed()?;
-        if binding.family != 0xac {
-            return Err(crate::control::unsupported());
-        }
+        let family = match binding.family {
+            0xac => ApplianceFamily::AirConditioner,
+            0xe1 => ApplianceFamily::Dishwasher,
+            _ => return Err(crate::control::unsupported()),
+        };
         Ok(Appliance {
             id: CloudId::parse(&serde_json::Value::String(binding.appliance_id.clone()))?,
-            family: ApplianceFamily::AirConditioner,
+            family,
             name: None,
             model: binding.model.clone(),
             online_hint: None,

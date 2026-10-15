@@ -672,3 +672,65 @@ Validation performed on October 16, 2026:
   JDK 21 and API 35 stubs. Production archive contents, eleven exports per ABI
   (ten C functions plus JNI), ELF architectures and 16 KiB alignment passed.
   These are library artifacts, not APK, emulator, Keystore or phone acceptance.
+
+## Profile-scoped dishwasher starts 1.14.0
+
+[ADR-0044](adr/0044-profile-scoped-dishwasher-start.md) adds experimental elevated,
+non-idempotent `vendor.midea.dishwasher.start_cycle` on `main`. Admission requires
+the existing exact dishwasher model, protected known subtype/product evidence,
+explicit adapter opt-in, an exact startup argument grant and trusted single-command
+user confirmation. Ordinary plan/execute/CLI/MCP cannot approve it. The adapter
+checks Core's marker before account access, then independently checks protected
+family/model, identity, inventory membership, product mapping and arguments.
+Public descriptor edits cannot supply missing authority or product evidence.
+
+Five reviewed product codes select short, suffixed or reduced program lists.
+760Y0026 requires an explicit additional-setting code in the confirmed command;
+other admitted profiles reject that field. The start list excludes its cancellation
+option. 7600016L remains unavailable because complete wash-region/door-preservation
+domains have not been established. Unknown/missing products do not use the family
+default. The owner's protected product-code match was not inspected in this phase.
+
+Native API 1.14 adds `meiju_dishwasher_grants` with at most 64 distinct exact
+local UUID-v4 / arguments pairs. Empty/absent lists preserve read-only startup.
+The startup union does not establish any device's program support. Existing AC
+authority is independent; CLI/MCP grant files have no elevated dishwasher field.
+The unreleased Rust grant bundle gains a `dishwasher` slice; existing helper
+functions preserve behavior and callers can use default fields. The 31 ordinary
+methods, ten C functions, SQLite schema 4 and protected payload 3 are unchanged.
+English/Chinese vendor-program, additional-option and confirmation labels were
+added; the public identifiers stay English.
+
+One cloud request contains only work status, the reviewed mode and any explicitly
+required additional option. No implicit pre/post read, cached-state copying,
+optimistic cache update, retry, fallback or restoration occurs. An acknowledgement
+is accepted, possible transmission remains unknown, and original request receipts
+prevent automatic duplicate starts. Protocol encoding and existing cloud outcome
+handling do not establish physical completion or preservation of unrelated settings.
+
+Validation performed on October 16, 2026:
+
+- Formatting, workspace Clippy with warnings denied, workspace build and example
+  build passed with locked offline dependencies.
+- `cargo test --workspace --offline --locked`: 321 passed, 2 ignored. Six new
+  dishwasher adapter tests cover every admitted program/encoding and additional
+  option, read-only defaults, retained profiles, forged public metadata,
+  protected model/family/product gates, host opt-in, approval enforcement, cloud
+  outcomes, cancelled possible sends, receipt replay and inventory membership.
+  Two host policy tests cover exact grant scope, invalid/duplicate lists and
+  refusal before profile creation.
+- `scripts/verify_mvp.py`: 34 runtime cases passed with local socket/signal access.
+- `scripts/verify_native_contract.py`: 31 methods, 51 live fictional examples,
+  existing trusted-approval checks and new native dishwasher startup/confirmation
+  checks passed. New native tests use a fictional descriptor with no account:
+  confirmation stops with `ACCOUNT_NOT_FOUND` before credential/provider access.
+- Python tooling: 29 tests passed; presentation catalogs: 5 tests passed.
+  Contract validation: 18 schemas, 41 positive fixtures and 140 negative fixtures.
+  Documentation, repository hygiene and Conventional Commit checks passed.
+- Combined, arm64-v8a and x86_64 Android AARs were rebuilt using NDK r28c, JDK 21
+  and API 35 stubs. Production archives, eleven exports per ABI, ELF architectures
+  and 16 KiB alignment passed. APK/emulator/Keystore/phone runtime remains untested.
+
+No real account or appliance was accessed. Physical/off-LAN dishwasher operation,
+remaining product mappings, refrigerator writes, Flutter consent and mobile
+acceptance remain outstanding; this stage does not complete T10 or the MVP goal.

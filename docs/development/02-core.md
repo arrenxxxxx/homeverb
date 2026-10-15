@@ -126,6 +126,7 @@ on equivalent lifecycle changes. Consequential adapters must check
 `ValidatedCommand::has_user_approval()` plus fixed protocol/identity constraints;
 public descriptor risk alone is insufficient. [ADR-0043](../adr/0043-native-trusted-approval-bridge.md)
 bridges these functions through three separate trusted C exports and a bounded
-session registry, never ordinary JSON/CLI/MCP. The shipped Meiju adapter still
-has no elevated action. Use [synthetic tests](../../crates/host/tests/user_approval.rs) as the
+session registry, never ordinary JSON/CLI/MCP. The Meiju adapter also admits reviewed elevated dishwasher starts through
+protected profile selection, exact grants and trusted approval; see
+[ADR-0044](../adr/0044-profile-scoped-dishwasher-start.md). Use [synthetic tests](../../crates/host/tests/user_approval.rs) as the
 integration example before adding reviewed model-specific controls.

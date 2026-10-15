@@ -1,15 +1,17 @@
-//! Native Meiju accounts and model-scoped reads, with explicit experimental AC controls.
+//! Native Meiju accounts and model-scoped reads, with reviewed experimental AC/dishwasher controls.
 
 mod auth;
 mod cloud;
 mod codec;
 mod control;
 pub use control::{AC_FAN_SPEEDS, AC_MODES, AcMode};
+mod dishwasher;
 mod material;
 mod product;
 mod temperature;
 pub use auth::{LoginCredentials, MeijuSession, SessionReads, login};
 pub use cloud::{CloudEndpoint, CloudTransport, MeijuHttps, SignedRequest};
+pub use dishwasher::{DISHWASHER_ADDITIONAL, DISHWASHER_PROGRAMS};
 pub use product::ProductProfile;
 
 mod account;

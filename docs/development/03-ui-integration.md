@@ -10,7 +10,9 @@ API 1.13 adds separate trusted C prepare/execute/discard functions for one eleva
 command. Follow the [confirmation contract](../native-ui-contract.md#trusted-single-command-approval-api-113)
 for immutable preview display, explicit consent, expiry and lifecycle handling.
 Use the fictional `approval-required` Mock scenario for integration. These are not
-ordinary JSON methods, and real Meiju elevated-action mappings remain pending.
+ordinary JSON methods. API 1.14 adds [profile-scoped Meiju dishwasher starts](../native-ui-contract.md#profile-scoped-dishwasher-starts-api-114)
+through exact startup grants plus this confirmation path. Actual Flutter/physical
+acceptance remains pending.
 
 
 API 1.4 adds local `get_account` and `rename_account` for platform details and names.

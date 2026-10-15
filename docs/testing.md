@@ -121,6 +121,18 @@ covers monotonic expiry/pruning, admission failure, and a deterministic barrier-
 controlled background/foreground preparation race. The same tests cover typed
 approval send uncertainty and cancellation; no sleep-based expiry test is needed.
 
+## Profile-scoped dishwasher controls
+
+The native contract suite also runs
+[verify_native_dishwasher.py](../scripts/verify_native_dishwasher.py). Startup
+schema/runtime checks reject invalid grant lists before profile creation, then
+use a fictional descriptor with no account to test exact grant scope, ordinary
+execution denial and trusted confirmation admission ending safely before any
+provider access. Rust adapter tests exercise every admitted program/encoding,
+explicit additional options, protected profile/model/family guards despite public
+metadata tampering, no implicit reads/cache writes, receipt replay, membership,
+cancellation and cloud outcomes. No actual account or appliance is used.
+
 ## Unverified release gates
 
 Physical-device authentication and control, real-provider account recovery and token rotation, actual Android Keystore, Android APK/iOS builds and phone lifecycle, a target AI host, dependency/security review, package installation, and licensing remain pending. The mainland read-only Meiju pilot and Android library builds do not establish these acceptance gates. Real writes require explicit device-owner authorization. Two different protocol families must demonstrate equivalent capability calls before cross-platform support is claimed.

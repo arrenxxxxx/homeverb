@@ -22,3 +22,5 @@ absent from the ordinary JSON/MCP method catalog. Follow the [confirmation
 contract](native-ui-contract.md#trusted-single-command-approval-api-113) for actual
 user consent, single-use IDs, foreground invalidation and receipt recovery. The
 fictional Mock scenario does not establish a real appliance's control capability.
+API 1.14 separately adds reviewed dishwasher mappings with exact startup grants;
+physical acceptance remains pending.

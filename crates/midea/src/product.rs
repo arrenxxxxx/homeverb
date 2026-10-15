@@ -82,6 +82,10 @@ impl ProductProfile {
         )
     }
 
+    pub(crate) fn dishwasher(&self) -> Option<crate::dishwasher::DishwasherProfile> {
+        crate::dishwasher::select(self.0.subtype.as_deref(), self.0.sn8.as_deref())
+    }
+
     pub(crate) fn parse(entry: &Value) -> Result<Self> {
         let sn8 = text(entry.get("sn8"))?.filter(|value| *value != "00000000");
         if sn8.is_some_and(|value| !valid_code(value)) {

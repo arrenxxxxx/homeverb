@@ -12,8 +12,10 @@ The next implemented phase adds an explicitly opted-in AC `power.set` path and
 [preview-first control probe](07-meiju-control.md). Its Core grants and TLS send
 progress are synthetic-tested. Native API 1.9 also adds independent vendor fan controls with exact-device/code grants.
 API 1.12 adds protected-profile AC temperature control; API 1.12.1 also uses that
-profile's selected temperature wire shape on explicit reads. Real control acceptance,
-other settings, dishwasher/refrigerator writes and Flutter consent UI remain pending.
+profile's selected temperature wire shape on explicit reads.
+API 1.14 adds reviewed profile-scoped dishwasher starts through exact native grants
+and trusted confirmation. Remaining dishwasher mappings, refrigerator writes,
+Flutter consent UI and physical acceptance remain pending.
 
 ## Reuse the community protocol work
 
@@ -290,3 +292,16 @@ Use it for explicit inspection of saved evidence; it performs no retrieval,
 reauthorization, publication or write. See the [native handoff](../native-ui-contract.md#inspect-saved-account-inventory).
 Existing local account details remain available without protected-store access.
 Inspection failures must not start a network fallback or clear historical cards.
+
+## Profile-scoped dishwasher cycle starts
+
+[ADR-0044](../adr/0044-profile-scoped-dishwasher-start.md) specifies reviewed E1
+product selectors, program encoding and explicit additional-setting requirements.
+Enable the adapter only through trusted host configuration; the matching exact
+startup grant alone is insufficient without the separate trusted approval path.
+Product 7600016L and unknown/default mappings remain unadmitted rather than losing
+centralized settings. No assumption is made about the owner's protected product
+code. Tests use fictional accounts and do not access the saved pilot profile.
+See the [Flutter contract](../native-ui-contract.md#profile-scoped-dishwasher-starts-api-114)
+for dynamic fields, confirmation and accepted/unknown receipts. Physical/off-LAN
+behavior and preservation of other settings remain acceptance work.

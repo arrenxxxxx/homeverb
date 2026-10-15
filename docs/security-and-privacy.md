@@ -23,6 +23,10 @@ CLI and MCP have no preparation/confirmation entry point. Approval IDs stay in
 trusted UI memory, never logs, persistence or model tools; possession of an ID
 is not proof of consent. The separate execution call asserts user interaction. Adapters
 must independently require Core's approval marker for consequential actions.
+The reviewed dishwasher adapter enforces that marker before account access and
+then checks protected model/family/product membership plus exact program arguments.
+Startup grants cannot bypass confirmation or broaden a device's selected mapping.
+No elevated grant list is exposed to ordinary CLI/MCP entry points.
 
 Generic AI tools do not expose high-risk actions initially. Future support requires trusted user interaction, short-lived approval, and auditable binding to the exact action. Model-supplied confirmation, special prompts, and generic `execute` cannot bypass policy.
 

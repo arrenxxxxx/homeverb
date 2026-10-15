@@ -307,14 +307,14 @@ struct RestoredSession {
 }
 
 impl MeijuSession {
-    pub(crate) fn ac_control_request(
+    pub(crate) fn control_request(
         &self,
         appliance: &crate::CloudId,
-        control: crate::control::AcControl,
+        control: crate::control::CloudControl,
     ) -> Result<SignedRequest> {
         #[derive(Serialize)]
         struct Control {
-            control: crate::control::AcControl,
+            control: crate::control::CloudControl,
         }
         #[derive(Serialize)]
         struct Target<'a> {

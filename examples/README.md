@@ -34,3 +34,10 @@ Every device, account, timestamp, and result here is fictional data, not physica
 | [adapter-manifest.json](adapter-manifest.json) | Candidate metadata without a daemon or project backend |
 
 These show contract arguments, not vendor wire packets. No real passwords, serial numbers, or IP addresses are supplied. Human-readable fixture messages are English.
+
+The [dishwasher capability](capability.meiju-dishwasher.json) and
+[start command](command.meiju-dishwasher.json) illustrate the reviewed product
+profile requiring an explicit additional option. They use fictional IDs and are
+not an executable production authorization. The elevated action requires a
+matching grant and separate trusted user confirmation; no real model is verified
+by these examples.

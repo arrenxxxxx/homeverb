@@ -251,3 +251,11 @@ for missing/foreign scope, `RESOURCE_BUSY` for a held account lease,
 deadline and host foreground/closed-session gates retain their existing meanings.
 No error causes cloud fallback or mutation. Unconfirmed legacy membership is a
 successful saved-evidence result; it does not make a live read/control admissible.
+
+Profile-scoped dishwasher startup (API 1.14) rejects malformed, duplicate, oversized
+or non-Meiju `meiju_dishwasher_grants` with `INVALID_ARGUMENT` before profile creation.
+A grant without trusted confirmation still returns `POLICY_DENIED`. Missing product
+mappings or host opt-in remain `CAPABILITY_UNSUPPORTED`; a changed protected family,
+model or unsupported profile cannot be replaced by public descriptor edits.
+Argument, identity, membership and receipt errors keep their existing semantics.
+An accepted start is not verified; an uncertain start must never be auto-replayed.

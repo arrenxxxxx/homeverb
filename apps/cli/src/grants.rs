@@ -43,6 +43,7 @@ impl Grants {
             fan: &self.meiju_fan_grants,
             mode: &self.meiju_mode_grants,
             temperature: &self.meiju_temperature_grants,
+            dishwasher: &[],
         }
     }
 

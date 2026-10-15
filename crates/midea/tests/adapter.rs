@@ -913,3 +913,6 @@ async fn unsent_loss_cancellation_and_deadline_keep_distinct_phases_without_repl
 
 #[path = "adapter/temperature.rs"]
 mod temperature;
+
+#[path = "adapter/dishwasher.rs"]
+mod dishwasher;

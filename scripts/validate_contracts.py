@@ -46,6 +46,7 @@ def main() -> int:
         ("capability", "capability.meiju-fan"), ("command", "command.meiju-fan"),
         ("capability", "capability.meiju-mode"), ("command", "command.meiju-mode"),
         ("capability", "capability.meiju-temperature"), ("command", "command.meiju-temperature"),
+        ("capability", "capability.meiju-dishwasher"), ("command", "command.meiju-dishwasher"),
         ("capability", "capability.approved-cycle"), ("command", "command.approved-cycle"),
         ("command-result", "command-result.approval-expired"),
     ]
@@ -285,6 +286,12 @@ def main() -> int:
     negative.append(("unbounded diagnostic receipts", validators["diagnostics"], bad))
     bad = load("examples/diagnostics.json"); bad["recent_receipts"][0]["attempts"] *= 33
     negative.append(("unbounded diagnostic attempts", validators["diagnostics"], bad))
+    cycle = Draft202012Validator(load("examples/capability.meiju-dishwasher.json")["actions"]["start_cycle"]["parameters"])
+    cycle.validate(load("examples/command.meiju-dishwasher.json")["arguments"])
+    for arguments in [{"program":"eco_wash"}, {"program":"neutral_gear","additional":0},
+                      {"program":"eco_wash","additional":1}, {"program":"eco_wash","additional":None},
+                      {"program":"eco_wash","additional":0,"confirmed":True}]:
+        negative.append(("invalid dishwasher start scope", cycle, arguments))
     # Resolve native definition references locally, without provider or network access.
     from native_contract import validator as native_validator
     approval = load("packages/native-contract/approval-examples.json")

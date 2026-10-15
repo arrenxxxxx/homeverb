@@ -3,8 +3,9 @@
 use homeverb_core::SecretBytes;
 use homeverb_domain::{Error, Query};
 use homeverb_host::{
-    ConnectRequest, ExecuteApprovalRequest, HostRequest, MeijuControlGrants, MeijuFanGrant,
-    MeijuModeGrant, MeijuPowerGrant, MeijuTemperatureGrant, PrepareApprovalRequest, Session,
+    ConnectRequest, ExecuteApprovalRequest, HostRequest, MeijuControlGrants, MeijuDishwasherGrant,
+    MeijuFanGrant, MeijuModeGrant, MeijuPowerGrant, MeijuTemperatureGrant, PrepareApprovalRequest,
+    Session,
 };
 use homeverb_mock::Scenario;
 use serde::Deserialize;
@@ -49,6 +50,8 @@ struct Config {
     meiju_mode_grants: Vec<MeijuModeGrant>,
     #[serde(default)]
     meiju_temperature_grants: Vec<MeijuTemperatureGrant>,
+    #[serde(default)]
+    meiju_dishwasher_grants: Vec<MeijuDishwasherGrant>,
     #[serde(default)]
     scenario: Scenario,
 }
@@ -123,7 +126,8 @@ pub unsafe extern "C" fn homeverb_open(config: *const c_char) -> *mut c_char {
             && (!config.meiju_power_grants.is_empty()
                 || !config.meiju_fan_grants.is_empty()
                 || !config.meiju_mode_grants.is_empty()
-                || !config.meiju_temperature_grants.is_empty())
+                || !config.meiju_temperature_grants.is_empty()
+                || !config.meiju_dishwasher_grants.is_empty())
         {
             return error(
                 "INVALID_ARGUMENT",
@@ -149,6 +153,7 @@ pub unsafe extern "C" fn homeverb_open(config: *const c_char) -> *mut c_char {
                         fan: &config.meiju_fan_grants,
                         mode: &config.meiju_mode_grants,
                         temperature: &config.meiju_temperature_grants,
+                        dishwasher: &config.meiju_dishwasher_grants,
                     },
                 ),
             ),

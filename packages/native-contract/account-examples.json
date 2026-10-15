@@ -1,5 +1,5 @@
 {
-  "api_version": "1.13.0",
+  "api_version": "1.14.0",
   "provenance": "Fictional account DTO examples. Actual synthetic host responses are checked against the same schemas by crates/host/tests/meiju_accounts.rs. No live identities or credentials.",
   "connect_metadata": {
     "schema_version": "1.0",

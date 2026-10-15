@@ -86,8 +86,11 @@ malformed undecodable input does not. Missing/consumed/foreign/pruned IDs return
 `APPROVAL_INVALID`; a retained expired preview returns `APPROVAL_EXPIRED`.
 Background/close clears the registry; a generation check prevents publishing a
 preview across a background/foreground race. No registry lock spans execution.
-Ordinary JSON/CLI/MCP remain unchanged. Flutter consent UI and physical action
-mappings remain separate work.
+Ordinary JSON/CLI/MCP remain unchanged. Flutter consent UI and physical acceptance remain separate work.
+[ADR-0044](adr/0044-profile-scoped-dishwasher-start.md) uses this path for reviewed
+experimental dishwasher starts: elevated, non-idempotent, exact arguments, one
+cloud request, no replay/readback/optimistic cache. Explicit additional settings
+are part of the confirmed command; stale cached state is never silently copied.
 
 ## Composite and batch operations
 

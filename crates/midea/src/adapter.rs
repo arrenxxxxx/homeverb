@@ -64,14 +64,18 @@ fn capability(component: &str, id: &str, fields: &[(&str, &str, Option<&str>)]) 
 }
 
 fn descriptors(
+    adapter: &MeijuAdapter,
     appliance: &Appliance,
     binding: DeviceBinding,
     account: Uuid,
-    ac_power: bool,
-    ac_fan: bool,
-    ac_mode: bool,
-    temperature: Option<crate::temperature::TemperatureProfile>,
+    profile: Option<&crate::ProductProfile>,
 ) -> Descriptor {
+    let temperature = profile
+        .filter(|_| adapter.ac_temperature)
+        .and_then(crate::ProductProfile::temperature);
+    let dishwasher = profile
+        .filter(|_| adapter.dishwasher)
+        .and_then(crate::ProductProfile::dishwasher);
     let family = appliance
         .model
         .as_deref()
@@ -85,7 +89,7 @@ fn descriptors(
     match family {
         Some(ApplianceFamily::AirConditioner) => {
             let mut power = capability("main", "power", &[("state", "boolean", None)]);
-            if ac_power {
+            if adapter.ac_power {
                 power.revision = 2;
                 power.properties.get_mut("state").unwrap()["writable"] = json!(true);
                 power.actions.insert("set".into(), power_action());
@@ -105,12 +109,12 @@ fn descriptors(
                 "vendor.midea.ac",
                 &[("mode", "string", None), ("wind_speed", "integer", None)],
             );
-            if ac_fan {
+            if adapter.ac_fan {
                 fan.revision = 2;
                 fan.properties.get_mut("wind_speed").unwrap()["writable"] = json!(true);
                 fan.actions.insert("set_fan_speed".into(), fan_action());
             }
-            if ac_mode {
+            if adapter.ac_mode {
                 fan.revision = 3;
                 fan.properties.get_mut("mode").unwrap()["writable"] = json!(true);
                 fan.actions.insert("activate_mode".into(), mode_action());
@@ -127,20 +131,27 @@ fn descriptors(
                 capabilities.push(capability(component, "climate", &temperatures));
             }
         }
-        Some(ApplianceFamily::Dishwasher) => capabilities.push(capability(
-            "main",
-            "vendor.midea.dishwasher",
-            &[
-                ("mode", "string", None),
-                ("work_status", "string", None),
-                ("doorswitch", "integer", None),
-                ("water_lack", "integer", None),
-                ("softwater_lack", "integer", None),
-                ("bright_lack", "integer", None),
-                ("temperature", "number", Some("celsius")),
-                ("remaining_minutes", "integer", Some("minutes")),
-            ],
-        )),
+        Some(ApplianceFamily::Dishwasher) => {
+            let mut cycle = capability(
+                "main",
+                "vendor.midea.dishwasher",
+                &[
+                    ("mode", "string", None),
+                    ("work_status", "string", None),
+                    ("doorswitch", "integer", None),
+                    ("water_lack", "integer", None),
+                    ("softwater_lack", "integer", None),
+                    ("bright_lack", "integer", None),
+                    ("temperature", "number", Some("celsius")),
+                    ("remaining_minutes", "integer", Some("minutes")),
+                ],
+            );
+            if let Some(profile) = dishwasher {
+                cycle.revision = 2;
+                cycle.actions.insert("start_cycle".into(), profile.action());
+            }
+            capabilities.push(cycle);
+        }
         _ => capabilities.push(capability("main", "vendor.midea.inventory", &[])),
     }
     let mut components = BTreeMap::<String, Vec<String>>::new();
@@ -213,6 +224,7 @@ pub struct MeijuAdapter {
     ac_fan: bool,
     ac_mode: bool,
     ac_temperature: bool,
+    dishwasher: bool,
 }
 
 impl MeijuAdapter {
@@ -229,6 +241,7 @@ impl MeijuAdapter {
             ac_fan: false,
             ac_mode: false,
             ac_temperature: false,
+            dishwasher: false,
         }
     }
 
@@ -253,6 +266,12 @@ impl MeijuAdapter {
     /// Admit only temperature mappings selected from retained protected product evidence.
     pub fn with_ac_temperature_control(mut self) -> Self {
         self.ac_temperature = true;
+        self
+    }
+
+    /// Admit reviewed elevated dishwasher starts; exact grants and trusted approval remain required.
+    pub fn with_dishwasher_control(mut self) -> Self {
+        self.dishwasher = true;
         self
     }
 
@@ -482,22 +501,18 @@ impl MeijuAdapter {
                 }
             }
             if let Some(bound) = bound {
-                let profiles = if self.ac_temperature {
+                let profiles = if self.ac_temperature || self.dishwasher {
                     account.product_profiles(operation).await?
                 } else {
                     Default::default()
                 };
                 for (appliance, binding) in bound.inventory.appliances.iter().zip(bound.bindings) {
                     output.push(descriptors(
+                        self,
                         appliance,
                         binding,
                         account.record().id,
-                        self.ac_power,
-                        self.ac_fan,
-                        self.ac_mode,
-                        profiles
-                            .get(&binding.device_id)
-                            .and_then(crate::ProductProfile::temperature),
+                        profiles.get(&binding.device_id),
                     ));
                 }
             }
@@ -570,11 +585,19 @@ impl Adapter for MeijuAdapter {
         if command.component_id != "main" {
             return Err(crate::control::unsupported());
         }
+        let dishwasher =
+            command.capability == "vendor.midea.dishwasher" && command.action == "start_cycle";
+        if dishwasher && !validated.has_user_approval() {
+            return Err(Error::new(
+                "POLICY_DENIED",
+                "Starting a dishwasher requires trusted user approval.",
+            ));
+        }
         // Repeat the fixed adapter contract even if public stored metadata was modified.
         let control = match (command.capability.as_str(), command.action.as_str()) {
             ("power", "set") if self.ac_power => {
                 power_action().validate_arguments(&command.arguments)?;
-                Some(crate::control::AcControl::Power {
+                Some(crate::control::CloudControl::Power {
                     power: if command.arguments["state"].as_bool().unwrap() {
                         "on"
                     } else {
@@ -584,19 +607,20 @@ impl Adapter for MeijuAdapter {
             }
             ("vendor.midea.ac", "set_fan_speed") if self.ac_fan => {
                 fan_action().validate_arguments(&command.arguments)?;
-                Some(crate::control::AcControl::FanSpeed {
+                Some(crate::control::CloudControl::FanSpeed {
                     wind_speed: command.arguments["wind_speed"].as_f64().unwrap() as u8,
                 })
             }
             ("vendor.midea.ac", "activate_mode") if self.ac_mode => {
                 mode_action().validate_arguments(&command.arguments)?;
-                Some(crate::control::AcControl::ActivateMode {
+                Some(crate::control::CloudControl::ActivateMode {
                     power: "on",
                     mode: serde_json::from_value(command.arguments["mode"].clone())
                         .map_err(|_| Error::invalid())?,
                 })
             }
             ("climate", "set") if self.ac_temperature => None,
+            ("vendor.midea.dishwasher", "start_cycle") if self.dishwasher => None,
             _ => return Err(crate::control::unsupported()),
         };
         let id = connection
@@ -613,13 +637,23 @@ impl Adapter for MeijuAdapter {
         let appliance = account
             .control_appliance(&command.device_id, connection, operation)
             .await?;
-        if appliance.model.as_deref().and_then(model_family)
-            != Some(ApplianceFamily::AirConditioner)
+        let family = if dishwasher {
+            ApplianceFamily::Dishwasher
+        } else {
+            ApplianceFamily::AirConditioner
+        };
+        if appliance.family != family
+            || appliance.model.as_deref().and_then(model_family) != Some(family)
         {
             return Err(crate::control::unsupported());
         }
         let control = match control {
             Some(control) => control,
+            None if dishwasher => appliance
+                .product_profile
+                .dishwasher()
+                .ok_or_else(crate::control::unsupported)?
+                .control(&command.arguments)?,
             None => {
                 let profile = appliance
                     .product_profile
