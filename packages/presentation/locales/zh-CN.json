@@ -113,5 +113,11 @@
   "vendor.midea.ac.wind_speed.60": "中风",
   "vendor.midea.ac.wind_speed.80": "高风",
   "vendor.midea.ac.wind_speed.100": "强风",
-  "vendor.midea.ac.wind_speed.102": "自动"
+  "vendor.midea.ac.wind_speed.102": "自动",
+  "error.MIDEA_DEVICE_NOT_LISTED": "上次完整获取的平台列表中没有这台设备，请刷新账号设备列表后再试。",
+  "error.MIDEA_INVENTORY_REQUIRED": "请先刷新此平台账号的设备列表，再读取或控制设备。",
+  "account.inventory.inspect": "查看已保存的设备列表",
+  "inventory.membership.listed": "上次完整列表中存在",
+  "inventory.membership.not_listed": "上次完整列表中缺失",
+  "inventory.membership.unconfirmed": "设备列表待确认"
 }

@@ -33,6 +33,7 @@ def main() -> int:
         ("command-result", "command-result.accepted"),
         ("command-result", "command-result.meiju-accepted"),
         ("command-result", "command-result.meiju-unknown"),
+        ("command-result", "command-result.meiju-not-listed"),
         ("command-result", "command-result.unknown"),
         ("command-result", "command-result.partial"),
         ("command-result", "command-result.composite"),
@@ -105,6 +106,12 @@ def main() -> int:
         fresh["properties"]["target_temperature"]["max_age_ms"] = max_age_ms
         validators["capability"].validate(fresh)
     negative = []
+    bad = load("examples/command-result.meiju-not-listed.json")
+    bad["status"] = "verified"
+    negative.append(("inventory refusal promoted without evidence", validators["command-result"], bad))
+    bad = load("examples/command.meiju-fan.json")
+    bad["listed"] = True
+    negative.append(("command forges protected inventory membership", validators["command"], bad))
     for status in ("accepted", "unknown"):
         bad = load(f"examples/command-result.meiju-{status}.json")
         bad["status"] = "verified"

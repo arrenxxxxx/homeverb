@@ -13,7 +13,7 @@ Start with the progressive development path. Reference documents define invarian
 | 5 | [Integrate Midea/Hualing](development/05-midea.md) | Account-device retrieval, direct cloud control, additional LAN routes, and physical acceptance |
 | 6 | [Verify a Meiju account locally](development/06-meiju-probe.md) | Hidden-input read-only login, protected session and automatic inventory |
 | 7 | [Preview a Meiju AC control](development/07-meiju-control.md) | Exact-device power grant, tracked cloud outcomes and separately authorized physical acceptance |
-| 8 | [Embed the Android native library](development/08-android-native.md) | Native credential storage, arm64 AAR build and separate phone acceptance |
+| 8 | [Embed the Android native library](development/08-android-native.md) | Native credential storage, arm64/x86_64 AAR builds and separate phone acceptance |
 
 ## Reference
 
@@ -25,6 +25,8 @@ Start with the progressive development path. Reference documents define invarian
 - Persistence/security: [storage](storage.md), [authentication](authentication.md), [Android credential backend](adr/0032-android-native-credential-storage.md), [native account vault](adr/0021-persistent-account-vault.md), [local account removal](adr/0028-local-account-removal.md), [saved-session recovery](adr/0030-explicit-meiju-account-recovery.md), [pending-account reauthorization](adr/0031-pending-account-reauthorization.md), [cache/history clearing](adr/0029-local-cache-and-history-clearing.md), [security/privacy](security-and-privacy.md).
 - Delivery: [repository layout](repository.md), [testing](testing.md), [task status](task-breakdown.md), [roadmap](roadmap.md), [compatibility](compatibility.md), [commit conventions](commit-conventions.md), [private publishing](publishing.md).
 - Cleanup recovery: [remove unreadable local credentials](adr/0033-delete-unreadable-account-credentials.md) through the existing confirmed account-removal flow.
+- Inventory inspection: [foreground saved account evidence](adr/0036-local-account-inventory-inspection.md) for the native UI.
+- Inventory admission: [retain identity while gating live Meiju requests](adr/0035-meiju-inventory-membership.md).
 - Evidence: [references](references.md), [fictional examples](../examples/README.md), [diagrams](diagrams/README.md).
 
 ## Decisions

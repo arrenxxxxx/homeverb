@@ -27,6 +27,13 @@ pub struct DeviceBinding {
     pub identity_ref: Uuid,
 }
 
+/// Saved membership evidence only; no provider identifiers or operational authority.
+pub struct DeviceInventoryMembership {
+    pub device_id: Uuid,
+    pub connection_id: Uuid,
+    pub listed: Option<bool>,
+}
+
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct StoredBinding {
@@ -34,6 +41,24 @@ struct StoredBinding {
     family: u16,
     model: Option<String>,
     local: DeviceBinding,
+    #[serde(default)]
+    listed: Option<bool>,
+}
+
+impl StoredBinding {
+    fn require_listed(&self) -> Result<()> {
+        match self.listed {
+            Some(true) => Ok(()),
+            Some(false) => Err(Error::new(
+                "MIDEA_DEVICE_NOT_LISTED",
+                "The device was absent from the last complete account inventory. Refresh the account before trying again.",
+            )),
+            None => Err(Error::new(
+                "MIDEA_INVENTORY_REQUIRED",
+                "Refresh the account to establish complete device inventory before live access.",
+            )),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -113,8 +138,11 @@ impl Payload {
         if bytes.expose().len() > MAX_RESPONSE_BYTES {
             return Err(unconfirmed());
         }
-        let payload: Self = serde_json::from_slice(bytes.expose()).map_err(|_| unconfirmed())?;
+        let mut payload: Self =
+            serde_json::from_slice(bytes.expose()).map_err(|_| unconfirmed())?;
         payload.validate(record)?;
+        // Decode legacy identities without writing; the next explicit update uses version 2.
+        payload.version = 2;
         Ok(payload)
     }
 
@@ -127,7 +155,7 @@ impl Payload {
     }
 
     fn validate(&self, record: &AccountRecord) -> Result<()> {
-        if self.version != 1
+        if !matches!(self.version, 1 | 2)
             || self.account_id != record.id
             || self.credential_ref != record.credential_ref
             || self.provider != PROVIDER
@@ -146,6 +174,7 @@ impl Payload {
             if id.expose() != binding.appliance_id
                 || !appliances.insert(id)
                 || !valid_model(&binding.model)
+                || (self.version == 1 && binding.listed.is_some())
             {
                 return Err(unconfirmed());
             }
@@ -279,7 +308,7 @@ impl MeijuAccount {
             return Err(unconfirmed());
         }
         let payload = Payload {
-            version: 1,
+            version: 2,
             account_id: account.record().id,
             credential_ref: account.record().credential_ref,
             provider: account.record().provider.clone(),
@@ -301,6 +330,28 @@ impl MeijuAccount {
 
     pub fn record(&self) -> &AccountRecord {
         self.lease.record()
+    }
+
+    pub(crate) async fn inspect_inventory(
+        &self,
+        operation: &Operation,
+    ) -> Result<Vec<DeviceInventoryMembership>> {
+        let payload = self.load(operation).await?;
+        operation
+            .run(async {
+                let mut devices: Vec<_> = payload
+                    .bindings
+                    .iter()
+                    .map(|binding| DeviceInventoryMembership {
+                        device_id: binding.local.device_id,
+                        connection_id: binding.local.connection_id,
+                        listed: binding.listed,
+                    })
+                    .collect();
+                devices.sort_by_key(|entry| entry.device_id);
+                Ok(devices)
+            })
+            .await
     }
 
     pub async fn session(&self, operation: &Operation) -> Result<SecretBytes> {
@@ -405,7 +456,7 @@ impl MeijuAccount {
     }
 
     /// Return bindings in inventory order only after all new identity evidence is persisted.
-    /// Missing entries never remove older bindings, even for a complete inventory.
+    /// Complete inventory updates membership; missing entries never remove older identities.
     pub async fn bind_inventory(
         &mut self,
         inventory: &Inventory,
@@ -424,7 +475,7 @@ impl MeijuAccount {
                 let mut result = Vec::new();
                 let mut changed = false;
                 for appliance in &inventory.appliances {
-                    if !seen.insert(&appliance.id) || !valid_model(&appliance.model) {
+                    if !seen.insert(appliance.id.expose()) || !valid_model(&appliance.model) {
                         return Err(identity_conflict());
                     }
                     let family = family_code(appliance.family);
@@ -458,9 +509,19 @@ impl MeijuAccount {
                             family,
                             model: appliance.model.clone(),
                             local,
+                            listed: None,
                         });
                         result.push(local);
                         changed = true;
+                    }
+                }
+                if inventory.is_complete() {
+                    for binding in &mut payload.bindings {
+                        let listed = Some(seen.contains(binding.appliance_id.as_str()));
+                        if binding.listed != listed {
+                            binding.listed = listed;
+                            changed = true;
+                        }
                     }
                 }
                 Ok((result, changed))
@@ -472,7 +533,7 @@ impl MeijuAccount {
         operation.run(async { Ok(bindings) }).await
     }
 
-    /// Resolve within this leased account only, before issuing an appliance request.
+    /// Resolve historical identity only. This does not admit a live appliance request.
     pub async fn resolve_device(&self, device_id: Uuid, operation: &Operation) -> Result<CloudId> {
         let payload = self.load(operation).await?;
         let binding = payload
@@ -511,6 +572,7 @@ impl MeijuAccount {
         if *connection != expected {
             return Err(identity_conflict());
         }
+        binding.require_listed()?;
         if binding.family != 0xac {
             return Err(crate::control::unsupported());
         }
@@ -558,6 +620,7 @@ impl MeijuAccount {
                 {
                     return Err(identity_conflict());
                 }
+                binding.require_listed()?;
                 let family = match binding.family {
                     0xac if component == "main" => ApplianceFamily::AirConditioner,
                     0xe1 if component == "main" => ApplianceFamily::Dishwasher,

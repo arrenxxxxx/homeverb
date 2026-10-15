@@ -68,6 +68,25 @@ pub(crate) async fn details(
         .await
 }
 
+pub(crate) fn inventory(inspection: homeverb_midea::AccountInventory) -> serde_json::Value {
+    let devices: Vec<_> = inspection
+        .devices
+        .into_iter()
+        .map(|entry| {
+            serde_json::json!({
+                "device_id": entry.device_id,
+                "connection_id": entry.connection_id,
+                "membership": match entry.listed {
+                    Some(true) => "listed",
+                    Some(false) => "not_listed",
+                    None => "unconfirmed",
+                },
+            })
+        })
+        .collect();
+    serde_json::json!({"account": AccountSummary::from(inspection.account), "devices": devices})
+}
+
 #[derive(Serialize)]
 pub struct AccountConnection {
     account: AccountSummary,

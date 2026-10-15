@@ -31,6 +31,39 @@ fn fan_core(f: &Fixture, device: &Device, arguments: Value) -> Core {
 }
 
 #[tokio::test]
+async fn fan_refuses_absent_or_unconfirmed_membership_before_transport() {
+    let f = Fixture::new(vec![appliances()[0].clone()]).await;
+    let device = f.discover().await.remove(0);
+    let core = fan_core(&f, &device, json!({"const":{"wind_speed":20}}));
+    core.discover(&operation()).await.unwrap();
+    f.wire
+        .inventories
+        .lock()
+        .unwrap()
+        .insert("FIRST".into(), vec![]);
+    core.discover(&operation()).await.unwrap();
+    for (listed, code) in [
+        (json!(false), "MIDEA_DEVICE_NOT_LISTED"),
+        (Value::Null, "MIDEA_INVENTORY_REQUIRED"),
+    ] {
+        for bytes in f.secrets.values.lock().unwrap().values_mut() {
+            let mut payload: Value = serde_json::from_slice(bytes).unwrap();
+            payload["bindings"][0]["listed"] = listed.clone();
+            *bytes = serde_json::to_vec(&payload).unwrap();
+        }
+        let calls = f.calls();
+        let refused = core
+            .execute(fan_command(&device, 20), CancellationToken::new())
+            .await;
+        assert_eq!(refused.status, Status::Failed);
+        assert_eq!(refused.error.unwrap().code, code);
+        assert_eq!(refused.attempts[0].phase, Phase::NotSent);
+        assert_eq!(f.calls(), calls);
+        assert!(f.wire.controls.lock().unwrap().is_empty());
+    }
+}
+
+#[tokio::test]
 async fn reviewed_models_and_codes_send_only_fan_fields_with_unverified_receipts() {
     let f = Fixture::new(appliances()).await;
     let devices = f.discover().await;

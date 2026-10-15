@@ -13,7 +13,9 @@ first physical acceptance target. No Android version is physically verified yet.
 
 `src/main/java` is production code. `src/test/java` contains synthetic exportable
 JVM keys and must never enter an application artifact. The AAR builder includes
-only production classes and the arm64 Rust library. Keep `consumer-rules.pro` when
+only production classes and the selected arm64 and/or x86_64 Rust libraries.
+The default remains arm64; use `--abi x86_64` or repeat `--abi` for both. Integrate
+one matching AAR, as separate AARs duplicate the Java classes. Keep `consumer-rules.pro` when
 integrating sources manually: JNI requires the exact class, method and field names.
 
 The implementation uses Android Keystore keys and authenticated ciphertext in the

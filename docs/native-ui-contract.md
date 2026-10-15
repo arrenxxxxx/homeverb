@@ -1,4 +1,4 @@
-# Native UI contract 1.9
+# Native UI contract 1.10
 
 Status: implemented Linux native contract, October 15, 2026, with Mock, default read-only Meiju startup, protected account connection and scoped experimental AC power/fan grants. Six real devices passed the native read path; phone packaging and complete provider/physical acceptance remain pending. See [ADR-0019](adr/0019-native-ui-contract.md).
 
@@ -16,7 +16,7 @@ The seven C functions in [homeverb.h](../crates/ffi/include/homeverb.h) remain t
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects saved-account cloud reads. `scenario` defaults to `normal`. Meiju requires `allow_mock_writes: false` and rejects any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms `homeverb.mock` or `midea.meiju`. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.9.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.10.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -61,6 +61,7 @@ All rows use query envelopes except the two execution methods. The schemas and a
 | `get_account` | `account_id` | `{account, device_ids}` from local metadata; no authorization check |
 | `rename_account` | `account_id`, `label` | Updated local AccountSummary; no credential or permission changes |
 | `remove_account` | `account_id`, `expected_device_ids` | Local cleanup result: `removed` or `pending`; inspect the inner error |
+| `inspect_account_inventory` | `account_id` | Saved protected device/connection membership; no network or mutation |
 | `refresh_account` | `account_id` | Account and retrieval/publication result; no login |
 | `recover_account` | `account_id` | Explicit pending-session validation and card retrieval; same result shape as refresh |
 | `list_devices` | None | Device array from local storage |
@@ -570,6 +571,80 @@ cargo test -p homeverb-host --test native_contract --offline --locked
 .venv/bin/python scripts/verify_native_contract.py
 ```
 
-The native suite calls all 30 catalog methods, checks their schemas, verifies closed-field rejection, null success, pre-admission errors, composite/batch results, all execution outcomes, cancellation, foreground gating and closed handles. It also validates the saved examples and Meiju startup/account admission guards, caller-buffer clearing, local detail/rename persistence, removal admission/ledger replay, explicit cache/history clearing, retired-request refusal, recovery admission and account counterexamples without a live account. `--write-examples` regenerates those examples only from a successful fictional run; review and commit the changes together with the contract. Existing full MVP tests still cover execution and persistence behavior.
+The native suite calls all 31 catalog methods, checks their schemas, verifies closed-field rejection, null success, pre-admission errors, composite/batch results, all execution outcomes, cancellation, foreground gating and closed handles. It also validates the saved examples and Meiju startup/account admission guards, caller-buffer clearing, local detail/rename persistence, removal admission/ledger replay, explicit cache/history clearing, retired-request refusal, recovery admission and account counterexamples without a live account. `--write-examples` regenerates those examples only from a successful fictional run; review and commit the changes together with the contract. Existing full MVP tests still cover execution and persistence behavior.
 
 This is Linux native verification. Dart FFI allocation, worker scheduling, mobile library packaging, secure stores, system-browser lifecycle, and physical-phone behavior must be tested in the Flutter worktree. No Flutter build has been run for this delivery.
+
+## Missing devices and legacy account inventory
+
+API 1.9.1 gates live Meiju reads and controls on the protected last complete account
+inventory under [ADR-0035](adr/0035-meiju-inventory-membership.md). The public card
+and connection shapes are unchanged. Keep historical cards, rooms, favorites,
+cache and receipts; do not infer connectivity from a card or a refresh result.
+
+- `MIDEA_DEVICE_NOT_LISTED`: the last complete retrieval omitted this device. Show
+  the localized explanation and offer explicit `refresh_account`. This does not
+  establish physical removal, offline status or provider revocation.
+- `MIDEA_INVENTORY_REQUIRED`: an older protected binding has no complete-inventory
+  membership evidence. Offer the same explicit refresh, without another login.
+- Partial/failed retrieval does not change established membership. A complete
+  retrieval can restore the same immutable device identity without losing local
+  organization. Do not automatically retry a control after a refresh.
+
+Local lists, cached reads, descriptions and plans do not consult the protected
+membership. A valid plan is not a promise that execution will be admitted. A live
+read returns a query error; a control returns `failed` with a `not_sent` attempt.
+Neither error starts network work or background retries. A late descriptor cannot
+restore private membership. No cached availability field is added in this phase.
+
+Protected payload version 1 opens without migration or network access, but live
+work requires explicit complete retrieval. Subsequent protected updates write
+version 2; old libraries refuse it. Preserve the profile and upgrade the library;
+never reset credentials to downgrade. SQLite schema 4, 30 JSON methods and seven C
+functions remain unchanged. No owner profile was migrated during development.
+
+## Inspect saved account inventory
+
+API 1.10 adds `inspect_account_inventory` under
+[ADR-0036](adr/0036-local-account-inventory-inspection.md). Check method availability
+before exposing it. This foreground operation reads the selected account's saved
+protected bindings and does not contact Meiju, refresh state or change credentials.
+Unlike `get_account`, it requires readable protected material and an available
+account lease. Use the existing account recovery/removal flows for pending accounts.
+
+```json
+{
+  "schema_version": "1.0",
+  "operation_id": "inspect-saved-devices",
+  "timeout_ms": 10000,
+  "request": {
+    "method": "inspect_account_inventory",
+    "account_id": "00000000-0000-4000-8000-000000000001"
+  }
+}
+```
+
+Successful `data` contains `account` (the existing public summary, with
+`authorization: not_checked`) and `devices`, sorted by `device_id`. Each entry has
+only `device_id`, `connection_id` and `membership`:
+
+| Membership | Meaning | Suggested presentation |
+|---|---|---|
+| `listed` | Present in the last complete saved inventory | Show saved membership; do not infer online status, physical support or permission |
+| `not_listed` | Absent from the last complete saved inventory | Explain that live requests are blocked and offer explicit account refresh |
+| `unconfirmed` | No complete saved inventory has established membership | Offer explicit account refresh; legacy entries are not migrated by inspection |
+
+Join only matching device and connection IDs on existing cards. Historical and
+unsupported bindings remain present; partial retrieval may retain an unpublished
+binding. Never create cards, merge identities or change grants from this response.
+An empty saved list is not proof that the cloud account has no devices. There is
+no trustworthy retrieval timestamp in this payload version; do not invent one.
+
+Locked/unavailable/corrupt secrets, pending/removing accounts and lock contention
+return query errors, not an empty list. There is no automatic cloud fallback.
+Opening the app does not inspect all protected accounts; use the explicit selected
+account action and avoid polling. Ignore outdated callbacks after navigation,
+cancellation or backgrounding. A returned `listed` value can become outdated;
+Core rechecks protected membership and other admission rules before a live request.
+See the [fictional three-state example](../packages/native-contract/account-examples.json).
+The seven C functions, SQLite schema 4 and protected payload version 2 are unchanged.

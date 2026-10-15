@@ -126,6 +126,9 @@ API 1.2 adds protected account connection and list/refresh methods; Flutter inpu
   expose the raw provider response to diagnose it.
 - `MIDEA_REQUEST_FAILED` / `MIDEA_RESPONSE_INVALID`: transport/protocol failure.
   Report only the fixed error code; the exact provider response is not logged.
+- `MIDEA_DEVICE_NOT_LISTED` / `MIDEA_INVENTORY_REQUIRED`: explicitly refresh the
+  account inventory before another live request. Historical cards remain; do not
+  reset the protected map or automatically retry a write.
 - `MIDEA_INVENTORY_PARTIAL`: a Core discovery did not receive every home; existing
   cards were preserved. Retry explicitly when the account/network issue is resolved.
 - `DEVICE_IDENTITY_CONFLICT`: review conflicting protected device evidence; never

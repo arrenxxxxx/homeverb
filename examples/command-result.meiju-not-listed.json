@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "request_id": "req-meiju-missing-inventory",
+  "device_id": "dev-example-meiju-ac",
+  "status": "failed",
+  "started_at": "2026-10-14T05:00:00Z",
+  "completed_at": "2026-10-14T05:00:01Z",
+  "data": null,
+  "error": {
+    "code": "MIDEA_DEVICE_NOT_LISTED",
+    "message": "The device was absent from the last complete account inventory. Refresh the account before trying again.",
+    "retryable": false
+  },
+  "verification": null,
+  "attempts": [
+    {
+      "transport": "cloud",
+      "phase": "not_sent",
+      "duration_ms": 0
+    }
+  ]
+}

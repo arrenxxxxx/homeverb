@@ -1,6 +1,6 @@
 # 3. Connect the UI and localization
 
-Visual UI design is independent of this Core implementation. There is no production HTTP bridge or CLI-output parsing path. The [Flutter application](../../apps/mobile/README.md) uses an FVM-pinned SDK and direct Dart FFI, tested with the Linux Mock host. Android packaging and physical-phone lifecycle verification remain incomplete. The [Android native package](08-android-native.md) supplies a separate arm64 library builder and Keystore/JNI backend.
+Visual UI design is independent of this Core implementation. There is no production HTTP bridge or CLI-output parsing path. The [Flutter application](../../apps/mobile/README.md) uses an FVM-pinned SDK and direct Dart FFI, tested with the Linux Mock host. Android packaging and physical-phone lifecycle verification remain incomplete. The [Android native package](08-android-native.md) supplies a separate arm64/x86_64 library builder and Keystore/JNI backend.
 
 The current design handoff is the [complete Window Light prototype](../../output/prototypes/homeverb-window-light-v1/index.html). Use its [functional specification](../ui-functional-spec.md), [82-state inventory](../ui-screen-inventory.md), and [Flutter visual/skin guide](../ui-window-light.md) alongside the native methods below. The application implements the one-option Appearance screen and isolated native-widget preview. Neither establishes platform authorization or nearby-sharing support; [visual equality remains unverified](../../apps/mobile/verification.md).
 

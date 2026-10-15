@@ -28,6 +28,12 @@ The implemented rediscovery guard preserves an existing local ID's complete conn
 
 Deduplicate using strong vendor correlation IDs or verified protocol mappings. Matching names, rooms, or models is not enough for automatic merging. Ambiguous matches become user-confirmed merge suggestions. Namespace identifiers by provider and region where necessary.
 
+Protected Meiju inventory membership is separate from retained identity under
+[ADR-0035](adr/0035-meiju-inventory-membership.md). Missing devices keep their IDs,
+cards and preferences but cannot initiate live requests. Partial lists do not
+remove established membership. Cached observations remain historical; membership
+is neither physical online status nor proof of provider authorization.
+
 ## Local organization
 
 The trusted native account vault persists immutable random account and credential references within a random profile namespace. Only its local label can be renamed. Credential state is `pending`, `stored` or `removing`; none establishes provider identity or current authorization. `removing` blocks ordinary leases until explicit cleanup completes under [ADR-0028](adr/0028-local-account-removal.md). A lease coordinates session reads and updates. Meiju's protected payload retains an exact native-validated subject and stable per-account appliance bindings under [ADR-0024](adr/0024-meiju-private-device-bindings.md). The native Meiju connection flow uses a successful server login-ID proof as an exact subject guard and preserves bindings on reconnection. Explicit pending-account reauthorization additionally requires intact protected identity and unchanged bytes across login under [ADR-0031](adr/0031-pending-account-reauthorization.md). Native account summaries, local details/rename and protected connection methods are implemented; real reauthorization identity acceptance, explicit cross-account reconciliation and mobile authentication UI remain separate work. See the [account contract](native-ui-contract.md#local-account-details-and-names) and [vault decision](adr/0021-persistent-account-vault.md).

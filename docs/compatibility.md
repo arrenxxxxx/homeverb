@@ -162,7 +162,7 @@ acceptance remain pending. See [ADR-0028](adr/0028-local-account-removal.md).
 
 The native account vault under [ADR-0021](adr/0021-persistent-account-vault.md) adds SQLite schema 3 and internal Rust account APIs. Schema 1/2 upgrades preserve existing data and create verified backups; close older clients first. Schema-2 binaries reject the upgraded profile. Native UI API 1.0.0, its 22 methods, C symbols and execution semantics are unchanged. No public account operation or real-provider authentication is enabled by locally storing references.
 
-The Flutter application in `apps/mobile` is Mock-tested through the Linux native library and an actual Linux Flutter process. It pins Flutter 3.47.7 through FVM, packages the Linux library, and now incorporates Core API 1.9 and SQLite schema 4; Flutter account input, retrieval/recovery and local removal are synthetic-tested; real account/phone acceptance remains pending. Its isolated 82-state preview is fictional. Screenshot comparison still reports differences; Android/iOS native packaging, physical-phone lifecycle, full localization/accessibility and real-platform support are unverified. See the [Flutter verification report](../apps/mobile/verification.md). No platform row is promoted by the UI implementation.
+The Flutter application in `apps/mobile` is Mock-tested through the Linux native library and an actual Linux Flutter process. It pins Flutter 3.47.7 through FVM, packages the Linux library, and now incorporates Core API 1.10 and SQLite schema 4; Flutter account input, retrieval/recovery and local removal are synthetic-tested; real account/phone acceptance remains pending. Its isolated 82-state preview is fictional. Screenshot comparison still reports differences; Android/iOS native packaging, physical-phone lifecycle, full localization/accessibility and real-platform support are unverified. See the [Flutter verification report](../apps/mobile/verification.md). No platform row is promoted by the UI implementation.
 
 Foreground authorization sharing is also planned and unverified for every candidate. Login support alone does not establish transferability. Before enabling sharing, record provider-specific evidence for permission scope, device binding, refresh-token behavior across installations, expiry, and revocation under [ADR-0008](adr/0008-foreground-authorization-sharing.md).
 
@@ -265,3 +265,65 @@ outcomes and SQLite schema 4 are unchanged. Older libraries reject the new field
 negotiate API 1.9 before supplying it. Synthetic tests cover exact fields, scope,
 identity, immutable permissions, uncertainty, replay and lifecycle behavior. No
 household action was sent. See [ADR-0034](adr/0034-scoped-meiju-ac-fan-control.md).
+
+## Inventory membership correction 1.9.1
+
+Complete Meiju retrieval now records protected membership separately from retained
+historical bindings. Missing targets refuse new reads/controls before transmission;
+partial and failed retrieval preserve prior membership. Same-identity reappearance
+restores admission without replacing IDs or local preferences. This is synthetic
+account/Core/native evidence, not tested physical revocation behavior.
+
+Version 1 protected payloads remain readable with unconfirmed membership; an
+explicit complete refresh establishes it. Subsequent protected updates write
+version 2, which older libraries refuse. No downgrade/reset or live-profile
+migration was performed. Public response shapes, 30 methods, seven C functions
+and SQLite schema 4 stay unchanged. New localized errors are documented in the
+[native handoff](native-ui-contract.md#missing-devices-and-legacy-account-inventory).
+No public online-state field, background refresh or new control is introduced.
+
+Local validation for this correction passed: 256 Rust workspace tests (two explicit
+system probes ignored), Clippy with warnings denied, formatting/build checks,
+24 Mock runtime cases, the 30-method/50-example Linux ABI suite, 23 Python tests,
+five presentation tests, and docs/contracts/repository checks. The Android arm64
+AAR was rebuilt and passed export/archive/16 KiB alignment checks. No remote CI,
+Flutter/APK, physical-phone, actual Keystore or appliance test was performed.
+
+## Saved inventory inspection 1.10
+
+`inspect_account_inventory` adds one native JSON method (31 total). It returns
+sorted local device/connection IDs and saved membership for one selected account,
+including historical, unsupported and unpublished bindings. It reads protected
+material under a lease, without cloud work, mutation, descriptor publication or
+permission changes. It never upgrades listed membership to online/authorized.
+
+Existing metadata-only `get_account` behavior, seven C functions, SQLite schema 4
+and protected payload version 2 remain unchanged. Legacy bindings are returned as
+unconfirmed without migration. Older libraries reject the method; negotiate it
+through the catalog. Synthetic host and Linux ABI coverage is described in
+[testing](testing.md). Flutter rendering and physical/provider acceptance remain
+unverified. No real account was inspected during this phase.
+
+Local verification passed 261 Rust workspace tests (two opt-in system probes
+ignored), Clippy/format/build checks, 24 Mock runtime cases, all 31 Linux native
+methods with 51 examples, 23 Python tests, five presentation tests and contract,
+document and repository checks. The rebuilt Android arm64 AAR passed export,
+archive and 16 KiB alignment inspection; no APK, physical-phone, actual Keystore
+or remote CI acceptance is claimed.
+
+## Android emulator ABI packaging
+
+The Android builder additionally accepts `--abi x86_64`, or both supported ABIs
+for one combined AAR. The default arm64 command and artifact path remain stable.
+The x86_64 target is for compatible devices/emulators; no 32-bit support is added.
+Native API 1.10.0, its 31 methods and seven C functions, SQLite schema 4 and
+protected payload version 2 remain unchanged. Use one AAR dependency per app.
+
+Local arm64, x86_64 and combined release builds passed with Rust 1.96.0 and NDK
+r28c at API 28, with eight exports per ABI, correct ELF architecture, 16 KiB load
+alignment and production-only archive checks. All 29 Python tests, including six
+package admission/failure tests, and document/contract/repository/commit checks
+passed. No Flutter worktree, real account or appliance was accessed by this phase.
+Emulator startup, APK integration, Android Keystore and physical/off-LAN acceptance
+remain unverified; no emulator was available in the inspected SDK. See the
+[Android build and startup guide](development/08-android-native.md).

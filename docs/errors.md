@@ -109,6 +109,15 @@ The native read protocols use `MIDEA_RESPONSE_INVALID` for malformed/oversized, 
 
 The account-bound read path returns `DEVICE_IDENTITY_CONFLICT` before transport when the local device, selected connection or known model differs from the protected binding. Invalid components return `CAPABILITY_UNSUPPORTED`. Pending or unavailable credentials stop the request through the vault. Core rejects decoded but undeclared properties with `INVALID_OBSERVATION`; neither that rejection nor a protocol failure replaces the previous cache or triggers a retry.
 
+Protected inventory membership is independent of historical identity. API 1.9.1
+returns `MIDEA_DEVICE_NOT_LISTED` when the last complete retrieval omitted the
+device, or `MIDEA_INVENTORY_REQUIRED` when no complete inventory has established
+membership (including legacy payloads). Both stop bound reads and controls before
+network work, with `retryable=false`. Offer explicit account refresh; do not infer
+revocation, delete the card or resend a write automatically. Controls retain
+`failed` / `not_sent`. Local/cached access remains available. See
+[ADR-0035](adr/0035-meiju-inventory-membership.md).
+
 ## Meiju cloud control errors
 
 The explicit experimental AC control path uses existing execution codes and schema
@@ -173,3 +182,13 @@ be repaired by login; preserve it. Changed protected bytes during login return
 `ACCOUNT_SESSION_UNCONFIRMED` without replacement; a different login subject returns
 `ACCOUNT_IDENTITY_CONFLICT`. Uncertain persistence uses the existing storage errors.
 Reload local metadata after interruption. No error permits automatic login or an appliance retry.
+
+## Saved inventory inspection errors
+
+`inspect_account_inventory` uses existing account/vault errors: `ACCOUNT_NOT_FOUND`
+for missing/foreign scope, `RESOURCE_BUSY` for a held account lease,
+`ACCOUNT_SESSION_UNCONFIRMED` for pending/corrupt material, and
+`ACCOUNT_REMOVAL_PENDING` during removal. Secure-store errors, cancellation,
+deadline and host foreground/closed-session gates retain their existing meanings.
+No error causes cloud fallback or mutation. Unconfirmed legacy membership is a
+successful saved-evidence result; it does not make a live read/control admissible.

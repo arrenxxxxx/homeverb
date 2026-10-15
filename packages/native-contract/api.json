@@ -1,5 +1,5 @@
 {
-  "api_version": "1.9.0",
+  "api_version": "1.10.0",
   "methods": {
     "get_api_info": {
       "response_kind": "query"
@@ -89,6 +89,9 @@
       "response_kind": "query"
     },
     "recover_account": {
+      "response_kind": "query"
+    },
+    "inspect_account_inventory": {
       "response_kind": "query"
     }
   },

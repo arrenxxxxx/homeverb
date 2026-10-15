@@ -18,6 +18,9 @@ use uuid::Uuid;
 #[path = "adapter/fan.rs"]
 mod fan;
 
+#[path = "adapter/membership.rs"]
+mod membership;
+
 const MODELS: &[(&str, &str)] = &[
     ("KFR-35G/N8HE1\u{2161}Pro", "AC"),
     ("KFR-35G/WF2", "AC"),

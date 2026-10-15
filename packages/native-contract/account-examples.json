@@ -1,5 +1,5 @@
 {
-  "api_version": "1.9.0",
+  "api_version": "1.10.0",
   "provenance": "Fictional account DTO examples. Actual synthetic host responses are checked against the same schemas by crates/host/tests/meiju_accounts.rs. No live identities or credentials.",
   "connect_metadata": {
     "schema_version": "1.0",
@@ -388,6 +388,101 @@
           "method": "recover_account",
           "account_id": "00000000-0000-4000-8000-000000000001"
         }
+      }
+    },
+    {
+      "response_definition": "query_error",
+      "response": {
+        "schema_version": "1.0",
+        "data": null,
+        "warnings": [],
+        "error": {
+          "code": "MIDEA_DEVICE_NOT_LISTED",
+          "message": "The device was absent from the last complete account inventory. Refresh the account before trying again.",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "response_definition": "query_error",
+      "response": {
+        "schema_version": "1.0",
+        "data": null,
+        "warnings": [],
+        "error": {
+          "code": "MIDEA_INVENTORY_REQUIRED",
+          "message": "Refresh the account to establish complete device inventory before live access.",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "response_definition": "execute",
+      "response": {
+        "schema_version": "1.0",
+        "request_id": "req-meiju-missing-inventory",
+        "device_id": "dev-example-meiju-ac",
+        "status": "failed",
+        "started_at": "2026-10-14T05:00:00Z",
+        "completed_at": "2026-10-14T05:00:01Z",
+        "data": null,
+        "error": {
+          "code": "MIDEA_DEVICE_NOT_LISTED",
+          "message": "The device was absent from the last complete account inventory. Refresh the account before trying again.",
+          "retryable": false
+        },
+        "verification": null,
+        "attempts": [
+          {
+            "transport": "cloud",
+            "phase": "not_sent",
+            "duration_ms": 0
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "inspect-saved-inventory",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "inspect_account_inventory",
+          "account_id": "00000000-0000-4000-8000-000000000001"
+        }
+      },
+      "response_definition": "inspect_account_inventory",
+      "response": {
+        "schema_version": "1.0",
+        "data": {
+          "account": {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "provider": "midea.meiju",
+            "region": "CN",
+            "label": "Example account",
+            "credential_state": "stored",
+            "authorization": "not_checked"
+          },
+          "devices": [
+            {
+              "device_id": "00000000-0000-4000-8000-000000000002",
+              "connection_id": "00000000-0000-4000-8000-000000000012",
+              "membership": "listed"
+            },
+            {
+              "device_id": "00000000-0000-4000-8000-000000000003",
+              "connection_id": "00000000-0000-4000-8000-000000000013",
+              "membership": "not_listed"
+            },
+            {
+              "device_id": "00000000-0000-4000-8000-000000000004",
+              "connection_id": "00000000-0000-4000-8000-000000000014",
+              "membership": "unconfirmed"
+            }
+          ]
+        },
+        "warnings": [],
+        "error": null
       }
     }
   ],

@@ -337,7 +337,7 @@ async fn partial_and_empty_lists_keep_older_bindings_and_ignore_names_and_online
             .unwrap(),
         bindings
     );
-    assert_eq!(fixture.puts(), 2);
+    assert_eq!(fixture.puts(), 4);
 }
 
 #[tokio::test]
@@ -392,6 +392,84 @@ async fn identity_conflicts_reject_the_whole_update_before_any_write() {
             .unwrap(),
         binding
     );
+}
+
+#[tokio::test]
+async fn partial_inventory_keeps_membership_and_new_bindings_unconfirmed() {
+    let fixture = Fixture::new();
+    let mut account = fixture.account().await;
+    let reference = account.record().credential_ref;
+    let initial = inventory(
+        reference,
+        vec![appliance("11", "AC"), appliance("22", "CA")],
+    )
+    .await;
+    account
+        .bind_inventory(&initial, &operation())
+        .await
+        .unwrap();
+    let subset = inventory(reference, vec![appliance("11", "AC")]).await;
+    account.bind_inventory(&subset, &operation()).await.unwrap();
+    let mut partial = inventory(
+        reference,
+        vec![appliance("22", "CA"), appliance("33", "E1")],
+    )
+    .await;
+    partial.failures.push(HomeFailure {
+        home_id: initial.appliances[0].id.clone(),
+        error: Error::new("MIDEA_REQUEST_FAILED", "Synthetic missing home."),
+    });
+    account
+        .bind_inventory(&partial, &operation())
+        .await
+        .unwrap();
+    let payload: Value = serde_json::from_slice(&fixture.bytes(reference)).unwrap();
+    let membership: Vec<_> = payload["bindings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|b| b["listed"].clone())
+        .collect();
+    assert_eq!(membership, vec![json!(true), json!(false), Value::Null]);
+    let before = fixture.bytes(reference);
+    account
+        .replace_session(&secret("PRIVATE-SUBJECT"), &secret("ROTATED"), &operation())
+        .await
+        .unwrap();
+    let updated: Value = serde_json::from_slice(&fixture.bytes(reference)).unwrap();
+    assert_eq!(updated["bindings"], payload["bindings"]);
+    assert_ne!(fixture.bytes(reference), before);
+}
+
+#[tokio::test]
+async fn uncertain_membership_removal_blocks_account_reuse_without_losing_identity() {
+    let fixture = Fixture::new();
+    let mut account = fixture.account().await;
+    let record = account.record().clone();
+    let initial = inventory(record.credential_ref, vec![appliance("11", "AC")]).await;
+    let ids = account
+        .bind_inventory(&initial, &operation())
+        .await
+        .unwrap();
+    let empty = inventory(record.credential_ref, vec![]).await;
+    fixture.secrets.mode.store(2, Ordering::Relaxed);
+    assert_eq!(
+        account
+            .bind_inventory(&empty, &operation())
+            .await
+            .unwrap_err()
+            .code,
+        "SECRET_STORE_WRITE_UNKNOWN"
+    );
+    assert_eq!(account.record().credential_state, CredentialState::Pending);
+    drop(account);
+    assert_eq!(
+        fixture.reopen(record.id).await.unwrap_err().code,
+        "ACCOUNT_SESSION_UNCONFIRMED"
+    );
+    let payload: Value = serde_json::from_slice(&fixture.bytes(record.credential_ref)).unwrap();
+    assert_eq!(payload["bindings"][0]["listed"], false);
+    assert_eq!(payload["bindings"][0]["local"], json!(ids[0]));
 }
 
 #[tokio::test]
@@ -494,10 +572,10 @@ async fn malformed_or_missing_protected_state_never_creates_a_replacement_map() 
         .unwrap();
     let original = fixture.bytes(record.credential_ref);
     drop(account);
-    for kind in 0..16 {
+    for kind in 0..20 {
         let mut data: Value = serde_json::from_slice(&original).unwrap();
         match kind {
-            0 => data["version"] = json!(2),
+            0 => data["version"] = json!(3),
             1 => data["account_id"] = json!(Uuid::new_v4()),
             2 => data["credential_ref"] = json!(CredentialRef::new()),
             3 => data["provider"] = json!("another.provider"),
@@ -512,7 +590,14 @@ async fn malformed_or_missing_protected_state_never_creates_a_replacement_map() 
             12 => data["subject"] = json!(vec![1; 1025]),
             13 => data["session"] = json!(vec![1; 65537]),
             14 => data["bindings"][0]["model"] = json!("x".repeat(257)),
-            _ => data["bindings"][0]["model"] = json!("Invalid\nModel"),
+            15 => data["bindings"][0]["model"] = json!("Invalid\nModel"),
+            16 => data["bindings"][0]["listed"] = json!("true"),
+            17 => data["bindings"][0]["listed"] = json!(1),
+            18 => data["version"] = json!(1),
+            _ => {
+                data["version"] = json!(1);
+                data["bindings"][0]["listed"] = json!(false);
+            }
         }
         fixture.set_bytes(record.credential_ref, serde_json::to_vec(&data).unwrap());
         let error = fixture.reopen(record.id).await.unwrap_err();

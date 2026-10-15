@@ -45,7 +45,7 @@
     "execution": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "CommandResult",
-      "description": "A command receipt, also returned unchanged inside a successful local execution-lookup query. Query success does not change or imply success of the stored command outcome.",
+      "description": "A command receipt, also returned unchanged inside a successful local execution-lookup query. Query success does not change or imply success of the stored command outcome. MIDEA_DEVICE_NOT_LISTED and MIDEA_INVENTORY_REQUIRED indicate failed, not-sent membership checks; they do not establish provider revocation.",
       "type": "object",
       "properties": {
         "schema_version": {
