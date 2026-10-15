@@ -637,14 +637,56 @@ class Blocks extends StatelessWidget {
   }
 }
 
-Widget product(String key, {double size = 80}) =>
-    ['ac', 'lamp', 'tv', 'sensor'].contains(key)
-    ? Image.asset(
-        'assets/$key.png',
-        fit: BoxFit.contain,
-        filterQuality: FilterQuality.high,
-      )
-    : Center(child: Glyph(key, size: 52, color: accent));
+Widget product(String key, {double size = 80}) {
+  const dimensions = {
+    'ac': Size(216, 77),
+    'lamp': Size(87, 137),
+    'tv': Size(172, 111),
+    'sensor': Size(84, 98),
+  };
+  final source = dimensions[key];
+  if (source == null) return Center(child: Glyph(key, size: 52, color: accent));
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      if (!constraints.hasBoundedWidth || !constraints.hasBoundedHeight) {
+        return Image.asset(
+          'assets/$key.png',
+          fit: BoxFit.contain,
+          filterQuality: FilterQuality.high,
+        );
+      }
+      final ratio = MediaQuery.devicePixelRatioOf(context);
+      final fitted = applyBoxFit(BoxFit.contain, source, constraints.biggest);
+      double pixel(double value) {
+        final scaled = value * ratio;
+        final lower = scaled.floor();
+        final fraction = scaled - lower;
+        final rounded = fraction > .5 || (fraction == .5 && lower.isOdd)
+            ? lower + 1
+            : lower;
+        return rounded / ratio;
+      }
+      final width = pixel(fitted.destination.width);
+      final height = pixel(fitted.destination.height);
+      // Keep the image bounds on physical pixels, as in the source artwork.
+      return Stack(
+        children: [
+          Positioned(
+            left: pixel((constraints.maxWidth - width) / 2),
+            top: pixel((constraints.maxHeight - height) / 2),
+            width: width,
+            height: height,
+            child: Image.asset(
+              'assets/$key.png',
+              fit: BoxFit.fill,
+              filterQuality: FilterQuality.high,
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
 
 class Rows extends StatelessWidget {
   const Rows(

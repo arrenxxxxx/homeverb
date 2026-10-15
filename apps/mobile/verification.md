@@ -371,3 +371,35 @@ The ordinary Android release APK rebuilt, passed 16 KiB ZIP alignment, installed
 and cold-started on the isolated emulator. The delivery APK/hash manifest was
 updated; `icon-geometry-release-home.png` records the inspected launch. Earlier
 real OS keyboard and lifecycle evidence remains tied to its recorded checkpoint.
+
+
+## Device-image pixel alignment
+
+Device illustrations now preserve their fitted aspect ratio while aligning image
+bounds to physical pixels. The original renderer rounds half-pixel ties to even;
+using ordinary Dart rounding moved the home AC and TV images by half a logical
+pixel. The retained implementation follows the original rounding rule and uses
+the four source assets' dimensions. It keeps Flutter widgets and runtime image
+scaling; no page screenshot or reference image replaces interactive content.
+Unbounded layouts retain the normal image-fitting fallback.
+
+A temporary layout probe measured the actual image positions and was removed
+after diagnosis. The 82-state comparison improves 15 screens and leaves 67
+unchanged, with no regression against the preceding checkpoint. Mean channel
+error drops from 1.6261 to 1.6208/255. Reference/actual home-image crops were
+inspected. The unchanged-reference strict gate still fails at **0/82 exact**;
+remaining resampling, glyph rasterization and other layout differences are not
+accepted by this result, and P08 remains pending owner review.
+
+Static analysis, the full 61-test Flutter suite, documentation, contract and
+repository checks passed. The suite includes the actual native Mock widget-click
+journey and 198 explicitly simulated atlas branches, plus narrow/large-text and
+high-contrast layouts. No native contract, Core storage, real-provider admission
+or device-operation semantics changed.
+
+The ordinary Android release APK rebuilt, passed 16 KiB ZIP alignment and installed
+on the isolated emulator. Actual UI taps opened Add device, discovered the fictional
+Mock appliance and opened its card. Android screenshots record the device image
+and detail screen. Force-stop/cold restart restored the saved Mock card, confirmed
+by the accessibility tree and `image-alignment-release-home.png`. The local delivery
+APK/hash manifest was updated. No real network appliance or owner account was used.
