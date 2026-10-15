@@ -9,6 +9,16 @@ use std::{path::Path, sync::Arc};
 mod session;
 pub use session::{HostRequest, Request, Session};
 
+/// Compose a native account vault without reading credentials or starting authentication.
+pub fn open_accounts(directory: &Path) -> Result<homeverb_core::AccountVault> {
+    use homeverb_core::AccountStore;
+    let store = Arc::new(SqliteStore::open(directory)?);
+    let secrets = Arc::new(homeverb_secrets::SystemSecretStore::new(
+        store.profile_namespace()?,
+    )?);
+    Ok(homeverb_core::AccountVault::new(store, secrets))
+}
+
 pub fn open_mock(directory: &Path, scenario: Scenario, allow_writes: bool) -> Result<Core> {
     let store = Arc::new(SqliteStore::open(directory)?);
     let clock = Arc::new(SystemClock);

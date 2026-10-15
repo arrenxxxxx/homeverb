@@ -46,7 +46,7 @@ Use `<type>(<optional-scope>): <English imperative summary>`. Allowed types: `fe
 
 ## Implementation status and test honesty
 
-The Rust Mock MVP and Linux Secret Service library are implemented. Read the progressive guides in `docs/development/` before changing them. Real authentication/account integration, mobile credential stores and packaging, and physical-device support remain pending; see `docs/task-breakdown.md`. A real adapter is `verified` only after model-specific physical-device testing.
+The Rust Mock MVP, Linux Secret Service library, and native account vault are implemented. Read the progressive guides in `docs/development/` before changing them. Real provider authentication/account flows, mobile credential stores and packaging, and physical-device support remain pending; see `docs/task-breakdown.md`. A real adapter is `verified` only after model-specific physical-device testing.
 
 Current checks:
 

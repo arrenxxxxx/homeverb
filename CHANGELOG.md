@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Persistent account vault
+
+- Upgrade SQLite schema 1/2 to 3 with a verified backup, persisting random profile/account/credential references without session bytes or provider identifiers.
+- Compose trusted native account storage with the OS secret store, and hold account leases across rereading and updating sessions.
+- Leave uncertain or unfinished credential updates pending; recover through explicit validation of the exact stored bytes without repeating a secret write.
+- Keep native UI API 1.0.0 unchanged. Provider login, public account methods, account removal and mobile secure stores remain pending; older schema-2 binaries refuse upgraded profiles.
+
 ### Meiju inventory protocol
 
 - Add the native Midea cloud home/appliance inventory protocol with an injected read transport, account-scoped deduplication, unknown-family retention, partial errors, and shared cancellation/deadlines.

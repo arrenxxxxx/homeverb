@@ -10,11 +10,13 @@ homeverb-domain.workspace = true
 homeverb-core.workspace = true
 homeverb-mock.workspace = true
 homeverb-storage.workspace = true
+homeverb-secrets.workspace = true
 tokio-util.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 
 [dev-dependencies]
+rusqlite.workspace = true
 async-trait.workspace = true
 tokio.workspace = true
 serde_json.workspace = true

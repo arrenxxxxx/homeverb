@@ -5,7 +5,7 @@
 | Entity | Key fields | Meaning |
 |---|---|---|
 | Provider | id / region / auth_methods | Account platform, not necessarily a brand |
-| Account | id / provider / profile / credential_ref | Local account reference without plaintext credentials |
+| Account | id / provider / region / label / credential_ref / credential_state | Local account record in a persisted profile namespace, without plaintext credentials or provider identifiers |
 | Device | id / brand / model / alias / components / connections | Unified identity for one physical appliance |
 | Connection | id / adapter / transport / account_id / identity_ref | A potentially available LAN/cloud route |
 | Component | id / capabilities | A main unit, fridge compartment, freezer compartment, etc. |
@@ -29,6 +29,8 @@ The implemented rediscovery guard preserves an existing local ID's complete conn
 Deduplicate using strong vendor correlation IDs or verified protocol mappings. Matching names, rooms, or models is not enough for automatic merging. Ambiguous matches become user-confirmed merge suggestions. Namespace identifiers by provider and region where necessary.
 
 ## Local organization
+
+The trusted native account vault persists immutable random account and credential references within a random profile namespace. Only its local label can be renamed. Credential state is `pending` or `stored`; neither establishes provider identity or current authorization. A lease coordinates session reads and updates. Account summaries, provider identity matching and UI authentication methods remain separate future contracts; see [ADR-0021](adr/0021-persistent-account-vault.md).
 
 Room IDs are generated locally. Names are trimmed, limited to 80 characters, and unique after Unicode lowercasing. Device preferences survive rediscovery. Deleting a room unassigns its devices without removing them or changing their permissions. Null alias restores the adapter's label. Duplicate aliases are allowed, so ambiguous selection requires an exact device ID. Renaming or moving a device never changes its identity, routes, credentials, or capabilities.
 

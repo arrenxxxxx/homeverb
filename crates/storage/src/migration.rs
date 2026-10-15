@@ -6,7 +6,7 @@ use rusqlite::{
 };
 use std::{fs::File, path::Path};
 
-pub const SCHEMA_VERSION: u32 = 2;
+pub const SCHEMA_VERSION: u32 = 3;
 
 pub fn unsupported() -> Error {
     Error::new(
@@ -48,7 +48,8 @@ pub fn upgrade(connection: &mut Connection, directory: &Path) -> Result<()> {
             CREATE TABLE snapshots (device TEXT NOT NULL, component TEXT NOT NULL, snapshot TEXT NOT NULL, PRIMARY KEY(device, component));
             CREATE TABLE executions (request_id TEXT PRIMARY KEY, command TEXT NOT NULL, result TEXT NOT NULL);").map_err(storage_error)?;
     }
-    transaction.execute_batch("CREATE TABLE rooms (
+    if version < 2 {
+        transaction.execute_batch("CREATE TABLE rooms (
             id TEXT PRIMARY KEY, name TEXT NOT NULL, name_key TEXT NOT NULL UNIQUE,
             position INTEGER NOT NULL CHECK(position>=0));
         CREATE TABLE device_preferences (
@@ -59,7 +60,25 @@ pub fn upgrade(connection: &mut Connection, directory: &Path) -> Result<()> {
         INSERT INTO device_preferences(device_id, position) SELECT id, ROW_NUMBER() OVER(ORDER BY id)-1 FROM devices;
         ALTER TABLE executions ADD COLUMN finalized INTEGER NOT NULL DEFAULT 0 CHECK(finalized IN (0,1));
         CREATE TABLE retired_requests (request_id TEXT PRIMARY KEY);
-        PRAGMA user_version=2;").map_err(storage_error)?;
+        ").map_err(storage_error)?;
+    }
+    transaction
+        .execute_batch(
+            "CREATE TABLE profile_namespace (
+            singleton INTEGER PRIMARY KEY CHECK(singleton=1), namespace TEXT NOT NULL UNIQUE);
+        CREATE TABLE accounts (
+            id TEXT PRIMARY KEY, provider TEXT NOT NULL, region TEXT NOT NULL,
+            label TEXT NOT NULL, credential_ref TEXT NOT NULL UNIQUE,
+            credential_state TEXT NOT NULL CHECK(credential_state IN ('pending','stored')));
+        PRAGMA user_version=3;",
+        )
+        .map_err(storage_error)?;
+    transaction
+        .execute(
+            "INSERT INTO profile_namespace VALUES (1, ?1)",
+            [uuid::Uuid::new_v4().to_string()],
+        )
+        .map_err(storage_error)?;
     transaction.commit().map_err(storage_error)
 }
 

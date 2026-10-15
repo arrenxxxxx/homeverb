@@ -12,6 +12,7 @@ use std::{
     time::Duration,
 };
 
+mod accounts;
 mod journal;
 mod migration;
 mod organization;

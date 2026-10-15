@@ -5,13 +5,13 @@
 | Area | Stores | Does not store |
 |---|---|---|
 | Configuration | Profiles, route defaults, UI preferences | Passwords or tokens |
-| SQLite | Device descriptors, local rooms/preferences, latest snapshots, bounded detailed receipts, retired request IDs | Plaintext credentials or continuous device history |
+| SQLite | Random profile/account/credential references, device descriptors, local rooms/preferences, latest snapshots, bounded detailed receipts, retired request IDs | Plaintext credentials, provider account identifiers, or continuous device history |
 | System secret store | Account sessions, refresh tokens, pairing keys | Ordinary diagnostic logs |
 | Diagnostic logs | Redacted errors, request IDs, durations | Full vendor responses or Authorization headers |
 
 Hosts inject paths following platform application-directory conventions. Do not hardcode a user's home directory. Desktop CLI/MCP may share storage for the same explicit user/profile. Mobile sandboxes remain independent; there is no automatic sync.
 
-## Implemented schema 2
+## Implemented schema 3
 
 ```text
 devices(id, descriptor)
@@ -20,6 +20,8 @@ rooms(id, name, name_key, position)
 device_preferences(device_id, alias, room_id, favorite, position)
 executions(request_id, command, result, finalized)
 retired_requests(request_id)
+profile_namespace(singleton, namespace)
+accounts(id, provider, region, label, credential_ref, credential_state)
 ```
 
 The SQLite `user_version` records the schema version. Each profile has its own directory. Device descriptors include components, connections, and capabilities; aliases overlay the descriptor at read time. Rediscovery preserves preferences. Deleting a room sets its assignments to null without deleting devices or credentials. Card reads join devices and preferences in one consistent query. See [ADR-0009](adr/0009-local-organization-and-retention.md).
@@ -28,7 +30,7 @@ The SQLite `user_version` records the schema version. Each profile has its own d
 
 Batch room assignments resolve every selected device and destination inside one immediate transaction, then update only `room_id`. Any failure rolls back all selected devices. Responses follow request order without changing stored card order. No additional table or schema upgrade is needed.
 
-Account records and persisted credential references remain pending. The Linux system-store library is implemented separately below. JSON columns are not permission to hide secrets in the database. Export using explicit allowlists. Real device identities are sensitive and do not belong in default error messages.
+Account records contain only local references, provider/region, a local label, and `pending` or `stored` credential state. The profile namespace and account/credential references are random UUIDs persisted before credential writes. Account ID, provider, region, and credential reference cannot be rebound; rename changes only the label. Provider identity matching and real device persistence remain pending. JSON columns are not permission to hide secrets in the database. Export using explicit allowlists. See [ADR-0021](adr/0021-persistent-account-vault.md).
 
 ## Native credential storage
 
@@ -40,11 +42,15 @@ Operations share the caller's deadline and cancellation. Create/delete may requi
 
 The local synthetic test verifies create/read/reopen/replace, profile isolation, deletion/absence, and socket release within a bounded runtime cleanup window on the available GNOME Secret Service. Regular tests do not access a developer's keyring. This is not evidence of real-platform login, locked/prompted service integration, KWallet compatibility, or mobile support.
 
-The future account host must persist its nonsecret profile namespace and credential references before relying on them for recovery. Recreating namespaces on each launch loses access to existing entries. Attribute namespaces prevent accidental mixing; they do not isolate malicious processes running as the same OS user. Account refresh locking and cross-process credential rotation remain unimplemented. No credential bytes are exposed through CLI, MCP, or native JSON requests.
+`homeverb_host::open_accounts` composes the persisted profile namespace, SQLite account records and system secret store without accessing the keyring. Core's [AccountVault](../crates/core/src/accounts.rs) creates pending references or leases existing accounts; neither authenticates a provider. Attribute namespaces prevent accidental mixing; they do not isolate malicious processes running as the same OS user. No credential bytes are exposed through CLI, MCP, or native JSON requests.
+
+Hold the account lease across session read, any future provider refresh, and replacement. `store_session` persists `pending` before calling the secure store, then records `stored` only after confirmed success. An interruption before finalization leaves pending and ordinary reads return `ACCOUNT_SESSION_UNCONFIRMED`. If the initial metadata update fails, no secret write starts. `stored` proves local persistence only; the adapter must still check expiry, provider identity and validity. A missing referenced secret returns `AUTH_REQUIRED`.
+
+Trusted recovery uses `inspect_session`, validates those exact bytes with the provider while retaining the lease, then calls `confirm_session`. Confirmation rereads and compares the bytes before marking stored, without repeating the secret mutation. A mismatch or absent entry remains unconfirmed. There is no automatic recovery, refresh, credential deletion, or public account method. Actual provider rotation and mobile stores remain pending.
 
 ## Concurrency
 
-Writes use short transactions; no database write transaction spans adapter I/O. Device file locks are nonblocking and return `RESOURCE_BUSY` on contention. SQLite lock waits are limited to 250 ms per call. These locks cannot coordinate another phone or the vendor app. Account-refresh locks and rereading the newest session after acquiring one remain real-authentication requirements.
+Writes use short transactions; no database write transaction spans adapter I/O. Device and account file locks are nonblocking and return `RESOURCE_BUSY` on contention. Account locks use `account-<local-uuid>` and remain held by the lease until drop. The vault rereads metadata only after acquiring that lock, then reads the current secret. SQLite lock waits are limited to 250 ms per call. These locks cannot coordinate another phone or the vendor app. Synchronous storage work is not preemptible; subsequent secure-store work rechecks the original operation budget.
 
 Lock filenames retain the existing lowercase UTF-8 hex encoding for device IDs up to 127 bytes. Longer IDs use `sha256-` followed by the lowercase SHA-256 digest of the complete UTF-8 ID, keeping filenames below 255 bytes without truncation. The prefix cannot collide with legacy hex names. The mapping is deterministic across processes and preserves existing short-ID lock coordination; no SQLite migration is needed. Older binaries could not create the oversized hex filenames for these longer IDs on the verified Linux filesystem.
 
@@ -62,6 +68,6 @@ Device-specific history filters the command's exact device ID in SQLite before l
 
 Startup recovery finalizes orphaned pending records only after acquiring their device locks. Records owned by a live writer are left active. Recovery preserves their last known outcomes and never sends commands. A failed final journal update can leave an older conservative receipt even when the caller received stronger evidence.
 
-New empty profiles initialize schema 2. Schema 1 upgrades take a consistent, WAL-aware SQLite backup under `backups/schema-1-<uuid>.sqlite3`, check its integrity, and sync it before a transactional migration. Failure preserves the old schema and completed backup. Newer versions and unversioned foreign databases are refused. Existing stores hold shared migration leases; an upgrade requires exclusive access and returns `RESOURCE_BUSY` on conflict. Close older clients before upgrading, including versions that predate migration locks. Backups are retained locally and may contain older detailed history; they contain no credentials in the current schema.
+New empty profiles initialize schema 3. Schema 1 and 2 upgrades take a consistent, WAL-aware SQLite backup under `backups/schema-<previous-version>-<uuid>.sqlite3`, check its integrity, and sync it before a transactional migration. Failure preserves the old schema and completed backup. Newer versions and unversioned foreign databases are refused. Existing stores hold shared migration leases; an upgrade requires exclusive access and returns `RESOURCE_BUSY` on conflict. Close older clients before upgrading, including versions that predate migration locks. Schema-2 binaries reject schema 3; do not alternate older and newer binaries on an upgraded profile. Backups are retained locally and may contain older detailed history; they contain no credentials in the current schema.
 
 Profile deletion is not an implemented command. A future deletion flow must remove its local records and secret-store entries. Do not promise reliable erasure of OS backups or vendor-cloud data.

@@ -93,7 +93,7 @@ Settings calls `{"method":"diagnostics"}` in the normal host envelope. The query
 
 Use the `diagnostics.*` locale keys for the preview/save controls and explanatory notices. Show that this is local metadata, with at most 100 stored receipt summaries and 32 attempts each; `attempts_omitted` makes truncation explicit. `item_outcomes` counts direct children, including partial children as partial, without exporting their private payloads. `OTHER` denotes an unreviewed error code. Room/device/connection counts do not establish online status, and parent/child receipts can represent overlapping work. See [privacy limits](../security-and-privacy.md#local-diagnostic-reports).
 
-This adds a native request method without changing existing payloads, the C ABI, or SQLite schema 2. Older hosts reject the unknown method; the UI must handle that response. Backgrounded/closed hosts continue to reject diagnostic requests.
+This adds a native request method without changing existing payloads, the C ABI, or device storage layout. Older hosts reject the unknown method; the UI must handle that response. Backgrounded/closed hosts continue to reject diagnostic requests.
 
 ## Localization contract
 

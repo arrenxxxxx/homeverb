@@ -161,7 +161,7 @@ fn migration_preserves_records_and_creates_a_consistent_version_one_backup() {
     let store = SqliteStore::open(&directory.0).unwrap();
     assert_eq!(
         migration::version(&store.connection.lock().unwrap()).unwrap(),
-        2
+        3
     );
     assert_eq!(store.devices().unwrap()[0].device.id, descriptor.device.id);
     assert_eq!(
@@ -233,8 +233,80 @@ fn failed_migration_rolls_back_and_preserves_its_backup() {
 }
 
 #[test]
+fn schema_two_upgrade_preserves_organization_and_persists_a_random_profile_namespace() {
+    use homeverb_core::AccountStore;
+    let directory = Directory::new();
+    let store = SqliteStore::open(&directory.0).unwrap();
+    store.create_room("room-example", "Bedroom").unwrap();
+    store
+        .connection
+        .lock()
+        .unwrap()
+        .execute_batch("DROP TABLE accounts; DROP TABLE profile_namespace; PRAGMA user_version=2;")
+        .unwrap();
+    drop(store);
+    let upgraded = SqliteStore::open(&directory.0).unwrap();
+    assert_eq!(upgraded.rooms().unwrap()[0].name, "Bedroom");
+    let namespace = upgraded.profile_namespace().unwrap();
+    assert_eq!(namespace.get_version_num(), 4);
+    assert!(upgraded.accounts().unwrap().is_empty());
+    let backups: Vec<_> = std::fs::read_dir(directory.0.join("backups"))
+        .unwrap()
+        .map(|entry| entry.unwrap().path())
+        .collect();
+    assert_eq!(backups.len(), 1);
+    let backup = Connection::open(&backups[0]).unwrap();
+    assert_eq!(migration::version(&backup).unwrap(), 2);
+    assert_eq!(
+        backup
+            .query_row("SELECT name FROM rooms", [], |row| row.get::<_, String>(0))
+            .unwrap(),
+        "Bedroom"
+    );
+    drop(upgraded);
+    assert_eq!(
+        SqliteStore::open(&directory.0)
+            .unwrap()
+            .profile_namespace()
+            .unwrap(),
+        namespace
+    );
+}
+
+#[test]
+fn account_storage_rejects_rebinding_and_corrupt_references() {
+    use homeverb_core::{AccountRecord, AccountStore, CredentialRef, CredentialState};
+    let directory = Directory::new();
+    let store = SqliteStore::open(&directory.0).unwrap();
+    let record = AccountRecord {
+        id: uuid::Uuid::new_v4(),
+        provider: "midea.meiju".into(),
+        region: "CN".into(),
+        label: "Home".into(),
+        credential_ref: CredentialRef::new(),
+        credential_state: CredentialState::Pending,
+    };
+    store.insert_account(&record).unwrap();
+    let mut rebound = record.clone();
+    rebound.provider = "other.provider".into();
+    assert!(store.insert_account(&rebound).is_err());
+    assert_eq!(store.account(record.id).unwrap(), record);
+    store
+        .connection
+        .lock()
+        .unwrap()
+        .execute(
+            "UPDATE accounts SET credential_ref='not-a-random-id' WHERE id=?1",
+            [record.id.to_string()],
+        )
+        .unwrap();
+    assert_eq!(store.account(record.id).unwrap_err().code, "STORAGE_ERROR");
+    assert_eq!(store.accounts().unwrap_err().code, "STORAGE_ERROR");
+}
+
+#[test]
 fn newer_or_foreign_databases_are_rejected_without_schema_changes() {
-    for version in [0, 3] {
+    for version in [0, 4] {
         let directory = Directory::new();
         let connection = Connection::open(directory.database()).unwrap();
         connection

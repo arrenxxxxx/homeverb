@@ -21,6 +21,8 @@
 | AUTH_REQUIRED | Login or user consent required | Start login through a trusted UI |
 | AUTH_EXPIRED | Session cannot be refreshed safely | Request reauthorization |
 | AUTH_FLOW_UNSUPPORTED | Authentication requires an excluded backend | Mark blocked; do not add a hidden backend |
+| ACCOUNT_NOT_FOUND | Unknown local account reference | Reload local account records; do not select another account implicitly |
+| ACCOUNT_SESSION_UNCONFIRMED | Credential persistence was not finalized, or recovery bytes differ | Use trusted native validation/recovery or explicit reauthorization; do not reuse or rewrite automatically |
 | SECRET_STORE_UNAVAILABLE | Secure credential storage unavailable | Fail explicitly; no plaintext fallback |
 | SECRET_STORE_LOCKED | The default collection or matching item is locked before mutation | Unlock it through the operating system; HomeVerb does not call Unlock |
 | SECRET_STORE_CONFLICT | Multiple entries match the exact profile and credential reference | Stop without reading, replacing, or deleting ambiguous entries |

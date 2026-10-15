@@ -1,5 +1,6 @@
 //! Embedded execution policy shared by every host.
 
+mod accounts;
 mod batch;
 mod descriptors;
 mod diagnostics;
@@ -8,6 +9,7 @@ mod observations;
 mod organization;
 mod policy;
 mod secrets;
+pub use accounts::*;
 pub use execution::Core;
 pub use policy::{Grant, Policy};
 pub use secrets::{CredentialRef, SecretBytes, SecretStore, UnavailableSecretStore};
