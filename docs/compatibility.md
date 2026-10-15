@@ -308,3 +308,20 @@ methods with 51 examples, 23 Python tests, five presentation tests and contract,
 document and repository checks. The rebuilt Android arm64 AAR passed export,
 archive and 16 KiB alignment inspection; no APK, physical-phone, actual Keystore
 or remote CI acceptance is claimed.
+
+## Android emulator ABI packaging
+
+The Android builder additionally accepts `--abi x86_64`, or both supported ABIs
+for one combined AAR. The default arm64 command and artifact path remain stable.
+The x86_64 target is for compatible devices/emulators; no 32-bit support is added.
+Native API 1.10.0, its 31 methods and seven C functions, SQLite schema 4 and
+protected payload version 2 remain unchanged. Use one AAR dependency per app.
+
+Local arm64, x86_64 and combined release builds passed with Rust 1.96.0 and NDK
+r28c at API 28, with eight exports per ABI, correct ELF architecture, 16 KiB load
+alignment and production-only archive checks. All 29 Python tests, including six
+package admission/failure tests, and document/contract/repository/commit checks
+passed. No Flutter worktree, real account or appliance was accessed by this phase.
+Emulator startup, APK integration, Android Keystore and physical/off-LAN acceptance
+remain unverified; no emulator was available in the inspected SDK. See the
+[Android build and startup guide](development/08-android-native.md).

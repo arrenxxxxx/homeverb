@@ -14,4 +14,4 @@ Trusted Rust hosts construct explicit component/argument/transport-scoped `Grant
 
 JSON schema version remains `1.0`; native host requests reject other versions and unknown fields. Keep generated frontend bindings synchronized when changing DTOs. Public contract changes require an ADR and positive/negative fixtures.
 
-Android embeds the same C ABI with a platform-only JNI credential initializer. The [native Android guide](development/08-android-native.md) supplies the Java package, arm64 AAR builder and synthetic JVM/JNI verification. OS Keystore, APK and physical-phone acceptance remain separate; no Flutter page or background worker is introduced.
+Android embeds the same C ABI with a platform-only JNI credential initializer. The [native Android guide](development/08-android-native.md) supplies the Java package, arm64/x86_64 AAR builder and synthetic JVM/JNI verification. OS Keystore, APK and physical-phone acceptance remain separate; no Flutter page or background worker is introduced.

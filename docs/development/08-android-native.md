@@ -1,6 +1,6 @@
 # 8. Embed the Android Core and native credential store
 
-This stage supplies native storage and an arm64 Android library build path for the
+This stage supplies native storage and arm64/x86_64 Android library build paths for the
 separate Flutter worktree. It does not change Flutter pages or enable physical
 controls. Read the [native contract](../native-ui-contract.md),
 [account recovery rules](../storage.md#native-credential-storage) and
@@ -8,15 +8,15 @@ controls. Read the [native contract](../native-ui-contract.md),
 
 ## Build and verify on Linux
 
-Requirements: the locked Rust toolchain and `aarch64-linux-android` target, a JDK
+Requirements: the project Rust toolchain and the selected Android targets, a JDK
 with `--release` support, official Android API 28+ stubs, and Android NDK r28c.
 The current validation uses JDK 21 and Android API 35 stubs. SDK/NDK files belong
 outside the repository and are not included in commits. Fetch Cargo dependencies
 once before the offline commands.
 
 ```bash
-rustup target add aarch64-linux-android
-cargo fetch --target aarch64-linux-android
+rustup target add aarch64-linux-android x86_64-linux-android
+cargo fetch --target aarch64-linux-android --target x86_64-linux-android
 .venv/bin/python scripts/verify_android_store.py \
   --android-jar /absolute/android-sdk/platforms/android-35/android.jar \
   --java-home /absolute/jdk-21
@@ -26,23 +26,49 @@ cargo fetch --target aarch64-linux-android
   --java-home /absolute/jdk-21
 ```
 
+Omitting `--abi` preserves the arm64 build and output path. Add `--abi x86_64`
+for a typical Linux-host Android emulator, or repeat the option to package both:
+
+```bash
+.venv/bin/python scripts/build_android_native.py \
+  --ndk /absolute/android-ndk-r28c \
+  --android-jar /absolute/android-sdk/platforms/android-35/android.jar \
+  --java-home /absolute/jdk-21 \
+  --abi arm64-v8a --abi x86_64
+```
+
+| ABI selection | Output under `target/android/` | Native entries |
+|---|---|---|
+| Omitted or `--abi arm64-v8a` | `homeverb-core-arm64.aar` | `jni/arm64-v8a/libhomeverb_ffi.so` |
+| `--abi x86_64` | `homeverb-core-x86_64.aar` | `jni/x86_64/libhomeverb_ffi.so` |
+| Both | `homeverb-core-universal.aar` | Both entries above |
+
+The combined artifact covers these two 64-bit ABIs only. No 32-bit ARM or x86
+support is included. Single-ABI builds require only their selected Rust target.
+
 The verifier compiles production Java against real Android stubs, runs synthetic
 JVM encryption assertions and explicitly runs the otherwise ignored JNI test.
 It uses generated temporary paths and fictional keys, never Android or Linux
 account credentials. The ordinary Rust suite does not start a JVM or open a keyring.
 
-The builder compiles the complete Rust FFI library for API 28 arm64, checks eight
-exports (seven C functions plus the Android JNI initializer), checks 16 KiB ELF
-segment alignment and excludes desktop runtime dependencies. It creates
-`target/android/homeverb-core-arm64.aar` with production Java, the native library,
-manifest and JNI consumer rules. Test providers cannot enter that archive. This
-is an arm64 library package, not an APK, emulator image or published release.
+The builder compiles the complete Rust FFI library for each selected ABI at API 28,
+checks its ELF architecture, eight exports (seven C functions plus the Android JNI
+initializer), 16 KiB ELF segment alignment and absence of desktop runtime
+dependencies. It packages production Java, the selected native libraries, manifest
+and JNI consumer rules. Test providers cannot enter that archive. All checks must
+pass before replacing the output; a failed build may leave an older artifact and
+must not be treated as success. This is a library package, not an APK, emulator
+image or published release.
 
 ## Integrate trusted startup
 
 Add the local AAR to the Android application dependencies, retain its consumer
-rules, and set the application's minimum SDK to 28 or later. This artifact includes
-only `arm64-v8a`; an x86 emulator needs a separately built and verified ABI.
+rules, and set the application's minimum SDK to 28 or later. Select the artifact
+matching the device/emulator ABI, or the combined AAR. Add only one HomeVerb AAR
+to the application: combining separate AAR dependencies duplicates Java classes.
+Cross-compilation does not establish that a library loads or that Keystore works
+on an emulator. Emulator images, application assembly and runtime tests belong to
+the mobile acceptance stage.
 
 Before Dart opens a Meiju host, invoke these calls from trusted Android startup:
 
@@ -111,10 +137,15 @@ Java compilation and 54 encrypted-entry assertions passed on the Linux JVM. The
 actual JNI test passed with synthetic storage, including copied-array clearing,
 backend errors, pre-cancellation, deadline/cancellation after an OS-call stand-in,
 uncertain mutations and explicit rereading. This does not exercise Android Keystore.
-The complete arm64 AAR built with NDK r28c, JDK 21 and API 35 stubs targeting API 28.
-Archive integrity, production-only Java classes, all eight native exports and
-16 KiB ELF load alignment passed inspection. The Linux workspace tests, native
-contract examples and MVP runtime checks also passed. No APK or phone test has passed.
+The complete arm64, x86_64 and combined AARs built with Rust 1.96.0, NDK r28c,
+JDK 21 and API 35 stubs targeting API 28. Archive integrity, production-only Java
+classes, each architecture's eight native exports and 16 KiB ELF load alignment
+passed inspection. Six package tests cover architecture, undefined/missing exports,
+alignment, desktop dependencies, ABI directory placement, test-class exclusion and
+preserving a previous archive on failure. All 29 Python tests and the document,
+contract, repository and commit checks passed. Prior Linux workspace, native
+contract and MVP runtime evidence remains separate; no Rust application behavior
+changed in this packaging phase. No emulator, APK or phone test has passed here.
 
 Before enabling a phone release, verify actual Keystore round trips across process
 restart, key invalidation, profile isolation, screen locking/unlocking, unavailable
@@ -122,5 +153,5 @@ storage, backup/restore and uninstall/reinstall behavior, release shrinking rule
 16 KiB devices, foreground/background/forced termination and measured cancellation
 latency. Then test explicitly authorized Meiju login, identity-preserving
 reauthorization, inventory and off-LAN reads. Real appliance writes require separate
-owner authorization. iOS storage, x86 Android packaging and physical model/control
+owner authorization. iOS storage, Android runtime and physical model/control
 acceptance remain separate work.
