@@ -29,7 +29,7 @@ def main():
     responses = {name: validator('native-response', name) for name in [*api['methods'], 'open']}
     query_error = validator('native-response', 'query_error')
     info_example = {'schema_version': '1.0', 'data': copy.deepcopy(api), 'warnings': [], 'error': None}
-    info_example['data']['api_version'] = '1.4.0'
+    info_example['data']['api_version'] = '1.5.0'
     info_example['data']['methods']['future_query'] = {'response_kind': 'query'}
     responses['get_api_info'].validate(info_example)
     info_example['data']['api_version'] = '2.0.0'
@@ -106,6 +106,8 @@ def main():
             assert call(handle, 'get_api_info')['data'] == api
             assert call(handle, 'list_devices')['data'] == []
             assert call(handle, 'list_accounts')['data'] == []
+            assert call(handle, 'get_account', account_id='00000000-0000-4000-8000-000000000001')['error']['code'] == 'AUTH_FLOW_UNSUPPORTED'
+            assert call(handle, 'rename_account', account_id='00000000-0000-4000-8000-000000000001', label='Family appliances')['error']['code'] == 'AUTH_FLOW_UNSUPPORTED'
             assert call(handle, 'refresh_account', account_id='00000000-0000-4000-8000-000000000001')['error']['code'] == 'AUTH_FLOW_UNSUPPORTED'
             assert call(handle, 'list_device_cards')['data'] == []
             assert call(handle, 'list_rooms')['data'] == []
@@ -269,6 +271,57 @@ def main():
         finally:
             library.homeverb_close(handle)
 
+    # Local account metadata remains usable without creating any protected session.
+    with tempfile.TemporaryDirectory(prefix='homeverb-ui-local-accounts-') as directory:
+        account_id = '40000000-0000-4000-8000-000000000001'
+        other_id = '40000000-0000-4000-8000-000000000002'
+        reference = '50000000-0000-4000-8000-000000000001'
+        handle = open_host(directory, allow=False, adapter='midea.meiju')
+        try:
+            with sqlite3.connect(Path(directory) / 'homeverb.sqlite3') as database:
+                database.execute('INSERT INTO accounts VALUES (?, ?, ?, ?, ?, ?)',
+                                 (account_id, 'midea.meiju', 'CN', 'Original', reference, 'pending'))
+                for device_id, accounts in [('linked', [account_id, account_id]), ('other', [other_id])]:
+                    device = load('examples/device.json')
+                    device.update(id=device_id, support_status='unsupported', connections=[
+                        {'id': f'route-{index}', 'adapter': 'midea.meiju', 'transport': 'cloud',
+                         'account_id': selected, 'identity_ref': 'fictional-binding'}
+                        for index, selected in enumerate(accounts)])
+                    database.execute('INSERT INTO devices VALUES (?, ?)',
+                                     (device_id, json.dumps({'device': device, 'capabilities': []})))
+            details = raw(handle, envelope('get_account', account_id=account_id))
+            responses['get_account'].validate(details)
+            assert details['data']['device_ids'] == ['linked']
+            assert details['data']['account']['authorization'] == 'not_checked'
+            assert reference not in json.dumps(details)
+            renamed = raw(handle, envelope('rename_account', account_id=account_id, label='  Family appliances  '))
+            responses['rename_account'].validate(renamed)
+            assert renamed['data']['label'] == 'Family appliances'
+            assert renamed['data']['credential_state'] == 'pending'
+            for fields in [{'label': ''}, {'label': ' '}, {'label': 'a' * 81}, {'label': 'a\nb'},
+                           {'label': 'Denied', 'provider': 'other'}, {'label': 'Denied', 'confirmed': True}]:
+                request = envelope('rename_account', account_id=account_id, **fields)
+                assert raw(handle, request)['error']['code'] == 'INVALID_ARGUMENT'
+            for method in ['get_account', 'rename_account']:
+                fields = {'label': 'Denied'} if method == 'rename_account' else {}
+                assert raw(handle, envelope(method, account_id=other_id, **fields))['error']['code'] == 'ACCOUNT_NOT_FOUND'
+                assert raw(handle, envelope(method, account_id='not-a-uuid', **fields))['error']['code'] == 'INVALID_ARGUMENT'
+            with sqlite3.connect(Path(directory) / 'homeverb.sqlite3') as database:
+                database.execute("CREATE TRIGGER refuse_account_rename BEFORE UPDATE OF label ON accounts BEGIN SELECT RAISE(ABORT, 'synthetic'); END")
+            failed = raw(handle, envelope('rename_account', account_id=account_id, label='Must not persist'))
+            responses['rename_account'].validate(failed)
+            assert failed['error']['code'] == 'STORAGE_ERROR'
+            assert raw(handle, envelope('get_account', account_id=account_id))['data']['account']['label'] == 'Family appliances'
+        finally:
+            library.homeverb_close(handle)
+        handle = open_host(directory, allow=False, adapter='midea.meiju')
+        try:
+            persisted = raw(handle, envelope('get_account', account_id=account_id))
+            assert persisted['data']['account'] == renamed['data']
+            assert persisted['data']['device_ids'] == ['linked']
+        finally:
+            library.homeverb_close(handle)
+
     for fields in [
         {'adapter': 'unknown'}, {'adapter': None},
         {'adapter': 'midea.meiju', 'allow_mock_writes': True},
@@ -372,6 +425,8 @@ def main():
     connect_schema.validate(account_examples['connect_metadata'])
     for case in account_examples['cases']:
         validator('native-response', case['response_definition']).validate(case['response'])
+        if 'request' in case:
+            request_schema.validate(case['request'])
     for path, value in [
         (('account', 'credential_ref'), 'FORBIDDEN'),
         (('account', 'authorization'), 'connected'),

@@ -126,6 +126,21 @@ fields before profile creation. No real account or device was used in this phase
 the owner explicitly deferred household operation. Physical control, off-LAN and
 mobile acceptance remain pending.
 
+## Local account metadata contract 1.4
+
+API 1.4.0 adds `get_account` and `rename_account`, taking the ordinary method count
+to 26. Local details list saved linked IDs including unsupported cards; rename
+changes only the trimmed local display label. Neither accesses protected sessions
+or the vendor. Pending state and default read-only permissions are preserved.
+Synthetic host/ABI tests cover provider/account isolation, duplicate route counting,
+secret-store unavailability, lease contention, invalid input, SQLite update failure,
+reopening and closed/background admission. No live account was changed.
+
+Existing requests, seven C symbols, SQLite schema 3 and execution schemas remain
+compatible. Older libraries reject the two new methods. Check the catalog before
+enabling them; see the [local metadata contract](native-ui-contract.md#local-account-details-and-names).
+Account removal, provider revocation and mobile acceptance remain pending.
+
 ## Status definitions
 
 The native account vault under [ADR-0021](adr/0021-persistent-account-vault.md) adds SQLite schema 3 and internal Rust account APIs. Schema 1/2 upgrades preserve existing data and create verified backups; close older clients first. Schema-2 binaries reject the upgraded profile. Native UI API 1.0.0, its 22 methods, C symbols and execution semantics are unchanged. No public account operation or real-provider authentication is enabled by locally storing references.

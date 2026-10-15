@@ -40,6 +40,34 @@ impl From<AccountRecord> for AccountSummary {
     }
 }
 
+pub(crate) async fn details(
+    core: &Core,
+    record: AccountRecord,
+    operation: &Operation,
+) -> Result<serde_json::Value> {
+    operation
+        .run(async {
+            let id = record.id.to_string();
+            let mut device_ids: Vec<_> = core
+                .list()?
+                .into_iter()
+                .filter(|device| {
+                    device
+                        .connections
+                        .iter()
+                        .any(|connection| connection.account_id.as_deref() == Some(id.as_str()))
+                })
+                .map(|device| device.id)
+                .collect();
+            device_ids.sort();
+            Ok(serde_json::json!({
+                "account": AccountSummary::from(record),
+                "device_ids": device_ids,
+            }))
+        })
+        .await
+}
+
 #[derive(Serialize)]
 pub struct AccountConnection {
     account: AccountSummary,

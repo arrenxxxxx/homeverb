@@ -254,7 +254,10 @@ impl Fixture {
     async fn call_id(&self, id: &str, request: Value) -> Value {
         let method = request["method"].as_str().unwrap().to_owned();
         let result = self.session.call(serde_json::from_value::<HostRequest>(json!({"schema_version":"1.0","operation_id":id,"timeout_ms":1000,"request":request})).unwrap()).await;
-        if matches!(method.as_str(), "list_accounts" | "refresh_account") {
+        if matches!(
+            method.as_str(),
+            "list_accounts" | "refresh_account" | "get_account" | "rename_account"
+        ) {
             validate_response(&result, &method);
         }
         result
@@ -284,6 +287,124 @@ impl Fixture {
     fn calls(&self) -> Vec<CloudEndpoint> {
         self.wire.calls.lock().unwrap().clone()
     }
+}
+
+#[tokio::test]
+async fn local_account_details_and_rename_preserve_bindings_without_secret_access() {
+    let f = Fixture::new();
+    let connected = f.connect(None).await;
+    let id = connected["data"]["account"]["id"].as_str().unwrap();
+    let account_id = Uuid::parse_str(id).unwrap();
+    let before_record = f.store.account(account_id).unwrap();
+    let before_secrets = f.secrets.values.lock().unwrap().clone();
+    let before_calls = f.calls();
+    let cards = f.call(json!({"method":"list_device_cards"})).await;
+    f.secrets.unavailable.store(true, Ordering::Relaxed);
+
+    let details = f
+        .call(json!({"method":"get_account","account_id":id}))
+        .await;
+    assert_eq!(details["data"]["account"], connected["data"]["account"]);
+    let mut expected_ids = connected["data"]["retrieval"]["device_ids"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|v| v.as_str().unwrap())
+        .collect::<Vec<_>>();
+    expected_ids.sort();
+    assert_eq!(details["data"]["device_ids"], json!(expected_ids));
+    assert_eq!(
+        expected_ids.len(),
+        2,
+        "Unsupported cards belong in local account details."
+    );
+
+    let renamed = f
+        .call(json!({"method":"rename_account","account_id":id,"label":"  Family appliances  "}))
+        .await;
+    assert_eq!(renamed["error"], Value::Null);
+    assert_eq!(renamed["data"]["label"], "Family appliances");
+    assert_eq!(renamed["data"]["authorization"], "not_checked");
+    let mut expected_record = before_record;
+    expected_record.label = "Family appliances".into();
+    let reopened = SqliteStore::open(&f.path).unwrap();
+    assert_eq!(reopened.account(account_id).unwrap(), expected_record);
+    assert_eq!(
+        f.call(json!({"method":"list_accounts"})).await["data"][0],
+        renamed["data"]
+    );
+    assert_eq!(f.call(json!({"method":"list_device_cards"})).await, cards);
+    assert_eq!(*f.secrets.values.lock().unwrap(), before_secrets);
+    assert_eq!(f.calls(), before_calls);
+    for marker in [
+        "credential_ref",
+        "SYNTHETIC-TOKEN",
+        "88000000000000",
+        "synthetic-login-001",
+    ] {
+        assert!(!format!("{details}{renamed}").contains(marker));
+    }
+}
+
+#[tokio::test]
+async fn local_account_edits_reject_conflicts_and_leave_pending_sessions_pending() {
+    let f = Fixture::new();
+    let lease = f
+        .vault
+        .prepare("midea.meiju", "CN", "Pending account", &operation())
+        .await
+        .unwrap();
+    let id = lease.record().id;
+    let query = json!({"method":"get_account","account_id":id});
+    let edit = json!({"method":"rename_account","account_id":id,"label":"Renamed"});
+    assert_eq!(f.call(query.clone()).await["data"]["device_ids"], json!([]));
+    assert_eq!(f.call(edit.clone()).await["error"]["code"], "RESOURCE_BUSY");
+    drop(lease);
+    assert_eq!(
+        f.call(edit.clone()).await["data"]["credential_state"],
+        "pending"
+    );
+    for label in [" ".to_string(), "a\nb".to_string(), "a".repeat(81)] {
+        let result = f
+            .call(json!({"method":"rename_account","account_id":id,"label":label}))
+            .await;
+        assert_eq!(result["error"]["code"], "INVALID_ARGUMENT");
+        assert_eq!(f.store.account(id).unwrap().label, "Renamed");
+    }
+    for (provider, region) in [("other.provider", "CN"), ("midea.meiju", "US")] {
+        let other = f
+            .vault
+            .prepare(provider, region, "Other", &operation())
+            .await
+            .unwrap();
+        let other_id = other.record().id;
+        drop(other);
+        for method in ["get_account", "rename_account"] {
+            let mut request = json!({"method":method,"account_id":other_id});
+            if method == "rename_account" {
+                request["label"] = json!("Denied");
+            }
+            assert_eq!(f.call(request).await["error"]["code"], "ACCOUNT_NOT_FOUND");
+        }
+        assert_eq!(f.store.account(other_id).unwrap().label, "Other");
+    }
+    for method in ["get_account", "rename_account"] {
+        let mut request = json!({"method":method,"account_id":Uuid::new_v4()});
+        if method == "rename_account" {
+            request["label"] = json!("Missing");
+        }
+        assert_eq!(f.call(request).await["error"]["code"], "ACCOUNT_NOT_FOUND");
+    }
+    f.session.set_foreground(false);
+    assert_eq!(
+        f.call(edit.clone()).await["error"]["code"],
+        "HOST_BACKGROUND"
+    );
+    f.session.close();
+    assert_eq!(f.call(edit).await["error"]["code"], "HOST_CLOSED");
+    assert_eq!(f.store.account(id).unwrap().label, "Renamed");
+    assert!(f.calls().is_empty());
+    assert!(f.secrets.values.lock().unwrap().is_empty());
 }
 
 #[tokio::test]

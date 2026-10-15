@@ -215,6 +215,38 @@ impl MeijuAdapter {
             .collect())
     }
 
+    pub async fn account(&self, id: Uuid, operation: &Operation) -> Result<AccountRecord> {
+        homeverb_core::valid_account_id(id)?;
+        self.accounts(operation)
+            .await?
+            .into_iter()
+            .find(|record| record.id == id)
+            .ok_or_else(|| {
+                Error::new(
+                    "ACCOUNT_NOT_FOUND",
+                    "The selected Meiju account does not exist.",
+                )
+            })
+    }
+
+    /// Change only local presentation metadata, even when secure storage is unavailable.
+    pub async fn rename_account(
+        &self,
+        id: Uuid,
+        label: &str,
+        operation: &Operation,
+    ) -> Result<AccountRecord> {
+        let mut lease = self.vault.lease(id, operation).await?;
+        if lease.record().provider != PROVIDER || lease.record().region != "CN" {
+            return Err(Error::new(
+                "ACCOUNT_NOT_FOUND",
+                "The selected Meiju account does not exist.",
+            ));
+        }
+        lease.rename(label, operation).await?;
+        Ok(lease.record().clone())
+    }
+
     pub async fn connect_devices(
         &self,
         credentials: LoginCredentials,

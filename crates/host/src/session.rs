@@ -22,6 +22,13 @@ pub struct HostRequest {
 pub enum Request {
     GetApiInfo {},
     ListAccounts {},
+    GetAccount {
+        account_id: uuid::Uuid,
+    },
+    RenameAccount {
+        account_id: uuid::Uuid,
+        label: String,
+    },
     RefreshAccount {
         account_id: uuid::Uuid,
     },
@@ -243,6 +250,24 @@ impl Session {
                         .map(crate::AccountSummary::from)
                         .collect::<Vec<_>>()
                 ))
+            }
+            Request::GetAccount { account_id } => {
+                let adapter = self
+                    .accounts
+                    .as_ref()
+                    .ok_or_else(crate::accounts::unsupported)?;
+                let account = adapter.account(account_id, &operation).await?;
+                crate::accounts::details(&self.core, account, &operation).await
+            }
+            Request::RenameAccount { account_id, label } => {
+                let adapter = self
+                    .accounts
+                    .as_ref()
+                    .ok_or_else(crate::accounts::unsupported)?;
+                let account = adapter
+                    .rename_account(account_id, &label, &operation)
+                    .await?;
+                Ok(json!(crate::AccountSummary::from(account)))
             }
             Request::RefreshAccount { account_id } => {
                 let adapter = self

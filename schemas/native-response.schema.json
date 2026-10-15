@@ -352,6 +352,30 @@
                         "response_kind"
                       ],
                       "additionalProperties": false
+                    },
+                    "get_account": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "rename_account": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": false
                     }
                   },
                   "required": [
@@ -378,7 +402,9 @@
                     "reorder_devices",
                     "assign_devices_to_room",
                     "list_accounts",
-                    "refresh_account"
+                    "refresh_account",
+                    "get_account",
+                    "rename_account"
                   ],
                   "additionalProperties": {
                     "type": "object",
@@ -1570,6 +1596,92 @@
                 "retrieval"
               ],
               "additionalProperties": false
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "urn:homeverb:schema:native-response#/$defs/query_error"
+        }
+      ]
+    },
+    "get_account": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "account": {
+                  "$ref": "urn:homeverb:schema:native-response#/$defs/account_summary"
+                },
+                "device_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true
+                }
+              },
+              "required": [
+                "account",
+                "device_ids"
+              ],
+              "additionalProperties": false
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "urn:homeverb:schema:native-response#/$defs/query_error"
+        }
+      ]
+    },
+    "rename_account": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "$ref": "urn:homeverb:schema:native-response#/$defs/account_summary"
             },
             "warnings": {
               "type": "array",

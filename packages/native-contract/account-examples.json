@@ -1,5 +1,5 @@
 {
-  "api_version": "1.3.0",
+  "api_version": "1.4.0",
   "provenance": "Fictional account DTO examples. Actual synthetic host responses are checked against the same schemas by crates/host/tests/meiju_accounts.rs. No live identities or credentials.",
   "connect_metadata": {
     "schema_version": "1.0",
@@ -159,6 +159,62 @@
             "authorization": "not_checked"
           }
         ],
+        "warnings": [],
+        "error": null
+      }
+    },
+    {
+      "response_definition": "get_account",
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "get_account-example",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "get_account",
+          "account_id": "00000000-0000-4000-8000-000000000001"
+        }
+      },
+      "response": {
+        "schema_version": "1.0",
+        "data": {
+          "account": {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "provider": "midea.meiju",
+            "region": "CN",
+            "label": "Example account",
+            "credential_state": "stored",
+            "authorization": "not_checked"
+          },
+          "device_ids": [
+            "00000000-0000-4000-8000-000000000002"
+          ]
+        },
+        "warnings": [],
+        "error": null
+      }
+    },
+    {
+      "response_definition": "rename_account",
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "rename_account-example",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "rename_account",
+          "account_id": "00000000-0000-4000-8000-000000000001",
+          "label": "Family appliances"
+        }
+      },
+      "response": {
+        "schema_version": "1.0",
+        "data": {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "provider": "midea.meiju",
+          "region": "CN",
+          "label": "Family appliances",
+          "credential_state": "stored",
+          "authorization": "not_checked"
+        },
         "warnings": [],
         "error": null
       }

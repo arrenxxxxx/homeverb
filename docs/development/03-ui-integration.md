@@ -6,6 +6,11 @@ The current design handoff is the [complete Window Light prototype](../../output
 
 ## Native boundary
 
+API 1.4 adds local `get_account` and `rename_account` for platform details and names.
+Use the [account metadata contract](../native-ui-contract.md#local-account-details-and-names)
+to show saved linked devices without a refresh or secret-store access. Local names
+do not change account identity, credentials or write permissions.
+
 Start new Flutter work against the [versioned native UI contract](../native-ui-contract.md): it provides the callable catalog, offline request/response schemas, actual Mock examples, page-to-interface coverage, and unavailable-feature boundaries. Call `get_api_info` after opening the native host. Do not derive an interface solely from screenshots or issue undocumented requests.
 
 Build `homeverb-ffi`. The C declarations are in [homeverb.h](../../crates/ffi/include/homeverb.h). Linux produces `target/debug/libhomeverb_ffi.so`. A native UI loads the library in its own process.

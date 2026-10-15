@@ -1,5 +1,5 @@
 {
-  "api_version": "1.3.0",
+  "api_version": "1.4.0",
   "cases": [
     {
       "request": {
@@ -12,7 +12,7 @@
       },
       "response": {
         "data": {
-          "api_version": "1.3.0",
+          "api_version": "1.4.0",
           "limits": {
             "max_active_operations": 8,
             "max_request_bytes": 1048576,
@@ -46,6 +46,9 @@
             "execute_batch": {
               "response_kind": "batch_execution"
             },
+            "get_account": {
+              "response_kind": "query"
+            },
             "get_api_info": {
               "response_kind": "query"
             },
@@ -77,6 +80,9 @@
               "response_kind": "query"
             },
             "refresh_account": {
+              "response_kind": "query"
+            },
+            "rename_account": {
               "response_kind": "query"
             },
             "rename_room": {
@@ -1802,7 +1808,7 @@
       },
       "response": {
         "data": {
-          "api_version": "1.3.0",
+          "api_version": "1.4.0",
           "limits": {
             "max_active_operations": 8,
             "max_request_bytes": 1048576,
@@ -1836,6 +1842,9 @@
             "execute_batch": {
               "response_kind": "batch_execution"
             },
+            "get_account": {
+              "response_kind": "query"
+            },
             "get_api_info": {
               "response_kind": "query"
             },
@@ -1867,6 +1876,9 @@
               "response_kind": "query"
             },
             "refresh_account": {
+              "response_kind": "query"
+            },
+            "rename_account": {
               "response_kind": "query"
             },
             "rename_room": {
@@ -2431,6 +2443,49 @@
         "started_at": "2026-10-15T09:48:42.925444439Z",
         "status": "failed",
         "verification": null
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-4",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "get_account",
+          "account_id": "00000000-0000-4000-8000-000000000001"
+        }
+      },
+      "response": {
+        "data": null,
+        "error": {
+          "code": "AUTH_FLOW_UNSUPPORTED",
+          "message": "This host has no admitted account connection flow.",
+          "retryable": false
+        },
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-5",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "rename_account",
+          "account_id": "00000000-0000-4000-8000-000000000001",
+          "label": "Family appliances"
+        }
+      },
+      "response": {
+        "data": null,
+        "error": {
+          "code": "AUTH_FLOW_UNSUPPORTED",
+          "message": "This host has no admitted account connection flow.",
+          "retryable": false
+        },
+        "schema_version": "1.0",
+        "warnings": []
       }
     }
   ]
