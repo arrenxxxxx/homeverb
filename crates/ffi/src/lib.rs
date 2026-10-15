@@ -17,6 +17,9 @@ use std::{
 };
 use zeroize::Zeroize;
 
+#[cfg(target_os = "android")]
+mod android;
+
 struct Host {
     session: Session,
     runtime: tokio::runtime::Runtime,

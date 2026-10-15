@@ -5,11 +5,12 @@ apps/cli/                  # One-shot CLI and local read-only MCP host
 crates/domain/             # Versioned DTOs and action-schema validation
 crates/core/               # Local organization, policy, routing, execution, verification
 crates/storage/            # SQLite metadata/journal, migration, retention, and device locks
-crates/secret-store/       # Bounded Linux Secret Service access; other platforms fail closed
+crates/secret-store/       # Linux Secret Service and Android JNI credential backends
 crates/mock/               # Persistent fictional appliance and fault scenarios
-crates/midea/              # Meiju read protocols and protected bindings; live access pending
+crates/midea/              # Meiju account/cloud protocols, protected bindings and scoped controls
 crates/host/               # Composition root and foreground session contract
 crates/ffi/                # Native in-process C ABI and public header
+packages/android/          # Android Keystore/ciphertext package and synthetic JVM fixtures
 packages/presentation/     # en-US/zh-CN catalogs and framework-neutral helpers
 schemas/                   # Runtime JSON contracts
 examples/                  # Fictional positive fixtures

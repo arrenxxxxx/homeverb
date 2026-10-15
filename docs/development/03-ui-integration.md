@@ -1,6 +1,6 @@
 # 3. Connect the UI and localization
 
-Visual UI design is independent of this Core implementation. There is no production HTTP bridge or CLI-output parsing path. Flutter is the owner-selected mobile framework; its SDK, Android packaging, and physical-phone lifecycle verification are not completed here.
+Visual UI design is independent of this Core implementation. There is no production HTTP bridge or CLI-output parsing path. Flutter is the owner-selected mobile framework; its SDK, APK packaging, and physical-phone lifecycle verification are not completed here. The [Android native package](08-android-native.md) supplies a separate arm64 library builder and Keystore/JNI backend.
 
 The current design handoff is the [complete Window Light prototype](../../output/prototypes/homeverb-window-light-v1/index.html). Use its [functional specification](../ui-functional-spec.md), [82-state inventory](../ui-screen-inventory.md), and [Flutter visual/skin guide](../ui-window-light.md) alongside the native methods below. The one-option Appearance screen is planned UI, and the isolated Flutter visual reference is uncompiled; neither establishes platform authorization or nearby-sharing support.
 

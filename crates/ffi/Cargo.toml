@@ -17,3 +17,7 @@ serde.workspace = true
 serde_json.workspace = true
 tokio.workspace = true
 zeroize.workspace = true
+
+[target.'cfg(target_os = "android")'.dependencies]
+homeverb-secrets.workspace = true
+jni.workspace = true

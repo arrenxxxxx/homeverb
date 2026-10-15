@@ -220,3 +220,19 @@ The 30 methods, seven C symbols, JSON shapes, SQLite schema 4 and protected payl
 version 1 remain unchanged. Older libraries refuse pending reauthorization; check
 the version before enabling it. Real identity stability, mobile and physical
 acceptance remain unverified. See [ADR-0031](adr/0031-pending-account-reauthorization.md).
+
+
+## Android native credential backend
+
+The Android Java/JNI backend uses per-profile Keystore keys and authenticated
+ciphertext under the application no-backup directory. Synthetic JVM/JNI tests and
+Java compilation against official API stubs passed. The complete API 28 arm64 AAR
+built with NDK r28c; archive contents, native exports and 16 KiB ELF load alignment
+passed inspection. This is library build evidence, not application acceptance.
+Native API 1.8, seven C functions, 30 methods, SQLite schema 4 and protected Meiju
+payloads are unchanged; Android adds a trusted platform-only JNI initializer.
+Default Linux behavior is unchanged; iOS still fails closed without a backend.
+Android OS/Keystore, APK, physical-phone and real account/control acceptance remain
+unverified. Unreadable protected entries leave ordinary account removal pending;
+no force-cleanup API is provided. See [ADR-0032](adr/0032-android-native-credential-storage.md) and the
+[Android guide](development/08-android-native.md).

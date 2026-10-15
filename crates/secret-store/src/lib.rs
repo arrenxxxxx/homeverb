@@ -8,9 +8,12 @@ use uuid::{Uuid, Variant};
 #[cfg(target_os = "linux")]
 mod linux;
 
+#[cfg(any(target_os = "android", test))]
+pub mod android;
+
 /// Construction performs no I/O. The trusted host must persist its random profile namespace.
 pub struct SystemSecretStore {
-    #[cfg(target_os = "linux")]
+    #[cfg(any(target_os = "linux", target_os = "android"))]
     profile: Uuid,
 }
 
@@ -20,7 +23,7 @@ impl SystemSecretStore {
             return Err(Error::invalid());
         }
         Ok(Self {
-            #[cfg(target_os = "linux")]
+            #[cfg(any(target_os = "linux", target_os = "android"))]
             profile,
         })
     }
@@ -38,7 +41,11 @@ impl SecretStore for SystemSecretStore {
             self.perform(reference, linux::Request::Get, operation)
                 .await
         }
-        #[cfg(not(target_os = "linux"))]
+        #[cfg(target_os = "android")]
+        {
+            android::perform(self.profile, reference, android::Request::Get, operation).await
+        }
+        #[cfg(not(any(target_os = "linux", target_os = "android")))]
         {
             homeverb_core::UnavailableSecretStore
                 .get(reference, operation)
@@ -58,7 +65,18 @@ impl SecretStore for SystemSecretStore {
                 .await
                 .map(|_| ())
         }
-        #[cfg(not(target_os = "linux"))]
+        #[cfg(target_os = "android")]
+        {
+            android::perform(
+                self.profile,
+                reference,
+                android::Request::Put(secret),
+                operation,
+            )
+            .await
+            .map(|_| ())
+        }
+        #[cfg(not(any(target_os = "linux", target_os = "android")))]
         {
             homeverb_core::UnavailableSecretStore
                 .put(reference, secret, operation)
@@ -73,7 +91,13 @@ impl SecretStore for SystemSecretStore {
                 .await
                 .map(|_| ())
         }
-        #[cfg(not(target_os = "linux"))]
+        #[cfg(target_os = "android")]
+        {
+            android::perform(self.profile, reference, android::Request::Delete, operation)
+                .await
+                .map(|_| ())
+        }
+        #[cfg(not(any(target_os = "linux", target_os = "android")))]
         {
             homeverb_core::UnavailableSecretStore
                 .delete(reference, operation)

@@ -176,7 +176,7 @@ preferences on discovery, described six real devices, and read/cached all seven
 components through schema-validated responses. No appliance controls were sent.
 The automated suite separately checks empty-account startup/discovery, invalid
 mode/grant/scenario combinations, lifecycle gating and closed handles without
-vendor calls. Mobile secure stores and Android/iOS packaging remain unimplemented.
+vendor calls. The [Android native package](development/08-android-native.md) now supplies Keystore integration and a library build path; Android OS/APK/phone and iOS acceptance remain pending.
 
 The separate [AC developer probe](development/07-meiju-control.md) can persist
 experimental writable descriptors in a shared profile. Metadata is not authority:

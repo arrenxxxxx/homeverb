@@ -1,0 +1,4 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="org.homeverb">
+    <uses-sdk android:minSdkVersion="28" />
+    <uses-permission android:name="android.permission.INTERNET" />
+</manifest>
