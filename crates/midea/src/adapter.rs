@@ -69,6 +69,7 @@ fn descriptors(
     account: Uuid,
     ac_power: bool,
     ac_fan: bool,
+    ac_mode: bool,
 ) -> Descriptor {
     let family = appliance
         .model
@@ -99,6 +100,11 @@ fn descriptors(
                 fan.revision = 2;
                 fan.properties.get_mut("wind_speed").unwrap()["writable"] = json!(true);
                 fan.actions.insert("set_fan_speed".into(), fan_action());
+            }
+            if ac_mode {
+                fan.revision = 3;
+                fan.properties.get_mut("mode").unwrap()["writable"] = json!(true);
+                fan.actions.insert("activate_mode".into(), mode_action());
             }
             capabilities.push(fan);
         }
@@ -196,6 +202,7 @@ pub struct MeijuAdapter {
     clock: Arc<dyn Clock>,
     ac_power: bool,
     ac_fan: bool,
+    ac_mode: bool,
 }
 
 impl MeijuAdapter {
@@ -210,6 +217,7 @@ impl MeijuAdapter {
             clock,
             ac_power: false,
             ac_fan: false,
+            ac_mode: false,
         }
     }
 
@@ -223,6 +231,12 @@ impl MeijuAdapter {
     /// Admit the reviewed vendor fan presets only; Core grants remain independently required.
     pub fn with_ac_fan_control(mut self) -> Self {
         self.ac_fan = true;
+        self
+    }
+
+    /// Admit combined power-on and mode selection; this grants no independent power authority.
+    pub fn with_ac_mode_control(mut self) -> Self {
+        self.ac_mode = true;
         self
     }
     /// Local metadata only; a stored credential is not proof of current authorization.
@@ -458,6 +472,7 @@ impl MeijuAdapter {
                         account.record().id,
                         self.ac_power,
                         self.ac_fan,
+                        self.ac_mode,
                     ));
                 }
             }
@@ -548,6 +563,14 @@ impl Adapter for MeijuAdapter {
                     wind_speed: command.arguments["wind_speed"].as_f64().unwrap() as u8,
                 }
             }
+            ("vendor.midea.ac", "activate_mode") if self.ac_mode => {
+                mode_action().validate_arguments(&command.arguments)?;
+                crate::control::AcControl::ActivateMode {
+                    power: "on",
+                    mode: serde_json::from_value(command.arguments["mode"].clone())
+                        .map_err(|_| Error::invalid())?,
+                }
+            }
             _ => return Err(crate::control::unsupported()),
         };
         let id = connection
@@ -585,6 +608,14 @@ impl Adapter for MeijuAdapter {
 fn fan_action() -> Action {
     Action {
         parameters: json!({"type":"object","properties":{"wind_speed":{"type":"integer","enum":crate::AC_FAN_SPEEDS}},"required":["wind_speed"],"additionalProperties":false}),
+        ..power_action()
+    }
+}
+
+fn mode_action() -> Action {
+    Action {
+        parameters: json!({"type":"object","description":"Turn on the AC and activate the selected vendor mode in one cloud request.",
+            "properties":{"mode":{"type":"string","enum":crate::AC_MODES}},"required":["mode"],"additionalProperties":false}),
         ..power_action()
     }
 }

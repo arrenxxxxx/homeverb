@@ -19,6 +19,9 @@ use uuid::Uuid;
 #[path = "meiju_accounts/fan.rs"]
 mod fan;
 
+#[path = "meiju_accounts/mode.rs"]
+mod mode;
+
 #[path = "meiju_accounts/inventory.rs"]
 mod inventory;
 

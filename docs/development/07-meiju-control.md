@@ -6,7 +6,7 @@ default to read-only; API 1.3 adds separately configured
 [scoped power permissions](../native-ui-contract.md#scoped-experimental-ac-power-startup). This developer probe is a separate
 trusted Core host, not a production CLI dependency for Flutter.
 
-The formal Linux CLI now supports the same exact power/fan authority through
+The formal Linux CLI now supports the same exact power, fan and mode activation authority through
 [explicit startup grant files](../cli.md#scoped-meiju-controls). Its dry run is
 local-only and requires a separate account refresh to publish descriptors; the
 probe below deliberately includes inventory reads in its preview. Both paths
@@ -38,7 +38,8 @@ a generic cycle command. Refrigerator cooling changes need separate risk review.
 
 ## Outcome contract
 
-The existing Command/Execution schemas and native API version remain unchanged.
+The existing Command/Execution schemas and outcome semantics remain unchanged.
+Native startup additions are versioned separately in the UI contract.
 See the synthetic [accepted](../../examples/command-result.meiju-accepted.json) and
 [unknown](../../examples/command-result.meiju-unknown.json) fixtures.
 
@@ -129,3 +130,12 @@ preserves power, mode and temperature without it; a single-field request alone
 does not prove that the appliance changes only that field. Offline tests cover exact bodies, protected identities, no cache
 changes, permission separation, receipts and cancellation. Real fan operations
 remain deferred by the owner.
+
+## Explicit power-on and mode activation
+
+Native API 1.11, the formal CLI and local MCP can admit separately scoped
+[mode activation](../native-ui-contract.md#scoped-experimental-ac-mode-activation-startup).
+This sends `power: on` and one reviewed mode in a single request and requires
+consent for both effects. The power-only probe above is unchanged. Activation
+cannot establish physical atomicity or verify either effect; physical acceptance
+must also check preservation of unrelated settings without cached status context.

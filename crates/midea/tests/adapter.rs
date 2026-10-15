@@ -18,6 +18,9 @@ use uuid::Uuid;
 #[path = "adapter/fan.rs"]
 mod fan;
 
+#[path = "adapter/mode.rs"]
+mod mode;
+
 #[path = "adapter/membership.rs"]
 mod membership;
 

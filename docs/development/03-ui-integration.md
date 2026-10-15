@@ -41,6 +41,11 @@ The general JSON bridge never accepts a principal, grant, profile change, passwo
 
 When rendering a component, resolve each referenced capability against that component. `describe_device` may return two definitions with the same capability ID and different `component_id` values. Omitted scope means shared; exact scope means that component only. Core rejects shared/scoped mixing of one ID, so there is no override precedence. Do not pick the first capability by ID or copy one compartment's temperature limits into another. Command and read-state component fields are unchanged. See [component scopes](../adr/0018-component-capability-scopes.md). Older strict readers must be updated before consuming scoped definitions; the C ABI functions do not change.
 
+API 1.11 adds independent [mode activation startup grants](../native-ui-contract.md#scoped-experimental-ac-mode-activation-startup).
+Render `activate_mode` as turning on the AC and selecting the exact vendor mode;
+use its explicit consent label. It grants no independent power/fan authority and
+cannot verify either physical effect from the current cloud response.
+
 ## Explicit device batches
 
 For explicit appliance selections, `{"method":"plan_batch","batch":...}` returns a query envelope with per-command plans. `{"method":"execute_batch","batch":...}` returns [BatchExecution](../../schemas/batch-result.schema.json) directly after successful admission; admission errors use the query envelope. The [BatchCommand](../../schemas/batch-command.schema.json) contains `schema_version: "1.0"` and 1-32 complete `commands` for distinct exact device IDs. Each command supplies its own request ID, capability, arguments, route, wait condition, and budget. The outer host timeout covers the whole call, including queue time; an individual budget can only shorten execution.

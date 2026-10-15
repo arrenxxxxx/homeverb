@@ -119,5 +119,13 @@
   "account.inventory.inspect": "查看已保存的设备列表",
   "inventory.membership.listed": "上次完整列表中存在",
   "inventory.membership.not_listed": "上次完整列表中缺失",
-  "inventory.membership.unconfirmed": "设备列表待确认"
+  "inventory.membership.unconfirmed": "设备列表待确认",
+  "vendor.midea.ac.mode": "模式",
+  "vendor.midea.ac.mode.cool": "制冷",
+  "vendor.midea.ac.mode.heat": "制热",
+  "vendor.midea.ac.mode.auto": "自动",
+  "vendor.midea.ac.mode.dry": "除湿",
+  "vendor.midea.ac.mode.fan": "送风",
+  "vendor.midea.ac.activate_mode": "开机并切换模式",
+  "vendor.midea.ac.activate_mode.confirm": "开启{device}并切换为{mode}？"
 }

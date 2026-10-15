@@ -11,13 +11,13 @@ The schemas use JSON Schema Draft 2020-12. They are HomeVerb runtime contracts, 
 | [diagnostics.schema.json](diagnostics.schema.json) | Closed allowlist for local counts, bounded receipt summaries, and reviewed error codes |
 | [capability.schema.json](capability.schema.json) | Property and action descriptions |
 | [command.schema.json](command.schema.json) | Command structure |
-| [cli-meiju-grants.schema.json](cli-meiju-grants.schema.json) | Explicit trusted Linux CLI startup permissions for exact local devices and power/fan values |
+| [cli-meiju-grants.schema.json](cli-meiju-grants.schema.json) | Explicit trusted Linux CLI startup permissions for exact local devices and power, fan and mode activation values |
 | [batch-command.schema.json](batch-command.schema.json) | Explicit commands for 1-32 distinct devices; Core also enforces identity and request-ID uniqueness |
 | [batch-result.schema.json](batch-result.schema.json) | Ordered per-device receipts and aggregate status without a fabricated device identity |
 | [command-result.schema.json](command-result.schema.json) | Execution outcomes and evidence invariants |
 | [adapter-manifest.schema.json](adapter-manifest.schema.json) | Adapter metadata; daemon/backend requirements forbidden |
 | [state.schema.json](state.schema.json) | State with source, timestamps, and cache semantics |
-| [native-open.schema.json](native-open.schema.json) | Trusted Mock/Meiju startup configuration and optional exact power/fan permissions |
+| [native-open.schema.json](native-open.schema.json) | Trusted Mock/Meiju startup configuration and optional exact power, fan and mode activation permissions |
 | [native-request.schema.json](native-request.schema.json) | Closed host envelope and all 31 callable method inputs |
 | [native-response.schema.json](native-response.schema.json) | Response bundle; select `$defs/<method>` or `$defs/open`, preserving query/admitted-execution distinctions |
 

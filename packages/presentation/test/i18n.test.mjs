@@ -39,6 +39,14 @@ test('unknown observations and uncertain outcomes do not become optimistic state
   assert.equal(presentObservation({ value: false }, 'en-US', 'power.state').label, 'Off');
   assert.equal(presentObservation({ value: 'heat' }, 'en-US', 'climate.mode').label, 'Heat');
   assert.notEqual(presentObservation({ value: 'heat' }, 'zh-CN', 'climate.mode').label, 'Heat');
+  for (const locale of supportedLocales) {
+    const translator = createTranslator(locale);
+    assert.equal(presentObservation({value:'cool'}, locale, 'vendor.midea.ac.mode').label,
+      translator.t('vendor.midea.ac.mode.cool'));
+    assert.equal(presentObservation({value:'unrecognized'}, locale, 'vendor.midea.ac.mode').label, 'unrecognized');
+    const prompt = translator.t('vendor.midea.ac.activate_mode.confirm', {device:'Bedroom AC', mode:'Cool'});
+    assert.ok(prompt.includes('Bedroom AC') && prompt.includes('Cool'));
+  }
   const result = presentExecution({ status: 'unknown', data: { state: true } });
   assert.equal(result.requiresRefresh, true);
   assert.equal(result.evidence, null);

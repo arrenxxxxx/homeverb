@@ -61,11 +61,42 @@
         "additionalProperties": false
       },
       "description": "Trusted startup-only permission for one local AC and one reviewed vendor wind_speed code over cloud. Independent of power grants; never a percentage, wildcard or ordinary request field."
+    },
+    "meiju_mode_grants": {
+      "type": "array",
+      "maxItems": 64,
+      "uniqueItems": true,
+      "default": [],
+      "items": {
+        "type": "object",
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "cool",
+              "heat",
+              "auto",
+              "dry",
+              "fan"
+            ]
+          }
+        },
+        "required": [
+          "device_id",
+          "mode"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Trusted startup-only permission to turn on one exact local AC and activate one reviewed vendor mode over cloud. This includes power-on; it grants no independent power, fan or temperature action."
     }
   },
   "required": [
     "schema_version"
   ],
   "additionalProperties": false,
-  "description": "Explicit trusted Linux CLI startup grants. The owner-controlled file contains only exact local device IDs and allowed values; no credentials, wildcard permissions or ordinary request approval flags. Missing or empty lists grant nothing."
+  "description": "Explicit trusted Linux CLI startup grants. The owner-controlled file contains only exact local device IDs and allowed values, including explicit power-on/mode activation; no credentials, wildcard permissions or ordinary request approval flags. Missing or empty lists grant nothing."
 }

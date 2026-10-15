@@ -60,10 +60,11 @@ pub async fn run(
         }
         super::terminal::require_interactive()?;
     }
-    let session = homeverb_host::open_meiju_session_with_control_grants(
+    let session = homeverb_host::open_meiju_session_with_scoped_grants(
         directory,
         &grants.meiju_power_grants,
         &grants.meiju_fan_grants,
+        &grants.meiju_mode_grants,
     )?;
     let operation_id = Uuid::new_v4().to_string();
     let response = match command {

@@ -1190,6 +1190,52 @@ class RuntimeAcceptance(unittest.TestCase):
                 self.assertEqual(process.stderr.read(), '')
         self.assertFalse((database.parent / 'mock-appliance.sqlite3').exists())
 
+    def test_mode_only_cli_and_mcp_grants_plan_activation_and_refuse_unconfirmed_send(self):
+        path, _, target, other, database = self.seed_meiju_controls()
+        capability = json.loads((ROOT / 'examples/capability.meiju-mode.json').read_text())
+        with closing(sqlite3.connect(database)) as connection, connection:
+            for device_id in [target, other]:
+                descriptor = json.loads(connection.execute('SELECT descriptor FROM devices WHERE id=?', (device_id,)).fetchone()[0])
+                vendor = next(item for item in descriptor['capabilities'] if item['id']=='vendor.midea.ac')
+                vendor['actions'].update(capability['actions'])
+                vendor['properties']['mode']['writable'] = True
+                vendor['revision'] = 3
+                connection.execute('UPDATE devices SET descriptor=? WHERE id=?', (json.dumps(descriptor),device_id))
+        path.write_text(json.dumps({'schema_version':'1.0', 'meiju_mode_grants':[{'device_id':target,'mode':'cool'}]}))
+        options = ['--meiju-grants',str(path)]
+        args = ['device','execute',target,'--capability','vendor.midea.ac','--action','activate_mode','--arguments','{"mode":"cool"}']
+        plan = self.meiju(*options,'--request-id','mode-preview','--dry-run',*args,response_definition='plan')['data']
+        self.assertEqual(plan['transports'],['cloud'])
+        self.assertEqual(plan['command']['arguments'],{'mode':'cool'})
+        denied = self.meiju(*options,'--request-id','mode-denied','--dry-run',*args[:-1],'{"mode":"heat"}',expected=6)
+        self.assertEqual(denied['error']['code'],'POLICY_DENIED')
+        for action in [['power','set',target,'--on'],
+                       ['device','execute',target,'--capability','vendor.midea.ac','--action','set_fan_speed','--arguments','{"wind_speed":40}']]:
+            self.assertEqual(self.meiju(*options,'--request-id','mode-denied','--dry-run',*action,expected=6)['error']['code'],'POLICY_DENIED')
+        receipt = self.meiju(*options,'--request-id','mode-cli-write',*args,expected=3,execution_schema='command-result')
+        self.assertEqual(receipt['error']['code'],'ACCOUNT_SESSION_UNCONFIRMED')
+        self.assertEqual(receipt['attempts'][0]['phase'],'not_sent')
+        base = [str(BINARY),'--adapter','midea.meiju','--data-dir',self.directory.name,'--profile','meiju',*options]
+        process, send, response = self.start_mcp(base)
+        send({'jsonrpc':'2.0','id':1,'method':'initialize'})
+        response()
+        send({'jsonrpc':'2.0','method':'notifications/initialized'})
+        command = {**plan['command'],'request_id':'mode-mcp-write'}
+        for index, name in [(2,'command_plan'), (3,'command_execute')]:
+            send({'jsonrpc':'2.0','id':index,'method':'tools/call','params':{'name':name,'arguments':{'command':command}}})
+            result = response()['result']
+            if name == 'command_plan':
+                validator('native-response','plan').validate(result['structuredContent'])
+                self.assertFalse(result['isError'])
+            else:
+                self.schema('command-result',result['structuredContent'])
+                self.assertTrue(result['isError'])
+                self.assertEqual(result['structuredContent']['error']['code'],'ACCOUNT_SESSION_UNCONFIRMED')
+        process.stdin.close()
+        process.wait(timeout=2)
+        self.assertEqual(process.returncode,0)
+        self.assertEqual(process.stderr.read(),'')
+
     def test_native_bridge_independence_and_foreground_lifecycle(self):
         library = ctypes.CDLL(str(LIBRARY))
         library.homeverb_open.argtypes = [ctypes.c_char_p]

@@ -4,7 +4,7 @@ mod auth;
 mod cloud;
 mod codec;
 mod control;
-pub use control::AC_FAN_SPEEDS;
+pub use control::{AC_FAN_SPEEDS, AC_MODES, AcMode};
 mod material;
 pub use auth::{LoginCredentials, MeijuSession, SessionReads, login};
 pub use cloud::{CloudEndpoint, CloudTransport, MeijuHttps, SignedRequest};

@@ -133,9 +133,12 @@ when verification was requested; current cloud observations cannot verify it.
 See the [outcome table](development/07-meiju-control.md#outcome-contract).
 
 Native startup rejects malformed, duplicate, excessive, noncanonical or wrong-adapter
-`meiju_power_grants` (API 1.3) or `meiju_fan_grants` (API 1.9) with `INVALID_ARGUMENT`
-before profile creation. A valid startup grants only the listed local devices and
-exact states or reviewed fan codes over cloud. Other values/routes still return
+`meiju_power_grants` (API 1.3), `meiju_fan_grants` (API 1.9) or
+`meiju_mode_grants` (API 1.11) with `INVALID_ARGUMENT` before profile creation.
+A valid startup grants only the listed local devices and exact power states, fan
+codes or combined power-on/mode actions over cloud. Activation accepts only
+`cool`, `heat`, `auto`, `dry` and `fan`; `off`, aliases and extra fields are invalid.
+Power/fan grants cannot authorize activation or vice versa. Other values/routes still return
 `POLICY_DENIED`; no implicit grant expansion is allowed.
 
 The Linux CLI applies the same validation to an explicit `--meiju-grants` startup

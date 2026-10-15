@@ -1,7 +1,10 @@
 //! Explicit owner-controlled startup policy, never ordinary command or credential input.
 
 use homeverb_domain::{Error, Result};
-use homeverb_host::{MeijuFanGrant, MeijuPowerGrant, meiju_fan_policy, meiju_power_policy};
+use homeverb_host::{
+    MeijuFanGrant, MeijuModeGrant, MeijuPowerGrant, meiju_fan_policy, meiju_mode_policy,
+    meiju_power_policy,
+};
 use serde::Deserialize;
 use std::path::Path;
 
@@ -15,6 +18,8 @@ pub struct Grants {
     pub meiju_power_grants: Vec<MeijuPowerGrant>,
     #[serde(default)]
     pub meiju_fan_grants: Vec<MeijuFanGrant>,
+    #[serde(default)]
+    pub meiju_mode_grants: Vec<MeijuModeGrant>,
 }
 
 impl Default for Grants {
@@ -23,13 +28,16 @@ impl Default for Grants {
             schema_version: "1.0".into(),
             meiju_power_grants: vec![],
             meiju_fan_grants: vec![],
+            meiju_mode_grants: vec![],
         }
     }
 }
 
 impl Grants {
     pub fn is_empty(&self) -> bool {
-        self.meiju_power_grants.is_empty() && self.meiju_fan_grants.is_empty()
+        self.meiju_power_grants.is_empty()
+            && self.meiju_fan_grants.is_empty()
+            && self.meiju_mode_grants.is_empty()
     }
 
     pub fn load(path: Option<&Path>) -> Result<Self> {
@@ -73,6 +81,7 @@ impl Grants {
             }
             meiju_power_policy(&grants.meiju_power_grants)?;
             meiju_fan_policy(&grants.meiju_fan_grants)?;
+            meiju_mode_policy(&grants.meiju_mode_grants)?;
             Ok(grants)
         }
         #[cfg(not(target_os = "linux"))]
@@ -170,6 +179,26 @@ mod tests {
                 "INVALID_ARGUMENT"
             );
         }
+    }
+
+    #[test]
+    fn mode_only_files_admit_exact_activation_without_other_authority() {
+        let directory = tempfile::tempdir().unwrap();
+        let path = directory.path().join("grants.json");
+        let mut value = serde_json::json!({"schema_version":"1.0","meiju_mode_grants":[
+            {"device_id":"30000000-0000-4000-8000-000000000001","mode":"cool"}]});
+        write(&path, &value.to_string());
+        let grants = Grants::load(Some(&path)).unwrap();
+        assert!(!grants.is_empty());
+        assert!(grants.meiju_power_grants.is_empty());
+        assert!(grants.meiju_fan_grants.is_empty());
+        assert_eq!(grants.meiju_mode_grants.len(), 1);
+        value["meiju_mode_grants"][0]["mode"] = serde_json::json!("off");
+        write(&path, &value.to_string());
+        assert_eq!(
+            Grants::load(Some(&path)).err().unwrap().code,
+            "INVALID_ARGUMENT"
+        );
     }
 
     #[test]

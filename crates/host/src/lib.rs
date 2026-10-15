@@ -14,6 +14,8 @@ mod power_grants;
 pub use power_grants::{MeijuPowerGrant, meiju_power_policy};
 mod fan_grants;
 pub use fan_grants::{MeijuFanGrant, meiju_fan_policy};
+mod mode_grants;
+pub use mode_grants::{MeijuModeGrant, meiju_mode_policy};
 
 /// Compose a native account vault without reading credentials or starting authentication.
 pub fn open_accounts(directory: &Path) -> Result<homeverb_core::AccountVault> {
@@ -37,7 +39,17 @@ pub fn open_meiju_with_control_grants(
     power: &[MeijuPowerGrant],
     fan: &[MeijuFanGrant],
 ) -> Result<Core> {
-    meiju_parts(directory, power, fan).map(|(core, _)| core)
+    open_meiju_with_scoped_grants(directory, power, fan, &[])
+}
+
+/// Trusted startup with independent power, fan and combined power-on/mode authority.
+pub fn open_meiju_with_scoped_grants(
+    directory: &Path,
+    power: &[MeijuPowerGrant],
+    fan: &[MeijuFanGrant],
+    mode: &[MeijuModeGrant],
+) -> Result<Core> {
+    meiju_parts(directory, power, fan, mode).map(|(core, _)| core)
 }
 
 /// Compose foreground account operations and the read-only Core with one adapter instance.
@@ -59,7 +71,17 @@ pub fn open_meiju_session_with_control_grants(
     power: &[MeijuPowerGrant],
     fan: &[MeijuFanGrant],
 ) -> Result<Session> {
-    let (core, adapter) = meiju_parts(directory, power, fan)?;
+    open_meiju_session_with_scoped_grants(directory, power, fan, &[])
+}
+
+/// Native sessions capture reviewed mode activation independently of other actions.
+pub fn open_meiju_session_with_scoped_grants(
+    directory: &Path,
+    power: &[MeijuPowerGrant],
+    fan: &[MeijuFanGrant],
+    mode: &[MeijuModeGrant],
+) -> Result<Session> {
+    let (core, adapter) = meiju_parts(directory, power, fan, mode)?;
     Ok(Session::with_accounts(core, adapter))
 }
 
@@ -67,9 +89,11 @@ fn meiju_parts(
     directory: &Path,
     grants: &[MeijuPowerGrant],
     fan: &[MeijuFanGrant],
+    mode: &[MeijuModeGrant],
 ) -> Result<(Core, Arc<homeverb_midea::MeijuAdapter>)> {
     let mut policy = meiju_power_policy(grants)?;
     policy.grants.extend(meiju_fan_policy(fan)?.grants);
+    policy.grants.extend(meiju_mode_policy(mode)?.grants);
     let store = Arc::new(SqliteStore::open(directory)?);
     let vault = Arc::new(open_accounts(directory)?);
     let clock = Arc::new(SystemClock);
@@ -83,6 +107,9 @@ fn meiju_parts(
     }
     if !fan.is_empty() {
         adapter = adapter.with_ac_fan_control();
+    }
+    if !mode.is_empty() {
+        adapter = adapter.with_ac_mode_control();
     }
     let adapter = Arc::new(adapter);
     Ok((

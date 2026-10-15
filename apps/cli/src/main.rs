@@ -31,7 +31,7 @@ struct Cli {
         global = true,
         requires = "adapter",
         conflicts_with = "mock",
-        help = "Explicit absolute path to an owner-controlled Meiju power/fan grant file"
+        help = "Explicit absolute path to an owner-controlled Meiju control grant file"
     )]
     meiju_grants: Option<PathBuf>,
     #[arg(long, global = true)]
@@ -365,10 +365,11 @@ async fn run(cli: Cli, cancellation: CancellationToken) -> Result<u8> {
         return accounts::run(&directory, command, timeout_ms, cancellation, &grants).await;
     }
     let core = if meiju {
-        homeverb_host::open_meiju_with_control_grants(
+        homeverb_host::open_meiju_with_scoped_grants(
             &directory,
             &grants.meiju_power_grants,
             &grants.meiju_fan_grants,
+            &grants.meiju_mode_grants,
         )?
     } else {
         homeverb_host::open_mock(&directory, scenario, !is_mcp)?

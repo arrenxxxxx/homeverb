@@ -135,6 +135,15 @@ protected model/binding checks and conservative outcomes, sending only one revie
 power, mode or temperature to force an effect; mode-dependent effectiveness remains
 unverified. No read, optimistic cache update, fallback or retry follows acceptance.
 
+API 1.11 adds explicit `vendor.midea.ac.activate_mode` under
+[ADR-0039](adr/0039-explicit-meiju-mode-activation.md). Each independent startup
+grant permits one exact device/mode and its combined power-on effect. The adapter
+sends `power: on` and that mode in one request, never separate power/mode calls.
+Neither power nor fan grants admit it. `atomic` and `independent_fields` are false;
+accepted/unknown handling, protected checks and replay rules remain unchanged.
+It neither copies cached status nor writes temperature/fan values. Model behavior
+and preservation of unrelated settings remain unverified without physical evidence.
+
 The Linux CLI can supply these same independent grants through an explicit
 owner-controlled file under [ADR-0037](adr/0037-cli-meiju-control-grants.md).
 It requires explicit request IDs for single writes and previews, and never

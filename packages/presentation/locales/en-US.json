@@ -119,5 +119,13 @@
   "account.inventory.inspect": "Inspect saved device list",
   "inventory.membership.listed": "Present in last complete list",
   "inventory.membership.not_listed": "Missing from last complete list",
-  "inventory.membership.unconfirmed": "Device list needs confirmation"
+  "inventory.membership.unconfirmed": "Device list needs confirmation",
+  "vendor.midea.ac.mode": "Mode",
+  "vendor.midea.ac.mode.cool": "Cool",
+  "vendor.midea.ac.mode.heat": "Heat",
+  "vendor.midea.ac.mode.auto": "Auto",
+  "vendor.midea.ac.mode.dry": "Dry",
+  "vendor.midea.ac.mode.fan": "Fan",
+  "vendor.midea.ac.activate_mode": "Turn on and set mode",
+  "vendor.midea.ac.activate_mode.confirm": "Turn on {device} and switch to {mode}?"
 }

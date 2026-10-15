@@ -29,7 +29,7 @@ def main():
     responses = {name: validator('native-response', name) for name in [*api['methods'], 'open']}
     query_error = validator('native-response', 'query_error')
     info_example = {'schema_version': '1.0', 'data': copy.deepcopy(api), 'warnings': [], 'error': None}
-    info_example['data']['api_version'] = '1.11.0'
+    info_example['data']['api_version'] = '1.12.0'
     info_example['data']['methods']['future_query'] = {'response_kind': 'query'}
     responses['get_api_info'].validate(info_example)
     info_example['data']['api_version'] = '2.0.0'
@@ -598,6 +598,61 @@ def main():
             assert decode(library.homeverb_open(json.dumps(config).encode()))['error']['code'] == 'INVALID_ARGUMENT'
             assert not private.exists()
 
+    mode_grant = {'device_id':grant_id, 'mode':'cool'}
+    for grants in [[], [mode_grant]]:
+        with tempfile.TemporaryDirectory(prefix='homeverb-ui-mode-grants-') as directory:
+            config = {'schema_version':'1.0', 'data_dir':directory, 'adapter':'midea.meiju',
+                      'allow_mock_writes':False, 'meiju_mode_grants':grants}
+            open_schema.validate(config)
+            result = decode(library.homeverb_open(json.dumps(config).encode()))
+            assert result['error'] is None, result
+            handle = result['data']['handle']
+            try:
+                assert raw(handle, envelope('list_accounts'))['data'] == []
+                assert raw(handle, envelope('discover'))['data'] == []
+                device = load('examples/device.json')
+                device.update(id=grant_id, model='KFR-35G/WF2', support_status='experimental',
+                              components=[{'id': 'main', 'capabilities': ['power', 'vendor.midea.ac']}],
+                              connections=[{'id': 'fictional-cloud', 'adapter': 'midea.meiju',
+                                            'transport': 'cloud', 'account_id': '40000000-0000-4000-8000-000000000001',
+                                            'identity_ref': 'fictional-binding'}])
+                mode_capability = load('examples/capability.meiju-mode.json')
+                mode_capability['actions'].update(load('examples/capability.meiju-fan.json')['actions'])
+                with sqlite3.connect(Path(directory) / 'homeverb.sqlite3') as database:
+                    database.execute('INSERT INTO devices VALUES (?, ?)',
+                                     (grant_id, json.dumps({'device':device, 'capabilities':[power, mode_capability]})))
+                for mode in ['cool', 'heat', 'auto', 'dry', 'fan']:
+                    request = command('native-mode-plan', device_id=grant_id, capability='vendor.midea.ac',
+                                      action='activate_mode', arguments={'mode':mode}, connection='cloud')
+                    plan = raw(handle, envelope('plan', command=request))
+                    responses['plan'].validate(plan)
+                    assert (plan['error'] is None) == (bool(grants) and mode == 'cool')
+                for capability, action, arguments in [('power','set',{'state':True}),
+                                                      ('vendor.midea.ac','set_fan_speed',{'wind_speed':40})]:
+                    request = command('independent-mode', device_id=grant_id, capability=capability,
+                                      action=action, arguments=arguments, connection='cloud')
+                    assert raw(handle, envelope('plan', command=request))['error']['code'] == 'POLICY_DENIED'
+                forged = envelope('list_devices')
+                forged['request']['meiju_mode_grants'] = [mode_grant]
+                assert not request_schema.is_valid(forged)
+                assert raw(handle, forged)['error']['code'] == 'INVALID_ARGUMENT'
+            finally:
+                library.homeverb_close(handle)
+    bad_modes = [None, True, {}, [mode_grant, mode_grant], [mode_grant]*65,
+                 [{'device_id':'*','mode':'cool'}], [{'device_id':grant_id}],
+                 [{**mode_grant,'confirmed':True}], [{**mode_grant,'power':'off'}]]
+    bad_modes.extend([{**mode_grant,'mode':mode}] for mode in [None, True, 1, 'off', 'COOL', 'fan_only'])
+    for grants, adapter in [(grants,'midea.meiju') for grants in bad_modes] + [([mode_grant],None), ([mode_grant],'homeverb.mock')]:
+        with tempfile.TemporaryDirectory(prefix='homeverb-ui-bad-mode-') as directory:
+            private = Path(directory) / 'must-not-create'
+            config = {'schema_version':'1.0', 'data_dir':str(private), 'allow_mock_writes':False,
+                      'meiju_mode_grants':grants}
+            if adapter:
+                config['adapter'] = adapter
+            assert not open_schema.is_valid(config), config
+            assert decode(library.homeverb_open(json.dumps(config).encode()))['error']['code'] == 'INVALID_ARGUMENT'
+            assert not private.exists()
+
     example_path = ROOT / 'packages/native-contract/examples.json'
     if args.write_examples:
         example_path.write_text(json.dumps({'api_version': api['api_version'], 'cases': examples}, indent=2) + '\n')
@@ -650,7 +705,7 @@ def main():
         target[path[-1]] = value
         assert not connect_response.is_valid(bad), path
     print(f"PASS: {len(api['methods'])} native methods; {len(examples)} live examples; closed-field, error, outcome, and lifecycle checks.")
-    print('Mock, empty Meiju startup, independent power/fan-grant admission and protected account-buffer guards verified on Linux; no live accounts, Flutter/mobile or physical-device verification in this suite.')
+    print('Mock, empty Meiju startup, independent power, fan and mode grant admission and protected account-buffer guards verified on Linux; no live accounts, Flutter/mobile or physical-device verification in this suite.')
 
 
 if __name__ == '__main__':

@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "id": "vendor.midea.ac",
+  "component_id": "main",
+  "revision": 3,
+  "properties": {
+    "mode": {
+      "type": "string",
+      "readable": true,
+      "writable": true
+    },
+    "wind_speed": {
+      "type": "integer",
+      "readable": true,
+      "writable": false
+    }
+  },
+  "actions": {
+    "activate_mode": {
+      "parameters": {
+        "type": "object",
+        "description": "Turn on the AC and activate the selected vendor mode in one cloud request.",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "cool",
+              "heat",
+              "auto",
+              "dry",
+              "fan"
+            ]
+          }
+        },
+        "required": [
+          "mode"
+        ],
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "set_value",
+      "risk": "low",
+      "atomic": false,
+      "independent_fields": false,
+      "verification": "unavailable"
+    }
+  },
+  "events": {}
+}

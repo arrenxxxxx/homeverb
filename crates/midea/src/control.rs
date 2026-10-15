@@ -8,11 +8,31 @@ use serde::{Deserialize, Serialize};
 // Pinned default AC mapping, admitted only for the explicitly reviewed model list.
 pub const AC_FAN_SPEEDS: [u8; 6] = [20, 40, 60, 80, 100, 102];
 
+/// Reviewed vendor mode codes; activating any of them also powers on the AC.
+#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq, Hash)]
+#[serde(rename_all = "snake_case")]
+pub enum AcMode {
+    Cool,
+    Heat,
+    Auto,
+    Dry,
+    Fan,
+}
+
+pub const AC_MODES: [AcMode; 5] = [
+    AcMode::Cool,
+    AcMode::Heat,
+    AcMode::Auto,
+    AcMode::Dry,
+    AcMode::Fan,
+];
+
 #[derive(Serialize)]
 #[serde(untagged)]
 pub(crate) enum AcControl {
     Power { power: &'static str },
     FanSpeed { wind_speed: u8 },
+    ActivateMode { power: &'static str, mode: AcMode },
 }
 
 #[derive(Deserialize)]

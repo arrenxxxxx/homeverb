@@ -1,7 +1,7 @@
 # CLI contract
 
 Status: Mock commands, local organization, diagnostics and the experimental mainland
-Meiju account/read flow and scoped power/fan controls are implemented. Select `--mock` or `--adapter midea.meiju`
+Meiju account/read flow and scoped power, fan and mode activation controls are implemented. Select `--mock` or `--adapter midea.meiju`
 explicitly. Meiju uses the same native Host/Core as the app bridge; no example
 executable, HA or service is required. Real CLI login/read/control acceptance remains
 separate from the earlier [developer probe](development/06-meiju-probe.md).
@@ -115,7 +115,7 @@ opening the profile. MCP can reuse this profile through explicit
 ## Scoped Meiju controls
 
 On Linux, `--adapter midea.meiju --meiju-grants <absolute-path>` loads a trusted
-startup file for the existing experimental AC power and vendor fan actions. The
+startup file for the experimental AC power, vendor fan and combined power-on/mode actions. The
 owner must review each local device ID and allowed value. The file is never loaded
 automatically, saved into the profile or accepted inside ordinary command JSON.
 It has the closed [CLI grant schema](../schemas/cli-meiju-grants.schema.json); see
@@ -126,11 +126,16 @@ The same file may be selected by a trusted [MCP host](mcp.md). MCP captures its
 policy for the entire session; stop/restart that host to change grants. One-shot
 CLI commands reread the explicitly supplied file on each invocation.
 
-`schema_version` is `"1.0"`. Each independent list, `meiju_power_grants` and
-`meiju_fan_grants`, permits at most 64 distinct entries. Power entries name one
-local `device_id` and boolean `state`; fan entries name one local `device_id` and
-one `wind_speed` code: 20, 40, 60, 80, 100 or 102. These are vendor codes, not
-percentages. Omitted/empty lists grant nothing. No wildcard, provider identifier,
+`schema_version` is `"1.0"`. Each independent list, `meiju_power_grants`,
+`meiju_fan_grants` and `meiju_mode_grants`, permits at most 64 distinct entries.
+Power entries name one local `device_id` and boolean `state`; fan entries name
+one local `device_id` and one `wind_speed` code: 20, 40, 60, 80, 100 or 102. These
+are vendor codes, not percentages. Mode entries name one local `device_id` and
+one `mode`: `cool`, `heat`, `auto`, `dry` or `fan`. Mode activation **turns on the
+AC and selects that mode**; it does not authorize independent power or fan changes.
+Power/fan grants do not authorize activation. Older binaries reject the new mode
+list; see [ADR-0039](adr/0039-explicit-meiju-mode-activation.md).
+Omitted/empty lists grant nothing. No wildcard, provider identifier,
 arbitrary action, credential or approval flag is accepted. Only the existing
 exact-model AC mappings and cloud route are admitted; temperature, dishwasher and
 refrigerator controls remain unsupported.
@@ -160,7 +165,10 @@ prove saved inventory membership, reachability or physical behavior. Only after
 separate owner authorization for the real operation, remove `--dry-run` to send
 with the reviewed request ID. For a fan preview, use the same options with
 `device execute <local-device-id> --capability vendor.midea.ac --action set_fan_speed
---arguments '{"wind_speed":40}'`.
+--arguments '{"wind_speed":40}'`. For a combined power-on and mode preview, use
+`device execute <local-device-id> --capability vendor.midea.ac --action activate_mode
+--arguments '{"mode":"cool"}'` with a matching mode grant. Review both effects
+before sending; this is not a mode-only setter.
 
 Execution repeats Core and protected-account checks. Cloud acceptance remains
 `accepted`, never physical verification; the default verified wait exits 12 when

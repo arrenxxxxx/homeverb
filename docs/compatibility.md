@@ -419,3 +419,43 @@ timed out; the focused and complete runtime suites passed with ordinary process
 signal access. Tests use fictional profiles and no owner credentials, vendor
 requests or appliance controls. No target AI host configuration, Flutter worktree,
 phone, physical/off-LAN behavior or remote CI was tested by this phase.
+
+## Explicit AC power-on and mode activation
+
+Native API 1.11.0 adds `meiju_mode_grants` for
+`main / vendor.midea.ac.activate_mode`. Each exact local-device/mode grant covers
+both turning on the AC and selecting `cool`, `heat`, `auto`, `dry` or `fan` in one
+cloud request. Existing power and fan grants remain independent; default startup
+is read-only. The four previously admitted AC models expose this candidate action
+only after explicit opt-in and discovery/refresh. The mode-enabled vendor
+capability has revision 3. See [ADR-0039](adr/0039-explicit-meiju-mode-activation.md)
+and the [native handoff](native-ui-contract.md#scoped-experimental-ac-mode-activation-startup).
+
+The formal CLI and MCP accept the same optional grant list. Ordinary commands
+cannot change permissions. The action sends only power-on and the selected mode;
+no cached status, temperature or fan values and no separate power request are
+sent. Acceptance remains unverified; possible sends retain unknown outcomes
+without retry, cache mutation or a restoring command. UI labels and consent name
+both effects. Physical behavior and preservation of unrelated settings remain
+unverified, including the missing status-context limitation from ADR-0034.
+
+Existing Rust host helpers, 31 JSON methods, seven C functions, command/result
+schemas, SQLite schema 4 and protected payload version 2 remain compatible.
+Older binaries reject the new startup field; negotiate API 1.11 before supplying
+it. The English/Chinese catalogs include mode labels and explicit power-on consent.
+
+Local verification passed 278 Rust tests (two opt-in system probes ignored),
+Clippy with warnings denied, formatting/workspace build, 33 runtime cases,
+the 31-method/51-example native ABI suite, 29 Python tests and five presentation
+tests. Contract checks passed 17 schemas, 32 positive and 111 negative fixtures;
+document/repository/commit checks passed. The full Rust/runtime suites ran with
+ordinary local socket and signal access. The API 28 arm64/x86_64 combined AAR was
+rebuilt with NDK r28c, JDK 21 and API 35 stubs; archive contents, eight exports per
+ABI and 16 KiB ELF alignment passed. This does not establish APK, emulator,
+Android Keystore or phone acceptance.
+
+Tests used fictional profiles, synthetic protected storage and local protocol
+fixtures. This phase accessed no owner account or appliance and did not modify
+the separate Flutter worktree. Physical/off-LAN acceptance remains deferred;
+model-specific AC temperature bounds, dishwasher/refrigerator controls and the
+complete mobile journey remain incomplete. Remote CI was not verified.

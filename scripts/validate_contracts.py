@@ -44,6 +44,7 @@ def main() -> int:
         ("device", "device.refrigerator"),
         ("capability", "capability.fridge"), ("capability", "capability.freezer"),
         ("capability", "capability.meiju-fan"), ("command", "command.meiju-fan"),
+        ("capability", "capability.meiju-mode"), ("command", "command.meiju-mode"),
     ]
     validators = {}
     for path in (ROOT / "schemas").glob("*.schema.json"):
@@ -52,7 +53,7 @@ def main() -> int:
         validators[path.name.removesuffix(".schema.json")] = Draft202012Validator(sch, format_checker=formats)
     for sch, fixture in pairs:
         validators[sch].validate(load(f"examples/{fixture}.json"))
-    for key in ("meiju_power_grants", "meiju_fan_grants"):
+    for key in ("meiju_power_grants", "meiju_fan_grants", "meiju_mode_grants"):
         assert load("schemas/cli-meiju-grants.schema.json")["properties"][key] == load("schemas/native-open.schema.json")["properties"][key]
     validators["cli-meiju-grants"].validate({"schema_version": "1.0"})
     assert load("schemas/batch-command.schema.json")["$defs"]["command"] == load("schemas/command.schema.json")
@@ -74,6 +75,15 @@ def main() -> int:
     action_validator.validate(load("examples/command.json")["arguments"])
     fan_validator = Draft202012Validator(load("examples/capability.meiju-fan.json")["actions"]["set_fan_speed"]["parameters"])
     fan_validator.validate(load("examples/command.meiju-fan.json")["arguments"])
+    mode_validator = Draft202012Validator(load("examples/capability.meiju-mode.json")["actions"]["activate_mode"]["parameters"])
+    mode_validator.validate(load("examples/command.meiju-mode.json")["arguments"])
+    for mode in ["cool", "heat", "auto", "dry", "fan"]:
+        mode_validator.validate({"mode": mode})
+        validators["cli-meiju-grants"].validate({"schema_version":"1.0", "meiju_mode_grants":[
+            {"device_id":"30000000-0000-4000-8000-000000000001", "mode":mode}]})
+    for args in [{}, {"mode":"off"}, {"mode":"fan_only"}, {"mode":"COOL"}, {"mode":1},
+                 {"mode":"cool", "power":"off"}, {"mode":"cool", "temperature":26}]:
+        assert not mode_validator.is_valid(args), args
     for speed in [20, 40, 60, 80, 100, 102, 20.0]:
         fan_validator.validate({"wind_speed": speed})
     for args in [{}, {"wind_speed": "40"}, {"wind_speed": 40.5}, {"wind_speed": 101},
@@ -110,6 +120,10 @@ def main() -> int:
         fresh["properties"]["target_temperature"]["max_age_ms"] = max_age_ms
         validators["capability"].validate(fresh)
     negative = []
+    for mode in [None, True, 1, "off", "fan_only", "COOL"]:
+        bad = {"schema_version":"1.0", "meiju_mode_grants":[
+            {"device_id":"30000000-0000-4000-8000-000000000001", "mode":mode}]}
+        negative.append((f"invalid CLI activation mode {mode}", validators["cli-meiju-grants"], bad))
     for key, value in [("schema_version", "2.0"), ("confirmed", True), ("principal", "owner"),
                        ("password", "PRIVATE"), ("meiju_power_grants", None)]:
         bad = load("examples/cli-meiju-grants.json"); bad[key] = value

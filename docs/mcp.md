@@ -2,7 +2,7 @@
 
 Status: local stdio supports Mock reads and explicit Meiju startup. Meiju defaults
 to read-only; reviewed startup grants can admit the existing experimental AC power
-and vendor fan controls. Protocol and fictional execution tests cover this path;
+and vendor fan controls, plus explicit power-on with mode selection. Protocol and fictional execution tests cover this path;
 validation inside a particular AI host and physical controls remain pending.
 
 ## Host configuration
@@ -75,6 +75,11 @@ risk and route. The closed `command` field embeds the existing
 approval, profile or grant fields are rejected. No batch or authentication tool is
 exposed. A valid plan does not establish saved inventory membership, cloud
 reachability or physical correctness; execution repeats those checks.
+
+A `meiju_mode_grants` entry permits only the combined
+`vendor.midea.ac.activate_mode` action for that device and mode. Describe it to
+the user as turning on the AC and selecting a mode. Independent power/fan grants
+do not imply this permission. See the [activation contract](native-ui-contract.md#scoped-experimental-ac-mode-activation-startup).
 
 For example, this fictional tool request plans a single allowed power-off command:
 
