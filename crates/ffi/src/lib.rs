@@ -30,9 +30,20 @@ fn hosts() -> &'static Mutex<HashMap<u64, Arc<Host>>> {
 struct Config {
     schema_version: String,
     data_dir: PathBuf,
+    #[serde(default)]
+    adapter: AdapterMode,
     allow_mock_writes: bool,
     #[serde(default)]
     scenario: Scenario,
+}
+
+#[derive(Default, Deserialize, PartialEq, Eq)]
+enum AdapterMode {
+    #[default]
+    #[serde(rename = "homeverb.mock")]
+    Mock,
+    #[serde(rename = "midea.meiju")]
+    Meiju,
 }
 
 fn error(code: &str, message: &str) -> Value {
@@ -68,7 +79,8 @@ unsafe fn input_json<T: serde::de::DeserializeOwned>(input: *const c_char) -> Op
     serde_json::from_slice(bytes).ok()
 }
 
-/// Open an explicit Mock host. Configuration comes from trusted application startup.
+/// Open an explicitly selected host. Configuration comes from trusted application startup.
+/// Omitted adapter selection preserves the existing Mock default.
 /// # Safety
 /// `config` must be NULL or a valid NUL-terminated UTF-8 string.
 #[unsafe(no_mangle)]
@@ -83,11 +95,29 @@ pub unsafe extern "C" fn homeverb_open(config: *const c_char) -> *mut c_char {
                 "Use schema version 1.0 and an absolute private data directory.",
             );
         }
-        let core = match homeverb_host::open_mock(
-            &config.data_dir,
-            config.scenario,
-            config.allow_mock_writes,
-        ) {
+        if config.adapter == AdapterMode::Meiju
+            && (config.allow_mock_writes || config.scenario != Scenario::Normal)
+        {
+            return error(
+                "INVALID_ARGUMENT",
+                "Meiju startup is read-only and does not accept Mock scenarios or grants.",
+            );
+        }
+        let (adapter, core) = match config.adapter {
+            AdapterMode::Mock => (
+                "homeverb.mock",
+                homeverb_host::open_mock(
+                    &config.data_dir,
+                    config.scenario,
+                    config.allow_mock_writes,
+                ),
+            ),
+            AdapterMode::Meiju => (
+                "midea.meiju",
+                homeverb_host::open_meiju_read_only(&config.data_dir),
+            ),
+        };
+        let core = match core {
             Ok(core) => core,
             Err(problem) => return json!(Query::<Value>::from_result(Err(problem))),
         };
@@ -113,7 +143,7 @@ pub unsafe extern "C" fn homeverb_open(config: *const c_char) -> *mut c_char {
             Err(_) => return error("INTERNAL_ERROR", "The host registry is unavailable."),
         }
         json!(Query::from_result(Ok(
-            json!({"handle": id, "adapter": "homeverb.mock"})
+            json!({"handle": id, "adapter": adapter})
         )))
     })
 }

@@ -1,7 +1,9 @@
 //! Explicit Linux read-only account probe. No device controls or public credential JSON.
 
 use clap::{Parser, Subcommand};
-use homeverb_core::{AccountRecord, Core, Operation, Policy, SecretBytes, SystemClock};
+use homeverb_core::{
+    AccountRecord, AccountStore, AccountVault, Core, Operation, Policy, SecretBytes, SystemClock,
+};
 use homeverb_domain::{Error, Result, Route};
 use homeverb_midea::{
     ApplianceFamily, BoundInventory, LoginCredentials, MeijuAccount, MeijuAdapter, MeijuHttps,
@@ -103,7 +105,11 @@ async fn main() {
 }
 
 async fn run(arguments: Arguments) -> Result<()> {
-    let vault = Arc::new(homeverb_host::open_accounts(&arguments.data_dir)?);
+    let store = Arc::new(homeverb_storage::SqliteStore::open(&arguments.data_dir)?);
+    let secrets = Arc::new(homeverb_secrets::SystemSecretStore::new(
+        store.profile_namespace()?,
+    )?);
+    let vault = Arc::new(AccountVault::new(store.clone(), secrets));
     let credentials = if matches!(arguments.command, Command::Connect { .. }) {
         if !io::stdin().is_terminal() || !io::stderr().is_terminal() {
             return Err(Error::new(
@@ -129,7 +135,7 @@ async fn run(arguments: Arguments) -> Result<()> {
             Command::CoreInspect => {
                 let clock = Arc::new(SystemClock);
                 let core = Core::new(
-                    Arc::new(homeverb_storage::SqliteStore::open(&arguments.data_dir)?),
+                    store,
                     vec![Arc::new(MeijuAdapter::new(
                         vault.clone(),
                         Arc::new(MeijuHttps),

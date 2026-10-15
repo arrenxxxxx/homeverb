@@ -46,7 +46,7 @@ Use `<type>(<optional-scope>): <English imperative summary>`. Allowed types: `fe
 
 ## Implementation status and test honesty
 
-The Rust Mock MVP, Linux Secret Service library, and native account vault are implemented. Read the progressive guides in `docs/development/` before changing them. Native Meiju login, protected connection and automatic inventory are synthetic-tested with a local read-only probe. One real mainland account has passed login/inventory and saved-session refresh. Real reauthorization, production UI account methods, mobile credential stores and packaging, and physical-device support remain pending; see `docs/task-breakdown.md`. A real adapter is `verified` only after model-specific physical-device testing.
+The Rust Mock MVP, Linux Secret Service library, and native account vault are implemented. Read the progressive guides in `docs/development/` before changing them. Native Meiju login, protected connection and automatic inventory are synthetic-tested with a local read-only probe. One real mainland account has passed login/inventory and saved-session refresh; six exact models have experimental read-only Core/native mappings. Native API 1.1.0 selects Mock by default or explicit Meiju saved-account reads. Real reauthorization, production UI account methods, mobile credential stores and packaging, and physical-device support remain pending; see `docs/task-breakdown.md`. A real adapter is `verified` only after model-specific physical-device testing.
 
 Current checks:
 

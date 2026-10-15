@@ -4,7 +4,7 @@ The owner selected Midea and Hualing air conditioners, dishwashers, and refriger
 
 Daily cloud control is required in the first real integration. LAN is an additional route for the same physical devices, not a substitute for cloud control. The owner has physical products; exact models, firmware, app version, and account region remain to be recorded. This guide records requirements and source research on October 15, 2026, not implemented HomeVerb support or physical verification.
 
-The native read protocols are implemented in [homeverb-midea](../../crates/midea/src/lib.rs): account-scoped home/appliance retrieval, code/data validation, deduplication, partial inventory failure, and bounded cloud-state decoding for the three selected families. The inventory/state decoders use an injected read transport and synthetic responses with the inspected wire fields. Native password login, signing, session-key decoding and restricted HTTPS are now implemented under ADR-0022 and tested against fictional responses and a local TLS server. One real mainland account has passed the read-only login/inventory probe below; the exact-model read-only Core adapter is available through `core-inspect`, while UI account methods and real C ABI host selection remain pending. See [ADR-0020](../adr/0020-midea-cloud-inventory.md) and [ADR-0023](../adr/0023-meiju-cloud-state-evidence.md).
+The native read protocols are implemented in [homeverb-midea](../../crates/midea/src/lib.rs): account-scoped home/appliance retrieval, code/data validation, deduplication, partial inventory failure, and bounded cloud-state decoding for the three selected families. The inventory/state decoders use an injected read transport and synthetic responses with the inspected wire fields. Native password login, signing, session-key decoding and restricted HTTPS are now implemented under ADR-0022 and tested against fictional responses and a local TLS server. One real mainland account has passed the read-only login/inventory probe below; the exact-model read-only Core adapter is available through `core-inspect`, and native API 1.1.0 startup selection. UI account methods remain pending. See [ADR-0020](../adr/0020-midea-cloud-inventory.md) and [ADR-0023](../adr/0023-meiju-cloud-state-evidence.md).
 
 The native account vault now persists random local references, composes Linux secure storage, and coordinates session read/update work through account leases. Meiju's private account payload also preserves appliance-to-local-ID bindings with the session. Interrupted or uncertain updates remain pending until trusted validation and recovery. The explicit native connection coordinator now uses this storage and the admitted login client; real account identity and session validity still require live acceptance. See [ADR-0021](../adr/0021-persistent-account-vault.md), [ADR-0024](../adr/0024-meiju-private-device-bindings.md) and the [credential integration guide](04-add-adapter.md#integrate-native-credentials).
 
@@ -174,7 +174,8 @@ component reads succeeded with zero failures. No controls were sent. Unit/integr
 tests separately cover exact and unsupported models, forged admission, partial and
 empty retrieval, historical cross-account conflicts, preserved preferences/cache,
 secure-store unavailability, cancellation/deadlines and lease release. Native UI
-API 1.0.0 and SQLite schema 3 are unchanged; standard host startup remains Mock.
+API 1.1.0 adds explicit Meiju startup while preserving the Mock default and existing
+22 request methods. SQLite schema 3 is unchanged; see the [Flutter handoff](../native-ui-contract.md#real-meiju-read-only-startup).
 
 ## Daily cloud control and the additional LAN route
 

@@ -112,8 +112,9 @@ historical bindings whose appliance is missing from the latest inventory.
 On October 15, 2026 this command published six real cards and successfully read
 seven component snapshots, with zero failures. All source timestamps remained
 unproven and every observation stale. Physical/app comparison and off-LAN tests
-remain pending. The standard C ABI host still opens Mock; Flutter account input
-and real-host selection are separate integration work.
+remain pending. Native API 1.1.0 can open this same profile with explicit `adapter: "midea.meiju"`;
+see the [native startup contract](../native-ui-contract.md#real-meiju-read-only-startup).
+Flutter account input remains separate integration work.
 
 ## Interpret failures and record evidence
 

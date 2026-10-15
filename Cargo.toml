@@ -12,6 +12,7 @@ publish = false
 homeverb-domain = { path = "crates/domain" }
 homeverb-core = { path = "crates/core" }
 homeverb-mock = { path = "crates/mock" }
+homeverb-midea = { path = "crates/midea" }
 homeverb-storage = { path = "crates/storage" }
 homeverb-secrets = { path = "crates/secret-store" }
 homeverb-host = { path = "crates/host" }

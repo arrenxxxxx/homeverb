@@ -1,6 +1,6 @@
-# Native UI contract 1.0
+# Native UI contract 1.1
 
-Status: implemented Linux Mock contract, October 15, 2026. This is the integration baseline for independent Flutter development, not phone packaging or real-provider acceptance. See [ADR-0019](adr/0019-native-ui-contract.md).
+Status: implemented Linux native contract, October 15, 2026, with Mock and experimental Meiju read-only startup. Six real devices passed the native read path; phone packaging and complete provider/physical acceptance remain pending. See [ADR-0019](adr/0019-native-ui-contract.md).
 
 ## Start here in a Flutter worktree
 
@@ -8,16 +8,16 @@ Branch from a commit containing both the Mock MVP and this contract. Put the Flu
 
 Read the [UI integration guide](development/03-ui-integration.md) for existing behavior and the [functional handoff](ui-functional-spec.md) for screens. Use [api.json](../packages/native-contract/api.json) as the callable-method catalog and [examples.json](../packages/native-contract/examples.json) as fictional request/response examples. The examples were obtained from the built native library. They contain temporary fictional IDs and observations, not defaults for a production device.
 
-The runtime is still an explicit Mock host. A real provider must not be represented as connected merely because its page exists. Preview-only refrigerator, dishwasher, and sharing screens can use isolated UI fixture repositories; never mix those records with a native installation or label them live.
+Startup explicitly selects Mock or the read-only Meiju adapter. Meiju requires an already connected local account; opening the library alone does not establish connection or authorization. Preview-only refrigerator, dishwasher, and sharing screens can use isolated UI fixture repositories; never mix those records with a native installation or label them live.
 
 ## Startup, ownership, and version negotiation
 
 The six existing C functions in [homeverb.h](../crates/ffi/include/homeverb.h) remain the native boundary. There is no HTTP endpoint, port, CLI subprocess, or daemon.
 
-1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `scenario` is optional and defaults to `normal`. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
-2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` is `homeverb.mock`. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The initial `api_version` is `1.0.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
-4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit Mock discovery is available for development.
+1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects saved-account cloud reads. `scenario` defaults to `normal`. Meiju requires `allow_mock_writes: false` and rejects any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
+2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms `homeverb.mock` or `midea.meiju`. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.1.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
 ```json
@@ -56,7 +56,7 @@ All rows use query envelopes except the two execution methods. The schemas and a
 |---|---|---|
 | `get_api_info` | None | API version, method response kinds, native limits |
 | `list_devices` | None | Device array from local storage |
-| `discover` | None | Discovered Device array; currently fictional Mock only |
+| `discover` | None | Local Device array after selected-adapter discovery; Mock or model-scoped Meiju |
 | `describe_device` | `device` | `{device, capabilities}` |
 | `read_state` | `device`, `component`, `connection`, `cached` | State snapshot; missing/null observations remain unknown |
 | `plan` | `command` | Command, permitted transports, warnings, optional independent steps |
@@ -84,9 +84,9 @@ Prefer exact device IDs even where lookup accepts an alias. Resolve a capability
 | UI scope | Current integration | Remaining work and boundary |
 |---|---|---|
 | D01–D12, R01–R05: cards, search, rooms, local organization | Device/room methods above | Flutter filtering, loading/errors, accessibility and layouts. Metadata writes preserve routes and grants |
-| C01–C14: dynamic controls, history and outcomes | Describe/read/plan/execute/batch/receipt methods | Render exact capabilities; non-AC fixtures are previews, not registered real adapters. Consequential real approvals remain unavailable |
-| A01–A08: device discovery and addition | Explicit Mock `discover` | Real pairing, cloud retrieval, mobile permissions and safe identity merge remain unavailable. No merge API exists |
-| P01–P13: platforms, accounts, authorization and removal | No account methods in this version | The native account vault exists internally; catalog/account UI projection, auth challenges, automatic Meiju device retrieval, connection checks, local removal and provider revocation require the next native contract phase |
+| C01–C14: dynamic controls, history and outcomes | Describe/read/plan/execute/batch/receipt methods | Render exact capabilities; Meiju has read-only AC/fridge/dishwasher mappings and no actions. Consequential real approvals remain unavailable |
+| A01–A08: device discovery and addition | Explicit selected-adapter `discover`, including saved-account Meiju cloud retrieval | Real pairing, mobile permissions and safe identity merge remain unavailable. No merge API exists |
+| P01–P13: platforms, accounts, authorization and removal | No account methods in this version | Native login/storage and saved-account discovery exist; UI account projection, protected input, connection progress, local removal and provider revocation require the next native contract phase |
 | H01–H16: nearby authorization sharing | No sharing methods in this version | Eligibility, peer discovery, code verification, scope, consent, conflict/import and transfer records require ADR-0008 implementation |
 | S02/S11: Window Light appearance | Flutter-owned private preferences | Persist `window_light`, fallback to it, and provide one preview; no native theme API or download capability is needed |
 | S03/S10, D07: sharing name and route choices | Flutter-owned private preferences plus explicit Command/ReadState `connection` | Store only nonsensitive display preferences. Resolve device > installation > `auto`; Core still enforces allowed routes. Do not add route fields to `set_device_preferences`. A saved sharing name does not start advertising |
@@ -96,6 +96,46 @@ Prefer exact device IDs even where lookup accepts an alias. Resolve a capability
 | W01/W02 and all screens | Same contract at all sizes | Flutter navigation, text scaling, semantics, focus, system permissions and lifecycle binding |
 
 Flutter-owned preferences contain no credentials and grant no authority. Room/card organization remains owned by Core. Route controls must reflect actual connections and action capabilities, not brand labels. Localization uses the shared `en-US`/`zh-CN` catalogs; IDs, arguments and outcomes stay English. Preserve unknown error codes and use a generic localized fallback instead of mapping them to success.
+
+## Real Meiju read-only startup
+
+After the [local connection probe](development/06-meiju-probe.md) saves an account,
+open the same absolute private profile directory with trusted startup configuration:
+
+```json
+{
+  "schema_version": "1.0",
+  "data_dir": "/absolute/private/meiju-profile",
+  "adapter": "midea.meiju",
+  "allow_mock_writes": false
+}
+```
+
+Use separate directories for Mock development and real accounts. Version 1.0 hosts
+reject the added `adapter` field; an upgraded library is required for this mode.
+Existing startup objects without `adapter` keep Mock behavior. The six C symbols,
+22 request methods, JSON envelope version 1.0 and SQLite schema 3 are unchanged.
+No credentials belong in startup JSON or `homeverb_call`.
+
+Use `list_device_cards` for local cards, explicit `discover` to retrieve saved
+account inventories, `describe_device` for component-scoped read properties, and
+`read_state` with `connection: "cloud"`. Cache reads remain local. Complete empty
+inventory does not delete cards. Partial retrieval preserves old cards and returns
+`MIDEA_INVENTORY_PARTIAL`; conflicting historical/current cross-account bindings
+return `DEVICE_IDENTITY_CONFLICT`. No implicit reconciliation is available.
+
+Only the six [observed model/family pairs](compatibility.md#observed-cloud-read-models)
+are experimental; other models remain visible as unsupported. There are no real
+actions or writable properties. Cloud observations have no proven source timestamp
+and remain stale, including after a successful live request. Show them as recent
+cloud responses with unknown freshness, not as verified physical state.
+
+On October 15, 2026 the built Linux C ABI opened this mode, preserved existing
+preferences on discovery, described six real devices, and read/cached all seven
+components through schema-validated responses. No appliance controls were sent.
+The automated suite separately checks empty-account startup/discovery, invalid
+mode/grant/scenario combinations, lifecycle gating and closed handles without
+vendor calls. Mobile secure stores and Android/iOS packaging remain unimplemented.
 
 ## Next native phase: account connection
 
@@ -113,6 +153,6 @@ cargo test -p homeverb-host --test native_contract --offline --locked
 .venv/bin/python scripts/verify_native_contract.py
 ```
 
-The native suite calls all 22 catalog methods, checks their schemas, verifies closed-field rejection, null success, pre-admission errors, composite/batch results, all execution outcomes, cancellation, foreground gating and closed handles. It also validates the saved examples. `--write-examples` regenerates those examples only from a successful fictional run; review and commit the changes together with the contract. Existing full MVP tests still cover execution and persistence behavior.
+The native suite calls all 22 catalog methods, checks their schemas, verifies closed-field rejection, null success, pre-admission errors, composite/batch results, all execution outcomes, cancellation, foreground gating and closed handles. It also validates the saved examples and Meiju startup guards without a live account. `--write-examples` regenerates those examples only from a successful fictional run; review and commit the changes together with the contract. Existing full MVP tests still cover execution and persistence behavior.
 
 This is Linux native verification. Dart FFI allocation, worker scheduling, mobile library packaging, secure stores, system-browser lifecycle, and physical-phone behavior must be tested in the Flutter worktree. No Flutter build has been run for this delivery.

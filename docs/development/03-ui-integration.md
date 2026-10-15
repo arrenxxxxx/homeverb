@@ -10,7 +10,7 @@ Start new Flutter work against the [versioned native UI contract](../native-ui-c
 
 Build `homeverb-ffi`. The C declarations are in [homeverb.h](../../crates/ffi/include/homeverb.h). Linux produces `target/debug/libhomeverb_ffi.so`. A native UI loads the library in its own process.
 
-1. Call `homeverb_open` with trusted startup configuration: `schema_version`, an absolute private `data_dir`, and `allow_mock_writes`. The returned query envelope contains `data.handle`.
+1. Call `homeverb_open` with trusted startup configuration: `schema_version`, an absolute private `data_dir`, and `allow_mock_writes`. Optional `adapter` defaults to `homeverb.mock`; `midea.meiju` selects read-only saved-account access and requires false Mock write permission. The returned query envelope contains `data.handle` and the selected adapter.
 2. Call `homeverb_call` on a worker thread with a unique `operation_id`. Each returned UTF-8 JSON string must be freed exactly once with `homeverb_string_free`.
 3. On backgrounding, immediately call `homeverb_set_foreground(handle, false)`. This rejects new operations and cancels active work. Returning to the foreground enables explicit new calls, without automatic refresh.
 4. Use `homeverb_cancel` for an individual operation. Call `homeverb_close` when the host closes. Forced termination cannot guarantee a callback; reopen and inspect recorded outcomes.

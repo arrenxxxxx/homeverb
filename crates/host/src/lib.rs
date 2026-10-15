@@ -19,6 +19,20 @@ pub fn open_accounts(directory: &Path) -> Result<homeverb_core::AccountVault> {
     Ok(homeverb_core::AccountVault::new(store, secrets))
 }
 
+/// Compose the real read-only adapter without loading credentials or contacting the provider.
+/// Account connection is a separate trusted native operation; there are no write grants.
+pub fn open_meiju_read_only(directory: &Path) -> Result<Core> {
+    let store = Arc::new(SqliteStore::open(directory)?);
+    let vault = Arc::new(open_accounts(directory)?);
+    let clock = Arc::new(SystemClock);
+    let adapter = Arc::new(homeverb_midea::MeijuAdapter::new(
+        vault,
+        Arc::new(homeverb_midea::MeijuHttps),
+        clock.clone(),
+    ));
+    Ok(Core::new(store, vec![adapter], clock, Policy::default()))
+}
+
 pub fn open_mock(directory: &Path, scenario: Scenario, allow_writes: bool) -> Result<Core> {
     let store = Arc::new(SqliteStore::open(directory)?);
     let clock = Arc::new(SystemClock);

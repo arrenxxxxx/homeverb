@@ -12,7 +12,7 @@
 
 Brand names express user interest, not protocol boundaries. `midea-local` and SmartThings CLI provide protocol/API references, but do not prove native authentication, mobile embedding, or model support in this project. [R5 and R6](references.md)
 
-The owner selected Midea/Hualing air conditioners, dishwashers, and refrigerators on October 15, 2026, with automatic retrieval of existing Meiju-bound devices after authorization and daily cloud control at home or away. The [integration guide](development/05-midea.md) pins separate cloud and LAN sources. Source research is sufficient to start offline work; it does not establish HomeVerb support. Refrigerator writes are absent from the inspected LAN implementation, while cloud mappings declare compartment settings. Neither a mapping nor a dishwasher message class proves a verified model-specific action. A model-scoped read-only Meiju adapter is now available through the explicit developer probe; standard C ABI startup remains Mock.
+The owner selected Midea/Hualing air conditioners, dishwashers, and refrigerators on October 15, 2026, with automatic retrieval of existing Meiju-bound devices after authorization and daily cloud control at home or away. The [integration guide](development/05-midea.md) pins separate cloud and LAN sources. Source research is sufficient to start offline work; it does not establish HomeVerb support. Refrigerator writes are absent from the inspected LAN implementation, while cloud mappings declare compartment settings. Neither a mapping nor a dishwasher message class proves a verified model-specific action. A model-scoped read-only Meiju adapter is available through the explicit developer probe and native API 1.1.0 startup selection; omitted selection remains Mock.
 
 `homeverb-midea` now implements the Meiju home/appliance inventory protocol behind an injected read transport, verified with synthetic responses. Synthetic protocol coverage is supplemented by the scoped live evidence below; full account/model/physical acceptance remains pending. Existing native API version 1.0.0 and Mock behavior are unchanged. See [ADR-0020](adr/0020-midea-cloud-inventory.md).
 
@@ -66,8 +66,15 @@ six cards and read seven component snapshots through Core with zero failures.
 Every observation remains stale. Unknown/missing/mismatched models stay visible as
 unsupported without read requests or actions. Complete discovery checks current
 and historical protected bindings across accounts and refuses ambiguous duplicates.
-Partial retrieval preserves existing cards. This phase adds no controls, public
-native methods, C ABI startup mode or SQLite migration.
+Partial retrieval preserves existing cards.
+
+Native API 1.1.0 subsequently adds optional startup `adapter` selection. Existing
+startup objects preserve Mock behavior; explicit `midea.meiju` opens saved-account
+read-only access and rejects Mock write grants/fault scenarios. Version 1.0 hosts
+reject the new startup field. The six C symbols, 22 request methods and SQLite
+schema 3 are unchanged. A live Linux C ABI run described six devices, read/cached
+seven components and preserved existing preferences. No UI login method, controls,
+mobile secure store or physical verification follows from this host integration.
 
 ## Status definitions
 

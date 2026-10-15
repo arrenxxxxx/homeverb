@@ -1285,7 +1285,10 @@
                   "minimum": 1
                 },
                 "adapter": {
-                  "const": "homeverb.mock"
+                  "enum": [
+                    "homeverb.mock",
+                    "midea.meiju"
+                  ]
                 }
               },
               "required": [

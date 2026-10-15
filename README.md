@@ -4,7 +4,7 @@
 
 HomeVerb is the owner-approved project name; `homeverb` is the executable and repository name.
 
-> **Status: 0.2.0 Mock MVP.** The Rust Core, persistent fictional appliance, CLI, read-only local MCP, and native UI bridge are implemented. No real-device adapter is implemented or physically verified. Android/iOS packaging and visual UI are separate work.
+> **Status: 0.2.0 Mock MVP.** The Rust Core, persistent fictional appliance, CLI, read-only local MCP, and native UI bridge are implemented. An experimental Meiju adapter has read six actual appliances through Core and the native bridge; physical verification and controls remain pending. Android/iOS packaging and visual UI are separate work.
 
 ## Run the MVP
 
@@ -32,7 +32,7 @@ This exits with code 11. Refresh state to inspect the result; do not blindly res
 
 - Capability-driven validation, device/component/argument/route-scoped low-risk grants, shared deadlines, cancellation, and timestamped verification.
 - SQLite metadata/cache/execution journal, cross-process device locks, and request-ID replay protection.
-- A bounded Linux Secret Service library and native account vault with persisted profile/account references, leased session updates, redacted secret buffers, and no plaintext fallback. A native Meiju login/read client is synthetic-tested; protected connection and automatic inventory are available through a [local read-only probe](docs/development/06-meiju-probe.md). One real mainland account has passed login/inventory and saved-session refresh; production host integration, model support and mobile stores remain pending.
+- A bounded Linux Secret Service library and native account vault with persisted profile/account references, leased session updates, redacted secret buffers, and no plaintext fallback. A native Meiju login/read client is synthetic-tested; protected connection and automatic inventory are available through a [local read-only probe](docs/development/06-meiju-probe.md). One real mainland account has passed login/inventory and saved-session refresh; six exact model mappings now support read-only Core/native access. UI account methods, physical model acceptance and mobile stores remain pending.
 - Local rooms, aliases, favorites, and card ordering through Core, CLI, and the native UI bridge; rediscovery preserves preferences.
 - Schema-1/2 migration to schema 3 with a consistent backup, bounded detailed receipts, and retained request IDs that prevent replay after history is retired.
 - Explicit local diagnostic previews with allowlisted fields and bounded receipt summaries, available through CLI and the native UI bridge.
@@ -45,7 +45,7 @@ This exits with code 11. Refresh state to inspect the result; do not blindly res
 
 ## Boundaries
 
-Each host owns its Core instance. No HA, NAS, project backend, daemon, relay, background polling, cloud sync, or remote HTTP MCP is required or implemented. A future real adapter may contact a vendor cloud directly only when native-client authentication is viable. Mock success does not establish device compatibility or mobile support.
+Each host owns its Core instance. No HA, NAS, project backend, daemon, relay, background polling, cloud sync, or remote HTTP MCP is required or implemented. The experimental Meiju adapter contacts the vendor cloud directly through the owner-admitted native flow. Mock success does not establish device compatibility or mobile support.
 
 ## Develop progressively
 

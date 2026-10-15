@@ -27,6 +27,13 @@
         "partial",
         "correlated-completion"
       ]
+    },
+    "adapter": {
+      "enum": [
+        "homeverb.mock",
+        "midea.meiju"
+      ],
+      "default": "homeverb.mock"
     }
   },
   "required": [
@@ -35,5 +42,29 @@
     "allow_mock_writes"
   ],
   "additionalProperties": false,
-  "description": "Trusted Mock startup only. data_dir must be an absolute private OS path. scenario defaults to normal."
+  "description": "Trusted native startup. data_dir must be an absolute private OS path. adapter defaults to homeverb.mock; scenario defaults to normal. midea.meiju uses saved accounts for read-only cloud access and rejects Mock grants or fault scenarios. Opening never authenticates or discovers.",
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "adapter": {
+            "const": "midea.meiju"
+          }
+        },
+        "required": [
+          "adapter"
+        ]
+      },
+      "then": {
+        "properties": {
+          "allow_mock_writes": {
+            "const": false
+          },
+          "scenario": {
+            "const": "normal"
+          }
+        }
+      }
+    }
+  ]
 }

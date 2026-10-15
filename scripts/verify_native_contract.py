@@ -7,6 +7,7 @@ import argparse
 import copy
 import ctypes
 import json
+from pathlib import Path
 import tempfile
 import threading
 import time
@@ -27,7 +28,7 @@ def main():
     responses = {name: validator('native-response', name) for name in [*api['methods'], 'open']}
     query_error = validator('native-response', 'query_error')
     info_example = {'schema_version': '1.0', 'data': copy.deepcopy(api), 'warnings': [], 'error': None}
-    info_example['data']['api_version'] = '1.1.0'
+    info_example['data']['api_version'] = '1.2.0'
     info_example['data']['methods']['future_query'] = {'response_kind': 'query'}
     responses['get_api_info'].validate(info_example)
     info_example['data']['api_version'] = '2.0.0'
@@ -72,13 +73,16 @@ def main():
         examples.append({'request': request, 'response': result})
         return result
 
-    def open_host(directory, scenario='normal', allow=True):
+    def open_host(directory, scenario='normal', allow=True, adapter=None):
         config = {'schema_version': '1.0', 'data_dir': directory,
                   'allow_mock_writes': allow, 'scenario': scenario}
+        if adapter is not None:
+            config['adapter'] = adapter
         open_schema.validate(config)
         result = decode(library.homeverb_open(json.dumps(config).encode()))
         responses['open'].validate(result)
         assert result['error'] is None, result
+        assert result['data']['adapter'] == (adapter or 'homeverb.mock')
         return result['data']['handle']
 
     def command(identifier, **changes):
@@ -201,6 +205,40 @@ def main():
         finally:
             library.homeverb_close(handle)
 
+    # Empty real-host startup/discovery needs neither a credential nor vendor traffic.
+    # Keep these cases out of fictional Mock device examples.
+    with tempfile.TemporaryDirectory(prefix='homeverb-ui-meiju-') as directory:
+        handle = open_host(directory, allow=False, adapter='midea.meiju')
+        try:
+            assert not (Path(directory) / 'mock-appliance.sqlite3').exists()
+            for method in ['list_devices', 'list_device_cards', 'discover']:
+                result = raw(handle, envelope(method))
+                responses[method].validate(result)
+                assert result['error'] is None and result['data'] == []
+            library.homeverb_set_foreground(handle, False)
+            result = raw(handle, envelope('discover'))
+            query_error.validate(result)
+            assert result['error']['code'] == 'HOST_BACKGROUND'
+        finally:
+            library.homeverb_close(handle)
+        assert raw(handle, envelope('list_devices'))['error']['code'] == 'HOST_CLOSED'
+
+    for fields in [
+        {'adapter': 'unknown'}, {'adapter': None},
+        {'adapter': 'midea.meiju', 'allow_mock_writes': True},
+        {'adapter': 'midea.meiju', 'scenario': 'lost-ack'},
+        {'adapter': 'midea.meiju', 'password': 'FICTIONAL-REFUSED'},
+    ]:
+        with tempfile.TemporaryDirectory(prefix='homeverb-ui-invalid-start-') as directory:
+            private = Path(directory) / 'must-not-create'
+            config = {'schema_version': '1.0', 'data_dir': str(private),
+                      'allow_mock_writes': False, **fields}
+            assert not open_schema.is_valid(config), config
+            result = decode(library.homeverb_open(json.dumps(config).encode()))
+            query_error.validate(result)
+            assert result['error']['code'] == 'INVALID_ARGUMENT'
+            assert not private.exists(), 'Invalid startup must fail before profile creation.'
+
     example_path = ROOT / 'packages/native-contract/examples.json'
     if args.write_examples:
         example_path.write_text(json.dumps({'api_version': api['api_version'], 'cases': examples}, indent=2) + '\n')
@@ -211,7 +249,7 @@ def main():
         responses[case['request']['request']['method']].validate(case['response'])
     assert {case['request']['request']['method'] for case in saved['cases']} == set(api['methods'])
     print(f"PASS: {len(api['methods'])} native methods; {len(examples)} live examples; closed-field, error, outcome, and lifecycle checks.")
-    print('Mock Linux ABI evidence only; no Flutter/mobile or physical-device verification.')
+    print('Mock and empty Meiju startup verified on Linux; no live accounts, Flutter/mobile or physical-device verification in this suite.')
 
 
 if __name__ == '__main__':
