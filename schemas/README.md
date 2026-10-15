@@ -27,3 +27,10 @@ Counterexamples include verified outcomes without evidence, retryable unknown wr
 Batch schemas embed the existing Command/CommandResult definitions for offline self-contained validation. `validate_contracts.py` checks exact parity, with recursive execution references rebased into the batch schema. Update these definitions together when their underlying contracts change. Schema validation cannot prove the batch's preflight, identity uniqueness, shared budget, or concurrency behavior; integration tests cover those rules.
 
 Native schemas reference shared definitions using `urn:homeverb:schema:<name>`. Resolve them with [native_contract.py](../scripts/native_contract.py), which registers only local files and rejects external retrieval. Run `python3 scripts/verify_native_contract.py` after building the native library; it validates actual method responses and the shared examples. The response file is a definition bundle, not a catch-all root validator. See the [Flutter contract](../docs/native-ui-contract.md).
+
+The Meiju membership correction keeps existing response fields. The shared receipt
+description and [not-listed fixture](../examples/command-result.meiju-not-listed.json)
+document a failed/not-sent outcome. Schema validation does not prove inventory
+membership; the account lease and protected payload enforce it. Native account
+examples include both membership errors, and negative fixtures reject caller
+membership claims and evidence-free promotion to verified.

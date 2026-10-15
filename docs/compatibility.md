@@ -263,3 +263,26 @@ outcomes and SQLite schema 4 are unchanged. Older libraries reject the new field
 negotiate API 1.9 before supplying it. Synthetic tests cover exact fields, scope,
 identity, immutable permissions, uncertainty, replay and lifecycle behavior. No
 household action was sent. See [ADR-0034](adr/0034-scoped-meiju-ac-fan-control.md).
+
+## Inventory membership correction 1.9.1
+
+Complete Meiju retrieval now records protected membership separately from retained
+historical bindings. Missing targets refuse new reads/controls before transmission;
+partial and failed retrieval preserve prior membership. Same-identity reappearance
+restores admission without replacing IDs or local preferences. This is synthetic
+account/Core/native evidence, not tested physical revocation behavior.
+
+Version 1 protected payloads remain readable with unconfirmed membership; an
+explicit complete refresh establishes it. Subsequent protected updates write
+version 2, which older libraries refuse. No downgrade/reset or live-profile
+migration was performed. Public response shapes, 30 methods, seven C functions
+and SQLite schema 4 stay unchanged. New localized errors are documented in the
+[native handoff](native-ui-contract.md#missing-devices-and-legacy-account-inventory).
+No public online-state field, background refresh or new control is introduced.
+
+Local validation for this correction passed: 256 Rust workspace tests (two explicit
+system probes ignored), Clippy with warnings denied, formatting/build checks,
+24 Mock runtime cases, the 30-method/50-example Linux ABI suite, 23 Python tests,
+five presentation tests, and docs/contracts/repository checks. The Android arm64
+AAR was rebuilt and passed export/archive/16 KiB alignment checks. No remote CI,
+Flutter/APK, physical-phone, actual Keystore or appliance test was performed.

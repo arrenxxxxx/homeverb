@@ -1,6 +1,6 @@
 # HomeVerb native contract
 
-Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.9.0 has 30 callable JSON methods and one separate protected account-connection function; the JSON envelope schema is 1.0.
+Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.9.1 has 30 callable JSON methods and one separate protected account-connection function; the JSON envelope schema is 1.0.
 
 - [api.json](api.json) is compiled into the `get_api_info` response.
 - [examples.json](examples.json) contains fictional requests and actual Mock native responses, including failures and lifecycle states. It is preview/test data, never a production device database.

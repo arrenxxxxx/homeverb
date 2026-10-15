@@ -20,6 +20,7 @@ Every device, account, timestamp, and result here is fictional data, not physica
 | [command-result.storage-failure.json](command-result.storage-failure.json) | Preserved verification after a storage error; remaining item not sent |
 | [command-result.retired.json](command-result.retired.json) | Retired request ID rejected without another send |
 | [command-result.policy-denied.json](command-result.policy-denied.json) | Unauthorised command rejected before transmission |
+| [command-result.meiju-not-listed.json](command-result.meiju-not-listed.json) | Retained device refused before transmission after complete inventory omission |
 | [room.json](room.json) | Local room with a stable ID and position |
 | [room-assignment.json](room-assignment.json) | Fictional selection moved to one local room atomically |
 | [device-preferences.json](device-preferences.json) | Local alias, room assignment, favorite, and position |

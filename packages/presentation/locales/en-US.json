@@ -113,5 +113,7 @@
   "vendor.midea.ac.wind_speed.60": "Medium",
   "vendor.midea.ac.wind_speed.80": "High",
   "vendor.midea.ac.wind_speed.100": "Full",
-  "vendor.midea.ac.wind_speed.102": "Auto"
+  "vendor.midea.ac.wind_speed.102": "Auto",
+  "error.MIDEA_DEVICE_NOT_LISTED": "This device was missing from the last complete platform list. Refresh the account before trying again.",
+  "error.MIDEA_INVENTORY_REQUIRED": "Refresh this platform account to confirm its device list before reading or controlling devices."
 }

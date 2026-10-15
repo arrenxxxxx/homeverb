@@ -156,6 +156,7 @@ struct Wire {
     control_code: AtomicI32,
     homes_code: AtomicI32,
     extra_device: AtomicBool,
+    empty_inventory: AtomicBool,
     delay: Mutex<Option<CloudEndpoint>>,
     started: tokio::sync::Notify,
     resume: tokio::sync::Notify,
@@ -171,6 +172,7 @@ impl Default for Wire {
             control_code: AtomicI32::new(0),
             homes_code: AtomicI32::new(0),
             extra_device: AtomicBool::new(false),
+            empty_inventory: AtomicBool::new(false),
             delay: Mutex::new(None),
             started: tokio::sync::Notify::new(),
             resume: tokio::sync::Notify::new(),
@@ -232,6 +234,11 @@ impl CloudTransport for Wire {
             && self.extra_device.load(Ordering::Relaxed)
         {
             data["homeList"][0]["roomList"][0]["applianceList"].as_array_mut().unwrap().push(json!({"applianceCode":"880000000000003","type":"AC","productModel":"KFR-35G/WF2"}));
+        }
+        if request.endpoint() == CloudEndpoint::HomeAppliances
+            && self.empty_inventory.load(Ordering::Relaxed)
+        {
+            data["homeList"][0]["roomList"][0]["applianceList"] = json!([]);
         }
         Ok(bytes(
             json!({"code":code,"data":data,"msg":"PRIVATE-PROVIDER-MESSAGE"}),
@@ -770,6 +777,53 @@ fn power_command(device: &str, state: bool) -> Value {
     json!({"schema_version":"1.0","request_id":Uuid::new_v4().to_string(),
         "device_id":device,"component_id":"main","capability":"power","action":"set",
         "arguments":{"state":state},"connection":"cloud","timeout_ms":1000,"wait_for":"verified"})
+}
+
+#[tokio::test]
+async fn complete_empty_refresh_preserves_cards_and_reports_unsent_membership_refusals() {
+    let mut f = Fixture::new();
+    let connected = f.connect(None).await;
+    let account = connected["data"]["account"]["id"].as_str().unwrap();
+    let device = f
+        .store
+        .devices()
+        .unwrap()
+        .into_iter()
+        .find(|d| d.device.model == "KFR-35G/WF2")
+        .unwrap()
+        .device
+        .id;
+    f.reopen_with_power_grants(&[MeijuPowerGrant {
+        device_id: device.clone(),
+        state: false,
+    }]);
+    f.refresh(account).await;
+    let cards = f.call(json!({"method":"list_device_cards"})).await;
+    f.wire.empty_inventory.store(true, Ordering::Relaxed);
+    let refreshed = f.refresh(account).await;
+    assert_eq!(refreshed["data"]["retrieval"]["status"], "complete");
+    assert_eq!(refreshed["data"]["retrieval"]["device_ids"], json!([]));
+    assert_eq!(f.call(json!({"method":"list_device_cards"})).await, cards);
+    let calls = f.calls();
+    let read = f
+        .call(json!({"method":"read_state", "device":device,
+        "component":"main", "connection":"cloud", "cached":false}))
+        .await;
+    validate_response(&read, "query_error");
+    assert_eq!(read["error"]["code"], "MIDEA_DEVICE_NOT_LISTED");
+    let refused = f
+        .call(json!({"method":"execute", "command":power_command(&device, false)}))
+        .await;
+    assert_eq!(refused["status"], "failed");
+    assert_eq!(refused["error"]["code"], "MIDEA_DEVICE_NOT_LISTED");
+    assert_eq!(refused["attempts"][0]["phase"], "not_sent");
+    let schema: Value =
+        serde_json::from_str(include_str!("../../../schemas/command-result.schema.json")).unwrap();
+    jsonschema::validator_for(&schema)
+        .unwrap()
+        .validate(&refused)
+        .unwrap();
+    assert_eq!(f.calls(), calls);
 }
 
 #[tokio::test]

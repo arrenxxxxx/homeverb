@@ -160,3 +160,19 @@ Caller-supplied command identifiers are nonblank and bounded to 256 UTF-8 bytes.
 Database failure before transmission prevents sending. Infrastructure failures after acceptance or verification preserve the strongest known outcome. A failed snapshot save cannot erase already obtained verification evidence. For a composite, any storage failure stops later writes and records remaining items as `failed` / `NOT_EXECUTED`, with no attempts. Parent and child receipts retain known results even if final persistence fails. Verified, unknown, or partial receipts record infrastructure errors in `warnings`; their existing evidence, uncertainty, and item results remain intact. An existing rejection, cancellation, or skipped-item error is also preserved, with the subsequent storage error added as a warning. A failed journal update may leave an earlier conservative stored outcome. Never replay or compensate to repair local storage.
 
 CLI and native sessions pass their existing operation into Core. Starting execution never extends the earlier host deadline; a shorter command budget can only reduce it.
+
+## Meiju inventory membership admission
+
+Under [ADR-0035](adr/0035-meiju-inventory-membership.md), each live bound read or
+control checks protected membership while holding the account lease through the
+network operation. A complete inventory marks missing historical bindings absent;
+partial/failed retrieval preserves established membership. Identity records and
+public descriptors remain retained. `MIDEA_DEVICE_NOT_LISTED` or
+`MIDEA_INVENTORY_REQUIRED` fails before transmission without implicit enumeration,
+login, fallback or retry. Reappearance preserves IDs and does not replay receipts.
+
+Membership is never copied back from descriptors. Late publication cannot undo a
+newer protected exclusion. Static plans and cached reads remain local and do not
+check membership; execution can therefore refuse a previously valid plan. This
+is last-retrieval evidence, not an online signal or current authorization proof.
+No change is made to accepted/unknown writes, existing receipt lookup or journaling.
