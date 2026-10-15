@@ -102,5 +102,8 @@
   "account.recovery.complete": "Saved authorization recovered and devices loaded.",
   "account.recovery.pending": "Recovery is incomplete. Existing local account data has been kept.",
   "account.recovery.retrievalFailed": "The account is stored, but devices could not be loaded. Review the retrieval error.",
-  "account.recovery.unrecoverable": "The pending authorization is missing or expired. Recovery cannot repair it. Removing and reconnecting this account is a separate action that loses its saved organization."
+  "account.recovery.unrecoverable": "Saved account data is missing or damaged. Recovery and sign-in cannot safely restore its device bindings. Removing and reconnecting is a separate action that loses its saved organization.",
+  "account.recovery.expired": "Saved authorization has expired. Sign in to the original account to retain existing device organization when its saved account data is intact.",
+  "account.reauthorization.action": "Sign in to the original account",
+  "account.reauthorization.confirm": "Sign in again to this platform account? Existing rooms and device names will be kept only if the saved account identity matches. Device control permissions will stay the same."
 }

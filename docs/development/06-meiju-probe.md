@@ -134,7 +134,10 @@ API 1.2 adds protected account connection and list/refresh methods; Flutter inpu
   review identity evidence. Never reset bindings to force a match.
 - `ACCOUNT_SESSION_UNCONFIRMED` / `SECRET_STORE_WRITE_UNKNOWN`: an interrupted or
   uncertain local mutation needs [explicit native recovery](../native-ui-contract.md#recover-interrupted-account-storage). The probe deliberately
-  does not delete/recreate accounts or automatically overwrite pending material.
+  does not delete/recreate accounts or automatically overwrite pending material. If
+  saved identity/bindings are intact but authorization expired, explicit
+  `connect --account-id <local-account-id>` can reauthorize that original account under
+  [ADR-0031](../adr/0031-pending-account-reauthorization.md); missing/corrupt material remains refused.
 - `RESOURCE_BUSY`: another explicit account operation owns the profile/account lease.
 
 Record only region, app version, device counts and fixed error codes for the initial

@@ -94,8 +94,10 @@ establish account, regional, mobile or physical-device support.
 a profile registration lock and checks secure-store access before login. With no
 explicit account it compares protected subjects in the same provider/region and
 reuses a unique exact match. An explicit account retains its lease through login
-and refuses a changed subject. Unconfirmed existing accounts fail before login;
-no reset, deletion or duplicate-account fallback is attempted.
+and refuses a changed subject. Without an explicit account ID, unconfirmed accounts fail before login. An explicitly
+selected pending account may use fresh same-subject login under [ADR-0031](../adr/0031-pending-account-reauthorization.md),
+after validating its protected identity/bindings and retaining the exact bytes for
+a post-login comparison. No reset, deletion or duplicate-account fallback is attempted.
 
 Successful login stores the session and then immediately retrieves/binds the
 inventory. `ConnectReport` separates account persistence from `retrieval`, which may

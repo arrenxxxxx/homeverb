@@ -23,6 +23,7 @@
       "maxLength": 80
     },
     "account_id": {
+      "description": "Explicit local account for same-subject reauthorization. API 1.8 permits pending credentials only with intact protected identity and unchanged saved bindings. Null never opts into pending-account recovery.",
       "anyOf": [
         {
           "type": "string",

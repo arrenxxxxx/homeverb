@@ -132,6 +132,8 @@ impl SecretStore for Secrets {
 
 struct Wire {
     subject: Mutex<String>,
+    token: Mutex<String>,
+    login_code: AtomicI32,
     calls: Mutex<Vec<CloudEndpoint>>,
     inventory_code: AtomicI32,
     control_code: AtomicI32,
@@ -145,6 +147,8 @@ impl Default for Wire {
     fn default() -> Self {
         Self {
             subject: Mutex::new("synthetic-login-001".into()),
+            token: Mutex::new("SYNTHETIC-TOKEN".into()),
+            login_code: AtomicI32::new(0),
             calls: Mutex::new(vec![]),
             inventory_code: AtomicI32::new(0),
             control_code: AtomicI32::new(0),
@@ -190,8 +194,8 @@ impl CloudTransport for Wire {
                     serde_json::from_str(include_str!("../../midea/tests/fixtures/login.json"))
                         .unwrap();
                 (
-                    0,
-                    json!({"mdata":{"accessToken":"SYNTHETIC-TOKEN"},"key":vector["wrapped_key"]}),
+                    self.login_code.load(Ordering::Relaxed),
+                    json!({"mdata":{"accessToken":*self.token.lock().unwrap()},"key":vector["wrapped_key"]}),
                 )
             }
             CloudEndpoint::Homes => (
@@ -901,3 +905,6 @@ mod removal;
 
 #[path = "meiju_accounts/recovery.rs"]
 mod recovery;
+
+#[path = "meiju_accounts/reauthorization.rs"]
+mod reauthorization;

@@ -1,4 +1,4 @@
-# Native UI contract 1.7
+# Native UI contract 1.8
 
 Status: implemented Linux native contract, October 15, 2026, with Mock, default read-only Meiju startup, protected account connection and scoped experimental AC power grants. Six real devices passed the native read path; phone packaging and complete provider/physical acceptance remain pending. See [ADR-0019](adr/0019-native-ui-contract.md).
 
@@ -16,7 +16,7 @@ The seven C functions in [homeverb.h](../crates/ffi/include/homeverb.h) remain t
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects saved-account cloud reads. `scenario` defaults to `normal`. Meiju requires `allow_mock_writes: false` and rejects any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms `homeverb.mock` or `midea.meiju`. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.7.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.8.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -415,8 +415,9 @@ Its data has `account`, `authentication: "succeeded"`, and `retrieval`:
 
 Top-level query errors mean no completed connection report is available. After
 `SECRET_STORE_WRITE_UNKNOWN` or interruption, reload local summaries before deciding
-what happened. Pending sessions require explicit `recover_account`; ordinary connect
-and refresh do not reset, delete or overwrite them. If inventory-binding storage becomes uncertain, the
+what happened. Pending sessions require explicit `recover_account` or the
+[scoped reauthorization flow](#reauthorize-a-pending-account) in API 1.8. Refresh and
+connection without an existing account ID do not reset or overwrite them. If inventory-binding storage becomes uncertain, the
 returned account state is pending. Even when authentication succeeded, callers must
 inspect `retrieval.error`; an outer `error: null` does not mean devices were loaded.
 Core validates the complete descriptor batch before storage, but a later storage
@@ -468,16 +469,48 @@ independently establish a new account subject. Summary authorization stays `not_
 
 If already stored, the request performs ordinary explicit refresh. `removing` accounts
 return `ACCOUNT_REMOVAL_PENDING`; missing/foreign account IDs are refused. Missing,
-malformed, changed or rejected credentials are never reset. A pending expired/missing
-session cannot be repaired with repeated recovery or ordinary reconnect: preserve the
-local data and explain the limitation. Removing that account and connecting again is
-a separate user-confirmed path that loses its old organization and grants.
+malformed, changed or rejected credentials are never reset. Repeated recovery cannot
+repair an expired session. API 1.8 allows explicit reauthorization of the original
+account when protected identity/bindings are intact. Missing/corrupt protected data
+remains refused; preserve local data and explain the limitation. Removing that
+account and connecting again is a separate user-confirmed path that loses its old
+organization and grants.
 
 Cancellation, deadline, backgrounding or close stops networking and leaves the last
 persisted credential state. Forced termination has no guaranteed callback. Reload local
 summaries after interruption; never run recovery automatically on startup or page open.
 Mock refuses the method, older hosts reject it, and live recovery/mobile acceptance
 remain unverified. No new C symbol or database migration is required.
+
+## Reauthorize a pending account
+
+API 1.8 extends the existing `homeverb_connect_account` function under
+[ADR-0031](adr/0031-pending-account-reauthorization.md). Require native version 1.8.0
+or later before offering this action for pending credentials. It uses the same
+protected input buffers and connection response; there is no new JSON method.
+
+On the selected account page, offer **Sign in to the original account** after
+expired recovery or as an explicit alternative to saved-session recovery. Explain
+that successful identity validation retains existing device organization. Supply
+that exact local UUID as `account_id` in the connection metadata; never substitute
+null or silently create a new account if reauthorization fails. A fresh password
+login is initiated only by this explicit submission.
+
+Native code validates the protected payload/session association before login,
+requires the newly authenticated subject to match it, and rereads the exact bytes
+before replacement. Missing, malformed or foreign material refuses before login;
+`ACCOUNT_IDENTITY_CONFLICT` refuses a different authenticated account. A changed
+entry during login returns `ACCOUNT_SESSION_UNCONFIRMED`. None permits reset or merge.
+
+An outer connection error provides no completed report: reload local account
+summaries. Uncertain storage or failed final metadata confirmation leaves pending;
+offer saved-session recovery rather than automatically submitting credentials again.
+After successful persistence, `authentication: succeeded` and stored credentials
+are independent of the nested inventory/publication result. Inspect both, as in the
+ordinary connection flow. Labels, IDs, rooms, aliases, favorites and existing grants
+remain; login does not broaden control permission. Cancellation/backgrounding follows
+the same foreground rules. Only synthetic login/account evidence exists for this
+extension; real reauthorization and mobile acceptance remain unverified.
 
 ## Verify the handoff
 

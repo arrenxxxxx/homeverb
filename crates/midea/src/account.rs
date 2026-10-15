@@ -358,6 +358,52 @@ impl MeijuAccount {
         self.save(&payload, operation).await
     }
 
+    /// Inspect identity for an explicit login without declaring the old session usable.
+    async fn reauthorization_material(&self, operation: &Operation) -> Result<SecretBytes> {
+        let bytes = self
+            .lease
+            .inspect_session(operation)
+            .await?
+            .ok_or_else(unconfirmed)?;
+        operation
+            .run(async {
+                Payload::decode(&bytes, self.record())?.cloud_session()?;
+                Ok(bytes)
+            })
+            .await
+    }
+
+    /// Replace only unchanged protected bindings after a fresh same-subject login.
+    async fn reauthorize(
+        &mut self,
+        original: &SecretBytes,
+        session: &MeijuSession,
+        operation: &Operation,
+    ) -> Result<()> {
+        let mut payload = operation
+            .run(async {
+                let payload = Payload::decode(original, self.record())?;
+                if payload.subject != session.subject().expose() {
+                    return Err(Error::new(
+                        "ACCOUNT_IDENTITY_CONFLICT",
+                        "The authorized provider identity differs from this local account.",
+                    ));
+                }
+                Ok(payload)
+            })
+            .await?;
+        let current = self.lease.inspect_session(operation).await?;
+        if current
+            .as_ref()
+            .is_none_or(|bytes| bytes.expose() != original.expose())
+        {
+            return Err(unconfirmed());
+        }
+        payload.session.zeroize();
+        payload.session = session.encode()?.expose().to_vec();
+        self.save(&payload, operation).await
+    }
+
     /// Return bindings in inventory order only after all new identity evidence is persisted.
     /// Missing entries never remove older bindings, even for a complete inventory.
     pub async fn bind_inventory(
@@ -599,14 +645,17 @@ pub async fn connect(
     let _registration = vault.lock_registration(operation).await?;
     vault.check_secure_storage(operation).await?;
     let mut selected = if let Some(id) = existing {
-        let account = MeijuAccount::open(vault.lease(id, operation).await?, operation).await?;
-        if account.record().region != "CN" {
+        let account = MeijuAccount {
+            lease: vault.lease(id, operation).await?,
+        };
+        if account.record().provider != PROVIDER || account.record().region != "CN" {
             return Err(Error::new(
                 "AUTH_FLOW_UNSUPPORTED",
                 "Only mainland Meiju is admitted.",
             ));
         }
-        Some(account)
+        let original = account.reauthorization_material(operation).await?;
+        Some((account, original))
     } else {
         None
     };
@@ -640,19 +689,18 @@ pub async fn connect(
             ));
         }
         if let Some(id) = matches.first() {
-            selected =
-                Some(MeijuAccount::open(vault.lease(*id, operation).await?, operation).await?);
+            let account = MeijuAccount::open(vault.lease(*id, operation).await?, operation).await?;
+            let original = account.reauthorization_material(operation).await?;
+            selected = Some((account, original));
         }
     }
-    let encoded = session.encode()?;
     let mut account = match selected {
-        Some(mut account) => {
-            account
-                .replace_session(session.subject(), &encoded, operation)
-                .await?;
+        Some((mut account, original)) => {
+            account.reauthorize(&original, &session, operation).await?;
             account
         }
         None => {
+            let encoded = session.encode()?;
             MeijuAccount::create(vault, "CN", &label, session.subject(), &encoded, operation)
                 .await?
         }

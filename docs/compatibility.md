@@ -203,5 +203,20 @@ accounts use ordinary refresh. Synthetic host tests cover uncertain initial/map
 writes, preserved organization, unchanged-secret recovery, rejected/partial reads,
 corrupt/foreign material, exact-byte races, SQLite failures and host lifecycle.
 C ABI guards use fictional metadata without a keyring. Seven C symbols, SQLite
-schema 4 and protected payload version 1 remain unchanged; live recovery, expired
-pending-session reauthorization and mobile acceptance remain unverified/unimplemented.
+schema 4 and protected payload version 1 remain unchanged. This phase did not
+implement expired pending-session reauthorization; the API 1.8 extension is below.
+Live recovery and mobile acceptance remain unverified.
+
+
+## Pending Meiju reauthorization contract 1.8
+
+API 1.8.0 permits protected fresh login for an explicitly selected pending account
+with intact saved identity/bindings. Exact subject matching and unchanged-byte
+checks precede replacement. Missing/corrupt material and unselected pending accounts
+remain refused. Synthetic host tests cover success, preserved organization/grants,
+identity rejection, failed login, byte races, persistence uncertainty and lifecycle.
+Actual ABI tests cover input guards and clearing, not successful provider login.
+The 30 methods, seven C symbols, JSON shapes, SQLite schema 4 and protected payload
+version 1 remain unchanged. Older libraries refuse pending reauthorization; check
+the version before enabling it. Real identity stability, mobile and physical
+acceptance remain unverified. See [ADR-0031](adr/0031-pending-account-reauthorization.md).

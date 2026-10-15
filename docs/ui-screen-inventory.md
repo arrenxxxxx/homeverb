@@ -602,8 +602,10 @@ credential persistence. A pending account offers Recover Saved Authorization usi
 `recover_account`, with finite progress/cancel and explicit failure/retry states.
 Inspect both the returned credential state and retrieval result; stored credentials
 with failed publication are not completed card loading. Recovery preserves known
-organization and sends no controls or new login. Missing/expired pending material
-stays pending; explain the limitation without an automatic reconnect/removal loop.
+organization and sends no controls or new login. API 1.8 additionally offers explicit Sign In to the Original Account through the
+protected connection function when saved identity/bindings are intact, including
+expired pending sessions. Missing/corrupt material stays pending; explain the
+limitation without an automatic reconnect/removal loop.
 This is a functional amendment, not newly rendered or visually verified atlas states.
 
 

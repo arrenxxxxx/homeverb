@@ -14,6 +14,8 @@ do not change account identity, credentials or write permissions. API 1.5 adds
 confirm the saved-device scope and render pending cleanup separately from success.
 API 1.7 adds [explicit saved-session recovery](../native-ui-contract.md#recover-interrupted-account-storage)
 for interrupted credential confirmation, with card retrieval and preserved bindings.
+API 1.8 permits [pending-account reauthorization](../native-ui-contract.md#reauthorize-a-pending-account)
+through the protected connection function when saved identity/bindings remain intact.
 
 Start new Flutter work against the [versioned native UI contract](../native-ui-contract.md): it provides the callable catalog, offline request/response schemas, actual Mock examples, page-to-interface coverage, and unavailable-feature boundaries. Call `get_api_info` after opening the native host. Do not derive an interface solely from screenshots or issue undocumented requests.
 

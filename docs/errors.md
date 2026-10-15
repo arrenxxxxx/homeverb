@@ -25,7 +25,7 @@
 | ACCOUNT_REMOVAL_PENDING | Account cleanup is incomplete; ordinary credential use or late publication is refused | Finish explicit local cleanup; never reconnect or restore the old account automatically |
 | ACCOUNT_SCOPE_CHANGED | The device set differs from the reviewed removal scope | Reload local details and obtain a new user confirmation before removal |
 | ACCOUNT_REMOVAL_UNSUPPORTED | A linked card has routes outside this account/provider | Preserve all data; shared-route detachment needs a separate supported identity flow |
-| ACCOUNT_SESSION_UNCONFIRMED | Credential persistence was not finalized, recovery bytes differ, or protected account state is invalid | Offer explicit Meiju saved-session recovery; preserve pending data when validation fails, never reset or rewrite automatically |
+| ACCOUNT_SESSION_UNCONFIRMED | Credential persistence was not finalized, recovery bytes differ, or protected account state is invalid | Offer saved-session recovery or explicit same-account reauthorization when protected identity is intact; preserve data on validation failure, never reset automatically |
 | ACCOUNT_IDENTITY_CONFLICT | Reauthorization identifies a different provider account | Keep the original session and device bindings; use the original account or a separately reviewed new-account flow |
 | SECRET_STORE_UNAVAILABLE | Secure credential storage unavailable | Fail explicitly; no plaintext fallback |
 | SECRET_STORE_LOCKED | The default collection or matching item is locked before mutation | Unlock it through the operating system; HomeVerb does not call Unlock |
@@ -164,6 +164,9 @@ must not automatically repeat cleanup or appliance commands.
 state and nested retrieval error. `AUTH_REQUIRED`, `MIDEA_INVENTORY_PARTIAL`, malformed
 protected material or changed confirmation bytes leave pending material unconfirmed.
 A stored result with a publication error is distinct from a pending recovery failure.
-Missing/expired pending credentials cannot be repaired by automatic login or repeated
-recovery. Reload local metadata after interruption and preserve the account for a
-separately reviewed next action. No recovery error permits an appliance retry.
+Expired pending credentials may use explicit same-account reauthorization in API
+1.8 when protected identity/bindings remain intact. Missing/corrupt material cannot
+be repaired by login; preserve it. Changed protected bytes during login return
+`ACCOUNT_SESSION_UNCONFIRMED` without replacement; a different login subject returns
+`ACCOUNT_IDENTITY_CONFLICT`. Uncertain persistence uses the existing storage errors.
+Reload local metadata after interruption. No error permits automatic login or an appliance retry.
