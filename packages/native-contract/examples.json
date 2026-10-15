@@ -1,5 +1,5 @@
 {
-  "api_version": "1.6.0",
+  "api_version": "1.7.0",
   "cases": [
     {
       "request": {
@@ -12,7 +12,7 @@
       },
       "response": {
         "data": {
-          "api_version": "1.6.0",
+          "api_version": "1.7.0",
           "limits": {
             "max_active_operations": 8,
             "max_request_bytes": 1048576,
@@ -83,6 +83,9 @@
               "response_kind": "query"
             },
             "recent_executions": {
+              "response_kind": "query"
+            },
+            "recover_account": {
               "response_kind": "query"
             },
             "refresh_account": {
@@ -1817,7 +1820,7 @@
       },
       "response": {
         "data": {
-          "api_version": "1.6.0",
+          "api_version": "1.7.0",
           "limits": {
             "max_active_operations": 8,
             "max_request_bytes": 1048576,
@@ -1888,6 +1891,9 @@
               "response_kind": "query"
             },
             "recent_executions": {
+              "response_kind": "query"
+            },
+            "recover_account": {
               "response_kind": "query"
             },
             "refresh_account": {
@@ -2560,6 +2566,27 @@
           "removed_receipts": 4
         },
         "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-8",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "recover_account",
+          "account_id": "00000000-0000-4000-8000-000000000001"
+        }
+      },
+      "response": {
+        "data": null,
+        "error": {
+          "code": "AUTH_FLOW_UNSUPPORTED",
+          "message": "This host has no admitted account connection flow.",
+          "retryable": false
+        },
         "schema_version": "1.0",
         "warnings": []
       }

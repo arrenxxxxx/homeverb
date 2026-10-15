@@ -25,7 +25,7 @@
 | ACCOUNT_REMOVAL_PENDING | Account cleanup is incomplete; ordinary credential use or late publication is refused | Finish explicit local cleanup; never reconnect or restore the old account automatically |
 | ACCOUNT_SCOPE_CHANGED | The device set differs from the reviewed removal scope | Reload local details and obtain a new user confirmation before removal |
 | ACCOUNT_REMOVAL_UNSUPPORTED | A linked card has routes outside this account/provider | Preserve all data; shared-route detachment needs a separate supported identity flow |
-| ACCOUNT_SESSION_UNCONFIRMED | Credential persistence was not finalized, recovery bytes differ, or protected account state is invalid | Use trusted native validation/recovery or explicit reauthorization; do not reuse, reset or rewrite automatically |
+| ACCOUNT_SESSION_UNCONFIRMED | Credential persistence was not finalized, recovery bytes differ, or protected account state is invalid | Offer explicit Meiju saved-session recovery; preserve pending data when validation fails, never reset or rewrite automatically |
 | ACCOUNT_IDENTITY_CONFLICT | Reauthorization identifies a different provider account | Keep the original session and device bindings; use the original account or a separately reviewed new-account flow |
 | SECRET_STORE_UNAVAILABLE | Secure credential storage unavailable | Fail explicitly; no plaintext fallback |
 | SECRET_STORE_LOCKED | The default collection or matching item is locked before mutation | Unlock it through the operating system; HomeVerb does not call Unlock |
@@ -159,3 +159,11 @@ with a removed row count; a storage error rolls back that transaction. Cleared
 history uses the existing `REQUEST_RETIRED` outcome, while cleared cached reads use
 `CACHE_MISS` without a network fallback. Interrupted callers reload local views and
 must not automatically repeat cleanup or appliance commands.
+
+`recover_account` uses a query result with the selected account's current credential
+state and nested retrieval error. `AUTH_REQUIRED`, `MIDEA_INVENTORY_PARTIAL`, malformed
+protected material or changed confirmation bytes leave pending material unconfirmed.
+A stored result with a publication error is distinct from a pending recovery failure.
+Missing/expired pending credentials cannot be repaired by automatic login or repeated
+recovery. Reload local metadata after interruption and preserve the account for a
+separately reviewed next action. No recovery error permits an appliance retry.

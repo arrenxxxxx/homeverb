@@ -36,6 +36,9 @@ pub enum Request {
     RefreshAccount {
         account_id: uuid::Uuid,
     },
+    RecoverAccount {
+        account_id: uuid::Uuid,
+    },
     ListDevices {},
     Discover {},
     DescribeDevice {
@@ -295,6 +298,16 @@ impl Session {
                     .as_ref()
                     .ok_or_else(crate::accounts::unsupported)?;
                 let report = adapter.refresh_devices(account_id, &operation).await?;
+                Ok(json!(
+                    crate::accounts::publish(&self.core, report, "not_attempted", &operation).await
+                ))
+            }
+            Request::RecoverAccount { account_id } => {
+                let adapter = self
+                    .accounts
+                    .as_ref()
+                    .ok_or_else(crate::accounts::unsupported)?;
+                let report = adapter.recover_devices(account_id, &operation).await?;
                 Ok(json!(
                     crate::accounts::publish(&self.core, report, "not_attempted", &operation).await
                 ))

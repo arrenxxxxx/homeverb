@@ -75,7 +75,7 @@
   "error.AUTH_REQUIRED": "请重新连接此平台账号后继续。",
   "error.ACCOUNT_NOT_FOUND": "此本地账号已不可用，请重新加载账号列表。",
   "error.ACCOUNT_IDENTITY_CONFLICT": "当前授权的不是原平台账号，请重新连接原账号以保留设备绑定。",
-  "error.ACCOUNT_SESSION_UNCONFIRMED": "已保存的会话需要经过可信恢复，才能继续使用此账号。",
+  "error.ACCOUNT_SESSION_UNCONFIRMED": "已保存的授权需要恢复，请进入该平台账号进行恢复。",
   "error.MIDEA_RESPONSE_INVALID": "平台返回的数据格式暂不支持。",
   "error.MIDEA_REQUEST_REJECTED": "平台拒绝了请求。",
   "error.MIDEA_REQUEST_FAILED": "暂时无法获取平台数据。",
@@ -96,5 +96,11 @@
   "cleanup.cache.done": "已清除 {count} 条状态快照。",
   "cleanup.history.confirm": "清除详细操作历史（包括结果未确定的记录）？请求编号会保留以防重复执行，设备和状态缓存会保留。",
   "cleanup.history.done": "已清除 {count} 条操作回执。",
-  "cleanup.history.busy": "有操作仍在记录中，请等待完成后再重试清除历史。"
+  "cleanup.history.busy": "有操作仍在记录中，请等待完成后再重试清除历史。",
+  "account.recovery.action": "恢复已保存的授权",
+  "account.recovery.confirm": "使用此账号已保存的授权恢复连接并重新获取设备？已有房间和设备名称会保留。",
+  "account.recovery.complete": "已恢复保存的授权并获取设备。",
+  "account.recovery.pending": "恢复尚未完成，已有本地账号数据已保留。",
+  "account.recovery.retrievalFailed": "账号已保存，但设备获取失败，请查看获取失败的原因。",
+  "account.recovery.unrecoverable": "待恢复的授权已缺失或过期，无法通过恢复修复。移除后重新连接是另一个操作，会失去该账号原有的设备整理信息。"
 }

@@ -597,6 +597,16 @@ Visible content: Home account · h***@example.invalid; Region / Europe / Devices
 
 ### P10 — Reconnect needed
 
+API 1.7 amendment: distinguish expired confirmed authorization from interrupted
+credential persistence. A pending account offers Recover Saved Authorization using
+`recover_account`, with finite progress/cancel and explicit failure/retry states.
+Inspect both the returned credential state and retrieval result; stored credentials
+with failed publication are not completed card loading. Recovery preserves known
+organization and sends no controls or new login. Missing/expired pending material
+stays pending; explain the limitation without an automatic reconnect/removal loop.
+This is a functional amendment, not newly rendered or visually verified atlas states.
+
+
 [Rendered state](../output/prototypes/homeverb-window-light-v1/screens/P10.png) · Nested screen
 
 Same account detail with amber Sign-in needed / Your platform authorization has expired. Cached device count remains labelled Last known. Primary Reauthorize. Secondary View Devices and Remove From This Device. No other account auto-selection.

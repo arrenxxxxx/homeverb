@@ -6,8 +6,8 @@ use crate::{
     retrieve_inventory,
 };
 use homeverb_core::{
-    AccountLease, AccountRecord, AccountVault, Clock, CredentialRef, Operation, SecretBytes,
-    valid_account_id,
+    AccountLease, AccountRecord, AccountVault, Clock, CredentialRef, CredentialState, Operation,
+    SecretBytes, valid_account_id,
 };
 use homeverb_domain::{Connection, Device, Error, Result, Snapshot, Transport};
 use serde::{Deserialize, Serialize};
@@ -109,6 +109,23 @@ fn family_code(family: ApplianceFamily) -> u16 {
 }
 
 impl Payload {
+    fn decode(bytes: &SecretBytes, record: &AccountRecord) -> Result<Self> {
+        if bytes.expose().len() > MAX_RESPONSE_BYTES {
+            return Err(unconfirmed());
+        }
+        let payload: Self = serde_json::from_slice(bytes.expose()).map_err(|_| unconfirmed())?;
+        payload.validate(record)?;
+        Ok(payload)
+    }
+
+    fn cloud_session(&self) -> Result<MeijuSession> {
+        let session = MeijuSession::restore(&SecretBytes::new(self.session.clone()))?;
+        if session.subject().expose() != self.subject {
+            return Err(unconfirmed());
+        }
+        Ok(session)
+    }
+
     fn validate(&self, record: &AccountRecord) -> Result<()> {
         if self.version != 1
             || self.account_id != record.id
@@ -156,12 +173,69 @@ impl MeijuAccount {
                 "Only mainland Meiju is admitted.",
             ));
         }
-        let payload = self.load(operation).await?;
-        let session = MeijuSession::restore(&SecretBytes::new(payload.session.clone()))?;
-        if session.subject().expose() != payload.subject {
+        self.load(operation).await?.cloud_session()
+    }
+
+    /// Explicit recovery validates saved credentials with reads, never a login or control.
+    pub(crate) async fn recover(
+        lease: AccountLease,
+        transport: &dyn CloudTransport,
+        operation: &Operation,
+    ) -> ConnectReport {
+        let mut account = Self { lease };
+        let retrieval = account.recover_inventory(transport, operation).await;
+        ConnectReport {
+            account: account.record().clone(),
+            retrieval,
+        }
+    }
+
+    async fn recover_inventory(
+        &mut self,
+        transport: &dyn CloudTransport,
+        operation: &Operation,
+    ) -> Result<BoundInventory> {
+        if self.record().provider != PROVIDER || self.record().region != "CN" {
             return Err(unconfirmed());
         }
-        Ok(session)
+        if self.record().credential_state == CredentialState::Stored {
+            return self.retrieve(transport, operation).await;
+        }
+        let bytes = self
+            .lease
+            .inspect_session(operation)
+            .await?
+            .ok_or_else(|| {
+                Error::new(
+                    "AUTH_REQUIRED",
+                    "The account has no locally stored session.",
+                )
+            })?;
+        let session = operation
+            .run(async { Payload::decode(&bytes, self.record())?.cloud_session() })
+            .await?;
+        let reference = self.record().credential_ref;
+        let inventory =
+            retrieve_inventory(&session.reads(transport, reference), reference, operation).await?;
+        if !inventory.is_complete() {
+            if let Some(failure) = inventory
+                .failures
+                .iter()
+                .find(|failure| failure.error.code == "AUTH_REQUIRED")
+            {
+                return Err(failure.error.clone());
+            }
+            return Err(Error::new(
+                "MIDEA_INVENTORY_PARTIAL",
+                "Recovery requires complete cloud retrieval; the account remains unconfirmed.",
+            ));
+        }
+        self.lease.confirm_session(&bytes, operation).await?;
+        let bindings = self.bind_inventory(&inventory, operation).await?;
+        Ok(BoundInventory {
+            inventory,
+            bindings,
+        })
     }
 
     /// Explicit retrieval only. Keep partial failures and preserve existing bindings.
@@ -476,15 +550,7 @@ impl MeijuAccount {
     async fn load(&self, operation: &Operation) -> Result<Payload> {
         let bytes = self.lease.read_session(operation).await?;
         let payload = operation
-            .run(async {
-                if bytes.expose().len() > MAX_RESPONSE_BYTES {
-                    return Err(unconfirmed());
-                }
-                let payload: Payload =
-                    serde_json::from_slice(bytes.expose()).map_err(|_| unconfirmed())?;
-                payload.validate(self.record())?;
-                Ok(payload)
-            })
+            .run(async { Payload::decode(&bytes, self.record()) })
             .await?;
         operation.run(async { Ok(payload) }).await
     }

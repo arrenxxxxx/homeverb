@@ -292,6 +292,23 @@ impl MeijuAdapter {
         id: Uuid,
         operation: &Operation,
     ) -> Result<AccountDiscovery> {
+        self.reload_devices(id, false, operation).await
+    }
+
+    pub async fn recover_devices(
+        &self,
+        id: Uuid,
+        operation: &Operation,
+    ) -> Result<AccountDiscovery> {
+        self.reload_devices(id, true, operation).await
+    }
+
+    async fn reload_devices(
+        &self,
+        id: Uuid,
+        recover: bool,
+        operation: &Operation,
+    ) -> Result<AccountDiscovery> {
         self.accounts(operation)
             .await?
             .into_iter()
@@ -306,12 +323,17 @@ impl MeijuAdapter {
             let _registration = self.vault.lock_registration(operation).await?;
             let lease = self.vault.lease(id, operation).await?;
             let record = lease.record().clone();
-            match MeijuAccount::open(lease, operation).await {
-                Ok(mut account) => {
-                    let retrieval = account.retrieve(self.transport.as_ref(), operation).await;
-                    (account.record().clone(), retrieval)
+            if recover {
+                let report = MeijuAccount::recover(lease, self.transport.as_ref(), operation).await;
+                (report.account, report.retrieval)
+            } else {
+                match MeijuAccount::open(lease, operation).await {
+                    Ok(mut account) => {
+                        let retrieval = account.retrieve(self.transport.as_ref(), operation).await;
+                        (account.record().clone(), retrieval)
+                    }
+                    Err(error) => (record, Err(error)),
                 }
-                Err(error) => (record, Err(error)),
             }
         };
         let descriptors = match retrieval {

@@ -75,7 +75,7 @@
   "error.AUTH_REQUIRED": "Reconnect this platform account to continue.",
   "error.ACCOUNT_NOT_FOUND": "This local account is no longer available. Reload the account list.",
   "error.ACCOUNT_IDENTITY_CONFLICT": "This is a different platform account. Reconnect the original account to keep its device bindings.",
-  "error.ACCOUNT_SESSION_UNCONFIRMED": "The saved session needs trusted recovery before this account can be used again.",
+  "error.ACCOUNT_SESSION_UNCONFIRMED": "Saved authorization needs recovery. Open this platform account to recover it.",
   "error.MIDEA_RESPONSE_INVALID": "The platform returned an unsupported response.",
   "error.MIDEA_REQUEST_REJECTED": "The platform rejected the request.",
   "error.MIDEA_REQUEST_FAILED": "The platform data could not be retrieved.",
@@ -96,5 +96,11 @@
   "cleanup.cache.done": "Cleared {count} cached snapshots.",
   "cleanup.history.confirm": "Clear detailed operation history, including uncertain outcomes? Request IDs will remain reserved to prevent replay. Devices and cached state will remain.",
   "cleanup.history.done": "Cleared {count} operation receipts.",
-  "cleanup.history.busy": "An operation is still being recorded. Wait for it to finish, then retry clearing history."
+  "cleanup.history.busy": "An operation is still being recorded. Wait for it to finish, then retry clearing history.",
+  "account.recovery.action": "Recover saved authorization",
+  "account.recovery.confirm": "Use this account’s saved authorization to recover access and reload devices? Existing rooms and device names will be kept.",
+  "account.recovery.complete": "Saved authorization recovered and devices loaded.",
+  "account.recovery.pending": "Recovery is incomplete. Existing local account data has been kept.",
+  "account.recovery.retrievalFailed": "The account is stored, but devices could not be loaded. Review the retrieval error.",
+  "account.recovery.unrecoverable": "The pending authorization is missing or expired. Recovery cannot repair it. Removing and reconnecting this account is a separate action that loses its saved organization."
 }

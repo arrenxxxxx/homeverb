@@ -62,6 +62,7 @@ struct Secrets {
     unavailable: AtomicBool,
     uncertain: AtomicBool,
     reads: AtomicUsize,
+    puts: AtomicUsize,
     deletes: AtomicUsize,
     deletion: AtomicI32,
     delete_started: tokio::sync::Notify,
@@ -88,6 +89,7 @@ impl SecretStore for Secrets {
     }
     async fn put(&self, key: &CredentialRef, value: &SecretBytes, op: &Operation) -> Result<()> {
         op.run(async {
+            self.puts.fetch_add(1, Ordering::Relaxed);
             self.values
                 .lock()
                 .unwrap()
@@ -137,6 +139,7 @@ struct Wire {
     extra_device: AtomicBool,
     delay: Mutex<Option<CloudEndpoint>>,
     started: tokio::sync::Notify,
+    resume: tokio::sync::Notify,
 }
 impl Default for Wire {
     fn default() -> Self {
@@ -149,6 +152,7 @@ impl Default for Wire {
             extra_device: AtomicBool::new(false),
             delay: Mutex::new(None),
             started: tokio::sync::Notify::new(),
+            resume: tokio::sync::Notify::new(),
         }
     }
 }
@@ -177,7 +181,7 @@ impl CloudTransport for Wire {
         let delay = *self.delay.lock().unwrap() == Some(request.endpoint());
         if delay {
             self.started.notify_one();
-            std::future::pending::<()>().await;
+            self.resume.notified().await;
         }
         let (code, mut data) = match request.endpoint() {
             CloudEndpoint::LoginId => (0, json!({"loginId":*self.subject.lock().unwrap()})),
@@ -284,6 +288,7 @@ impl Fixture {
             method.as_str(),
             "list_accounts"
                 | "refresh_account"
+                | "recover_account"
                 | "get_account"
                 | "rename_account"
                 | "remove_account"
@@ -893,3 +898,6 @@ async fn native_power_background_cancel_and_close_preserve_unknown_and_release_a
 
 #[path = "meiju_accounts/removal.rs"]
 mod removal;
+
+#[path = "meiju_accounts/recovery.rs"]
+mod recovery;

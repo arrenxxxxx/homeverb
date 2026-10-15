@@ -133,7 +133,7 @@ API 1.2 adds protected account connection and list/refresh methods; Flutter inpu
 - `ACCOUNT_IDENTITY_CONFLICT`: reconnect to the correct existing local account or
   review identity evidence. Never reset bindings to force a match.
 - `ACCOUNT_SESSION_UNCONFIRMED` / `SECRET_STORE_WRITE_UNKNOWN`: an interrupted or
-  uncertain local mutation needs trusted exact-byte recovery. The probe deliberately
+  uncertain local mutation needs [explicit native recovery](../native-ui-contract.md#recover-interrupted-account-storage). The probe deliberately
   does not delete/recreate accounts or automatically overwrite pending material.
 - `RESOURCE_BUSY`: another explicit account operation owns the profile/account lease.
 

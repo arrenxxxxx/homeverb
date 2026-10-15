@@ -412,6 +412,18 @@
                         "response_kind"
                       ],
                       "additionalProperties": false
+                    },
+                    "recover_account": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": false
                     }
                   },
                   "required": [
@@ -443,7 +455,8 @@
                     "rename_account",
                     "remove_account",
                     "clear_cached_state",
-                    "clear_execution_history"
+                    "clear_execution_history",
+                    "recover_account"
                   ],
                   "additionalProperties": {
                     "type": "object",
@@ -1969,6 +1982,9 @@
           "$ref": "urn:homeverb:schema:native-response#/$defs/query_error"
         }
       ]
+    },
+    "recover_account": {
+      "$ref": "urn:homeverb:schema:native-response#/$defs/refresh_account"
     }
   },
   "description": "Select the method with #/$defs/<method>; open is the startup response. No method tag is added to runtime responses."

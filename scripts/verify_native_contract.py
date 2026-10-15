@@ -29,7 +29,7 @@ def main():
     responses = {name: validator('native-response', name) for name in [*api['methods'], 'open']}
     query_error = validator('native-response', 'query_error')
     info_example = {'schema_version': '1.0', 'data': copy.deepcopy(api), 'warnings': [], 'error': None}
-    info_example['data']['api_version'] = '1.7.0'
+    info_example['data']['api_version'] = '1.8.0'
     info_example['data']['methods']['future_query'] = {'response_kind': 'query'}
     responses['get_api_info'].validate(info_example)
     info_example['data']['api_version'] = '2.0.0'
@@ -110,6 +110,7 @@ def main():
             assert call(handle, 'rename_account', account_id='00000000-0000-4000-8000-000000000001', label='Family appliances')['error']['code'] == 'AUTH_FLOW_UNSUPPORTED'
             assert call(handle, 'remove_account', account_id='00000000-0000-4000-8000-000000000001', expected_device_ids=[])['error']['code'] == 'AUTH_FLOW_UNSUPPORTED'
             assert call(handle, 'refresh_account', account_id='00000000-0000-4000-8000-000000000001')['error']['code'] == 'AUTH_FLOW_UNSUPPORTED'
+            assert call(handle, 'recover_account', account_id='00000000-0000-4000-8000-000000000001')['error']['code'] == 'AUTH_FLOW_UNSUPPORTED'
             assert call(handle, 'list_device_cards')['data'] == []
             assert call(handle, 'list_rooms')['data'] == []
             devices = call(handle, 'discover')['data']
@@ -179,6 +180,7 @@ def main():
             assert call(handle, 'get_api_info')['error']['code'] == 'HOST_BACKGROUND'
             for method in ['clear_cached_state', 'clear_execution_history']:
                 assert raw(handle, envelope(method))['error']['code'] == 'HOST_BACKGROUND'
+            assert raw(handle, envelope('recover_account', account_id='00000000-0000-4000-8000-000000000001'))['error']['code'] == 'HOST_BACKGROUND'
             library.homeverb_set_foreground(handle, True)
             assert call(handle, 'get_api_info')['data'] == api
         finally:
@@ -186,6 +188,7 @@ def main():
         assert call(handle, 'list_devices')['error']['code'] == 'HOST_CLOSED'
         for method in ['clear_cached_state', 'clear_execution_history']:
             assert raw(handle, envelope(method))['error']['code'] == 'HOST_CLOSED'
+        assert raw(handle, envelope('recover_account', account_id='00000000-0000-4000-8000-000000000001'))['error']['code'] == 'HOST_CLOSED'
 
     with tempfile.TemporaryDirectory(prefix='homeverb-ui-clear-history-') as directory:
         handle = open_host(directory, 'lost-ack')
@@ -342,6 +345,21 @@ def main():
             responses['rename_account'].validate(renamed)
             assert renamed['data']['label'] == 'Family appliances'
             assert renamed['data']['credential_state'] == 'pending'
+            # Removing and foreign accounts refuse recovery before any keyring access.
+            with sqlite3.connect(Path(directory) / 'homeverb.sqlite3') as database:
+                database.execute("UPDATE accounts SET credential_state='removing' WHERE id=?", (account_id,))
+            refused = raw(handle, envelope('recover_account', account_id=account_id))
+            responses['recover_account'].validate(refused)
+            assert refused['error']['code'] == 'ACCOUNT_REMOVAL_PENDING'
+            with sqlite3.connect(Path(directory) / 'homeverb.sqlite3') as database:
+                database.execute("UPDATE accounts SET credential_state='pending', region='US' WHERE id=?", (account_id,))
+            assert raw(handle, envelope('recover_account', account_id=account_id))['error']['code'] == 'ACCOUNT_NOT_FOUND'
+            with sqlite3.connect(Path(directory) / 'homeverb.sqlite3') as database:
+                database.execute("UPDATE accounts SET region='CN' WHERE id=?", (account_id,))
+            for field, value in [('confirmed', True), ('validated', True), ('session', 'FICTIONAL'), ('provider', 'midea.meiju')]:
+                forged = envelope('recover_account', account_id=account_id, **{field: value})
+                assert not request_schema.is_valid(forged)
+                assert raw(handle, forged)['error']['code'] == 'INVALID_ARGUMENT'
             for fields in [{'label': ''}, {'label': ' '}, {'label': 'a' * 81}, {'label': 'a\nb'},
                            {'label': 'Denied', 'provider': 'other'}, {'label': 'Denied', 'confirmed': True}]:
                 request = envelope('rename_account', account_id=account_id, **fields)

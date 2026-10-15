@@ -193,3 +193,15 @@ Synthetic SQLite/Core and actual Linux C ABI tests cover cache misses, preserved
 metadata, active/composite journal refusal, atomic rollback, retired-ID protection,
 reopening and lifecycle admission. This does not add device controls, full-profile
 removal, credential revocation, secure erasure or phone acceptance.
+
+## Explicit Meiju account recovery contract 1.7
+
+API 1.7.0 adds `recover_account`, bringing the ordinary catalog to 30 methods.
+It validates interrupted saved credentials with complete cloud inventory, confirms
+unchanged bytes, and republishes through the existing identity guards. Stored
+accounts use ordinary refresh. Synthetic host tests cover uncertain initial/map
+writes, preserved organization, unchanged-secret recovery, rejected/partial reads,
+corrupt/foreign material, exact-byte races, SQLite failures and host lifecycle.
+C ABI guards use fictional metadata without a keyring. Seven C symbols, SQLite
+schema 4 and protected payload version 1 remain unchanged; live recovery, expired
+pending-session reauthorization and mobile acceptance remain unverified/unimplemented.
