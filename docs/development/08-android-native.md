@@ -60,6 +60,21 @@ pass before replacing the output; a failed build may leave an older artifact and
 must not be treated as success. This is a library package, not an APK, emulator
 image or published release.
 
+## Continuous build checks
+
+The `android-native` job in [the MVP workflow](../../.github/workflows/mvp.yml)
+runs on pushes and pull requests on Ubuntu 24.04. It installs Rust 1.96.0, Temurin JDK 21,
+Android API 35 stubs and NDK r28c (28.2.13676358), fetches the locked dependencies,
+then runs the existing offline scripts. The job first checks the 54 synthetic
+encrypted-entry assertions and the Rust/JNI bridge. It then builds and inspects
+the arm64, x86_64 and combined AAR variants, including export and ELF alignment
+checks. `RUSTUP_TOOLCHAIN` also pins Cargo invocations inside the Python scripts.
+
+These checks require no provider account or appliance and do not publish an
+artifact. They do not run the isolated emulator procedure below, establish
+Android Keystore behavior, build Flutter or prove physical-device compatibility.
+Check the job result for the exact commit before reporting remote success.
+
 ## Integrate trusted startup
 
 Add the local AAR to the Android application dependencies, retain its consumer

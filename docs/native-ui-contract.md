@@ -1,4 +1,4 @@
-# Native UI contract 1.12
+# Native UI contract
 
 Status: implemented Linux native contract, October 16, 2026, with Mock, default read-only Meiju startup, protected account connection and scoped experimental AC power, fan, mode activation and profile-scoped temperature grants. Six real devices passed the native read path; phone packaging and complete provider/physical acceptance remain pending. See [ADR-0019](adr/0019-native-ui-contract.md).
 
@@ -177,7 +177,9 @@ preferences on discovery, described six real devices, and read/cached all seven
 components through schema-validated responses. No appliance controls were sent.
 The automated suite separately checks empty-account startup/discovery, invalid
 mode/grant/scenario combinations, lifecycle gating and closed handles without
-vendor calls. The [Android native package](development/08-android-native.md) now supplies Keystore integration and a library build path; Android OS/APK/phone and iOS acceptance remain pending.
+vendor calls. The [Android native package](development/08-android-native.md) supplies
+Keystore integration, a library build path and isolated AOSP Android 15 acceptance.
+Flutter APK/physical-phone journeys and iOS acceptance remain pending.
 
 The separate [AC developer probe](development/07-meiju-control.md) can persist
 experimental writable descriptors in a shared profile. Metadata is not authority:

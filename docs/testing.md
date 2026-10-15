@@ -85,7 +85,12 @@ and requires explicit instrumentation success; four Python tests cover its refus
 and false-success paths. This procedure is not part of ordinary workspace tests
 and does not use provider accounts or networking.
 
-The CI workflow declares these build/test steps; a local run is not evidence that remote CI ran.
+The [MVP workflow](../.github/workflows/mvp.yml) runs the Linux build/runtime checks
+and a separate Android native job. The latter uses pinned SDK/NDK/JDK/Rust versions
+for synthetic JVM/JNI storage tests and arm64/x86_64/combined AAR inspection; see
+the [Android build checks](development/08-android-native.md#continuous-build-checks).
+It does not run Android OS, Flutter or physical-device acceptance. A local run is
+not evidence that remote CI ran; inspect the exact commit's job results.
 
 JSON Schema validation uses `jsonschema` 0.45.1 or a compatible patch, with default network-resolution features disabled and the resolved version in `Cargo.lock`. This version includes the [upstream correction for negative `multipleOf` values](https://github.com/Stranger6667/jsonschema/blob/master/CHANGELOG.md). Regression coverage exercises negative fractional temperatures through device constraints, trusted grants, writes, and live/cached observations.
 
