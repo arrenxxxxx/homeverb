@@ -209,7 +209,7 @@ fn main() -> ExitCode {
         }
     };
     let code = runtime.block_on(async_main());
-    // Tokio stdin uses a blocking read. Do not wait indefinitely for it after SIGINT.
+    // Tokio stdio uses blocking I/O. Do not wait indefinitely after cancellation or pipe failure.
     runtime.shutdown_timeout(std::time::Duration::from_millis(250));
     code
 }
@@ -261,10 +261,23 @@ async fn run(cli: Cli, cancellation: CancellationToken) -> Result<u8> {
             "Select --mock or --adapter midea.meiju explicitly.",
         ));
     }
-    if meiju && (cli.scenario.is_some() || matches!(cli.command, Commands::Mcp { .. })) {
+    if meiju && cli.scenario.is_some() {
         return Err(Error::new(
             "CAPABILITY_UNSUPPORTED",
-            "Mock scenarios and MCP startup require --mock.",
+            "Mock scenarios require --mock.",
+        ));
+    }
+    let is_mcp = matches!(cli.command, Commands::Mcp { .. });
+    if is_mcp
+        && (cli.dry_run
+            || cli.connection != "auto"
+            || cli.wait != "verified"
+            || cli.request_id.is_some()
+            || cli.timeout_ms.is_some())
+    {
+        return Err(Error::new(
+            "INVALID_ARGUMENT",
+            "MCP commands supply their own route, wait condition, request ID and timeout.",
         ));
     }
     let is_write = matches!(
@@ -351,7 +364,6 @@ async fn run(cli: Cli, cancellation: CancellationToken) -> Result<u8> {
     if let Commands::Account { command } = cli.command {
         return accounts::run(&directory, command, timeout_ms, cancellation, &grants).await;
     }
-    let is_mcp = matches!(cli.command, Commands::Mcp { .. });
     let core = if meiju {
         homeverb_host::open_meiju_with_control_grants(
             &directory,
@@ -362,7 +374,7 @@ async fn run(cli: Cli, cancellation: CancellationToken) -> Result<u8> {
         homeverb_host::open_mock(&directory, scenario, !is_mcp)?
     };
     if is_mcp {
-        return mcp::serve(std::sync::Arc::new(core), cancellation).await;
+        return mcp::serve(std::sync::Arc::new(core), !grants.is_empty(), cancellation).await;
     }
     if let Commands::Batch { file } = &cli.command {
         if route != Route::Auto || wait_for != WaitFor::Verified || cli.request_id.is_some() {

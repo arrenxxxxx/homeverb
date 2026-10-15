@@ -4,7 +4,7 @@
 
 HomeVerb is the owner-approved project name; `homeverb` is the executable and repository name.
 
-> **Status: 0.2.0 Mock MVP.** The Rust Core, persistent fictional appliance, CLI, read-only local MCP, and native UI bridge are implemented. An experimental Meiju adapter has read six actual appliances through Core and the native bridge; physical verification and real control acceptance remain pending. Android/iOS packaging and visual UI are separate work.
+> **Status: 0.2.0 Mock MVP.** The Rust Core, persistent fictional appliance, CLI, local MCP with default read-only policy, and native UI bridge are implemented. An experimental Meiju adapter has read six actual appliances through Core and the native bridge; physical verification and real control acceptance remain pending. Android/iOS packaging and visual UI are separate work.
 
 ## Run the MVP
 
@@ -43,7 +43,7 @@ This exits with code 11. Refresh state to inspect the result; do not blindly res
 - Bounded correlated-completion verification with exact request/device/connection and timestamp checks; fictional evidence does not establish real protocol support.
 - Explicit device batches through Core, CLI files, and native requests, with whole-list preflight, four-device concurrency, shared deadlines, and per-device receipts.
 - Component-scoped capabilities for different constraints on one physical appliance, verified with fictional fridge/freezer fixtures.
-- One-shot CLI, host-owned read-only MCP stdio, and a C ABI that loads Core directly in the UI process.
+- One-shot CLI, host-owned [MCP stdio](docs/mcp.md) with Mock/Meiju reads and explicitly granted Meiju command planning/execution, and a C ABI that loads Core directly in the UI process. MCP defaults to read-only and never connects accounts automatically.
 - Experimental [Meiju CLI account and read commands](docs/cli.md#meiju-account-and-read-commands): protected Linux terminal login, automatic card retrieval, saved-session refresh/recovery, local account management and on-demand Core reads. Default startup stays read-only; an explicit [owner-controlled grant file](docs/cli.md#scoped-meiju-controls) can admit exact-device power states and vendor fan codes. Live CLI/phone acceptance is separate.
 - Framework-independent `en-US` and `zh-CN` catalogs, locale normalization, and presentation helpers. Visual UI design remains separate.
 

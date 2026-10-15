@@ -7,7 +7,9 @@ Status: accepted for implementation; physical acceptance remains deferred.
 Extend the existing trusted native power/fan grant model to the Linux CLI through
 an explicitly supplied `--meiju-grants` file. Do not automatically load permissions
 from the profile, environment, command JSON or device metadata. Default Meiju
-startup stays read-only. MCP cannot select this adapter or acquire these grants.
+startup stays read-only. This phase did not admit Meiju MCP; the later
+[ADR-0038](0038-scoped-meiju-mcp.md) extends these same grants to explicitly
+configured local MCP sessions.
 
 The file has a closed, versioned schema and the same independent exact-device/value
 lists as native startup. It can admit only the already reviewed low-risk AC power

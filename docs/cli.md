@@ -38,8 +38,10 @@ Global options: `--profile` (default `mock` or `meiju` for the selected adapter)
 account connect defaults to 180000 after input), `--wait accepted|verified`
 (default verified), `--request-id`, `--dry-run`, `--scenario`, `--meiju-grants`, and `--json`.
 All operation responses are JSON even without `--json`. Help/version output is text.
-`--mock` conflicts with `--adapter`. Explicit `--scenario` and MCP startup remain
-Mock-only. Existing Mock command forms and profile paths are unchanged.
+`--mock` conflicts with `--adapter`. Explicit `--scenario` remains Mock-only.
+MCP accepts either adapter with the startup policy described in the
+[local MCP contract](mcp.md); command-only global options are restricted there.
+Existing Mock command forms and profile paths are unchanged.
 
 ## Meiju account and read commands
 
@@ -107,7 +109,8 @@ with the Meiju profile. Live discovery/reads use the selected adapter only; cach
 reads retain their recorded evidence. Missing/unsupported models stay unsupported,
 cloud readings remain stale, and no LAN route is added. Without nonempty explicit
 startup grants, appliance writes and their dry runs return `POLICY_DENIED` before
-opening the profile. The MCP tool surface is unchanged.
+opening the profile. MCP can reuse this profile through explicit
+`--adapter midea.meiju mcp --stdio` startup.
 
 ## Scoped Meiju controls
 
@@ -118,6 +121,10 @@ automatically, saved into the profile or accepted inside ordinary command JSON.
 It has the closed [CLI grant schema](../schemas/cli-meiju-grants.schema.json); see
 the [fictional example](../examples/cli-meiju-grants.json) and
 [ADR-0037](adr/0037-cli-meiju-control-grants.md).
+
+The same file may be selected by a trusted [MCP host](mcp.md). MCP captures its
+policy for the entire session; stop/restart that host to change grants. One-shot
+CLI commands reread the explicitly supplied file on each invocation.
 
 `schema_version` is `"1.0"`. Each independent list, `meiju_power_grants` and
 `meiju_fan_grants`, permits at most 64 distinct entries. Power entries name one

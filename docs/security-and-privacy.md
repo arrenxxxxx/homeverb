@@ -14,6 +14,14 @@ The current Core enforces exact device/component/action binding, local argument-
 
 Generic AI tools do not expose high-risk actions initially. Future support requires trusted user interaction, short-lived approval, and auditable binding to the exact action. Model-supplied confirmation, special prompts, and generic `execute` cannot bypass policy.
 
+Meiju MCP defaults to four read-only tools. A trusted host may explicitly load the
+same exact-device power/fan [startup grants](cli.md#scoped-meiju-controls) used by
+the CLI; only then are plan/execute tools visible. Core policy remains authoritative
+even if a client forges a hidden tool call. Grants are immutable for that MCP
+session: file edits require host restart, and stopping a session cannot roll back
+an already sent command. No tool accepts account credentials, a different profile,
+principal or replacement permissions. See [ADR-0038](adr/0038-scoped-meiju-mcp.md).
+
 ## Connections and endpoints
 
 Verify vendor-cloud TLS; never globally disable certificate checking to fix connectivity. Document weak-security LAN protocols and constrain network targets. A discovered URL is not automatically a trusted endpoint.

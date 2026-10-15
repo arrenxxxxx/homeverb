@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import ctypes
 import copy
+import fcntl
 from contextlib import closing
 from datetime import datetime, timedelta, timezone
 import json
@@ -115,7 +116,7 @@ class RuntimeAcceptance(unittest.TestCase):
         self.assertEqual(result['error']['code'], 'POLICY_DENIED')
         self.assertFalse((path.parent / 'meiju').exists())
 
-    def test_meiju_grants_bound_real_cli_plans_execution_refusals_and_receipt_replay(self):
+    def seed_meiju_controls(self):
         self.cli('device', 'discover')
         base = self.cli('device', 'describe', 'mock-ac')['data']
         power = next(item for item in base['capabilities'] if item['id'] == 'power')
@@ -143,6 +144,11 @@ class RuntimeAcceptance(unittest.TestCase):
                                             'transport':'cloud', 'account_id':account, 'identity_ref':f'fictional-binding-{index}'}])
                 connection.execute('INSERT INTO devices VALUES (?, ?)',
                                    (device_id, json.dumps({'device':device, 'capabilities':[power, fan]})))
+        return path, grants, target, other, database
+
+    def test_meiju_grants_bound_real_cli_plans_execution_refusals_and_receipt_replay(self):
+        path, grants, target, other, database = self.seed_meiju_controls()
+        options = ['--meiju-grants', str(path)]
         plan = self.meiju(*options, '--request-id', 'scoped-power', '--dry-run', 'power', 'set', target, '--off',
                           response_definition='plan')['data']
         self.assertEqual(plan['transports'], ['cloud'])
@@ -255,12 +261,14 @@ class RuntimeAcceptance(unittest.TestCase):
                                 capture_output=True, text=True, timeout=5)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertTrue((Path(self.directory.name) / 'mock/mock-appliance.sqlite3').exists())
-        result = subprocess.run([*base, '--adapter', 'midea.meiju', '--profile', 'refused', 'mcp', '--stdio'],
-                                capture_output=True, text=True, timeout=5)
-        self.assertEqual(result.returncode, 4)
-        self.assertEqual(result.stdout, '')
-        self.assertIn('CAPABILITY_UNSUPPORTED', result.stderr)
-        self.assertFalse((Path(self.directory.name) / 'refused').exists())
+        for options in [['--request-id', 'not-a-command'], ['--dry-run'], ['--timeout-ms', '1000'],
+                        ['--connection', 'cloud'], ['--wait', 'accepted']]:
+            result = subprocess.run([*base, '--adapter', 'midea.meiju', '--profile', 'refused',
+                                     *options, 'mcp', '--stdio'], capture_output=True, text=True, timeout=5)
+            self.assertEqual(result.returncode, 2)
+            self.assertEqual(result.stdout, '')
+            self.assertIn('INVALID_ARGUMENT', result.stderr)
+            self.assertFalse((Path(self.directory.name) / 'refused').exists())
         master, slave = pty.openpty()
         try:
             before = termios.tcgetattr(slave)
@@ -1006,12 +1014,26 @@ class RuntimeAcceptance(unittest.TestCase):
         self.assertEqual(stderr, '')
         self.assertEqual(json.loads(stdout)['status'], 'unknown')
 
-    def test_mcp_protocol_read_tools_policy_and_eof_exit(self):
-        self.cli('device', 'discover')
-        receipt = self.cli('--scenario', 'lost-ack', '--request-id', 'mcp-receipt',
-                           'power', 'set', 'mock-ac', '--on', expected=11)
-        process = subprocess.Popen([*self.base, 'mcp', '--stdio'], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE, text=True, bufsize=1)
+    def assert_no_internet_sockets(self, process):
+        # Tokio may use Unix socket pairs for signals; check Internet sockets only.
+        if Path(f'/proc/{process.pid}/fd').exists():
+            socket_inodes = set()
+            for descriptor in Path(f'/proc/{process.pid}/fd').iterdir():
+                try:
+                    target = os.readlink(descriptor)
+                    if target.startswith('socket:['):
+                        socket_inodes.add(target[8:-1])
+                except FileNotFoundError:
+                    pass
+            for table in ['tcp', 'tcp6', 'udp', 'udp6']:
+                for row in Path(f'/proc/{process.pid}/net/{table}').read_text().splitlines()[1:]:
+                    self.assertNotIn(row.split()[9], socket_inodes)
+
+    def start_mcp(self, base):
+        process = subprocess.Popen([*base, 'mcp', '--stdio'], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE, text=True, bufsize=1,
+                                   env={**os.environ, 'DBUS_SESSION_BUS_ADDRESS':
+                                        f'unix:path={self.directory.name}/absent-bus'})
         self.addCleanup(self.close_process, process)
 
         def send(value):
@@ -1023,6 +1045,14 @@ class RuntimeAcceptance(unittest.TestCase):
                 selector.register(process.stdout, selectors.EVENT_READ)
                 self.assertTrue(selector.select(timeout=3), 'MCP response timed out')
             return json.loads(process.stdout.readline())
+
+        return process, send, response
+
+    def test_mcp_protocol_read_tools_policy_and_eof_exit(self):
+        self.cli('device', 'discover')
+        receipt = self.cli('--scenario', 'lost-ack', '--request-id', 'mcp-receipt',
+                           'power', 'set', 'mock-ac', '--on', expected=11)
+        process, send, response = self.start_mcp(self.base)
 
         send({'jsonrpc': '2.0', 'id': 1, 'method': 'initialize', 'params': {
             'protocolVersion': '2025-06-18', 'capabilities': {}, 'clientInfo': {'name': 'acceptance', 'version': '1'}}})
@@ -1053,25 +1083,112 @@ class RuntimeAcceptance(unittest.TestCase):
         missing = response()['result']
         self.assertTrue(missing['isError'])
         self.assertEqual(missing['structuredContent']['error']['code'], 'REQUEST_NOT_FOUND')
-        # Tokio may use Unix socket pairs for signals; check Internet sockets only.
-        if Path(f'/proc/{process.pid}/fd').exists():
-            socket_inodes = set()
-            for descriptor in Path(f'/proc/{process.pid}/fd').iterdir():
-                try:
-                    target = os.readlink(descriptor)
-                    if target.startswith('socket:['):
-                        socket_inodes.add(target[8:-1])
-                except FileNotFoundError:
-                    pass
-            for table in ['tcp', 'tcp6', 'udp', 'udp6']:
-                for row in Path(f'/proc/{process.pid}/net/{table}').read_text().splitlines()[1:]:
-                    self.assertNotIn(row.split()[9], socket_inodes)
+        self.assert_no_internet_sockets(process)
         process.stdin.close()
         process.wait(timeout=2)
         self.assertEqual(process.returncode, 0)
         self.assertEqual(process.stderr.read(), '')
         process.stdout.close()
         process.stderr.close()
+
+    def test_meiju_mcp_scopes_live_reads_controls_and_receipts_without_credentials(self):
+        path, grants, target, other, database = self.seed_meiju_controls()
+        snapshot = json.loads((ROOT / 'examples/state.json').read_text())
+        snapshot['device_id'] = target
+        observation = snapshot['observations'].pop('climate.target_temperature')
+        observation.update(value=False, source='cloud')
+        snapshot['observations']['power.state'] = observation
+        with closing(sqlite3.connect(database)) as connection, connection:
+            connection.execute('INSERT INTO snapshots VALUES (?, ?, ?)', (target, 'main', json.dumps(snapshot)))
+        base = [str(BINARY), '--adapter', 'midea.meiju', '--data-dir', self.directory.name, '--profile', 'meiju']
+        command = {'schema_version':'1.0', 'request_id':'mcp-scoped-power', 'device_id':target,
+                   'component_id':'main', 'capability':'power', 'action':'set', 'arguments':{'state':False},
+                   'connection':'cloud', 'timeout_ms':10000, 'wait_for':'verified'}
+        receipt = None
+        for enabled in [False, True, False]:
+            with self.subTest(controls=enabled, has_receipt=receipt is not None):
+                process, send, response = self.start_mcp([*base, *(['--meiju-grants', str(path)] if enabled else [])])
+                send({'jsonrpc':'2.0', 'id':1, 'method':'initialize'})
+                self.assertEqual(response()['result']['protocolVersion'], '2025-06-18')
+                send({'jsonrpc':'2.0', 'method':'notifications/initialized'})
+                send({'jsonrpc':'2.0', 'id':2, 'method':'tools/list'})
+                catalog = response()['result']['tools']
+                expected = {'device_list', 'device_describe', 'device_get_state', 'execution_get'}
+                if enabled:
+                    expected.update(['command_plan', 'command_execute'])
+                self.assertEqual({tool['name'] for tool in catalog}, expected)
+                self.assert_no_internet_sockets(process)
+                sequence = 2
+
+                def call(name, arguments):
+                    nonlocal sequence
+                    sequence += 1
+                    send({'jsonrpc':'2.0', 'id':sequence, 'method':'tools/call',
+                          'params':{'name':name, 'arguments':arguments}})
+                    reply = response()
+                    self.assertEqual(reply['id'], sequence)
+                    result = reply['result']
+                    self.assertEqual(json.loads(result['content'][0]['text']), result['structuredContent'])
+                    return result
+
+                listed = call('device_list', {})['structuredContent']
+                validator('native-response', 'list_devices').validate(listed)
+                self.assertEqual({device['id'] for device in listed['data']}, {target, other})
+                described = call('device_describe', {'device':target})['structuredContent']
+                validator('native-response', 'describe_device').validate(described)
+                cached = call('device_get_state', {'device':target, 'cached':True})['structuredContent']
+                validator('native-response', 'read_state').validate(cached)
+                self.assertTrue(cached['data']['from_cache'])
+                self.assertTrue(cached['data']['observations']['power.state']['stale'])
+                live = call('device_get_state', {'device':target})
+                self.assertTrue(live['isError'])
+                self.assertEqual(live['structuredContent']['error']['code'], 'ACCOUNT_SESSION_UNCONFIRMED')
+                for name, arguments in [('account_connect', {}), ('device_discover', {}),
+                                        ('command_execute', {'command':command, 'principal':'admin'})]:
+                    self.assertTrue(call(name, arguments)['isError'])
+                if not enabled:
+                    for name in ['command_plan', 'command_execute']:
+                        denied = call(name, {'command':command})
+                        self.assertEqual(denied['structuredContent']['error']['code'], 'POLICY_DENIED')
+                else:
+                    for tool in catalog:
+                        if tool['name'].startswith('command_'):
+                            self.assertEqual(tool['inputSchema']['properties']['command'],
+                                             json.loads((ROOT / 'schemas/command.schema.json').read_text()))
+                            Draft202012Validator(tool['inputSchema']).validate({'command':command})
+                    plan = call('command_plan', {'command':command})
+                    self.assertFalse(plan['isError'])
+                    validator('native-response', 'plan').validate(plan['structuredContent'])
+                    for changes in [{'device_id':other}, {'arguments':{'state':True}}, {'connection':'lan'}]:
+                        denied = call('command_plan', {'command':{**command, **changes}})
+                        self.assertEqual(denied['structuredContent']['error']['code'], 'POLICY_DENIED')
+                    fan = {**command, 'capability':'vendor.midea.ac', 'action':'set_fan_speed', 'arguments':{'wind_speed':40}}
+                    self.assertFalse(call('command_plan', {'command':fan})['isError'])
+                    denied = call('command_plan', {'command':{**fan, 'arguments':{'wind_speed':60}}})
+                    self.assertEqual(denied['structuredContent']['error']['code'], 'POLICY_DENIED')
+                    # Startup policy is immutable for this host session; replacement requires restart.
+                    path.write_text('{"schema_version":"1.0"}')
+                    self.assertFalse(call('command_plan', {'command':command})['isError'])
+                    with closing(sqlite3.connect(database)) as connection:
+                        self.assertEqual(connection.execute('SELECT COUNT(*) FROM executions').fetchone()[0], 0)
+                    result = call('command_execute', {'command':command})
+                    receipt = result['structuredContent']
+                    self.schema('command-result', receipt)
+                    self.assertTrue(result['isError'])
+                    self.assertEqual(receipt['status'], 'failed')
+                    self.assertEqual(receipt['error']['code'], 'ACCOUNT_SESSION_UNCONFIRMED')
+                    self.assertEqual([attempt['phase'] for attempt in receipt['attempts']], ['not_sent'])
+                    self.assertEqual(call('command_execute', {'command':command}), result)
+                if receipt:
+                    lookup = call('execution_get', {'request_id':command['request_id']})
+                    self.assertFalse(lookup['isError'])
+                    self.assertEqual(lookup['structuredContent']['data'], receipt)
+                self.assert_no_internet_sockets(process)
+                process.stdin.close()
+                process.wait(timeout=2)
+                self.assertEqual(process.returncode, 0)
+                self.assertEqual(process.stderr.read(), '')
+        self.assertFalse((database.parent / 'mock-appliance.sqlite3').exists())
 
     def test_native_bridge_independence_and_foreground_lifecycle(self):
         library = ctypes.CDLL(str(LIBRARY))
@@ -1183,6 +1300,24 @@ class RuntimeAcceptance(unittest.TestCase):
         self.assertEqual(rejected_report['error']['code'], 'INVALID_ARGUMENT')
         library.homeverb_close(handle)
         self.assertEqual(call('list-4', {'method': 'list_devices'})['error']['code'], 'HOST_CLOSED')
+
+    def test_mcp_closed_or_stalled_output_exits_without_waiting_for_host_input(self):
+        for stalled in [False, True]:
+            with self.subTest(stalled=stalled):
+                process, send, response = self.start_mcp(self.base)
+                send({'jsonrpc':'2.0', 'id':1, 'method':'initialize'})
+                response()
+                send({'jsonrpc':'2.0', 'method':'notifications/initialized'})
+                if stalled:
+                    fcntl.fcntl(process.stdout, fcntl.F_SETPIPE_SZ, 4096)
+                    for index in range(2, 22):
+                        send({'jsonrpc':'2.0', 'id':index, 'method':'tools/list'})
+                else:
+                    process.stdout.close()
+                    send({'jsonrpc':'2.0', 'id':2, 'method':'ping'})
+                process.wait(timeout=5)
+                self.assertEqual(process.returncode, 10)
+                self.assertIn('MCP_IO_ERROR', process.stderr.read())
 
     def test_mcp_sigint_exits_even_when_host_stdin_remains_open(self):
         process = subprocess.Popen([*self.base, 'mcp', '--stdio'], stdin=subprocess.PIPE,

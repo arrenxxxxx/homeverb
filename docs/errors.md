@@ -146,6 +146,16 @@ or empty grants deny appliance writes before profile startup. Single Meiju write
 and previews without an explicit request ID return `INVALID_ARGUMENT` when grants
 are present. See [CLI admission](cli.md#scoped-meiju-controls).
 
+Meiju MCP applies the same startup-file checks. Without nonempty grants, command
+tools are unlisted and direct calls return `POLICY_DENIED`. Forged/invalid command
+inputs return the query error envelope. Once decoded and validated, execution
+returns its existing receipt, including Core preflight failures. MCP `isError`
+is true for failed/unknown/partial outcomes and for acceptance when verification
+was requested; receipt lookup itself remains successful regardless of stored
+status. `MCP_IO_ERROR` ends the session after cancelling and draining active work;
+a later lookup is required when the response could not be delivered. See
+[MCP results](mcp.md#results-and-shutdown).
+
 ## Native account connection results
 
 `homeverb_connect_account` is separate from ordinary JSON and rejects invalid

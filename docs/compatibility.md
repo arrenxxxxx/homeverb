@@ -385,3 +385,37 @@ runtime grant cases use fictional SQLite profiles, pending accounts and an
 unavailable test D-Bus endpoint. No owner profile, vendor request, appliance
 control, Flutter worktree, phone or remote CI was tested by this phase. Physical
 model, off-LAN and real CLI acceptance remain pending.
+
+## Meiju local MCP and scoped command tools
+
+Explicit Meiju MCP startup reuses the connected profile and embedded Core. Default
+sessions expose the four existing read tools; nonempty owner-controlled startup
+grants add `command_plan` and `command_execute`. Each command includes its own
+request ID, bounded timeout, route and wait condition. Core permissions, exact
+model admission, protected account/membership checks and conservative outcomes
+remain unchanged. Tool parameters cannot select credentials, profile, principal
+or new permissions. No account/discovery/batch tool is added. Mock MCP stays
+read-only. See [ADR-0038](adr/0038-scoped-meiju-mcp.md) and the [MCP guide](mcp.md).
+
+This supersedes the earlier Meiju MCP startup refusal. MCP now rejects formerly
+ignored global request/deadline/dry-run and nondefault route/wait options. Query
+tools preserve their envelopes; command execution returns the existing Execution
+envelope with outcome-aware `isError`. Plans do not send or journal. RPC IDs and
+durable command IDs remain separate. Grant-file edits take effect only after
+session restart. Native API 1.10.0, its 31 methods/seven C functions, SQLite schema
+4 and protected payload version 2 are unchanged.
+
+EOF/SIGINT, input/output failures and a two-second output-backpressure deadline
+cancel active operations and drain their cleanup. Synthetic sent operations retain
+unknown receipts after reopening; no automatic replay or physical rollback occurs.
+The existing bounded CLI runtime shutdown also prevents blocked stdio workers
+from keeping the process alive. Actual pipe closure/backpressure tests passed.
+
+Local verification passed 271 Rust tests (two opt-in system probes ignored),
+Clippy with warnings denied, formatting/workspace build, 32 runtime acceptance
+cases, the 31-method/51-example native suite, 29 Python tests, five presentation
+tests and document/contract/repository/commit checks. The sandboxed SIGINT case
+timed out; the focused and complete runtime suites passed with ordinary process
+signal access. Tests use fictional profiles and no owner credentials, vendor
+requests or appliance controls. No target AI host configuration, Flutter worktree,
+phone, physical/off-LAN behavior or remote CI was tested by this phase.
