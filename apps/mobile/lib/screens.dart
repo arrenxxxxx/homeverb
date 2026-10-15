@@ -322,19 +322,27 @@ class ScreenView extends StatelessWidget {
                                         SizedBox(
                                           height: 36,
                                           width: 45,
-                                          child: IconAction(
-                                            'search',
-                                            'Search',
-                                            () => onAction('Search'),
+                                          child: Transform.translate(
+                                            offset: const Offset(8.5, -2),
+                                            child: IconAction(
+                                              'search',
+                                              'Search',
+                                              () => onAction('Search'),
+                                              size: 22,
+                                            ),
                                           ),
                                         ),
                                         SizedBox(
                                           height: 36,
                                           width: 45,
-                                          child: IconAction(
-                                            'plus',
-                                            'Add device',
-                                            () => onAction('Add device'),
+                                          child: Transform.translate(
+                                            offset: const Offset(9, -2.5),
+                                            child: IconAction(
+                                              'plus',
+                                              'Add device',
+                                              () => onAction('Add device'),
+                                              size: 23,
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -351,7 +359,12 @@ class ScreenView extends StatelessWidget {
                                         : root == 'Settings'
                                         ? 16
                                         : root == 'Platforms'
-                                        ? 23
+                                        ? (MediaQuery.textScalerOf(
+                                                    context,
+                                                  ).scale(13) <=
+                                                  13
+                                              ? 22.4
+                                              : 23)
                                         : 22,
                                   ),
                                   if (ui['subtitle'] != '' &&
@@ -489,12 +502,13 @@ class ScreenView extends StatelessWidget {
           ),
           Positioned(
             right: 16,
-            top: 72,
+            top: 70,
             child: IconAction(
               'settings',
               'Manage rooms',
               () => onAction('Manage rooms'),
               color: muted,
+              size: 20,
             ),
           ),
           Positioned(

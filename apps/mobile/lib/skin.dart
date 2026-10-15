@@ -693,16 +693,19 @@ class IconAction extends StatelessWidget {
     this.label,
     this.onTap, {
     this.color = ink,
+    this.size = 24,
     super.key,
   });
   final String icon, label;
   final VoidCallback onTap;
   final Color color;
+  final double size;
   @override
   Widget build(BuildContext context) => IconButton(
     tooltip: label,
+    padding: EdgeInsets.zero,
     onPressed: onTap,
-    icon: Glyph(icon, color: color),
+    icon: Glyph(icon, color: color, size: size),
     constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
   );
 }
