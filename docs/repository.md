@@ -1,67 +1,23 @@
-# Repository layout and Git workflow
-
-## Current content
+# Repository layout
 
 ```text
-homeverb/
-  README.md
-  AGENTS.md                 # Canonical AI contributor rules
-  agent.md                  # Pointer preserving the requested filename
-  CONTRIBUTING.md
-  SECURITY.md
-  CHANGELOG.md
-  LICENSE-DECISION.md        # No project license selected yet
-  docs/
-    index.md
-    architecture.md
-    capabilities.md
-    commit-conventions.md
-    publishing.md
-    adr/                    # Architecture decisions
-    diagrams/               # SVG, PNG, Mermaid
-  schemas/                  # Machine-checkable JSON contracts
-  examples/                 # Fictional data only
-  scripts/                  # Validation and private publishing tools
-  tests/                    # Repository-tool tests, not device tests
-  .githooks/commit-msg       # Optional local commit guard
-  .github/
-    ISSUE_TEMPLATE/
-    PULL_REQUEST_TEMPLATE.md
-    labels.json
-    workflows/docs.yml
+apps/cli/                  # One-shot CLI and local read-only MCP host
+crates/domain/             # Versioned DTOs and action-schema validation
+crates/core/               # Local organization, policy, routing, execution, verification
+crates/storage/            # SQLite metadata/journal, migration, retention, and device locks
+crates/secret-store/       # Bounded Linux Secret Service access; other platforms fail closed
+crates/mock/               # Persistent fictional appliance and fault scenarios
+crates/host/               # Composition root and foreground session contract
+crates/ffi/                # Native in-process C ABI and public header
+packages/presentation/     # en-US/zh-CN catalogs and framework-neutral helpers
+schemas/                   # Runtime JSON contracts
+examples/                  # Fictional positive fixtures
+scripts/                   # Validation, runtime acceptance, publishing helper
+tests/                     # Repository-tool tests
+docs/development/          # Progressive contributor guides
+docs/adr/                  # Architecture decisions
 ```
 
-## Proposed implementation layout - not present
+Rust package names use the `homeverb-` prefix. The executable is `homeverb`. `Cargo.lock` records resolved dependency versions and belongs in implementation commits; the supported minimum compiler is Rust 1.96. The local stable toolchain was verified at 1.96.0. Flutter/Android project files are not generated placeholders; add them when implementing and validating the actual frontend.
 
-```text
-crates/domain/         # Types and semantics
-crates/core/           # Routing, execution, authorization
-crates/adapter-api/    # Extension contracts
-crates/storage/        # Local persistence
-crates/adapters/       # Real protocols
-apps/cli/              # Independent commands
-apps/mcp/              # Local stdio host entry point
-apps/mobile/           # Flutter with in-process FFI
-```
-
-Do not create empty implementations just to imply completeness. Add real build scripts, lockfiles, tests, and CI only when they correspond to functioning source projects.
-
-## Git baseline
-
-The intended default branch is `main`. The distribution includes a portable Git bundle containing English, typed local commits. A bundle has no live remote access credentials. Restore it using the steps in [Private publishing](publishing.md).
-
-For a fresh source-only checkout without history:
-
-```bash
-git init -b main
-git add .
-git commit -m "docs: establish English no-daemon design baseline"
-```
-
-This requires a locally configured Git author. The command initializes local history only; it does not create a remote repository.
-
-## Branches and review
-
-Prefer small PRs and branches such as `feat/native-auth`, `fix/write-verification`, or `docs/adapter-contract`. Use the [commit convention](commit-conventions.md) for commits and PR titles. Each review explains lifecycle, physical-write semantics, capability, and compatibility impact.
-
-The CI in this package validates documentation and contracts. Add actual application builds, lint, and platform tests later. Placeholder workflows are not evidence of product quality. Do not publish credentials, captures, local databases, or real device identities.
+Runtime data belongs outside the repository. Preserve unrelated local changes and never stage IDE files or device data. Prefer small commits with English [Conventional Commit](commit-conventions.md) subjects. Publishing requires explicit owner authorization and remote read-back; see [publishing](publishing.md).

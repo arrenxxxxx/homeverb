@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0",
+  "id": "climate",
+  "component_id": "freezer",
+  "revision": 1,
+  "properties": {
+    "target_temperature": {
+      "type": "number",
+      "minimum": -24,
+      "maximum": -16,
+      "multipleOf": 1,
+      "readable": true,
+      "writable": true,
+      "unit": "celsius",
+      "max_age_ms": 120000
+    }
+  },
+  "actions": {
+    "set": {
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "target_temperature": {
+            "type": "number",
+            "minimum": -24,
+            "maximum": -16,
+            "multipleOf": 1
+          }
+        },
+        "required": [
+          "target_temperature"
+        ],
+        "additionalProperties": false
+      },
+      "transports": [
+        "lan"
+      ],
+      "idempotency": "set_value",
+      "risk": "low",
+      "atomic": true,
+      "verification": "state_match"
+    }
+  },
+  "events": {}
+}

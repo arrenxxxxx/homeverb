@@ -1,0 +1,31 @@
+name: Mock MVP checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  linux-mock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install the tested Rust toolchain
+        run: rustup toolchain install 1.96.0 --profile minimal --component rustfmt --component clippy
+      - name: Check formatting and lint
+        run: |
+          cargo +1.96.0 fmt --all -- --check
+          cargo +1.96.0 clippy --workspace --all-targets --locked -- -D warnings
+      - name: Test and build the shared core and entry points
+        run: |
+          cargo +1.96.0 test --workspace --locked
+          cargo +1.96.0 build --workspace --locked
+      - name: Verify runtime contracts and lifecycle
+        run: |
+          python -m pip install -r requirements-dev.txt
+          python scripts/verify_mvp.py
+      - name: Verify localization
+        run: node packages/presentation/test/i18n.test.mjs

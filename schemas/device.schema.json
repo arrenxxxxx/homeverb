@@ -1,6 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Device",
+  "description": "Core additionally requires unique component and connection IDs, unique capability references per component, and exactly one shared or component-scoped definition for each reference. Rediscovery preserves established connection bindings for a local device ID; comparing identities requires the runtime domain check.",
   "type": "object",
   "properties": {
     "schema_version": {
@@ -55,6 +56,7 @@
       "items": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "title": "Connection",
+        "description": "The complete connection tuple is a stable binding. Rediscovery may reorder bindings but cannot silently replace, add, or remove them. identity_ref is a stable local reference, not a changing network address or credential.",
         "type": "object",
         "properties": {
           "id": {

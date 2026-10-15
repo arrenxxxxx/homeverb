@@ -1,0 +1,7 @@
+{
+  "device_ids": [
+    "dev-example-ac",
+    "dev-example-fan"
+  ],
+  "room_id": "room-example-bedroom"
+}

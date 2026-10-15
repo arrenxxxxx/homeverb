@@ -1,6 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "StateSnapshot",
+  "description": "Core checks the requested device/component, schema version, and observation chronology in addition to this shape. Live snapshots must use the selected transport and have no future receipt timestamps. Invalid snapshots must not replace cached state or verify a write.",
   "type": "object",
   "properties": {
     "schema_version": {
@@ -15,7 +16,8 @@
       "minLength": 1
     },
     "from_cache": {
-      "type": "boolean"
+      "type": "boolean",
+      "description": "True only for an explicitly cached read. A live adapter response marked cached cannot verify execution."
     },
     "observations": {
       "type": "object",
@@ -24,14 +26,18 @@
         "title": "Observation",
         "type": "object",
         "properties": {
-          "value": {},
+          "value": {
+            "description": "Validated by Core against the readable property declared for this component, including type, enum, minimum, maximum, and multipleOf. This generic envelope cannot establish device-specific value validity. Missing readings are omitted, not represented by an undeclared null."
+          },
           "source": {
+            "description": "Transport that supplied this observation. Every observation in one live read must match its selected connection; cached reads preserve historical sources.",
             "enum": [
               "lan",
               "cloud"
             ]
           },
           "observed_at": {
+            "description": "Trusted source observation time, at or before received_at. Null means unavailable; Core must not invent a source timestamp.",
             "anyOf": [
               {
                 "type": "string",
@@ -44,10 +50,12 @@
           },
           "received_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "Local receipt time. A future live receipt is invalid. A cached future receipt is stale because the local clock may have moved backward."
           },
           "stale": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Core preserves a true flag and applies the MVP 30-second age limit using observed_at when available, otherwise received_at. This is not a universal device freshness guarantee."
           }
         },
         "required": [

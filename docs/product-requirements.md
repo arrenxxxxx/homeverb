@@ -1,6 +1,6 @@
 # Product requirements and scope
 
-Version: v0.1.1-docs. Status: design baseline; application features are not implemented.
+Requirements baseline: v0.1.1-docs. The 0.2.0 Mock MVP implements a subset; see [task status](task-breakdown.md). Real-device and mobile release gates below remain unmet.
 
 ## Positioning
 
@@ -12,6 +12,7 @@ Provide independent cross-brand appliance-control tools for users, developers, a
 |---|---|---|
 | CLI user | Install binary -> authenticate/pair -> discover -> control | No pre-existing daemon; scriptable JSON; exit after the command |
 | Mobile user | Open app without a HomeVerb login -> authorize a platform or receive eligible authorization -> discover -> organize rooms -> control | The app itself controls devices without a computer or NAS |
+| Midea/Hualing owner | Connect the existing Midea Meiju account -> automatically retrieve bound devices -> read and control supported appliances | No re-pairing or manual device credentials; direct vendor-cloud operation at home or away, including mobile data |
 | AI user | Configure a local executable -> call read or authorized write tools | Host-owned stdio session; no public network listener |
 
 ## Required functionality
@@ -19,6 +20,8 @@ Provide independent cross-brand appliance-control tools for users, developers, a
 Multiple platforms and accounts; viable native authentication; LAN/cloud discovery and deduplication; stable local IDs and aliases; dynamic capability descriptions; cached snapshots and on-demand refresh; common actions; explicit route policies; execution verification; structured errors; protected credentials; access control; and redacted diagnostics. CLI, App, and MCP use the same Core API.
 
 The owner-selected Flutter app uses custom local rooms and device cards, with Devices, Platforms, and Settings as its primary destinations. Platform management uses consumer-facing appliance-platform terminology. Explicit nearby authorization sharing belongs in Settings and follows [ADR-0008](adr/0008-foreground-authorization-sharing.md), with no app account, background receiver, or sender relay. See the [screen inventory](mobile-app.md) for the planned functions; sharing eligibility requires separate provider evidence.
+
+The first real integration targets Midea/Hualing air conditioners, dishwashers, and refrigerators already bound in Meiju. Successful provider authorization starts bounded foreground account-device retrieval and automatically adds supported cards; unsupported returned devices remain visible with their limitation. Reauthorization preserves local organization and identity. Daily cloud reads and controls are required, while LAN is an additional route on the same Device. No LAN discovery or home gateway is required for the cloud journey. Exact controls depend on model, region, account permissions, and tested protocol evidence; this is not a promise of complete official-app feature parity. See the [integration plan](development/05-midea.md).
 
 ## Out of scope
 

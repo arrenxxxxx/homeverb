@@ -1,47 +1,33 @@
 # Local MCP interface
 
-## Execution model
+Status: read-only stdio is implemented. The protocol harness verifies initialization, discovery of tools, reads, write denial, protocol-only stdout, and EOF exit. Validation inside a particular AI host remains pending.
 
-Only stdio is supported. A local AI host launches and owns the subprocess. There is no HTTP endpoint, reverse proxy, or public cloud-callable service. Hosts supporting remote URLs only are outside scope. See [R1](references.md).
+## Host configuration
 
 ```json
 {
   "mcpServers": {
     "homeverb": {
       "command": "homeverb",
-      "args": ["mcp", "--stdio", "--profile", "home"]
+      "args": ["mcp", "--stdio", "--mock", "--profile", "mock"]
     }
   }
 }
 ```
 
-This is an illustrative common host configuration, not a universal format. No `homeverb` binary exists yet. Verify configuration and negotiated protocol versions against each target host and SDK before release.
+Use the built executable's absolute path when it is not on PATH. Run explicit CLI discovery for the same profile first. CLI and MCP share local SQLite only when their directory/profile match. No background discovery occurs.
 
-## Proposed tools
+The host owns the subprocess and its lifetime. No HTTP endpoint, relay, or independently deployed service exists. The implementation negotiates protocol `2025-06-18`, uses newline-delimited JSON-RPC 2.0, and accepts up to eight concurrent tool calls with a 1 MiB frame limit.
 
-| Tool | Purpose | Default authorization |
+## Tools and policy
+
+| Tool | Arguments | Behavior |
 |---|---|---|
-| device_list | Enumerate local device records with optional filters | Read |
-| device_describe | Capabilities, constraints, and available routes | Read |
-| device_get_state | Explicit live or cached read | Read |
-| power_set | Explicit on/off | Device-scoped write grant required |
-| climate_set | Set target temperature or mode | Parameter-bounded write grant required |
-| device_execute | Future generic action entry point | P1 allowlist; never expose every action automatically |
+| device_list | Empty object | Local records only |
+| device_describe | device | Cached capability description |
+| device_get_state | device, optional component/cached | Explicit live or cached read |
+| execution_get | request_id | One retained local receipt, without refresh or replay |
 
-Project tool schemas from capabilities into the subset supported by the selected SDK and host. Do not expose arbitrary private vendor APIs. Contract tests must ensure that CLI and MCP schema projections preserve the same semantics.
+Every tool has a read-only annotation, but authorization is enforced independently: this host's Core has no write grants. Unlisted write tools and forged principal fields fail. Model parameters cannot change profile or collect credentials. Write tools and real authentication remain pending reviewed work.
 
-## Trusted principal
-
-The principal is fixed by trusted startup configuration. A model cannot pass `principal=admin`. Default to read-only; a trusted user interface or local policy grants specific device/capability writes. Core rechecks risk and bounds. Tool annotations are not authorization.
-
-Do not provide password, token, or OTP collection parameters. Users authenticate through CLI or App first. Tool calls cannot arbitrarily switch profiles or read another OS user's secret store.
-
-## Results and cancellation
-
-Return structured execution outcomes while preserving `accepted` versus `unknown`. Failure to meet the requested wait condition is a tool-level failure, not evidence that no physical action occurred. Do not insert raw vendor responses, secret-bearing authorization URLs, or stderr logs into model context.
-
-Cancellation stops waiting and future stages, not an already-executed action. EOF or host termination closes resources. Idle sessions do not scan, poll, or retain device subscriptions. Short-lived observation requires an explicit tool call and budget.
-
-## Tests
-
-Protocol-only stdout; actual host/SDK initialization and version negotiation; default denial of writes; rejection of forged principal/confirmation fields; cancellation without leaked tasks; exit with the host; and separate transport versus business-error mapping.
+Results include `structuredContent`, a JSON text content block, and `isError`. For `execution_get`, a found receipt is a successful tool query even when its stored status is `unknown`, `failed`, or `partial`. Missing/retired receipts produce `REQUEST_NOT_FOUND` / `REQUEST_RETIRED` with `isError: true`; no outcome is inferred and nothing is resent. Extra fields such as a principal or approval flag are rejected. Receipt fields are local history, not a redacted diagnostic export. Cancellation notifications cancel the matching active operation. EOF cancels remaining work and exits. Idle sessions create no appliance requests or Internet listeners. Error messages are English and contain no raw vendor responses.

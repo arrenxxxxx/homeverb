@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+### Mock MVP
+
+- Add the Rust domain/Core/Mock/storage/host workspace, JSON CLI, read-only MCP stdio, and native C ABI.
+- Implement capability validation, scoped write policy, routing, deadlines, uncertain outcomes, journal recovery, and per-item composite receipts.
+- Add local rooms, aliases, favorites, and ordering without changing device identity or control permissions.
+- Add atomic batch room assignment and device-filtered operation history to Core, CLI, and native hosts, with matching en-US/zh-CN labels.
+- Upgrade SQLite schema 1 to 2 with a verified backup and exclusive migration access; retain 100 finalized detailed receipts plus active records and a growing retired-ID ledger.
+- Count validation/storage time toward the write budget and preserve verification and composite receipts when local persistence fails.
+- Bind write grants to exact components, argument schemas, and transports; use the same whole-command and per-step preflight for planning and execution.
+- Add asynchronous native credential contracts and a Linux Secret Service library with profile-scoped references, zeroizing buffers, bounded cleanup, and explicit uncertain mutation errors.
+- Add bounded local diagnostic reports through Core, CLI, and the native bridge; omit private identifiers, arguments, state values, and raw messages, and normalize unreviewed error codes.
+- Validate complete snapshots before caching or verifying writes; preserve acceptance and old cache on invalid evidence, use source observation age, and mark clock-shifted cached values stale.
+- Validate live, cached, and verification values against component-specific readable property contracts, preserving device-specific ranges and read-only vendor capabilities.
+- Update JSON Schema validation to 0.45.1 to accept valid negative fractional-step values while retaining device and permission bounds.
+- Verify equal integer/float state values without type coercion, approximate matching, or loss of large-integer precision; preserve observed representations and request-ID conflict checks.
+- Validate complete adapter descriptor batches before saving and revalidate stored metadata before operational use, preventing unsupported or ambiguous definitions from authorizing device calls.
+- Require explicit independent-field declarations before splitting setter arguments; keep other multi-argument actions intact and reject contradictory descriptors before sends.
+- Preserve device connection identities during rediscovery, preflight adapter responses, and reject conflicting SQLite updates transactionally without transferring existing grants.
+- Add exact local receipt lookup through Core, CLI, native requests, and read-only MCP without replay, current write grants, or receipt mutation.
+- Apply optional per-property observation freshness limits consistently to live/cache reads and verification, preserving the existing default and post-send evidence requirements.
+- Verify bounded adapter-correlated completion evidence without state fabrication or write replay, preserve it across journal failures, and add a fictional completion scenario.
+- Add explicit device batches through Core, CLI, and native requests with whole-list admission, bounded concurrency, shared cancellation/deadlines, and ordered per-device receipts.
+- Resolve component-scoped capability definitions consistently for commands, observations, freshness, and verification; reject ambiguous shared/scoped mixtures while preserving legacy definitions.
+- Support the full caller identifier limit in composite requests and device locks, preserving replay checks and legacy short-ID lock filenames.
+- Add en-US/zh-CN presentation resources and progressive implementation guides.
+- Remove the obsolete static checks report and duplicated FAQ; preserve normative references.
+- Keep real-account integration, real-device support, mobile packaging, and non-Linux credential stores explicitly pending.
+
 ### Changed
 
 - Adopt HomeVerb as the owner-approved project and app name, with `homeverb` as the repository and CLI identifier.

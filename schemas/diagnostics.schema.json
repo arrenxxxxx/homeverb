@@ -1,0 +1,229 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Diagnostics",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "application_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "scope": {
+      "const": "local_profile"
+    },
+    "device_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "room_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "connections": {
+      "type": "object",
+      "properties": {
+        "lan": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cloud": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "lan",
+        "cloud"
+      ],
+      "additionalProperties": false
+    },
+    "receipt_limit": {
+      "const": 100
+    },
+    "attempt_limit": {
+      "const": 32
+    },
+    "recent_receipts": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "$ref": "#/$defs/receipt"
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "application_version",
+    "generated_at",
+    "scope",
+    "device_count",
+    "room_count",
+    "connections",
+    "receipt_limit",
+    "attempt_limit",
+    "recent_receipts"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "receipt": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "accepted",
+            "verified",
+            "failed",
+            "unknown",
+            "partial"
+          ]
+        },
+        "error_code": {
+          "enum": [
+            null,
+            "AUTH_REQUIRED",
+            "AUTH_EXPIRED",
+            "AUTH_FLOW_UNSUPPORTED",
+            "SECRET_STORE_UNAVAILABLE",
+            "SECRET_STORE_LOCKED",
+            "SECRET_STORE_CONFLICT",
+            "SECRET_STORE_WRITE_UNKNOWN",
+            "DEVICE_NOT_FOUND",
+            "DEVICE_IDENTITY_CONFLICT",
+            "AMBIGUOUS_DEVICE",
+            "ROOM_NOT_FOUND",
+            "ROOM_NAME_CONFLICT",
+            "CAPABILITY_UNSUPPORTED",
+            "INVALID_ARGUMENT",
+            "POLICY_DENIED",
+            "LAN_UNREACHABLE",
+            "CLOUD_UNREACHABLE",
+            "READ_TIMEOUT",
+            "RATE_LIMITED",
+            "RESOURCE_BUSY",
+            "DEVICE_REJECTED",
+            "WRITE_OUTCOME_UNKNOWN",
+            "VERIFICATION_PENDING",
+            "PARTIAL_EXECUTION",
+            "CANCELLED",
+            "DEADLINE_EXCEEDED",
+            "CACHE_MISS",
+            "INVALID_OBSERVATION",
+            "REQUEST_CONFLICT",
+            "REQUEST_NOT_FOUND",
+            "REQUEST_RETIRED",
+            "NOT_EXECUTED",
+            "STORAGE_ERROR",
+            "MOCK_STORAGE_ERROR",
+            "STORAGE_VERSION_UNSUPPORTED",
+            "HOST_BACKGROUND",
+            "HOST_CLOSED",
+            "INTERNAL_ERROR",
+            "MCP_IO_ERROR",
+            "OTHER"
+          ]
+        },
+        "verification_kind": {
+          "enum": [
+            null,
+            "state_match",
+            "correlated_completion",
+            "unavailable"
+          ]
+        },
+        "attempts": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "$ref": "#/$defs/attempt"
+          }
+        },
+        "attempts_omitted": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "warning_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "item_outcomes": {
+          "type": "object",
+          "properties": {
+            "accepted": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "verified": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "failed": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "unknown": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "partial": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "accepted",
+            "verified",
+            "failed",
+            "unknown",
+            "partial"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "error_code",
+        "verification_kind",
+        "attempts",
+        "attempts_omitted",
+        "warning_count",
+        "item_outcomes"
+      ],
+      "additionalProperties": false
+    },
+    "attempt": {
+      "type": "object",
+      "properties": {
+        "transport": {
+          "enum": [
+            "lan",
+            "cloud"
+          ]
+        },
+        "phase": {
+          "enum": [
+            "not_sent",
+            "possibly_sent",
+            "accepted",
+            "rejected"
+          ]
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "transport",
+        "phase",
+        "duration_ms"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

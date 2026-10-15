@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.0",
+  "request_id": "req-example-001",
+  "device_id": "dev-example-ac",
+  "status": "partial",
+  "started_at": "2026-10-14T05:00:00Z",
+  "completed_at": "2026-10-14T05:00:01Z",
+  "data": null,
+  "error": {
+    "code": "PARTIAL_EXECUTION",
+    "message": "Inspect each sub-operation result.",
+    "retryable": false
+  },
+  "verification": null,
+  "attempts": [],
+  "items": [
+    {
+      "schema_version": "1.0",
+      "request_id": "req-example-001:0",
+      "device_id": "dev-example-ac",
+      "status": "verified",
+      "started_at": "2026-10-14T05:00:00Z",
+      "completed_at": "2026-10-14T05:00:01Z",
+      "data": {
+        "mode": "cool"
+      },
+      "error": null,
+      "verification": {
+        "kind": "state_match",
+        "source": "lan",
+        "observed_at": "2026-10-14T05:00:01Z",
+        "received_at": "2026-10-14T05:00:01Z",
+        "matches_target": true,
+        "note": "Fictional observation. State match does not prove causality."
+      },
+      "attempts": [
+        {
+          "transport": "lan",
+          "phase": "accepted",
+          "duration_ms": 1000
+        }
+      ],
+      "warnings": [
+        "The local store could not complete the operation."
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "request_id": "req-example-001:1",
+      "device_id": "dev-example-ac",
+      "status": "failed",
+      "started_at": "2026-10-14T05:00:00Z",
+      "completed_at": "2026-10-14T05:00:01Z",
+      "data": null,
+      "error": {
+        "code": "NOT_EXECUTED",
+        "message": "An earlier sub-operation prevented this write.",
+        "retryable": false
+      },
+      "verification": null,
+      "attempts": []
+    }
+  ]
+}

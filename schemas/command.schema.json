@@ -7,6 +7,7 @@
       "const": "1.0"
     },
     "request_id": {
+      "description": "Caller-supplied IDs must be nonblank and at most 256 UTF-8 bytes, checked by Core. Internal composite receipt IDs append a colon and step index after input validation and may exceed that caller limit; they are not new standalone requests.",
       "type": "string",
       "minLength": 1
     },
@@ -27,14 +28,16 @@
       "minLength": 1
     },
     "arguments": {
-      "type": "object"
+      "type": "object",
+      "description": "Must satisfy the selected device action schema and one complete trusted grant. Commands cannot supply or expand grants."
     },
     "connection": {
       "enum": [
         "auto",
         "lan",
         "cloud"
-      ]
+      ],
+      "description": "Requested route policy; it never grants authority. Core intersects it with trusted component/argument/route grants and action support."
     },
     "timeout_ms": {
       "type": "integer",

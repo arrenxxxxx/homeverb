@@ -47,11 +47,11 @@ SQLite stores configuration, device references, capability caches, timestamped o
 
 Use short transactions, account-refresh locks, and per-device write coordination. Such locks only coordinate the local profile; they cannot prevent a vendor app or another computer from controlling the device concurrently.
 
-## Proposed technology
+## Implementation technology
 
-Rust is the proposed Domain/Core/Adapter/CLI implementation language. Flutter is the owner-selected app framework, using in-process FFI. MCP is another host adapter. `flutter_rust_bridge` is a possible binding mechanism, but packaging, network permissions, cancellation, and secure storage require project-specific prototypes; the library's existence does not make this project runnable. [R4](references.md)
+Rust is implemented for Domain/Core/Adapter/CLI. The C ABI embeds the same Core in a native host; Linux loading, cancellation, and foreground gating are tested. Flutter is the owner-selected mobile framework. Android/iOS packaging, permissions, secure storage, and physical-phone lifecycle tests are still required. See the [UI integration guide](development/03-ui-integration.md).
 
-Flutter is selected; the proposed Core toolchain and binding mechanism still require prototype evidence. Validate Android core loading and cancellation, at least one desktop CLI, and restricted credential access early. Existing Python device libraries can inform protocols and test comparisons; they must not become mandatory remote services for the phone app.
+The implementation uses reviewed compile-time registration and a fictional adapter. It does not depend on a Python device service. The stack and composite-receipt decision are recorded in [ADR-0007](adr/0007-mock-mvp.md).
 
 ## Decisions
 

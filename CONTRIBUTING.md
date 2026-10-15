@@ -8,7 +8,7 @@ Select a task with acceptance criteria. Write a contract or regression test, imp
 
 ## Language and commits
 
-Use English for documentation, comments, diagrams, examples, issue/PR text, and commit subjects/bodies. Follow [Commit conventions](docs/commit-conventions.md): `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `ci`, `build`, `chore`, `style`, or `revert`. Use `docs` for documentation-only changes; do not mislabel a design as a delivered feature.
+Use English for documentation, comments, diagrams, examples, issue/PR text, and commit subjects/bodies. The only translated source exception is the owner-requested `zh-CN` UI catalog. Follow [Commit conventions](docs/commit-conventions.md): `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `ci`, `build`, `chore`, `style`, or `revert`. Use `docs` for documentation-only changes; do not mislabel a design as a delivered feature.
 
 Enable the optional local hook:
 
@@ -27,7 +27,7 @@ python3 scripts/validate_commits.py --all
 python3 -m unittest discover -s tests -v
 ```
 
-There is no application implementation yet. These checks do not establish device support or mobile build success. Add real implementation tests when source projects exist, and report actual results in the PR.
+Run the additional Rust, native runtime, and locale checks in [Testing](docs/testing.md) for implementation changes. These checks establish Mock behavior only; report mobile and hardware validation separately.
 
 ## Device evidence and privacy
 

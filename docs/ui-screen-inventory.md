@@ -6,6 +6,8 @@ Each entry preserves its stable screen ID, visible content and explicit branch t
 
 The legacy S11 dark-appearance study is superseded by the one-option Window Light preview. There is no alternate skin in this release.
 
+The October 15 Meiju account-flow amendment below changes P08 to automatic cloud device retrieval after authorization. The existing P08 image and atlas branch buttons still show the earlier manual discovery flow. The required transitions are recorded below for implementation; visual assets and interactive atlas updates remain pending. Other screen IDs retain their meaning.
+
 ## Everyday devices
 
 ### D01 — All devices
@@ -561,13 +563,19 @@ Visible content: Authorization expired / Start again to request a new authorizat
 
 [Rendered state](../output/prototypes/homeverb-window-light-v1/screens/P08.png) · Nested screen
 
-Back Platform Connected. Terracotta check, Example Home / Home account / Europe. Text Authorization saved securely. Primary Find Devices, secondary Done. No invented devices until discovery; no raw token display.
+The rendered image is the earlier generic example: Authorization saved securely, Find Devices, and Done. For the required Meiju journey, authorization instead continues automatically into bounded account-device retrieval. Show Loading Devices with Cancel; then the actual supported/unsupported counts and Open Devices. Do not require Find Devices or individual device selection. Preserve an authorization-success message when retrieval fails, offer Retry Retrieval, and distinguish empty from partial results. New supported cards start Unassigned; reauthorization preserves existing organization. No raw token display or invented fresh device state.
 
-Visible content: Authorization saved securely / Example Home · Home account · Europe; Find Devices; Done; Devices are listed after explicit discovery.
+Required content, pending visual update: Authorization saved securely; Loading Devices; Cancel; retrieved device counts and unsupported reasons; Open Devices; optional room assignment. Error/partial variants offer Retry Retrieval and View Available Devices; a confirmed empty account explains that no devices were returned.
 
 | Action or outcome | Review destination |
 |---|---|
-| Find Devices | [A04](../output/prototypes/homeverb-window-light-v1/screens/A04.png) |
+| Authorization saved | P08 retrieval variant, started automatically within the foreground connection flow |
+| Retrieval completed / Open Devices | [D01](../output/prototypes/homeverb-window-light-v1/screens/D01.png), using actual retrieved cards; empty variant when no devices are returned |
+| Retrieval failed or partial / Retry Retrieval | P08 retrieval variant; explicit bounded retry using the saved session when valid |
+| Partial result / View Available Devices | [D01](../output/prototypes/homeverb-window-light-v1/screens/D01.png), with incomplete retrieval disclosed |
+| Ambiguous identity | [A05](../output/prototypes/homeverb-window-light-v1/screens/A05.png), returning to the initiating account flow |
+| Assign local rooms | [R03](../output/prototypes/homeverb-window-light-v1/screens/R03.png), without gating retrieval or changing permissions |
+| Cancel retrieval | [P09](../output/prototypes/homeverb-window-light-v1/screens/P09.png), preserving securely saved authorization and known results without automatic resumption |
 | Done | [P01](../output/prototypes/homeverb-window-light-v1/screens/P01.png) |
 
 ## Manage access deliberately

@@ -1,6 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Capability",
+  "description": "Capability definitions are unique by optional component_id and id. Core rejects mixed shared/scoped definitions of one ID, invalid component bindings, and ambiguous full capability.property names. Action parameter schemas compile locally.",
   "type": "object",
   "properties": {
     "schema_version": {
@@ -48,6 +49,13 @@
           "multipleOf": {
             "type": "number",
             "exclusiveMinimum": 0
+          },
+          "max_age_ms": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991,
+            "default": 30000,
+            "description": "Observation age limit in milliseconds. Age at or above the limit is stale, using observed_at when known and otherwise received_at. Existing stale flags and post-send verification requirements still apply."
           },
           "enum": {
             "type": "array",
@@ -99,14 +107,21 @@
             ]
           },
           "atomic": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether the device action is atomic. False alone does not permit Core to split its arguments."
+          },
+          "independent_fields": {
+            "type": "boolean",
+            "default": false,
+            "description": "Explicit permission for Core to split independent setter fields. Requires atomic=false and idempotency=set_value; per-field validation and authorization still apply. Absent or false preserves the complete argument object."
           },
           "verification": {
             "enum": [
               "state_match",
               "correlated_completion",
               "unavailable"
-            ]
+            ],
+            "description": "The required evidence method. correlated_completion requires a successful protocol-correlated completion receipt from the bounded adapter call; Core never substitutes a state match or an enqueue acknowledgement."
           }
         },
         "required": [
@@ -117,11 +132,40 @@
           "atomic",
           "verification"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "independent_fields": {
+                  "const": true
+                }
+              },
+              "required": [
+                "independent_fields"
+              ]
+            },
+            "then": {
+              "properties": {
+                "atomic": {
+                  "const": false
+                },
+                "idempotency": {
+                  "const": "set_value"
+                }
+              }
+            }
+          }
+        ]
       }
     },
     "events": {
       "type": "object"
+    },
+    "component_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "An exact component ID in this device. Omission makes this a shared definition for referencing components. Explicit null and shared/scoped mixing for the same capability ID are invalid."
     }
   },
   "required": [

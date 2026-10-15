@@ -1,0 +1,24 @@
+# 4. Admit a real adapter
+
+No real model is currently verified. Start from pinned protocol evidence and record a selected physical device's model, firmware, region, official app, and account type before live acceptance. Missing model details do not block source research or offline protocol implementation. Commit only fictional or redacted evidence. The first selected scope is [Midea/Hualing air conditioners, dishwashers, and refrigerators](05-midea.md).
+
+## Admission and implementation
+
+1. Prove authentication works in an independent native client. Record cloud-dependent onboarding separately from daily control. Backend-only secrets or permanent relays are blockers.
+2. Wire and verify the operating system's secure store. The Linux library is implemented; other platforms still need a backend. No token, key, password, or live identifier belongs in command arguments, logs, fixtures, or plaintext database fields. Add refresh coordination if the provider rotates credentials.
+3. Add reviewed compile-time registration through `host`. Keep protocol encoding, pairing, transport selection evidence, and capability mapping inside the adapter. Declare `independent_fields: true` only with evidence that separate setter fields have no ordering dependencies or implicit resets; `atomic: false` alone does not permit splitting.
+4. Establish stable random local identity and strong deduplication evidence. Mock's fixed fictional ID is a simulator convenience, not a production identity strategy. Rediscovery must retain the established connection IDs, account references, and identity references; network addresses and tokens must not replace those bindings. Adding or replacing routes needs a reviewed confirmation path beyond ordinary discovery.
+   For a multi-component appliance, bind distinct capability definitions with `component_id` when ranges, actions, routes, or freshness differ. Keep one physical device and stable semantic capability IDs; do not duplicate the device or mix shared and scoped definitions of the same capability. See [ADR-0018](../adr/0018-component-capability-scopes.md).
+5. Write contract tests for reads, unsent failures, sent timeouts, explicit rejection, stale verification, cancellation, and cleanup. Core implements state matching with per-property `max_age_ms` and bounded correlated completion. Record model evidence for freshness limits. For completion, prove the protocol correlates a successful completion to the entire command; local IDs and enqueue acknowledgements are insufficient. Return the evidence only within the current execution budget, mark acceptance before waiting, and test invalid correlation/timestamps. See [ADR-0016](../adr/0016-correlated-completion.md).
+6. Test the physical device read-only first. Obtain explicit owner authorization before safe writes, then verify results independently and exercise disconnection.
+7. Update [compatibility](../compatibility.md) with exact-model evidence. A second protocol family is needed before claiming that cross-platform semantics are demonstrated.
+
+Do not call a library reference or successful Mock run physical verification. Mobile must repeat network, permission, authentication, and lifecycle acceptance on a phone independently of the desktop CLI.
+
+## Integrate native credentials
+
+The host creates `homeverb_secrets::SystemSecretStore::new(profile_namespace)` with a persisted random UUID. Generate and persist a `homeverb_core::CredentialRef` as nonsecret metadata; do not derive it from an email, vendor ID, or path. Pass the current Operation into SecretStore methods rather than granting a new deadline. Keep transient bytes in SecretBytes, expose them only to the reviewed native adapter, and drop them promptly.
+
+Read returns `None` when an exact reference is absent. Put creates or replaces that reference in the default collection; delete removes only local material. `SECRET_STORE_WRITE_UNKNOWN` requires inspection before recovery, never blind retry. Secure-store failure must not produce a plaintext database fallback. The existing Mock hosts do not require credentials and do not open the service at startup.
+
+Use the [explicit synthetic integration test](../testing.md#linux-secret-service-probe) before claiming a Linux backend works on a target desktop. See [storage boundaries](../storage.md#native-credential-storage) and [ADR-0011](../adr/0011-system-secret-store.md). Real authentication, profile namespace persistence, account refresh coordination, and mobile backends remain follow-up work.

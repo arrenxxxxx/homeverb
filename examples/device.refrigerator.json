@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "id": "dev-example-fridge",
+  "alias": "Example refrigerator",
+  "brand": "Example",
+  "model": "Fictional two-compartment model",
+  "components": [
+    {
+      "id": "fridge",
+      "capabilities": [
+        "climate"
+      ]
+    },
+    {
+      "id": "freezer",
+      "capabilities": [
+        "climate"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn-example-lan",
+      "adapter": "homeverb.mock",
+      "transport": "lan",
+      "account_id": null,
+      "identity_ref": "identity:fictional-local-1"
+    },
+    {
+      "id": "conn-example-cloud",
+      "adapter": "homeverb.mock",
+      "transport": "cloud",
+      "account_id": null,
+      "identity_ref": "identity:fictional-cloud-1"
+    }
+  ],
+  "support_status": "mock-tested"
+}

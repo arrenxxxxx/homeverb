@@ -1,0 +1,7 @@
+{
+  "device_id": "dev-example-ac",
+  "alias": "Bedroom AC",
+  "room_id": "room-example-bedroom",
+  "favorite": true,
+  "position": 0
+}

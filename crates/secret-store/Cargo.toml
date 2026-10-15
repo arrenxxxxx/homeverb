@@ -1,0 +1,20 @@
+[package]
+name = "homeverb-secrets"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+homeverb-core.workspace = true
+homeverb-domain.workspace = true
+async-trait.workspace = true
+tokio.workspace = true
+uuid.workspace = true
+
+[target.'cfg(target_os = "linux")'.dependencies]
+secret-service.workspace = true
+zbus.workspace = true
+
+[dev-dependencies]
+tokio-util.workspace = true

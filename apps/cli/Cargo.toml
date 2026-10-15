@@ -1,0 +1,22 @@
+[package]
+name = "homeverb-cli"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "homeverb"
+path = "src/main.rs"
+
+[dependencies]
+homeverb-domain.workspace = true
+homeverb-core.workspace = true
+homeverb-host.workspace = true
+homeverb-mock.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+tokio-util.workspace = true
+clap.workspace = true
+uuid.workspace = true

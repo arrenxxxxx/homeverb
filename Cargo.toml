@@ -1,0 +1,30 @@
+[workspace]
+members = ["crates/domain", "crates/core", "crates/mock", "crates/storage", "crates/secret-store", "crates/host", "crates/ffi", "apps/cli"]
+resolver = "3"
+
+[workspace.package]
+version = "0.2.0"
+edition = "2024"
+rust-version = "1.96"
+publish = false
+
+[workspace.dependencies]
+homeverb-domain = { path = "crates/domain" }
+homeverb-core = { path = "crates/core" }
+homeverb-mock = { path = "crates/mock" }
+homeverb-storage = { path = "crates/storage" }
+homeverb-host = { path = "crates/host" }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.150"
+chrono = { version = "0.4.45", features = ["serde"] }
+uuid = { version = "1.22.0", features = ["v4", "serde"] }
+tokio = { version = "1.52.3", features = ["rt-multi-thread", "macros", "time", "sync", "signal", "io-util", "io-std", "test-util"] }
+tokio-util = "0.7.18"
+async-trait = "0.1.89"
+rusqlite = { version = "0.37", features = ["bundled", "backup"] }
+jsonschema = { version = "0.45.1", default-features = false }
+clap = { version = "4.6.1", features = ["derive"] }
+zeroize = "1.8"
+sha2 = "0.11.1"
+secret-service = { version = "5.2.0", default-features = false, features = ["rt-tokio-crypto-rust"] }
+zbus = { version = "5", default-features = false, features = ["tokio"] }

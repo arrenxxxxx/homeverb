@@ -1,39 +1,13 @@
-# Core SDK and host interfaces
+# Embedded SDK
 
-## Goal
+The SDK is implemented in Rust. `homeverb-core::Core` accepts injected Store, Adapter registry, Clock, and Policy values. `homeverb-host::open_mock` assembles the explicit simulator configuration without discovery. `Session` adds bounded operation registration, cancellation, foreground gating, and shutdown.
 
-CLI, Flutter bindings, and MCP handle input/output and host interaction. The SDK owns access and control semantics. It does not start a server, require a persistent global runtime, or include hidden telemetry.
+Use [the UI integration guide](development/03-ui-integration.md) for the JSON request contract and C ABI. [homeverb.h](../crates/ffi/include/homeverb.h) defines ownership and thread requirements. The UI never shells out to CLI or contacts a loopback HTTP service.
 
-```text
-CoreBuilder
-  .storage(Storage)
-  .secrets(SecretStore)
-  .adapters(AdapterRegistry)
-  .policy(PolicyEngine)
-  .clock(Clock)
-  .network(NetworkPolicy)
-  .build() -> Core
+Core supports local listing/describing, room/device preferences, explicit discovery, cached/live reads, single-command and bounded-batch planning/execution, and recent outcomes. `Core::execution(request_id, operation)` retrieves one retained receipt without device access or current write grants; missing and retired IDs remain distinct. See [ADR-0014](adr/0014-local-receipt-lookup.md).
 
-Core.list_devices(Query, Context)
-Core.describe_device(DeviceSelector, Context)
-Core.read_state(ReadRequest, Context)
-Core.execute(Command, TrustedPrincipal, Context)
-Core.begin_auth(AuthRequest, TrustedInteraction, Context)
-Core.close()
-```
+Core implements state-match verification and validates adapter-provided correlated completion under [ADR-0016](adr/0016-correlated-completion.md). Real adapters must establish protocol correlation and authentication; no real adapter is registered yet. An unavailable secret provider fails closed. Component-specific definitions resolve through `Descriptor::capability(component_id, capability_id)`; see [ADR-0018](adr/0018-component-capability-scopes.md). Do not select a definition by capability ID alone.
 
-This is responsibility-level pseudocode, not SDK source. Rust signatures, asynchronous interfaces, and mobile binding generation are prototype decisions.
+Trusted Rust hosts construct explicit component/argument/transport-scoped `Grant` values; ordinary JSON requests cannot provide them. `Policy::authorize` returns the permitted transports, which Core intersects with the command and action routes. Hosts with an existing deadline call `execute_with_operation`; `execute` starts a new command budget. See [Core development](development/02-core.md) and [ADR-0010](adr/0010-scoped-write-grants.md) for the unreleased Rust API change. The C ABI and Command envelope are unchanged.
 
-## FFI boundary
-
-Exchange versioned DTOs and structured errors. Cancellation uses an explicit operation ID and cancel API, not an assumption that destroying a UI object will stop networking. Exchange secrets through restricted platform interfaces or references rather than unnecessary Dart strings or log copies.
-
-Do not block the UI thread with networking. The host owns the runtime lifecycle. Do not use a second local HTTP server as the default Flutter/Rust bridge.
-
-## Dependency injection and tests
-
-Replace clocks, networking, random IDs, and secret stores for deterministic deadline and state-machine tests. Tests use mock adapters and fictional devices by default, not real vendor endpoints. Business modules must not import vendor SDKs and add brand-selection branches in the upper layers.
-
-## Versions
-
-Version the SDK, JSON `schema_version`, and adapters separately. FFI DTO changes require synchronized generated bindings on both sides. Reject incompatible major versions during initialization and preserve additive compatibility where possible.
+JSON schema version remains `1.0`; native host requests reject other versions and unknown fields. Keep generated frontend bindings synchronized when changing DTOs. Public contract changes require an ADR and positive/negative fixtures.

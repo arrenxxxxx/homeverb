@@ -13,5 +13,12 @@ Baseline source list: October 14, 2026. These sources inform external concepts. 
 | R7 | [OpenCLI](https://github.com/jackwener/opencli) | CLI ergonomics reference, not a device driver or required dependency |
 | R8 | [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/) | Commit structure and `feat`/`fix` semantics |
 | R9 | [GitHub CLI: gh repo create](https://cli.github.com/manual/gh_repo_create) | Authenticated private-repository creation from local source |
+| R10 | [secret-service 5.2.0 API](https://docs.rs/secret-service/5.2.0/secret_service/) / [upstream source](https://github.com/hwchen/secret-service-rs) / [Secret Service protocol](https://specifications.freedesktop.org/secret-service/latest/) | Implemented Linux library dependency, MIT OR Apache-2.0; DH sessions, exact collection searches, native get/create/delete; no source port or mobile claim |
+| R11 | [Midea AC LAN](https://github.com/georgezhao2010/midea_ac_lan) | HA community integration evidence for the selected AC/E1/CA families; reference only, not a HomeVerb runtime dependency |
+| R12 | [Midea Auto Cloud](https://github.com/sususweet/midea_auto_cloud) | HA community cloud account enumeration, state/control, and capability-mapping evidence; Apache-2.0 reference, not native-client admission or physical verification |
 
-R8 and R9 were consulted for this English repository revision. Other entries are retained from the original design baseline and must be revalidated for implementation decisions. Do not repeat unverified claims of universal brand coverage or fixed API prices. Authentication, regional policy, protocol details, and licensing require fresh adapter-specific evidence.
+R8 and R9 were consulted for this English repository revision. R1-R4, R6, and R7 are retained from the original design baseline and must be revalidated for implementation decisions. Do not repeat unverified claims of universal brand coverage or fixed API prices. Authentication, regional policy, protocol details, and licensing require fresh adapter-specific evidence.
+
+R10's downloaded crate source and the resolved zbus 5.19.0 connection lifecycle were inspected for the Linux implementation on October 14, 2026. Cargo.lock records exact dependency versions. This source review and synthetic service test do not replace a dependency vulnerability audit or the project's license decision.
+
+R5, R11, and R12 were inspected on October 15, 2026. The [Midea/Hualing integration guide](development/05-midea.md) records exact revisions, MIT/Apache-2.0 licensing, cloud versus LAN evidence, upstream runtime differences, and authentication questions. No device or account was contacted, and no upstream credential material was imported into HomeVerb.

@@ -1,5 +1,7 @@
 # Mobile app design
 
+Status: UI implementation is separate work. The native bridge and en-US/zh-CN resource contract are available in the [UI integration guide](development/03-ui-integration.md); physical-phone integration is not yet verified.
+
 Status: owner-approved functional design, October 14, 2026. The screens and sharing flows below are planned, not implemented or device-verified.
 
 ## Independent execution
@@ -7,6 +9,8 @@ Status: owner-approved functional design, October 14, 2026. The screens and shar
 Flutter UI -> in-process bindings -> Core -> in-process adapters -> appliance LAN or vendor cloud. There is no initial HA/NAS address screen and no hidden dependency on a desktop CLI forwarding requests.
 
 HomeVerb has no application account, registration, sign-in screen, or personal-account center. Users open the app directly; authentication applies only to third-party platforms or device pairing. Local configuration remains accessible without platform authorization.
+
+The first real account journey is Midea Meiju: connect an existing account, automatically retrieve its bound Midea/Hualing appliances, then read/control supported capabilities directly through Midea's cloud at home or away. Cloud operation requires no home gateway or LAN discovery. LAN can later become another connection to the same device. This is a requirement, not implemented support; see the [integration guide](development/05-midea.md).
 
 ## Visual direction and navigation
 
@@ -30,13 +34,21 @@ Authorization sharing belongs inside Settings, with no primary navigation destin
 | Room Management | Room-bar management control; Settings | Create, rename, reorder, and delete custom rooms; move devices individually or in a selection. |
 | Device Controls | Tap a device card | Observed state, supported controls, components, manual refresh, and operation outcomes; links to Device Information and recent operations for this device. |
 | Device Information | Device Controls; card menu | Edit the local name and room; inspect model, linked platform, capabilities, and connections; set a connection preference and review ambiguous duplicate-device matches. |
-| Add Device | Devices toolbar; empty room | Enumerate an authorized platform account or run supported nearby discovery/pairing; show progress, select devices, resolve identity conflicts, and choose a room. Link to Add Platform when authorization is needed. |
+| Add Device | Devices toolbar; empty room | Explicitly retrieve account devices again or run supported nearby discovery/pairing; show progress, resolve identity conflicts, and choose a room. Nearby discovery may require device selection. The first Meiju account connection retrieves devices automatically. |
 | Smart Appliance Platforms | Primary navigation | Connected platforms and accounts, regions, device counts, and the last authorization check; add a platform, reauthorize, or open details. Support multiple accounts on one platform. |
 | Select Platform | Add Platform | Search platforms or protocols; show region requirements, supported authorization methods, and compatibility status. Identify unavailable or unimplemented integrations. |
-| Platform Authorization / Pairing | Selected platform; Reauthorize | Adapter-supported browser authorization, verification-code challenge, or device pairing; steps, waiting, cancellation, expiry, and actionable failure reasons. |
+| Platform Authorization / Pairing | Selected platform; Reauthorize | Adapter-supported authorization or pairing; steps, waiting, cancellation, expiry, and actionable failure reasons. Meiju account authorization continues automatically into bounded cloud device retrieval and supported card creation. |
 | Platform Details | Select a connected account | Masked account details, region, granted permissions, linked devices, and the last check; manually check the connection, reauthorize, or remove local authorization. Offer remote revocation separately only when supported. |
 | Recent Operations | Settings; Device Controls | Bounded local device-operation and authorization-transfer records, result details, and recovery actions. Device Controls opens a filtered view. |
 | Settings | Primary navigation | Room Management, Authorization Sharing, appearance, this installation's sharing name, connection defaults, system permissions, local-data management, redacted diagnostic preview/export, version, and compatibility information. |
+
+## Existing account to device cards
+
+Before Connect Platform, explain account/region scope and automatic retrieval. Once Meiju authorization is saved securely, show finite retrieval progress, then the returned supported device cards without another Find Devices step or per-device selection. Unsupported returned devices remain visible with a reason and no enabled unsupported controls. Empty, failed, and partial retrieval are separate states; a successful login with failed retrieval offers explicit retry without repeating login.
+
+New devices start Unassigned; existing aliases, rooms, favorites, and IDs survive reauthorization and retrieval. Vendor room names do not overwrite local organization. Resolve ambiguous identities explicitly, and do not remove existing cards based on a partial response. Subsequent refresh is user-initiated. Cloud retrieval works away from the appliance network and does not request local-network permission.
+
+The [functional handoff](ui-functional-spec.md) and [P08 inventory amendment](ui-screen-inventory.md#p08--platform-connected) define this account flow. The current atlas still pictures a manual Find Devices step; its affected images/transitions need a separate visual update and do not establish this new flow's visual acceptance.
 
 ## Rooms and the device home
 
@@ -77,7 +89,7 @@ Recent Operations distinguishes `accepted`, `verified`, `failed`, and `unknown`,
 
 ## Lifecycle
 
-Read, write, and bounded observation happen only for explicit foreground tasks. Backgrounding cancels work and closes subscriptions; already-started appliance behavior may continue. On reopen, display cache age and network only when the user requests it. No keep-alive or system scheduling is added.
+Read, write, and bounded observation happen only for explicit foreground tasks. The user-initiated Meiju account connection includes automatic device retrieval within that foreground flow. Backgrounding cancels work and closes subscriptions; already-started appliance behavior may continue. On reopen, display cache age and network only when the user requests it. No keep-alive or system scheduling is added.
 
 Authorization discovery, advertising, and transfer belong to an explicit foreground operation. Completion, cancellation, timeout, or backgrounding releases its sockets and temporary session material. Closing the flow cannot retract credentials already imported by the recipient. Do not promise a callback after forced termination.
 
@@ -87,7 +99,7 @@ Request local-network or protocol permissions when the relevant feature is used.
 
 ## Cross-platform validation
 
-Start with a mock device to verify dynamic forms, invalid arguments, cancellation, unknown outcomes, repeated calls in one process, and cleanup on backgrounding. Then validate real pairing, LAN access, and capability changes. Android and iOS require independent acceptance; desktop FFI success does not substitute for phone testing.
+Start with a mock device to verify dynamic forms, invalid arguments, cancellation, unknown outcomes, repeated calls in one process, and cleanup on backgrounding. Then validate real account authorization, automatic cloud retrieval, permitted cloud controls on mobile data, and additional pairing/LAN paths where supported. Android and iOS require independent acceptance; desktop FFI success does not substitute for phone testing.
 
 ## UI acceptance criteria
 
@@ -97,6 +109,8 @@ Planned UI acceptance checks cover:
 - Room creation, renaming, ordering, reassignment, and deletion without losing devices or changing their identity.
 - Card navigation versus quick-action targets, large text, accessible menus, stale state, and empty rooms.
 - Multiple platform accounts, cancelled/expired authorization, and unsupported integrations.
+- Automatic Meiju bound-device retrieval after authorization, preserved organization after reauthorization, and honest empty/partial/failed/unsupported results.
+- Supported cloud reads and authorized writes away from home with Wi-Fi disabled and no home computer or gateway.
 - Explicit receive mode, peer-code mismatch, rejected consent, unreachable peers, and session timeout.
 - Unavailable secure storage, account conflicts, invalid imported authorization, and a lost final acknowledgement.
 - Provider sharing eligibility, cross-installation refresh behavior, actual scope/expiry/revocation, and independent receiving clients.

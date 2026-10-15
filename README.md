@@ -1,75 +1,59 @@
 # HomeVerb
 
-**Cross-brand appliance control without a persistent service. One embedded core, three independent entry points: CLI, mobile app, and local MCP.**
-
-> **Status: design baseline v0.1.1-docs, October 14, 2026.** HomeVerb is the owner-approved project name. This repository contains design documents, contract examples, architecture diagrams, and validation tooling. **It does not contain a working appliance-control application.** All `homeverb` commands are proposed interfaces. Every real-device adapter remains unimplemented and unverified.
-
-## Project identity
-
 **One language for your appliances. No daemon required.**
 
-Use **HomeVerb** for the project and mobile app, and `homeverb` for the repository and CLI executable. Proposed modules use the `homeverb-` prefix. See the [naming decision](docs/adr/0006-project-name.md).
+HomeVerb is the owner-approved project name; `homeverb` is the executable and repository name.
 
-## What this project solves
+> **Status: 0.2.0 Mock MVP.** The Rust Core, persistent fictional appliance, CLI, read-only local MCP, and native UI bridge are implemented. No real-device adapter is implemented or physically verified. Android/iOS packaging and visual UI are separate work.
 
-Connect platform accounts and appliances from a single client, translate vendor protocols into common capabilities, and control devices from a terminal, a phone, or a local AI host. Users do not deploy Home Assistant, a NAS gateway, Docker services, or a project-operated backend.
+## Run the MVP
 
-A shared core means shared **code**, not a shared central service. Each entry point loads its own Core instance and performs authentication, discovery, routing, execution, and verification inside its process. Direct access to vendor clouds is allowed; universal offline operation is not promised.
-
-## Product boundaries
-
-| Required | Explicitly excluded |
-|---|---|
-| One-shot CLI commands that exit when complete | Daemons, keep-alive workers, and startup services |
-| An embedded mobile core with foreground, on-demand networking | Background phone gateways and central control servers |
-| A local MCP stdio process owned by its host session | Remote HTTP MCP and public project APIs |
-| Common devices, capabilities, and actions | Automation engines and unattended scheduling |
-| Direct LAN or vendor-cloud connections | Project-operated relays and hosted credentials |
-| Local configuration and timestamped state snapshots | Automatic cross-device sync and continuous collection |
-
-An appliance continuing an already-started wash or cleaning cycle is not a project background task. Continuously evaluating conditions and issuing new commands is automation and is out of scope.
-
-## Architecture
-
-![Independent embedded-core architecture without a persistent service](docs/diagrams/architecture-overview.svg)
-
-[Mermaid source](docs/diagrams/architecture-overview.mmd) | [PNG preview](docs/diagrams/architecture-overview.png) | [Architecture details](docs/architecture.md)
-
-## Proposed usage - not implemented
+Requirements: Rust 1.96 or later. The first build downloads dependencies; `Cargo.lock` records resolved versions. Commands use a private local profile and never contact an appliance.
 
 ```bash
-homeverb auth login midea --profile home
-homeverb device discover --profile home --connection auto --timeout 10s
-homeverb device list --json
-homeverb device describe bedroom-ac --json
-homeverb device state bedroom-ac --fresh --json
-homeverb climate set bedroom-ac --temperature 26 --mode cool --connection lan --json
-homeverb power set bedroom-ac --off --connection auto --json
-homeverb mcp --stdio --profile home
+cargo build --workspace --locked
+./target/debug/homeverb --mock device discover
+./target/debug/homeverb --mock device list
+./target/debug/homeverb --mock device describe mock-ac
+./target/debug/homeverb --mock power set mock-ac --on
+./target/debug/homeverb --mock climate set mock-ac --temperature 25
+./target/debug/homeverb --mock device state mock-ac --fresh
 ```
 
-Authentication, capability ranges, and control paths require model-specific evidence. Unreachable LAN-only devices must return a clear error; no implicit relay is created. Cloud adapters that cannot meet the native-client authentication requirement are not admitted.
-
-## Reading order
-
-[Documentation index](docs/index.md) -> [Product requirements](docs/product-requirements.md) -> [Architecture](docs/architecture.md) -> [Capabilities](docs/capabilities.md) -> [Adapter contract](docs/adapter-contract.md) -> [Task breakdown](docs/task-breakdown.md).
-
-AI contributors must read [AGENTS.md](AGENTS.md). The requested [agent.md](agent.md) filename is retained as a pointer to the canonical instructions.
-
-## What is available now
-
-Design documents, fictional JSON fixtures, JSON Schemas, Mermaid/SVG/PNG diagrams, issue and pull-request templates, and local documentation/contract checks. There is no Cargo workspace, Flutter application, control binary, or real account configuration.
+All operation output is JSON. Mock state survives process exit. Use `--data-dir /absolute/private/path` for an isolated installation and `--profile demo` for an isolated profile. An `unknown` result is intentional when acknowledgement is lost:
 
 ```bash
-python3 scripts/validate_docs.py
-python3 -m pip install -r requirements-dev.txt
-python3 scripts/validate_contracts.py
+./target/debug/homeverb --mock --scenario lost-ack power set mock-ac --off
 ```
 
-The first check only needs Python's standard library. Passing these checks does not establish real-device compatibility.
+This exits with code 11. Refresh state to inspect the result; do not blindly resend. See the [runnable walkthrough](docs/development/01-run-mock.md).
 
-## Repository policy
+## What is implemented
 
-All repository documentation, diagram labels, examples, issue/PR templates, and commit messages are written in English. Use Conventional Commits such as `feat(core): ...`, `fix(adapter): ...`, `docs: ...`, and `test: ...`; see [Commit conventions](docs/commit-conventions.md).
+- Capability-driven validation, device/component/argument/route-scoped low-risk grants, shared deadlines, cancellation, and timestamped verification.
+- SQLite metadata/cache/execution journal, cross-process device locks, and request-ID replay protection.
+- A bounded Linux Secret Service library with scoped credential references, redacted secret buffers, and no plaintext fallback. Real-account host integration and mobile stores remain pending.
+- Local rooms, aliases, favorites, and card ordering through Core, CLI, and the native UI bridge; rediscovery preserves preferences.
+- Schema-1 migration with a consistent backup, bounded detailed receipts, and retained request IDs that prevent replay after history is retired.
+- Explicit local diagnostic previews with allowlisted fields and bounded receipt summaries, available through CLI and the native UI bridge.
+- Persistent Mock power/climate operations and fault scenarios, including non-atomic partial outcomes.
+- Bounded correlated-completion verification with exact request/device/connection and timestamp checks; fictional evidence does not establish real protocol support.
+- Explicit device batches through Core, CLI files, and native requests, with whole-list preflight, four-device concurrency, shared deadlines, and per-device receipts.
+- Component-scoped capabilities for different constraints on one physical appliance, verified with fictional fridge/freezer fixtures.
+- One-shot CLI, host-owned read-only MCP stdio, and a C ABI that loads Core directly in the UI process.
+- Framework-independent `en-US` and `zh-CN` catalogs, locale normalization, and presentation helpers. Visual UI design remains separate.
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), the [test plan](docs/testing.md), and the [roadmap](docs/roadmap.md). The project license has not been selected; see [License decision](LICENSE-DECISION.md). [Private publishing](docs/publishing.md) describes the authenticated GitHub upload procedure. A local checkout or this documentation package is not evidence that a remote repository has been created.
+## Boundaries
+
+Each host owns its Core instance. No HA, NAS, project backend, daemon, relay, background polling, cloud sync, or remote HTTP MCP is required or implemented. A future real adapter may contact a vendor cloud directly only when native-client authentication is viable. Mock success does not establish device compatibility or mobile support.
+
+## Develop progressively
+
+1. [Run and verify the Mock flow](docs/development/01-run-mock.md).
+2. [Understand and extend the Core](docs/development/02-core.md).
+3. [Connect a UI and localization](docs/development/03-ui-integration.md).
+4. [Admit a real adapter](docs/development/04-add-adapter.md).
+
+[Documentation index](docs/index.md) | [Current task status](docs/task-breakdown.md) | [Compatibility](docs/compatibility.md) | [Testing](docs/testing.md) | [AI contributor rules](AGENTS.md)
+
+Repository documentation, code, diagnostics, and commit messages are English. Chinese is permitted only in the requested `zh-CN` translation catalog. Use English [Conventional Commits](docs/commit-conventions.md). The [project license](LICENSE-DECISION.md) remains undecided; nothing has been published by this implementation work.

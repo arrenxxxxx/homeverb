@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "application_version": "0.2.0",
+  "generated_at": "2026-10-14T10:00:00Z",
+  "scope": "local_profile",
+  "device_count": 1,
+  "room_count": 1,
+  "connections": {
+    "lan": 1,
+    "cloud": 1
+  },
+  "receipt_limit": 100,
+  "attempt_limit": 32,
+  "recent_receipts": [
+    {
+      "status": "unknown",
+      "error_code": "WRITE_OUTCOME_UNKNOWN",
+      "verification_kind": null,
+      "attempts": [
+        {
+          "transport": "lan",
+          "phase": "possibly_sent",
+          "duration_ms": 250
+        }
+      ],
+      "attempts_omitted": 0,
+      "warning_count": 0,
+      "item_outcomes": {
+        "accepted": 0,
+        "verified": 0,
+        "failed": 0,
+        "unknown": 0,
+        "partial": 0
+      }
+    }
+  ]
+}

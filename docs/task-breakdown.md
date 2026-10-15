@@ -1,36 +1,32 @@
-# Actionable task breakdown
+# Implementation status and next tasks
 
-Each task should fit a small pull request. T00 is delivered as a documentation baseline; every application task is `planned` unless explicit implementation evidence is added.
+The Mock MVP is runnable. Status below is evidence-scoped; no row implies physical-device support.
 
-| ID | Task | Dependencies | Acceptance criteria |
+| ID | Task | Current status | Remaining acceptance |
 |---|---|---|---|
-| T00 | Documents, diagrams, contracts, repository templates | None | Documentation and contract checks pass |
-| T01 | Select language/toolchain/layout; create a compilable workspace | T00 | At least one real executable unit test; toolchain recorded |
-| T02 | Device/Capability/Command/Execution DTOs | T01 | Positive/negative, unit, range, and version tests |
-| T03 | Mock adapter and controlled clock/network | T02 | Reproducible reads, writes, rejection, lost ACK, cancellation |
-| T04 | Core execution state machine and routing | T03 | No duplicate uncertain writes; hard route policy |
-| T05 | SQLite, secret storage, refresh locks | T02 | No plaintext credentials; no crash replay |
-| T06 | CLI queries, capabilities, writes, exit codes | T04,T05 | Stable JSON; commands exit without a daemon |
-| T07 | Minimal Android Flutter in-process probe | T02,T03 | Same Core on a physical phone; cancellation/lifecycle verified |
-| T08 | Local MCP stdio reads and allowlisted writes | T04,T05 | Protocol-only stdout; EOF exit; default denial of writes |
-| T09 | First adapter authentication feasibility | T00 | Evidence of no-project-backend authentication, or blocked |
-| T10 | First real-device discovery/read/authorized write | T04,T05,T09 | Model-specific hardware and verification evidence |
-| T11 | Flutter room/card UI, platform management, and dynamic device controls | T07,T10 | Implement the [Window Light screen inventory](ui-screen-inventory.md), [functional acceptance checklist](ui-functional-spec.md), and [one-skin extension contract](ui-window-light.md); no HomeVerb login; custom rooms preserve device identity; independent control without any project service; actual Flutter/phone validation remains required |
-| T12 | Second heterogeneous adapter | T10 | Same capability calls; no brand branches in UI |
-| T13 | Credentials, policy, diagnostics, supply-chain review | T06,T08,T11 | Security cases and documented residual risks |
-| T14 | Packages and public release readiness | T12,T13 | Platform matrix, license decision, actual CI success |
-| T15 | Foreground local-network authorization sharing in Settings | T05,T07,T09 | ADR-0008 contract/security review; peer verification and bilateral consent; secure import; provider eligibility evidence; honest scope and revocation; lifecycle cleanup and interruption tests |
+| T00 | Documents and contracts | Implemented | Keep references synchronized |
+| T01 | Toolchain and workspace | Implemented: Rust 1.96, Cargo workspace | Additional target builds |
+| T02 | Domain DTOs and validation | Shared/component-scoped capability definitions, per-adapter descriptor admission, transactional rediscovery identity guards, and stored-metadata operational validation implemented | Expand tests with new capabilities and actual model constraints |
+| T03 | Mock and controlled failures | Implemented | Add protocol-specific faults with adapters |
+| T04 | Execution and routing | State-match and bounded correlated-completion verification, explicit independent-field decomposition, explicit device batches with whole-list preflight/shared deadlines, scoped authorization, and full-snapshot observation validation with per-property freshness limits implemented | Model-specific freshness/correlation evidence and real protocol guarantees |
+| T05 | Storage and credentials | SQLite journal/cache, device locks, schema-1 backup/upgrade, bounded detailed receipts, retired-ID protection, and Linux Secret Service library implemented | Real-account host wiring, mobile secure stores, and account refresh locks |
+| T06 | CLI | Mock queries/writes and explicit batch files, local organization, exact receipt lookup, device-filtered history, and bounded redacted local diagnostic reports implemented | Real authentication and adapter-specific diagnostics evidence |
+| T07 | Android embedding probe | Linux native ABI and foreground lifecycle tested | Flutter SDK, Android toolchain, physical phone |
+| T08 | Local MCP | Read-only stdio with exact receipt lookup implemented and protocol harness tested | Target AI host validation and reviewed write grants |
+| T09 | First native authentication | Midea Meiju account journey selected; community cloud login, home/device enumeration, and LAN credential paths researched | Review native-client admission/signing material; implement secure sessions and automatic bound-device retrieval; validate account/region and reauthorization identity preservation |
+| T10 | First real adapter | Midea/Hualing air conditioners, dishwashers, and refrigerators selected; pinned cloud and LAN sources inspected | Implement direct cloud reads/controls first, then additional LAN connections; obtain exact-model and off-LAN physical acceptance for permitted writes |
+| T11 | Flutter room/card UI, platform management, and dynamic device controls | UI bridge, Core room/card metadata, and locale resources implemented; complete Window Light visual specification available | Implement the [functional acceptance checklist](ui-functional-spec.md), [82-state inventory](ui-screen-inventory.md), and [one-skin extension contract](ui-window-light.md); actual Flutter/phone integration remains unverified. No HomeVerb login; rooms preserve device identity |
+| T12 | Second protocol family | Planned after T10 | Equivalent capability calls on heterogeneous hardware |
+| T13 | Security review | Mock component, argument, route, composite-policy, uncertainty, and diagnostic allowlist/marker tests implemented | Real credential, dependency, live-adapter log and diagnostic review |
+| T14 | Release | Planned | License decision, packages, actual remote CI and device evidence |
+| T15 | Foreground local-network authorization sharing in Settings | Planned | ADR-0008 contract/security review; peer verification and bilateral consent; secure import; provider eligibility evidence; honest scope and revocation; lifecycle cleanup and interruption tests |
 
-T15 is planned and does not establish real-platform sharing support. Its security and compatibility evidence is required before packaging any enabled sharing path. It does not change the T01-T03 and minimal T07 starting sequence.
+T15 does not establish real-platform sharing support. Its security and compatibility evidence is required before packaging any enabled sharing path.
 
-## First implementation tasks
+## Next development order
 
-Start with T01, T02, T03, and a minimal T07 probe. Do not implement every platform or build an HTTP service first. T09 can run alongside prototype work; authentication research must not bypass the boundary through a "temporary" backend.
+Use the [progressive guides](index.md). UI development can proceed against the native room/card request contract and locale catalogs. Local organization, schema migration, detailed-receipt retention, and the Linux secret-store library are implemented. The owner selected Midea/Hualing air conditioners, dishwashers, and refrigerators. Follow the [pinned community-source integration plan](development/05-midea.md): secure account connection and automatic cloud device retrieval, cloud reads through Core, authorized cloud writes with physical evidence, then additional LAN connections. The complete mobile journey must work away from home without a gateway or manual IP/Token entry. A read-only stage or LAN-only control does not complete T10.
 
-## PR completion record
+Research and offline contract/protocol implementation can proceed before exact model details arrive; account/region evidence gates real authentication and model/firmware evidence gates physical compatibility claims. The inspected refrigerator LAN setter is empty, while cloud mappings include compartment temperature settings; assess those routes separately. Mobile needs its own secure-store implementation. Preserve specific blockers for live access and mobile tooling. Authorization sharing remains gated by ADR-0008.
 
-Task ID; changed files; interface changes; commands actually executed and results; skipped tests and reasons; physical-device evidence; security impact; documentation and compatibility updates. Write the entire record in English and use a Conventional Commit PR title.
-
-## Blockers
-
-Record precise reasons for native-authentication incompatibility, missing authorized accounts, unavailable hardware, or unresolved upstream licensing. Mock and contract work can proceed, but do not claim support. A stack change updates the architecture and ADR first; avoid indefinitely maintaining two separate cores.
+Each completion record names the task, changed interfaces, commands actually run, results, skipped checks, compatibility effects, and external actions. All such records are English.

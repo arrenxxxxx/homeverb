@@ -1,6 +1,6 @@
 # AGENTS.md - Instructions for AI contributors
 
-Scope: every file in this repository. Project: **HomeVerb**. Repository and CLI: `homeverb`. Design baseline: v0.1.1-docs, October 14, 2026.
+Scope: every file in this repository. Project: **HomeVerb**. Repository and CLI: `homeverb`. Implementation baseline: 0.2.0 Mock MVP, October 14, 2026.
 
 ## Read first
 
@@ -40,13 +40,13 @@ MCP principals come from trusted host configuration. Tool parameters must not se
 
 Use the owner-approved name **HomeVerb** in prose and app branding, `homeverb` for the repository and executable, and `homeverb-` for proposed module names. Follow `docs/adr/0006-project-name.md`. Do not mark the name as provisional.
 
-Write all documentation, code comments, diagram labels, example messages, issue/PR text, commit subjects, and commit bodies in English. Keep public identifiers stable and English. Do not add translated copies unless the owner changes this policy explicitly.
+Write all documentation, code comments, diagram labels, example messages, issue/PR text, commit subjects, and commit bodies in English. Keep public identifiers stable and English. Do not add translated documentation. The owner-authorized exception is the `packages/presentation/locales/zh-CN.json` UI translation catalog; all public identifiers and other source text remain English.
 
 Use `<type>(<optional-scope>): <English imperative summary>`. Allowed types: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `ci`, `build`, `chore`, `style`, and `revert`. Use `feat`, not `feature` or `fateture`. Documentation-only work is `docs`, not a claim that a product feature now works. See `docs/commit-conventions.md`.
 
 ## Implementation status and test honesty
 
-This is a documentation and contract baseline, not a compilable appliance-control application. Establish T01-T03 and a minimal mock end-to-end flow before extensive vendor code. A real adapter is `verified` only after model-specific physical-device testing.
+The Rust Mock MVP and Linux Secret Service library are implemented. Read the progressive guides in `docs/development/` before changing them. Real authentication/account integration, mobile credential stores and packaging, and physical-device support remain pending; see `docs/task-breakdown.md`. A real adapter is `verified` only after model-specific physical-device testing.
 
 Current checks:
 
@@ -58,7 +58,7 @@ python3 scripts/validate_repository.py
 python3 scripts/validate_commits.py --all
 ```
 
-Add actual build/lint/test commands after Rust and Flutter projects exist. Never report unexecuted `cargo test`, mobile builds, physical-device tests, or remote CI as successful. Record a specific `blocked` reason when hardware, accounts, authentication evidence, or licensing is missing.
+Run the Rust and runtime commands in `docs/testing.md` for application changes. Flutter is not installed or validated in this checkout. Never report unexecuted `cargo test`, mobile builds, physical-device tests, or remote CI as successful. Record a specific `blocked` reason when hardware, accounts, authentication evidence, or licensing is missing.
 
 ## Delivery workflow
 

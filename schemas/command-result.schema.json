@@ -1,12 +1,14 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "CommandResult",
+  "description": "A command receipt, also returned unchanged inside a successful local execution-lookup query. Query success does not change or imply success of the stored command outcome.",
   "type": "object",
   "properties": {
     "schema_version": {
       "const": "1.0"
     },
     "request_id": {
+      "description": "The caller ID or an internal composite correlation ID derived by appending a colon and step index. Internal IDs may exceed the 256-byte caller-input limit.",
       "type": "string",
       "minLength": 1
     },
@@ -86,7 +88,8 @@
               "enum": [
                 "state_match",
                 "correlated_completion"
-              ]
+              ],
+              "description": "state_match compares observed values. correlated_completion reports adapter-validated successful completion of this exact command on its selected connection; acknowledgement alone is insufficient."
             },
             "source": {
               "enum": [
@@ -103,6 +106,7 @@
               "format": "date-time"
             },
             "matches_target": {
+              "description": "For state_match, validated observed values equal the requested values without coercion or approximate tolerance. For correlated_completion, the adapter established successful completion of the entire correlated command; this does not assert current state or exactly-once execution.",
               "const": true
             },
             "note": {
@@ -163,6 +167,14 @@
         "$ref": "#"
       },
       "minItems": 2
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Infrastructure diagnostics that do not erase known outcomes, verification evidence, or composite items."
     }
   },
   "required": [
@@ -198,7 +210,8 @@
                 "enum": [
                   "state_match",
                   "correlated_completion"
-                ]
+                ],
+                "description": "state_match compares observed values. correlated_completion reports adapter-validated successful completion of this exact command on its selected connection; acknowledgement alone is insufficient."
               },
               "source": {
                 "enum": [
@@ -215,7 +228,8 @@
                 "format": "date-time"
               },
               "matches_target": {
-                "const": true
+                "const": true,
+                "description": "For state_match, validated observed values equal the requested values without coercion or approximate tolerance. For correlated_completion, the adapter established successful completion of the entire correlated command; this does not assert current state or exactly-once execution."
               },
               "note": {
                 "type": "string",
@@ -369,12 +383,110 @@
         "required": [
           "items"
         ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "verified"
+          }
+        },
+        "required": [
+          "items"
+        ]
       },
-      "else": {
-        "not": {
-          "required": [
-            "items"
-          ]
+      "then": {
+        "properties": {
+          "items": {
+            "items": {
+              "properties": {
+                "status": {
+                  "const": "verified"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "accepted"
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "then": {
+        "properties": {
+          "items": {
+            "items": {
+              "properties": {
+                "status": {
+                  "const": "accepted"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "failed"
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "then": {
+        "properties": {
+          "items": {
+            "items": {
+              "properties": {
+                "status": {
+                  "const": "failed"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "const": "NOT_EXECUTED"
+              }
+            },
+            "required": [
+              "code"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "failed"
+          },
+          "attempts": {
+            "maxItems": 0
+          },
+          "verification": {
+            "type": "null"
+          }
         }
       }
     }

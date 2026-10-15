@@ -1,0 +1,17 @@
+[package]
+name = "homeverb-ffi"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+homeverb-host.workspace = true
+homeverb-domain.workspace = true
+homeverb-mock.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true

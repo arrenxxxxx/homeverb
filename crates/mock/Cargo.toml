@@ -1,0 +1,16 @@
+[package]
+name = "homeverb-mock"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+homeverb-core.workspace = true
+homeverb-domain.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+async-trait.workspace = true
+tokio.workspace = true
+rusqlite.workspace = true

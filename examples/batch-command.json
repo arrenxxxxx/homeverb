@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "commands": [
+    {
+      "schema_version": "1.0",
+      "request_id": "req-example-001",
+      "device_id": "dev-example-ac",
+      "component_id": "main",
+      "capability": "climate",
+      "action": "set",
+      "arguments": {
+        "target_temperature": 26,
+        "mode": "cool"
+      },
+      "connection": "auto",
+      "timeout_ms": 10000,
+      "wait_for": "verified"
+    },
+    {
+      "schema_version": "1.0",
+      "request_id": "req-example-002",
+      "device_id": "dev-example-ac-2",
+      "component_id": "main",
+      "capability": "climate",
+      "action": "set",
+      "arguments": {
+        "target_temperature": 26,
+        "mode": "cool"
+      },
+      "connection": "auto",
+      "timeout_ms": 10000,
+      "wait_for": "verified"
+    }
+  ]
+}

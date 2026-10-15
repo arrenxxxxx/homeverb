@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SKIP_PARTS = {'.git', '.venv', 'venv', '__pycache__', 'node_modules', 'target', 'build'}
-TEXT_SUFFIXES = {'.md', '.mmd', '.svg', '.json', '.yml', '.yaml', '.py', '.sh', '.txt', '.toml'}
+TEXT_SUFFIXES = {'.md', '.mmd', '.svg', '.json', '.yml', '.yaml', '.py', '.sh', '.txt', '.toml', '.rs', '.h', '.mjs'}
 TEXT_NAMES = {'.gitignore', '.gitattributes', '.editorconfig', 'commit-msg'}
 
 
@@ -25,7 +25,8 @@ def check_file(path: Path) -> list[str]:
     except (OSError, UnicodeError) as exc:
         return [f'{path.name}: cannot read UTF-8 text: {exc}']
     for number, line in enumerate(text.splitlines(), 1):
-        if non_latin_letters(line):
+        translation_catalog = path == ROOT / 'packages/presentation/locales/zh-CN.json'
+        if non_latin_letters(line) and not translation_catalog:
             errors.append(f'{path.name}:{number}: non-Latin letters violate the English documentation policy')
     if text and not text.endswith('\n'):
         errors.append(f'{path.name}: missing final newline')

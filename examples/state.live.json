@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "device_id": "dev-example-ac",
+  "component_id": "main",
+  "from_cache": false,
+  "observations": {
+    "power.state": {
+      "value": true,
+      "source": "lan",
+      "observed_at": "2026-10-14T05:00:00Z",
+      "received_at": "2026-10-14T05:00:01Z",
+      "stale": false
+    },
+    "climate.mode": {
+      "value": "cool",
+      "source": "lan",
+      "observed_at": "2026-10-14T04:59:00Z",
+      "received_at": "2026-10-14T05:00:01Z",
+      "stale": true
+    },
+    "climate.target_temperature": {
+      "value": 25.5,
+      "source": "lan",
+      "observed_at": "2026-10-14T05:00:00Z",
+      "received_at": "2026-10-14T05:00:01Z",
+      "stale": false
+    }
+  },
+  "warnings": [
+    "Fictional live response evaluated at its receipt time.",
+    "One or more observations are at least 30 seconds old."
+  ]
+}
