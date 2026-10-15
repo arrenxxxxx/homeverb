@@ -11,8 +11,9 @@ The native account vault now persists random local references, composes Linux se
 The next implemented phase adds an explicitly opted-in AC `power.set` path and
 [preview-first control probe](07-meiju-control.md). Its Core grants and TLS send
 progress are synthetic-tested. Native API 1.9 also adds independent vendor fan controls with exact-device/code grants.
-Real control acceptance, temperature constraints, other settings, dishwasher/refrigerator
-writes and Flutter consent UI remain pending.
+API 1.12 adds protected-profile AC temperature control; API 1.12.1 also uses that
+profile's selected temperature wire shape on explicit reads. Real control acceptance,
+other settings, dishwasher/refrigerator writes and Flutter consent UI remain pending.
 
 ## Reuse the community protocol work
 
@@ -241,7 +242,7 @@ The native [state decoder](../../crates/midea/src/state.rs) uses these limited s
 
 | Family / decoder component | Fields and projection | Boundary |
 |---|---|---|
-| [AC][ac-cloud-source] / `main` | `power` -> `power.state`; `indoor_temperature` -> current temperature; `temperature` plus `small_temperature` -> target temperature | Both target parts are required. Mode and wind-speed codes remain `vendor.midea.ac.*`; no universal fan enums or setter ranges |
+| [AC][ac-cloud-source] / `main` | `power` -> `power.state`; `indoor_temperature` -> current temperature; `temperature` plus `small_temperature` -> target temperature | Both target parts are required unless the protected selector chooses the reviewed single-field product mapping (23096245 with a known non-overriding subtype); that mapping reads only `temperature`. Writable limits never filter historical observations. Mode and wind-speed codes remain `vendor.midea.ac.*`; no universal fan enums or setter ranges |
 | [CA][ca-cloud-source] / `fridge`, `freezer` | `storage_*` / `freezing_*` power and target fields; `refrigeration_real_temperature` / `freezing_real_temperature` -> current values | Two decoder slots for one local device, not proof of physical compartment support. Other zones remain unmapped |
 | [E1][e1-cloud-source] / `main` | Program `mode`, `work_status`, `doorswitch`, lack flags, temperature and remaining minutes under `vendor.midea.dishwasher.*` | Preserve model-specific codes. In the inspected `7600016L` mapping, door code 1 means closed; do not manufacture a universal door-open or cycle-running boolean |
 

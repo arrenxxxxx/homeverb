@@ -177,6 +177,12 @@ status. `MCP_IO_ERROR` ends the session after cancelling and draining active wor
 a later lookup is required when the response could not be delivered. See
 [MCP results](mcp.md#results-and-shutdown).
 
+For the reviewed scalar AC temperature profile, malformed/nonfinite `temperature`
+returns `MIDEA_RESPONSE_INVALID` and leaves the previous snapshot intact. Missing
+or null target fields remain absent; `small_temperature` is not a recognized
+field in that selected mapping. Compound profiles retain their two-field checks.
+Neither path applies write bounds to observations or establishes freshness.
+
 ## Native account connection results
 
 `homeverb_connect_account` is separate from ordinary JSON and rejects invalid

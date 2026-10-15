@@ -1,6 +1,6 @@
 # HomeVerb native contract
 
-Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.12.0 has 31 callable JSON methods and one separate protected account-connection function; the JSON envelope schema is 1.0.
+Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.12.1 has 31 callable JSON methods and one separate protected account-connection function; the JSON envelope schema is 1.0.
 
 - [api.json](api.json) is compiled into the `get_api_info` response.
 - [examples.json](examples.json) contains fictional requests and actual Mock native responses, including failures and lifecycle states. It is preview/test data, never a production device database.
@@ -19,3 +19,5 @@ API 1.11 adds independent `meiju_mode_grants` for explicit combined AC power-on 
 API 1.11.1 preserves product mapping evidence only inside protected account payload version 3. Older payloads remain readable without mutation; older binaries cannot open the upgraded payload. Native methods and public DTOs are unchanged. Follow the [migration guidance](../../docs/native-ui-contract.md#protected-product-profile-migration).
 
 API 1.12 adds independent `meiju_temperature_grants` for exact Celsius targets on ACs with reviewed protected product mappings. Negotiate the version before supplying this field. The action schema supplies device-specific write limits; startup grants never establish capability. See the [temperature startup contract](../../docs/native-ui-contract.md#scoped-experimental-ac-temperature-startup). Methods, C functions, SQLite schema 4 and protected payload 3 remain unchanged.
+
+API 1.12.1 fixes explicit AC target reads for the protected single-field temperature profile. It adds no method, schema, permission or storage migration; read-only sessions also benefit. Compound-profile reads retain their previous requirements.

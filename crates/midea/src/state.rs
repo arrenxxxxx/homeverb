@@ -134,7 +134,7 @@ pub async fn read_cloud_state(
                 account_ref,
                 appliance_id: appliance.id.clone(),
                 received_at,
-                components: decode(&data, appliance.family)?,
+                components: decode(&data, appliance)?,
             })
         })
         .await?;
@@ -211,10 +211,10 @@ fn field(
 
 fn decode(
     data: &Value,
-    family: ApplianceFamily,
+    appliance: &Appliance,
 ) -> Result<BTreeMap<&'static str, BTreeMap<String, Value>>> {
     let mut output = BTreeMap::new();
-    match family {
+    match appliance.family {
         ApplianceFamily::AirConditioner => {
             let readings = output.entry("main").or_default();
             field(readings, data, "power", "power.state", on_off)?;
@@ -233,19 +233,34 @@ fn decode(
                 "climate.current_temperature",
                 numeric,
             )?;
-            let whole = present(data, "temperature").map(number).transpose()?;
-            let fraction = present(data, "small_temperature").map(number).transpose()?;
-            if whole.is_some_and(|value| value.fract() != 0.0)
-                || fraction.is_some_and(|value| !(0.0..1.0).contains(&value))
+            if appliance
+                .product_profile
+                .temperature()
+                .is_some_and(|profile| !profile.fractional_field)
             {
-                return Err(invalid());
-            }
-            if let (Some(whole), Some(fraction)) = (whole, fraction) {
-                let target = whole + fraction;
-                if !target.is_finite() {
+                // Read the selected wire shape without applying writable bounds or steps.
+                field(
+                    readings,
+                    data,
+                    "temperature",
+                    "climate.target_temperature",
+                    numeric,
+                )?;
+            } else {
+                let whole = present(data, "temperature").map(number).transpose()?;
+                let fraction = present(data, "small_temperature").map(number).transpose()?;
+                if whole.is_some_and(|value| value.fract() != 0.0)
+                    || fraction.is_some_and(|value| !(0.0..1.0).contains(&value))
+                {
                     return Err(invalid());
                 }
-                readings.insert("climate.target_temperature".into(), json!(target));
+                if let (Some(whole), Some(fraction)) = (whole, fraction) {
+                    let target = whole + fraction;
+                    if !target.is_finite() {
+                        return Err(invalid());
+                    }
+                    readings.insert("climate.target_temperature".into(), json!(target));
+                }
             }
         }
         ApplianceFamily::Dishwasher => {

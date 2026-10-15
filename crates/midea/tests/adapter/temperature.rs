@@ -58,7 +58,11 @@ async fn temperature_controls_use_each_protected_encoding_without_other_fields_o
         let devices = f.discover().await;
         assert_eq!(devices.len(), 4);
         for device in devices {
-            *f.wire.state.lock().unwrap() = Some(json!({"temperature":15,"small_temperature":0.5}));
+            *f.wire.state.lock().unwrap() = Some(if fractional {
+                json!({"temperature":15,"small_temperature":0.5})
+            } else {
+                json!({"temperature":15.5})
+            });
             let before = f.read(&device, "main", false).await.unwrap();
             let core = core(&f, &device, true);
             core.discover(&operation()).await.unwrap();
@@ -192,6 +196,66 @@ async fn weakened_descriptors_cannot_bypass_profile_arguments_opt_in_or_membersh
             .await;
         assert_eq!(result.status, Status::Failed);
         assert_eq!(result.attempts[0].phase, Phase::NotSent);
+    }
+    assert!(f.wire.controls.lock().unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn read_only_scalar_targets_use_retained_profiles_and_preserve_cache_on_invalid_responses() {
+    let entries = appliances()
+        .into_iter()
+        .take(4)
+        .map(|mut entry| {
+            entry["modelNumber"] = json!(1);
+            entry["sn8"] = json!("23096245");
+            entry
+        })
+        .collect();
+    let f = Fixture::new(entries).await;
+    let devices = f.discover().await;
+    // Later sparse inventory must not erase the protected read mapping.
+    *f.wire.inventories.lock().unwrap().get_mut("FIRST").unwrap() =
+        appliances().into_iter().take(4).collect();
+    f.discover().await;
+    for device in devices {
+        let descriptor = f.core.describe(&device.id).unwrap();
+        let climate = descriptor.capability("main", "climate").unwrap();
+        assert!(climate.actions.is_empty());
+        assert_eq!(
+            climate.properties["target_temperature"]["writable"],
+            json!(false)
+        );
+        *f.wire.state.lock().unwrap() = Some(json!({"temperature":"15.5","indoor_temperature":27}));
+        let calls = f.calls();
+        let live = f.read(&device, "main", false).await.unwrap();
+        assert_eq!(f.calls(), calls + 1);
+        assert_eq!(
+            live.observations["climate.target_temperature"].value,
+            json!(15.5)
+        );
+        assert!(live.observations["climate.target_temperature"].stale);
+        assert!(
+            live.observations["climate.target_temperature"]
+                .observed_at
+                .is_none()
+        );
+        let cached = f.read(&device, "main", true).await.unwrap();
+        assert_eq!(f.calls(), calls + 1);
+        assert_eq!(
+            cached.observations["climate.target_temperature"].value,
+            json!(15.5)
+        );
+        let saved = f.store.snapshot(&device.id, "main").unwrap().unwrap();
+        *f.wire.state.lock().unwrap() = Some(json!({"temperature":true}));
+        assert_eq!(
+            f.read(&device, "main", false).await.unwrap_err().code,
+            "MIDEA_RESPONSE_INVALID"
+        );
+        assert_eq!(f.calls(), calls + 2);
+        assert_eq!(
+            json!(f.store.snapshot(&device.id, "main").unwrap().unwrap()),
+            json!(saved)
+        );
     }
     assert!(f.wire.controls.lock().unwrap().is_empty());
 }

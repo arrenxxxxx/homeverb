@@ -54,6 +54,21 @@ field. Older binaries reject it. Previously saved product evidence survives
 omitted later fields and supplies discovery descriptors without extra provider
 calls; permissions remain session-local and require explicit host restart to change.
 
+## Read consistency correction in API 1.12.1
+
+The pinned climate getter (`_get_target_temp_from_list`) reads a one-element key
+list as a scalar. Explicit cloud reads use the same protected selector: product
+code 23096245 with a known non-overriding subtype reads only `temperature`.
+`small_temperature` is unrelated for that mapping and is ignored, not added or
+required. Missing/null targets remain absent and malformed/nonfinite numeric
+targets invalidate the response. Historical values outside writable bounds or
+steps remain observable. Other profiles and missing evidence retain the existing
+two-field decoder; subtype 524 still wins over product code 23096245.
+
+This correction applies to read-only sessions without control grants and uses
+retained protected evidence without extra provider requests. It changes no public
+schema or storage version and does not make observations fresh or verify writes.
+
 ## Outcomes and verification
 
 One request contains only the encoded temperature field(s). Do not round invalid

@@ -543,3 +543,35 @@ storage/transport only. No owner account, credential profile or appliance was
 accessed; the separate Flutter worktree was untouched. APK/emulator/Keystore/phone,
 physical/off-LAN controls, dishwasher/refrigerator writes and remote CI remain
 unverified. The full real-device MVP remains incomplete.
+
+## Profile-aware scalar AC readings 1.12.1
+
+The prior decoder required `small_temperature` for every AC target. This dropped
+a valid `temperature` reading for the reviewed single-field mapping even though
+API 1.12 could send its scalar setpoint. API 1.12.1 uses the existing protected
+selector for reads as well: product code 23096245 with a known non-overriding
+subtype reads `temperature` alone, matching the pinned climate getter. Subtype
+524, compound profiles and missing evidence retain the two-field contract.
+No extra provider request, implicit refresh, control opt-in or raw-profile export
+is introduced. Missing/null values remain absent, invalid scalar values refuse
+the response without overwriting cache, and historical values are not constrained
+by write bounds or steps. Cloud freshness and write outcomes remain unchanged.
+
+The new regression was executed against the prior committed decoder and failed
+because the expected target 26 was absent. After the fix, local verification on
+October 16, 2026 passed 299 Rust tests (two opt-in system probes ignored),
+formatting, Clippy with warnings denied, workspace and example builds using
+`--offline --locked`, 34 runtime cases, the 31-method/51-example native ABI suite,
+29 Python tests and five presentation tests. Contract validation passed 17 schemas,
+34 positive and 117 negative fixtures; document/repository/commit checks passed.
+Tests cover scalar/compound selection, subtype priority, numeric strings,
+malformed/nonfinite targets, missing fields, unproven freshness, retained protected
+evidence after sparse inventory, read-only Core sessions and cache preservation.
+
+All three API 28 Android AARs (arm64, x86_64 and combined) were rebuilt using
+NDK r28c, JDK 21 and API 35 stubs; archive contents, eight exports per ABI and
+16 KiB ELF alignment passed. Native methods, C functions, public schemas,
+SQLite schema 4 and protected payload 3 are unchanged. No real account,
+credential profile or appliance was accessed; the separate Flutter worktree was
+untouched. Physical/off-LAN, phone/Keystore/APK and remote CI acceptance remain
+unverified. Dishwasher and refrigerator controls remain incomplete.
