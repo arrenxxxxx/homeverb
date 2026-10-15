@@ -54,7 +54,8 @@ pub fn valid_account_id(id: Uuid) -> Result<()> {
     Ok(())
 }
 
-pub trait AccountLock: Send {}
+/// Retained across Send adapter futures, including immutable leased session reads.
+pub trait AccountLock: Send + Sync {}
 
 pub trait AccountStore: Send + Sync {
     fn profile_namespace(&self) -> Result<Uuid>;

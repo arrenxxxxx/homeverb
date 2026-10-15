@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Meiju account-bound Core reads
+
+- Verify the protected local device and cloud connection before a default state request, retaining known model evidence and component identity.
+- Exercise AC/E1/CA decoding through Core and SQLite with fictional read-only descriptors; preserve stale evidence and the previous cache on invalid responses.
+- Require thread-safe AccountLock guards so leased reads satisfy Core's Send future contract; native API 1.0.0, SQLite schema 3 and live authentication admission remain unchanged.
+
 ### Meiju private account and device bindings
 
 - Persist the provider-validated subject, opaque session and stable account-scoped appliance bindings in one protected vault payload.

@@ -1,11 +1,14 @@
 //! Private account/session storage and stable cloud-device bindings; no authentication.
 
-use crate::{ApplianceFamily, CloudId, Inventory, MAX_RESPONSE_BYTES};
+use crate::{
+    Appliance, ApplianceFamily, CloudId, Inventory, MAX_RESPONSE_BYTES, ReadTransport, StateQuery,
+    read_cloud_state,
+};
 use homeverb_core::{
-    AccountLease, AccountRecord, AccountVault, CredentialRef, Operation, SecretBytes,
+    AccountLease, AccountRecord, AccountVault, Clock, CredentialRef, Operation, SecretBytes,
     valid_account_id,
 };
-use homeverb_domain::{Error, Result};
+use homeverb_domain::{Connection, Device, Error, Result, Snapshot, Transport};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashSet, fmt};
 use uuid::Uuid;
@@ -301,6 +304,76 @@ impl MeijuAccount {
                 )
             })?;
         CloudId::parse(&serde_json::Value::String(binding.appliance_id.clone()))
+    }
+
+    /// Verify the selected local binding before one default cloud query. Core must still
+    /// admit the descriptor and validate every returned property before caching the result.
+    pub async fn read_bound_state(
+        &self,
+        transport: &dyn ReadTransport,
+        device: &Device,
+        component: &str,
+        connection: &Connection,
+        clock: &dyn Clock,
+        operation: &Operation,
+    ) -> Result<Snapshot> {
+        let payload = self.load(operation).await?;
+        let appliance = operation
+            .run(async {
+                let binding = payload
+                    .bindings
+                    .iter()
+                    .find(|binding| binding.local.device_id.to_string() == device.id)
+                    .ok_or_else(identity_conflict)?;
+                let expected = Connection {
+                    id: binding.local.connection_id.to_string(),
+                    adapter: PROVIDER.into(),
+                    transport: Transport::Cloud,
+                    account_id: Some(self.record().id.to_string()),
+                    identity_ref: binding.local.identity_ref.to_string(),
+                };
+                if *connection != expected
+                    || !device.connections.contains(connection)
+                    || binding
+                        .model
+                        .as_ref()
+                        .is_some_and(|model| model != &device.model)
+                {
+                    return Err(identity_conflict());
+                }
+                let family = match binding.family {
+                    0xac if component == "main" => ApplianceFamily::AirConditioner,
+                    0xe1 if component == "main" => ApplianceFamily::Dishwasher,
+                    0xca if matches!(component, "fridge" | "freezer") => {
+                        ApplianceFamily::Refrigerator
+                    }
+                    _ => return Err(crate::state::unsupported()),
+                };
+                if !device.components.iter().any(|entry| entry.id == component) {
+                    return Err(crate::state::unsupported());
+                }
+                Ok(Appliance {
+                    id: CloudId::parse(&serde_json::Value::String(binding.appliance_id.clone()))?,
+                    family,
+                    name: None,
+                    model: binding.model.clone(),
+                    online_hint: None,
+                })
+            })
+            .await?;
+        drop(payload);
+        let state = read_cloud_state(
+            transport,
+            self.record().credential_ref,
+            &appliance,
+            StateQuery::Default,
+            clock,
+            operation,
+        )
+        .await?;
+        operation
+            .run(async { state.snapshot(&device.id, component) })
+            .await
     }
 
     async fn load(&self, operation: &Operation) -> Result<Payload> {

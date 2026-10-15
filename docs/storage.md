@@ -56,6 +56,8 @@ Writes use short transactions; no database write transaction spans adapter I/O. 
 
 Lock filenames retain the existing lowercase UTF-8 hex encoding for device IDs up to 127 bytes. Longer IDs use `sha256-` followed by the lowercase SHA-256 digest of the complete UTF-8 ID, keeping filenames below 255 bytes without truncation. The prefix cannot collide with legacy hex names. The mapping is deterministic across processes and preserves existing short-ID lock coordination; no SQLite migration is needed. Older binaries could not create the oversized hex filenames for these longer IDs on the verified Linux filesystem.
 
+AccountLock requires Send + Sync for borrowed account-session reads inside the existing Send adapter futures. This changes the unreleased Rust trait bound for custom stores, not process-lock behavior or storage layout. The built-in file guard already meets it. The [bound Meiju read](adr/0025-bound-meiju-core-reads.md) tests verify lease contention during an in-flight request and release after cancellation or expiry.
+
 A `request_id` provides local deduplication and correlation, not device-side idempotency. After a crash, unresolved transmitted writes are shown as unknown, never automatically resent by a recovery queue.
 
 Device batches reuse these individual command journals and device locks. No aggregate batch record or durable queue is created. A returned batch preserves every item's result, but forced termination may leave later items unstarted and unrecorded. Inspect the original command IDs through receipt lookup. Never treat a missing item as automatic permission to rerun the batch; see [ADR-0017](adr/0017-bounded-device-batches.md).

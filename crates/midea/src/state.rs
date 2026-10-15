@@ -136,7 +136,7 @@ pub async fn read_cloud_state(
     operation.run(async { Ok(state) }).await
 }
 
-fn unsupported() -> Error {
+pub(crate) fn unsupported() -> Error {
     Error::new(
         "CAPABILITY_UNSUPPORTED",
         "The cloud state family, query, component, or temperature unit is unsupported.",
