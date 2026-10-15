@@ -234,6 +234,10 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       await finish(c.loadAccounts(), 'P01');
       return;
     }
+    if (label == 'Inspect Saved Inventory') {
+      await c.inspectAccountInventory();
+      return;
+    }
     if (label == 'Retrieve Devices' || label == 'Recover Saved Authorization') {
       await finish(
         c.retrieveAccount(recover: label == 'Recover Saved Authorization'),

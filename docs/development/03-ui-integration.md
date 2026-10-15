@@ -131,3 +131,11 @@ Render translation results as text, not raw HTML. Present requested values separ
 The native ABI is verified through a Linux ctypes host and Flutter processes on Linux and an Android 15 x86_64 emulator. They load Core directly; Mock tests cover writes, cancellation, foreground gating and close. Android Keystore, physical-phone acceptance and iOS support remain unverified.
 
 Next: [Add a real adapter](04-add-adapter.md).
+
+The Flutter account detail view now offers explicit saved-inventory inspection
+when Core advertises API 1.10's method. It reads only the selected protected account,
+keeps listed/not-listed/unconfirmed membership distinct, and joins exact device and
+connection IDs without creating cards or granting control. Query errors have no
+cloud fallback; navigation/cancellation/background clear results and fence late
+replies. Contract fixtures and native missing-account/method gates are tested;
+real-account inspection through Flutter remains unverified.

@@ -19,12 +19,17 @@ class HomeController extends ChangeNotifier {
   int _readEpoch = 0;
   void cancelPending() {
     _readEpoch++;
+    accountInventory = null;
     core.cancelAll();
   }
 
   void setForeground(bool foreground) {
-    if (!foreground) _readEpoch++;
+    if (!foreground) {
+      _readEpoch++;
+      accountInventory = null;
+    }
     core.foreground(foreground);
+    if (!foreground) notifyListeners();
   }
 
   bool busy = false;
@@ -360,7 +365,7 @@ class HomeController extends ChangeNotifier {
     // Observations only change after an explicit read, never from a requested value.
   });
   List<Json> accounts = [];
-  Json? accountDetails, accountReport, accountRemoval;
+  Json? accountDetails, accountReport, accountRemoval, accountInventory;
   String? selectedAccount;
   List<String>? removalScope;
   bool accountNeedsReload = false;
@@ -381,6 +386,7 @@ class HomeController extends ChangeNotifier {
       .toList();
 
   Future<void> reloadAccountViews() async {
+    accountInventory = null;
     accounts = (await core.call('list_accounts') as List).cast<Json>();
     await loadLocal();
     if (selectedAccount != null) {
@@ -410,12 +416,37 @@ class HomeController extends ChangeNotifier {
   Future<bool> loadAccounts() => perform(reloadAccountViews);
   Future<bool> selectAccount(String id) => perform(() async {
     selectedAccount = id;
+    accountInventory = null;
     accountDetails = null;
     accountReport = null;
     accountRemoval = null;
     removalScope = null;
     accountDetails = await core.call('get_account', {'account_id': id}) as Json;
     await loadLocal();
+  });
+
+  Future<bool> inspectAccountInventory() => perform(() async {
+    accountInventory = null;
+    final id = selectedAccount;
+    if (id == null ||
+        account?['credential_state'] != 'stored' ||
+        !supports('inspect_account_inventory')) {
+      throw NativeFailure(
+        'UNSUPPORTED_OPERATION',
+        'Select a stored account with saved-inventory inspection support.',
+      );
+    }
+    final epoch = _readEpoch;
+    try {
+      final result =
+          await core.call('inspect_account_inventory', {'account_id': id})
+              as Json;
+      if (epoch != _readEpoch || selectedAccount != id) return;
+      accountInventory = result;
+    } catch (_) {
+      if (epoch != _readEpoch || selectedAccount != id) return;
+      rethrow;
+    }
   });
 
   Future<bool> renameAccount(String label) => perform(() async {
@@ -428,6 +459,7 @@ class HomeController extends ChangeNotifier {
   });
 
   Future<bool> retrieveAccount({bool recover = false}) => perform(() async {
+    accountInventory = null;
     accountNeedsReload = true;
     accountReport = null;
     accountReport =

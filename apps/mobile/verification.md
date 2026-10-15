@@ -1,6 +1,6 @@
 # Flutter implementation verification
 
-Date: October 15, 2026. Baseline: native UI contract 1.9.0 (pinned Core `00d44b7`) and the approved Window Light atlas. This is an implementation checkpoint, not completion of the owner's pixel-identical acceptance requirement.
+Date: October 16, 2026. Baseline: native UI contract 1.10.0 (pinned Core `10a094d` plus the Android lock fix) and the approved Window Light atlas. This is an implementation checkpoint, not completion of the owner's pixel-identical acceptance requirement.
 
 ## Implemented scope
 
@@ -17,7 +17,7 @@ Commands below ran in the isolated worktree; Flutter commands used the pinned FV
 | Check | Evidence / result |
 |---|---|
 | `fvm flutter analyze` | No issues found |
-| `fvm flutter test --reporter expanded` | Full 59-test suite passed, including two native account and five synthetic account checks, three cleanup regressions and all 11 prior native/controller checks and the inline-stepper interaction check. Other coverage: one extended native click scenario, three native outcome scenarios, two component checks, four compartment-overview checks, five accessibility checks, three system-contrast checks, two receipt checks, two descriptor-control checks, six dedicated appliance-layout checks, three organization checks and seven screen/interaction/reflow checks |
+| `fvm flutter test --reporter expanded` | Full 61-test suite passed, including two saved-inventory checks, two native account and five synthetic account checks, three cleanup regressions and all 11 prior native/controller checks and the inline-stepper interaction check. Other coverage: one extended native click scenario, three native outcome scenarios, two component checks, four compartment-overview checks, five accessibility checks, three system-contrast checks, two receipt checks, two descriptor-control checks, six dedicated appliance-layout checks, three organization checks and seven screen/interaction/reflow checks |
 | `fvm flutter test integration_test/native_smoke_test.dart -d linux` under Xvfb | Actual Linux process loads the bundled Core library without a path override, discovers Mock, reads state, sets mode and verifies the returned receipt; process screenshot captured; the latest run also cancels and confirms cache cleanup and confirms history cleanup |
 | `fvm flutter build linux --release` | Linux bundle includes `libhomeverb_ffi.so`; the bundled Rust library is the checked debug build |
 | `fvm flutter build web -t lib/main_preview.dart` | Isolated preview compiles; web preview does not call native Core |
@@ -25,9 +25,9 @@ Commands below ran in the isolated worktree; Flutter commands used the pinned FV
 | `cargo clippy --workspace --all-targets --offline --locked -- -D warnings` | Passed |
 | `cargo test --workspace --offline --locked` | Passed |
 | `cargo build --workspace --offline --locked` | Passed |
-| `python3 scripts/verify_native_contract.py` | 30 native methods and 50 live fictional examples passed |
+| `python3 scripts/verify_native_contract.py` | 31 native methods and 51 live fictional examples passed |
 | `python3 scripts/verify_mvp.py` | 24 runtime checks passed |
-| `python3 scripts/validate_contracts.py` | 15 schemas, 24 positive and 86 negative fixtures passed |
+| `python3 scripts/validate_contracts.py` | 16 schemas, 29 positive and 90 negative fixtures passed |
 | `node packages/presentation/test/i18n.test.mjs` | 5 shared-catalog tests passed; this does not establish Flutter localization |
 | `python3 -m unittest discover -s tests -v` | 23 repository tests passed |
 
@@ -96,14 +96,18 @@ The command verifies the complete 82-file set, writes `output/flutter-verificati
 | UI-11 | One registered skin, local persistence/fallback and preview implemented and tested. |
 | UI-12 | Exact diagnostics preview/export and retained receipt navigation tested. Confirmed native cache/history cleanup, cancel, busy-journal refusal, local reload and request retirement are click/native-tested. Full-profile deletion and real OS save chooser acceptance remain pending. |
 | UI-13 | Reference phone/wide captures, 320-width/200% text, all-state landscape/150% text and all-form simulated keyboard checks passed. Field/control semantics, all-state tap labels and reduced-motion busy indicators tested. System high contrast passes the 82 initial-viewport text-contrast checks and all-state 320-width/200% layouts. Full zh-CN wiring, offscreen contrast, remaining animation behavior, screen-reader and physical-keyboard acceptance pending. |
-| UI-14 | Linux process and bundle verified. Android/iOS builds, phone profiling and pixel equality not passed. |
+| UI-14 | Linux process/bundle and Android debug/development-release APKs verified. Android 15 x86_64 journeys, cold launch, real IME and Home/resume checks passed. Physical phones, iOS, profiling and pixel equality remain unverified. |
 | UI-15 | Meiju Core and explicit read-only Flutter startup/account integration are present; real account and off-LAN acceptance remain pending. P08 preview copy follows automatic retrieval; replacement authoritative artwork and real off-LAN acceptance pending. |
 
 ## Compatibility and environment
 
 The frontend merged Core API 1.9 and SQLite schema 4 from pinned commit `00d44b7`, including the protected seventh C symbol. This cleanup UI uses the existing native methods without further schema changes. Presentation preferences are app-private JSON containing no credentials. No real-platform compatibility row is promoted. No real-device write, diagnostic upload or package publication was performed. The owner-authorized frontend implementation has been pushed to `origin/codex/flutter-ui`; the branch is retained. This is an incomplete acceptance checkpoint, not a merge into main or a claim that the pixel gate passed.
 
-Android/iOS project scaffolding is present. Core now supplies a verified arm64 AAR builder and Android credential backend, but Flutter packaging/startup and actual Keystore acceptance remain pending. The prior Flutter environment check lacked the complete SDK/NDK; the current Android integration environment must be rechecked. Xcode/Apple validation remains unavailable on Linux. ADB successfully listed devices and found none attached. No device choice is required to continue shared Flutter UI work; Android/iOS native packaging and actual OS lifecycle acceptance remain separate outstanding checks. Linux GTK/Clang development packages were extracted into a temporary local sysroot for this run; no system package installation was performed. Standard installed Linux dependencies are sufficient for normal development. FVM owns the SDK; no project-local SDK copy is committed.
+Android startup embeds the matching dual-ABI AAR, and debug/development-release
+APKs run on an isolated Android 15 x86_64 emulator. The task-local SDK/NDK and JDK
+21 support the recorded build. Actual Keystore and physical-phone acceptance
+remain pending; Xcode/Apple validation is unavailable on this Linux host.
+No device choice is required to continue shared Flutter UI work. Linux GTK/Clang development packages were extracted into a temporary local sysroot for this run; no system package installation was performed. Standard installed Linux dependencies are sufficient for normal development. FVM owns the SDK; no project-local SDK copy is committed.
 
 ## Core 1.9 integration checkpoint
 
@@ -257,3 +261,32 @@ The installable artifact is
 `release-artifact.json` records its SHA-256 and acceptance boundaries. It uses the
 development debug signing key and is not a store release. The earlier startup
 failure artifact and integration-test APK are not delivery artifacts.
+
+## Selected-account saved inventory
+
+Account details now expose the API 1.10 `inspect_account_inventory` action only
+when advertised and the selected account has stored credentials. Inspection reads
+protected local bindings explicitly; app startup and ordinary account navigation
+never trigger it. Three saved membership states remain distinct. A card alias is
+used only for an exact device/connection pair; unmatched historical or unpublished
+bindings remain visible without creating cards, changing grants or inventing online
+state, physical support or retrieval timestamps. Explicit Retrieve Devices is the
+only offered cloud-refresh path. Empty results and query failures remain distinct.
+
+Two new tests use the versioned fictional native-contract inventory example. They
+click inspection, check the exact selected account, all three memberships, matching
+and mismatched connections, unchanged cards, empty results, locked/busy/corrupt
+query errors without cloud fallback, large text, pending/removing guards and late
+success/error after cancellation/background. Three decoded widget captures are
+saved under `apps/mobile/build/verification/inventory/`. The native empty-profile
+test also verifies `ACCOUNT_NOT_FOUND` and hides/refuses inspection when the method
+is absent. These tests do not read a real account's protected inventory or establish
+prototype equality for the added contract state.
+
+Final inventory-phase analysis and all 61 Flutter tests passed. The unchanged-reference
+strict comparison still fails at 0/82 exact, mean channel error 1.6798/255.
+
+The updated ordinary Android release APK also rebuilt, passed both ABI/export and
+16 KiB ELF/ZIP checks, installed and cold-started on the isolated Android emulator.
+`inventory-release-home.png` records that launch. The full OS keyboard/Home/resume
+checks remain recorded against the preceding Android checkpoint `68fdaf6`.

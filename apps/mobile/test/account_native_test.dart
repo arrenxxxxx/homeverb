@@ -2,6 +2,9 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:homeverb_mobile/native_client.dart';
+import 'package:homeverb_mobile/controller.dart';
+import 'package:homeverb_mobile/account_views.dart';
+import 'package:homeverb_mobile/preferences.dart';
 
 void main() {
   final library = File('../../target/debug/libhomeverb_ffi.so').absolute.path;
@@ -113,10 +116,40 @@ void main() {
             'rename_account',
             'remove_account',
             'recover_account',
+            'inspect_account_inventory',
           ]),
         );
         expect(await core.call('list_accounts'), isEmpty);
         expect(await core.call('list_device_cards'), isEmpty);
+        final controller = HomeController(
+          core,
+          LocalPreferences(File('${directory.path}/presentation.json')),
+        );
+        const absentAccount = '00000000-0000-4000-8000-000000000001';
+        controller.selectedAccount = absentAccount;
+        controller.accountDetails = {
+          'account': {
+            'id': absentAccount,
+            'label': 'Fictional absent account',
+            'region': 'CN',
+            'credential_state': 'stored',
+          },
+          'device_ids': <String>[],
+        };
+        expect(await controller.inspectAccountInventory(), false);
+        expect((controller.error as NativeFailure).code, 'ACCOUNT_NOT_FOUND');
+        expect(controller.accountInventory, isNull);
+        core.methods.remove('inspect_account_inventory');
+        expect(
+          accountBlocks(controller, 'P09').toString(),
+          isNot(contains('Inspect Saved Inventory')),
+        );
+        expect(await controller.inspectAccountInventory(), false);
+        expect(
+          (controller.error as NativeFailure).code,
+          'UNSUPPORTED_OPERATION',
+        );
+        controller.dispose();
         // No discovery, credential lookup or vendor operation is requested.
       } finally {
         await core.close();

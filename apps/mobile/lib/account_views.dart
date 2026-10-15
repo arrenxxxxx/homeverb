@@ -35,6 +35,58 @@ List<dynamic> linkedCardRows(
     ],
 ];
 
+List<dynamic> savedInventoryBlocks(HomeController c) {
+  final result = c.accountInventory;
+  if (result == null) return [];
+  final devices = (result['devices'] as List).cast<Json>();
+  return [
+    [
+      'note',
+      'Saved inventory only. This does not check current access, online state, model support or control permission. No retrieval timestamp is available.',
+    ],
+    if (devices.isEmpty)
+      [
+        'note',
+        'No saved bindings were returned. This does not prove the cloud account is empty. Use Retrieve Devices to refresh explicitly.',
+      ],
+    for (final binding in devices)
+      [
+        'card',
+        c.cards
+                .where(
+                  (card) =>
+                      card['device']['id'] == binding['device_id'] &&
+                      (card['device']['connections'] as List).any(
+                        (connection) =>
+                            connection['id'] == binding['connection_id'],
+                      ),
+                )
+                .firstOrNull?['device']['alias'] ??
+            'Saved binding without a matching card',
+        [
+          [
+            'Saved membership',
+            switch (binding['membership']) {
+              'listed' => 'Listed in the last complete inventory',
+              'not_listed' => 'Not listed · live requests blocked',
+              'unconfirmed' => 'Membership unconfirmed',
+              _ => 'Unknown membership',
+            },
+            null,
+          ],
+          ['Device ID', binding['device_id'], null],
+          ['Connection ID', binding['connection_id'], null],
+          if (binding['membership'] != 'listed')
+            [
+              'Next step',
+              'Retrieve Devices explicitly to check membership.',
+              null,
+            ],
+        ],
+      ],
+  ];
+}
+
 List<dynamic> accountBlocks(HomeController c, String id) {
   final account = c.account;
   final state = account?['credential_state'];
@@ -215,6 +267,10 @@ List<dynamic> accountBlocks(HomeController c, String id) {
             'Saved devices',
             linkedCardRows(c, c.accountDeviceIds, open: true),
           ],
+        if (state == 'stored' && c.supports('inspect_account_inventory')) ...[
+          ['button', 'Inspect Saved Inventory', 'secondary'],
+          ...savedInventoryBlocks(c),
+        ],
         if (c.accountRemoval?['status'] == 'pending')
           [
             'status',

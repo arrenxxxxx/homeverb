@@ -26,6 +26,15 @@ This does not guarantee erasure of keyboard, OS or managed-string copies. Locked
 unavailable system storage is an error, never a plaintext fallback. No real-device
 write grants are supplied by this UI.
 
+Account details offer explicit Inspect Saved Inventory when Core advertises the
+method. It reads only the selected account's protected local bindings, distinguishes
+listed/not-listed/unconfirmed membership, and joins a card only when both device
+and connection IDs match. Historical and unpublished bindings remain visible;
+inspection neither creates cards nor grants control. Empty results are not proof
+of an empty cloud account, and query failures never fall back to cloud refresh.
+Navigation, cancellation and backgrounding clear inspection results and discard
+late replies. Use Retrieve Devices explicitly to refresh the account inventory.
+
 Account removal displays the exact local card scope, including entries whose
 metadata is unavailable, before confirmation. Pending cleanup and changed scope
 require explicit review/retry. Other installations and provider authorization are
