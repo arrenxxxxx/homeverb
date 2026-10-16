@@ -179,6 +179,15 @@ checksum-valid packet with another six-byte ID returns `DEVICE_IDENTITY_CONFLICT
 without releasing plaintext. This does not authenticate either ID. No envelope
 error changes write transmission phases, triggers I/O or permits replay/fallback.
 
+The [standard AC LAN query/C0 helpers](adr/0049-ac-lan-query-and-c0-decoding.md)
+reject query sequences outside 1..253 with `INVALID_ARGUMENT`. Invalid AA lengths,
+sum checksums, expected family/protocol context, short C0 bodies and out-of-range
+decimal nibbles for available sensors return fixed `MIDEA_RESPONSE_INVALID`.
+Non-query kinds, alternate body types and explicit Fahrenheit return
+`CAPABILITY_UNSUPPORTED`. An ambient 0xff sentinel remains unknown; it is not an
+error or zero-temperature observation. Failures return no partial candidate and
+do not query another format, update a cache or establish any device-write outcome.
+
 The account-bound read path returns `DEVICE_IDENTITY_CONFLICT` before transport when the local device, selected connection or known model differs from the protected binding. Invalid components return `CAPABILITY_UNSUPPORTED`. Pending or unavailable credentials stop the request through the vault. Core rejects decoded but undeclared properties with `INVALID_OBSERVATION`; neither that rejection nor a protocol failure replaces the previous cache or triggers a retry.
 
 Protected inventory membership is independent of historical identity. API 1.9.1

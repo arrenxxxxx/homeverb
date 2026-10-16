@@ -295,3 +295,10 @@ framing and matching identity fields do not establish endpoint ownership, an
 inner model response, freshness or causal completion. The codec performs no I/O,
 returns no outcome/observation and never changes existing transmission markers.
 Model-aware validation remains necessary after `exchange_v3` releases its socket.
+
+The [standard AC inner codec](adr/0049-ac-lan-query-and-c0-decoding.md) emits one
+explicit query and decodes only query-kind C0 candidates. Strict AA framing and
+checksum checks do not correlate an acknowledgement or establish freshness. Raw
+mode/fan codes remain native protocol values; a model-aware adapter must admit
+their semantics and reject known stale/alternate temperature layouts before
+publishing observations. No default query, route, outcome or retry is added.

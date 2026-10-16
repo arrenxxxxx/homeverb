@@ -10,6 +10,8 @@ mod transport;
 pub use transport::exchange_v3;
 mod packet;
 pub use packet::{decode_lan_packet, encode_lan_packet, lan_packet_len};
+mod ac;
+pub use ac::{AcC0Status, decode_ac_c0_status, encode_ac_status_query};
 
 use crate::{ApplianceFamily, CloudId};
 use aes::{

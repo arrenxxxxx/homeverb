@@ -7,6 +7,8 @@ Pinned revision: `ef28169926914d15f40fe521b9cc3d3c2f553c59`.
 Upstream files: `midealocal/discover.py`, `midealocal/security.py` and
 `midealocal/packet_builder.py`; V3 authentication also references `midealocal/device.py`,
 and Meiju v2 credential lookup references `midealocal/cloud.py`.
+Standard AC query/C0 mapping also uses `midealocal/message.py`, `midealocal/crc8.py`,
+`midealocal/devices/ac/message.py` and the profile caveats in its `__init__.py`.
 
 License: MIT; retain the complete upstream [LICENSE.txt](LICENSE.txt) when
 distributing the derived portions. HomeVerb's release license remains undecided.
@@ -31,6 +33,10 @@ The ordinary packet port bounds `5a5a` frames, checks the expected six-byte
 identity and strict padding before returning protected plaintext, and retains
 the source timestamp format without treating it as observation evidence. It
 does not copy permissive stream parsing, raw packet logging or status callbacks.
+The AC query/C0 port replaces the shared wrapping counter with an explicit query
+sequence, implements the equivalent CRC bitwise, validates AA bounds/checksum,
+preserves unavailable sensor values and rejects unsupported units/invalid decimals.
+It returns native candidates without copying model admission or freshness claims.
 Public fixed wire constants do not authenticate a device or protect HomeVerb
 credentials. LAN session authentication and physical compatibility are not
 established by this port.

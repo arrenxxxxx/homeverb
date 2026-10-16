@@ -983,3 +983,30 @@ acceptance: 35 passed; native contract: 31 methods/51 fictional examples plus
 approval checks; Python tooling: 33 passed; presentation: six passed. All three
 Android AAR variants passed build/export/16 KiB ELF checks. No real account,
 household endpoint, Flutter worktree or fresh Android runtime was accessed.
+
+## Standard AC LAN query and C0 candidates
+
+[ADR-0049](adr/0049-ac-lan-query-and-c0-decoding.md) adds a pure standard AC query
+encoder with explicit protocol/sequence inputs and a strict AA query/C0 decoder.
+The native result contains power, raw mode/fan codes and candidate Celsius values;
+missing sensors remain unknown. Extended-body decimal rules preserve signed
+truncation, invalid decimals fail, and explicit Fahrenheit is unsupported.
+
+Four query vectors match the unchanged pinned query/AA classes, eight positive
+C0 vectors match its unchanged field parser, and all 256 CRC lookup entries
+match the bitwise port. Twenty-four negative fixtures and truncation/context
+tests reject malformed or unrelated messages. The packet-to-C0 chain independently
+checks expected device identity and inner protocol context without a socket.
+
+No model, route, control, observation freshness or physical support is admitted.
+The pinned source documents stale C0 temperatures for product 22013279; exact
+protected model/profile selection remains necessary. Native API 1.14.1, JSON
+methods, C/JNI exports, SQLite schema 4, outer payload 3 and inner sessions 1/2
+are unchanged. No account, appliance or independent Flutter worktree was accessed.
+
+On October 16, 2026, formatting, workspace Clippy, workspace/example builds and
+local validators passed. Rust tests: 371 passed, two explicitly ignored; runtime
+acceptance: 35 passed; native contract: 31 methods/51 fictional examples plus
+approval checks; Python tooling: 33 passed; presentation: six passed. All three
+Android AAR variants passed build/export/16 KiB ELF checks. New emulator, phone,
+live credentials and physical/off-LAN behavior were not tested in this phase.

@@ -349,6 +349,28 @@ Inner message validation and protected endpoint/route admission remain required.
 Seven positive and sixteen negative independent vectors, all truncation lengths,
 identity and timestamp bounds, and nested V3 packets have fictional evidence only.
 
+### Standard AC queries and C0 candidates
+
+[ADR-0049](../adr/0049-ac-lan-query-and-c0-decoding.md) adds
+`encode_ac_status_query(protocol_version, sequence)` and
+`decode_ac_c0_status(expected_protocol_version, message)`. The encoder builds one
+standard 0x41 query with an explicit sequence (1..253), body CRC-8 and AA sum
+checksum. The decoder accepts one length/checksum-valid AC query/C0 frame with
+the expected protocol byte. It returns redacted native candidates for power,
+raw mode/fan codes, target Celsius and optional indoor/outdoor Celsius values.
+
+Missing sensors remain unknown; nonzero decimals follow the source's signed
+truncation rule only for extended bodies. Invalid decimals and explicit Fahrenheit
+are refused. Set acknowledgements, notifications and alternate formats are not
+silently parsed as this query response. No process counter, retry or socket is added.
+
+These values have no observation timestamp or proven freshness and do not publish
+capabilities or snapshots. The source explicitly warns that product 22013279 has
+stale C0 temperatures and other profiles need BB/new-protocol paths. Future route
+admission must select protected model/profile evidence before using the decoder.
+Physical compatibility, endpoint admission and model-specific field validation
+remain separate work; existing cloud behavior and native UI contracts are unchanged.
+
 ## Fit the embedded Core
 
 Reuse or port reviewed cloud requests, capability mappings, and LAN codecs into in-process Rust adapters. Keep the existing Core, capability contracts, and host architecture. There is no requirement to install HA, run a Python companion service, or call HA's control API.

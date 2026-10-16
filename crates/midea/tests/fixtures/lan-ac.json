@@ -1,0 +1,247 @@
+{
+  "provenance": "Fictional AA frames assembled independently in Python. Query CRC uses the exact pinned upstream crc8_854_table rather than the Rust bitwise implementation; state expectations are explicit cases for the inspected C0 formulas. No device was contacted.",
+  "crc8_table": "005ebce2613fdd83c29c7e20a3fd1f419dc3217ffca2401e5f01e3bd3e6082dc237d9fc1421cfea0e1bf5d0380de3c62bee0025cdf81633d7c22c09e1d43a1ff4618faa427799bc584da3866e5bb5907db856739bae406581947a5fb7826c49a653bd987045ab8e6a7f91b45c6987a24f8a6441a99c7257b3a6486d85b05e7b98cd2306eedb3510f4e10f2ac2f7193cd114fadf3702ecc92d38d6f31b2ec0e50aff1134dce90722c6d33d18f0c52b0ee326c8ed0530defb1f0ae4c1291cf2d73ca947628abf517490856b4ea6937d58b5709ebb536688ad495cb2977f4aa4816e9b7550b88d6346a2b7597c94a14f6a8742ac896154ba9f7b6e80a54d7896b35",
+  "protocol": 8,
+  "queries": [
+    {
+      "protocol": 0,
+      "sequence": 1,
+      "frame": "aa20ac00000000000003418100ff0000000000000000000000000000000001abc4"
+    },
+    {
+      "protocol": 1,
+      "sequence": 1,
+      "frame": "aa20ac00000000000103418100ff0000000000000000000000000000000001abc3"
+    },
+    {
+      "protocol": 8,
+      "sequence": 253,
+      "frame": "aa20ac00000000000803418100ff00000000000000000000000000000000fd7cef"
+    },
+    {
+      "protocol": 255,
+      "sequence": 253,
+      "frame": "aa20ac0000000000ff03418100ff00000000000000000000000000000000fd7cf8"
+    }
+  ],
+  "valid": [
+    {
+      "name": "on-decimals",
+      "frame": "aa21ac00000000000803c001587f00000000000000642800003200000000000000d2",
+      "expected": {
+        "power": true,
+        "mode_code": 2,
+        "fan_speed_code": 127,
+        "target_celsius": 24.5,
+        "indoor_celsius": 25.2,
+        "outdoor_celsius": -5.3
+      }
+    },
+    {
+      "name": "short-halves",
+      "frame": "aa19ac00000000000803c000000000000000000000333100000c",
+      "expected": {
+        "power": false,
+        "mode_code": 0,
+        "fan_speed_code": 0,
+        "target_celsius": 16.0,
+        "indoor_celsius": 0.5,
+        "outdoor_celsius": -0.5
+      }
+    },
+    {
+      "name": "near-zero-sign",
+      "frame": "aa1fac00000000000803c00111010000000000000031320000420000000000b2",
+      "expected": {
+        "power": true,
+        "mode_code": 0,
+        "fan_speed_code": 1,
+        "target_celsius": 17.5,
+        "indoor_celsius": -0.2,
+        "outdoor_celsius": 0.4
+      }
+    },
+    {
+      "name": "negative-decimals",
+      "frame": "aa1fac00000000000803c0012e40000000000000002829000089000000000021",
+      "expected": {
+        "power": true,
+        "mode_code": 1,
+        "fan_speed_code": 64,
+        "target_celsius": 30.0,
+        "indoor_celsius": -5.9,
+        "outdoor_celsius": -4.8
+      }
+    },
+    {
+      "name": "absent-sensors",
+      "frame": "aa21ac00000000000803c001502800000000000000ffff0000ff00000000000000f2",
+      "expected": {
+        "power": true,
+        "mode_code": 2,
+        "fan_speed_code": 40,
+        "target_celsius": 16.5,
+        "indoor_celsius": null,
+        "outdoor_celsius": null
+      }
+    },
+    {
+      "name": "short-ignores-decimal-field",
+      "frame": "aa1eac00000000000803c0019a500000000000000064650000ff00000000b8",
+      "expected": {
+        "power": true,
+        "mode_code": 4,
+        "fan_speed_code": 80,
+        "target_celsius": 26.5,
+        "indoor_celsius": 25.0,
+        "outdoor_celsius": 25.5
+      }
+    },
+    {
+      "name": "maximum-frame-and-wire-values",
+      "frame": "aaffac00000000000803c001ffff00000000000000fefd0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000090",
+      "expected": {
+        "power": true,
+        "mode_code": 7,
+        "fan_speed_code": 127,
+        "target_celsius": 31.5,
+        "indoor_celsius": 102.0,
+        "outdoor_celsius": 101.5
+      }
+    },
+    {
+      "name": "unrelated-flag-bits",
+      "frame": "aa27ac00000000000803c080a88000000000000000ff330000100000000000000000000000000078",
+      "expected": {
+        "power": false,
+        "mode_code": 5,
+        "fan_speed_code": 0,
+        "target_celsius": 24.0,
+        "indoor_celsius": null,
+        "outdoor_celsius": 0.1
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "name": "fahrenheit",
+      "frame": "aa21ac00000000000803c001587f00000000000004642800003200000000000000ce",
+      "error": "CAPABILITY_UNSUPPORTED"
+    },
+    {
+      "name": "bad-indoor-decimal",
+      "frame": "aa21ac00000000000803c001587f00000000000000642800003a00000000000000ca",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "bad-outdoor-decimal",
+      "frame": "aa21ac00000000000803c001587f0000000000000064280000a20000000000000062",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "non-query-0",
+      "frame": "aa21ac00000000000800c001587f00000000000000642800003200000000000000d5",
+      "error": "CAPABILITY_UNSUPPORTED"
+    },
+    {
+      "name": "non-query-2",
+      "frame": "aa21ac00000000000802c001587f00000000000000642800003200000000000000d3",
+      "error": "CAPABILITY_UNSUPPORTED"
+    },
+    {
+      "name": "non-query-4",
+      "frame": "aa21ac00000000000804c001587f00000000000000642800003200000000000000d1",
+      "error": "CAPABILITY_UNSUPPORTED"
+    },
+    {
+      "name": "non-query-5",
+      "frame": "aa21ac00000000000805c001587f00000000000000642800003200000000000000d0",
+      "error": "CAPABILITY_UNSUPPORTED"
+    },
+    {
+      "name": "non-query-6",
+      "frame": "aa21ac00000000000806c001587f00000000000000642800003200000000000000cf",
+      "error": "CAPABILITY_UNSUPPORTED"
+    },
+    {
+      "name": "non-query-160",
+      "frame": "aa21ac000000000008a0c001587f0000000000000064280000320000000000000035",
+      "error": "CAPABILITY_UNSUPPORTED"
+    },
+    {
+      "name": "alternate-body-65",
+      "frame": "aa21ac000000000008034101587f0000000000000064280000320000000000000051",
+      "error": "CAPABILITY_UNSUPPORTED"
+    },
+    {
+      "name": "alternate-body-176",
+      "frame": "aa21ac00000000000803b001587f00000000000000642800003200000000000000e2",
+      "error": "CAPABILITY_UNSUPPORTED"
+    },
+    {
+      "name": "alternate-body-177",
+      "frame": "aa21ac00000000000803b101587f00000000000000642800003200000000000000e1",
+      "error": "CAPABILITY_UNSUPPORTED"
+    },
+    {
+      "name": "alternate-body-187",
+      "frame": "aa21ac00000000000803bb01587f00000000000000642800003200000000000000d7",
+      "error": "CAPABILITY_UNSUPPORTED"
+    },
+    {
+      "name": "alternate-body-193",
+      "frame": "aa21ac00000000000803c101587f00000000000000642800003200000000000000d1",
+      "error": "CAPABILITY_UNSUPPORTED"
+    },
+    {
+      "name": "wrong-family",
+      "frame": "aa21e100000000000803c001587f000000000000006428000032000000000000009d",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "wrong-protocol",
+      "frame": "aa21ac00000000000103c001587f00000000000000642800003200000000000000d9",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "short-c0",
+      "frame": "aa18ac00000000000803c001587f000000000000006428000d",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "empty-body",
+      "frame": "aa0aac000000000008033f",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "oversized",
+      "frame": "aa00ac00000000000803c001587f0000000000000064280000320000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f3",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "wrong-header",
+      "frame": "ab21ac00000000000803c001587f00000000000000642800003200000000000000d2",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "wrong-length",
+      "frame": "aa20ac00000000000803c001587f00000000000000642800003200000000000000d2",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "bad-checksum",
+      "frame": "aa21ac00000000000803c001587f00000000000000642800003200000000000000d3",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "trailing",
+      "frame": "aa21ac00000000000803c001587f00000000000000642800003200000000000000d200",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "concatenated",
+      "frame": "aa21ac00000000000803c001587f00000000000000642800003200000000000000d2aa21ac00000000000803c001587f00000000000000642800003200000000000000d2",
+      "error": "MIDEA_RESPONSE_INVALID"
+    }
+  ]
+}
