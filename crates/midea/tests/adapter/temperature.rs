@@ -42,6 +42,18 @@ async fn temperature_controls_use_each_protected_encoding_without_other_fields_o
             0.5,
             true,
         ),
+        (
+            json!({"sn8":"TEST1234","category":"wall_air_conditioner"}),
+            17.0,
+            0.5,
+            true,
+        ),
+        (
+            json!({"modelNumber":0,"sn8":"23096245","category":"wall-air-conditioner"}),
+            17.0,
+            1.0,
+            false,
+        ),
     ] {
         let entries = appliances()
             .into_iter()
@@ -171,6 +183,15 @@ async fn weakened_descriptors_cannot_bypass_profile_arguments_opt_in_or_membersh
     let baseline = f.secrets.values.lock().unwrap().clone();
     for (field, value) in [
         ("product_profile", Value::Null),
+        (
+            "product_profile",
+            json!({"sn8":"00000Q1F","category":"wall-air-conditioner"}),
+        ),
+        ("product_profile", json!({"sn8":"TEST1234"})),
+        (
+            "product_profile",
+            json!({"category":"wall-air-conditioner"}),
+        ),
         (
             "product_profile",
             json!({"sn8":"22012895","subtype":"1","category":"wall-air-conditioner"}),

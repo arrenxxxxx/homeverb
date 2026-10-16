@@ -1855,3 +1855,11 @@ interaction and descriptor-driven additional control tiles. It adds no adapter
 functions or physical support. The selected AC's missing temperature setter,
 swing and comfort controls remain tracked in the [AC parity review](development/10-meiju-ac-parity.md).
 Native API 1.22.0, SQLite schema 5 and protected payload 3 are unchanged.
+
+The optional-subtype correction in [ADR-0066](adr/0066-optional-wall-ac-subtype.md)
+allows existing temperature mappings for the four exact reviewed wall models when
+protected product and explicit wall-category evidence remain available. Known
+subtype priority and excluded/ambiguous products are unchanged. The selected
+wall AC was diagnosed using fixed missing/present flags only: its missing optional
+subtype caused the earlier omission. Runtime command/read-back evidence is recorded
+separately in the app verification record; model-wide physical support is not implied.

@@ -235,7 +235,7 @@ fn decode(
             )?;
             if appliance
                 .product_profile
-                .temperature()
+                .temperature(appliance.model.as_deref())
                 .is_some_and(|profile| !profile.fractional_field)
             {
                 // Read the selected wire shape without applying writable bounds or steps.

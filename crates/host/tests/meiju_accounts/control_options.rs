@@ -144,6 +144,37 @@ async fn protected_profiles_determine_options_and_match_enabled_descriptors() {
         ),
         (json!({"sn8":"22397091"}), 3, None),
         (
+            json!({"sn8":"22397091","category":"wall-air-conditioner"}),
+            4,
+            Some((16, 0.5)),
+        ),
+        (
+            json!({"sn8":"23096245","category":"wall_air_conditioner"}),
+            4,
+            Some((17, 1.0)),
+        ),
+        (
+            json!({"sn8":"TEST1234","category":"wall-air-conditioner"}),
+            4,
+            Some((17, 0.5)),
+        ),
+        (
+            json!({"sn8":"00000Q1F","category":"wall-air-conditioner"}),
+            3,
+            None,
+        ),
+        (
+            json!({"sn8":"22012895","category":"wall-air-conditioner"}),
+            3,
+            None,
+        ),
+        (json!({"category":"wall-air-conditioner"}), 3, None),
+        (
+            json!({"productModel":"Unknown model","sn8":"TEST1234","category":"wall-air-conditioner"}),
+            0,
+            None,
+        ),
+        (
             json!({"type":"CA","productModel":"BCD-600WUFIPZM(E)","modelNumber":524}),
             0,
             None,

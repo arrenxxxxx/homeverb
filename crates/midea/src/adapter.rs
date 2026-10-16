@@ -30,11 +30,13 @@ mod control_options;
 pub use control_options::ControlOption;
 
 // Exact model strings from the read-only cloud probe; not physical support certification.
-const READ_MODELS: &[(&str, ApplianceFamily)] = &[
-    ("KFR-35G/N8HE1\u{2161}Pro", ApplianceFamily::AirConditioner),
-    ("KFR-35G/WF2", ApplianceFamily::AirConditioner),
-    ("KFR-72G/N8HA1Pro", ApplianceFamily::AirConditioner),
-    ("KFR-26G/N8VJC3", ApplianceFamily::AirConditioner),
+const REVIEWED_WALL_AC_MODELS: &[&str] = &[
+    "KFR-35G/N8HE1\u{2161}Pro",
+    "KFR-35G/WF2",
+    "KFR-72G/N8HA1Pro",
+    "KFR-26G/N8VJC3",
+];
+const OTHER_READ_MODELS: &[(&str, ApplianceFamily)] = &[
     ("BCD-600WUFIPZM(E)", ApplianceFamily::Refrigerator),
     (
         "GX1200Max \u{5c0a}\u{4eab}\u{7248}",
@@ -43,10 +45,17 @@ const READ_MODELS: &[(&str, ApplianceFamily)] = &[
 ];
 
 fn model_family(model: &str) -> Option<ApplianceFamily> {
-    READ_MODELS
+    if reviewed_wall_ac(model) {
+        return Some(ApplianceFamily::AirConditioner);
+    }
+    OTHER_READ_MODELS
         .iter()
         .find(|(name, _)| *name == model)
         .map(|(_, family)| *family)
+}
+
+pub(crate) fn reviewed_wall_ac(model: &str) -> bool {
+    REVIEWED_WALL_AC_MODELS.contains(&model)
 }
 
 fn capability(component: &str, id: &str, fields: &[(&str, &str, Option<&str>)]) -> Capability {
@@ -79,7 +88,7 @@ fn descriptors(
 ) -> Descriptor {
     let temperature = profile
         .filter(|_| adapter.ac_temperature)
-        .and_then(crate::ProductProfile::temperature);
+        .and_then(|profile| profile.temperature(appliance.model.as_deref()));
     let dishwasher = profile.and_then(crate::ProductProfile::dishwasher);
     let family = appliance
         .model
@@ -704,7 +713,7 @@ impl Adapter for MeijuAdapter {
             None => {
                 let profile = appliance
                     .product_profile
-                    .temperature()
+                    .temperature(appliance.model.as_deref())
                     .ok_or_else(crate::control::unsupported)?;
                 temperature_action(profile).validate_arguments(&command.arguments)?;
                 profile.control(&command.arguments["target_temperature"])?

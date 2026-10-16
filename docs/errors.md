@@ -327,6 +327,12 @@ return `CAPABILITY_UNSUPPORTED`; invalid action values return `INVALID_ARGUMENT`
 before transmission. Protected identity/membership checks still apply. Neither
 grant admission nor a successful plan proves physical temperature support.
 
+Under [ADR-0066](adr/0066-optional-wall-ac-subtype.md), an absent optional subtype
+alone does not make an otherwise reviewed wall-model/product/category combination
+unsupported. Missing protected model/product/category, ambiguous placeholders and
+excluded product overrides still fail before send. This changes no error schema,
+code, transport phase or uncertain-write handling.
+
 The Linux CLI applies the same validation to an explicit `--meiju-grants` startup
 file. Relative paths and malformed contents return `INVALID_ARGUMENT`. Unreadable,
 nonregular, foreign-owned, group/other-writable or oversized files and final

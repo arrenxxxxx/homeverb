@@ -74,7 +74,16 @@ fn text(value: Option<&Value>) -> Result<Option<&str>> {
 }
 
 impl ProductProfile {
-    pub(crate) fn temperature(&self) -> Option<crate::temperature::TemperatureProfile> {
+    pub(crate) fn temperature(
+        &self,
+        model: Option<&str>,
+    ) -> Option<crate::temperature::TemperatureProfile> {
+        if self.0.subtype.is_none() && model.is_some_and(crate::adapter::reviewed_wall_ac) {
+            return crate::temperature::select_wall_without_subtype(
+                self.0.sn8.as_deref(),
+                self.0.category.as_deref(),
+            );
+        }
         crate::temperature::select(
             self.0.subtype.as_deref(),
             self.0.sn8.as_deref(),
@@ -152,5 +161,71 @@ impl ProductProfile {
             self.0.category.clone_from(&incoming.0.category);
         }
         Ok(changed)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn optional_subtype_needs_protected_wall_category_product_and_exact_model() {
+        for (fields, expected) in [
+            (
+                json!({"sn8":"TEST1234","category":"wall_air_conditioner"}),
+                Some((17, 0.5, true)),
+            ),
+            (
+                json!({"modelNumber":0,"sn8":"23096245","category":"wall-air-conditioner"}),
+                Some((17, 1.0, false)),
+            ),
+            (
+                json!({"sn8":"22397091","category":"wall-air-conditioner"}),
+                Some((16, 0.5, true)),
+            ),
+            (json!({"sn8":"TEST1234"}), None),
+            (json!({"category":"wall-air-conditioner"}), None),
+            (
+                json!({"sn8":"00000Q1F","category":"wall-air-conditioner"}),
+                None,
+            ),
+            (
+                json!({"sn8":"TEST1234","category":"central-air-conditioner"}),
+                None,
+            ),
+            (
+                json!({"sn8":"22012895","category":"wall-air-conditioner"}),
+                None,
+            ),
+            (
+                json!({"sn8":"00000000","category":"wall-air-conditioner"}),
+                None,
+            ),
+        ] {
+            let profile = ProductProfile::parse(&fields).unwrap();
+            assert_eq!(
+                profile.temperature(Some("KFR-35G/WF2")).map(|p| (
+                    p.minimum,
+                    p.step,
+                    p.fractional_field
+                )),
+                expected
+            );
+            assert!(profile.temperature(Some("Unknown model")).is_none());
+            assert!(profile.temperature(Some("BCD-600WUFIPZM(E)")).is_none());
+            assert!(profile.temperature(None).is_none());
+            // Selection does not fill a missing subtype or rewrite evidence.
+            assert!(profile.0.subtype.is_none());
+        }
+        let portable = ProductProfile::parse(
+            &json!({"modelNumber":524,"sn8":"23096245","category":"wall-air-conditioner"}),
+        )
+        .unwrap();
+        let selected = portable.temperature(Some("KFR-35G/WF2")).unwrap();
+        assert_eq!(
+            (selected.minimum, selected.step, selected.fractional_field),
+            (16, 1.0, true)
+        );
     }
 }

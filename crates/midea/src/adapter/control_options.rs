@@ -30,7 +30,10 @@ fn options(appliance: &Appliance) -> Vec<ControlOption> {
             add("power", "set", power_action());
             add("vendor.midea.ac", "set_fan_speed", fan_action());
             add("vendor.midea.ac", "activate_mode", mode_action());
-            if let Some(profile) = appliance.product_profile.temperature() {
+            if let Some(profile) = appliance
+                .product_profile
+                .temperature(appliance.model.as_deref())
+            {
                 add("climate", "set", temperature_action(profile));
             }
         }

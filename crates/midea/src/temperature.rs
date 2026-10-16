@@ -39,6 +39,28 @@ pub(crate) fn select(
     category: Option<&str>,
 ) -> Option<TemperatureProfile> {
     let subtype = subtype?;
+    select_mapping(Some(subtype), sn8, category)
+}
+
+/// ADR-0066: the caller must independently validate an exact reviewed wall model.
+pub(crate) fn select_wall_without_subtype(
+    sn8: Option<&str>,
+    category: Option<&str>,
+) -> Option<TemperatureProfile> {
+    let code = sn8?;
+    if matches!(code, "00000000" | "00000Q1F")
+        || category.is_none_or(|value| value.replace('-', "_") != "wall_air_conditioner")
+    {
+        return None;
+    }
+    select_mapping(None, Some(code), category)
+}
+
+fn select_mapping(
+    subtype: Option<&str>,
+    sn8: Option<&str>,
+    category: Option<&str>,
+) -> Option<TemperatureProfile> {
     let profile = |minimum, step, fractional_field| {
         Some(TemperatureProfile {
             minimum,
@@ -46,7 +68,7 @@ pub(crate) fn select(
             fractional_field,
         })
     };
-    if subtype == "524" {
+    if subtype == Some("524") {
         return profile(16, 1.0, true);
     }
     match sn8? {
@@ -99,6 +121,9 @@ mod tests {
             "26096947", "22012227", "22013167", "22013285", "22251749",
         ] {
             assert!(select(Some("1"), Some(code), Some("wall-air-conditioner")).is_none());
+            assert!(
+                select_wall_without_subtype(Some(code), Some("wall-air-conditioner")).is_none()
+            );
         }
         assert!(select(None, Some("22397091"), Some("wall-air-conditioner")).is_none());
         assert!(select(Some("1"), None, Some("wall-air-conditioner")).is_none());

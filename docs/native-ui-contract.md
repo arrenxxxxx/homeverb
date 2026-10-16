@@ -1326,3 +1326,12 @@ See [ADR-0064](adr/0064-saved-device-conflict-inspection.md) and the fictional
 
 This is diagnosis only. Explicit account choice and atomic reconciliation that
 preserves stable cards, organization and history remain unimplemented.
+
+### Temperature options without an optional wall-AC subtype
+
+ADR-0066 makes the existing `climate.set` option available when the protected
+exact reviewed wall model, product code and explicit wall category suffice despite
+an omitted subtype. The unchanged 1.22.0 request/response and startup schemas already
+represent these options and bounds. Hosts must inspect again and establish exact
+temperature grants before refreshing descriptors. A cached readable target is never
+permission to construct arbitrary bounds or grant an uninspected action.

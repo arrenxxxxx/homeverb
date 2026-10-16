@@ -427,3 +427,13 @@ The original bounded operation, account lease and metadata checks still apply.
 Only local IDs and a non-authoritative status leave the bridge; candidate
 endpoints/provider identifiers are dropped. Ordinary JSON, CLI/MCP discovery,
 cloud routing, storage and appliance write outcomes remain unchanged.
+
+## Optional subtype in wall-AC temperature admission
+
+[ADR-0066](adr/0066-optional-wall-ac-subtype.md) corrects an over-restrictive
+selector: absent subtype is permitted only with an independently saved exact
+reviewed wall model, explicit wall category and non-placeholder product code.
+Existing product overrides and exclusions still determine the temperature encoding
+and bounds. Execution rechecks the same protected evidence as option inspection
+and discovery. No inferred subtype is stored; grants, schemas, one-send behavior,
+accepted/unknown outcomes and the separation of later observations are unchanged.

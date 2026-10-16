@@ -1759,3 +1759,36 @@ Celsius unit beside the target, select the mode icon from the observed semantic
 mode, and describe the unconnected direction control as an integration gap.
 Static analysis and the final climate/localization subset passed (13 tests).
 The full suite above was not repeated for these label/icon/layout-only changes.
+
+## Optional-subtype temperature correction
+
+The owner's wall AC had protected product and explicit wall-category evidence,
+but no nonzero subtype. The earlier mandatory-subtype check omitted its
+`climate.set` option. Temporary emulator logging emitted only fixed readiness
+booleans; the diagnostic was removed before this source phase. No raw product
+values, device identifiers or credentials were exported.
+
+ADR-0066 corrects this for independently protected exact reviewed wall models.
+Option inspection, descriptor admission, execution and read decoding use the
+same selection. Missing model/product/category, ambiguous placeholders and excluded
+profiles remain denied. Known subtype priority, exact grants, Celsius bounds,
+steps, encoding and uncertain-write rules are unchanged.
+
+Checks actually run:
+
+- Temperature-focused Rust tests passed, including additional missing-subtype
+  cases across all four exact models, encoding and negative evidence fixtures.
+- `cargo +1.96.0 clippy --workspace --all-targets --offline --locked -- -D warnings`
+  passed on the documented baseline. The workstation's stable Rust 1.99 check
+  encounters four pre-existing `chunks_exact_to_as_chunks` warnings in unchanged
+  codec/LAN files; these were not suppressed or included in this fix.
+- The unfiltered workspace suite encountered 14 LAN tests requiring an unconfigured
+  `127.0.0.2` address on macOS (`AddrNotAvailable`). A second workspace run excluded
+  exactly those 14 platform-blocked tests: 467 passed, one existing test ignored,
+  no failures. This is not an unfiltered workspace pass.
+- Both Android native ABIs built with 17 exports each and 16 KiB alignment.
+- Contract validation passed: 20 schemas, 45 positive and 250 negative fixtures.
+  Documentation/repository validation and formatting passed.
+
+This source phase changes no public schemas, native API 1.22.0, SQLite schema 5
+or protected payload 3. APK/runtime temperature evidence is recorded separately.

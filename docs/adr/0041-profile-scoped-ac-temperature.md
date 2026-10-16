@@ -31,6 +31,12 @@ not a physical model/firmware guarantee.
 
 ## Command and permission contract
 
+[ADR-0066](0066-optional-wall-ac-subtype.md) narrowly supersedes the mandatory
+subtype rule above: a protected exact reviewed wall model, explicit wall category
+and non-placeholder product code can resolve the existing mapping without that
+optional field. Known subtypes retain priority and excluded product overrides
+remain excluded. No generic-family fallback or synthetic subtype is introduced.
+
 Expose `main / climate.set {target_temperature}` after explicit temperature
 opt-in and discovery/refresh. The action carries its selected minimum, maximum
 and multipleOf constraints. Read properties retain their observed-value domain;
