@@ -102,7 +102,7 @@ void main() {
   ) async {
     await tester.runAsync(loadWindowSkin);
     tester.view.devicePixelRatio = 2;
-    tester.view.physicalSize = const Size(780, 1440);
+    tester.view.physicalSize = const Size(780, 1600);
     addTearDown(() {
       tester.view.resetDevicePixelRatio();
       tester.view.resetPhysicalSize();
@@ -113,6 +113,7 @@ void main() {
       (12.0, false, 'Waiting for an updated reading'),
       (13.0, false, 'observation.'),
       (14.0, true, 'Accepted; not yet confirmed'),
+      (16.0, false, '⌄'),
       (23.0, true, 'Select mode'),
       (25.0, true, 'Bedroom AC'),
       (68.0, false, '24°'),

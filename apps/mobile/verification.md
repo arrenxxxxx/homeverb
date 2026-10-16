@@ -1190,3 +1190,53 @@ Final APK SHA-256: `abc631f0a48b13891531a54838ada7bb140001913dcf8fecb23fb757ed27
 Full Android screen-reader acceptance remains unverified; the empty EditText's
 uiautomator node did not expose the wrapper label. No real account, appliance,
 physical phone or iOS execution was performed.
+
+## Shared decorative glyph alignment — October 16, 2026
+
+Navigation, header, appliance and stepper icons now use 25 small tintable masks
+exported from the approved prototype's drawing methods. The atlas is 7,787 bytes;
+its generator reads only the Canvas drawing methods and never imports the
+renderer or regenerates reference pages. Running it twice produces identical
+assets. Masks preserve the independent renderer's integer outlines and endpoints;
+paint origins snap to physical pixels. Native controls retain hit targets, focus,
+semantics and high-contrast tinting. Other icon sizes retain the vector fallback.
+The masks contain no labels, complete controls or page captures.
+
+Choice checkmarks retain their specified 14-logical-pixel size instead of being
+stretched by the circular parent, and their right inset matches the reference.
+The home dropdown's existing text symbol now has font-anchor metadata, correcting
+its downward fallback offset. The native body-ink regression includes that symbol.
+
+All **84 Flutter tests** and static analysis pass. The complete suite captures
+all 82 states, clicks all 201 explicitly simulated atlas branches, and exercises
+native Mock/fixture interactions, forms, large text and high contrast. Final
+strict comparison remains **0/82 exact**, with mean channel error **0.6451/255**,
+compared with 0.6725 before this phase. All 82 states improve; none regress.
+Intermediate icon scaling briefly regressed the reduced S11 preview; the final
+physical-pixel placement and geometry corrections remove that screen regression.
+Four independently cropped D01 icon regions (Search and all three navigation
+icons) are exactly equal. This does not establish whole-screen equivalence.
+
+Evidence: `output/flutter-verification/glyph-comparison.json`,
+`glyph-pixel-audit.json`, `glyph-{D01,C02,C09,C11,P05,S11}.png` review panels and
+the full `index.html` report. Logs: `/tmp/homeverb-glyph-position.log`,
+`/tmp/homeverb-glyph-tests-final.log` and `/tmp/homeverb-glyph-analyze.log`.
+No reference image, comparison tolerance, Core API, credential or execution
+semantics changed.
+
+The ordinary dual-ABI APK rebuilt in 26.9s and passed 16 KiB ZIP alignment.
+Its Core libraries match the previous phase byte for byte; packaged glyph masks,
+font metrics, atlas data and decorative button faces match source. The installed
+APK passed actual pointer checks for Platforms, Devices, Search, Back, Add Device,
+explicit Mock discovery, the saved card, Refresh State and Mode. Selecting heat
+moves the native checkmark; Cancel preserves the observed cool mode, target 26
+and power off. The resulting screenshots and UI labels were inspected.
+
+Evidence: `output/flutter-verification/android/glyph-package-check.json`,
+`glyph-release-clicks.json` and
+`glyph-release-{platforms,devices,search,home,device-read,mode,selected,cancel}.png`.
+Build log: `/tmp/homeverb-glyph-release.log`. APK SHA-256:
+`3ef0c9f3598e7025cea550a8f1e3b70c8df96b9551d8dd6539338dbbbae2ca2b`.
+The full Android integration journey was not repeated for this decorative phase;
+the prior journey's scope and limitations remain recorded above. No real account,
+appliance, physical phone, iOS or new Keystore acceptance is claimed.

@@ -68,6 +68,13 @@ center visible ascenders and descenders. Text, wrapping and semantics stay nativ
 Unknown glyphs and system bold/spacing overrides retain ordinary native layout.
 High contrast retains Flutter's existing solid outlined controls.
 
+The shared navigation and control glyphs use a small tintable atlas exported from
+the approved prototype's drawing methods. Regenerate it from this directory with
+`python3 tool/generate_glyph_assets.py`. The generator loads only those methods;
+it does not render or update reference pages. The masks contain no labels or
+whole controls. Flutter retains native hit targets, focus, selection and semantics,
+and tints the same masks for high contrast. Other sizes keep the vector fallback.
+
 Build the library from the repository root before running native tests:
 
 ```sh

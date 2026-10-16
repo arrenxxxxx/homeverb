@@ -26,6 +26,8 @@ const skinRegistry = {'window_light': HomeVerbSkin()};
 ui.FragmentProgram? _surfaceProgram;
 Future<void>? _skinAssetsLoad;
 final _buttonFaces = <String, ui.Image>{};
+ui.Image? _glyphAtlas;
+final _glyphRegions = <(String, double), Rect>{};
 final _textInkBounds = <(int, double), Map<int, (double, double)>>{};
 final _editableInkBounds = <int, (double, double)>{};
 Future<void> loadWindowSkin() => _skinAssetsLoad ??= () async {
@@ -57,6 +59,23 @@ Future<void> loadWindowSkin() => _skinAssetsLoad ??= () async {
       });
     }
   }
+  final glyphs = jsonDecode(await rootBundle.loadString('assets/glyphs.json'));
+  for (final entry in (glyphs['regions'] as Map<String, dynamic>).entries) {
+    final key = entry.key.split(':');
+    final region = (entry.value as List).cast<num>();
+    _glyphRegions[(key[0], double.parse(key[1]))] = Rect.fromLTWH(
+      region[0].toDouble(),
+      region[1].toDouble(),
+      region[2].toDouble(),
+      region[3].toDouble(),
+    );
+  }
+  final glyphBytes = await rootBundle.load('assets/glyphs.png');
+  final glyphCodec = await ui.instantiateImageCodec(
+    glyphBytes.buffer.asUint8List(),
+  );
+  _glyphAtlas = (await glyphCodec.getNextFrame()).image;
+  glyphCodec.dispose();
   for (final style in ['primary', 'secondary', 'danger', 'disabled']) {
     final bytes = await rootBundle.load('assets/button-$style.png');
     final codec = await ui.instantiateImageCodec(bytes.buffer.asUint8List());
@@ -1022,10 +1041,7 @@ class ChoiceTile extends StatelessWidget {
               return ConstrainedBox(
                 constraints: BoxConstraints(minHeight: height),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 15,
-                    vertical: 17,
-                  ),
+                  padding: const EdgeInsets.fromLTRB(15, 17, 16, 17),
                   child: Row(
                     children: [
                       Expanded(
@@ -1043,10 +1059,12 @@ class ChoiceTile extends StatelessWidget {
                           ),
                         ),
                         child: selected
-                            ? const Glyph(
-                                'check',
-                                size: 14,
-                                color: Colors.white,
+                            ? const Center(
+                                child: Glyph(
+                                  'check',
+                                  size: 14,
+                                  color: Colors.white,
+                                ),
                               )
                             : null,
                       ),
@@ -1071,7 +1089,11 @@ class Glyph extends StatelessWidget {
   Widget build(BuildContext context) => SizedBox.square(
     dimension: size,
     child: CustomPaint(
-      painter: _GlyphPainter(name, readableInk(context, color)),
+      painter: _GlyphPainter(
+        name,
+        readableInk(context, color),
+        MediaQuery.devicePixelRatioOf(context),
+      ),
     ),
   );
 }
@@ -1109,11 +1131,43 @@ class WindowSliderThumb extends SliderComponentShape {
 }
 
 class _GlyphPainter extends CustomPainter {
-  _GlyphPainter(this.name, this.color);
+  _GlyphPainter(this.name, this.color, this.pixelRatio);
   final String name;
   final Color color;
+  final double pixelRatio;
   @override
   void paint(Canvas canvas, Size size) {
+    final atlas = _glyphAtlas;
+    final region = _glyphRegions[(name, size.width)];
+    if (atlas != null && region != null) {
+      final transform = canvas.getTransform();
+      double snap(double value) {
+        final scaled = value * pixelRatio;
+        final floor = scaled.floor();
+        final rounded = scaled - floor == .5
+            ? (floor.isEven ? floor : floor + 1).toDouble()
+            : scaled.roundToDouble();
+        return rounded / pixelRatio - value;
+      }
+
+      canvas.save();
+      if (transform[0] == 1 &&
+          transform[5] == 1 &&
+          transform[1] == 0 &&
+          transform[4] == 0) {
+        canvas.translate(snap(transform[12]), snap(transform[13]));
+      }
+      canvas.drawImageRect(
+        atlas,
+        region,
+        Rect.fromLTWH(-2, -2, region.width / 2, region.height / 2),
+        Paint()
+          ..filterQuality = FilterQuality.low
+          ..colorFilter = ColorFilter.mode(color, BlendMode.srcIn),
+      );
+      canvas.restore();
+      return;
+    }
     canvas.scale(size.width / 24);
     final p = Paint()
       ..color = color
@@ -1252,7 +1306,7 @@ class _GlyphPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _GlyphPainter old) =>
-      name != old.name || color != old.color;
+      name != old.name || color != old.color || pixelRatio != old.pixelRatio;
 }
 
 class IconAction extends StatelessWidget {

@@ -5,7 +5,7 @@ from pathlib import Path
 from PIL import ImageFont
 
 ASSETS = Path(__file__).resolve().parents[1] / 'assets'
-characters = set(chr(i) for i in range(32, 127)) | {'…', '•'}
+characters = set(chr(i) for i in range(32, 127)) | {'…', '•', '⌄'}
 
 
 def collect(value):
