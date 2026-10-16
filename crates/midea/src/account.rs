@@ -273,6 +273,7 @@ impl MeijuAccount {
         }
         self.lease.confirm_session(&bytes, operation).await?;
         let bindings = self.bind_inventory(&inventory, operation).await?;
+        self.lease.record_complete_inventory(operation).await?;
         Ok(BoundInventory {
             inventory,
             bindings,
@@ -290,6 +291,9 @@ impl MeijuAccount {
         let inventory =
             retrieve_inventory(&session.reads(transport, reference), reference, operation).await?;
         let bindings = self.bind_inventory(&inventory, operation).await?;
+        if inventory.is_complete() {
+            self.lease.record_complete_inventory(operation).await?;
+        }
         Ok(BoundInventory {
             inventory,
             bindings,

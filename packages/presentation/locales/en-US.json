@@ -187,5 +187,8 @@
   "error.LAN_NETWORK_PERMISSION_REQUIRED": "Allow network-state access before selecting a local network.",
   "error.LAN_NETWORK_UNAVAILABLE": "Android network information is unavailable. Try again in the foreground.",
   "error.LAN_NETWORK_CHANGED": "The selected network changed or expired. Select it again and review a new scan preview.",
-  "error.LAN_NETWORK_UNSUPPORTED": "Local scanning is unavailable with the current VPN route. Cloud operations remain separate."
+  "error.LAN_NETWORK_UNSUPPORTED": "Local scanning is unavailable with the current VPN route. Cloud operations remain separate.",
+  "account.inventory.last_complete": "Last complete device list: {time}",
+  "account.inventory.never_recorded": "No complete device-list time recorded",
+  "account.inventory.time_hint": "Recorded using this device’s clock. This does not confirm current authorization or appliance status."
 }

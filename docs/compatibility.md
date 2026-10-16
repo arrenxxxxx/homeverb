@@ -1436,3 +1436,36 @@ outside that restriction passed. All three Android AAR variants passed 14-export
 and 16 KiB alignment inspection. No emulator/APK acceptance was repeated for this
 parser change. Both CI workflows for `b654721` were confirmed successful; this
 phase's commit/push and CI are checked separately.
+
+## Historical complete account inventory time
+
+[ADR-0060](adr/0060-account-inventory-timestamp.md) adds nullable
+`last_complete_inventory_at` to account summaries in native API 1.19.0. Complete
+validated inventory, including an empty list, records the local UTC wall clock
+after protected binding persistence. Partial/failed retrieval leaves it unchanged.
+It does not establish current authorization, appliance freshness or successful
+card publication. Unchanged credentials are not rewritten for this metadata.
+
+SQLite schema 5 upgrades schemas 1/2/3/4 under the existing exclusive migration
+lock and verified backup. Older accounts start with null evidence. Close older
+clients before upgrade; they refuse schema 5. The 33 ordinary methods, C/JNI
+exports, protected payload 3 and control authority remain unchanged. Local
+list/details/rename and cache/history clearing preserve the time without secrets;
+account removal deletes it. Storage failures preserve prior metadata and do not
+undo completed protected persistence or independently mark credentials pending.
+
+On October 16, 2026, verification passed: 458 Rust tests with two explicitly
+ignored probes, formatting, Clippy, workspace/example builds, 35 runtime checks,
+33 native methods/54 fictional examples and trusted-function checks, 42 Python
+tests, six presentation tests and document/contract/repository/commit validation.
+All three Android AAR variants passed 14-export and 16 KiB alignment inspection.
+The isolated APK passed Java/C compilation, signature, ABI and ZIP checks. A fresh
+AOSP Android 15 x86_64 emulator passed 19 network, 28 unsecured and 93 control
+assertions. Eleven new unsecured assertions cover schema-4 backup/upgrade,
+explicit null evidence, local metadata retention and reopen. The test package,
+emulator and dedicated ADB server were cleaned up.
+
+Both CI workflows for `9014fcd` were confirmed successful; this phase's push and
+CI are checked separately. No real account, household appliance, physical phone
+or separate Flutter worktree was accessed. Flutter rendering, real inventory
+timing and physical-device acceptance remain unverified; no package is published.

@@ -1490,6 +1490,13 @@
         },
         "authorization": {
           "const": "not_checked"
+        },
+        "last_complete_inventory_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
         }
       },
       "required": [
@@ -1498,7 +1505,8 @@
         "region",
         "label",
         "credential_state",
-        "authorization"
+        "authorization",
+        "last_complete_inventory_at"
       ],
       "additionalProperties": false
     },

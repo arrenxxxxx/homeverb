@@ -157,6 +157,12 @@ successful data return `MIDEA_RESPONSE_INVALID`. A rejected login creates no loc
 account, replaces no saved session and starts no inventory request. The UI may
 offer explicit user-side reauthorization; it must not retry automatically.
 
+Saving `last_complete_inventory_at` can return `STORAGE_ERROR` after a complete
+inventory has already updated protected bindings. The old timestamp remains when
+the metadata transaction fails; protected persistence is not rolled back and
+credentials do not become pending solely because timestamp storage failed. Inspect
+the returned account/retrieval state. This field never changes operational admission.
+
 ## Meiju cloud read errors
 
 `MIDEA_INVENTORY_PARTIAL` means the Core adapter could not retrieve every accessible

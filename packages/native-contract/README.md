@@ -1,6 +1,11 @@
 # HomeVerb native contract
 
-Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.18.0 has 33 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions and three trusted LAN-scan functions; the JSON envelope schema is 1.0.
+Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.19.0 has 33 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions and three trusted LAN-scan functions; the JSON envelope schema is 1.0.
+
+API 1.19 adds nullable `last_complete_inventory_at` to account summaries. It is
+historical local retrieval metadata, not authorization or online status. SQLite
+1/2/3/4 migrates with a backup to schema 5; close older clients before upgrading.
+Protected credentials and C/JNI exports are unchanged. See [ADR-0060](../../docs/adr/0060-account-inventory-timestamp.md).
 
 - [api.json](api.json) is compiled into the `get_api_info` response.
 - [examples.json](examples.json) contains fictional requests and actual Mock native responses, including failures and lifecycle states. It is preview/test data, never a production device database.

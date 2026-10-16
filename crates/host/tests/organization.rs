@@ -456,6 +456,7 @@ async fn clearing_cache_preserves_local_metadata_and_cached_reads_never_refill_i
         label: "Kept account".into(),
         credential_ref: CredentialRef::new(),
         credential_state: CredentialState::Pending,
+        last_complete_inventory_at: None,
     };
     p.store.insert_account(&account).unwrap();
     let room = p.core.create_room("Kept room").unwrap();

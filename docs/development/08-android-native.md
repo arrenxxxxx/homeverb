@@ -289,7 +289,7 @@ Run these phases in order, waiting for each OS lock transition to complete:
 
 | Phase | Emulator setup | Required result |
 |---|---|---|
-| `unsecured` | Fresh emulator without a secure screen lock | Store refusal; native Mock discovery/write, shared migration leases, device-lock contention/release, foreground/background/close and JNI pre-login refusal |
+| `unsecured` | Fresh emulator without a secure screen lock | Store refusal; native Mock discovery/write, schema-4 account metadata upgrade, shared migration leases, device-lock contention/release, foreground/background/close and JNI pre-login refusal |
 | `write` | Configure a test PIN on this disposable emulator, then leave it unlocked | Android Keystore round trip, nonexportable key, ciphertext, profile isolation, input clearing and protected fictional account fixture |
 | `locked` | Lock the emulator and wait until Android reports it locked | Java store and native JNI connection return locked errors before provider work; native Mock operations remain local |
 | `read` | Unlock with the test PIN and wait for the unlocked state | A different process reads prior ciphertext; nonce replacement, tamper refusal, deliberately deleted-key refusal without regeneration, native JNI inventory reading, account-lock contention/release and account deletion |
@@ -301,7 +301,7 @@ and assertion counts. If a lock-state precondition fails, complete the OS transi
 before rerunning that phase. A failed destructive `read` phase requires a fresh
 test installation; do not treat a partially consumed fixture as a new baseline.
 
-The fixture uses the native-created schema-4 database and encrypted version-3
+The fixture uses the native-created schema-5 database and encrypted version-3
 account payload, with no real credentials or provider requests. Successful secure
 writes use the production Java backend; native inventory reads and removal also
 exercise the production Rust/JNI backend. This does not test successful provider
@@ -317,6 +317,15 @@ Rust locks returning `Unsupported` while Bionic `flock` succeeded. The Android
 Both lock/unlock tests initially ran before the OS transition completed; rerunning
 after the required state was visible passed. This is emulator evidence, not a
 physical phone, hardware-backed key, Flutter journey or 16 KiB-page runtime claim.
+
+API 1.19 adds eleven local account-metadata assertions to the native flow. A
+disposable fictional profile reconstructs schema 4, then native reopen creates
+the migration backup and schema 5 with explicit null inventory-time evidence.
+Reopen, list/details, rename and cache/history clearing preserve a seeded
+historical timestamp without credentials. On October 16, 2026, the rebuilt APK
+passed 28 `unsecured`, 19 `networks` and 93 `controls` assertions on a fresh AOSP
+Android 15 x86_64 emulator. The secure-lock phases were not repeated for this
+metadata change. These checks make no provider request or appliance operation.
 
 ### Exercise native controls without a provider
 

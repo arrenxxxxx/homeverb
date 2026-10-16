@@ -24,6 +24,7 @@ pub struct AccountSummary {
     region: String,
     label: String,
     credential_state: CredentialState,
+    last_complete_inventory_at: Option<String>,
     authorization: &'static str,
 }
 
@@ -35,6 +36,9 @@ impl From<AccountRecord> for AccountSummary {
             region: record.region,
             label: record.label,
             credential_state: record.credential_state,
+            last_complete_inventory_at: record
+                .last_complete_inventory_at
+                .map(|time| time.to_rfc3339()),
             authorization: "not_checked",
         }
     }

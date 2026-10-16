@@ -979,6 +979,7 @@ dependencies = [
 name = "homeverb-storage"
 version = "0.2.0"
 dependencies = [
+ "chrono",
  "homeverb-core",
  "homeverb-domain",
  "libc",

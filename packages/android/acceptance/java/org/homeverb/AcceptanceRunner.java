@@ -192,7 +192,7 @@ public final class AcceptanceRunner extends Instrumentation {
         // Test-only fixture insertion into the schema created by native Core; no production import API.
         try (SQLiteDatabase db = SQLiteDatabase.openDatabase(
                 context.getFilesDir().toPath().resolve("meiju-fixture/homeverb.sqlite3").toString(), null, SQLiteDatabase.OPEN_READWRITE)) {
-            check(db.getVersion() == 4);
+            check(db.getVersion() == 5);
             try (Cursor rows = db.rawQuery("SELECT namespace FROM profile_namespace WHERE singleton=1", null)) {
                 check(rows.moveToFirst());
                 profile = rows.getString(0);
@@ -252,6 +252,7 @@ public final class AcceptanceRunner extends Instrumentation {
     }
 
     private void nativeFlow(Context context, String storageError) throws Exception {
+        InventoryTimeAcceptance.run(this, context);
         JSONObject config = new JSONObject().put("schema_version", "1.0")
             .put("data_dir", context.getFilesDir().toPath().resolve("mock").toString()).put("allow_mock_writes", true);
         long handle = open(config);

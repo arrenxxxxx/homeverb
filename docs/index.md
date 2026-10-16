@@ -26,6 +26,7 @@ Start with the progressive development path. Reference documents define invarian
 - Delivery: [repository layout](repository.md), [testing](testing.md), [task status](task-breakdown.md), [roadmap](roadmap.md), [compatibility](compatibility.md), [commit conventions](commit-conventions.md), [private publishing](publishing.md).
 - Cleanup recovery: [remove unreadable local credentials](adr/0033-delete-unreadable-account-credentials.md) through the existing confirmed account-removal flow.
 - Inventory inspection: [foreground saved account evidence](adr/0036-local-account-inventory-inspection.md) for the native UI.
+- Inventory timing: [historical complete-retrieval metadata](adr/0060-account-inventory-timestamp.md), nullable after upgrade and never an authorization or online signal.
 - Inventory admission: [retain identity while gating live Meiju requests](adr/0035-meiju-inventory-membership.md).
 - LAN foundation: [bounded discovery decoding and collection](adr/0045-bounded-lan-discovery-decoding.md), with unauthenticated native candidates, fictional loopback evidence and no route registration.
 - V3 LAN sessions: [protected handshake, bounded wire codec and operation-owned TCP exchange](adr/0046-bounded-v3-lan-codec.md), with fictional evidence and no identity or route admission.

@@ -1,5 +1,5 @@
 {
-  "api_version": "1.18.0",
+  "api_version": "1.19.0",
   "provenance": "Fictional account DTO examples. Actual synthetic host responses are checked against the same schemas by crates/host/tests/meiju_accounts.rs. No live identities or credentials.",
   "connect_metadata": {
     "schema_version": "1.0",
@@ -20,7 +20,8 @@
             "region": "CN",
             "label": "Example account",
             "credential_state": "stored",
-            "authorization": "not_checked"
+            "authorization": "not_checked",
+            "last_complete_inventory_at": null
           },
           "authentication": "succeeded",
           "retrieval": {
@@ -46,7 +47,8 @@
             "region": "CN",
             "label": "Example account",
             "credential_state": "stored",
-            "authorization": "not_checked"
+            "authorization": "not_checked",
+            "last_complete_inventory_at": null
           },
           "authentication": "succeeded",
           "retrieval": {
@@ -74,7 +76,8 @@
             "region": "CN",
             "label": "Example account",
             "credential_state": "stored",
-            "authorization": "not_checked"
+            "authorization": "not_checked",
+            "last_complete_inventory_at": null
           },
           "authentication": "succeeded",
           "retrieval": {
@@ -102,7 +105,8 @@
             "region": "CN",
             "label": "Example account",
             "credential_state": "stored",
-            "authorization": "not_checked"
+            "authorization": "not_checked",
+            "last_complete_inventory_at": null
           },
           "authentication": "succeeded",
           "retrieval": {
@@ -130,7 +134,8 @@
             "region": "CN",
             "label": "Example account",
             "credential_state": "stored",
-            "authorization": "not_checked"
+            "authorization": "not_checked",
+            "last_complete_inventory_at": null
           },
           "authentication": "not_attempted",
           "retrieval": {
@@ -156,7 +161,8 @@
             "region": "CN",
             "label": "Example account",
             "credential_state": "stored",
-            "authorization": "not_checked"
+            "authorization": "not_checked",
+            "last_complete_inventory_at": null
           }
         ],
         "warnings": [],
@@ -183,7 +189,8 @@
             "region": "CN",
             "label": "Example account",
             "credential_state": "stored",
-            "authorization": "not_checked"
+            "authorization": "not_checked",
+            "last_complete_inventory_at": null
           },
           "device_ids": [
             "00000000-0000-4000-8000-000000000002"
@@ -213,7 +220,8 @@
           "region": "CN",
           "label": "Family appliances",
           "credential_state": "stored",
-          "authorization": "not_checked"
+          "authorization": "not_checked",
+          "last_complete_inventory_at": null
         },
         "warnings": [],
         "error": null
@@ -292,7 +300,8 @@
             "region": "CN",
             "label": "Example account",
             "credential_state": "stored",
-            "authorization": "not_checked"
+            "authorization": "not_checked",
+            "last_complete_inventory_at": null
           },
           "authentication": "not_attempted",
           "retrieval": {
@@ -327,7 +336,8 @@
             "region": "CN",
             "label": "Example account",
             "credential_state": "pending",
-            "authorization": "not_checked"
+            "authorization": "not_checked",
+            "last_complete_inventory_at": null
           },
           "authentication": "not_attempted",
           "retrieval": {
@@ -364,7 +374,8 @@
             "region": "CN",
             "label": "Example account",
             "credential_state": "stored",
-            "authorization": "not_checked"
+            "authorization": "not_checked",
+            "last_complete_inventory_at": null
           },
           "authentication": "not_attempted",
           "retrieval": {
@@ -461,7 +472,8 @@
             "region": "CN",
             "label": "Example account",
             "credential_state": "stored",
-            "authorization": "not_checked"
+            "authorization": "not_checked",
+            "last_complete_inventory_at": "2026-10-16T06:00:00Z"
           },
           "devices": [
             {

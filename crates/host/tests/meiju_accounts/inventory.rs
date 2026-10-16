@@ -57,7 +57,16 @@ async fn inspection_reports_saved_membership_without_network_mutation_or_private
     f.wire.empty_inventory.store(false, Ordering::Relaxed);
     f.wire.inventory_code.store(0, Ordering::Relaxed);
     f.refresh(&account.id.to_string()).await;
-    assert_eq!(f.call(inspect(account.id)).await, initial);
+    let mut expected = initial;
+    expected["data"]["account"]["last_complete_inventory_at"] = json!(
+        f.store
+            .account(account.id)
+            .unwrap()
+            .last_complete_inventory_at
+            .unwrap()
+            .to_rfc3339()
+    );
+    assert_eq!(f.call(inspect(account.id)).await, expected);
 }
 
 #[tokio::test(start_paused = true)]

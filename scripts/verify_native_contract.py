@@ -383,7 +383,7 @@ def main():
         handle = open_host(directory, allow=False, adapter='midea.meiju')
         try:
             with sqlite3.connect(Path(directory) / 'homeverb.sqlite3') as database:
-                database.execute('INSERT INTO accounts VALUES (?, ?, ?, ?, ?, ?)',
+                database.execute('INSERT INTO accounts (id, provider, region, label, credential_ref, credential_state) VALUES (?, ?, ?, ?, ?, ?)',
                                  (account_id, 'midea.meiju', 'CN', 'Original', reference, 'pending'))
                 for device_id, accounts in [('linked', [account_id, account_id]), ('other', [other_id])]:
                     device = load('examples/device.json')
@@ -805,6 +805,16 @@ def main():
     connect_schema.validate(account_examples['connect_metadata'])
     connect_schema.validate(account_examples['reauthorize_metadata'])
     assert account_examples['reauthorize_metadata']['account_id'] is not None
+    summary_schema = validator('native-response', 'account_summary')
+    summary = next(case['response']['data']['account'] for case in account_examples['cases']
+                   if case['response_definition'] == 'inspect_account_inventory')
+    for value in [None, '2026-10-16T06:00:00Z']:
+        summary_schema.validate({**summary, 'last_complete_inventory_at': value})
+    for value in [True, 1792126800, 'invalid-time', '2026-02-30T00:00:00Z']:
+        assert not summary_schema.is_valid({**summary, 'last_complete_inventory_at': value})
+    missing_time = dict(summary)
+    del missing_time['last_complete_inventory_at']
+    assert not summary_schema.is_valid(missing_time)
     for case in account_examples['cases']:
         validator('native-response', case['response_definition']).validate(case['response'])
         if 'request' in case:

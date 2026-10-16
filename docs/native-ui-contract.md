@@ -5,7 +5,7 @@ Status: implemented Linux native contract, October 16, 2026, with Mock, default 
 ## Start here in a Flutter worktree
 
 The connection-linking foundation in [ADR-0052](adr/0052-trusted-connection-linking.md)
-is currently typed Rust Core/Session only. API 1.18.0 has no JSON/C/JNI link
+is currently typed Rust Core/Session only. API 1.19.0 has no JSON/C/JNI link
 method; Meiju does not opt in. Do not wire a confirmation button to discovery,
 invent a `confirmed` request field or add a duplicate LAN card. Native route
 admission and a separately versioned mobile bridge remain prerequisites.
@@ -34,7 +34,7 @@ The 13 C functions in [homeverb.h](../crates/ffi/include/homeverb.h) remain the 
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects saved-account cloud reads. `scenario` defaults to `normal`. Meiju requires `allow_mock_writes: false` and rejects any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms `homeverb.mock` or `midea.meiju`. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.18.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.19.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -355,7 +355,7 @@ receipt metadata or OS storage pages. No provider-revocation option is supported
 The [fictional examples](../packages/native-contract/account-examples.json) cover
 complete and pending results; English/Chinese catalogs provide scope and retry text.
 
-This version migrates SQLite 1/2/3 to 4 with a verified backup. Close older clients
+API 1.5 originally migrated SQLite 1/2/3 to 4 with a verified backup. Close older clients
 before opening the profile and update native/UI code together: schema-3 binaries
 refuse the upgrade, and strict older readers reject `removing`. The seven C symbols
 and appliance command/receipt schemas retain their meaning.
@@ -372,8 +372,34 @@ China only. No HomeVerb account or project server is involved.
 `list_accounts` returns local `id`, `provider`, `region`, `label`, `credential_state`
 (`pending`, `stored` or `removing`) and `authorization: "not_checked"`. It never opens the secret
 store or contacts the provider. A stored session is not proof of current authorization.
-No provider subject, credential reference, guessed masked login, permission scope
-or last-check timestamp is exposed. Display the local label as the account name.
+No provider subject, credential reference, guessed masked login or permission scope
+is exposed. Display the local label as the account name. API 1.19 adds historical
+inventory timing below; it does not add a current authorization check.
+
+### Last complete inventory time (API 1.19)
+
+All account summaries include `last_complete_inventory_at`, a nullable RFC 3339
+timestamp from this installation's UTC wall clock. Display it as **Last complete
+device list**, not Last online or Authorization valid. Null means no recorded
+evidence, including profiles upgraded from older libraries. Use the locale keys
+`account.inventory.last_complete`, `account.inventory.never_recorded` and
+`account.inventory.time_hint`; format the timestamp in the user's local timezone.
+Clock changes can move it backward or put a saved timestamp in the future.
+
+Only complete cloud retrieval after protected binding persistence updates this
+field, including an empty list and successful explicit recovery. Partial/failed
+retrieval, login alone, inspection, state reads and scans do not. A subsequent
+descriptor-publication failure can coexist with a new timestamp; always inspect
+`retrieval.status` and `retrieval.error`. The timestamp confers no authority or
+observation freshness. Listing/details remain local and need no secret-store access.
+
+SQLite schema 5 preserves this field separately from credentials, so unchanged
+inventories do not rewrite the secret store. Metadata-save failure reports the
+existing storage error without undoing protected binding persistence. Closing an
+operation after a local commit does not roll it back. Rename and cache/history
+clearing preserve the field; account removal deletes it. Upgrade with all older
+clients closed: the native library makes a verified backup of schema 1/2/3/4,
+and older binaries refuse schema 5. See [ADR-0060](adr/0060-account-inventory-timestamp.md).
 
 `refresh_account` takes one local UUID. It retrieves that account's inventory with
 the saved session, validates historical/current cross-account identities, and

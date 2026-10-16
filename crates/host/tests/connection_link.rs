@@ -115,6 +115,7 @@ impl Fixture {
             label: "Fictional account".into(),
             credential_ref: CredentialRef::new(),
             credential_state: CredentialState::Pending,
+            last_complete_inventory_at: None,
         };
         store.insert_account(&account).unwrap();
         let mut descriptor = MockAdapter::descriptor();

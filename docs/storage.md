@@ -11,7 +11,7 @@
 
 Hosts inject paths following platform application-directory conventions. Do not hardcode a user's home directory. Desktop CLI/MCP may share storage for the same explicit user/profile. Mobile sandboxes remain independent; there is no automatic sync.
 
-## Implemented schema 4
+## Implemented schema 5
 
 ```text
 devices(id, descriptor)
@@ -21,9 +21,17 @@ device_preferences(device_id, alias, room_id, favorite, position)
 executions(request_id, command, result, finalized)
 retired_requests(request_id)
 profile_namespace(singleton, namespace)
-accounts(id, provider, region, label, credential_ref, credential_state)
+accounts(id, provider, region, label, credential_ref, credential_state, last_complete_inventory_at)
 account_removals(id, record)
 ```
+
+`accounts.last_complete_inventory_at` is nullable, nonsecret local wall-clock
+metadata under [ADR-0060](adr/0060-account-inventory-timestamp.md). Complete
+validated retrieval records it after protected binding persistence, while holding
+the account lease. Partial/failed work leaves it unchanged. The update requires
+stored credentials and cannot resurrect a removing/deleted account. No unchanged
+secret is rewritten for this timestamp. It is not authorization, online status,
+device observation time or a guarantee of successful card publication.
 
 The SQLite `user_version` records the schema version. Each profile has its own directory. Device descriptors include components, connections, and capabilities; aliases overlay the descriptor at read time. Rediscovery preserves preferences. Deleting a room sets its assignments to null without deleting devices or credentials. Card reads join devices and preferences in one consistent query. See [ADR-0009](adr/0009-local-organization-and-retention.md).
 
@@ -147,6 +155,6 @@ Device-specific history filters the command's exact device ID in SQLite before l
 
 Startup recovery finalizes orphaned pending records only after acquiring their device locks. Records owned by a live writer are left active. Recovery preserves their last known outcomes and never sends commands. A failed final journal update can leave an older conservative receipt even when the caller received stronger evidence.
 
-New empty profiles initialize schema 4. Schema 1, 2 and 3 upgrades take a consistent, WAL-aware SQLite backup under `backups/schema-<previous-version>-<uuid>.sqlite3`, check its integrity, and sync it before a transactional migration. Failure preserves the old schema and completed backup. Newer versions and unversioned foreign databases are refused. Existing stores hold shared migration leases; an upgrade requires exclusive access and returns `RESOURCE_BUSY` on conflict. Close older clients before upgrading, including versions that predate migration locks. Schema-3 binaries reject schema 4; do not alternate older and newer binaries on an upgraded profile. Backups are retained locally and may contain older detailed history; they contain no credentials in the current schema.
+New empty profiles initialize schema 5. Schema 1, 2, 3 and 4 upgrades take a consistent, WAL-aware SQLite backup under `backups/schema-<previous-version>-<uuid>.sqlite3`, check its integrity, and sync it before a transactional migration. Failure preserves the old schema and completed backup. Newer versions and unversioned foreign databases are refused. Existing stores hold shared migration leases; an upgrade requires exclusive access and returns `RESOURCE_BUSY` on conflict. Close older clients before upgrading, including versions that predate migration locks. Schema-4 binaries reject schema 5; do not alternate older and newer binaries on an upgraded profile. Backups are retained locally and may contain older detailed history; they contain no credentials in the current schema.
 
 Profile deletion is not an implemented command. A future deletion flow must remove its local records and secret-store entries. Do not promise reliable erasure of OS backups or vendor-cloud data.

@@ -161,7 +161,7 @@ fn migration_preserves_records_and_creates_a_consistent_version_one_backup() {
     let store = SqliteStore::open(&directory.0).unwrap();
     assert_eq!(
         migration::version(&store.connection.lock().unwrap()).unwrap(),
-        4
+        migration::SCHEMA_VERSION
     );
     assert_eq!(store.devices().unwrap()[0].device.id, descriptor.device.id);
     assert_eq!(
@@ -285,6 +285,7 @@ fn account_storage_rejects_rebinding_and_corrupt_references() {
         label: "Home".into(),
         credential_ref: CredentialRef::new(),
         credential_state: CredentialState::Pending,
+        last_complete_inventory_at: None,
     };
     store.insert_account(&record).unwrap();
     let mut rebound = record.clone();
@@ -306,7 +307,7 @@ fn account_storage_rejects_rebinding_and_corrupt_references() {
 
 #[test]
 fn newer_or_foreign_databases_are_rejected_without_schema_changes() {
-    for version in [0, 5] {
+    for version in [0, 6] {
         let directory = Directory::new();
         let connection = Connection::open(directory.database()).unwrap();
         connection
@@ -328,6 +329,180 @@ fn newer_or_foreign_databases_are_rejected_without_schema_changes() {
             "preserved"
         );
     }
+}
+
+#[test]
+fn schema_four_upgrade_keeps_account_identity_and_backs_up_unknown_inventory_time() {
+    use homeverb_core::{AccountRecord, AccountStore, CredentialRef, CredentialState};
+    let directory = Directory::new();
+    let store = SqliteStore::open(&directory.0).unwrap();
+    let account = AccountRecord {
+        id: uuid::Uuid::new_v4(),
+        provider: "midea.meiju".into(),
+        region: "CN".into(),
+        label: "Existing".into(),
+        credential_ref: CredentialRef::new(),
+        credential_state: CredentialState::Pending,
+        last_complete_inventory_at: None,
+    };
+    store.insert_account(&account).unwrap();
+    store.create_room("kept-room", "Bedroom").unwrap();
+    let namespace = store.profile_namespace().unwrap();
+    store
+        .connection
+        .lock()
+        .unwrap()
+        .execute_batch(
+            "ALTER TABLE accounts DROP COLUMN last_complete_inventory_at; PRAGMA user_version=4;",
+        )
+        .unwrap();
+    drop(store);
+    let upgraded = SqliteStore::open(&directory.0).unwrap();
+    assert_eq!(upgraded.account(account.id).unwrap(), account);
+    assert_eq!(upgraded.profile_namespace().unwrap(), namespace);
+    assert_eq!(upgraded.rooms().unwrap()[0].id, "kept-room");
+    assert_eq!(
+        migration::version(&upgraded.connection.lock().unwrap()).unwrap(),
+        5
+    );
+    let backups: Vec<_> = std::fs::read_dir(directory.0.join("backups"))
+        .unwrap()
+        .map(|entry| entry.unwrap().path())
+        .collect();
+    assert_eq!(backups.len(), 1);
+    let backup = Connection::open(&backups[0]).unwrap();
+    assert_eq!(migration::version(&backup).unwrap(), 4);
+    assert_eq!(
+        backup
+            .query_row("SELECT credential_ref FROM accounts", [], |row| row
+                .get::<_, String>(0))
+            .unwrap(),
+        account.credential_ref.to_string()
+    );
+    assert!(
+        backup
+            .prepare("SELECT last_complete_inventory_at FROM accounts")
+            .is_err()
+    );
+}
+
+#[test]
+fn inventory_time_is_nullable_local_metadata_with_state_and_storage_guards() {
+    use homeverb_core::{AccountRecord, AccountStore, CredentialRef, CredentialState};
+    let directory = Directory::new();
+    let store = SqliteStore::open(&directory.0).unwrap();
+    let mut account = AccountRecord {
+        id: uuid::Uuid::new_v4(),
+        provider: "midea.meiju".into(),
+        region: "CN".into(),
+        label: "Existing".into(),
+        credential_ref: CredentialRef::new(),
+        credential_state: CredentialState::Pending,
+        last_complete_inventory_at: None,
+    };
+    let recent = "2026-10-16T06:00:00Z".parse().unwrap();
+    let earlier = "2026-10-15T06:00:00Z".parse().unwrap();
+    account.last_complete_inventory_at = Some(recent);
+    assert_eq!(
+        store.insert_account(&account).unwrap_err().code,
+        "INVALID_ARGUMENT"
+    );
+    account.last_complete_inventory_at = None;
+    store.insert_account(&account).unwrap();
+    assert_eq!(
+        store
+            .record_complete_inventory(account.id, recent)
+            .unwrap_err()
+            .code,
+        "ACCOUNT_SESSION_UNCONFIRMED"
+    );
+    assert_eq!(store.account(account.id).unwrap(), account);
+    store
+        .set_credential_state(account.id, CredentialState::Stored)
+        .unwrap();
+    store.record_complete_inventory(account.id, recent).unwrap();
+    // Wall-clock rollback changes display metadata, never authority or ordering policy.
+    store
+        .record_complete_inventory(account.id, earlier)
+        .unwrap();
+    store.rename_account(account.id, "Renamed").unwrap();
+    assert_eq!(
+        store.accounts().unwrap()[0].last_complete_inventory_at,
+        Some(earlier)
+    );
+    store.connection.lock().unwrap().execute_batch("CREATE TRIGGER reject_inventory_time BEFORE UPDATE OF last_complete_inventory_at ON accounts BEGIN SELECT RAISE(ABORT, 'synthetic'); END").unwrap();
+    assert_eq!(
+        store
+            .record_complete_inventory(account.id, recent)
+            .unwrap_err()
+            .code,
+        "STORAGE_ERROR"
+    );
+    assert_eq!(
+        store
+            .account(account.id)
+            .unwrap()
+            .last_complete_inventory_at,
+        Some(earlier)
+    );
+    store
+        .connection
+        .lock()
+        .unwrap()
+        .execute_batch("DROP TRIGGER reject_inventory_time")
+        .unwrap();
+    drop(store);
+    let store = SqliteStore::open(&directory.0).unwrap();
+    assert_eq!(
+        store
+            .account(account.id)
+            .unwrap()
+            .last_complete_inventory_at,
+        Some(earlier)
+    );
+    for value in [
+        "invalid-time",
+        "2026-02-30T00:00:00Z",
+        "+10000-01-01T00:00:00Z",
+    ] {
+        store
+            .connection
+            .lock()
+            .unwrap()
+            .execute(
+                "UPDATE accounts SET last_complete_inventory_at=?2 WHERE id=?1",
+                params![account.id.to_string(), value],
+            )
+            .unwrap();
+        assert_eq!(store.account(account.id).unwrap_err().code, "STORAGE_ERROR");
+        assert_eq!(store.accounts().unwrap_err().code, "STORAGE_ERROR");
+    }
+    store
+        .connection
+        .lock()
+        .unwrap()
+        .execute(
+            "UPDATE accounts SET last_complete_inventory_at=?2 WHERE id=?1",
+            params![account.id.to_string(), earlier.to_rfc3339()],
+        )
+        .unwrap();
+    store.begin_account_removal(account.id, &[]).unwrap();
+    assert_eq!(
+        store
+            .record_complete_inventory(account.id, recent)
+            .unwrap_err()
+            .code,
+        "ACCOUNT_REMOVAL_PENDING"
+    );
+    store.finish_account_removal(account.id).unwrap();
+    assert_eq!(
+        store
+            .record_complete_inventory(account.id, recent)
+            .unwrap_err()
+            .code,
+        "ACCOUNT_NOT_FOUND"
+    );
+    assert!(store.accounts().unwrap().is_empty());
 }
 
 #[test]
@@ -437,6 +612,7 @@ fn schema_three_migration_preserves_account_references_and_enables_durable_remov
         label: "Existing account".into(),
         credential_ref: CredentialRef::new(),
         credential_state: CredentialState::Pending,
+        last_complete_inventory_at: None,
     };
     store.insert_account(&account).unwrap();
     store
@@ -451,7 +627,7 @@ fn schema_three_migration_preserves_account_references_and_enables_durable_remov
         CREATE TABLE accounts (id TEXT PRIMARY KEY, provider TEXT NOT NULL, region TEXT NOT NULL,
         label TEXT NOT NULL, credential_ref TEXT NOT NULL UNIQUE,
         credential_state TEXT NOT NULL CHECK(credential_state IN ('pending','stored')));
-        INSERT INTO accounts SELECT * FROM newer_accounts; DROP TABLE newer_accounts;
+        INSERT INTO accounts SELECT id, provider, region, label, credential_ref, credential_state FROM newer_accounts; DROP TABLE newer_accounts;
         DROP TABLE account_removals; PRAGMA user_version=3;",
     )
     .unwrap();

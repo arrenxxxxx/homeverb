@@ -6,7 +6,7 @@ use rusqlite::{
 };
 use std::{fs::File, path::Path};
 
-pub const SCHEMA_VERSION: u32 = 4;
+pub const SCHEMA_VERSION: u32 = 5;
 
 pub fn unsupported() -> Error {
     Error::new(
@@ -80,17 +80,24 @@ pub fn upgrade(connection: &mut Connection, directory: &Path) -> Result<()> {
             )
             .map_err(storage_error)?;
     }
-    transaction
-        .execute_batch(
-            "CREATE TABLE accounts_v4 (
+    if version < 4 {
+        transaction
+            .execute_batch(
+                "CREATE TABLE accounts_v4 (
         id TEXT PRIMARY KEY, provider TEXT NOT NULL, region TEXT NOT NULL,
         label TEXT NOT NULL, credential_ref TEXT NOT NULL UNIQUE,
         credential_state TEXT NOT NULL CHECK(credential_state IN ('pending','stored','removing')));
         INSERT INTO accounts_v4 SELECT * FROM accounts;
         DROP TABLE accounts;
         ALTER TABLE accounts_v4 RENAME TO accounts;
-        CREATE TABLE account_removals (id TEXT PRIMARY KEY, record TEXT NOT NULL);
-        PRAGMA user_version=4;",
+        CREATE TABLE account_removals (id TEXT PRIMARY KEY, record TEXT NOT NULL);",
+            )
+            .map_err(storage_error)?;
+    }
+    transaction
+        .execute_batch(
+            "ALTER TABLE accounts ADD COLUMN last_complete_inventory_at TEXT;
+        PRAGMA user_version=5;",
         )
         .map_err(storage_error)?;
     transaction.commit().map_err(storage_error)

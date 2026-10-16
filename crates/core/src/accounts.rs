@@ -1,6 +1,7 @@
 //! Trusted native account metadata and leased secure sessions. No login mechanism lives here.
 
 use crate::{CredentialRef, Operation, SecretBytes, SecretStore};
+use chrono::{DateTime, Datelike, Utc};
 use homeverb_domain::{Error, Result, local_name};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -23,6 +24,7 @@ pub struct AccountRecord {
     pub label: String,
     pub credential_ref: CredentialRef,
     pub credential_state: CredentialState,
+    pub last_complete_inventory_at: Option<DateTime<Utc>>,
 }
 
 impl AccountRecord {
@@ -41,6 +43,9 @@ impl AccountRecord {
                 .bytes()
                 .all(|b| b.is_ascii_alphanumeric() || b"_-".contains(&b))
             || local_name(&self.label)? != self.label
+            || self
+                .last_complete_inventory_at
+                .is_some_and(|time| !(0..=9999).contains(&time.year()))
         {
             return Err(Error::invalid());
         }
@@ -66,6 +71,7 @@ pub trait AccountStore: Send + Sync {
     fn lock_account(&self, id: Uuid) -> Result<Box<dyn AccountLock>>;
     fn set_credential_state(&self, id: Uuid, state: CredentialState) -> Result<()>;
     fn rename_account(&self, id: Uuid, label: &str) -> Result<()>;
+    fn record_complete_inventory(&self, id: Uuid, recorded_at: DateTime<Utc>) -> Result<()>;
     fn account_removal(&self, id: Uuid) -> Result<Option<crate::AccountRemoval>>;
     fn begin_account_removal(
         &self,
@@ -120,6 +126,7 @@ impl AccountVault {
                     label: local_name(label)?,
                     credential_ref: CredentialRef::new(),
                     credential_state: CredentialState::Pending,
+                    last_complete_inventory_at: None,
                 };
                 record.validate()?;
                 let guard = self.store.lock_account(record.id)?;
@@ -165,6 +172,25 @@ pub struct AccountLease {
 impl AccountLease {
     pub fn record(&self) -> &AccountRecord {
         &self.record
+    }
+
+    /// Historical metadata only, after complete retrieval and protected binding persistence.
+    pub async fn record_complete_inventory(&mut self, operation: &Operation) -> Result<()> {
+        operation
+            .run(async {
+                if self.record.credential_state != CredentialState::Stored {
+                    return Err(Error::new(
+                        "ACCOUNT_SESSION_UNCONFIRMED",
+                        "Complete inventory metadata requires confirmed local credentials.",
+                    ));
+                }
+                let recorded_at = Utc::now();
+                self.store
+                    .record_complete_inventory(self.record.id, recorded_at)?;
+                self.record.last_complete_inventory_at = Some(recorded_at);
+                Ok(())
+            })
+            .await
     }
 
     pub async fn read_session(&self, operation: &Operation) -> Result<SecretBytes> {

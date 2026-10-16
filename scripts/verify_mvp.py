@@ -133,7 +133,7 @@ class RuntimeAcceptance(unittest.TestCase):
         self.assertEqual(self.meiju(*options, 'account', 'list', response_definition='list_accounts')['data'], [])
         database = path.parent / 'meiju/homeverb.sqlite3'
         with closing(sqlite3.connect(database)) as connection, connection:
-            connection.execute('INSERT INTO accounts VALUES (?, ?, ?, ?, ?, ?)',
+            connection.execute('INSERT INTO accounts (id, provider, region, label, credential_ref, credential_state) VALUES (?, ?, ?, ?, ?, ?)',
                                (account, 'midea.meiju', 'CN', 'Fictional pending account',
                                 '50000000-0000-4000-8000-000000000001', 'pending'))
             for index, device_id in enumerate([target, other]):
@@ -192,7 +192,7 @@ class RuntimeAcceptance(unittest.TestCase):
         reference = '50000000-0000-4000-8000-000000000001'
         database = Path(self.directory.name) / 'meiju/homeverb.sqlite3'
         with closing(sqlite3.connect(database)) as connection, connection:
-            connection.execute('INSERT INTO accounts VALUES (?, ?, ?, ?, ?, ?)',
+            connection.execute('INSERT INTO accounts (id, provider, region, label, credential_ref, credential_state) VALUES (?, ?, ?, ?, ?, ?)',
                                (account, 'midea.meiju', 'CN', 'Fictional account', reference, 'pending'))
         details = self.meiju('account', 'show', account)['data']
         self.assertEqual(details['device_ids'], [])

@@ -18,19 +18,22 @@ fn missing_account() -> Error {
     )
 }
 
-fn row_account(row: &rusqlite::Row<'_>) -> rusqlite::Result<[String; 6]> {
-    Ok([
-        row.get(0)?,
-        row.get(1)?,
-        row.get(2)?,
-        row.get(3)?,
-        row.get(4)?,
-        row.get(5)?,
-    ])
+fn row_account(row: &rusqlite::Row<'_>) -> rusqlite::Result<([String; 6], Option<String>)> {
+    Ok((
+        [
+            row.get(0)?,
+            row.get(1)?,
+            row.get(2)?,
+            row.get(3)?,
+            row.get(4)?,
+            row.get(5)?,
+        ],
+        row.get(6)?,
+    ))
 }
 
 fn account_record(
-    [id, provider, region, label, reference, state]: [String; 6],
+    ([id, provider, region, label, reference, state], timestamp): ([String; 6], Option<String>),
 ) -> Result<AccountRecord> {
     let record = AccountRecord {
         id: Uuid::parse_str(&id).map_err(storage_error)?,
@@ -44,6 +47,13 @@ fn account_record(
             "removing" => CredentialState::Removing,
             _ => return Err(storage_error(())),
         },
+        last_complete_inventory_at: timestamp
+            .map(|value| {
+                chrono::DateTime::parse_from_rfc3339(&value)
+                    .map(|time| time.with_timezone(&chrono::Utc))
+                    .map_err(storage_error)
+            })
+            .transpose()?,
     };
     record.validate().map_err(storage_error)?;
     Ok(record)
@@ -68,7 +78,7 @@ impl AccountStore for SqliteStore {
 
     fn accounts(&self) -> Result<Vec<AccountRecord>> {
         let connection = self.connection.lock().map_err(storage_error)?;
-        let mut query = connection.prepare("SELECT id, provider, region, label, credential_ref, credential_state FROM accounts ORDER BY rowid").map_err(storage_error)?;
+        let mut query = connection.prepare("SELECT id, provider, region, label, credential_ref, credential_state, last_complete_inventory_at FROM accounts ORDER BY rowid").map_err(storage_error)?;
         query
             .query_map([], row_account)
             .map_err(storage_error)?
@@ -79,7 +89,7 @@ impl AccountStore for SqliteStore {
     fn account(&self, id: Uuid) -> Result<AccountRecord> {
         valid_account_id(id)?;
         let row = self.connection.lock().map_err(storage_error)?.query_row(
-            "SELECT id, provider, region, label, credential_ref, credential_state FROM accounts WHERE id=?1",
+            "SELECT id, provider, region, label, credential_ref, credential_state, last_complete_inventory_at FROM accounts WHERE id=?1",
             [id.to_string()], row_account
         ).optional().map_err(storage_error)?.ok_or_else(missing_account)?;
         account_record(row)
@@ -87,7 +97,9 @@ impl AccountStore for SqliteStore {
 
     fn insert_account(&self, account: &AccountRecord) -> Result<()> {
         account.validate()?;
-        if account.credential_state != CredentialState::Pending {
+        if account.credential_state != CredentialState::Pending
+            || account.last_complete_inventory_at.is_some()
+        {
             return Err(Error::invalid());
         }
         let mut connection = self.connection.lock().map_err(storage_error)?;
@@ -99,7 +111,7 @@ impl AccountStore for SqliteStore {
         }
         transaction
             .execute(
-                "INSERT INTO accounts VALUES (?1, ?2, ?3, ?4, ?5, 'pending')",
+                "INSERT INTO accounts (id, provider, region, label, credential_ref, credential_state) VALUES (?1, ?2, ?3, ?4, ?5, 'pending')",
                 params![
                     account.id.to_string(),
                     account.provider,
@@ -173,6 +185,42 @@ impl AccountStore for SqliteStore {
         Ok(())
     }
 
+    fn record_complete_inventory(
+        &self,
+        id: Uuid,
+        recorded_at: chrono::DateTime<chrono::Utc>,
+    ) -> Result<()> {
+        valid_account_id(id)?;
+        let mut connection = self.connection.lock().map_err(storage_error)?;
+        let transaction = connection
+            .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)
+            .map_err(storage_error)?;
+        let row = transaction.query_row(
+            "SELECT id, provider, region, label, credential_ref, credential_state, last_complete_inventory_at FROM accounts WHERE id=?1",
+            [id.to_string()], row_account,
+        ).optional().map_err(storage_error)?.ok_or_else(missing_account)?;
+        let mut account = account_record(row)?;
+        match account.credential_state {
+            CredentialState::Stored => (),
+            CredentialState::Removing => return Err(account_removal_pending()),
+            CredentialState::Pending => {
+                return Err(Error::new(
+                    "ACCOUNT_SESSION_UNCONFIRMED",
+                    "Complete inventory metadata requires confirmed local credentials.",
+                ));
+            }
+        }
+        account.last_complete_inventory_at = Some(recorded_at);
+        account.validate()?;
+        transaction
+            .execute(
+                "UPDATE accounts SET last_complete_inventory_at=?2 WHERE id=?1",
+                params![id.to_string(), recorded_at.to_rfc3339()],
+            )
+            .map_err(storage_error)?;
+        transaction.commit().map_err(storage_error)
+    }
+
     fn account_removal(&self, id: Uuid) -> Result<Option<AccountRemoval>> {
         valid_account_id(id)?;
         removal(&*self.connection.lock().map_err(storage_error)?, id)
@@ -190,7 +238,7 @@ impl AccountStore for SqliteStore {
             .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)
             .map_err(storage_error)?;
         let row = transaction.query_row(
-            "SELECT id, provider, region, label, credential_ref, credential_state FROM accounts WHERE id=?1",
+            "SELECT id, provider, region, label, credential_ref, credential_state, last_complete_inventory_at FROM accounts WHERE id=?1",
             [id.to_string()], row_account,
         ).optional().map_err(storage_error)?.ok_or_else(missing_account)?;
         let account = account_record(row)?;
@@ -240,7 +288,7 @@ impl AccountStore for SqliteStore {
             return Ok(());
         }
         let row = transaction.query_row(
-            "SELECT id, provider, region, label, credential_ref, credential_state FROM accounts WHERE id=?1",
+            "SELECT id, provider, region, label, credential_ref, credential_state, last_complete_inventory_at FROM accounts WHERE id=?1",
             [id.to_string()], row_account,
         ).optional().map_err(storage_error)?.ok_or_else(missing_account)?;
         let account = account_record(row)?;

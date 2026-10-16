@@ -25,6 +25,9 @@ mod mode;
 #[path = "meiju_accounts/inventory.rs"]
 mod inventory;
 
+#[path = "meiju_accounts/inventory_time.rs"]
+mod inventory_time;
+
 #[path = "meiju_accounts/control_options.rs"]
 mod control_options;
 

@@ -187,5 +187,8 @@
   "error.LAN_NETWORK_PERMISSION_REQUIRED": "请先允许读取网络状态，再选择局域网。",
   "error.LAN_NETWORK_UNAVAILABLE": "无法读取 Android 网络信息，请在应用前台重试。",
   "error.LAN_NETWORK_CHANGED": "所选网络已变化或过期，请重新选择并核对新的扫描预览。",
-  "error.LAN_NETWORK_UNSUPPORTED": "当前 VPN 路由下无法进行局域网扫描，云端操作不受此扫描限制影响。"
+  "error.LAN_NETWORK_UNSUPPORTED": "当前 VPN 路由下无法进行局域网扫描，云端操作不受此扫描限制影响。",
+  "account.inventory.last_complete": "最近完整获取设备列表：{time}",
+  "account.inventory.never_recorded": "尚无完整获取设备列表的时间记录",
+  "account.inventory.time_hint": "此时间来自本机时钟，不代表当前授权有效或设备在线。"
 }
