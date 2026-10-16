@@ -62,6 +62,39 @@ four temperature fields. This list is protocol research, not a declaration that
 all those zones or modes exist on the selected model. Similar names do not prove
 that a manual mode equals a particular wire field.
 
+Two public CA Lua serializers in the pinned LAN repository provide additional
+encoding evidence: [310A1792][ca-lua-1792] and [310A1586][ca-lua-1586]. Both apply
+`status` before `control` to mutable fields initialized to zero, then serialize
+mode, temperature and power bytes together. Their packed mode byte also includes
+`storage_mode`; the centralized cloud-field list alone is not a complete
+preservation contract. The source initializes `hexLength` to zero, overriding
+the apparent local fallback of 119; an established message length is another
+required input. No reviewed evidence associates either file with the selected
+model or its protected product selector.
+
+An offline comparison ran six integer-only cases per unchanged serializer, each
+in a fresh Lua 5.4 state, with an integer-only bit shim, a fixture-table JSON stub
+and explicit synthetic `hex_length: 119`. The synthetic status set all eight
+packed mode flags on, all four compartment powers off, fridge 4 and freezer -18.
+The following bytes are zero-based body offsets 1, 2 and 6, in hexadecimal:
+
+| Control and supplied status | Mode byte | Temperature byte | Power byte |
+|---|---|---|---|
+| Length only, synthetic status | `ff` | `64` | `1d` |
+| Fridge 5 plus length, no status | `00` | `05` | `00` |
+| Fridge 5 plus length, synthetic status | `ff` | `65` | `1d` |
+| Fridge 5 plus length, only freezer -18 in status | `00` | `65` | `00` |
+
+Both serializers also emitted temperature bytes `c2` and `48` for integer
+fridge/freezer pairs 2/-24 and 8/-16 with the synthetic status. All twelve cases
+passed packet length/checksum and selected-byte assertions. This establishes
+omitted-setting differences in these public serializers, not valid appliance
+mode combinations, live preservation or the provider runtime's fractional
+conversion. A supplied status overlay does not prove that status is complete or
+current; reused Lua state adds another dependency. The 310A1792 source also
+changes temperature interpretation under `colmo_cool_freeze_mode`. Do not infer
+an exact-model step or writable contract from these integer vectors.
+
 The write gate is **blocked: exact-model encoder preservation and temperature
 step are unproven**. Continue with public model/codec evidence; do not derive
 control defaults from the manual, enable the generic family mapping, or copy
@@ -399,6 +432,8 @@ CloudState retains account/appliance identity privately and has redacted Debug w
 [ac-device-source]: https://github.com/midea-lan/midea-local/blob/ef28169926914d15f40fe521b9cc3d3c2f553c59/midealocal/devices/ac/__init__.py
 [e1-source]: https://github.com/midea-lan/midea-local/blob/ef28169926914d15f40fe521b9cc3d3c2f553c59/midealocal/devices/e1/__init__.py
 [ca-source]: https://github.com/midea-lan/midea-local/blob/ef28169926914d15f40fe521b9cc3d3c2f553c59/midealocal/devices/ca/__init__.py
+[ca-lua-1792]: https://github.com/midea-lan/midea-local/blob/ef28169926914d15f40fe521b9cc3d3c2f553c59/lua/ca/T_0000_CA_310A1792_2026050801.lua
+[ca-lua-1586]: https://github.com/midea-lan/midea-local/blob/ef28169926914d15f40fe521b9cc3d3c2f553c59/lua/ca/T_0000_CA_310A1586_2025030701.lua
 [device-source]: https://github.com/midea-lan/midea-local/blob/ef28169926914d15f40fe521b9cc3d3c2f553c59/midealocal/device.py
 
 ## Native account handoff
