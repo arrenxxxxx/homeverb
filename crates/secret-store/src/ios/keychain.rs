@@ -227,21 +227,20 @@ fn query(scope: &Scope) -> Result<Owned> {
     Ok(dict)
 }
 
-fn protected_query(scope: &Scope, entry: Option<&Entry>) -> Result<Owned> {
-    let dict = query(scope)?;
-    // SAFETY: the dictionary retains these declared constants and copied data.
+fn exact_query(entry: &Entry) -> Result<Owned> {
+    entry.validate()?;
+    let dict = dictionary()?;
+    let reference = data(entry.persistent_ref.expose())?;
+    // SAFETY: the reference comes only from admitted metadata, never public input.
+    // Security rejects persistent references combined with attribute filters.
     unsafe {
-        set(&dict, kSecAttrSynchronizable, kCFBooleanFalse.cast());
+        set(&dict, kSecClass, kSecClassGenericPassword.cast());
+        set(&dict, kSecValuePersistentRef, reference.0);
         set(
             &dict,
-            kSecAttrAccessible,
-            kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly.cast(),
+            kSecUseAuthenticationUI,
+            kSecUseAuthenticationUIFail.cast(),
         );
-        if let Some(entry) = entry {
-            entry.validate()?;
-            let reference = data(entry.persistent_ref.expose())?;
-            set(&dict, kSecValuePersistentRef, reference.0);
-        }
     }
     Ok(dict)
 }
@@ -354,7 +353,7 @@ impl Backend for Keychain {
     }
 
     fn read(&mut self, scope: &Scope, entry: &Entry) -> Result<Option<SecretBytes>> {
-        let query = protected_query(scope, Some(entry))?;
+        let query = exact_query(entry)?;
         // SAFETY: this exact one-item result requests attributes and data together.
         unsafe {
             set(&query, kSecMatchLimit, kSecMatchLimitOne.cast());
@@ -379,10 +378,9 @@ impl Backend for Keychain {
             Change::Add(_) => None,
             Change::Update(entry, _) | Change::Delete(entry) => Some(*entry),
         };
-        let query = if entry.is_none() {
-            add_attributes(scope)?
-        } else {
-            protected_query(scope, entry)?
+        let query = match entry {
+            None => add_attributes(scope)?,
+            Some(entry) => exact_query(entry)?,
         };
         let update = dictionary()?;
         // SAFETY: prepare all objects before marking dispatch; OS calls retain no
@@ -436,13 +434,30 @@ mod tests {
         }
     }
 
+    fn result(scope: &Scope, entry: &Entry) -> Owned {
+        let output = query(scope).unwrap();
+        let reference = data(entry.persistent_ref.expose()).unwrap();
+        // SAFETY: model returned attributes independently of the exact query shape.
+        unsafe {
+            set(
+                &output,
+                kSecAttrAccessible,
+                kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly.cast(),
+            );
+            set(&output, kSecAttrSynchronizable, kCFBooleanFalse.cast());
+            set(&output, kSecValuePersistentRef, reference.0);
+        }
+        output
+    }
+
     #[test]
     fn real_cf_queries_preserve_explicit_scope_protection_and_no_prompt_policy() {
         // Construct the real backend vtable without invoking Security services.
         let _: &mut dyn Backend = &mut Keychain;
         let scope = scope();
         let expected = entry();
-        let query = protected_query(&scope, Some(&expected)).unwrap();
+        let scoped = query(&scope).unwrap();
+        let query = exact_query(&expected).unwrap();
         // SAFETY: these are live dictionaries/constants made by production constructors.
         unsafe {
             for (key, text) in [
@@ -451,24 +466,19 @@ mod tests {
                 (kSecAttrAccessGroup, &scope.access_group),
             ] {
                 let text = string(text).unwrap();
-                assert!(equal(attribute(query.0, key), text.0));
+                assert!(equal(attribute(scoped.0, key), text.0));
+                assert!(attribute(query.0, key).is_null());
             }
-            assert!(equal(
-                attribute(query.0, kSecClass),
-                kSecClassGenericPassword.cast()
-            ));
-            assert!(equal(
-                attribute(query.0, kSecAttrAccessible),
-                kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly.cast()
-            ));
-            assert!(equal(
-                attribute(query.0, kSecAttrSynchronizable),
-                kCFBooleanFalse.cast()
-            ));
-            assert!(equal(
-                attribute(query.0, kSecUseAuthenticationUI),
-                kSecUseAuthenticationUIFail.cast()
-            ));
+            for dictionary in [&scoped, &query] {
+                assert!(equal(
+                    attribute(dictionary.0, kSecClass),
+                    kSecClassGenericPassword.cast()
+                ));
+                assert!(equal(
+                    attribute(dictionary.0, kSecUseAuthenticationUI),
+                    kSecUseAuthenticationUIFail.cast()
+                ));
+            }
             assert_eq!(
                 copy_data(attribute(query.0, kSecValuePersistentRef), MAX_REFERENCE)
                     .unwrap()
@@ -476,6 +486,9 @@ mod tests {
                 expected.persistent_ref.expose()
             );
             for key in [
+                kSecAttrAccessible,
+                kSecAttrSynchronizable,
+                kSecAttrAccessControl,
                 kSecReturnData,
                 kSecReturnAttributes,
                 kSecReturnPersistentRef,
@@ -484,13 +497,16 @@ mod tests {
                 assert!(attribute(query.0, key).is_null());
             }
         }
+        let mut rejected = entry();
+        rejected.matches_scope = false;
+        assert!(exact_query(&rejected).is_err());
     }
 
     #[test]
     fn real_cf_results_reject_wrong_types_foreign_scope_and_changed_references() {
         let scope = scope();
         let expected = entry();
-        let output = protected_query(&scope, Some(&expected)).unwrap();
+        let output = result(&scope, &expected);
         let secret = data(&[0, 128, 255]).unwrap();
         // SAFETY: synthetic CF results exercise production type checks, not the OS store.
         unsafe {
@@ -510,7 +526,7 @@ mod tests {
                 kSecValuePersistentRef,
                 kSecValueData,
             ] {
-                let malformed = protected_query(&scope, Some(&expected)).unwrap();
+                let malformed = result(&scope, &expected);
                 set(&malformed, kSecValueData, secret.0);
                 set(&malformed, key, kCFBooleanTrue.cast());
                 assert!(decode_secret(malformed.0, &scope, &expected).is_err());
@@ -529,7 +545,7 @@ mod tests {
 
         let scope = scope();
         let expected = entry();
-        let output = protected_query(&scope, Some(&expected)).unwrap();
+        let output = result(&scope, &expected);
         let secret = data(&[3, 1, 4]).unwrap();
         // SAFETY: all values are owned CF objects retained by the synthetic result.
         unsafe {
@@ -590,7 +606,7 @@ mod tests {
     fn real_cf_data_obeys_copy_limits_and_refuses_unsupported_access_control_objects() {
         let scope = scope();
         let expected = entry();
-        let output = protected_query(&scope, Some(&expected)).unwrap();
+        let output = result(&scope, &expected);
         // SAFETY: no borrowed pointer outlives its retained synthetic CF object.
         unsafe {
             let empty = data(&[]).unwrap();
@@ -607,7 +623,7 @@ mod tests {
     fn real_cf_access_control_admits_only_the_explicit_passcode_policy() {
         let scope = scope();
         let expected = entry();
-        let output = protected_query(&scope, Some(&expected)).unwrap();
+        let output = result(&scope, &expected);
         let attributes = add_attributes(&scope).unwrap();
         let secret = data(&[3, 1, 4]).unwrap();
         // SAFETY: these are real policy objects and synthetic dictionaries only;

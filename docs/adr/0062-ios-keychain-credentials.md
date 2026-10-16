@@ -6,13 +6,14 @@ Status: accepted for implementation; signed iOS runtime acceptance remains requi
 
 Implement the iOS `SystemSecretStore` with Apple's generic-password Keychain APIs.
 The trusted native build supplies `HOMEVERB_IOS_KEYCHAIN_ACCESS_GROUP`, equal to
-the signed application's private application identifier. Every query and mutation
-includes that exact group, a versioned service containing the random profile UUID,
-and the opaque credential reference as account. Missing or malformed configuration
+the signed application's private application identifier. Namespace lookup and add
+include that exact group, a versioned service containing the random profile UUID,
+and the opaque credential reference as account. Exact-item operations use only a
+reference obtained from that admitted namespace, as described below. Missing or malformed configuration
 fails before Keychain access. This is nonsecret build configuration, not an ordinary
 request parameter. Packaging must verify the entitlement and exclude shared groups;
 syntax validation alone cannot establish app isolation. Do not use the implicit
-first group or search across all entitled groups.
+first group or enumerate across all entitled groups.
 
 New items use `kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly` through an explicit
 `SecAccessControlCreateWithFlags` object with zero additional flags, and explicitly
@@ -29,12 +30,23 @@ objects, or protection weaker/different than the required policy. A returned
 access-control object must have the Security framework's type and compare equal
 to a newly created complete policy with the exact protection and zero flags.
 Do not parse descriptions, inspect private APIs, or admit objects based only on
-their accessibility attribute. Then read, replace or
-delete the exact persistent reference with the namespace and protection attributes
-still present. On iOS the selector is `kSecValuePersistentRef`, not macOS's
+their accessibility attribute. Then read, replace or delete only the admitted
+persistent reference, retaining generic-password class and the no-prompt option.
+Security rejects persistent references combined with attribute filters, including
+group/service/account and accessibility. Do not combine these selector forms or
+fall back to a namespace mutation when a reference fails. On iOS the selector is `kSecValuePersistentRef`, not macOS's
 `kSecMatchItemList`. Return-data queries use one match only. Delete does not read
 credential data. Add only after confirmed absence; never delete/recreate, broaden
 an exact query, or retry after a race or failure.
+
+References remain transient native data and cannot be supplied through public
+requests. Every operation first obtains and validates metadata within the exact
+private group while retaining its account lease. Reads revalidate the returned
+namespace, protection and identical persistent reference before exposing bytes.
+Updates/deletes target that one admitted object rather than a replacement at the
+same namespace; they never retry by attributes. Other code with the same Keychain
+entitlements remains trusted: the OS does not offer an atomic reference-plus-
+attribute condition against such a writer changing attributes after preflight.
 
 Metadata lookup or deletion may be permitted without decrypting the credential.
 Surface OS-reported lock errors, but do not treat these operations as device-lock
@@ -86,3 +98,4 @@ Keychain persistence or a Flutter/iPhone journey. Those remain release gates.
 - [SecItem dictionary semantics](https://developer.apple.com/forums/thread/724023).
 - [Public access-control API](https://github.com/apple-oss-distributions/Security/blob/db15acbe6a7f257a859ad9a3bb86097bfe0679d9/keychain/headers/SecAccessControl.h) and [complete-object equality implementation](https://github.com/apple-oss-distributions/Security/blob/db15acbe6a7f257a859ad9a3bb86097bfe0679d9/OSX/sec/Security/SecAccessControl.m), inspected October 16, 2026.
 - [Returned access-control conversion](https://github.com/apple-oss-distributions/Security/blob/db15acbe6a7f257a859ad9a3bb86097bfe0679d9/OSX/sec/Security/SecItem.m) and [implicit protection construction](https://github.com/apple-oss-distributions/Security/blob/db15acbe6a7f257a859ad9a3bb86097bfe0679d9/keychain/securityd/SecDbQuery.c).
+- [Persistent-reference query restrictions](https://github.com/apple-oss-distributions/Security/blob/db15acbe6a7f257a859ad9a3bb86097bfe0679d9/keychain/securityd/SecItemDb.c) in `s3dl_copy_matching` and `s3dl_query_update`; the Simulator reproduced `errSecParam` when reference and attribute selectors were combined.

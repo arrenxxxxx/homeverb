@@ -1609,7 +1609,7 @@ Runtime investigation identified three corrections:
   represented existing objects remain refused. No automatic migration or recreation
   occurs. [ADR-0062](adr/0062-ios-keychain-credentials.md) records the pinned sources.
 
-Local verification for the policy correction passed 21 secret-store tests with
+Local verification for the policy and reference-selector corrections passed 21 secret-store tests with
 two environment-dependent tests ignored, device-target and Simulator all-targets
 Clippy, 62 Python tooling tests, formatting and documentation/contract/repository/
 commit validation. The Python suite includes twelve Simulator-runner tests.
@@ -1623,7 +1623,15 @@ package checks in job `116894113326`, but still refused the first Keychain read
 after add. The test app now distinguishes the complete returned policy from the
 exact persistent-reference lookup using metadata-only Boolean diagnostics. It
 does not read credential data for diagnostics or weaken production policy.
-No successful Keychain round trip is claimed yet.
+On `42ce428`, the complete policy compared equal, but the exact lookup returned
+`errSecParam`. Apple's `s3dl_copy_matching` explicitly forbids a persistent
+reference combined with attribute filters. The backend now keeps exact-group
+metadata admission, then uses only class/reference/no-prompt selectors for reads
+and mutations. Reads still revalidate namespace, policy and reference; mutations
+never fall back to a namespace or replay. The real-object query regression now
+rejects mixed selectors and unadmitted references, while returned-attribute tests
+use independent result fixtures. ADR-0062 records the OS limitation and same-
+entitlement writer boundary. No successful Keychain round trip is claimed yet.
 
 No real account, appliance, physical phone or separate Flutter worktree was
 accessed. Simulator checks do not establish physical passcode/lock behavior,

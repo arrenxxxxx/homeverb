@@ -14,8 +14,9 @@ Build `homeverb-secrets` (normally through `homeverb-ffi`) with
 application identifier, including its App ID prefix. This value is nonsecret.
 Resolve it from the actual signing configuration; do not assume the prefix always
 equals a team identifier. Verify the signed entitlements, not just the Xcode UI.
-Do not use a group shared with another app or extension. All Keychain operations
-explicitly select this group and never fall back to another group.
+Do not use a group shared with another app or extension. Namespace lookup and add
+explicitly select this group. Subsequent exact-item operations use only a reference
+obtained from validated metadata in that group; no operation falls back to another group.
 
 The value is compiled into Rust with `option_env!`; changing it requires a rebuild
 and changes which items can be accessed. Cargo tracks this build environment
@@ -116,6 +117,12 @@ synchronizable entry. Missing flags, floating-point numbers, other integers and
 wrong object types are rejected; numeric zero does not relax any other policy.
 
 Deletion reads metadata only and targets the admitted persistent reference.
+The exact selector contains class, reference and the no-prompt option; Apple's API
+rejects combining a reference with group/service/account or protection filters.
+Reads validate the returned namespace, policy and reference again before exposing
+bytes. Updates/deletes keep the account lease and never retry by namespace after
+a reference fails. Code with the same entitlements remains trusted; see ADR-0062
+for the limit on atomic checks against another such writer.
 Removing the passcode invalidates these credentials; a new passcode does not
 restore them. Account metadata may remain and require explicit reconnection or
 local removal. Keychain persistence across reinstall, backup/restore behavior,

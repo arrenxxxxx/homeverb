@@ -91,11 +91,13 @@ static NSDictionary *storeMetadata(NSString *runID) {
         @"persistent_ref": metadataFlag([reference isKindOfClass:NSData.class] && [reference length] > 0)
     } mutableCopy];
     if ([reference isKindOfClass:NSData.class] && [reference length] > 0) {
-        NSMutableDictionary *exact = [request mutableCopy];
-        exact[(__bridge id)kSecValuePersistentRef] = reference;
-        exact[(__bridge id)kSecAttrSynchronizable] = @NO;
-        exact[(__bridge id)kSecAttrAccessible] = (__bridge id)kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly;
-        exact[(__bridge id)kSecMatchLimit] = (__bridge id)kSecMatchLimitOne;
+        NSDictionary *exact = @{
+            (__bridge id)kSecClass: (__bridge id)kSecClassGenericPassword,
+            (__bridge id)kSecValuePersistentRef: reference,
+            (__bridge id)kSecUseAuthenticationUI: (__bridge id)kSecUseAuthenticationUIFail,
+            (__bridge id)kSecMatchLimit: (__bridge id)kSecMatchLimitOne,
+            (__bridge id)kSecReturnAttributes: @YES, (__bridge id)kSecReturnPersistentRef: @YES
+        };
         raw = NULL;
         status = SecItemCopyMatching((__bridge CFDictionaryRef)exact, &raw);
         id matched = CFBridgingRelease(raw);
