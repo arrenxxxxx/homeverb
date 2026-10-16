@@ -198,6 +198,14 @@ a network fallback. Untrusted report conflicts return native `Ambiguous`, limits
 return `Incomplete` and no matching hint returns `NotObserved`, not an offline or
 revocation error. None of these results changes a public execution outcome.
 
+The [appliance query and composed AC read](adr/0051-bounded-ac-lan-read-sequence.md)
+return `CAPABILITY_UNSUPPORTED` for an unreviewed query family or non-A0 reply.
+Malformed AA framing/checksum or wrong family returns `MIDEA_RESPONSE_INVALID`.
+The composed read retains existing input, handshake, transport, expected-target,
+C0 and lifecycle errors. Negotiation failure never supplies a default version or
+sends the status query; status failure returns no partial state. There is no
+reconnect, format probing, public error extension or write-outcome conversion.
+
 The account-bound read path returns `DEVICE_IDENTITY_CONFLICT` before transport when the local device, selected connection or known model differs from the protected binding. Invalid components return `CAPABILITY_UNSUPPORTED`. Pending or unavailable credentials stop the request through the vault. Core rejects decoded but undeclared properties with `INVALID_OBSERVATION`; neither that rejection nor a protocol failure replaces the previous cache or triggers a retry.
 
 Protected inventory membership is independent of historical identity. API 1.9.1

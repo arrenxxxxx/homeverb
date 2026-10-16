@@ -311,3 +311,13 @@ never choose a winner. Report limits prevent a unique result; no result changes
 cards, membership, grants or connections. A unique hint is neither authenticated
 nor globally unique and cannot authorize sending credentials or publishing state.
 This native-only helper performs no networking and retains the caller's Operation.
+
+The [composed AC V3 query](adr/0051-bounded-ac-lan-read-sequence.md) takes an already
+admitted native endpoint, protected handshake and expected target. On one TCP
+connection it queries the appliance's message version, then builds one AC query
+with that version. Both replies require expected-ID envelope validation before
+inner decoding. The injected clock supplies each packet's timestamp; neither
+timestamp is observation evidence. One inherited deadline covers both reads;
+errors, cancellation and drop close the connection without retry or fallback.
+It returns C0 candidates only and never publishes a route, Snapshot or write
+outcome. Existing one-command `exchange_v3` transmission phases are unchanged.

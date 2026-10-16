@@ -483,3 +483,12 @@ and report validation rules. Do not turn a successful match into automatic token
 transmission. Trusted endpoint admission, model evidence and network consent
 remain prerequisites for a future composed route; cloud model admission is not
 LAN compatibility. Public native JSON methods do not expose this helper yet.
+
+For an already-admitted native endpoint and protected handshake, `query_ac_v3`
+performs one bounded connection with appliance-message negotiation before the
+standard AC query. Supply the expected private target, injected `Clock`, explicit
+query sequence and existing `Operation`. Do not hardcode the message version or
+confuse it with outer V3 transport. The result is still `AcC0Status` candidates,
+subject to the model-specific stale C0/BB caveats; it is not a Core observation.
+The helper neither obtains keys nor turns a discovery match into endpoint
+authorization. See [ADR-0051](../adr/0051-bounded-ac-lan-read-sequence.md).

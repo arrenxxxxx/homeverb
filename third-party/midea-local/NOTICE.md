@@ -37,6 +37,11 @@ The AC query/C0 port replaces the shared wrapping counter with an explicit query
 sequence, implements the equivalent CRC bitwise, validates AA bounds/checksum,
 preserves unavailable sensor values and rejects unsupported units/invalid decimals.
 It returns native candidates without copying model admission or freshness claims.
+The appliance-query port also uses `message.py` and the query ordering in
+`device.py`. It validates AA framing and family before extracting the message
+version, then composes one handshake and two read queries on one bounded TCP
+connection. No persistent refresh loop, default-version fallback, extra protocol
+probe or device-state publication is copied.
 Public fixed wire constants do not authenticate a device or protect HomeVerb
 credentials. LAN session authentication and physical compatibility are not
 established by this port.

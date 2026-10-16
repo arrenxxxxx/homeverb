@@ -1041,3 +1041,36 @@ approval checks; Python tooling: 33 passed; presentation: six passed. All three
 Android AAR variants passed build/export/16 KiB ELF checks. No real account,
 appliance, separate Flutter worktree, fresh Android runtime or physical/off-LAN
 acceptance was used in this phase. Remote CI is verified separately after push.
+
+## Composed AC V3 read with message-version negotiation
+
+[ADR-0051](adr/0051-bounded-ac-lan-read-sequence.md) adds strict appliance query
+encoding/protocol extraction and `query_ac_v3`. The native helper accepts an
+already-admitted endpoint, protected handshake and expected target. It performs
+one handshake, obtains the message version, then sends one AC status query with
+that version on the same TCP connection. The injected clock supplies a timestamp
+for each packet. Both responses require expected target and inner context checks.
+Errors, cancellation, deadline and drop close the connection without retry,
+reconnect or partial state. Existing one-command write tracking is unchanged.
+
+Three appliance query vectors and twelve protocol-field vectors match unchanged
+classes from the pinned upstream source. Sixteen negative AA cases and all
+truncations reject malformed or unrelated replies. Ten independently assembled
+nested packet/V3 responses drive a fictional loopback peer that checks both
+ordered request payloads, negotiated version, separate timestamps and request
+counters. Reply counters deliberately differ: echo correlation is not claimed.
+Lifecycle tests stop at either query; malformed negotiation stops before status.
+
+The result remains native C0 candidates, not fresh state or physical support.
+No automatic endpoint admission, account access, credential lookup, route/card
+publication or public command is added. Exact model/profile rules and the full
+mobile LAN journey remain unfinished. Native JSON API 1.14.1, C/JNI exports,
+SQLite/protected formats and cloud behavior remain unchanged.
+
+On October 16, 2026, formatting, workspace Clippy, workspace/example builds and
+local validators passed. Rust tests: 385 passed, two explicitly ignored; runtime
+acceptance: 35 passed; native contract: 31 methods/51 fictional examples plus
+approval checks; Python tooling: 33 passed; presentation: six passed. All three
+Android AAR variants passed build/export/16 KiB ELF checks. No real account,
+household endpoint, separate Flutter worktree, new emulator/phone or physical
+acceptance was used. Remote CI is inspected independently after push.
