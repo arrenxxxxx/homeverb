@@ -45,6 +45,8 @@ Real account/secure-store and physical-device acceptance of these Flutter flows
 remains pending; the account tests use isolated fixtures and empty native profiles.
 Nearby sharing, provider revocation and full-profile deletion are unavailable.
 
+Paused work and restart instructions: [RESUME.md](RESUME.md).
+
 ## Development
 
 Use FVM 4.3.1 and Flutter 3.47.7, pinned in `.fvmrc`.
