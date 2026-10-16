@@ -309,6 +309,76 @@ void main() {
     tester.view.resetDevicePixelRatio();
   });
 
+  testWidgets(
+    'repeated groups and choices retain fractional prototype geometry',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: windowTheme(),
+          home: Scaffold(
+            body: SizedBox(
+              width: 350,
+              child: Column(
+                children: [
+                  for (final title in [
+                    'Example Home',
+                    'Studio account',
+                    'Example TV',
+                  ])
+                    Rows(
+                      const [
+                        ['Room', 'Living room', null],
+                      ],
+                      title: title,
+                      onAction: (_) {},
+                    ),
+                  ChoiceTile(
+                    label: 'Living Room',
+                    selected: false,
+                    onTap: () {},
+                  ),
+                  ChoiceTile(label: 'Bedroom', selected: true, onTap: () {}),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      final groups = find.byType(Rows);
+      for (var i = 0; i < 3; i++) {
+        expect(tester.getSize(groups.at(i)).height, closeTo(90, .001));
+        expect(tester.getTopLeft(groups.at(i)).dy, closeTo(i * 90, .001));
+      }
+      final choices = find.byType(ChoiceTile);
+      expect(tester.getSize(choices.first).height, closeTo(61.2, .001));
+      expect(tester.getTopLeft(choices.last).dy, closeTo(331.2, .001));
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: windowTheme(),
+          home: Scaffold(
+            body: SizedBox(
+              width: 180,
+              child: ChoiceTile(
+                label: 'Primary bedroom upstairs',
+                selected: true,
+                onTap: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+      // Two lines are one centered group, including the unchanged nine-pixel gap.
+      expect(
+        tester.getSize(find.byType(ChoiceTile)).height,
+        closeTo(79.4, .001),
+      );
+      final text = tester.getRect(find.text('Primary bedroom upstairs'));
+      final face = tester.getRect(find.byType(InkWell));
+      expect(text.center.dy, closeTo(face.center.dy, .001));
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('long card names retain semantics without covering readings', (
     tester,
   ) async {

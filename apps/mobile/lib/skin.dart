@@ -562,28 +562,67 @@ class ChoiceTile extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 17),
-            child: Row(
-              children: [
-                Expanded(child: Copy(label, bold: selected, control: true)),
-                const SizedBox(width: 12),
-                Container(
-                  width: 18,
-                  height: 18,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: selected ? accent : null,
-                    border: Border.all(
-                      color: selected ? accent : const Color(0xffb3b3ac),
-                    ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final scaler = MediaQuery.textScalerOf(context);
+              final text = TextPainter(
+                text: TextSpan(
+                  text: label,
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 13,
+                    height: 1.4,
+                    letterSpacing: 0,
+                    wordSpacing: 0,
+                    fontWeight: selected || MediaQuery.highContrastOf(context)
+                        ? FontWeight.w600
+                        : FontWeight.w400,
                   ),
-                  child: selected
-                      ? const Glyph('check', size: 14, color: Colors.white)
-                      : null,
                 ),
-              ],
-            ),
+                textDirection: Directionality.of(context),
+                textScaler: scaler,
+              )..layout(maxWidth: math.max(0, constraints.maxWidth - 60));
+              // Keep fractional prototype line spacing despite paragraph rounding.
+              final height =
+                  34 +
+                  text.computeLineMetrics().length * scaler.scale(13) * 1.4;
+              text.dispose();
+              return ConstrainedBox(
+                constraints: BoxConstraints(minHeight: height),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 15,
+                    vertical: 17,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Copy(label, bold: selected, control: true),
+                      ),
+                      const SizedBox(width: 12),
+                      Container(
+                        width: 18,
+                        height: 18,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: selected ? accent : null,
+                          border: Border.all(
+                            color: selected ? accent : const Color(0xffb3b3ac),
+                          ),
+                        ),
+                        child: selected
+                            ? const Glyph(
+                                'check',
+                                size: 14,
+                                color: Colors.white,
+                              )
+                            : null,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
         ),
       ),

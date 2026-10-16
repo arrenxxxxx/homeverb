@@ -764,10 +764,7 @@ class Rows extends StatelessWidget {
         children: [
           if (title != null)
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 7.2,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
               child: Copy(title!, size: 14, bold: true, control: true),
             ),
           for (var i = 0; i < items.length; i++) ...[

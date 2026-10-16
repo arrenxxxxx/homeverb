@@ -17,7 +17,7 @@ Commands below ran in the isolated worktree; Flutter commands used the pinned FV
 | Check | Evidence / result |
 |---|---|
 | `fvm flutter analyze` | No issues found |
-| `fvm flutter test --reporter expanded` | Full 72-test suite passed, including four trusted confirmation scenarios and two saved-inventory checks, two native account and five synthetic account checks, three cleanup regressions and all 11 prior native/controller checks and the inline-stepper interaction check. Other coverage: one extended native click scenario, three native outcome scenarios, two component checks, four compartment-overview checks, five accessibility checks, three system-contrast checks, two receipt checks, two descriptor-control checks, six dedicated appliance-layout checks, three organization checks, nine screen/interaction/reflow checks, two Android export-channel checks and three diagnostics-card checks |
+| `fvm flutter test --reporter expanded` | Full 73-test suite passed, including the fractional geometry regression, four trusted confirmation scenarios and two saved-inventory checks, two native account and five synthetic account checks, three cleanup regressions and all 11 prior native/controller checks and the inline-stepper interaction check. Other coverage: one extended native click scenario, three native outcome scenarios, two component checks, four compartment-overview checks, five accessibility checks, three system-contrast checks, two receipt checks, two descriptor-control checks, six dedicated appliance-layout checks, three organization checks, nine screen/interaction/reflow checks, two Android export-channel checks and three diagnostics-card checks |
 | `fvm flutter test integration_test/native_smoke_test.dart -d linux` under Xvfb | Actual Linux process loads the bundled Core library without a path override, discovers Mock, reads state, sets mode and verifies the returned receipt; process screenshot captured; the latest run also cancels and confirms cache cleanup and confirms history cleanup |
 | `fvm flutter build linux --release` | Linux bundle includes `libhomeverb_ffi.so`; the bundled Rust library is the checked debug build |
 | `fvm flutter build web -t lib/main_preview.dart` | Isolated preview compiles; web preview does not call native Core |
@@ -750,3 +750,39 @@ opened with its expected actions. The final ordinary APK captures are
 `output/flutter-verification/android/centering-release-{home,device,settings}.png`.
 No real appliance was used. The installable development-signed APK and its hash
 manifest remain local under `output/flutter-verification/android/`.
+
+
+## Fractional control geometry — October 16, 2026
+
+A font-metric probe confirmed that Flutter rounds the 13-pixel control line from
+18.2 to 18 pixels and the 14-pixel title line from 19.6 to 20 pixels. Consequently,
+repeated choice rows were 0.2 pixels too short and sectioned-card title bands were
+0.4 pixels too tall. The title band now measures 34 pixels. Choice rows measure
+the actual wrapped/scaled text and retain the reference's minimum height of
+34 plus 18.2 pixels per unscaled line. Text and selection marks remain centered;
+large text may grow the row and is never clipped to a fixed screenshot height.
+
+The added geometry regression checks three repeated sectioned groups, successive
+single-line choices and a two-line choice with centered content. All 73 Flutter
+tests and static analysis passed, including screenshot, accessibility and native
+Mock click checks. The authoritative centered references were unchanged.
+
+The strict comparison remains **0/82 exact**, mean channel error **1.4886/255**
+(previously 1.5424). Thirteen states improve, 68 are unchanged and S03 regresses
+by 0.0038; its remaining raster difference is not hidden by a tolerance. C02
+improves from 2.1464 to 1.3482, R03 from 2.7279 to 1.9918 and P01 from 2.9174 to
+2.3522. Per-screen deltas are in
+`output/flutter-verification/fractional-geometry-comparison.json`.
+The unchanged P08 reference still depicts a superseded manual-discovery journey;
+that contract/design mismatch is separate from this geometry correction.
+
+The ordinary dual-ABI release APK rebuilt successfully and passed 16 KiB ZIP
+alignment, install and cold-start checks on the Android 15 API 35 emulator.
+No native API, permission, data or prototype-content changes were made.
+
+The installed release also passed native pointer clicks on Connections: select
+Local Network, restore Auto, and Save Preference returned to Settings with Auto
+shown. The selected row capture is
+`output/flutter-verification/android/geometry-release-connections.png`.
+Both packaged Core libraries are byte-identical to the previously validated
+centering APK, retaining its exact exports and ELF alignment evidence.
