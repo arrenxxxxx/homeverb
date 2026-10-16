@@ -50,12 +50,25 @@ class Canvas:
         self.draw.rounded_rectangle(tuple(round(n*SCALE) for n in box),round(radius*SCALE),fill=fill,outline=outline,width=round(width*SCALE))
     def text_width(self,text,size=14,bold=False):
         return self.draw.textlength(str(text),font=font(size,bold))/SCALE
-    def text(self,text,x,y,size=14,color=INK,bold=False,width=None,center=False):
+    def text_lines(self,text,size=14,bold=False,width=None):
         words=str(text).split(' ');lines=['']
         for word in words:
             trial=(lines[-1]+' '+word).strip()
             if width and self.text_width(trial,size,bold)>width and lines[-1]: lines.append(word)
             else: lines[-1]=trial
+        return lines
+    def centered_text(self,text,x,y,height,size=14,color=INK,bold=False,width=None,center=False):
+        # Center the visible multiline group, rather than an arbitrary top offset.
+        lines=self.text_lines(text,size,bold,width)
+        last=font(size,bold).getbbox(lines[-1],anchor='lt')
+        ink_height=(len(lines)-1)*size*1.4+(last[3]-last[1])/SCALE
+        return self.text(text,x,y+(height-ink_height)/2,size,color,bold,width,center)
+    def step_symbol(self,sign,cx,cy,size,color=INK):
+        half=size/3
+        self.line([(cx-half,cy),(cx+half,cy)],color,size/12)
+        if sign=='+':self.line([(cx,cy-half),(cx,cy+half)],color,size/12)
+    def text(self,text,x,y,size=14,color=INK,bold=False,width=None,center=False):
+        lines=self.text_lines(text,size,bold,width)
         for i,line in enumerate(lines):
             dx=x-self.text_width(line,size,bold)/2 if center else x
             self.draw.text((round(dx*SCALE),round((y+i*size*1.4)*SCALE)),line,font=font(size,bold),fill=color,anchor='lt')
@@ -169,7 +182,7 @@ def home(c,mode='all',x=20,y=109,w=350):
     y+=46
     for label,xx in [('All',x),('Living Room',x+45),('Bedroom',x+149),('Bathroom',x+239)]:
         selected=(label=='Living Room' if mode=='living' else label=='All')
-        c.text(label,xx,y,13,INK if selected else MUTED,selected)
+        c.centered_text(label,xx,y,25,13,INK if selected else MUTED,selected)
         if selected:c.rect((xx,y+25,xx+min(58,c.text_width(label,13)),y+28),ACCENT,2)
     y+=49
     c.text('2 devices' if mode=='living' else '4 devices',x,y,11,MUTED)
@@ -190,9 +203,9 @@ def climate(c,x,y,w,freshness='Updated just now',enabled=True):
     c.text('OBSERVED TARGET',x+w/2,y+22,10,'#d3d1ca',True,center=True)
     c.text('24°',x+w/2,y+52,68,'#fffaf2',False,center=True)
     c.text('Cooling · Room 26°C',x+w/2,y+134,14,'#e0ddd5',center=True)
-    c.rect((x+31,y+165,x+78,y+205),'#535452',20);c.text('−',x+54,y+171,24,'#fff',center=True)
-    c.rect((x+w-78,y+165,x+w-31,y+205),ACCENT if enabled else '#535452',20);c.text('+',x+w-54,y+171,24,'#fff',center=True)
-    c.text(freshness,x+w/2,y+179,10,'#d3d1ca',center=True)
+    c.rect((x+31,y+165,x+78,y+205),'#535452',20);c.step_symbol('−',x+54.5,y+185,24,'#fff')
+    c.rect((x+w-78,y+165,x+w-31,y+205),ACCENT if enabled else '#535452',20);c.step_symbol('+',x+w-54.5,y+185,24,'#fff')
+    c.centered_text(freshness,x+w/2,y+165,40,10,'#d3d1ca',center=True)
     return 230
 
 def rows(c,items,x,y,w,title=None):
@@ -202,24 +215,29 @@ def rows(c,items,x,y,w,title=None):
     total=sum(heights)+(34 if title else 0)
     c.surface(x,y,w,total,r=18)
     cy=y
-    if title:c.text(title,x+16,cy+13,14,bold=True);cy+=34
+    if title:c.centered_text(title,x+16,cy,34,14,bold=True);cy+=34
     for i,((label,value),height) in enumerate(zip(items,heights)):
-        c.text(label,x+16,cy+14,13,bold=False)
+        if height>44:
+            label_h=font(13).getbbox(label,anchor='lt')[3]/SCALE
+            value_h=font(12).getbbox(value,anchor='lt')[3]/SCALE
+            text_y=cy+(height-label_h-value_h-8)/2
+            c.text(label,x+16,text_y,13)
+        else:c.centered_text(label,x+16,cy,height,13)
         if label in ['Power','Oscillation','Muted'] and value in ['On','Off']:
-            on=value=='On';c.text(value,x+w-89,cy+15,12,MUTED)
+            on=value=='On';c.centered_text(value,x+w-89,cy,height,12,MUTED)
             c.rect((x+w-58,cy+9,x+w-14,cy+35),ACCENT if on else '#c2c4bc',13)
             cx=x+w-27 if on else x+w-45;c.rect((cx-10,cy+12,cx+10,cy+32),'#fffcf5',10)
         elif label in ['Target','Speed'] and '+' in value:
             value=value.strip().removeprefix('−').strip().removesuffix('+').strip()
             for cx,sign in [(x+w-125,'−'),(x+w-30,'+')]:
-                c.rect((cx-15,cy+7,cx+15,cy+37),'#e6e2d8',15);c.text(sign,cx,cy+13,16,INK,center=True)
-            c.text(value,x+w-78,cy+16,12,INK,True,center=True)
+                c.rect((cx-15,cy+7,cx+15,cy+37),'#e6e2d8',15);c.step_symbol(sign,cx,cy+22,16)
+            c.centered_text(value,x+w-78,cy,height,12,INK,True,center=True)
         elif '≡' in value:
             value=value.replace('≡','').strip()
             for dy in [0,4,8]:c.line([(x+w-27,cy+18+dy),(x+w-16,cy+18+dy)],MUTED,1)
-            c.text(value,x+w-40-c.text_width(value,12),cy+15,12,MUTED)
-        elif height>44:c.text(value,x+16,cy+37,12,MUTED,width=w-32)
-        else:c.text(value,x+w-16-c.text_width(value,12),cy+15,12,MUTED)
+            c.centered_text(value,x+w-40-c.text_width(value,12),cy,height,12,MUTED)
+        elif height>44:c.text(value,x+16,text_y+label_h+8,12,MUTED,width=w-32)
+        else:c.centered_text(value,x+w-16-c.text_width(value,12),cy,height,12,MUTED)
         cy+=height
         if i<len(items)-1:c.line([(x+16,cy),(x+w-16,cy)],'#deded7',.6)
     return total+12
@@ -228,7 +246,9 @@ def block(c,b,x,y,w):
     k=b[0]
     if k=='note':return c.text(b[1],x+2,y+2,13,MUTED,width=w-4)+12
     if k=='section':c.text(b[1],x+3,y+4,10,MUTED,True);return 25
-    if k=='link':return c.text(b[1],x+2,y+9,13,ACCENT,True,width=w-4)+22
+    if k=='link':
+        h=len(c.text_lines(b[1],13,True,w-4))*13*1.4+22
+        c.centered_text(b[1],x+2,y,h,13,ACCENT,True,width=w-4);return h
     if k=='rows':return rows(c,b[1],x,y,w)
     if k=='card':return rows(c,b[2],x,y,w,b[1])
     if k=='button':
@@ -236,10 +256,10 @@ def block(c,b,x,y,w):
         if style=='danger':fill='#fae7df';col='#9e3421'
         if style=='disabled':fill='#e4e2dc';col='#888781'
         c.rect((x,y,x+w,y+48),fill,15, '#d7d6cf' if style=='secondary' else None)
-        c.text(b[1],x+w/2,y+16,14,col,True,center=True);return 60
+        c.centered_text(b[1],x+w/2,y,48,14,col,True,center=True);return 60
     if k=='field':
         c.text(b[1],x+2,y,12,MUTED);c.surface(x,y+22,w,50,r=14)
-        c.text(b[2] or 'Search by name',x+15,y+38,15,INK if b[2] else MUTED)
+        c.centered_text(b[2] or 'Search by name',x+15,y+22,50,15,INK if b[2] else MUTED)
         if len(b)>3:
             c.rect((x,y+22,x+w,y+72),None,14,'#ae452d',1)
             return 83+c.text(b[3],x+2,y+81,12,'#9e3421',width=w-4)
@@ -248,10 +268,10 @@ def block(c,b,x,y,w):
         cy=y;selected=b[2] if len(b)>2 else 0
         selected=selected if isinstance(selected,list) else [selected]
         for i,item in enumerate(b[1]):
-            n=max(1,math.ceil(c.text_width(item,13)/(w-65)));h=34+n*18
+            n=len(c.text_lines(item,13,i in selected,w-60));h=34+n*18.2
             c.surface(x,cy,w,h,r=16)
             if i in selected:c.rect((x,cy,x+w,cy+h),None,16,ACCENT,1.2)
-            c.text(item,x+15,cy+18,13,INK,i in selected,width=w-60)
+            c.centered_text(item,x+15,cy,h,13,INK,i in selected,width=w-60)
             c.rect((x+w-34,cy+h/2-9,x+w-16,cy+h/2+9),ACCENT if i in selected else None,9,None if i in selected else '#b3b3ac')
             if i in selected:c.icon('check',x+w-32,cy+h/2-7,14,'#ffffff')
             cy+=h+9
@@ -260,12 +280,12 @@ def block(c,b,x,y,w):
         cx=x;cy=y
         for i,label in enumerate(b[1]):
             tw=c.text_width(label,12)+24
-            if cx+tw>x+w:cx=x;cy+=42
+            if cx+tw>x+w:cx=x;cy+=48
             selected=(k=='tabs' and i==b[2]) or (k=='chips' and label=='3')
             c.rect((cx,cy,cx+tw,cy+32),INK if selected else '#f8f5ee',16)
-            c.text(label,cx+12,cy+10,12,'#fff' if selected else MUTED)
+            c.centered_text(label,cx+12,cy,32,12,'#fff' if selected else MUTED)
             cx+=tw+7
-        return cy-y+47
+        return cy-y+48
     if k=='hero':
         c.surface(x,y,w,200)
         if b[1] in products:c.paste_fit(products[b[1]],(x+75,y+13,w-150,87))
@@ -285,12 +305,12 @@ def block(c,b,x,y,w):
         c.rect((x,y+7,x+w,y+13),'#deded6',3);c.rect((x,y+7,x+w*b[1],y+13),ACCENT,3)
         return 26+c.text(b[2],x,y+25,12,MUTED,width=w)+12
     if k=='slider':
-        c.surface(x,y,w,94,r=18);c.text(b[1],x+16,y+16,13);c.text(b[2],x+w-16-c.text_width(b[2],13,True),y+16,13,INK,True)
+        c.surface(x,y,w,94,r=18);c.centered_text(b[1],x+16,y,44,13);c.centered_text(b[2],x+w-16-c.text_width(b[2],13,True),y,44,13,INK,True)
         c.rect((x+20,y+61,x+w-20,y+66),'#d5d6cf',3);cx=x+20+(w-40)*b[3]
         c.rect((x+20,y+61,cx,y+66),ACCENT,3);c.rect((cx-10,y+53,cx+10,y+73),'#fffaf3',10,ACCENT,2);return 107
     if k=='stepper':return rows(c,[[b[1],'−       '+b[2]+'       +']],x,y,w)
     if k=='code':
-        c.surface(x,y,w,94,r=20);c.text(b[1],x+w/2,y+31,32,INK,True,center=True);return 109
+        c.surface(x,y,w,94,r=20);c.centered_text(b[1],x+w/2,y,94,32,INK,True,center=True);return 109
     if k=='devices':
         for i,key in enumerate(b[1]):device_card(c,key,x+(i%2)*(w/2+6),y+(i//2)*247,(w-12)/2)
         return math.ceil(len(b[1])/2)*247
@@ -300,7 +320,7 @@ def block(c,b,x,y,w):
         pc.paste_fit(products['ac'],(17,23,52,30));pc.paste_fit(products['lamp'],(104,20,31,47))
         pc.rect((22,65,62,72),ACCENT,3)
         c.surface(x,y,w,205);c.paste_fit(pc.im,(x+12,y+12,w-24,135))
-        c.text('Window Light',x+18,y+159,17,INK,True);c.text('Current',x+w-76,y+162,12,ACCENT,True)
+        c.centered_text('Window Light',x+18,y+147,58,17,INK,True);c.centered_text('Current',x+w-76,y+147,58,12,ACCENT,True)
         c.rect((x,y,x+w,y+205),None,22,ACCENT,1.2);return 221
     if k=='skin_preview':
         preview=render('D01');c.paste_fit(preview,(x,y,w,393));return 408

@@ -29,6 +29,27 @@ Apply the same background and material tokens to Devices, Platforms, Settings, d
 
 The raster prototype uses logical 390 × 844 phone layouts and 1024 × 768 wide layouts rendered at 2×. These dimensions are reference compositions, not fixed Flutter canvas sizes. Do not render the screenshots as the production interface: all text, controls, focus and accessibility semantics must be native widgets. Product cutouts and the decorative background can be image assets.
 
+## Control alignment revision — October 16, 2026
+
+The owner requested vertical centering throughout the prototype, explicitly
+including but not limited to C01–C10. Center labels and values within row content
+areas, button labels within button faces, input text within fields, and option
+labels within their selectable surfaces. Center wrapped label/value pairs as one
+group. Card section labels, slider headings, pairing codes and appearance labels
+follow the same rule. Titles, descriptions and status paragraphs retain their
+normal document flow.
+
+The prototype measures visible text bounds rather than applying a fixed top
+inset. Flutter controls use symmetric native line metrics and centered containers,
+without the former upward text translations; body copy retains its separate
+layout. Stepper symbols are centered vector marks in both implementations. A
+32-pixel visible pill retains a 48-pixel interaction area, including wrapped runs.
+The change does not alter actions, state or native permissions.
+
+All 82 raster references and 21 boards were regenerated for this explicit design
+revision. This is not automatic acceptance of Flutter differences. The strict
+comparison remains a separate gate in the [verification report](../apps/mobile/verification.md).
+
 ## Flutter feasibility and rendering strategy
 
 All selected effects have direct Flutter rendering paths. This conclusion is based on documented widget/painting capabilities, not a compiled phone test.

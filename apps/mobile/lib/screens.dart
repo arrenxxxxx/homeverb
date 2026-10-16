@@ -807,20 +807,28 @@ class DeviceHome extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Copy(
-                              labels[i],
-                              bold:
-                                  labels[i] ==
-                                  (mode == 'living' ? 'Living Room' : filter),
-                              color:
-                                  labels[i] ==
+                            SizedBox(
+                              height: 25,
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Copy(
+                                  labels[i],
+                                  control: true,
+                                  bold:
+                                      labels[i] ==
                                       (mode == 'living'
                                           ? 'Living Room'
-                                          : filter)
-                                  ? ink
-                                  : muted,
+                                          : filter),
+                                  color:
+                                      labels[i] ==
+                                          (mode == 'living'
+                                              ? 'Living Room'
+                                              : filter)
+                                      ? ink
+                                      : muted,
+                                ),
+                              ),
                             ),
-                            const SizedBox(height: 6.8),
                             if (labels[i] ==
                                 (mode == 'living' ? 'Living Room' : filter))
                               Container(
@@ -943,6 +951,7 @@ class DeviceHome extends StatelessWidget {
                       children: [
                         Copy(
                           label,
+                          control: true,
                           color:
                               label ==
                                   (mode == 'living' ? 'Living Room' : filter)

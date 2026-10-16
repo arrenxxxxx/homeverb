@@ -695,3 +695,58 @@ The final strict 82-state run remains **0/82 exact**, mean channel error
 **1.4822/255**. No reference was changed or blessed. Meiju startup grant UI,
 real accounts/appliances, full localization, physical phones and iOS acceptance
 remain outstanding. This is a verified frontend phase, not goal completion.
+
+
+## Owner-requested vertical centering — October 16, 2026
+
+The owner explicitly revised the prototype: vertically center text throughout
+control rows, not only C01–C10. The shared raster renderer now measures text
+bounds for labels, values, multiline choices, buttons, fields, chips, section
+bands, slider headings, pairing codes and appearance labels. All 82 reference
+screens and 21 boards were regenerated as a design revision. This is not an
+automatic reference blessing from Flutter captures. P08's amended application
+copy and all manual native-contract inventory amendments remain intact.
+
+Flutter uses ordinary symmetric line layout for control copy, removes the
+previous upward button/stepper translations, centers chip and code content, and
+explicitly centers field text. Home room-filter labels are centered above their unchanged underline positions.
+Native enum controls and appearance labels share
+the correction. Stepper symbols retain their labeled interactive widgets and
+use centered vector marks. Titles and paragraphs keep their existing layout.
+The prototype now gives wrapped chip runs the same 48-pixel pitch as Flutter's
+interaction regions. Progress caption spacing also matches the existing
+38-pixel-plus-caption block height, avoiding downstream card displacement.
+
+Executed checks:
+
+- `fvm flutter test --no-pub --reporter expanded`: all 72 tests passed, including
+  all 82 screenshot states, 198 explicitly simulated atlas branches, native Mock
+  click journeys and large-text/high-contrast reflow.
+- `fvm flutter analyze --no-pub`: no issues.
+- Prototype render/build/validate: 82 screens, 21 boards, 138 image hashes,
+  547 local links, 14 journeys, 198 branches, zero layout overflow.
+- `python3 apps/mobile/tool/compare_screens.py --require-exact`: **failed**, with
+  **0/82 exact**, mean absolute channel error **1.5424/255** against the revised
+  references. These metrics are not comparable to old-reference alignment metrics
+  as an acceptance trend. Remaining raster/layout differences and the explicit
+  P08 contract mismatch stay visible in `output/flutter-verification/index.html`.
+
+The earlier experimental one-pixel trailing-value translation was discarded in
+favor of this shared centering rule. No Core API, operation authority, data schema
+or supported-platform claim changes in this phase.
+
+The complete `integration_test/native_journeys_test.dart` also passed in the
+Android 15 API 35 x86_64 application process using the embedded Mock Core
+(2m20s). This suite injects keyboard input, lifecycle changes and save-picker
+results; it does not establish physical-device or real-provider acceptance.
+Document, contract and repository validators and `git diff --check` passed.
+
+The final ordinary dual-ABI release APK was rebuilt after the room-filter change,
+passed ZIP/ELF 16 KiB alignment and exact 11-export checks for both Core ABIs,
+installed and cold-started on the same emulator. A saved fictional Mock card
+survived the upgrade/restart; the centered room filter and card opened normally.
+Explicit Refresh State returned target 26, cool mode and power off. Settings
+opened with its expected actions. The final ordinary APK captures are
+`output/flutter-verification/android/centering-release-{home,device,settings}.png`.
+No real appliance was used. The installable development-signed APK and its hash
+manifest remain local under `output/flutter-verification/android/`.

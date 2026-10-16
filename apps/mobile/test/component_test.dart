@@ -250,7 +250,8 @@ void main() {
       await tap('4°');
       expect(app.currentState!.id, 'C01');
       expect(find.text('Temperature is read-only here.'), findsOneWidget);
-      await tap('+');
+      await tester.tap(find.bySemanticsLabel('Increase target'));
+      await tester.pumpAndSettle();
       expect(core.receipts, hasLength(2));
       expect(app.currentState!.id, 'C01');
     } finally {

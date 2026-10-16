@@ -156,13 +156,16 @@ class _ApplianceControlsState extends State<ApplianceControls> {
                 child: MediaQuery.textScalerOf(context).scale(13) <= 13
                     ? Row(
                         children: [
-                          const Expanded(child: Copy('Speed')),
+                          const Expanded(child: Copy('Speed', control: true)),
                           speedButtons(),
                         ],
                       )
                     : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [const Copy('Speed'), speedButtons()],
+                        children: [
+                          const Copy('Speed', control: true),
+                          speedButtons(),
+                        ],
                       ),
               ),
             )
@@ -224,6 +227,7 @@ class _ApplianceControlsState extends State<ApplianceControls> {
                   ChoiceChip(
                     key: ValueKey('appliance-option:$name:$option'),
                     label: Copy(
+                      control: true,
                       propertyValue(option, {}),
                       size: 12,
                       color: value == option ? Colors.white : muted,

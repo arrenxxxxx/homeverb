@@ -60,7 +60,7 @@ class Blocks extends StatelessWidget {
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             onPressed: () => onAction(b[1]),
-            child: Copy(b[1], color: accent, bold: true),
+            child: Copy(b[1], color: accent, bold: true, control: true),
           ),
         );
       case 'rows':
@@ -96,6 +96,7 @@ class Blocks extends StatelessWidget {
                   label: label,
                   child: TextField(
                     controller: field,
+                    textAlignVertical: TextAlignVertical.center,
                     key: ValueKey('field:$label'),
                     onChanged: (_) => onChanged?.call(),
                     keyboardType: label == 'Target temperature'
@@ -220,13 +221,17 @@ class Blocks extends StatelessWidget {
                           ),
                         ),
                         Positioned(
-                          top: 10,
+                          top: 0,
+                          height: 32,
                           left: 12,
                           right: 12,
-                          child: Copy(
-                            label,
-                            size: 12,
-                            color: selected ? Colors.white : muted,
+                          child: Center(
+                            child: Copy(
+                              label,
+                              size: 12,
+                              color: selected ? Colors.white : muted,
+                              control: true,
+                            ),
                           ),
                         ),
                       ],
@@ -258,6 +263,7 @@ class Blocks extends StatelessWidget {
                     label,
                     size: 12,
                     color: i == selected ? Colors.white : muted,
+                    control: true,
                   ),
                   onPressed: () {
                     if (b.length <= 3) choices['tabs'] = i;
@@ -420,8 +426,9 @@ class Blocks extends StatelessWidget {
           ),
         );
       case 'progress':
+        // Match the prototype's total of 38 pixels plus the caption height.
         return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.only(bottom: 13),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -466,9 +473,14 @@ class Blocks extends StatelessWidget {
               radius: 20,
               child: SizedBox(
                 height: 94,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 31),
-                  child: Copy(b[1], size: 32, bold: true, center: true),
+                child: Center(
+                  child: Copy(
+                    b[1],
+                    size: 32,
+                    bold: true,
+                    center: true,
+                    control: true,
+                  ),
                 ),
               ),
             ),
@@ -479,7 +491,13 @@ class Blocks extends StatelessWidget {
           child: Surface(
             radius: 20,
             padding: const EdgeInsets.symmetric(vertical: 30),
-            child: Copy(b[1], size: 32, bold: true, center: true),
+            child: Copy(
+              b[1],
+              size: 32,
+              bold: true,
+              center: true,
+              control: true,
+            ),
           ),
         );
       case 'devices':
@@ -565,17 +583,29 @@ class Blocks extends StatelessWidget {
                     ),
                     const Positioned(
                       left: 18,
-                      top: 159,
-                      child: Copy('Window Light', size: 17, bold: true),
+                      top: 147,
+                      height: 58,
+                      child: Center(
+                        child: Copy(
+                          'Window Light',
+                          size: 17,
+                          bold: true,
+                          control: true,
+                        ),
+                      ),
                     ),
                     const Positioned(
                       right: 18,
-                      top: 162,
-                      child: Copy(
-                        'Current',
-                        size: 12,
-                        color: accent,
-                        bold: true,
+                      top: 147,
+                      height: 58,
+                      child: Center(
+                        child: Copy(
+                          'Current',
+                          control: true,
+                          size: 12,
+                          color: accent,
+                          bold: true,
+                        ),
                       ),
                     ),
                   ],
@@ -617,9 +647,20 @@ class Blocks extends StatelessWidget {
                   child: Row(
                     children: [
                       Expanded(
-                        child: Copy('Window Light', size: 17, bold: true),
+                        child: Copy(
+                          'Window Light',
+                          size: 17,
+                          bold: true,
+                          control: true,
+                        ),
                       ),
-                      Copy('Current', size: 12, color: accent, bold: true),
+                      Copy(
+                        'Current',
+                        size: 12,
+                        color: accent,
+                        bold: true,
+                        control: true,
+                      ),
                     ],
                   ),
                 ),
@@ -723,8 +764,11 @@ class Rows extends StatelessWidget {
         children: [
           if (title != null)
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 13, 16, 1),
-              child: Copy(title!, size: 14, bold: true),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 7.2,
+              ),
+              child: Copy(title!, size: 14, bold: true, control: true),
             ),
           for (var i = 0; i < items.length; i++) ...[
             if (i > 0)
@@ -791,7 +835,7 @@ class Rows extends StatelessWidget {
                           measurement.layout();
                           final combinedWidth = measurement.width + valueWidth;
                           measurement.dispose();
-                          final leading = Copy(label);
+                          final leading = Copy(label, control: true);
                           final trailing =
                               this.trailing[i] ??
                               (stepper
@@ -816,7 +860,12 @@ class Rows extends StatelessWidget {
                                   ? Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Copy(value, size: 12, color: muted),
+                                        Copy(
+                                          value,
+                                          size: 12,
+                                          color: muted,
+                                          control: true,
+                                        ),
                                         const SizedBox(width: 8),
                                         SizedBox(
                                           height: 40,
@@ -841,6 +890,7 @@ class Rows extends StatelessWidget {
                                       children: [
                                         Copy(
                                           value.replaceAll('≡', '').trim(),
+                                          control: true,
                                           size: 12,
                                           color: muted,
                                         ),
@@ -852,13 +902,19 @@ class Rows extends StatelessWidget {
                                         ),
                                       ],
                                     )
-                                  : Copy(value, size: 12, color: muted));
+                                  : Copy(
+                                      value,
+                                      size: 12,
+                                      color: muted,
+                                      control: true,
+                                    ));
                           if ((!toggle &&
                                   !inline &&
                                   combinedWidth > c.maxWidth - 18) ||
                               (inline && scale > 1))
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 leading,
                                 SizedBox(height: scale <= 1 ? 3 : 9),
@@ -988,14 +1044,18 @@ class Climate extends StatelessWidget {
                   ),
                 ),
                 Positioned(
-                  top: 179,
+                  top: 165,
+                  height: 40,
                   left: 80,
                   right: 80,
-                  child: Copy(
-                    freshness,
-                    size: 10,
-                    color: const Color(0xffd3d1ca),
-                    center: true,
+                  child: Center(
+                    child: Copy(
+                      freshness,
+                      size: 10,
+                      color: const Color(0xffd3d1ca),
+                      center: true,
+                      control: true,
+                    ),
                   ),
                 ),
               ],
@@ -1070,11 +1130,11 @@ class Climate extends StatelessWidget {
               color: color,
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: Transform.translate(
-                offset: Offset(text == '−' ? -.5 : .5, text == '−' ? -10 : -5),
-                child: Copy(text, size: 24, color: Colors.white, center: true),
+            child: Center(
+              child: Glyph(
+                text == '+' ? 'step-plus' : 'step-minus',
+                size: 24,
+                color: Colors.white,
               ),
             ),
           ),

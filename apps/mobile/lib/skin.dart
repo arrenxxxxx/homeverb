@@ -81,13 +81,14 @@ class Copy extends StatelessWidget {
     this.color = ink,
     this.bold = false,
     this.center = false,
+    this.control = false,
     this.maxLines,
     super.key,
   });
   final String text;
   final double size;
   final Color color;
-  final bool bold, center;
+  final bool bold, center, control;
   final int? maxLines;
   @override
   Widget build(BuildContext context) {
@@ -105,6 +106,15 @@ class Copy extends StatelessWidget {
           ? FontWeight.w600
           : FontWeight.w400,
     );
+    if (control) {
+      return Text(
+        text,
+        textAlign: center ? TextAlign.center : TextAlign.start,
+        maxLines: maxLines,
+        overflow: maxLines == null ? null : TextOverflow.ellipsis,
+        style: style,
+      );
+    }
     final measure = TextPainter(
       text: TextSpan(text: text, style: style),
       textDirection: Directionality.of(context),
@@ -333,17 +343,14 @@ class ActionButton extends StatelessWidget {
         ),
       ),
       onPressed: onPressed,
-      child: Transform.translate(
-        offset: const Offset(0, -3),
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            height: 1.1,
-            letterSpacing: 0,
-          ),
+      child: Text(
+        label,
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          height: 1.4,
+          letterSpacing: 0,
         ),
       ),
     ),
@@ -390,7 +397,13 @@ class InlineStepper extends StatelessWidget {
           Positioned(
             left: 60,
             right: 45,
-            child: Copy(value, size: 12, bold: true, center: true),
+            child: Copy(
+              value,
+              size: 12,
+              bold: true,
+              center: true,
+              control: true,
+            ),
           ),
           for (final increase in [false, true])
             Positioned(
@@ -415,13 +428,9 @@ class InlineStepper extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                       child: ExcludeSemantics(
-                        child: Transform.translate(
-                          offset: Offset(0, increase ? -2.5 : -5),
-                          child: Copy(
-                            increase ? '+' : '−',
-                            size: 16,
-                            center: true,
-                          ),
+                        child: Glyph(
+                          increase ? 'step-plus' : 'step-minus',
+                          size: 16,
                         ),
                       ),
                     ),
@@ -482,8 +491,8 @@ class ValueSlider extends StatelessWidget {
     );
     Widget heading() => Row(
       children: [
-        Expanded(child: Copy(label)),
-        Copy(displayValue, bold: true),
+        Expanded(child: Copy(label, control: true)),
+        Copy(displayValue, bold: true, control: true),
       ],
     );
     return Padding(
@@ -495,7 +504,13 @@ class ValueSlider extends StatelessWidget {
                 height: 94,
                 child: Stack(
                   children: [
-                    Positioned(top: 16, left: 16, right: 16, child: heading()),
+                    Positioned(
+                      top: 0,
+                      left: 16,
+                      right: 16,
+                      height: 44,
+                      child: Center(child: heading()),
+                    ),
                     Positioned(
                       top: 39.5,
                       left: 0,
@@ -551,7 +566,7 @@ class ChoiceTile extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 17),
             child: Row(
               children: [
-                Expanded(child: Copy(label, bold: selected)),
+                Expanded(child: Copy(label, bold: selected, control: true)),
                 const SizedBox(width: 12),
                 Container(
                   width: 18,
@@ -677,6 +692,15 @@ class _GlyphPainter extends CustomPainter {
         }
       case 'back':
         line(const [Offset(15, 4), Offset(7, 12), Offset(15, 20)]);
+      case 'step-plus':
+      case 'step-minus':
+        final pen = Paint()
+          ..color = color
+          ..strokeWidth = 2;
+        canvas.drawLine(const Offset(4, 12), const Offset(20, 12), pen);
+        if (name == 'step-plus') {
+          canvas.drawLine(const Offset(12, 4), const Offset(12, 20), pen);
+        }
       case 'plus':
         line(const [Offset(12, 2), Offset(12, 22)]);
         line(const [Offset(2, 12), Offset(22, 12)]);

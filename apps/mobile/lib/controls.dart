@@ -314,6 +314,7 @@ class _CapabilityActionFormState extends State<CapabilityActionForm> {
                       ),
                       showCheckmark: false,
                       label: Copy(
+                        control: true,
                         propertyValue(value, {}),
                         size: 12,
                         color:
@@ -341,6 +342,7 @@ class _CapabilityActionFormState extends State<CapabilityActionForm> {
               Semantics(
                 label: controlLabel(name),
                 child: TextField(
+                  textAlignVertical: TextAlignVertical.center,
                   key: ValueKey('parameter:$name'),
                   controller: controller,
                   enabled: !saving,
