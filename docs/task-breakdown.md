@@ -62,3 +62,9 @@ that gate; Flutter can implement the read-only compartment view now.
 Each completion record names the task, changed interfaces, commands actually run, results, skipped checks, compatibility effects, and external actions. All such records are English.
 
 The owner requires one commit and remote push per completed, verified phase. The existing Mock MVP is committed as the reusable baseline. Independent Flutter work starts from the [native UI contract](native-ui-contract.md); frontend development must not wait for real-device acceptance to implement the available room/card/control flows. Subsequent account/cloud work adds reviewed contracts and implementation in separate verified phases.
+
+The [iOS package builder](development/09-ios-native.md#2-build-and-check-the-native-code)
+now supplies a development XCFramework path with separate device/Simulator slices,
+canonical C module metadata, local ad-hoc seals and consumer-link checks. Portable
+package tests do not prove the Xcode build; inspect the exact CI commit. App signing,
+Flutter embedding/runtime and actual Keychain/phone acceptance remain open.

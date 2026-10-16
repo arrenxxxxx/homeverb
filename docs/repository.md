@@ -11,6 +11,7 @@ crates/midea/              # Meiju account/cloud protocols, protected bindings a
 crates/host/               # Composition root and foreground session contract
 crates/ffi/                # Native in-process C ABI and public header
 packages/android/          # Android Keystore/ciphertext package and synthetic JVM fixtures
+packages/ios/              # iOS framework module map and development packaging guidance
 packages/presentation/     # en-US/zh-CN catalogs and framework-neutral helpers
 schemas/                   # Runtime JSON contracts
 examples/                  # Fictional positive fixtures

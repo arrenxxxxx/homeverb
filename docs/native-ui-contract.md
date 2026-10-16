@@ -206,6 +206,12 @@ account functions without an additional initializer. Its native build must suppl
 the signed application's private access group. Native API 1.20 alone does not prove
 that configuration, signed framework packaging or Keychain/phone acceptance.
 
+The [iOS development package](../packages/ios/README.md) preserves this ABI in a
+`HomeVerb.xcframework` with a canonical C module. Its builder checks every exported
+function and consumer linkage for device/Simulator slices. Ad-hoc framework seals
+are not app signing or provisioning; integrate with **Embed & Sign**, retain the
+worker/lifecycle rules above and verify actual Dart loading in the app worktree.
+
 The separate [AC developer probe](development/07-meiju-control.md) can persist
 experimental writable descriptors in a shared profile. Metadata is not authority:
 a default native host has no Meiju write grants and its adapter refuses controls.

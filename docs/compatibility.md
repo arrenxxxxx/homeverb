@@ -1548,3 +1548,30 @@ payload 3 and other platforms' storage behavior remain unchanged. The already
 locked `core-foundation-sys` 0.8.7 becomes a direct iOS dependency and a macOS
 test dependency; no dependency version changes. No real account, appliance,
 separate Flutter worktree or physical phone was accessed.
+
+## iOS development XCFramework packaging
+
+The [iOS builder](development/09-ios-native.md#2-build-and-check-the-native-code)
+packages release `cdylib` output into dynamic frameworks, then uses Xcode to create
+an XCFramework archive. Device arm64 targets iOS 13.0; the universal arm64/x86_64
+Simulator framework targets 14.0, matching the arm64 Simulator Rust minimum.
+Only Simulator architectures are combined; device and Simulator remain separate.
+
+Packaging copies the canonical C header/module map, sets the framework-relative
+install name, checks Mach-O destination/minimum version, all declared exports and
+public system dependencies, and creates local ad-hoc seals with no signing identity
+or timestamp service. The final archive is extracted, reinspected and linked from
+C module consumers for all three architectures before replacing a prior artifact.
+No Flutter views, new API, credential access, native schema or protocol change is
+introduced. Ad-hoc seals do not establish identity, provisioning or distribution
+signing. There is no package upload or publication.
+
+Eight portable package tests passed with fictional reports/files, bringing Python
+tooling coverage to fifty tests. YAML parsing preserves the exact CI commands.
+Local Xcode execution is blocked because this host is Linux without Apple SDKs;
+the macOS CI job runs actual release packaging and consumer checks. Its result
+must be read from the exact pushed commit before claiming success. Signed app
+embedding, Flutter/Dart loading, Keychain system behavior and physical iPhone
+acceptance remain open. The [previous storage phase](adr/0062-ios-keychain-credentials.md)
+passed all sixteen macOS tests and two complete iOS library builds on `3742e67`;
+that evidence does not by itself prove this new package format.

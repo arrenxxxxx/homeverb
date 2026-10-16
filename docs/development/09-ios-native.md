@@ -3,7 +3,8 @@
 This guide follows the [Android embedding guide](08-android-native.md). The iOS
 Keychain backend is implemented under [ADR-0062](../adr/0062-ios-keychain-credentials.md).
 Portable tests and target compilation are distinct from signed-device acceptance.
-An iPhone app, packaged framework and Flutter integration are still required.
+The [development package](../../packages/ios/README.md) adds XCFramework packaging
+and consumer-link checks. An installable app and Flutter integration are still required.
 
 ## 1. Supply the trusted build scope
 
@@ -32,7 +33,7 @@ The following group is fictional and only for compiler/CI checks. It is not a
 signing configuration and must not be shipped as a working account store.
 
 ```bash
-rustup target add aarch64-apple-ios aarch64-apple-ios-sim
+rustup target add aarch64-apple-ios aarch64-apple-ios-sim x86_64-apple-ios
 cargo test -p homeverb-secrets --offline --locked ios::
 HOMEVERB_IOS_KEYCHAIN_ACCESS_GROUP=SYNTHETIC.org.homeverb.test \
   cargo clippy -p homeverb-secrets --target aarch64-apple-ios --offline --locked -- -D warnings
@@ -41,17 +42,44 @@ HOMEVERB_IOS_KEYCHAIN_ACCESS_GROUP=SYNTHETIC.org.homeverb.test \
 ```
 
 Rust target checking can run on Linux with cached dependencies; it does not link
-Apple frameworks. On macOS with Xcode and the selected Apple SDKs, build
-`homeverb-ffi` for both targets with `IPHONEOS_DEPLOYMENT_TARGET=13.0`. The
-[MVP workflow](../../.github/workflows/mvp.yml) performs those builds and runs the
-same tests on macOS, where three additional tests construct real Core Foundation
+Apple frameworks. The [MVP workflow](../../.github/workflows/mvp.yml) runs the same
+tests on macOS, where three additional tests construct real Core Foundation
 objects and check production query/result handling without Keychain access.
-Inspect the exact commit's CI results before reporting them as passed.
+On commit `3742e67`, all sixteen iOS tests and complete native-library builds for
+arm64 device/simulator passed. This did not run Keychain or an iOS app.
 
-The current `cdylib` build establishes native compilation/linkage only. Creating
-and embedding a signed framework/XCFramework, checking exported symbols in that
-package, and building an installable Flutter app remain separate work. Do not
-publish an unsigned build as a supported iOS package.
+On macOS with Xcode, Python 3.11+ and cached dependencies, create the release
+development package with the trusted group from step 1:
+
+```bash
+python3 scripts/build_ios_native.py
+ditto -x -k target/ios/homeverb-core.xcframework.zip target/ios/integration
+```
+
+The builder requires `HOMEVERB_IOS_KEYCHAIN_ACCESS_GROUP` in its environment. It
+creates separate dynamic frameworks for arm64 iOS 13.0+ and arm64/x86_64 Simulator
+14.0+, with a canonical C header/module map and
+`@rpath/HomeVerb.framework/HomeVerb` install name. The higher Simulator floor
+matches the Rust arm64 Simulator target; it is not a physical support claim.
+The generated XCFramework is inspected, archived, extracted and inspected again.
+A C module consumer links every native function on all three architectures before
+the archive replaces a previous deliverable. The builder does not run the consumer.
+
+Local ad-hoc signatures use `codesign --sign - --timestamp=none`: they provide
+integrity without using an identity, signing key or timestamp service. They are
+not distribution signatures or provisioning. The CI package uses a fictional
+group and must not be shipped as a working account store. Do not publish the
+development artifact or treat package checks as signed-app/Keychain acceptance.
+
+In the Flutter iOS project, add the extracted `HomeVerb.xcframework` to the app's
+framework dependencies and select **Embed & Sign**. Let Xcode choose the matching
+slice; never copy a simulator binary into a device app. Ensure the app's framework
+runpath includes `@executable_path/Frameworks`. Resolve the embedded
+`HomeVerb.framework/HomeVerb` path from the app bundle and load it through the
+existing Dart FFI worker wrapper. Check
+`get_api_info` before optional calls. The package adds no API methods and changes
+no ownership/cancellation rules. Actual Dart loading, app signing and runtime
+validation remain the Flutter worktree's integration/acceptance work.
 
 ## 3. Wire foreground account operations
 
@@ -104,5 +132,5 @@ Keep test identifiers, raw Keychain output and secret bytes out of reports.
    Provider login, reauthorization and appliance writes require separate evidence
    and the existing owner authorization boundaries.
 
-No result from portable tests, Core Foundation object tests or unsigned library
-builds completes this device checklist.
+No result from portable tests, Core Foundation object tests, native-library builds
+or locally sealed development packages completes this device checklist.

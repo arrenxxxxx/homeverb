@@ -128,9 +128,16 @@ and uncertain dispatched mutations without retry. On macOS, the same command als
 runs three production Core Foundation query/result tests with fictional objects;
 it does not access Keychain. Linux cannot execute those framework-object tests.
 
-The `ios-native` CI job checks both arm64 device/simulator targets and links
-`homeverb-ffi` using Apple's SDKs and a fictional access-group build value. This
-is not signed packaging or a Keychain/app runtime test. Follow the
+The `ios-native` CI job checks the arm64 targets and builds a development
+XCFramework using Apple's SDKs and a fictional access-group build value. It
+contains arm64 device and arm64/x86_64 Simulator release frameworks with local
+ad-hoc seals. `scripts/build_ios_native.py` verifies the extracted package's
+platforms, minimum OS versions, dependencies, install names, defined exports,
+metadata, canonical header/module map and signatures, then links C consumers for
+all three architectures. Eight portable package tests cover wrong slices,
+undefined symbols, desktop dependencies, malformed metadata, stale headers,
+symlinks/extra fixtures and preservation of prior output after a failed check.
+This is not distribution signing or a Keychain/app runtime test. Follow the
 [iOS guide](development/09-ios-native.md) for explicit configuration and the
 remaining passcode/lock, lifetime, reinstall, backup and Flutter/iPhone gates.
 

@@ -36,22 +36,26 @@ jobs:
     env:
       RUSTUP_TOOLCHAIN: '1.96.0'
       IPHONEOS_DEPLOYMENT_TARGET: '13.0'
-      # Fictional build scope: no signing, Keychain calls or account access.
+      # Fictional build scope: local ad-hoc seals only; no Keychain/account access.
       HOMEVERB_IOS_KEYCHAIN_ACCESS_GROUP: 'SYNTHETIC.org.homeverb.test'
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
       - name: Install the tested Rust targets
         run: |
-          rustup toolchain install 1.96.0 --profile minimal --component clippy --target aarch64-apple-ios --target aarch64-apple-ios-sim
+          rustup toolchain install 1.96.0 --profile minimal --component clippy --target aarch64-apple-ios --target aarch64-apple-ios-sim --target x86_64-apple-ios
           cargo fetch --locked
       - name: Test Keychain orchestration and Core Foundation query objects
         run: 'cargo test -p homeverb-secrets --offline --locked ios::'
-      - name: Check and link the iOS native library
+      - name: Check the iOS native library
         run: |
           for target in aarch64-apple-ios aarch64-apple-ios-sim; do
             cargo clippy -p homeverb-secrets --target "$target" --offline --locked -- -D warnings
-            cargo build -p homeverb-ffi --target "$target" --offline --locked
           done
+      - name: Build and inspect the development XCFramework and consumers
+        run: python scripts/build_ios_native.py
   android-native:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
