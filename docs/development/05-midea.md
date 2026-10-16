@@ -4,7 +4,7 @@ The owner selected Midea and Hualing air conditioners, dishwashers, and refriger
 
 Daily cloud control is required in the first real integration. LAN is an additional route for the same physical devices, not a substitute for cloud control. A mainland account and six exact cloud model/family pairs have been observed. Firmware, app-version and model-specific physical acceptance remain incomplete. This guide reflects implementation through October 16, 2026; no model is physically verified.
 
-The native read protocols are implemented in [homeverb-midea](../../crates/midea/src/lib.rs): account-scoped home/appliance retrieval, code/data validation, deduplication, partial inventory failure, and bounded cloud-state decoding for the three selected families. The inventory/state decoders use an injected read transport and synthetic responses with the inspected wire fields. Native password login, signing, session-key decoding and restricted HTTPS are now implemented under ADR-0022 and tested against fictional responses and a local TLS server. One real mainland account has passed the read-only login/inventory probe below; the exact-model read-only Core adapter is available through `core-inspect` and native startup selection. The current [native API 1.20.0](../native-ui-contract.md) provides protected connection, account management and explicit refresh/recovery. Android storage has synthetic JVM and isolated emulator evidence; Flutter input, physical phone acceptance and signed iPhone credential acceptance remain pending. See [ADR-0020](../adr/0020-midea-cloud-inventory.md) and [ADR-0023](../adr/0023-meiju-cloud-state-evidence.md).
+The native read protocols are implemented in [homeverb-midea](../../crates/midea/src/lib.rs): account-scoped home/appliance retrieval, code/data validation, deduplication, partial inventory failure, and bounded cloud-state decoding for the three selected families. The inventory/state decoders use an injected read transport and synthetic responses with the inspected wire fields. Native password login, signing, session-key decoding and restricted HTTPS are now implemented under ADR-0022 and tested against fictional responses and a local TLS server. One real mainland account has passed the read-only login/inventory probe below; the exact-model read-only Core adapter is available through `core-inspect` and native startup selection. The current [native API 1.21.0](../native-ui-contract.md) provides protected connection, account management and explicit refresh/recovery. Android storage has synthetic JVM and isolated emulator evidence; Flutter input, physical phone acceptance and signed iPhone credential acceptance remain pending. See [ADR-0020](../adr/0020-midea-cloud-inventory.md) and [ADR-0023](../adr/0023-meiju-cloud-state-evidence.md).
 
 The native account vault now persists random local references, composes Linux secure storage, and coordinates session read/update work through account leases. Meiju's private account payload also preserves appliance-to-local-ID bindings with the session. Interrupted or uncertain updates remain pending until trusted validation and recovery. Native API 1.7 provides an explicit [recovery and retrieval flow](../native-ui-contract.md#recover-interrupted-account-storage) that validates saved material without another login. The explicit native connection coordinator now uses this storage and the admitted login client; real account identity and session validity still require live acceptance. See [ADR-0021](../adr/0021-persistent-account-vault.md), [ADR-0024](../adr/0024-meiju-private-device-bindings.md) and the [credential integration guide](04-add-adapter.md#integrate-native-credentials).
 
@@ -479,10 +479,13 @@ Inspection failures must not start a network fallback or clear historical cards.
 cycle actions for protected products 7600020L, 76006481, 7600649Q and 7600V1E7,
 alongside the existing exact experimental model check. Pinned E1 mappings encode
 pause as `operator: pause`, resume as `operator: start`, and cancellation as
-`work_status: cancel`. All four have empty centralized-field lists. Exclude
-760Y0026 and 7600016L here because their retained settings are not supplied by
-these empty-argument actions. Never infer authority or product identity from a
-successful earlier start.
+`work_status: cancel`. All four have empty centralized-field lists.
+[ADR-0063](../adr/0063-explicit-dishwasher-cycle-options.md) additionally admits
+760Y0026, requiring an explicit `additional` value (0, 9, 10, 13 or 14) in the
+command, exact startup grant and confirmation. This sets the chosen option; it
+does not copy cached state or prove preservation. Product 7600016L remains
+excluded pending wash-region and automatic-door domains. Never infer authority
+or product identity from a successful earlier start.
 
 Each action has independent startup permission and separate trusted approval,
 with elevated non-idempotent execution, conservative cloud outcomes and no retry,
@@ -503,3 +506,20 @@ code. Tests use fictional accounts and do not access the saved pilot profile.
 See the [Flutter contract](../native-ui-contract.md#profile-scoped-dishwasher-starts-api-114)
 for dynamic fields, confirmation and accepted/unknown receipts. Physical/off-LAN
 behavior and preservation of other settings remain acceptance work.
+
+## Explicit cycle-option implementation checkpoint
+
+The API 1.21 phase extends product 760Y0026 cycle controls with explicit additional
+options, exact startup grants, revision-4 fixtures and both supported confirmation
+locales. The original four cycle profiles retain their contracts. No account or
+appliance was accessed during this phase.
+
+Local verification on October 16, 2026 passed `cargo test --workspace --offline
+--locked` (478 passed; two environment-dependent tests ignored), workspace build,
+Clippy and formatting; `scripts/verify_mvp.py` (35 tests),
+`scripts/verify_native_contract.py` (33 methods, 54 examples and trusted C suites),
+Python tooling tests (62) and presentation tests (6). Documentation, contract and
+repository validation passed. An independent AST inspection of the pinned E1
+source matched all 27 product/action/option combinations. These results establish
+synthetic implementation behavior, not the owner's product identity, Flutter
+integration, mobile builds or physical/off-LAN acceptance.

@@ -216,7 +216,7 @@ async fn dishwasher_options_preserve_profile_domains_and_never_supply_approval()
         ("76006481", 4),
         ("7600649Q", 4),
         ("7600V1E7", 4),
-        ("760Y0026", 1),
+        ("760Y0026", 4),
         ("7600016L", 0),
         ("TEST1234", 0),
     ] {
@@ -228,15 +228,18 @@ async fn dishwasher_options_preserve_profile_domains_and_never_supply_approval()
         for option in options {
             assert_eq!(option["definition"]["risk"], "elevated");
             assert_eq!(option["definition"]["idempotency"], "non_idempotent");
-            let arguments = if option["action"] == "start_cycle" {
-                let mut value = json!({"program":"eco_wash"});
-                if code == "760Y0026" {
-                    value["additional"] = json!(0);
-                }
-                value
+            let mut arguments = if option["action"] == "start_cycle" {
+                json!({"program":"eco_wash"})
             } else {
                 json!({})
             };
+            if code == "760Y0026" {
+                arguments["additional"] = json!(0);
+                assert_eq!(
+                    option["definition"]["parameters"]["properties"]["additional"]["enum"],
+                    json!([0, 9, 10, 13, 14])
+                );
+            }
             let mut command = power_command(&descriptor.device.id, false);
             command["capability"] = option["capability"].clone();
             command["action"] = option["action"].clone();

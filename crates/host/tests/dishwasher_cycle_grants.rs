@@ -8,6 +8,7 @@ fn grant(id: &str, action: DishwasherCycleAction) -> MeijuDishwasherCycleGrant {
     MeijuDishwasherCycleGrant {
         device_id: id.into(),
         action,
+        arguments: json!({}),
     }
 }
 
@@ -95,7 +96,6 @@ fn cycle_grants_reject_defaults_duplicates_and_invalid_scope_before_storage() {
         json!({"device_id":id,"action":"start_cycle"}),
         json!({"device_id":id,"action":"pause"}),
         json!({"device_id":id,"action":null}),
-        json!({"device_id":id,"action":"pause_cycle","arguments":{}}),
         json!({"device_id":id,"action":"pause_cycle","confirmed":true}),
     ] {
         assert!(serde_json::from_value::<MeijuDishwasherCycleGrant>(body).is_err());
@@ -130,4 +130,66 @@ fn cycle_grants_reject_defaults_duplicates_and_invalid_scope_before_storage() {
     );
     grants.push(grant(id, action));
     assert!(meiju_dishwasher_cycle_policy(&grants).is_err());
+}
+
+#[test]
+fn additional_cycle_grants_match_exact_arguments_without_expanding_legacy_authority() {
+    let id = "abcdef00-1234-4567-89ab-123456abcdef";
+    let legacy: MeijuDishwasherCycleGrant =
+        serde_json::from_value(json!({"device_id":id,"action":"pause_cycle"})).unwrap();
+    assert_eq!(legacy.arguments, json!({}));
+    let mut c: Command = serde_json::from_str(include_str!(
+        "../../../examples/command.meiju-dishwasher-cycle.json"
+    ))
+    .unwrap();
+    c.device_id = id.into();
+    let cap: Capability = serde_json::from_str(include_str!(
+        "../../../examples/capability.meiju-dishwasher-cycle-additional.json"
+    ))
+    .unwrap();
+    for action in DISHWASHER_CYCLE_ACTIONS {
+        c.action = action.action_name().into();
+        let mut ordinary = cap.actions[action.action_name()].clone();
+        ordinary.risk = Risk::Low;
+        let empty_policy = meiju_dishwasher_cycle_policy(&[grant(id, action)]).unwrap();
+        let mut grants = vec![];
+        for code in [0, 9, 10, 13, 14] {
+            let mut exact = grant(id, action);
+            exact.arguments = json!({"additional":code});
+            let policy = meiju_dishwasher_cycle_policy(&[exact.clone()]).unwrap();
+            c.arguments = exact.arguments.clone();
+            assert!(policy.authorize(&c, &ordinary).is_ok());
+            assert!(empty_policy.authorize(&c, &ordinary).is_err());
+            for other in [
+                json!({}),
+                json!({"additional":if code == 9 { 10 } else { 9 }}),
+            ] {
+                c.arguments = other;
+                assert!(policy.authorize(&c, &ordinary).is_err());
+            }
+            grants.push(exact);
+        }
+        assert_eq!(
+            meiju_dishwasher_cycle_policy(&grants).unwrap().grants.len(),
+            5
+        );
+        let mut duplicate = grants[1].clone();
+        duplicate.arguments = json!({"additional":9.0});
+        grants.push(duplicate);
+        assert!(meiju_dishwasher_cycle_policy(&grants).is_err());
+        for arguments in [
+            json!(null),
+            json!([]),
+            json!({"additional":null}),
+            json!({"additional":true}),
+            json!({"additional":1}),
+            json!({"additional":9.5}),
+            json!({"additional":"9"}),
+            json!({"additional":9,"program":"eco_wash"}),
+        ] {
+            let mut invalid = grant(id, action);
+            invalid.arguments = arguments;
+            assert!(meiju_dishwasher_cycle_policy(&[invalid]).is_err());
+        }
+    }
 }

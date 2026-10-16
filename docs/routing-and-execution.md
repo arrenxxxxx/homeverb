@@ -50,7 +50,12 @@ without broadening adapter evidence, grants or Core's transactional rules.
 
 [ADR-0055](adr/0055-profile-scoped-dishwasher-cycle-controls.md) admits separate
 `pause_cycle`, `resume_cycle` and `cancel_cycle` actions only for reviewed protected
-products with no centralized settings to preserve. Each requires its own exact
+products with no centralized settings to preserve.
+[ADR-0063](adr/0063-explicit-dishwasher-cycle-options.md) additionally admits product
+760Y0026 with an explicit `additional` choice (0, 9, 10, 13 or 14). Its grant and
+immutable preview bind that exact value; never infer it from cached state.
+Omitted grant arguments mean exactly `{}` and grant no additional-option operation.
+Each requires its own exact
 cloud grant and trusted single-command confirmation, remains elevated and
 non-idempotent, and independently checks the approval marker in the adapter.
 Program-start permission and these three permissions do not imply one another.

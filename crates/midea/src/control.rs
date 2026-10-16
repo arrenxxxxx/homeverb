@@ -48,9 +48,13 @@ pub(crate) enum CloudControl {
     },
     DishwasherOperator {
         operator: &'static str,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        additional: Option<u8>,
     },
     DishwasherCancel {
         work_status: &'static str,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        additional: Option<u8>,
     },
     Temperature {
         temperature: u8,

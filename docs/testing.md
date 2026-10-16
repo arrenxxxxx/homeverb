@@ -214,8 +214,9 @@ cancellation and cloud outcomes. No actual account or appliance is used.
 The same native dishwasher suite verifies independent pause/resume/cancel startup
 schema/runtime admission, rejected malformed grants before profile creation,
 ordinary denial and separate trusted C confirmation using fictional descriptors
-with no account. Rust tests compare twelve product/action payloads, preserve
-cache and receipts, reject centralized or forged profiles, independently enforce
+with no account. Rust tests compare the twelve original product/action payloads and fifteen
+explicit additional-option payloads, preserve cache and receipts, reject
+unreviewed centralized or forged profiles and malformed required options, independently enforce
 approval despite public risk changes, and cover pre-send/rejected/unknown outcomes,
 replay, membership changes, cancellation/deadline and lease cleanup. Optional
 operator observations are raw/stale; malformed recognized values fail decoding.

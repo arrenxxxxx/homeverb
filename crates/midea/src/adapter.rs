@@ -157,10 +157,13 @@ fn descriptors(
                 cycle.actions.insert("start_cycle".into(), profile.action());
             }
             if let Some(profile) = dishwasher.filter(|_| adapter.dishwasher_cycle) {
+                if profile == crate::dishwasher::DishwasherProfile::Additional {
+                    cycle.revision = 4;
+                }
                 for action in crate::DISHWASHER_CYCLE_ACTIONS {
-                    if let Some(contract) = profile.cycle_action(action) {
-                        cycle.actions.insert(action.action_name().into(), contract);
-                    }
+                    cycle
+                        .actions
+                        .insert(action.action_name().into(), profile.cycle_action(action));
                 }
             }
             capabilities.push(cycle);

@@ -38,9 +38,11 @@ fn options(appliance: &Appliance) -> Vec<ControlOption> {
             if let Some(profile) = appliance.product_profile.dishwasher() {
                 add("vendor.midea.dishwasher", "start_cycle", profile.action());
                 for action in crate::DISHWASHER_CYCLE_ACTIONS {
-                    if let Some(definition) = profile.cycle_action(action) {
-                        add("vendor.midea.dishwasher", action.action_name(), definition);
-                    }
+                    add(
+                        "vendor.midea.dishwasher",
+                        action.action_name(),
+                        profile.cycle_action(action),
+                    );
                 }
             }
         }

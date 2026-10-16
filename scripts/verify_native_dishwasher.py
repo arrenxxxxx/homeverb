@@ -128,7 +128,7 @@ def verify_dishwasher():
                    [{'device_id': identifier}], [{**cycle_grant, 'action': 'start_cycle'}],
                    [{**cycle_grant, 'action': 'pause'}], [{**cycle_grant, 'action': True}],
                    [{**cycle_grant, 'device_id': '*'}], [{**cycle_grant, 'device_id': identifier.upper()}],
-                   [{**cycle_grant, 'arguments': {}}], [{**cycle_grant, 'confirmed': True}]]
+                   *[[{**cycle_grant, 'arguments': value}] for value in [None, [], {'additional': None}, {'additional': True}, {'additional': 1}, {'additional': 9.5}, {'additional': '9'}, {'additional': 9, 'program': 'eco_wash'}]], [{**cycle_grant, 'confirmed': True}]]
         configurations = [{**cycle_base, cycle_key: grants} for grants in invalid]
         configurations.append({**cycle_base, cycle_key: [cycle_grant], 'adapter': 'homeverb.mock'})
         configurations.append({'schema_version': '1.0', 'allow_mock_writes': False, cycle_key: [cycle_grant]})
@@ -139,44 +139,48 @@ def verify_dishwasher():
             error(decode(library.homeverb_open(json.dumps(config).encode())), 'INVALID_ARGUMENT')
             assert not path.exists()
 
-        for action in ['pause_cycle', 'resume_cycle', 'cancel_cycle']:
-            for permission in ['none', 'start', 'different', 'exact']:
-                path = Path(root) / f'{action}-{permission}'
-                config = {**cycle_base, 'data_dir': str(path)}
-                if permission == 'start':
-                    config['meiju_dishwasher_grants'] = [grant]
-                elif permission in ['different', 'exact']:
-                    config[cycle_key] = [{'device_id': identifier, 'action': action if permission == 'exact'
-                                         else ('resume_cycle' if action == 'pause_cycle' else 'pause_cycle')}]
-                shape.validate(config)
-                opened = decode(library.homeverb_open(json.dumps(config).encode()))
-                assert opened['error'] is None, opened
-                handle = opened['data']['handle']
-                try:
-                    assert call(handle, 'list_accounts')['data'] == []
-                    assert call(handle, 'get_api_info')['data']['api_version'] == load('packages/native-contract/api.json')['api_version']
-                    descriptor['capabilities'] = [load('examples/capability.meiju-dishwasher-cycle.json')]
-                    with sqlite3.connect(path / 'homeverb.sqlite3') as database:
-                        database.execute('INSERT INTO devices VALUES (?,?)', (identifier, json.dumps(descriptor)))
-                    c = command()
-                    c.update(action=action, arguments={})
-                    for method in ['plan', 'execute']:
-                        error(call(handle, method, command=c), 'POLICY_DENIED')
-                    prepared = invoke('homeverb_prepare_approval', handle, {'schema_version': '1.0',
-                        'operation_id': str(uuid.uuid4()), 'command': c})
-                    validator('native-approval', 'prepare_result').validate(prepared)
-                    if permission != 'exact':
-                        error(prepared, 'POLICY_DENIED')
-                        continue
-                    assert prepared['data']['command'] == c, prepared
-                    result = invoke('homeverb_execute_approved', handle, {'schema_version': '1.0',
-                        'operation_id': str(uuid.uuid4()), 'approval_id': prepared['data']['approval_id']})
-                    validator('native-approval', 'execute_result').validate(result)
-                    error(result, 'ACCOUNT_NOT_FOUND')
-                    assert result['status'] == 'failed' and result['attempts'][0]['phase'] == 'not_sent'
-                    assert call(handle, 'get_execution', request_id=c['request_id'])['data'] == result
-                finally:
-                    library.homeverb_close(handle)
+        for additional in [None, 0, 9, 10, 13, 14]:
+            arguments = {} if additional is None else {'additional': additional}
+            for action in ['pause_cycle', 'resume_cycle', 'cancel_cycle']:
+                for permission in ['none', 'start', 'different', 'empty', 'wrong_option', 'exact']:
+                    path = Path(root) / f'{action}-{permission}-{additional}'
+                    config = {**cycle_base, 'data_dir': str(path)}
+                    if permission == 'start':
+                        config['meiju_dishwasher_grants'] = [grant]
+                    elif permission in ['different', 'empty', 'wrong_option', 'exact']:
+                        config[cycle_key] = [{'device_id': identifier, 'action': action if permission != 'different'
+                                             else ('resume_cycle' if action == 'pause_cycle' else 'pause_cycle')}]
+                        if permission != 'empty':
+                            config[cycle_key][0]['arguments'] = arguments if permission != 'wrong_option' else {'additional': 10 if additional == 9 else 9}
+                    shape.validate(config)
+                    opened = decode(library.homeverb_open(json.dumps(config).encode()))
+                    assert opened['error'] is None, opened
+                    handle = opened['data']['handle']
+                    try:
+                        assert call(handle, 'list_accounts')['data'] == []
+                        assert call(handle, 'get_api_info')['data']['api_version'] == load('packages/native-contract/api.json')['api_version']
+                        descriptor['capabilities'] = [load('examples/capability.meiju-dishwasher-cycle-additional.json' if additional is not None else 'examples/capability.meiju-dishwasher-cycle.json')]
+                        with sqlite3.connect(path / 'homeverb.sqlite3') as database:
+                            database.execute('INSERT INTO devices VALUES (?,?)', (identifier, json.dumps(descriptor)))
+                        c = command()
+                        c.update(action=action, arguments=arguments)
+                        for method in ['plan', 'execute']:
+                            error(call(handle, method, command=c), 'POLICY_DENIED')
+                        prepared = invoke('homeverb_prepare_approval', handle, {'schema_version': '1.0',
+                            'operation_id': str(uuid.uuid4()), 'command': c})
+                        validator('native-approval', 'prepare_result').validate(prepared)
+                        if permission != 'exact' and not (permission == 'empty' and additional is None):
+                            error(prepared, 'POLICY_DENIED')
+                            continue
+                        assert prepared['data']['command'] == c, prepared
+                        result = invoke('homeverb_execute_approved', handle, {'schema_version': '1.0',
+                            'operation_id': str(uuid.uuid4()), 'approval_id': prepared['data']['approval_id']})
+                        validator('native-approval', 'execute_result').validate(result)
+                        error(result, 'ACCOUNT_NOT_FOUND')
+                        assert result['status'] == 'failed' and result['attempts'][0]['phase'] == 'not_sent'
+                        assert call(handle, 'get_execution', request_id=c['request_id'])['data'] == result
+                    finally:
+                        library.homeverb_close(handle)
     print('PASS: native dishwasher start/pause/resume/cancel startup, independent exact grants and trusted confirmation; no accounts, credentials or provider traffic.')
 
 

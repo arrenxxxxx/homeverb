@@ -1,6 +1,6 @@
 # HomeVerb native contract
 
-Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.20.0 has 33 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions and three trusted connection-link functions; the JSON envelope schema is 1.0.
+Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.21.0 has 33 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions and three trusted connection-link functions; the JSON envelope schema is 1.0.
 
 API 1.19 adds nullable `last_complete_inventory_at` to account summaries. It is
 historical local retrieval metadata, not authorization or online status. SQLite
@@ -57,7 +57,7 @@ is not a universal temperature range. Negotiate 1.14.1 before supplying more tha
 unchanged. CLI grant files retain their independent 32 KiB limit.
 
 API 1.15.0 adds independent exact `meiju_dishwasher_cycle_grants` for reviewed
-pause/resume/cancel actions. Each uses empty arguments and the existing trusted
+pause/resume/cancel actions. The original profiles use empty arguments and the existing trusted
 confirmation functions; program-start permission does not grant a cycle action.
 Dishwasher revision 3 adds optional raw operator observations with cloud staleness.
 See the [cycle contract](../../docs/native-ui-contract.md#profile-scoped-dishwasher-cycle-operations-api-115).
@@ -78,3 +78,10 @@ API 1.18 adds [three trusted LAN-scan functions](lan-scan.json) with
 [fictional examples](lan-scan-examples.json). Platform interface/permission
 integration and actual user consent are required. A unique candidate adds no
 connection and exposes no endpoint; never register these as ordinary tools.
+
+API 1.21 extends cycle grants with optional exact `arguments` (omission means `{}`).
+Product 760Y0026 requires an explicit `additional` value in grant and command;
+empty grants never authorize it. Read-only control options expose its domain,
+and trusted confirmation must display the chosen setting. Other admitted profiles
+still forbid extra arguments. There remain 33 ordinary methods and 16 C functions
+plus the Android-only JNI initializer. Storage formats are unchanged.

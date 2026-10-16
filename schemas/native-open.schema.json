@@ -231,6 +231,23 @@
               "resume_cycle",
               "cancel_cycle"
             ]
+          },
+          "arguments": {
+            "type": "object",
+            "properties": {
+              "additional": {
+                "type": "integer",
+                "enum": [
+                  0,
+                  9,
+                  10,
+                  13,
+                  14
+                ]
+              }
+            },
+            "additionalProperties": false,
+            "default": {}
           }
         },
         "required": [
@@ -239,7 +256,7 @@
         ],
         "additionalProperties": false
       },
-      "description": "Trusted startup-only exact dishwasher cycle action over cloud. Requires reviewed protected product evidence and separate trusted confirmation. Grants no program start or other cycle action."
+      "description": "Trusted startup-only exact dishwasher cycle action and arguments over cloud. Omitted arguments mean exactly {}. Product 760Y0026 requires explicit additional; other admitted profiles forbid it. Requires reviewed protected product evidence and separate trusted confirmation. Grants no program start or other cycle action."
     }
   },
   "required": [

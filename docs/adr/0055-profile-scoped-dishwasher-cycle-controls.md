@@ -17,6 +17,10 @@ that the owner's dishwasher has one of these product codes. The independent
 source comparison checks all twelve admitted product/action payloads and the
 excluded centralized profiles without account or appliance access.
 
+API 1.21 extends only product 760Y0026 through explicit options under
+[ADR-0063](0063-explicit-dishwasher-cycle-options.md); the original contract below
+remains the baseline for the other four profiles.
+
 ## Contract
 
 Native API 1.15.0 adds `meiju_dishwasher_cycle_grants`: at most 64 distinct exact

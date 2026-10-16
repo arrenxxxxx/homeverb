@@ -20,6 +20,12 @@ pub struct MeijuDishwasherGrant {
 pub struct MeijuDishwasherCycleGrant {
     pub device_id: String,
     pub action: DishwasherCycleAction,
+    #[serde(default = "empty_arguments")]
+    pub arguments: Value,
+}
+
+fn empty_arguments() -> Value {
+    json!({})
 }
 
 pub fn meiju_dishwasher_cycle_policy(grants: &[MeijuDishwasherCycleGrant]) -> Result<Policy> {
@@ -30,10 +36,26 @@ pub fn meiju_dishwasher_cycle_policy(grants: &[MeijuDishwasherCycleGrant]) -> Re
     let mut policy = Policy::default();
     for grant in grants {
         let id = Uuid::parse_str(&grant.device_id).map_err(|_| Error::invalid())?;
+        let arguments = grant.arguments.as_object().ok_or_else(Error::invalid)?;
+        let additional = arguments
+            .get("additional")
+            .map(|value| {
+                value
+                    .as_f64()
+                    .filter(|value| {
+                        DISHWASHER_ADDITIONAL
+                            .iter()
+                            .any(|code| f64::from(*code) == *value)
+                    })
+                    .map(|value| value as u8)
+                    .ok_or_else(Error::invalid)
+            })
+            .transpose()?;
         if id.get_version_num() != 4
             || id.get_variant() != uuid::Variant::RFC4122
             || id.to_string() != grant.device_id
-            || !seen.insert((&grant.device_id, grant.action))
+            || arguments.keys().any(|key| key != "additional")
+            || !seen.insert((&grant.device_id, grant.action, additional))
         {
             return Err(Error::invalid());
         }
@@ -43,7 +65,7 @@ pub fn meiju_dishwasher_cycle_policy(grants: &[MeijuDishwasherCycleGrant]) -> Re
             capability: "vendor.midea.dishwasher".into(),
             action: grant.action.action_name().into(),
             transports: vec![Transport::Cloud],
-            argument_schema: json!({"const":{}}),
+            argument_schema: json!({"const":grant.arguments}),
         });
     }
     Ok(policy)

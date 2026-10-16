@@ -34,7 +34,7 @@ The 16 C functions in [homeverb.h](../crates/ffi/include/homeverb.h) form the na
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects saved-account cloud reads. `scenario` defaults to `normal`. Meiju requires `allow_mock_writes: false` and rejects any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms `homeverb.mock` or `midea.meiju`. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.20.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.21.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -948,21 +948,33 @@ startup field. Each entry selects one exact device and one action:
 ```
 
 At most 64 distinct entries are accepted. Actions are `pause_cycle`, `resume_cycle`
-and `cancel_cycle` on `main / vendor.midea.dishwasher`, cloud only. Their ordinary
-Command arguments are exactly `{}`; the grant entry has no `arguments` field.
+and `cancel_cycle` on `main / vendor.midea.dishwasher`, cloud only.
+For the four original profiles, Command arguments are exactly `{}`.
+API 1.21 adds an optional grant `arguments` field; omission still means exactly
+`{}`. Older libraries reject this field, so negotiate 1.21 before supplying it.
 Empty/omitted grants preserve existing behavior. Start grants and each cycle
 action are independent; no automatic authority follows from a previous start.
 
 Render only actions actually declared by the descriptor. The protected product
-must match a reviewed mapping with no centralized settings to preserve. Unsupported
-profiles cannot be enabled by adding a grant or passing extra settings. The
+must match a reviewed mapping. The four original profiles forbid additional
+settings. API 1.21 additionally admits 760Y0026 with required command arguments
+`{"additional":9}` (allowed values: 0, 9, 10, 13, 14) and an identical `arguments`
+object in the exact startup grant. Missing arguments never mean a default option.
+Unreviewed profiles cannot be enabled by adding a grant or passing extra settings. The
 [cycle capability](../examples/capability.meiju-dishwasher-cycle.json) and
 [pause command](../examples/command.meiju-dishwasher-cycle.json) are fictional
 integration examples; they do not identify an owner's appliance.
 
 Use the existing trusted prepare/display/execute/discard flow for all three
 elevated actions. Display the immutable device and action and the matching locale
-confirmation. Resume may consume water/heat; cancellation may terminate a program.
+confirmation. When `additional` is required, demand an explicit selection using
+`vendor.midea.dishwasher.additional.<code>` and display the corresponding
+`vendor.midea.dishwasher.<action>.confirmAdditional` text with `{device}` and
+`{additional}` from the immutable preview. The operation sets that option; never
+claim the cached setting was preserved. See the revision-4
+[capability](../examples/capability.meiju-dishwasher-cycle-additional.json) and
+[command](../examples/command.meiju-dishwasher-cycle-additional.json) examples.
+Resume may consume water/heat; cancellation may terminate a program.
 Pause/cancel must not promise safe door opening, completed draining or rollback.
 Ordinary plan/execute still return `POLICY_DENIED`; `confirmed` is not consent.
 

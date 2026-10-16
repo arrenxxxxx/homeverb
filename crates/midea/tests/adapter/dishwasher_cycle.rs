@@ -68,7 +68,17 @@ fn command(device: &Device, action: DishwasherCycleAction) -> Command {
 
 #[tokio::test]
 async fn reviewed_cycle_payloads_require_approval_and_preserve_observations_and_replay() {
-    for product in ["7600020L", "76006481", "7600649Q", "7600V1E7"] {
+    for (product, additional) in [
+        ("7600020L", None),
+        ("76006481", None),
+        ("7600649Q", None),
+        ("7600V1E7", None),
+        ("760Y0026", Some(0)),
+        ("760Y0026", Some(9)),
+        ("760Y0026", Some(10)),
+        ("760Y0026", Some(13)),
+        ("760Y0026", Some(14)),
+    ] {
         let f = Fixture::new(inventory(json!({"modelNumber":1,"sn8":product}))).await;
         let device = f.discover().await.remove(0);
         *f.wire.state.lock().unwrap() = Some(json!({"work_status":"work", "operator":"pause"}));
@@ -82,9 +92,13 @@ async fn reviewed_cycle_payloads_require_approval_and_preserve_observations_and_
         let cap = descriptor.capability("main", CAPABILITY).unwrap();
         assert_eq!(
             json!(cap),
-            serde_json::from_str::<Value>(include_str!(
-                "../../../../examples/capability.meiju-dishwasher-cycle.json"
-            ))
+            serde_json::from_str::<Value>(if additional.is_some() {
+                include_str!(
+                    "../../../../examples/capability.meiju-dishwasher-cycle-additional.json"
+                )
+            } else {
+                include_str!("../../../../examples/capability.meiju-dishwasher-cycle.json")
+            })
             .unwrap()
         );
         assert!(!cap.actions.contains_key("start_cycle"));
@@ -92,7 +106,10 @@ async fn reviewed_cycle_payloads_require_approval_and_preserve_observations_and_
             let contract = &cap.actions[action.action_name()];
             assert_eq!(contract.risk, Risk::Elevated);
             assert_eq!(contract.idempotency, Idempotency::NonIdempotent);
-            let c = command(&device, action);
+            let mut c = command(&device, action);
+            if let Some(code) = additional {
+                c.arguments = json!({"additional":code});
+            }
             assert_eq!(enabled.plan(&c).unwrap_err().code, "POLICY_DENIED");
             assert_eq!(
                 enabled
@@ -111,11 +128,14 @@ async fn reviewed_cycle_payloads_require_approval_and_preserve_observations_and_
             assert_eq!(result.status, Status::Accepted);
             assert_eq!(result.error.as_ref().unwrap().code, "VERIFICATION_PENDING");
             assert!(result.verification.is_none());
-            let body = match action {
+            let mut body = match action {
                 DishwasherCycleAction::PauseCycle => json!({"operator":"pause"}),
                 DishwasherCycleAction::ResumeCycle => json!({"operator":"start"}),
                 DishwasherCycleAction::CancelCycle => json!({"work_status":"cancel"}),
             };
+            if let Some(code) = additional {
+                body["additional"] = json!(code);
+            }
             assert_eq!(
                 f.wire.controls.lock().unwrap().last().unwrap()["command"],
                 json!({"control":body})
@@ -163,7 +183,6 @@ async fn centralized_missing_or_forged_profiles_and_host_opt_out_refuse_before_s
         (json!({"sn8":"76006481"}), true),
         (json!({"modelNumber":1,"sn8":"TEST1234"}), true),
         (json!({"modelNumber":1,"sn8":"7600016L"}), true),
-        (json!({"modelNumber":1,"sn8":"760Y0026"}), true),
         (
             json!({"modelNumber":1,"sn8":"76006481","productModel":"Unreviewed"}),
             true,
@@ -343,4 +362,41 @@ async fn cancelled_or_expired_cycle_send_stays_unknown_without_retry_and_release
             drop(f.vault.lease(account, &operation()).await.unwrap());
         }
     }
+}
+
+#[tokio::test]
+async fn additional_cycle_options_are_required_and_rechecked_after_public_schema_tampering() {
+    let f = Fixture::new(inventory(json!({"modelNumber":1,"sn8":"760Y0026"}))).await;
+    let device = f.discover().await.remove(0);
+    let enabled = core(&f, &device, true);
+    enabled.discover(&operation()).await.unwrap();
+    let original = enabled.describe(&device.id).unwrap();
+    for action in DISHWASHER_CYCLE_ACTIONS {
+        for arguments in [
+            json!({}),
+            json!({"additional":null}),
+            json!({"additional":true}),
+            json!({"additional":1}),
+            json!({"additional":9.5}),
+            json!({"additional":"9"}),
+            json!({"additional":9,"program":"eco_wash"}),
+        ] {
+            let mut c = command(&device, action);
+            c.arguments = arguments;
+            assert!(enabled.prepare_user_approval(c.clone()).is_err());
+            let mut forged = original.clone();
+            forged.capabilities[0]
+                .actions
+                .get_mut(action.action_name())
+                .unwrap()
+                .parameters = json!({"type":"object"});
+            f.store.save_device(&forged).unwrap();
+            let preview = enabled.prepare_user_approval(c).unwrap();
+            let result = enabled.execute_user_approved(preview, &operation()).await;
+            assert_eq!(result.status, Status::Failed);
+            assert_eq!(result.attempts[0].phase, Phase::NotSent);
+            f.store.save_device(&original).unwrap();
+        }
+    }
+    assert!(f.wire.controls.lock().unwrap().is_empty());
 }

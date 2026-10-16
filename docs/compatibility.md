@@ -1642,3 +1642,15 @@ No real account, appliance, physical phone or separate Flutter worktree was
 accessed. Simulator checks do not establish physical passcode/lock behavior,
 no-prompt enforcement, signed entitlements, reinstall/backup behavior, Flutter
 integration or provider/device/off-LAN acceptance. These remain open.
+
+## Explicit dishwasher cycle options (API 1.21)
+
+[ADR-0063](adr/0063-explicit-dishwasher-cycle-options.md) extends the reviewed
+760Y0026 profile to pause/resume/cancel with a required explicit `additional`
+choice. Startup grants bind exact arguments; omitted arguments remain exactly
+empty and cannot authorize the new path. Its cycle-enabled capability is revision
+4; the existing four profiles retain revision 3 and empty payload arguments.
+No C signatures, ordinary methods, SQLite or protected-payload versions change.
+Older native libraries reject the new grant field. This is synthetic evidence,
+not a match to the owner's product or physical/off-LAN support. Product 7600016L
+and refrigerator writes remain unadmitted.

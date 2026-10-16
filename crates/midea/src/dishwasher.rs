@@ -134,20 +134,23 @@ pub(crate) enum DishwasherProfile {
 }
 
 impl DishwasherProfile {
-    pub(crate) fn cycle_action(self, action: DishwasherCycleAction) -> Option<Action> {
+    pub(crate) fn cycle_action(self, action: DishwasherCycleAction) -> Action {
+        let mut parameters = json!({"type":"object", "description":action.description(),
+            "properties":{}, "additionalProperties":false});
         if self == Self::Additional {
-            return None;
+            parameters["properties"]["additional"] =
+                json!({"type":"integer","enum":DISHWASHER_ADDITIONAL});
+            parameters["required"] = json!(["additional"]);
         }
-        Some(Action {
-            parameters: json!({"type":"object", "description":action.description(),
-                "properties":{}, "additionalProperties":false}),
+        Action {
+            parameters,
             transports: vec![Transport::Cloud],
             idempotency: Idempotency::NonIdempotent,
             risk: Risk::Elevated,
             atomic: false,
             independent_fields: false,
             verification: VerificationMethod::Unavailable,
-        })
+        }
     }
 
     pub(crate) fn cycle_control(
@@ -155,18 +158,22 @@ impl DishwasherProfile {
         action: DishwasherCycleAction,
         arguments: &Value,
     ) -> homeverb_domain::Result<CloudControl> {
-        self.cycle_action(action)
-            .ok_or_else(crate::control::unsupported)?
-            .validate_arguments(arguments)?;
+        self.cycle_action(action).validate_arguments(arguments)?;
+        let additional = arguments
+            .get("additional")
+            .map(|value| value.as_f64().unwrap() as u8);
         Ok(match action {
-            DishwasherCycleAction::PauseCycle => {
-                CloudControl::DishwasherOperator { operator: "pause" }
-            }
-            DishwasherCycleAction::ResumeCycle => {
-                CloudControl::DishwasherOperator { operator: "start" }
-            }
+            DishwasherCycleAction::PauseCycle => CloudControl::DishwasherOperator {
+                operator: "pause",
+                additional,
+            },
+            DishwasherCycleAction::ResumeCycle => CloudControl::DishwasherOperator {
+                operator: "start",
+                additional,
+            },
             DishwasherCycleAction::CancelCycle => CloudControl::DishwasherCancel {
                 work_status: "cancel",
+                additional,
             },
         })
     }
