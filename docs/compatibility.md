@@ -1410,3 +1410,29 @@ authenticated endpoint/model admission, actual LAN routes and real/off-LAN
 appliance acceptance remain pending. This phase accessed no real account,
 appliance or separate Flutter worktree. Its commit/push and remote CI are checked
 after local acceptance; no package is published.
+
+## Meiju login rejection classification
+
+Both login endpoints now classify a bounded JSON object's provider code before
+decoding successful data. A regression reproduced `code: 7400` with `data: {}`
+being misreported as `MIDEA_RESPONSE_INVALID`; it now returns `AUTH_REQUIRED`.
+Other nonzero codes retain `MIDEA_REQUEST_REJECTED` regardless of challenge data.
+Successful payloads remain strictly validated, and malformed/oversized envelopes,
+non-object roots and ambiguous codes are refused. No provider challenge is exposed.
+
+Synthetic tests cover both endpoints, numeric/string codes, five failure payload
+shapes, invalid successful data and raw envelope counterexamples. Native Session
+tests preserve new/stored/pending account state, secrets and cards on rejection,
+release leases, make no inventory request and allow a subsequent explicit login.
+Native API 1.18.0, schemas, exports, storage formats and control authority are
+unchanged. No real account, appliance, Flutter worktree or phone was accessed.
+
+On October 16, 2026, verification passed: 451 Rust tests with two explicitly
+ignored probes, formatting, Clippy, workspace/example builds, 35 runtime checks,
+33 native methods/54 fictional examples and trusted-function checks, 42 Python
+tests, six presentation tests and documentation/contract/repository/commit checks.
+The first sandboxed suite could not bind loopback sockets; the complete rerun
+outside that restriction passed. All three Android AAR variants passed 14-export
+and 16 KiB alignment inspection. No emulator/APK acceptance was repeated for this
+parser change. Both CI workflows for `b654721` were confirmed successful; this
+phase's commit/push and CI are checked separately.

@@ -260,6 +260,9 @@ impl CloudTransport for Wire {
             ),
             _ => panic!("Account connection must not request state or controls."),
         };
+        if request.endpoint() == CloudEndpoint::Login && code != 0 {
+            data = json!({"challenge":"PRIVATE-CHALLENGE"});
+        }
         if request.endpoint() == CloudEndpoint::HomeAppliances
             && let Some(fields) = self.product_fields.lock().unwrap().as_ref()
         {

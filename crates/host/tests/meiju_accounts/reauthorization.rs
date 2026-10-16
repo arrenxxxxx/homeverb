@@ -14,6 +14,55 @@ fn saved(f: &Fixture, account: &AccountRecord) -> Vec<u8> {
 }
 
 #[tokio::test(start_paused = true)]
+async fn rejected_login_preserves_new_stored_and_pending_account_state() {
+    for state in ["new", "stored", "pending"] {
+        for (code, expected) in [
+            (7400, "AUTH_REQUIRED"),
+            (40002, "AUTH_REQUIRED"),
+            (123, "MIDEA_REQUEST_REJECTED"),
+        ] {
+            let f = Fixture::new();
+            let selected = match state {
+                "pending" => Some(pending(&f).await.id),
+                "stored" => {
+                    f.connect(None).await;
+                    Some(f.store.accounts().unwrap().remove(0).id)
+                }
+                _ => None,
+            };
+            let accounts = f.store.accounts().unwrap();
+            let cards = f.call(json!({"method":"list_device_cards"})).await;
+            let secrets = f.secrets.values.lock().unwrap().clone();
+            let puts = f.secrets.puts.load(Ordering::Relaxed);
+            let calls = f.calls().len();
+            f.wire.login_code.store(code, Ordering::Relaxed);
+            let result = f.connect(selected).await;
+            assert_eq!(result["error"]["code"], expected);
+            assert!(result["data"].is_null());
+            assert!(!result.to_string().contains("PRIVATE"));
+            assert_eq!(f.store.accounts().unwrap(), accounts);
+            assert_eq!(f.call(json!({"method":"list_device_cards"})).await, cards);
+            assert_eq!(*f.secrets.values.lock().unwrap(), secrets);
+            assert_eq!(f.secrets.puts.load(Ordering::Relaxed), puts);
+            assert_eq!(f.secrets.deletes.load(Ordering::Relaxed), 0);
+            assert_eq!(
+                &f.calls()[calls..],
+                [CloudEndpoint::LoginId, CloudEndpoint::Login]
+            );
+            drop(f.vault.lock_registration(&operation()).await.unwrap());
+            if let Some(id) = selected {
+                drop(f.vault.lease(id, &operation()).await.unwrap());
+            }
+            f.wire.login_code.store(0, Ordering::Relaxed);
+            let retry = f.connect(selected).await;
+            assert_eq!(retry["data"]["authentication"], "succeeded");
+            assert_eq!(retry["data"]["retrieval"]["status"], "complete");
+            assert_eq!(f.store.accounts().unwrap().len(), 1);
+        }
+    }
+}
+
+#[tokio::test(start_paused = true)]
 async fn explicit_pending_reauthorization_preserves_bindings_preferences_and_scoped_grants() {
     let mut f = Fixture::new();
     f.connect(None).await;

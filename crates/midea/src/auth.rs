@@ -68,22 +68,34 @@ enum Code {
 }
 
 #[derive(Deserialize)]
-struct Envelope<T> {
+struct ResponseCode {
     code: Code,
+}
+
+#[derive(Deserialize)]
+struct ResponseData<T> {
     data: Option<T>,
 }
 
 fn decode<T: DeserializeOwned>(body: &SecretBytes) -> Result<T> {
-    if body.expose().len() > MAX_RESPONSE_BYTES {
+    if body.expose().len() > MAX_RESPONSE_BYTES
+        || body.expose().trim_ascii_start().first() != Some(&b'{')
+    {
         return Err(invalid());
     }
-    let envelope: Envelope<T> = serde_json::from_slice(body.expose()).map_err(|_| invalid())?;
+    // Rejections may carry challenge data instead of the successful endpoint schema.
+    // Ignore that data without materializing its private strings before checking the code.
+    let envelope: ResponseCode = serde_json::from_slice(body.expose()).map_err(|_| invalid())?;
     let code = match envelope.code {
         Code::Number(code) => code,
         Code::Text(code) => code.parse().map_err(|_| invalid())?,
     };
     match code {
-        0 => envelope.data.ok_or_else(invalid),
+        0 => {
+            let response: ResponseData<T> =
+                serde_json::from_slice(body.expose()).map_err(|_| invalid())?;
+            response.data.ok_or_else(invalid)
+        }
         7400 | 40002 => Err(Error::new(
             "AUTH_REQUIRED",
             "The platform account requires user-side authorization.",
@@ -504,5 +516,46 @@ impl ReadTransport for SessionReads<'_> {
                 .await
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn login_envelopes_require_bounded_json_objects_with_unambiguous_codes() {
+        for raw in [
+            "null",
+            "[]",
+            "[7400]",
+            "[0,{\"loginId\":\"synthetic\"}]",
+            "{\"data\":{}}",
+            "{\"code\":true}",
+            "{\"code\":0.0}",
+            "{\"code\":\"invalid\"}",
+            "{\"code\":0,\"code\":7400,\"data\":{}}",
+            "{\"code\":7400,\"code\":0,\"data\":{}}",
+            "{\"code\":0,\"data\":{},\"data\":{}}",
+            "{\"code\":7400,\"data\":",
+            "{\"code\":7400} trailing",
+        ] {
+            let body = SecretBytes::new(raw.as_bytes().to_vec());
+            assert_eq!(
+                decode::<LoginId>(&body).err().unwrap().code,
+                "MIDEA_RESPONSE_INVALID"
+            );
+        }
+        let oversized = format!(
+            "{{\"code\":7400,\"data\":\"{}\"}}",
+            "x".repeat(MAX_RESPONSE_BYTES)
+        );
+        assert_eq!(
+            decode::<LoginId>(&SecretBytes::new(oversized.into_bytes()))
+                .err()
+                .unwrap()
+                .code,
+            "MIDEA_RESPONSE_INVALID"
+        );
     }
 }

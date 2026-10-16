@@ -148,6 +148,15 @@ rejected without bypass or retry. No provider message, account spelling, passwor
 hash, URL, token or session key is included. Invalid protected session encodings
 return `ACCOUNT_SESSION_UNCONFIRMED`; no session is fabricated or reset.
 
+Both login endpoints classify the code of a bounded, valid JSON object before
+decoding successful data. Codes `7400` and `40002` return `AUTH_REQUIRED`, and other
+nonzero codes return `MIDEA_REQUEST_REJECTED`, even when `data` is empty or contains
+an unsupported challenge. Provider challenge fields are ignored and never exported.
+Missing, invalid or duplicate codes, malformed/oversized envelopes, and invalid
+successful data return `MIDEA_RESPONSE_INVALID`. A rejected login creates no local
+account, replaces no saved session and starts no inventory request. The UI may
+offer explicit user-side reauthorization; it must not retry automatically.
+
 ## Meiju cloud read errors
 
 `MIDEA_INVENTORY_PARTIAL` means the Core adapter could not retrieve every accessible

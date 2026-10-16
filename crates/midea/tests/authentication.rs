@@ -183,6 +183,77 @@ fn stored_session_versions_preserve_legacy_and_validate_private_client_ids() {
 }
 
 #[tokio::test]
+async fn login_rejections_do_not_require_success_data_at_either_endpoint() {
+    for token_stage in [false, true] {
+        for (code, expected) in [
+            (json!(7400), "AUTH_REQUIRED"),
+            (json!("7400"), "AUTH_REQUIRED"),
+            (json!(40002), "AUTH_REQUIRED"),
+            (json!("40002"), "AUTH_REQUIRED"),
+            (json!(123), "MIDEA_REQUEST_REJECTED"),
+            (json!("123"), "MIDEA_REQUEST_REJECTED"),
+        ] {
+            for data in [
+                Value::Null,
+                json!({}),
+                json!([]),
+                json!("PRIVATE-PROVIDER-TEXT"),
+                json!({"challenge":"PRIVATE-CHALLENGE","mdata":false,"loginId":42}),
+            ] {
+                let mut responses = if token_stage {
+                    vec![id_response()]
+                } else {
+                    vec![]
+                };
+                responses.push(json!({"code":code,"data":data,"msg":"PRIVATE-MESSAGE"}));
+                let script = Script::new(responses);
+                let error = login(&script, &credentials(), &operation())
+                    .await
+                    .unwrap_err();
+                assert_eq!(error.code, expected);
+                assert!(!format!("{error:?}").contains("PRIVATE"));
+                let calls = script.calls.lock().unwrap();
+                assert_eq!(calls.len(), if token_stage { 2 } else { 1 });
+                assert_eq!(calls[0].0, CloudEndpoint::LoginId);
+                if token_stage {
+                    assert_eq!(calls[1].0, CloudEndpoint::Login);
+                }
+            }
+        }
+    }
+}
+
+#[tokio::test]
+async fn successful_login_codes_still_require_valid_endpoint_data() {
+    for token_stage in [false, true] {
+        for data in [
+            Value::Null,
+            json!({}),
+            json!([]),
+            json!("PRIVATE-PROVIDER-TEXT"),
+            json!({"challenge":"PRIVATE-CHALLENGE","mdata":false,"loginId":42}),
+        ] {
+            let mut responses = if token_stage {
+                vec![id_response()]
+            } else {
+                vec![]
+            };
+            responses.push(json!({"code":0,"data":data}));
+            let script = Script::new(responses);
+            let error = login(&script, &credentials(), &operation())
+                .await
+                .unwrap_err();
+            assert_eq!(error.code, "MIDEA_RESPONSE_INVALID");
+            assert!(!format!("{error:?}").contains("PRIVATE"));
+            assert_eq!(
+                script.calls.lock().unwrap().len(),
+                if token_stage { 2 } else { 1 }
+            );
+        }
+    }
+}
+
+#[tokio::test]
 async fn invalid_login_or_challenge_stops_without_retry_or_session() {
     for response in [
         json!({"code":7400,"msg":"PRIVATE-PROVIDER-TEXT"}),

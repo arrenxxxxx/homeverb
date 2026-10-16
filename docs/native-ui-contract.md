@@ -451,6 +451,13 @@ inspect `retrieval.error`; an outer `error: null` does not mean devices were loa
 Core validates the complete descriptor batch before storage, but a later storage
 failure can leave earlier cards saved. Reload cards after errors; do not imply rollback.
 
+During either login step, recognized authorization failures return top-level
+`AUTH_REQUIRED` even if the provider supplies challenge-shaped data instead of a
+successful payload. Other explicit rejections return `MIDEA_REQUEST_REJECTED`.
+These login refusals leave existing account/session/card state unchanged and do
+not start inventory retrieval. Show the fixed localized error and allow an explicit
+new attempt; never display provider challenge data or retry automatically.
+
 Connection, refresh and local metadata methods grant no appliance writes or provider
 revocation. Only explicit removal cleans this installation's account. Sharing, mobile
 secure stores and phone lifecycle remain unverified.
