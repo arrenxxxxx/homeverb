@@ -1,0 +1,164 @@
+{
+  "provenance": "Independent fictional Python hashlib and OpenSSL nested ordinary/V3 frames. Responses use counters 17/27, without an echo assumption.",
+  "appliance_id": "123456789",
+  "timestamp": "2026-10-16T04:05:06.789123Z",
+  "conversations": [
+    {
+      "family": 225,
+      "appliance_request_packet": "5a5a011158002000000000004e060504100a1a1415cd5b070000000000000000000000000000000017470bc3e70daab9338172303f0273f888e94729a5123799dd8a6669bdf6c3f5c3581cf994d0d4ab9d5546456f024ae7",
+      "status_request_packet": "5a5a011148002000000000004e070504100a1a1415cd5b0700000000000000000000000000000000254a9760b38f425f38665b2960b3de1f04b2c95b0f5189245a6ad29cc8afbad7",
+      "responses": {
+        "appliance": "8370007e206321fc865100bc76972471bf3181b57d86349bc77662c4219bb11e9f40d42bb44b59c899441560f833739acf84f38f944dcfaa1912bc9f1a2354993b067cf56916923ff4818cb754ff026764f9cd22e177579edda403a01184a8c6313a5892e4b6688f30e9a145ec2047cb07b8ed200a8e38e4bb44ee697c1bc83db3e6cc100c16",
+        "status": "8370008e206351405f5122ba948ebe508248bbf73d4cc629fd93af89be46a6a527e3ef960a3c340179a7973fa0ba0767a87b9062d02f66b56d5810a7be92fdd978f9ea80db4c524f5300d5423cb08f69bbbf6e7995e219ff35b3a87e7e2fb61116fde5fd0410104ec736253c7142b6b9136bed4df71d0399e41855f5f98dccb58df71cf104088e8343624b0c628f3fb9d6a1f2c213bb",
+        "wrong-target-0": "8370007e206321fc865100bc76972471bf3181b57d869228f048d3af24d22136d9513f0a426c922cab71b44c4a27adf79de3e6aa8d994eb548f50896c3771d291fe6ec4843229f6c9b4893f6fa0b60815400825c863503e18c2ebdd6eccf3581ccb2a4ff76544224f5b4647fdd13ee5a9c722ed8e96fa313a1d3014a41e5176bfc4dafd4b0b8",
+        "wrong-family-0": "8370007e206321fc865100bc76972471bf3181b57d86349bc77662c4219bb11e9f40d42bb44ba91a156a24a20c00c81f25b91a0821abadac0f011e78e02a8ab3b608db8dec1e962efc8d43b22b8710a31f22595e72495fa5d17f485f76a2eb5ec134b9c2b826ca4b3100043d95aca24d43c331428ebfe4b6dde5477714145b91e9d6104b5eef",
+        "checksum-0": "8370007e206321fc865100bc76972471bf3181b57d86349bc77662c4219bb11e9f40d42bb44b59c899441560f833739acf84f38f944ddcf26299f68202c9be02ac4b291f7d5e18970595573aa3a6f9ec381a198aef2f9db8d373936657551d0c75135f57980bf1932c5a88639bd1246825c93f7be05926709801f55456aac956bd54c9f09f0f",
+        "kind-0": "8370007e206321fc865100bc76972471bf3181b57d86349bc77662c4219bb11e9f40d42bb44b41de645d738e0aa7854490651fe489214fe660c6b1bf642903be8f936db79d57a2a7dfadf10c524dae65522c689f45470e503a95cf5452db9ef8a8675a938e03cc0ae7f8ca6d4a86d4e9cb926f3005b60cb5ac1b807fb973670f9bd4161e8090",
+        "wrong-target-1": "8370008e206351405f5122ba948ebe508248bbf73d4cb4d64a4ca6ceedfd30a7f54cc7c019bf745f0fbc3914ca74dc1935cb70ce5540b057e37185f5fdc68b5c2bb2a667794606838b1fbe0c97cdd9df658208a7b1522b4d6c36ce1b2ea045f5fcee3aa6bc8fe014449a1c9d77e7915f4ab9824bf4b101a55926d62fc74475b8b6263565daa8418637a4adde9509eb22248cc1d7c64c",
+        "wrong-family-1": "8370008e206351405f5122ba948ebe508248bbf73d4cc629fd93af89be46a6a527e3ef960a3c5044cdbaa226c6f14d534e91a50a81e44ac5b04b63b0ba68290bb28cf01415b8140d2f41af5b840d9e49f44b1d2a40eae23b1ee675c67378728de207a5e2a723721e5e427b077e9493e7b3d4fc15c42214f246edcbbae52be40a6f2a6f0fe96590f06f6eb6d8e29640c46f6dad41ccd2",
+        "checksum-1": "8370008e206351405f5122ba948ebe508248bbf73d4cc629fd93af89be46a6a527e3ef960a3c340179a7973fa0ba0767a87b9062d02f66b56d5810a7be92fdd978f9ea80db4c4792cc62a411dad5d0965cb18c8d9aae3c181834956d7d5e5b1d6680d4fe2f93a1373e035333e87d564c0c40042ed859ebcee5c48af5f62b432425613c4d5943e1d1f8706a7e1219e1e0bd152a48a07f",
+        "kind-1": "8370008e206351405f5122ba948ebe508248bbf73d4cc629fd93af89be46a6a527e3ef960a3cd64149aef46288d8a6e35f3bd03efa5fc739a0afd55b78c85b4e8feb296fb49cbe7ca0bb6b70310726eac8e512b9dc4f4253eae0fe4282a4647d38069000c8a63ab6c611866d6e608fadb0217783d87bacaf9923b4811e032e8f2c0e3fd93b6953dc12173ae606cff1e91c8ff3abf79c",
+        "wrong-version": "8370008e206351405f5122ba948ebe508248bbf73d4cc629fd93af89be46a6a527e3ef960a3c651a21cf6dbbb12c69263f91501157fed844397b5da4d530dd4c0c09ef6e90f23bb7c09def5e6475d5e11adb1c3d71ece936443d47c04d6d654ff1be8824f80e1253a56409a9a68cad5b24269bde32ce8b0b61a3f905cba521aed78c766a7bfc8ae52241b97355e10fd9f3b23f7e4a2b",
+        "short-status": "8370007e2063a4a293919e90176a4972d1d9f9b354ac9b81aad4af15f66c2c131386feaf71ef78d264c8d6983a2837ebba06723b14b08289392563f67a573ad2978a4f52e114d8e71fe73b826c9c1202c80808bf3677295c5703c88b99cb2add14eb456f3c10d86c3f036fb7f03b7bc7e20c823e448f15a3a86f829c0d1577e182e40a64e49d",
+        "wrong-body-type": "8370008e206351405f5122ba948ebe508248bbf73d4cc629fd93af89be46a6a527e3ef960a3c3e1a3d85c23fd804461b16d4616461e203e47d4e8c85b6d4c3f04ed2b197084d77962a1e75585df559d3eb7de6cd88af8e1b6cb05a870ebcc6fcc241cb31232768a99bc674aeac237d33c15663c8bb5bf091ce4a16d910b8c30de22a4db39e1f1337221f5fb5939ac6c44b8c0e4dcd05"
+      },
+      "errors": {
+        "wrong-target-0": {
+          "stage": 0,
+          "error": "DEVICE_IDENTITY_CONFLICT"
+        },
+        "wrong-family-0": {
+          "stage": 0,
+          "error": "MIDEA_RESPONSE_INVALID"
+        },
+        "checksum-0": {
+          "stage": 0,
+          "error": "MIDEA_RESPONSE_INVALID"
+        },
+        "kind-0": {
+          "stage": 0,
+          "error": "CAPABILITY_UNSUPPORTED"
+        },
+        "wrong-target-1": {
+          "stage": 1,
+          "error": "DEVICE_IDENTITY_CONFLICT"
+        },
+        "wrong-family-1": {
+          "stage": 1,
+          "error": "MIDEA_RESPONSE_INVALID"
+        },
+        "checksum-1": {
+          "stage": 1,
+          "error": "MIDEA_RESPONSE_INVALID"
+        },
+        "kind-1": {
+          "stage": 1,
+          "error": "CAPABILITY_UNSUPPORTED"
+        },
+        "wrong-version": {
+          "stage": 1,
+          "error": "MIDEA_RESPONSE_INVALID"
+        },
+        "short-status": {
+          "stage": 1,
+          "error": "MIDEA_RESPONSE_INVALID"
+        },
+        "wrong-body-type": {
+          "stage": 1,
+          "error": "CAPABILITY_UNSUPPORTED"
+        }
+      },
+      "expected": {
+        "status_code": 3,
+        "mode_code": 251,
+        "additional_code": 14,
+        "temperature_code": 55,
+        "door_open": true,
+        "rinse_aid_low": true,
+        "salt_low": true,
+        "water_low": true,
+        "remaining_minutes": 513
+      }
+    },
+    {
+      "family": 202,
+      "appliance_request_packet": "5a5a011158002000000000004e060504100a1a1415cd5b0700000000000000000000000000000000d4f06b110f28eb0f63e819e01d2a66c73b6dcd9a352f5ae9c8399fcc18e21f42c7f88e69ffdf218bdce951e28d9f9a3d",
+      "status_request_packet": "5a5a011148002000000000004e070504100a1a1415cd5b0700000000000000000000000000000000f9f5412db7cab3802f6c6bb7fda474bb60f87c9f37834edc3f5c8b6794c23f16",
+      "responses": {
+        "appliance": "8370007e206321fc865100bc76972471bf3181b57d86349bc77662c4219bb11e9f40d42bb44b02785bfecea1bbbc0f7573baf0b8abed784d151dab4c733a072cc26f08aa4d7ee23f3184a97439b1c9f3415cf44fa8bbda003c3c03d9d7cd95a3e8bfde884b7a6f5446fe401f147103d71eee61882b19c2e66dcdd9eda7ae3f8273d9568f9148",
+        "status": "8370008e206351405f5122ba948ebe508248bbf73d4cc629fd93af89be46a6a527e3ef960a3c087834b67408f4f3611303556c1ed93e92affeccdcffbbbe2cf65f6ca136b826f54817670e371e72fd68e39211b07b6ed5e37e3286507d056c335e156d2a3b81c5faf6226bbfd466d9d7046a527e8aacdb7e327f2ea096d4448f011ede8603489db0bab51263e452076f2c1eb925fcd0",
+        "wrong-target-0": "8370007e206321fc865100bc76972471bf3181b57d869228f048d3af24d22136d9513f0a426c88857c6c7deff4851dd5f3424e9c06a08e8bff91329be53e6a98889feafcd629c79bfd90ace38a9e8de32472d66b57736127435c11ec88c6ac4d8f3d91d60c4b58dfce836248f3aa9d948bf15bae9abdfc0e7739418b86eec844a8ad541f9ff9",
+        "wrong-family-0": "8370007e206321fc865100bc76972471bf3181b57d86349bc77662c4219bb11e9f40d42bb44ba91a156a24a20c00c81f25b91a0821abadac0f011e78e02a8ab3b608db8dec1e962efc8d43b22b8710a31f22595e72495fa5d17f485f76a2eb5ec134b9c2b826ca4b3100043d95aca24d43c331428ebfe4b6dde5477714145b91e9d6104b5eef",
+        "checksum-0": "8370007e206321fc865100bc76972471bf3181b57d86349bc77662c4219bb11e9f40d42bb44b02785bfecea1bbbc0f7573baf0b8abed72cd6a2c676ac8607600557f262cf4e6740250dac6b3f9a4411f45cd9cd3b751c95a1013ccab91915822e8429a986045ac165c572802e1e19870c19d0818be7af52a21228cf824dbc9cee3cc5a6f605c",
+        "kind-0": "8370007e206321fc865100bc76972471bf3181b57d86349bc77662c4219bb11e9f40d42bb44b8b52ee136da21b3764cbed840fc38755f950a2a3a8ab9c85c2183ebd038c2f96299a46d1ac64d77c2651702d0e6fe73a94532ae650650dd81c0548f8da74405fd02312c6a5c07b67920ce6514cd746457b777a469271994354c29b956b84c795",
+        "wrong-target-1": "8370008e206351405f5122ba948ebe508248bbf73d4cb4d64a4ca6ceedfd30a7f54cc7c019bf38e30ce1393c18ef8e8c7186e4b2be4cbc05a3c2c8ea4c74863a2d96f349c7d3cee6b5568dfbbc9e159f547532aafc1b722c56a4f0182a4a1b92ee9b3323b0c0ee8c893f61a0594da7de8675270e503b2e90c9ff164a34b2ae0408d10c8afd2b97031ab3c1cfd9c54006e497b6452dac",
+        "wrong-family-1": "8370008e206351405f5122ba948ebe508248bbf73d4cc629fd93af89be46a6a527e3ef960a3c062747a7000877c9709137a463f2a6cd7fd3df97ce456268f668a86adc48dccd392a7a5047c633bd12bc4f1fce18b35e74ab3008cd6062a49706585d6f0ca113af85e65a29d3b2d0b922959d957ae547e996573a9a3ab54f65069bf7b4b5250685aca7bf482c2d722894fe15342ba103",
+        "checksum-1": "8370008e206351405f5122ba948ebe508248bbf73d4cc629fd93af89be46a6a527e3ef960a3c087834b67408f4f3611303556c1ed93e92affeccdcffbbbe2cf65f6ca136b826ca20dc403ba19a494660eca19cf82e3c06f4048cf5244be7993f380cd1c724662caa85398528d8ac55c530e3976426ac8637d98cdbdf841f507101d2c00c5cd50b3a4bcb53db88008690cf0db622b4e7",
+        "kind-1": "8370008e206351405f5122ba948ebe508248bbf73d4cc629fd93af89be46a6a527e3ef960a3c94fd1034440aa1e75497b83b5e5fd279ca91962f8df974c6974ad56e30baf3bcdffc7d230a9bc4dbc41bcc685b850c589473c1e66c993655effc43f80917c1b741a054bedcfa1b190fe5b61799ffb22b89403cadd525e362f60a7e1c743ceda262d6a1eed57e90890ac0e2e785440468",
+        "wrong-version": "8370008e206351405f5122ba948ebe508248bbf73d4cc629fd93af89be46a6a527e3ef960a3c0bcfa73d5f28c55f18638637d4471ef0f083b19eb5b04dc71aae1275419a24cb74034571ff9a7f85db60c43f2e38f96d0aabe2190c1cee061a71d38804205fa1e759266c40c7974ff47df75e34cf29e60ee55b6f7f3d157c7e7c600702cc6f7da98552e1943c9bccb1c998f5be147496",
+        "short-status": "8370008e206351405f5122ba948ebe508248bbf73d4cc629fd93af89be46a6a527e3ef960a3cdcfc3a088cc4b04a05f588f5984bad0ba941361fa15c6791c3d1f9fc63b02ae9910adda0059c94ed34ec9b682dbb91122a4732f90ed23fde1ef553049831c0ecd410acd88687de2c75ee6955d6cde44ccb93f5f7063714621d341add2b63abd8fd004e46263b2fc71fc77ef17411bb41",
+        "wrong-body-type": "8370008e206351405f5122ba948ebe508248bbf73d4cc629fd93af89be46a6a527e3ef960a3ce6aaea67cc4f4260c04df4dd3867c85f08ae870ffad451368c220d86b4465174679e4a140589c73dedb302914080bdad89e833d2eeeee65c7c3ca5493d06157ab6145bc30e47145b71e36092a6ac630f0fcd3d6ae5a181138116daf8a6ed0d1b3e07af449f06dcd21e658407cfca69ef",
+        "fahrenheit": "8370008e206351405f5122ba948ebe508248bbf73d4cc629fd93af89be46a6a527e3ef960a3c087834b67408f4f3611303556c1ed93efb6f4d144cf4d0c40ac3e7a15bbbafd1abccbc4418515a6aa67afb16c40e645709d8a32474ab4e84983e8a03e9b95b06d1006f77ac4af6f61d9d6b2f0c1b208a0bc11e4477c4590bc6f9f639cf21b353f8da482661dffdce7f02eec09b432830"
+      },
+      "errors": {
+        "wrong-target-0": {
+          "stage": 0,
+          "error": "DEVICE_IDENTITY_CONFLICT"
+        },
+        "wrong-family-0": {
+          "stage": 0,
+          "error": "MIDEA_RESPONSE_INVALID"
+        },
+        "checksum-0": {
+          "stage": 0,
+          "error": "MIDEA_RESPONSE_INVALID"
+        },
+        "kind-0": {
+          "stage": 0,
+          "error": "CAPABILITY_UNSUPPORTED"
+        },
+        "wrong-target-1": {
+          "stage": 1,
+          "error": "DEVICE_IDENTITY_CONFLICT"
+        },
+        "wrong-family-1": {
+          "stage": 1,
+          "error": "MIDEA_RESPONSE_INVALID"
+        },
+        "checksum-1": {
+          "stage": 1,
+          "error": "MIDEA_RESPONSE_INVALID"
+        },
+        "kind-1": {
+          "stage": 1,
+          "error": "CAPABILITY_UNSUPPORTED"
+        },
+        "wrong-version": {
+          "stage": 1,
+          "error": "MIDEA_RESPONSE_INVALID"
+        },
+        "short-status": {
+          "stage": 1,
+          "error": "MIDEA_RESPONSE_INVALID"
+        },
+        "wrong-body-type": {
+          "stage": 1,
+          "error": "CAPABILITY_UNSUPPORTED"
+        },
+        "fahrenheit": {
+          "stage": 1,
+          "error": "CAPABILITY_UNSUPPORTED"
+        }
+      },
+      "expected": {
+        "mode_flags": 0,
+        "fridge_power": true,
+        "freezer_power": true,
+        "fridge_target_celsius": 4,
+        "freezer_target_celsius": -18,
+        "fridge_current_celsius": 4.5,
+        "freezer_current_celsius": -18.5
+      }
+    }
+  ]
+}

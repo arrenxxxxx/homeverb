@@ -349,3 +349,13 @@ timestamp is observation evidence. One inherited deadline covers both reads;
 errors, cancellation and drop close the connection without retry or fallback.
 It returns C0 candidates only and never publishes a route, Snapshot or write
 outcome. Existing one-command `exchange_v3` transmission phases are unchanged.
+
+The standard E1/CA sequences in
+[ADR-0053](adr/0053-dishwasher-refrigerator-lan-reads.md) reuse that same bounded
+handshake/negotiation/query flow through `query_dishwasher_v3` and
+`query_refrigerator_v3`. They validate the expected family/version at both stages
+and return only native candidates. E1 retains raw program/status/temperature
+codes; CA admits only its main-compartment Celsius prefix. Setter replies,
+notifications, alternative headers, short bodies and unsupported units cannot
+become observations or completion evidence. Model/endpoint admission and Core
+route publication remain separate; no caller or grant is implicitly enabled.

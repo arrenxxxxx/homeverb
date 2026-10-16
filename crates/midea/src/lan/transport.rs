@@ -1,9 +1,11 @@
 //! Operation-owned V3 exchanges, with separate command transmission evidence.
 
 use super::{
-    AcC0Status, DiscoveryNetwork, V3Handshake, V3Response, V3Session, decode_ac_c0_status,
-    decode_appliance_protocol, decode_lan_packet, encode_ac_status_query, encode_appliance_query,
-    encode_lan_packet, v3_frame_len,
+    AcC0Status, DiscoveryNetwork, DishwasherStatus, RefrigeratorStatus, V3Handshake, V3Response,
+    V3Session, decode_ac_c0_status, decode_appliance_protocol, decode_dishwasher_status,
+    decode_lan_packet, decode_refrigerator_status, encode_ac_status_query, encode_appliance_query,
+    encode_dishwasher_status_query, encode_lan_packet, encode_refrigerator_status_query,
+    v3_frame_len,
 };
 use crate::{ApplianceFamily, CloudId};
 use homeverb_core::{Clock, Operation, SecretBytes, WriteProgress};
@@ -139,24 +141,44 @@ pub async fn exchange_v3(
         .await
 }
 
-/// Query the message version, then one standard AC status on the same bounded connection.
-/// The trusted caller must separately admit the protected endpoint/model and network access.
-/// Returns only C0 candidates, never a Snapshot, fresh state or write outcome.
-pub async fn query_ac_v3(
+enum StatusQuery {
+    Ac(u8),
+    Dishwasher,
+    Refrigerator,
+}
+
+impl StatusQuery {
+    fn family(&self) -> ApplianceFamily {
+        match self {
+            Self::Ac(_) => ApplianceFamily::AirConditioner,
+            Self::Dishwasher => ApplianceFamily::Dishwasher,
+            Self::Refrigerator => ApplianceFamily::Refrigerator,
+        }
+    }
+    fn encode(&self, version: u8) -> Result<SecretBytes> {
+        match self {
+            Self::Ac(sequence) => encode_ac_status_query(version, *sequence),
+            Self::Dishwasher => Ok(encode_dishwasher_status_query(version)),
+            Self::Refrigerator => Ok(encode_refrigerator_status_query(version)),
+        }
+    }
+}
+
+async fn query_status_v3(
     network: &DiscoveryNetwork,
     endpoint: SocketAddrV4,
     handshake: V3Handshake,
     target: &CloudId,
     clock: &dyn Clock,
-    sequence: u8,
+    query: StatusQuery,
     operation: &Operation,
-) -> Result<AcC0Status> {
+) -> Result<(u8, SecretBytes)> {
     operation
         .run(async {
-            // Reject the explicit sequence before opening a socket, without assuming
-            // that the initial message version is usable for a real status query.
-            encode_ac_status_query(0, sequence)?;
-            let appliance = encode_appliance_query(ApplianceFamily::AirConditioner)?;
+            // Reject invalid query inputs before opening a socket. The real status
+            // query uses the negotiated message version, never this preflight value.
+            query.encode(0)?;
+            let appliance = encode_appliance_query(query.family())?;
             let packet = encode_lan_packet(target, &appliance, clock.now())?;
             let (mut stream, mut session) =
                 connect_v3(network, endpoint, handshake, operation).await?;
@@ -169,9 +191,8 @@ pub async fn query_ac_v3(
             )
             .await?;
             let message = decode_lan_packet(target, response.payload.expose())?;
-            let version = decode_appliance_protocol(ApplianceFamily::AirConditioner, &message)?;
-            let query = encode_ac_status_query(version, sequence)?;
-            let packet = encode_lan_packet(target, &query, clock.now())?;
+            let version = decode_appliance_protocol(query.family(), &message)?;
+            let packet = encode_lan_packet(target, &query.encode(version)?, clock.now())?;
             let response = exchange_session(
                 &mut stream,
                 &mut session,
@@ -181,13 +202,90 @@ pub async fn query_ac_v3(
             )
             .await?;
             let message = decode_lan_packet(target, response.payload.expose())?;
-            operation
-                .run(async { decode_ac_c0_status(version, &message) })
-                .await
+            Ok((version, message))
         })
         .await
 }
 
+/// Query the message version, then one standard AC status on the same bounded connection.
+/// The trusted caller must separately admit the protected endpoint/model and network access.
+/// Returns only C0 candidates, never a Snapshot, fresh state or write outcome.
+pub async fn query_ac_v3(
+    network: &DiscoveryNetwork,
+    endpoint: SocketAddrV4,
+    handshake: V3Handshake,
+    target: &CloudId,
+    clock: &dyn Clock,
+    sequence: u8,
+    operation: &Operation,
+) -> Result<AcC0Status> {
+    let (version, message) = query_status_v3(
+        network,
+        endpoint,
+        handshake,
+        target,
+        clock,
+        StatusQuery::Ac(sequence),
+        operation,
+    )
+    .await?;
+    operation
+        .run(async { decode_ac_c0_status(version, &message) })
+        .await
+}
+
+/// One negotiated standard E1 read. Requires separately admitted endpoint/model/network.
+/// Returns native candidates without freshness, physical support or cycle-completion claims.
+pub async fn query_dishwasher_v3(
+    network: &DiscoveryNetwork,
+    endpoint: SocketAddrV4,
+    handshake: V3Handshake,
+    target: &CloudId,
+    clock: &dyn Clock,
+    operation: &Operation,
+) -> Result<DishwasherStatus> {
+    let (version, message) = query_status_v3(
+        network,
+        endpoint,
+        handshake,
+        target,
+        clock,
+        StatusQuery::Dishwasher,
+        operation,
+    )
+    .await?;
+    operation
+        .run(async { decode_dishwasher_status(version, &message) })
+        .await
+}
+
+/// One negotiated standard AA/CA read, excluding Toshiba and Fahrenheit layouts.
+/// Requires separately admitted endpoint/model/network; returns only native candidates.
+pub async fn query_refrigerator_v3(
+    network: &DiscoveryNetwork,
+    endpoint: SocketAddrV4,
+    handshake: V3Handshake,
+    target: &CloudId,
+    clock: &dyn Clock,
+    operation: &Operation,
+) -> Result<RefrigeratorStatus> {
+    let (version, message) = query_status_v3(
+        network,
+        endpoint,
+        handshake,
+        target,
+        clock,
+        StatusQuery::Refrigerator,
+        operation,
+    )
+    .await?;
+    operation
+        .run(async { decode_refrigerator_status(version, &message) })
+        .await
+}
+
+#[cfg(test)]
+mod appliance_tests;
 #[cfg(test)]
 mod query_tests;
 #[cfg(test)]

@@ -1101,3 +1101,30 @@ Native JSON API 1.14.1, eleven C/JNI exports and storage versions are unchanged.
 No real account, household appliance, separate Flutter worktree, new emulator,
 phone or physical/off-LAN acceptance was used. This phase is committed and pushed
 separately; remote CI results are checked after that push.
+
+## Standard dishwasher and refrigerator LAN query candidates
+
+[ADR-0053](adr/0053-dishwasher-refrigerator-lan-reads.md) adds standard AA E1/CA
+query encoders, selected general-prefix decoders and composed V3 reads. Both
+families share AC's bounded handshake/version-negotiation/query sequence. Native
+candidates retain raw E1 status/program/option/temperature codes and time/shortage
+bits, or CA main-compartment power and Celsius readings. No optional defaults,
+Core Snapshots, public routes, cloud changes or physical support are added.
+
+Eight query encodings and 19 field projections match unchanged pinned source
+classes. Twenty-one positive and 40 negative AA vectors include two CA lengths
+that exercise only the admitted prefix, avoiding upstream optional-field indexing.
+All truncations and single-byte corruption, flag polarity, extension boundaries,
+identity/context checks and redaction are tested. Independent nested vectors and
+loopback peers verify two complete conversations and 23 invalid response paths,
+plus cancellation/deadline/drop at either query without reconnecting. Existing AC
+query and write-transmission tests continue to pass.
+
+On October 16, 2026, formatting, workspace Clippy, workspace/example builds and
+local validators passed. Rust: 410 passed, two explicitly ignored; runtime: 35;
+native: 31 methods/51 fictional examples plus approval checks; Python tooling: 33;
+presentation: six. All three Android AAR variants passed export/alignment checks.
+API 1.14.1 and storage formats remain unchanged. Exact-model admission, network
+consent, linked-route integration and physical/off-LAN acceptance remain pending.
+No real account, appliance, separate Flutter worktree, new emulator or phone was
+accessed. Remote CI is inspected independently after the phase push.

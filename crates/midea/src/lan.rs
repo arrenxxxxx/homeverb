@@ -7,13 +7,18 @@ pub use discovery::{DiscoveryNetwork, DiscoveryReport, discover};
 mod v3;
 pub use v3::{V3Handshake, V3Response, V3Session, v3_frame_len};
 mod transport;
-pub use transport::{exchange_v3, query_ac_v3};
+pub use transport::{exchange_v3, query_ac_v3, query_dishwasher_v3, query_refrigerator_v3};
 mod packet;
 pub use packet::{decode_lan_packet, encode_lan_packet, lan_packet_len};
 mod ac;
 pub use ac::{AcC0Status, decode_ac_c0_status, encode_ac_status_query};
 mod appliance;
 pub use appliance::{decode_appliance_protocol, encode_appliance_query};
+mod appliances;
+pub use appliances::{
+    DishwasherStatus, RefrigeratorStatus, decode_dishwasher_status, decode_refrigerator_status,
+    encode_dishwasher_status_query, encode_refrigerator_status_query,
+};
 
 use crate::{ApplianceFamily, CloudId};
 use aes::{

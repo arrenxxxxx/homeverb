@@ -1,0 +1,605 @@
+{
+  "provenance": "Independent fictional AA assembly; standard E1/CA queries and selected fields cross-checked against pinned midea-local classes. CA lengths 26 and 29 exercise only the admitted prefix, avoiding upstream optional-extension indexing.",
+  "queries": [
+    {
+      "family": 225,
+      "protocol": 0,
+      "frame": "aa0be1000000000000030011"
+    },
+    {
+      "family": 225,
+      "protocol": 1,
+      "frame": "aa0be1000000000001030010"
+    },
+    {
+      "family": 225,
+      "protocol": 8,
+      "frame": "aa0be1000000000008030009"
+    },
+    {
+      "family": 225,
+      "protocol": 255,
+      "frame": "aa0be10000000000ff030012"
+    },
+    {
+      "family": 202,
+      "protocol": 0,
+      "frame": "aa0bca000000000000030028"
+    },
+    {
+      "family": 202,
+      "protocol": 1,
+      "frame": "aa0bca000000000001030027"
+    },
+    {
+      "family": 202,
+      "protocol": 8,
+      "frame": "aa0bca000000000008030020"
+    },
+    {
+      "family": 202,
+      "protocol": 255,
+      "frame": "aa0bca0000000000ff030029"
+    }
+  ],
+  "valid": [
+    {
+      "name": "e1-length-17",
+      "family": 225,
+      "frame": "aa1be1000000000008030003fb0e008601000000003700000000002f",
+      "expected": {
+        "status_code": 3,
+        "mode_code": 251,
+        "additional_code": 14,
+        "temperature_code": 55,
+        "door_open": true,
+        "rinse_aid_low": true,
+        "salt_low": true,
+        "water_low": true,
+        "remaining_minutes": 1
+      }
+    },
+    {
+      "name": "e1-length-18",
+      "family": 225,
+      "frame": "aa1ce1000000000008030003fb0e00860100000000370000000000002e",
+      "expected": {
+        "status_code": 3,
+        "mode_code": 251,
+        "additional_code": 14,
+        "temperature_code": 55,
+        "door_open": true,
+        "rinse_aid_low": true,
+        "salt_low": true,
+        "water_low": true,
+        "remaining_minutes": 1
+      }
+    },
+    {
+      "name": "e1-length-19",
+      "family": 225,
+      "frame": "aa1de1000000000008030003fb0e0086010000000037000000000000002d",
+      "expected": {
+        "status_code": 3,
+        "mode_code": 251,
+        "additional_code": 14,
+        "temperature_code": 55,
+        "door_open": true,
+        "rinse_aid_low": true,
+        "salt_low": true,
+        "water_low": true,
+        "remaining_minutes": 1
+      }
+    },
+    {
+      "name": "e1-length-24",
+      "family": 225,
+      "frame": "aa22e1000000000008030003fb0e008601000000003700000000000000000000000028",
+      "expected": {
+        "status_code": 3,
+        "mode_code": 251,
+        "additional_code": 14,
+        "temperature_code": 55,
+        "door_open": true,
+        "rinse_aid_low": true,
+        "salt_low": true,
+        "water_low": true,
+        "remaining_minutes": 1
+      }
+    },
+    {
+      "name": "e1-length-25",
+      "family": 225,
+      "frame": "aa23e1000000000008030003fb0e00860100000000370000000000000000000000000027",
+      "expected": {
+        "status_code": 3,
+        "mode_code": 251,
+        "additional_code": 14,
+        "temperature_code": 55,
+        "door_open": true,
+        "rinse_aid_low": true,
+        "salt_low": true,
+        "water_low": true,
+        "remaining_minutes": 1
+      }
+    },
+    {
+      "name": "e1-length-33",
+      "family": 225,
+      "frame": "aa2be1000000000008030003fb0e00860100000000370000000000000000000000000000000000000000021d",
+      "expected": {
+        "status_code": 3,
+        "mode_code": 251,
+        "additional_code": 14,
+        "temperature_code": 55,
+        "door_open": true,
+        "rinse_aid_low": true,
+        "salt_low": true,
+        "water_low": true,
+        "remaining_minutes": 1
+      }
+    },
+    {
+      "name": "e1-length-34",
+      "family": 225,
+      "frame": "aa2ce1000000000008030003fb0e0086010000000037000000000000000000000000000000000000000002001c",
+      "expected": {
+        "status_code": 3,
+        "mode_code": 251,
+        "additional_code": 14,
+        "temperature_code": 55,
+        "door_open": true,
+        "rinse_aid_low": true,
+        "salt_low": true,
+        "water_low": true,
+        "remaining_minutes": 513
+      }
+    },
+    {
+      "name": "e1-length-245",
+      "family": 225,
+      "frame": "aaffe1000000000008030003fb0e0086010000000037000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000049",
+      "expected": {
+        "status_code": 3,
+        "mode_code": 251,
+        "additional_code": 14,
+        "temperature_code": 55,
+        "door_open": true,
+        "rinse_aid_low": true,
+        "salt_low": true,
+        "water_low": true,
+        "remaining_minutes": 513
+      }
+    },
+    {
+      "name": "e1-closed-clear",
+      "family": 225,
+      "frame": "aa2ce1000000000008030003fb0e000100000000003700000000000000000000000000000000000000000000a4",
+      "expected": {
+        "status_code": 3,
+        "mode_code": 251,
+        "additional_code": 14,
+        "temperature_code": 55,
+        "door_open": false,
+        "rinse_aid_low": false,
+        "salt_low": false,
+        "water_low": false,
+        "remaining_minutes": 0
+      }
+    },
+    {
+      "name": "e1-maximum-time",
+      "family": 225,
+      "frame": "aa2ce1000000000008030003fb0e00ffff00000000370000000000000000000000000000000000000000ff00a8",
+      "expected": {
+        "status_code": 3,
+        "mode_code": 251,
+        "additional_code": 14,
+        "temperature_code": 55,
+        "door_open": false,
+        "rinse_aid_low": true,
+        "salt_low": true,
+        "water_low": true,
+        "remaining_minutes": 65535
+      }
+    },
+    {
+      "name": "e1-temperature-code",
+      "family": 225,
+      "frame": "aa1be10000000000080300fffb0e00860100000000ff00000000006b",
+      "expected": {
+        "status_code": 255,
+        "mode_code": 251,
+        "additional_code": 14,
+        "temperature_code": 255,
+        "door_open": true,
+        "rinse_aid_low": true,
+        "salt_low": true,
+        "water_low": true,
+        "remaining_minutes": 1
+      }
+    },
+    {
+      "name": "ca-length-25",
+      "family": 202,
+      "frame": "aa23ca0000000000080300006400000000000000000000000000006d3f000000000000f8",
+      "expected": {
+        "mode_flags": 0,
+        "fridge_power": true,
+        "freezer_power": true,
+        "fridge_target_celsius": 4,
+        "freezer_target_celsius": -18,
+        "fridge_current_celsius": 4.5,
+        "freezer_current_celsius": -18.5
+      }
+    },
+    {
+      "name": "ca-length-26",
+      "family": 202,
+      "frame": "aa24ca0000000000080300006400000000000000000000000000006d3f00000000000000f7",
+      "expected": {
+        "mode_flags": 0,
+        "fridge_power": true,
+        "freezer_power": true,
+        "fridge_target_celsius": 4,
+        "freezer_target_celsius": -18,
+        "fridge_current_celsius": 4.5,
+        "freezer_current_celsius": -18.5
+      }
+    },
+    {
+      "name": "ca-length-29",
+      "family": 202,
+      "frame": "aa27ca0000000000080300006400000000000000000000000000006d3f00000000000000000000f4",
+      "expected": {
+        "mode_flags": 0,
+        "fridge_power": true,
+        "freezer_power": true,
+        "fridge_target_celsius": 4,
+        "freezer_target_celsius": -18,
+        "fridge_current_celsius": 4.5,
+        "freezer_current_celsius": -18.5
+      }
+    },
+    {
+      "name": "ca-length-30",
+      "family": 202,
+      "frame": "aa28ca0000000000080300006400000000000000000000000000006d3f0000000000000000000000f3",
+      "expected": {
+        "mode_flags": 0,
+        "fridge_power": true,
+        "freezer_power": true,
+        "fridge_target_celsius": 4,
+        "freezer_target_celsius": -18,
+        "fridge_current_celsius": 4.5,
+        "freezer_current_celsius": -18.5
+      }
+    },
+    {
+      "name": "ca-length-31",
+      "family": 202,
+      "frame": "aa29ca0000000000080300006400000000000000000000000000006d3f000000000000000000000000f2",
+      "expected": {
+        "mode_flags": 0,
+        "fridge_power": true,
+        "freezer_power": true,
+        "fridge_target_celsius": 4,
+        "freezer_target_celsius": -18,
+        "fridge_current_celsius": 4.5,
+        "freezer_current_celsius": -18.5
+      }
+    },
+    {
+      "name": "ca-length-32",
+      "family": 202,
+      "frame": "aa2aca0000000000080300006400000000000000000000000000006d3f00000000000000000000000000f1",
+      "expected": {
+        "mode_flags": 0,
+        "fridge_power": true,
+        "freezer_power": true,
+        "fridge_target_celsius": 4,
+        "freezer_target_celsius": -18,
+        "fridge_current_celsius": 4.5,
+        "freezer_current_celsius": -18.5
+      }
+    },
+    {
+      "name": "ca-length-245",
+      "family": 202,
+      "frame": "aaffca0000000000080300006400000000000000000000000000006d3f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001c",
+      "expected": {
+        "mode_flags": 0,
+        "fridge_power": true,
+        "freezer_power": true,
+        "fridge_target_celsius": 4,
+        "freezer_target_celsius": -18,
+        "fridge_current_celsius": 4.5,
+        "freezer_current_celsius": -18.5
+      }
+    },
+    {
+      "name": "ca-flags-min",
+      "family": 202,
+      "frame": "aa23ca0000000000080300ffff000000ff0000000000000000000000ff0000000000000c",
+      "expected": {
+        "mode_flags": 255,
+        "fridge_power": false,
+        "freezer_power": false,
+        "fridge_target_celsius": 15,
+        "freezer_target_celsius": -27,
+        "fridge_current_celsius": -50.0,
+        "freezer_current_celsius": 77.5
+      }
+    },
+    {
+      "name": "ca-power-fridge-off",
+      "family": 202,
+      "frame": "aa23ca0000000000080300006400000001000000000000000000006d3f000000000000f7",
+      "expected": {
+        "mode_flags": 0,
+        "fridge_power": false,
+        "freezer_power": true,
+        "fridge_target_celsius": 4,
+        "freezer_target_celsius": -18,
+        "fridge_current_celsius": 4.5,
+        "freezer_current_celsius": -18.5
+      }
+    },
+    {
+      "name": "ca-power-freezer-off",
+      "family": 202,
+      "frame": "aa23ca000000000008030000000000001000000000000000000000636400000000000031",
+      "expected": {
+        "mode_flags": 0,
+        "fridge_power": true,
+        "freezer_power": false,
+        "fridge_target_celsius": 0,
+        "freezer_target_celsius": -12,
+        "fridge_current_celsius": -0.5,
+        "freezer_current_celsius": 0.0
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "name": "e1-header",
+      "family": 225,
+      "frame": "ab2ce1000000000008030003fb0e0086010000000037000000000000000000000000000000000000000002001c",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "e1-length",
+      "family": 225,
+      "frame": "aa2de1000000000008030003fb0e0086010000000037000000000000000000000000000000000000000002001c",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "e1-family",
+      "family": 225,
+      "frame": "aa2ce0000000000008030003fb0e0086010000000037000000000000000000000000000000000000000002001c",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "e1-version",
+      "family": 225,
+      "frame": "aa2ce1000000000009030003fb0e0086010000000037000000000000000000000000000000000000000002001c",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "e1-body",
+      "family": 225,
+      "frame": "aa2ce1000000000008030002fb0e0086010000000037000000000000000000000000000000000000000002001c",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "e1-checksum",
+      "family": 225,
+      "frame": "aa2ce1000000000008030003fb0e0086010000000037000000000000000000000000000000000000000002001d",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "e1-wrong-version-valid-checksum",
+      "family": 225,
+      "frame": "aa2ce1000000000009030003fb0e0086010000000037000000000000000000000000000000000000000002001b",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "e1-wrong-family-valid-checksum",
+      "family": 225,
+      "frame": "aa2cac000000000008030003fb0e00860100000000370000000000000000000000000000000000000000020051",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "e1-short-prefix",
+      "family": 225,
+      "frame": "aa1ae1000000000008030003fb0e00860100000000370000000030",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "e1-empty-body",
+      "family": 225,
+      "frame": "aa0ae1000000000008030a",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "e1-trailing",
+      "family": 225,
+      "frame": "aa2ce1000000000008030003fb0e0086010000000037000000000000000000000000000000000000000002001c00",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "e1-coalesced",
+      "family": 225,
+      "frame": "aa2ce1000000000008030003fb0e0086010000000037000000000000000000000000000000000000000002001caa2ce1000000000008030003fb0e0086010000000037000000000000000000000000000000000000000002001c",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "e1-oversized",
+      "family": 225,
+      "frame": "aaffe10000000000080300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001500",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "e1-kind-2",
+      "family": 225,
+      "frame": "aa2ce1000000000008020003fb0e0086010000000037000000000000000000000000000000000000000002001d",
+      "error": "CAPABILITY_UNSUPPORTED"
+    },
+    {
+      "name": "e1-kind-4",
+      "family": 225,
+      "frame": "aa2ce1000000000008040003fb0e0086010000000037000000000000000000000000000000000000000002001b",
+      "error": "CAPABILITY_UNSUPPORTED"
+    },
+    {
+      "name": "e1-kind-5",
+      "family": 225,
+      "frame": "aa2ce1000000000008050003fb0e0086010000000037000000000000000000000000000000000000000002001a",
+      "error": "CAPABILITY_UNSUPPORTED"
+    },
+    {
+      "name": "e1-kind-6",
+      "family": 225,
+      "frame": "aa2ce1000000000008060003fb0e00860100000000370000000000000000000000000000000000000000020019",
+      "error": "CAPABILITY_UNSUPPORTED"
+    },
+    {
+      "name": "e1-kind-160",
+      "family": 225,
+      "frame": "aa2ce1000000000008a00003fb0e0086010000000037000000000000000000000000000000000000000002007f",
+      "error": "CAPABILITY_UNSUPPORTED"
+    },
+    {
+      "name": "e1-body-type",
+      "family": 225,
+      "frame": "aa2ce1000000000008030203fb0e0086010000000037000000000000000000000000000000000000000002001a",
+      "error": "CAPABILITY_UNSUPPORTED"
+    },
+    {
+      "name": "ca-header",
+      "family": 202,
+      "frame": "ab23ca0000000000080300006400000000000000000000000000006d3f000000000000f8",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "ca-length",
+      "family": 202,
+      "frame": "aa22ca0000000000080300006400000000000000000000000000006d3f000000000000f8",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "ca-family",
+      "family": 202,
+      "frame": "aa23cb0000000000080300006400000000000000000000000000006d3f000000000000f8",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "ca-version",
+      "family": 202,
+      "frame": "aa23ca0000000000090300006400000000000000000000000000006d3f000000000000f8",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "ca-body",
+      "family": 202,
+      "frame": "aa23ca0000000000080300016400000000000000000000000000006d3f000000000000f8",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "ca-checksum",
+      "family": 202,
+      "frame": "aa23ca0000000000080300006400000000000000000000000000006d3f000000000000f9",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "ca-wrong-version-valid-checksum",
+      "family": 202,
+      "frame": "aa23ca0000000000090300006400000000000000000000000000006d3f000000000000f7",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "ca-wrong-family-valid-checksum",
+      "family": 202,
+      "frame": "aa23ac0000000000080300006400000000000000000000000000006d3f00000000000016",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "ca-short-prefix",
+      "family": 202,
+      "frame": "aa22ca0000000000080300006400000000000000000000000000006d3f0000000000f9",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "ca-empty-body",
+      "family": 202,
+      "frame": "aa0aca0000000000080321",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "ca-trailing",
+      "family": 202,
+      "frame": "aa23ca0000000000080300006400000000000000000000000000006d3f000000000000f800",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "ca-coalesced",
+      "family": 202,
+      "frame": "aa23ca0000000000080300006400000000000000000000000000006d3f000000000000f8aa23ca0000000000080300006400000000000000000000000000006d3f000000000000f8",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "ca-oversized",
+      "family": 202,
+      "frame": "aaffca0000000000080300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002c00",
+      "error": "MIDEA_RESPONSE_INVALID"
+    },
+    {
+      "name": "ca-kind-2",
+      "family": 202,
+      "frame": "aa23ca0000000000080200006400000000000000000000000000006d3f000000000000f9",
+      "error": "CAPABILITY_UNSUPPORTED"
+    },
+    {
+      "name": "ca-kind-4",
+      "family": 202,
+      "frame": "aa23ca0000000000080400006400000000000000000000000000006d3f000000000000f7",
+      "error": "CAPABILITY_UNSUPPORTED"
+    },
+    {
+      "name": "ca-kind-5",
+      "family": 202,
+      "frame": "aa23ca0000000000080500006400000000000000000000000000006d3f000000000000f6",
+      "error": "CAPABILITY_UNSUPPORTED"
+    },
+    {
+      "name": "ca-kind-6",
+      "family": 202,
+      "frame": "aa23ca0000000000080600006400000000000000000000000000006d3f000000000000f5",
+      "error": "CAPABILITY_UNSUPPORTED"
+    },
+    {
+      "name": "ca-kind-160",
+      "family": 202,
+      "frame": "aa23ca000000000008a000006400000000000000000000000000006d3f0000000000005b",
+      "error": "CAPABILITY_UNSUPPORTED"
+    },
+    {
+      "name": "ca-body-type",
+      "family": 202,
+      "frame": "aa23ca0000000000080302006400000000000000000000000000006d3f000000000000f6",
+      "error": "CAPABILITY_UNSUPPORTED"
+    },
+    {
+      "name": "ca-fahrenheit",
+      "family": 202,
+      "frame": "aa23ca0000000000080300006400000000080000000000000000006d3f000000000000f0",
+      "error": "CAPABILITY_UNSUPPORTED"
+    },
+    {
+      "name": "ca-toshiba-header",
+      "family": 202,
+      "frame": "5523ca0000000000080300006400000000000000000000000000006d3f000000000000f8",
+      "error": "MIDEA_RESPONSE_INVALID"
+    }
+  ]
+}

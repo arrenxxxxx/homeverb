@@ -216,6 +216,14 @@ C0 and lifecycle errors. Negotiation failure never supplies a default version or
 sends the status query; status failure returns no partial state. There is no
 reconnect, format probing, public error extension or write-outcome conversion.
 
+The [standard E1/CA query paths](adr/0053-dishwasher-refrigerator-lan-reads.md)
+reuse those bounded transport and identity errors. Invalid AA framing, checksum,
+family/version or short general prefixes return `MIDEA_RESPONSE_INVALID`.
+Non-query kinds, nonzero body types and the CA Fahrenheit flag return
+`CAPABILITY_UNSUPPORTED`. A 0x55 header is outside the expected AA context and
+returns `MIDEA_RESPONSE_INVALID`. No error synthesizes missing values, tries a
+different layout, changes cloud routing or publishes partial observations.
+
 The account-bound read path returns `DEVICE_IDENTITY_CONFLICT` before transport when the local device, selected connection or known model differs from the protected binding. Invalid components return `CAPABILITY_UNSUPPORTED`. Pending or unavailable credentials stop the request through the vault. Core rejects decoded but undeclared properties with `INVALID_OBSERVATION`; neither that rejection nor a protocol failure replaces the previous cache or triggers a retry.
 
 Protected inventory membership is independent of historical identity. API 1.9.1

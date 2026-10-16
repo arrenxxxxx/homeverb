@@ -261,7 +261,7 @@ The sequence below describes integration dependencies, not an enabled App flow.
 | Process V3 frames | `V3Handshake`, `V3Session`, `v3_frame_len` | [ADR-0046](../adr/0046-bounded-v3-lan-codec.md): protected buffers, bounded frames, direction/digest checks and nonwrapping request counters. No identity, freshness or acknowledgement inference |
 | Process ordinary packets | `encode_lan_packet`, `decode_lan_packet`, `lan_packet_len` | [ADR-0048](../adr/0048-bounded-lan-packet-envelopes.md): bounded envelopes and expected six-byte target checks. Public AES/checksum material does not authenticate a peer |
 | Perform one admitted exchange | `lan::exchange_v3` | [ADR-0046](../adr/0046-bounded-v3-lan-codec.md): one operation-owned TCP connection; command-send progress survives uncertainty. No retry, acceptance inference or persistent session |
-| Query one AC candidate | `lan::query_ac_v3` | [ADR-0051](../adr/0051-bounded-ac-lan-read-sequence.md): one handshake, appliance-message version query, then one AC query on the same connection. Both replies validate expected target and inner context; one inherited deadline and per-packet clock reads |
+| Query one status candidate | `lan::query_ac_v3`, `query_dishwasher_v3`, `query_refrigerator_v3` | [ADR-0051](../adr/0051-bounded-ac-lan-read-sequence.md) and [ADR-0053](../adr/0053-dishwasher-refrigerator-lan-reads.md): one handshake, appliance-message version query, then one family-specific query on the same connection. Both replies validate expected target and inner context; one inherited deadline and per-packet clock reads |
 
 Credential lookup requires cloud connectivity. Protected inner session version 2
 retains the original login client identifier needed by this request. Legacy inner
@@ -278,12 +278,20 @@ V3 transport and is not a model/subtype identifier. Failure at either query,
 cancellation, deadline or drop closes the socket without retry or partial state.
 
 The pure `encode_appliance_query`/`decode_appliance_protocol` helpers admit AC,
-E1 and CA message-version frames. Only the AC composed status query exists.
-`encode_ac_status_query` and `decode_ac_c0_status` implement the standard AC/C0
-path under [ADR-0049](../adr/0049-ac-lan-query-and-c0-decoding.md). Their raw
-mode/fan codes and optional ambient values have no proven observation time.
-`query_ac_v3` returns these native `AcC0Status` candidates, not a Core Snapshot.
-No E1/CA LAN status mapping, LAN control encoder or physical support is implied.
+E1 and CA message-version frames. `encode_ac_status_query` and
+`decode_ac_c0_status` implement the standard AC/C0 path under
+[ADR-0049](../adr/0049-ac-lan-query-and-c0-decoding.md). Its raw mode/fan codes and
+optional ambient values have no proven observation time.
+
+The E1/CA codecs in [ADR-0053](../adr/0053-dishwasher-refrigerator-lan-reads.md)
+encode standard one-byte-body AA queries and decode selected general prefixes.
+`DishwasherStatus` preserves raw status/mode/option/temperature codes, shortage
+and door bits, and length-dependent remaining minutes. `RefrigeratorStatus`
+contains raw mode flags and the two main compartments' power, target and actual
+Celsius values. CA Fahrenheit, Toshiba, notifications and exception layouts are
+refused; optional extension fields are not interpreted. All three query helpers
+return native candidates, not Core Snapshots. Exact-model capability/freshness
+mapping, LAN controls and physical support are not established by these codecs.
 
 ### Remaining route-admission work
 
