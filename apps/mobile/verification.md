@@ -1504,3 +1504,32 @@ key. Builds now set ANDROID_USER_HOME to the existing persistent Android directo
 the build guide records this requirement. The rebuilt APK certificate was checked
 against that persistent local development key. No key is copied into this repo.
 The final rebuilt artifact and updated runtime inspection follow below.
+
+
+### Final bilingual Android artifact
+
+The final release-mode Meiju APK was built from clean source
+`312eeb5dab2b48325b9792ff5fdf4362a33209fe` with Flutter 3.47.7, the existing
+native dual-ABI AAR and persistent local development signing. Archive verification
+passed: arm64-v8a/x86_64, 17 Core exports per ABI, signature, disabled backup and
+16 KiB ZIP/ELF alignment. The app remains a development artifact, not a store release.
+
+- Local artifact: `output/flutter-verification/android/homeverb-0.2.0-meiju-i18n.apk`
+- Bytes: 68061872
+- SHA-256: `e48661d8e5f95770464d2771390c0b66c7c77030f9412dc90718691cd81f62a5`
+- Commands: `fvm flutter build apk --release --target-platform android-arm64,android-x64 --dart-define=HOMEVERB_ADAPTER=midea.meiju`,
+  `scripts/verify_flutter_apk.py --adapter midea.meiju` with the artifact/toolchain
+  paths, and explicit `adb -s emulator-5586 install -r` followed by cold start.
+
+The final APK successfully updated the persistent-key installation without wiping
+its preferences. It reopened in Chinese. Actual UI inspection and screenshot review
+confirmed Chinese navigation, language preference and both corrected section labels.
+The app remains open on its Chinese Settings page. The earlier force-stop/new-process
+check established preference persistence; the final update independently retained it.
+Local `i18n-runtime-evidence.json`, the archive report and
+`i18n-settings-zh-CN-final.png` accompany the APK. No artifacts were uploaded.
+
+Real provider login remains blocked by the earlier `SECRET_STORE_UNAVAILABLE`
+attempt, which was not retried during this localization-first phase. No real-device
+write, physical-phone acceptance or remote push is claimed. Core API 1.22, SQLite 5,
+protected payload 3 and read-only startup authority remain unchanged.
