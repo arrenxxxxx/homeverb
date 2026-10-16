@@ -84,6 +84,14 @@ def validate_entitlements(entitlements):
         raise ValueError('The isolated app must have only its exact fictional private Keychain scope.')
 
 
+def launch_failure_messages(log):
+    records = json.loads(log)
+    messages = [record.get('eventMessage', '') for record in records if isinstance(record, dict)]
+    failures = [message for message in messages if isinstance(message, str)
+                and re.search(r'fail|denied|error|unsupported|invalid|incompatible|refus', message, re.IGNORECASE)]
+    return '\n'.join(message[:4000] for message in failures[-12:]) or 'No matching failure messages.'
+
+
 def build_app(directory):
     architecture = platform.machine()
     if architecture not in package.DESTINATIONS['simulator']['targets']:
@@ -153,9 +161,9 @@ def exercise(app, runtime, device_type):
                 predicate = f'eventMessage CONTAINS "{BUNDLE}" OR eventMessage CONTAINS "HomeVerbAcceptance"'
                 try:
                     log = command('xcrun', 'simctl', 'spawn', device, 'log', 'show', '--last', '2m',
-                                  '--style', 'compact', '--predicate', predicate, timeout=30)
-                    print('Isolated test-app launch diagnostics:\n' + log[-12000:], flush=True)
-                except subprocess.SubprocessError:
+                                  '--style', 'json', '--predicate', predicate, timeout=30)
+                    print('Isolated test-app launch diagnostics:\n' + launch_failure_messages(log), flush=True)
+                except (ValueError, subprocess.SubprocessError):
                     print('Isolated test-app launch diagnostics unavailable.', flush=True)
                 raise
             if phase == 'write':

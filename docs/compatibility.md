@@ -1609,3 +1609,8 @@ test-app-filtered launch diagnostics from only its newly created Simulator befor
 cleanup, without relaunching. It never collects host logs or user-device diagnostics.
 A ninth portable runner test verifies this failure path and preserves the original
 launch error if diagnostics are unavailable.
+
+The follow-up `610d92c` reproduced the launch refusal, but later SpringBoard UI
+messages displaced the cause in the diagnostic tail. Structured log filtering
+now retains bounded failure messages independently of later UI noise; a regression
+test verifies that selection. This is diagnostic work, not runtime acceptance.

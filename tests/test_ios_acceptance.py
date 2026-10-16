@@ -1,6 +1,7 @@
 """Refuse stale/incomplete runtime evidence and protect existing simulators."""
 
 from pathlib import Path
+import json
 import sys
 import subprocess
 import tempfile
@@ -141,6 +142,14 @@ class IosAcceptanceTests(unittest.TestCase):
             self.assertEqual(len(diagnostics), 1)
             self.assertIn('org.homeverb.test', diagnostics[0][-1])
             self.assertEqual([call[2] for call in calls[-2:]], ['shutdown', 'delete'])
+
+    def test_launch_failure_is_not_hidden_by_later_ui_noise(self):
+        records = [{'eventMessage': 'Launch failed: fictional incompatible executable.'}]
+        records.extend({'eventMessage': 'Fictional AppSwitcher transition.'} for _ in range(1000))
+        result = ios.launch_failure_messages(json.dumps(records))
+        self.assertIn('incompatible executable', result)
+        self.assertNotIn('AppSwitcher', result)
+        self.assertLess(len(result), 100)
 
 
 if __name__ == '__main__':
