@@ -45,7 +45,7 @@ jobs:
           rustup toolchain install 1.96.0 --profile minimal --component clippy --target aarch64-apple-ios --target aarch64-apple-ios-sim
           cargo fetch --locked
       - name: Test Keychain orchestration and Core Foundation query objects
-        run: cargo test -p homeverb-secrets --offline --locked ios::
+        run: 'cargo test -p homeverb-secrets --offline --locked ios::'
       - name: Check and link the iOS native library
         run: |
           for target in aarch64-apple-ios aarch64-apple-ios-sim; do
