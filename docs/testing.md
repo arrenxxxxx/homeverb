@@ -209,8 +209,21 @@ background/close invalidation and accepted receipt lookup. A separate simulated
 write reaches its state commit before background cancellation, retains `unknown`
 across reopen and returns the same receipt without reapplying the command after
 a subsequent state change. Test-only JNI code remains outside production AARs;
-there is no Internet permission or provider account. Flutter consent, process-kill
-recovery and physical-phone behavior are not inferred from this test.
+there is no Internet permission or provider account. Flutter consent and physical-phone behavior are not inferred from this test.
+The separate force-stop phase below tests process recovery on the emulator.
+
+## Android forced-stop recovery
+
+The [isolated force-stop phase](development/08-android-native.md#verify-a-forced-process-stop-after-transmission)
+requires matching run/PID evidence from a still-live fictional write, force-stops
+only its test APK, verifies process absence, then starts another process. Recovery
+checks the unfinalized journal before Core opens, unchanged `unknown` results,
+read-only receipt access, released locks, no replay after a later state change,
+and request-ID retirement after history clearing. The host treats missing/stale
+markers, completed observers and unsuccessful process-state checks as failures;
+no exit code or readiness file alone establishes termination. JSON receipts are
+compared structurally with every field retained. No Internet permission or
+provider account is present, and this phase does not establish phone/OEM behavior.
 
 ## Unverified release gates
 

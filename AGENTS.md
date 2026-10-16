@@ -57,7 +57,9 @@ The Rust Mock MVP, Linux Secret Service library, and native account vault are im
 An isolated test APK has passed native Core and Android Keystore checks on AOSP
 Android 15 x86_64, including process restart and lock-screen refusal. Its separate control phase verifies
 local grant revocation, trusted approval consumption/lifecycle and uncertain
-write receipt recovery without replay on Android. It uses
+write receipt recovery without replay on Android. A separate force-stop phase
+verifies a live pending write, actual process disappearance and new-process
+recovery of the unchanged unknown receipt with replay/retirement guards. It uses
 fictional material and no Internet permission. Android storage must use the
 reviewed Bionic file-lock path; standard Rust file locking is unsupported there.
 See the [Android acceptance guide](docs/development/08-android-native.md).

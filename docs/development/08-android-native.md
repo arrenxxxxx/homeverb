@@ -255,8 +255,8 @@ It calls the production C ABI through test-only JNI wrappers to verify:
 Every test profile is local to the disposable APK. This phase does not call the
 Meiju provider, obtain LAN credentials or send appliance traffic. The test APK
 still has no permissions, while production AAR contents and C exports are unchanged.
-Session reopening is tested here; forced process termination remains a separate
-mobile acceptance requirement.
+This phase tests session reopening. The separate force-stop phase below covers
+process termination on the emulator; physical-phone acceptance remains separate.
 
 The subsequent API 1.17 control-flow run used a fresh disposable instance of the
 same AOSP Android 15 x86_64 image. The independent `controls` phase passed 93
@@ -266,6 +266,48 @@ assertions. Android lock state was checked before sensitive phases. Production
 AARs were unchanged; the rebuilt test APK passed signature, ABI, no-permission
 and 16 KiB ZIP-alignment checks. These results do not establish physical Keystore,
 Flutter consent, real account access or appliance behavior.
+
+### Verify a forced process stop after transmission
+
+Run the independent phase only on the dedicated disposable emulator:
+
+```bash
+.venv/bin/python scripts/verify_android_acceptance.py \
+  --adb-port 5047 --serial emulator-5588 --phase force-stop
+```
+
+The host creates a unique test run and starts an instrumentation process. Native
+Core writes its conservative journal and the fictional appliance commits a state
+change while the acknowledgement is delayed. The test verifies that the call is
+still pending and the journal remains unfinalized, then atomically publishes a
+run/PID marker. The host accepts only that run's marker and a matching live test
+process. It force-stops only `org.homeverb.nativeacceptance`, waits for the observer
+and verifies process absence before starting recovery. An old marker, a completed
+observer, a missing live PID or a successful stop command alone cannot pass.
+Preparation has no successful callback; failure to stop within its bounded window
+cancels the fictional operation and fails the phase.
+
+A new process must find the committed fictional state and an unfinalized `unknown`
+receipt before opening Core. Read-only startup recovers that receipt unchanged and
+finalizes the orphaned journal after acquiring the released device lock. Reopening
+with fictional grants permits a different state change; replaying the interrupted
+request returns its original receipt without applying it again. Explicit history
+clearing then retires its request ID, preserving replay refusal. The test clears
+its run marker only after all recovery assertions succeed. A failed run requires
+uninstall/reinstall of this isolated APK before another attempt.
+
+On October 16, 2026, a fresh AOSP Android 15 x86_64 emulator passed all 27 recovery
+assertions and the host's live-process/termination checks. The existing `controls`
+and `unsecured` phases also passed 93 and 17 assertions. The initial recovery
+comparison failed because raw SQLite and public JSON used different object-key
+orders; structural comparison retained every field and the rebuilt APK passed.
+Six host-side test groups additionally reject stale/malformed readiness evidence,
+normal observer completion, absent/mismatched processes and unverified stop
+results, including bounded waiting for delayed process disappearance. All 39
+Python tests passed. APK compilation, signature, ABI, no-permission and 16 KiB
+ZIP-alignment checks passed. No production API, storage or execution code changed.
+This is Android emulator process-recovery evidence, not Flutter consent,
+physical-phone/OEM lifecycle or real-appliance acceptance.
 
 Before enabling a phone release, repeat Keystore round trips across process
 restart, OS/OEM key invalidation, profile isolation, screen locking/unlocking, unavailable

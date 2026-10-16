@@ -1292,3 +1292,33 @@ emulator installation and dedicated ADB server were cleaned up after acceptance.
 Actual Flutter consent, physical phones, forced process termination during control
 and real/off-LAN appliance behavior remain pending. Remote CI for this test phase
 is inspected after commit/push.
+
+## Android forced-stop journal recovery
+
+The isolated APK's `force-stop` phase now demonstrates actual process termination
+after a fictional state commit and before acknowledgement. A unique run/PID marker
+is accepted only while the matching instrumentation/application process is live.
+The host stops only the test package and verifies process disappearance before
+starting recovery. Neither a readiness file nor an observer exit code alone is
+accepted as termination evidence.
+
+On October 16, 2026, AOSP Android 15 x86_64 passed 27 recovery assertions: the
+pre-open journal remained unfinalized and `unknown`; read-only startup finalized
+it without changing the receipt or fictional appliance state; released Bionic
+locks allowed a subsequent write; replay did not repeat the interrupted command;
+history clearing preserved request-ID retirement. Existing controls/unsecured
+phases passed 93/17 assertions. An initial test compared JSON text with different
+key order; structural equality fixed the assertion while retaining every field.
+
+The rebuilt APK passed Java/C compilation, signature, ABI/no-permission and
+16 KiB ZIP-alignment checks. Six new host-side test groups cover stale/malformed
+markers, normal completion, process identity/absence and delayed termination;
+all 39 Python tests and documentation/contract/repository/commit checks passed.
+Both CI workflows for the previous `e2009aa` commit were confirmed successful.
+The disposable APK, emulator and dedicated ADB server were cleaned up.
+
+Production Rust/Java code, API 1.17.0, C exports, grants, storage versions and
+execution semantics are unchanged. No real account, appliance, Flutter worktree
+or physical phone was accessed. Flutter interaction, physical/OEM process behavior
+and real/off-LAN controls remain separate acceptance gates. This phase's remote CI
+is checked after its commit and push.

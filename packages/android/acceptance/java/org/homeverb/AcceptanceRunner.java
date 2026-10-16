@@ -75,6 +75,10 @@ public final class AcceptanceRunner extends Instrumentation {
                 readAndClean(context);
             } else if ("controls".equals(phase)) {
                 new ControlAcceptance(this, context).run();
+            } else if ("crash_prepare".equals(phase)) {
+                new CrashAcceptance(this, context, arguments.getString("run_id", "")).prepare();
+            } else if ("force-stop".equals(phase)) {
+                new CrashAcceptance(this, context, arguments.getString("run_id", "")).recover();
             } else {
                 throw new AssertionError();
             }
