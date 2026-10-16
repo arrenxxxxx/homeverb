@@ -1322,3 +1322,44 @@ execution semantics are unchanged. No real account, appliance, Flutter worktree
 or physical phone was accessed. Flutter interaction, physical/OEM process behavior
 and real/off-LAN controls remain separate acceptance gates. This phase's remote CI
 is checked after its commit and push.
+
+## Trusted native selected-device scan bridge
+
+[ADR-0058](adr/0058-native-lan-scan-bridge.md) adds API 1.18.0 and three separate
+C prepare/confirm/discard functions around the existing typed Meiju scan. The
+controller supplies platform-assigned interface information outside ordinary
+JSON and obtains actual user consent to immutable device/network scope. Session
+retains at most eight previews for 60 seconds, consumes confirmation before
+admission, and clears previews on background/close. Scan and appliance-approval
+IDs cannot alias across their separate consent registries.
+
+The returned four-state summary contains only local IDs and explicit false
+authentication/route flags. No candidate endpoint, provider identity or retained
+candidate handle is exported. Preparation does no discovery; confirmation
+reuses bounded collection, protected account leases and identity checks.
+The 33 ordinary methods, CLI/MCP, cloud grants/routing, storage versions and
+appliance write outcomes are unchanged. Thirteen C functions plus Android
+credential JNI initialization are now required by archive export inspection.
+
+On October 16, 2026, six new injected Session tests passed, covering four outcomes,
+schema-valid immutable previews/results, cross-handle and consent-kind isolation,
+capacity/expiry, duplicate confirmation during a scan, failure consumption,
+membership changes, lifecycle/preparation races and cancellation/deadline/drop.
+All 14 typed/native scan tests passed. The actual Linux C ABI suite checks
+metadata, network syntax, ordinary-dispatch refusal and background/closed
+admission without accounts or UDP traffic; successful scans are exercised through
+the injected Session path, not a live C-triggered household scan.
+
+Verification passed: 447 Rust tests with two explicitly ignored system/account
+probes, formatting, Clippy, workspace/example builds, 35 runtime checks, all 33
+native methods/54 fictional examples plus trusted approval/dishwasher/scan checks,
+39 Python tests, six presentation tests and document/contract/repository/commit
+validation. Android arm64, x86_64 and combined AAR builds passed architecture,
+all 14 exports and 16 KiB alignment inspection. No dependencies were added.
+Both CI workflows for the previous `6415f79` commit were confirmed successful.
+
+No real account, household network/device, Flutter worktree, emulator or physical
+phone was accessed by this phase. Mobile interface/permission selection, Flutter
+consent, endpoint/model admission, connection linking and physical/off-LAN
+acceptance remain pending. This phase is committed and pushed after local checks;
+its remote CI is inspected separately.

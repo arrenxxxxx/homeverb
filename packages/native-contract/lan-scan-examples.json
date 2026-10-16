@@ -1,0 +1,86 @@
+{
+  "api_version": "1.18.0",
+  "prepare": {
+    "schema_version": "1.0",
+    "operation_id": "scan-preview",
+    "timeout_ms": 10000,
+    "device_id": "30000000-0000-4000-8000-000000000001",
+    "connection_id": "30000000-0000-4000-8000-000000000002"
+  },
+  "network_arguments": {
+    "local_address": 3232246274,
+    "prefix_length": 24
+  },
+  "confirm": {
+    "schema_version": "1.0",
+    "operation_id": "scan-confirm",
+    "timeout_ms": 10000,
+    "scan_id": 1
+  },
+  "prepare_result": {
+    "schema_version": "1.0",
+    "data": {
+      "device_id": "30000000-0000-4000-8000-000000000001",
+      "connection_id": "30000000-0000-4000-8000-000000000002",
+      "scan_id": 1,
+      "alias": "Fictional AC",
+      "network": {
+        "local_address": "192.168.42.2",
+        "prefix_length": 24
+      },
+      "expires_in_ms": 60000
+    },
+    "warnings": [],
+    "error": null
+  },
+  "outcomes": [
+    {
+      "schema_version": "1.0",
+      "data": {
+        "device_id": "30000000-0000-4000-8000-000000000001",
+        "connection_id": "30000000-0000-4000-8000-000000000002",
+        "status": "not_observed",
+        "authenticated": false,
+        "route_added": false
+      },
+      "warnings": [],
+      "error": null
+    },
+    {
+      "schema_version": "1.0",
+      "data": {
+        "device_id": "30000000-0000-4000-8000-000000000001",
+        "connection_id": "30000000-0000-4000-8000-000000000002",
+        "status": "incomplete",
+        "authenticated": false,
+        "route_added": false
+      },
+      "warnings": [],
+      "error": null
+    },
+    {
+      "schema_version": "1.0",
+      "data": {
+        "device_id": "30000000-0000-4000-8000-000000000001",
+        "connection_id": "30000000-0000-4000-8000-000000000002",
+        "status": "ambiguous",
+        "authenticated": false,
+        "route_added": false
+      },
+      "warnings": [],
+      "error": null
+    },
+    {
+      "schema_version": "1.0",
+      "data": {
+        "device_id": "30000000-0000-4000-8000-000000000001",
+        "connection_id": "30000000-0000-4000-8000-000000000002",
+        "status": "unique_candidate",
+        "authenticated": false,
+        "route_added": false
+      },
+      "warnings": [],
+      "error": null
+    }
+  ]
+}

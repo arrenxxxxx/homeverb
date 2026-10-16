@@ -317,6 +317,25 @@ def main() -> int:
     for value in [0, -1, 18446744073709551616, "1", True]:
         bad = dict(approval["execute"]); bad["approval_id"] = value
         negative.append(("invalid native approval ID", native_validator("native-approval", "execute"), bad))
+    scan = load("packages/native-contract/lan-scan-examples.json")
+    assert scan["api_version"] == load("packages/native-contract/api.json")["api_version"]
+    for definition in ["prepare", "confirm", "prepare_result"]:
+        shape = native_validator("native-lan-scan", definition)
+        shape.validate(scan[definition])
+        for field in ["confirmed", "principal", "endpoint", "network", "appliance_id"]:
+            bad = copy.deepcopy(scan[definition]); bad[field] = "FORBIDDEN"
+            negative.append((f"scan {definition} rejects {field}", shape, bad))
+    for outcome in scan["outcomes"]:
+        shape = native_validator("native-lan-scan", "confirm_result")
+        shape.validate(outcome)
+        for field, value in [("authenticated", True), ("route_added", True),
+                             ("status", "verified"), ("endpoint", "192.168.42.3"),
+                             ("appliance_id", "FORBIDDEN")]:
+            bad = copy.deepcopy(outcome); bad["data"][field] = value
+            negative.append((f"scan result rejects {field}", shape, bad))
+    for value in [0, -1, 18446744073709551616, "1", True]:
+        bad = dict(scan["confirm"]); bad["scan_id"] = value
+        negative.append(("invalid scan ID", native_validator("native-lan-scan", "confirm"), bad))
     for name, validator, data in negative:
         if validator.is_valid(data):
             raise AssertionError(f"Counterexample was not rejected: {name}")

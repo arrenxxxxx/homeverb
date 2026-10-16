@@ -1,0 +1,30 @@
+{
+  "api_version": "1.18.0",
+  "functions": {
+    "homeverb_prepare_lan_scan": {
+      "parameters": [
+        "uint64 handle",
+        "const char *metadata",
+        "uint32 local_address",
+        "uint8 prefix_length"
+      ],
+      "request": "native-lan-scan#/$defs/prepare",
+      "response": "native-lan-scan#/$defs/prepare_result"
+    },
+    "homeverb_confirm_lan_scan": {
+      "request": "native-lan-scan#/$defs/confirm",
+      "response": "native-lan-scan#/$defs/confirm_result"
+    },
+    "homeverb_discard_lan_scan": {
+      "parameters": [
+        "uint64 handle",
+        "uint64 scan_id"
+      ],
+      "response": "bool"
+    }
+  },
+  "limits": {
+    "max_pending_scans": 8,
+    "scan_ttl_ms": 60000
+  }
+}

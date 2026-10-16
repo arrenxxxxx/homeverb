@@ -9,7 +9,10 @@ use std::{path::Path, sync::Arc};
 mod native_approval;
 pub use native_approval::{ExecuteApprovalRequest, PrepareApprovalRequest};
 mod session;
-pub use session::{HostRequest, PendingMeijuLanScan, Request, Session};
+pub use session::{
+    ConfirmLanScanRequest, HostRequest, PendingMeijuLanScan, PrepareLanScanRequest, Request,
+    Session,
+};
 mod accounts;
 pub use accounts::{AccountConnection, AccountSummary, ConnectRequest};
 mod power_grants;

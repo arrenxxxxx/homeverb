@@ -166,3 +166,11 @@ Render translation results as text, not raw HTML. Present requested values separ
 The native ABI is verified through a Linux ctypes host that loads Core directly, executes a write, backgrounds the host, observes cancellation, and closes it. This does not establish Flutter, Android, or iOS support.
 
 Next: [Add a real adapter](04-add-adapter.md).
+
+## Trusted local-network scan
+
+API 1.18 adds [three trusted scan functions](../native-ui-contract.md#trusted-local-network-scan-api-118)
+outside general JSON. The UI first integrates assigned-interface selection and
+platform permission, shows the immutable device/network scope, and obtains actual
+consent. Scan results contain no endpoint or route authority. Do not connect these
+functions to automatic discovery or treat a candidate as a connected appliance.

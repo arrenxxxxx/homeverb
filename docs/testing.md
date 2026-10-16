@@ -228,3 +228,20 @@ provider account is present, and this phase does not establish phone/OEM behavio
 ## Unverified release gates
 
 Physical-device authentication and control, real-provider account recovery and token rotation, actual Android Keystore, Android APK/iOS builds and phone lifecycle, a target AI host, dependency/security review, package installation, and licensing remain pending. The mainland read-only Meiju pilot and Android library builds do not establish these acceptance gates. Real writes require explicit device-owner authorization. Two different protocol families must demonstrate equivalent capability calls before cross-platform support is claimed.
+
+## Trusted native scan bridge
+
+`cargo test -p homeverb-host --test meiju_accounts lan_scan --offline --locked`
+exercises the typed and native Session paths with fictional account/discovery
+transports. Native cases cover all four outcomes, immutable scope, schema-valid
+outputs, cross-session and consent-kind isolation, single consumption including
+concurrent confirmation/refusal, capacity/expiry, background/close, preparation
+races, cancellation/deadline/drop and lease release. No household network is used.
+
+`python3 scripts/verify_native_contract.py` includes the three actual C export
+parsing/admission checks on empty temporary profiles, plus closed request/result
+schema counterexamples. Successful scans use the injected Session tests; the C
+suite does not access a provider account or perform UDP discovery. Android AAR
+inspection requires all 13 C functions and credential JNI initialization.
+Platform interface/permission selection, Flutter consent and physical acceptance
+remain pending.

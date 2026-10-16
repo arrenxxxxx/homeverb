@@ -342,8 +342,9 @@ Before enabling a product route, complete these separate gates:
 
 1. Integrate trusted host selection of an assigned network and foreground network
    consent, with mobile permission/lifecycle acceptance. The typed Rust preview
-   and consuming scan are implemented under ADR-0054; platform interface selection,
-   permissions, consent UI and the mobile bridge are still pending. Private address
+   and consuming scan are implemented under ADR-0054; API 1.18 adds the separate
+   [trusted C scan bridge](../adr/0058-native-lan-scan-bridge.md). Platform interface
+   selection, permissions and consent UI are still pending. Private address
    syntax is not proof of interface ownership. Do not ask ordinary JSON callers to
    supply private addresses, keys or a confirmation boolean.
 2. Establish endpoint/account identity evidence and exact model/profile selection.

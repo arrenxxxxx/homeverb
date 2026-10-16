@@ -175,5 +175,13 @@
   "control.options.allow": "允许所选控制",
   "control.permissions": "本次会话允许的控制",
   "control.permissions.empty": "本次会话未允许通过此连接控制该设备。",
-  "control.permissions.notice": "这些权限仅适用于本次会话。操作时仍需检查设备是否可用，并完成所需的确认。"
+  "control.permissions.notice": "这些权限仅适用于本次会话。操作时仍需检查设备是否可用，并完成所需的确认。",
+  "lan.scan.title": "在局域网中查找此设备",
+  "lan.scan.confirm": "扫描所选网络",
+  "lan.scan.notice": "仅在应用前台扫描所选网络。发现候选设备不代表已添加连接或验证设备。",
+  "lan.scan.network": "所选网络：{address}/{prefix}",
+  "lan.scan.not_observed": "未发现匹配的候选设备。",
+  "lan.scan.incomplete": "扫描结果不完整，未选择候选设备。",
+  "lan.scan.ambiguous": "发现相互冲突的候选设备，未选择任何设备。",
+  "lan.scan.unique_candidate": "发现一个候选设备，仍需验证设备并配置连接。"
 }

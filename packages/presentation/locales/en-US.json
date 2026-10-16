@@ -175,5 +175,13 @@
   "control.options.allow": "Allow selected controls",
   "control.permissions": "Allowed controls for this session",
   "control.permissions.empty": "No controls are allowed for this device on this connection.",
-  "control.permissions.notice": "These permissions apply to this session. Device availability and any confirmation needed are checked when you use a control."
+  "control.permissions.notice": "These permissions apply to this session. Device availability and any confirmation needed are checked when you use a control.",
+  "lan.scan.title": "Find this device on the local network",
+  "lan.scan.confirm": "Scan selected network",
+  "lan.scan.notice": "Scan only the selected network while this app is in the foreground. Finding a candidate does not add a connection or verify the device.",
+  "lan.scan.network": "Selected network: {address}/{prefix}",
+  "lan.scan.not_observed": "No matching candidate was observed.",
+  "lan.scan.incomplete": "The scan was incomplete. No candidate was selected.",
+  "lan.scan.ambiguous": "Conflicting candidates were found. No candidate was selected.",
+  "lan.scan.unique_candidate": "One candidate was found. Device verification and connection setup are still required."
 }

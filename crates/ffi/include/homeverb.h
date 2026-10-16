@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 /* All strings are UTF-8. Inputs remain caller-owned; free each output exactly once. */
-/* Call open/call/connect/approval/close on worker threads. Cancel and foreground updates may run concurrently. */
+/* Call open/call/connect/approval/scan/close on worker threads. Cancel and foreground updates may run concurrently. */
 char *homeverb_open(const char *config_json);
 char *homeverb_call(uint64_t handle, const char *request_json);
 /* Secret buffers are disjoint caller-owned writable memory; no concurrent access. */
@@ -19,6 +19,14 @@ char *homeverb_connect_account(uint64_t handle, const char *metadata_json,
 char *homeverb_prepare_approval(uint64_t handle, const char *request_json);
 char *homeverb_execute_approved(uint64_t handle, const char *request_json);
 bool homeverb_discard_approval(uint64_t handle, uint64_t approval_id);
+/* API 1.18+: trusted UI scan consent, never ordinary JSON/model tools. */
+/* Obtain assigned interface/permission from the platform. IPv4 is numeric octets: */
+/* 192.168.42.2 = 0xC0A82A02 regardless of memory byte order. Display returned scope. */
+char *homeverb_prepare_lan_scan(uint64_t handle, const char *request_json,
+                               uint32_t local_address, uint8_t prefix_length);
+/* Recheck interface/permission and obtain user consent before consuming the preview. */
+char *homeverb_confirm_lan_scan(uint64_t handle, const char *request_json);
+bool homeverb_discard_lan_scan(uint64_t handle, uint64_t scan_id);
 bool homeverb_cancel(uint64_t handle, const char *operation_id);
 void homeverb_set_foreground(uint64_t handle, bool foreground);
 void homeverb_close(uint64_t handle);

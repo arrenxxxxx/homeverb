@@ -12,7 +12,7 @@ use std::{
 use tokio_util::sync::CancellationToken;
 
 mod lan_scan;
-pub use lan_scan::PendingMeijuLanScan;
+pub use lan_scan::{ConfirmLanScanRequest, PendingMeijuLanScan, PrepareLanScanRequest};
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -116,13 +116,14 @@ pub enum Request {
     },
 }
 
-static NEXT_APPROVAL_ID: AtomicU64 = AtomicU64::new(1);
+static NEXT_PREVIEW_ID: AtomicU64 = AtomicU64::new(1);
 
 struct State {
     foreground: bool,
     closed: bool,
     operations: HashMap<String, CancellationToken>,
     approvals: HashMap<u64, PendingApproval>,
+    lan_scans: HashMap<u64, PendingMeijuLanScan>,
     approval_generation: u64,
 }
 
@@ -154,6 +155,7 @@ impl Session {
                 closed: false,
                 operations: HashMap::new(),
                 approvals: HashMap::new(),
+                lan_scans: HashMap::new(),
                 approval_generation: 0,
             })),
         }
@@ -195,6 +197,7 @@ impl Session {
             if !foreground {
                 self.core.invalidate_user_approvals();
                 state.approvals.clear();
+                state.lan_scans.clear();
                 state.approval_generation += 1;
                 for token in state.operations.values() {
                     token.cancel();
@@ -219,6 +222,7 @@ impl Session {
             state.closed = true;
             self.core.invalidate_user_approvals();
             state.approvals.clear();
+            state.lan_scans.clear();
             state.approval_generation += 1;
             for token in state.operations.values() {
                 token.cancel();
@@ -330,7 +334,7 @@ impl Session {
                     "Dismiss a pending approval before preparing another.",
                 ));
             }
-            let id = NEXT_APPROVAL_ID.fetch_add(1, Ordering::Relaxed);
+            let id = NEXT_PREVIEW_ID.fetch_add(1, Ordering::Relaxed);
             let value = json!({
                 "approval_id": id,
                 "command": preview.command(),

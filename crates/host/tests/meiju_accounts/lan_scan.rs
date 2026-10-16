@@ -7,6 +7,9 @@ use homeverb_midea::lan::{
 use std::time::Duration;
 use tokio::sync::Notify;
 
+#[path = "lan_scan/native.rs"]
+mod native;
+
 #[derive(Default)]
 struct Discovery {
     reply: Mutex<Option<DiscoveryReport>>,

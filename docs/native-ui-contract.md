@@ -5,7 +5,7 @@ Status: implemented Linux native contract, October 16, 2026, with Mock, default 
 ## Start here in a Flutter worktree
 
 The connection-linking foundation in [ADR-0052](adr/0052-trusted-connection-linking.md)
-is currently typed Rust Core/Session only. API 1.17.0 has no JSON/C/JNI link
+is currently typed Rust Core/Session only. API 1.18.0 has no JSON/C/JNI link
 method; Meiju does not opt in. Do not wire a confirmation button to discovery,
 invent a `confirmed` request field or add a duplicate LAN card. Native route
 admission and a separately versioned mobile bridge remain prerequisites.
@@ -14,8 +14,9 @@ admission and a separately versioned mobile bridge remain prerequisites.
 `prepare_meiju_lan_scan` / `scan_meiju_lan_candidate`. Display the immutable saved
 device and selected native network, then consume the 60-second preview only after
 actual user consent. Preparation performs local protected preflight; confirmation
-collects bounded hints for that device. There is no JSON/C/JNI scan method in
-1.17.0. Flutter permission/interface selection and a versioned bridge remain
+collects bounded hints for that device. API 1.18 adds the
+[trusted C scan bridge](#trusted-local-network-scan-api-118); ordinary JSON and
+CLI/MCP cannot scan. Flutter permission/interface selection and consent remain
 pending. A unique candidate neither adds a LAN card/route nor authorizes credentials,
 state queries or controls. Scan consent and connection-link consent are separate.
 
@@ -27,11 +28,11 @@ Startup explicitly selects Mock or Meiju; Meiju remains read-only unless the tru
 
 ## Startup, ownership, and version negotiation
 
-The ten C functions in [homeverb.h](../crates/ffi/include/homeverb.h) remain the native boundary. There is no HTTP endpoint, port, CLI subprocess, or daemon.
+The 13 C functions in [homeverb.h](../crates/ffi/include/homeverb.h) remain the native boundary. There is no project HTTP endpoint, CLI subprocess, or daemon.
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects saved-account cloud reads. `scenario` defaults to `normal`. Meiju requires `allow_mock_writes: false` and rejects any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms `homeverb.mock` or `midea.meiju`. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.17.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.18.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -1101,4 +1102,54 @@ identifier. This is separate from outer account payload version 3. Current
 libraries continue using version-1 sessions for existing cloud functions without
 rewriting them. Older libraries refuse inner version 2; upgrade rather than reset
 accounts or discard local bindings. No client identifier, Token/Key, LAN method or
-new consent flow is exposed to Flutter by this phase; API 1.17.0 exposes no scan method.
+new consent flow is exposed by the payload migration itself; API 1.18 separately
+provides the trusted scan bridge below.
+
+## Trusted local-network scan (API 1.18)
+
+Require API 1.18 before resolving the three exports in
+[lan-scan.json](../packages/native-contract/lan-scan.json). Their
+[closed schemas](../schemas/native-lan-scan.schema.json) and
+[fictional examples](../packages/native-contract/lan-scan-examples.json) are
+separate from the 33 ordinary JSON methods. See [ADR-0058](adr/0058-native-lan-scan-bridge.md).
+
+1. The trusted controller obtains an assigned IPv4 interface/prefix from the OS
+   and handles local-network permission. Do not take addresses from tool input.
+   Call `homeverb_prepare_lan_scan(handle, metadata, local_address, prefix_length)`
+   on a worker. Metadata contains `schema_version`, `operation_id`, `timeout_ms`,
+   `device_id` and `connection_id`. The last two C arguments are unsigned 32-bit
+   numeric IPv4 octets and an unsigned 8-bit prefix: `192.168.42.2/24` is
+   `0xC0A82A02, 24`, independent of memory byte order. Native validation restricts
+   private/link-local subnet syntax; it cannot prove platform ownership/permission.
+2. Display the returned immutable `alias`, local device/connection IDs and
+   `network.local_address` / `network.prefix_length`. Preparation does protected
+   local preflight without discovery. Retain `scan_id` only in controller memory.
+   `expires_in_ms` is a remaining display budget; native monotonic time controls
+   the 60-second expiry. Changing the selection requires a new preview.
+3. After actual user consent and a platform interface/permission recheck, call
+   `homeverb_confirm_lan_scan` with only `schema_version`, a new `operation_id`,
+   `timeout_ms` and `scan_id`. A decoded attempt consumes the matching preview
+   even on admission failure. Malformed undecodable metadata does not consume it.
+   There is no replacement network, device, grant or `confirmed` field.
+4. A successful query returns local `device_id`, `connection_id`, `status`,
+   `authenticated: false` and `route_added: false`. Status is `not_observed`,
+   `incomplete`, `ambiguous` or `unique_candidate`. No appliance endpoint, provider
+   ID, credential or retained candidate handle is exported. None of these states
+   establishes online status, absence, physical support or a usable LAN route.
+5. Dismiss with `homeverb_discard_lan_scan(handle, scan_id)`. It returns whether
+   a pending preview was removed. Use `homeverb_cancel` for an active scan;
+   dismissal cannot cancel consumed work. Background/close clears pending scopes
+   and cancels active work. A restarted session must obtain fresh consent.
+
+At most eight previews are retained; expired entries are pruned when preparing
+another. Scan and appliance-approval IDs share a process-wide allocator but stay
+in separate registries, so one consent kind cannot alias the other. Neither is
+a credential, durable ID or proof of consent. Missing, dismissed, consumed,
+cross-handle and pruned IDs return `LAN_SCAN_INVALID`; a retained expired preview
+returns `LAN_SCAN_EXPIRED`. Neither failure starts a retry. Use `lan.scan.*`
+locale keys; keep the network preview out of logs, diagnostics and persistence.
+
+Use the existing C string ownership and worker-thread rules. These functions are
+not an in-process sandbox and must not be exposed to model/plugin/remote callers.
+Flutter platform selection/permission, consent integration, authenticated
+endpoint/model admission, linking and physical acceptance remain separate work.

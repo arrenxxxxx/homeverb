@@ -119,6 +119,13 @@ remaining preview budget returns `DEADLINE_EXCEEDED`. Neither error triggers
 another scan, credential lookup or route fallback. An empty, incomplete or
 ambiguous report does not establish device absence or a usable endpoint.
 
+API 1.18's [trusted C scan bridge](adr/0058-native-lan-scan-bridge.md) also returns
+`LAN_SCAN_INVALID` for missing, dismissed, consumed, foreign or pruned IDs.
+A decoded confirmation consumes its matching preview before operation admission,
+including errors; malformed undecodable metadata does not. Eight retained previews
+cause `RESOURCE_BUSY` until dismissal or expiry pruning. Results never imply a
+linked connection, and ordinary JSON cannot prepare or consume scan consent.
+
 If persistence fails after verification or while the result is already unknown or partial, optional English `warnings` preserve the infrastructure failure without replacing the stronger outcome. A verified result still has `error: null` and its original evidence, even if saving the observation failed. Existing rejection/cancellation errors are retained too. Composite items remain present and later unsent items keep `NOT_EXECUTED`, even if finalizing their receipt fails. The UI must display these warnings. The saved journal may still contain the earlier conservative receipt.
 
 Receipt lookup reports query failure for `REQUEST_NOT_FOUND` or `REQUEST_RETIRED`; neither establishes the physical outcome. A found receipt is query success even when the nested command status is failed or unknown.

@@ -1,0 +1,229 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "native-lan-scan",
+  "description": "Separate trusted C functions only. Platform-assigned network arguments and actual user consent are required; a candidate never authorizes a connection.",
+  "$defs": {
+    "prepare": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "operation_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 180000
+        },
+        "device_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "connection_id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "schema_version",
+        "operation_id",
+        "timeout_ms",
+        "device_id",
+        "connection_id"
+      ],
+      "additionalProperties": false
+    },
+    "confirm": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "operation_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 180000
+        },
+        "scan_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 18446744073709551615
+        }
+      },
+      "required": [
+        "schema_version",
+        "operation_id",
+        "timeout_ms",
+        "scan_id"
+      ],
+      "additionalProperties": false
+    },
+    "preview": {
+      "type": "object",
+      "properties": {
+        "scan_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 18446744073709551615
+        },
+        "device_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "connection_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "alias": {
+          "type": "string",
+          "minLength": 1
+        },
+        "network": {
+          "type": "object",
+          "properties": {
+            "local_address": {
+              "type": "string",
+              "format": "ipv4"
+            },
+            "prefix_length": {
+              "type": "integer",
+              "minimum": 8,
+              "maximum": 30
+            }
+          },
+          "required": [
+            "local_address",
+            "prefix_length"
+          ],
+          "additionalProperties": false
+        },
+        "expires_in_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 60000
+        }
+      },
+      "required": [
+        "scan_id",
+        "device_id",
+        "connection_id",
+        "alias",
+        "network",
+        "expires_in_ms"
+      ],
+      "additionalProperties": false
+    },
+    "outcome": {
+      "type": "object",
+      "properties": {
+        "device_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "connection_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "status": {
+          "enum": [
+            "not_observed",
+            "incomplete",
+            "ambiguous",
+            "unique_candidate"
+          ]
+        },
+        "authenticated": {
+          "const": false
+        },
+        "route_added": {
+          "const": false
+        }
+      },
+      "required": [
+        "device_id",
+        "connection_id",
+        "status",
+        "authenticated",
+        "route_added"
+      ],
+      "additionalProperties": false
+    },
+    "prepare_result": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "$ref": "#/$defs/preview"
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "urn:homeverb:schema:native-response#/$defs/query_error"
+        }
+      ]
+    },
+    "confirm_result": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "$ref": "#/$defs/outcome"
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "urn:homeverb:schema:native-response#/$defs/query_error"
+        }
+      ]
+    }
+  }
+}

@@ -406,3 +406,15 @@ codes; CA admits only its main-compartment Celsius prefix. Setter replies,
 notifications, alternative headers, short bodies and unsupported units cannot
 become observations or completion evidence. Model/endpoint admission and Core
 route publication remain separate; no caller or grant is implicitly enabled.
+
+## Trusted native scan bridge
+
+[ADR-0058](adr/0058-native-lan-scan-bridge.md) exposes ADR-0054's typed scan through
+three separate trusted C functions in API 1.18. Preparation stores at most eight
+immutable device/network previews; confirmation consumes one before admission.
+The controller must obtain assigned-interface information, platform permission
+and actual foreground consent. Background/close clears previews and cancels work.
+The original bounded operation, account lease and metadata checks still apply.
+Only local IDs and a non-authoritative status leave the bridge; candidate
+endpoints/provider identifiers are dropped. Ordinary JSON, CLI/MCP discovery,
+cloud routing, storage and appliance write outcomes remain unchanged.

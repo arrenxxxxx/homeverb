@@ -3,9 +3,9 @@
 use homeverb_core::SecretBytes;
 use homeverb_domain::{Error, Query};
 use homeverb_host::{
-    ConnectRequest, ExecuteApprovalRequest, HostRequest, MeijuControlGrants,
+    ConfirmLanScanRequest, ConnectRequest, ExecuteApprovalRequest, HostRequest, MeijuControlGrants,
     MeijuDishwasherCycleGrant, MeijuDishwasherGrant, MeijuFanGrant, MeijuModeGrant,
-    MeijuPowerGrant, MeijuTemperatureGrant, PrepareApprovalRequest, Session,
+    MeijuPowerGrant, MeijuTemperatureGrant, PrepareApprovalRequest, PrepareLanScanRequest, Session,
 };
 use homeverb_mock::Scenario;
 use serde::Deserialize;
@@ -284,6 +284,60 @@ pub unsafe extern "C" fn homeverb_execute_approved(
 #[unsafe(no_mangle)]
 pub extern "C" fn homeverb_discard_approval(handle: u64, approval_id: u64) -> bool {
     host(handle).is_some_and(|host| host.session.discard_native_approval(approval_id))
+}
+
+/// Trusted UI only: preview one selected device and platform-assigned IPv4 network.
+/// The address is numeric IPv4 octets (192.168.42.2 = 0xC0A82A02), not memory byte order.
+/// The caller obtains platform permission and displays the returned immutable scope.
+/// # Safety
+/// `request` must be NULL or a valid NUL-terminated UTF-8 string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn homeverb_prepare_lan_scan(
+    handle: u64,
+    request: *const c_char,
+    local_address: u32,
+    prefix_length: u8,
+) -> *mut c_char {
+    output(|| {
+        let Some(host) = host(handle) else {
+            return error("HOST_CLOSED", "The native host handle is closed.");
+        };
+        let Some(request) = (unsafe { input_json::<PrepareLanScanRequest>(request) }) else {
+            return error("INVALID_ARGUMENT", "Invalid scan preparation metadata.");
+        };
+        host.runtime.block_on(host.session.prepare_native_lan_scan(
+            request,
+            local_address,
+            prefix_length,
+        ))
+    })
+}
+
+/// Call only after actual trusted UI consent and platform interface/permission recheck.
+/// A decoded request consumes its matching preview; no endpoint or credential is returned.
+/// # Safety
+/// `request` must be NULL or a valid NUL-terminated UTF-8 string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn homeverb_confirm_lan_scan(
+    handle: u64,
+    request: *const c_char,
+) -> *mut c_char {
+    output(|| {
+        let Some(host) = host(handle) else {
+            return error("HOST_CLOSED", "The native host handle is closed.");
+        };
+        let Some(request) = (unsafe { input_json::<ConfirmLanScanRequest>(request) }) else {
+            return error("INVALID_ARGUMENT", "Invalid scan confirmation metadata.");
+        };
+        host.runtime
+            .block_on(host.session.confirm_native_lan_scan(request))
+    })
+}
+
+/// Dismiss pending consent. Active scans use homeverb_cancel instead.
+#[unsafe(no_mangle)]
+pub extern "C" fn homeverb_discard_lan_scan(handle: u64, scan_id: u64) -> bool {
+    host(handle).is_some_and(|host| host.session.discard_native_lan_scan(scan_id))
 }
 
 /// Execute a request synchronously on a host worker thread. Free the returned string once.

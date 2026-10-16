@@ -3,6 +3,26 @@ use homeverb_midea::{LanScanOutcome, lan::DiscoveryNetwork};
 use std::{fmt, sync::Weak, time::Duration};
 use tokio::time::Instant;
 
+/// Closed metadata for the separate trusted scan bridge, never an ordinary request.
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct PrepareLanScanRequest {
+    pub schema_version: String,
+    pub operation_id: String,
+    pub timeout_ms: u64,
+    pub device_id: String,
+    pub connection_id: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ConfirmLanScanRequest {
+    pub schema_version: String,
+    pub operation_id: String,
+    pub timeout_ms: u64,
+    pub scan_id: u64,
+}
+
 /// Show the immutable device and network before trusted foreground scan consent.
 /// ```compile_fail
 /// fn export(value: &homeverb_host::PendingMeijuLanScan) {
@@ -80,6 +100,97 @@ impl PendingMeijuLanScan {
 }
 
 impl Session {
+    /// Trusted controller only: the platform must supply an assigned interface and
+    /// permission. The address is the numeric IPv4 octets, not native-memory bytes.
+    pub async fn prepare_native_lan_scan(
+        &self,
+        input: PrepareLanScanRequest,
+        local_address: u32,
+        prefix_length: u8,
+    ) -> Value {
+        let result = async {
+            if input.schema_version != SCHEMA_VERSION {
+                return Err(Error::invalid());
+            }
+            let network = DiscoveryNetwork::new(local_address.into(), prefix_length)?;
+            let preview = self
+                .prepare_meiju_lan_scan(
+                    input.operation_id,
+                    &input.device_id,
+                    &input.connection_id,
+                    network,
+                    input.timeout_ms,
+                )
+                .await?;
+            let mut state = self.state.lock().map_err(|_| invalid())?;
+            if state.closed || !state.foreground || state.approval_generation != preview.generation
+            {
+                return Err(invalid());
+            }
+            state.lan_scans.retain(|_, value| !value.is_expired());
+            if state.lan_scans.len() >= 8 {
+                return Err(Error::new(
+                    "RESOURCE_BUSY",
+                    "Dismiss a pending scan before preparing another.",
+                ));
+            }
+            let id = NEXT_PREVIEW_ID.fetch_add(1, Ordering::Relaxed);
+            let value = json!({
+                "scan_id":id, "device_id":preview.descriptor.device.id,
+                "connection_id":preview.connection.id, "alias":preview.descriptor.device.alias,
+                "network":{"local_address":preview.network.local_address().to_string(),
+                           "prefix_length":preview.network.prefix_length()},
+                "expires_in_ms":preview.remaining().as_millis() as u64
+            });
+            state.lan_scans.insert(id, preview);
+            Ok(value)
+        }
+        .await;
+        json!(Query::from_result(result))
+    }
+
+    /// Call only after actual user consent and rechecking platform network permission.
+    /// Consume the pending scope even when decoded metadata fails admission.
+    pub async fn confirm_native_lan_scan(&self, input: ConfirmLanScanRequest) -> Value {
+        let result = async {
+            let preview = self
+                .state
+                .lock()
+                .map_err(|_| invalid())?
+                .lan_scans
+                .remove(&input.scan_id)
+                .ok_or_else(invalid)?;
+            if input.schema_version != SCHEMA_VERSION {
+                return Err(Error::invalid());
+            }
+            let device_id = preview.descriptor.device.id.clone();
+            let connection_id = preview.connection.id.clone();
+            let outcome = self
+                .scan_meiju_lan_candidate(input.operation_id, preview, input.timeout_ms)
+                .await?;
+            let status = match outcome {
+                LanScanOutcome::NotObserved => "not_observed",
+                LanScanOutcome::Incomplete => "incomplete",
+                LanScanOutcome::Ambiguous => "ambiguous",
+                LanScanOutcome::UniqueCandidate(_) => "unique_candidate",
+            };
+            Ok(
+                json!({"device_id":device_id, "connection_id":connection_id, "status":status,
+                      "authenticated":false, "route_added":false}),
+            )
+        }
+        .await;
+        json!(Query::from_result(result))
+    }
+
+    /// Drop pending consent only; use operation cancellation for an active scan.
+    pub fn discard_native_lan_scan(&self, scan_id: u64) -> bool {
+        self.state
+            .lock()
+            .ok()
+            .is_some_and(|mut state| state.lan_scans.remove(&scan_id).is_some())
+    }
+
     /// Trusted native host only. The host selects an assigned interface and handles
     /// platform permission. This performs protected local preflight, never a scan.
     pub async fn prepare_meiju_lan_scan(
