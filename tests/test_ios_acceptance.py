@@ -67,9 +67,12 @@ class IosAcceptanceTests(unittest.TestCase):
 
     def test_report_failures_do_not_echo_arbitrary_strings(self):
         with self.assertRaises(ValueError) as failure:
-            ios.validate_report(dict(report(), stage='fictional-sensitive-text', store_code='fictional-secret'),
+            ios.validate_report(dict(report(), stage='fictional-sensitive-text', store_code='fictional-secret',
+                                     metadata_shape={'scope': 'fictional-secret', 'unexpected': True, 'sync_number': True}),
                                 'write', RUN, 101, 101)
         self.assertNotIn('fictional', str(failure.exception))
+        self.assertNotIn('unexpected', str(failure.exception))
+        self.assertIn("'sync_number': True", str(failure.exception))
 
     def test_signed_entitlements_must_match_exact_private_scope(self):
         valid = {'application-identifier': ios.GROUP, 'keychain-access-groups': [ios.GROUP]}

@@ -1625,3 +1625,10 @@ signature placement and missing/changed sections, bringing runner tests to twelv
 This changes only the test app; production Keychain protection, private-group
 checks and framework packaging are unchanged. Runtime success is still contingent
 on the corrected CI run.
+
+On `e7da257`, the corrected app launched and completed its first Core flow, then
+failed at the first read after a successful fictional Keychain add
+(`SECRET_STORE_UNAVAILABLE`, two store checks). The app now reports only fixed
+boolean metadata-shape diagnostics on that failure; it never requests credential
+data for diagnostics or emits raw attributes. This isolates OS representation
+differences before changing any production admission rule.

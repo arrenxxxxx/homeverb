@@ -1,6 +1,7 @@
 /* Isolated Simulator acceptance app. No provider/account or appliance requests. */
 @import UIKit;
 @import HomeVerb;
+@import Security;
 #include <unistd.h>
 
 typedef struct { uint32_t code; uint32_t checks; } StoreResult;
@@ -41,6 +42,40 @@ static id query(uint64_t handle, NSDictionary *request) {
     check(response[@"error"] == NSNull.null);
     return response[@"data"];
 }
+
+/* Test-only metadata shape diagnostics; never request or report credential data. */
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+static NSDictionary *storeMetadata(NSString *runID) {
+    NSDictionary *request = @{
+        (__bridge id)kSecClass: (__bridge id)kSecClassGenericPassword,
+        (__bridge id)kSecAttrService: [@"org.homeverb.credentials.v1." stringByAppendingString:runID.lowercaseString],
+        (__bridge id)kSecAttrAccount: runID.lowercaseString,
+        (__bridge id)kSecAttrAccessGroup: @"SYNTHETIC.org.homeverb.test",
+        (__bridge id)kSecAttrSynchronizable: (__bridge id)kSecAttrSynchronizableAny,
+        (__bridge id)kSecUseAuthenticationUI: (__bridge id)kSecUseAuthenticationUIFail,
+        (__bridge id)kSecMatchLimit: @2,
+        (__bridge id)kSecReturnAttributes: @YES, (__bridge id)kSecReturnPersistentRef: @YES
+    };
+    CFTypeRef raw = NULL;
+    OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)request, &raw);
+    id result = CFBridgingRelease(raw);
+    if (status != errSecSuccess || ![result isKindOfClass:NSArray.class] || [result count] != 1)
+        return @{@"status": @(status), @"array": @([result isKindOfClass:NSArray.class])};
+    NSDictionary *entry = result[0];
+    if (![entry isKindOfClass:NSDictionary.class]) return @{@"dictionary": @NO};
+    id sync = entry[(__bridge id)kSecAttrSynchronizable];
+    id reference = entry[(__bridge id)kSecValuePersistentRef];
+    return @{
+        @"status": @(status), @"scope": @([entry[(__bridge id)kSecAttrAccessGroup] isEqual:@"SYNTHETIC.org.homeverb.test"]),
+        @"passcode": @([entry[(__bridge id)kSecAttrAccessible] isEqual:(__bridge id)kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly]),
+        @"sync_present": @(sync != nil), @"sync_boolean": @(sync && CFGetTypeID((__bridge CFTypeRef)sync) == CFBooleanGetTypeID()),
+        @"sync_number": @([sync isKindOfClass:NSNumber.class]), @"sync_zero": @([sync isEqual:@0]),
+        @"access_control": @(entry[(__bridge id)kSecAttrAccessControl] != nil),
+        @"persistent_ref": @([reference isKindOfClass:NSData.class] && [reference length] > 0)
+    };
+}
+#pragma clang diagnostic pop
 
 static void coreFlow(NSString *documents, NSString *phase, NSString *runID) {
     stage = @"core_open";
@@ -133,6 +168,7 @@ static void probe(void) {
             StoreResult result = homeverb_test_ios_store([phase isEqual:@"write"] ? 1 : 2, high, low);
             report[@"store_code"] = @(result.code);
             report[@"store_checks"] = @(result.checks);
+            if (result.code != 0) report[@"metadata_shape"] = storeMetadata(runID);
             check(result.code == 0 && result.checks == ([phase isEqual:@"write"] ? 10 : 4));
             report[@"status"] = @"passed";
             stage = @"complete";
