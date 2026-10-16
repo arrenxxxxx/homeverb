@@ -1,6 +1,10 @@
 # Implementation status and next tasks
 
-The Mock MVP is runnable. Status below is evidence-scoped; no row implies physical-device support.
+The Mock MVP and Flutter frontend are runnable. This branch remains on native API
+1.14.1 and SQLite schema 4; it does not include main's newer Core integration.
+See the [source checkpoint](../apps/mobile/RESUME.md) and
+[verification record](../apps/mobile/verification.md) for current Flutter evidence.
+Pixel work is paused. Status below is evidence-scoped; no row implies physical-device support.
 
 ## Paused handoff: October 16, 2026
 

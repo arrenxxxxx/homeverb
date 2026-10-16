@@ -1,18 +1,24 @@
 # 3. Connect the UI and localization
 
-Visual UI design is independent of this Core implementation. There is no production HTTP bridge or CLI-output parsing path. Flutter is the owner-selected mobile framework; its SDK, APK packaging, and physical-phone lifecycle verification are not completed here. The [Android native package](08-android-native.md) supplies a separate arm64/x86_64 library builder and Keystore/JNI backend.
+Visual UI design is independent of this Core implementation. There is no production HTTP bridge or CLI-output parsing path. The [Flutter application](../../apps/mobile/README.md) uses an FVM-pinned SDK and direct Dart FFI, tested with the Linux Mock host. Android APK packaging and Android 15 x86_64 Mock journeys are verified in this worktree; actual Keystore and physical-phone lifecycle remain unverified. The [Android native package](08-android-native.md) supplies a separate arm64/x86_64 library builder and Keystore/JNI backend.
 
-The current design handoff is the [complete Window Light prototype](../../output/prototypes/homeverb-window-light-v1/index.html). Use its [functional specification](../ui-functional-spec.md), [82-state inventory](../ui-screen-inventory.md), and [Flutter visual/skin guide](../ui-window-light.md) alongside the native methods below. The one-option Appearance screen is planned UI, and the isolated Flutter visual reference is uncompiled; neither establishes platform authorization or nearby-sharing support.
+The current design handoff is the [complete Window Light prototype](../../output/prototypes/homeverb-window-light-v1/index.html). Use its [functional specification](../ui-functional-spec.md), [82-state inventory](../ui-screen-inventory.md), and [Flutter visual/skin guide](../ui-window-light.md) alongside the native methods below. The application implements the one-option Appearance screen and isolated native-widget preview. Neither establishes platform authorization or nearby-sharing support; [visual equality remains unverified](../../apps/mobile/verification.md).
 
 ## Native boundary
+
+The [Flutter app](../../apps/mobile/README.md#account-integration) now has protected
+account input and local account/retrieval/recovery/removal pages. The default build
+remains Mock; an explicit Meiju build uses a separate read-only private profile.
+Fixture clicks and native admission checks do not establish real account, secure
+storage or phone acceptance. See the [verification report](../../apps/mobile/verification.md).
 
 API 1.13 adds separate trusted C prepare/execute/discard functions for one elevated
 command. Follow the [confirmation contract](../native-ui-contract.md#trusted-single-command-approval-api-113)
 for immutable preview display, explicit consent, expiry and lifecycle handling.
 Use the fictional `approval-required` Mock scenario for integration. These are not
 ordinary JSON methods. API 1.14 adds [profile-scoped Meiju dishwasher starts](../native-ui-contract.md#profile-scoped-dishwasher-starts-api-114)
-through exact startup grants plus this confirmation path. Actual Flutter/physical
-acceptance remains pending.
+through exact startup grants plus this confirmation path. The Flutter worktree now implements immutable consent and receipt recovery with
+fictional Mock tests. Meiju startup grant UI and physical acceptance remain pending.
 
 API 1.15 adds independent [dishwasher pause/resume/cancel permissions](../native-ui-contract.md#profile-scoped-dishwasher-cycle-operations-api-115)
 with the same trusted confirmation flow and no new C exports. Render only
@@ -163,7 +169,7 @@ the component action schema remains authoritative.
 
 Render translation results as text, not raw HTML. Present requested values separately from observations. Missing/null state means unknown. `accepted` is unverified; `unknown` means it may have executed and should be refreshed. Display non-atomic receipts item by item, retaining their evidence and warnings. A partial receipt needs a refresh action when any child is accepted, unknown, or references a retired request. Refresh means an explicit state read, never automatic replay.
 
-The native ABI is verified through a Linux ctypes host that loads Core directly, executes a write, backgrounds the host, observes cancellation, and closes it. This does not establish Flutter, Android, or iOS support.
+The native ABI is verified through a Linux ctypes host and Flutter processes on Linux and an Android 15 x86_64 emulator. They load Core directly; Mock tests cover writes, cancellation, foreground gating and close. Android Keystore, physical-phone acceptance and iOS support remain unverified.
 
 Next: [Add a real adapter](04-add-adapter.md).
 
@@ -174,3 +180,11 @@ outside general JSON. The UI first integrates assigned-interface selection and
 platform permission, shows the immutable device/network scope, and obtains actual
 consent. Scan results contain no endpoint or route authority. Do not connect these
 functions to automatic discovery or treat a candidate as a connected appliance.
+
+The Flutter account detail view now offers explicit saved-inventory inspection
+when Core advertises API 1.10's method. It reads only the selected protected account,
+keeps listed/not-listed/unconfirmed membership distinct, and joins exact device and
+connection IDs without creating cards or granting control. Query errors have no
+cloud fallback; navigation/cancellation/background clear results and fence late
+replies. Contract fixtures and native missing-account/method gates are tested;
+real-account inspection through Flutter remains unverified.

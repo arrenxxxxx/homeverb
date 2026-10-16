@@ -1,0 +1,805 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
+import 'native_client.dart';
+import 'preferences.dart';
+
+enum LocalCleanup { cachedState, executionHistory }
+
+class HomeController extends ChangeNotifier {
+  HomeController(this.core, this.preferences);
+  final CoreClient core;
+  final LocalPreferences preferences;
+  List<Json> rooms = [], cards = [], history = [];
+  Json? description, snapshot, receipt, diagnostics, batchResult;
+  final Map<String, Json> snapshots = {};
+  final Map<(String, String), Json> _componentSnapshots = {};
+  final Map<(String, String), Object> _componentReadErrors = {};
+  String? selectedDevice, selectedRoom, editingRoom;
+  String component = 'main', filter = 'All', search = '';
+  final Set<String> selection = {};
+  int _readEpoch = 0;
+  void cancelPending() {
+    discardApproval();
+    _readEpoch++;
+    accountInventory = null;
+    core.cancelAll();
+  }
+
+  void setForeground(bool foreground) {
+    if (!foreground) {
+      discardApproval();
+      _readEpoch++;
+      accountInventory = null;
+    }
+    core.foreground(foreground);
+    if (!foreground) notifyListeners();
+  }
+
+  bool busy = false;
+  Object? error;
+
+  Future<bool> perform(Future<void> Function() work) async {
+    if (busy) return false;
+    busy = true;
+    error = null;
+    notifyListeners();
+    try {
+      await work();
+      return true;
+    } catch (e) {
+      error = e;
+      return false;
+    } finally {
+      busy = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadLocal() async {
+    final results = await Future.wait([
+      core.call('list_rooms'),
+      core.call('list_device_cards'),
+    ]);
+    rooms = (results[0] as List).cast<Json>();
+    cards = (results[1] as List).cast<Json>();
+  }
+
+  Future<bool> initialize() => perform(() async {
+    if (accountNeedsReload) {
+      await reloadAccountViews();
+      return;
+    }
+    if (cleanupNeedsReload) {
+      await reloadAfterCleanup();
+      return;
+    }
+    await loadLocal();
+    if (accountClient != null && supports('list_accounts')) {
+      accounts = (await core.call('list_accounts') as List).cast<Json>();
+    }
+  });
+  Future<bool> discover() => perform(() async {
+    await core.call('discover');
+    await loadLocal();
+  });
+  String roomName(String? id) =>
+      rooms
+          .where((r) => r['id'] == id)
+          .map((r) => r['name'] as String)
+          .firstOrNull ??
+      'Unassigned';
+  List<Json> get visibleCards => cards.where((c) {
+    final device = c['device'] as Json, prefs = c['preferences'] as Json;
+    return (filter == 'All' ||
+            prefs['room_id'] == filter ||
+            (filter == 'Unassigned' && prefs['room_id'] == null)) &&
+        '${device['alias']} ${device['model']} ${roomName(prefs['room_id'])}'
+            .toLowerCase()
+            .contains(search.toLowerCase());
+  }).toList();
+  Json? get currentCard =>
+      cards.where((c) => c['device']['id'] == selectedDevice).firstOrNull;
+  dynamic observed(String property) =>
+      snapshot?['observations']?[property]?['value'];
+  List<Json> get components =>
+      ((description?['device']?['components'] as List?) ?? []).cast<Json>();
+  Json? get selectedComponent =>
+      components.where((part) => part['id'] == component).firstOrNull;
+  List<Json> capabilitiesFor(String componentId) {
+    final part = components
+        .where((part) => part['id'] == componentId)
+        .firstOrNull;
+    return ((description?['capabilities'] as List?) ?? [])
+        .cast<Json>()
+        .where(
+          (capability) =>
+              (capability['component_id'] == null ||
+                  capability['component_id'] == componentId) &&
+              (part?['capabilities'] as List? ?? []).contains(capability['id']),
+        )
+        .toList();
+  }
+
+  List<Json> get capabilities => capabilitiesFor(component);
+  Json? componentCapability(String componentId, String id) => capabilitiesFor(
+    componentId,
+  ).where((capability) => capability['id'] == id).firstOrNull;
+  Json? capability(String id) => componentCapability(component, id);
+  Json? componentSnapshot(String id) =>
+      _componentSnapshots[(selectedDevice, id)];
+  Object? componentReadError(String id) =>
+      _componentReadErrors[(selectedDevice, id)];
+  bool get hasCompartmentOverview =>
+      components
+          .where((part) => componentCapability(part['id'], 'climate') != null)
+          .length >
+      1;
+  Future<bool> selectDevice(String id) => perform(() async {
+    selectedDevice = id;
+    description = null;
+    snapshot = null;
+    description = await core.call('describe_device', {'device': id}) as Json;
+    component = components.first['id'] as String;
+    if (description!['device']['support_status'] == 'unsupported') return;
+    await _loadComponentCache();
+    if (hasCompartmentOverview) {
+      for (final part in components.where((part) => part['id'] != component)) {
+        try {
+          await readComponent(part['id'], cached: true);
+        } on NativeFailure catch (error) {
+          if (!['STATE_UNAVAILABLE', 'CACHE_MISS'].contains(error.code))
+            rethrow;
+        }
+      }
+    }
+  });
+  Future<bool> selectComponent(String id) => perform(() async {
+    if (!components.any((part) => part['id'] == id)) {
+      throw NativeFailure('INVALID_ARGUMENT', 'Select an available component.');
+    }
+    component = id;
+    await _loadComponentCache();
+  });
+  Future<void> _loadComponentCache() async {
+    snapshot = _componentSnapshots[(selectedDevice!, component)];
+    try {
+      await read(cached: true);
+    } on NativeFailure catch (e) {
+      if (!['STATE_UNAVAILABLE', 'CACHE_MISS'].contains(e.code)) rethrow;
+    }
+  }
+
+  Future<void> read({bool cached = false}) =>
+      readComponent(component, cached: cached);
+  Future<void> readComponent(String componentId, {bool cached = false}) async {
+    final device = selectedDevice!, epoch = _readEpoch;
+    final next =
+        await core.call('read_state', {
+              'device': device,
+              'component': componentId,
+              'connection': preferences.route(device),
+              'cached': cached,
+            })
+            as Json;
+    if (epoch != _readEpoch) {
+      throw NativeFailure('CANCELLED', 'Component reading was cancelled.');
+    }
+    _componentSnapshots[(device, componentId)] = next;
+    _componentReadErrors.remove((device, componentId));
+    if (componentId == component) snapshot = next;
+    if (componentId == components.first['id']) snapshots[device] = next;
+  }
+
+  Future<bool> refresh() => perform(() => read());
+  Future<bool> refreshComponents() => perform(() async {
+    Object? failure;
+    for (final part in components) {
+      final id = part['id'] as String;
+      try {
+        await readComponent(id);
+      } catch (error) {
+        if (error is NativeFailure && error.code == 'CANCELLED') rethrow;
+        _componentReadErrors[(selectedDevice!, id)] = error;
+        failure ??= error;
+      }
+    }
+    if (failure != null) throw failure;
+  });
+  Future<bool> refreshReceipt() => perform(() async {
+    final device = receipt?['device_id'] as String?;
+    if (device == null) {
+      throw NativeFailure(
+        'STATE_UNAVAILABLE',
+        'Select a device receipt to refresh.',
+      );
+    }
+    final descriptor =
+        await core.call('describe_device', {'device': device}) as Json;
+    for (final part in descriptor['device']['components'] as List) {
+      final result =
+          await core.call('read_state', {
+                'device': device,
+                'component': part['id'],
+                'connection': preferences.route(device),
+                'cached': false,
+              })
+              as Json;
+      _componentSnapshots[(device, part['id'] as String)] = result;
+      _componentReadErrors.remove((device, part['id'] as String));
+      if (part['id'] == descriptor['device']['components'][0]['id']) {
+        snapshots[device] = result;
+      }
+      if (selectedDevice == device && component == part['id'])
+        snapshot = result;
+    }
+  });
+  Future<bool> refreshCards() => perform(() async {
+    for (final c in visibleCards) {
+      final d = c['device'] as Json;
+      if (d['support_status'] == 'unsupported') continue;
+      final result =
+          await core.call('read_state', {
+                'device': d['id'],
+                'component': d['components'][0]['id'],
+                'connection': preferences.route(d['id']),
+                'cached': false,
+              })
+              as Json;
+      snapshots[d['id']] = result;
+      _componentReadErrors.remove((
+        d['id'] as String,
+        d['components'][0]['id'] as String,
+      ));
+      _componentSnapshots[(
+            d['id'] as String,
+            d['components'][0]['id'] as String,
+          )] =
+          result;
+      if (selectedDevice == d['id'] && component == d['components'][0]['id']) {
+        snapshot = result;
+      }
+    }
+  });
+  Future<bool> saveRoom(String name, {String? id}) => perform(() async {
+    await core.call(id == null ? 'create_room' : 'rename_room', {
+      'name': name.trim(),
+      if (id != null) 'room_id': id,
+    });
+    await loadLocal();
+  });
+  Future<bool> deleteRoom(String id) => perform(() async {
+    await core.call('delete_room', {'room_id': id});
+    if (filter == id) filter = 'Unassigned';
+    await loadLocal();
+  });
+  Future<bool> assign(String? room) => perform(() async {
+    await core.call('assign_devices_to_room', {
+      'assignment': {
+        'device_ids': selection.isEmpty ? [selectedDevice] : selection.toList(),
+        'room_id': room,
+      },
+    });
+    await loadLocal();
+    selection.clear();
+  });
+  Future<bool> saveDevice(Json changes) => perform(() async {
+    final p = currentCard!['preferences'] as Json;
+    await core.call('set_device_preferences', {
+      'device_id': selectedDevice,
+      'preferences': {
+        'alias': p['alias'],
+        'room_id': p['room_id'],
+        'favorite': p['favorite'],
+        ...changes,
+      },
+    });
+    await loadLocal();
+  });
+  Future<bool> reorderRooms(List<String> ids) => perform(() async {
+    await reorder('reorder_rooms', {'room_ids': ids});
+  });
+  Future<bool> reorderDevices(List<String> visible) => perform(() async {
+    final selected = visible.toSet();
+    final expected = visibleCards.map((card) => card['device']['id']).toSet();
+    if (selected.length != visible.length ||
+        selected.length != expected.length ||
+        !selected.containsAll(expected)) {
+      throw NativeFailure(
+        'INVALID_ARGUMENT',
+        'Include every visible device exactly once.',
+      );
+    }
+    var index = 0;
+    final ids = cards
+        .map((c) => c['device']['id'] as String)
+        .map((id) => selected.contains(id) ? visible[index++] : id)
+        .toList();
+    await reorder('reorder_devices', {'device_ids': ids});
+  });
+
+  Future<void> reorder(String method, Json arguments) async {
+    try {
+      await core.call(method, arguments);
+    } on NativeFailure catch (error) {
+      if (error.code != 'INVALID_ARGUMENT') rethrow;
+      await loadLocal();
+      throw NativeFailure(
+        'INVALID_ARGUMENT',
+        'The list changed. Review the refreshed order and try again.',
+      );
+    }
+    await loadLocal();
+  }
+
+  ApprovalPreview? approvalPreview;
+  Timer? _approvalTimer;
+  String? approvalRequestId;
+  bool approvalNeedsReceipt = false;
+  ApprovalClient? get approvalClient =>
+      core is ApprovalClient ? core as ApprovalClient : null;
+  bool get supportsTrustedApproval =>
+      approvalClient?.supportsTrustedApproval ?? false;
+
+  void discardApproval() {
+    final previous = approvalPreview;
+    approvalPreview = null;
+    _approvalTimer?.cancel();
+    _approvalTimer = null;
+    if (previous != null) {
+      unawaited(
+        approvalClient!.discardApproval(previous).catchError((Object _) {
+          // Local consent is already revoked; native expiry/lifecycle also prevents reuse.
+        }),
+      );
+    }
+  }
+
+  Future<bool> prepareApproval(
+    String capabilityId,
+    String action,
+    Json arguments,
+    String route,
+  ) => perform(() async {
+    discardApproval();
+    final epoch = _readEpoch;
+    if (!supportsTrustedApproval ||
+        capability(capabilityId)?['actions']?[action]?['risk'] != 'elevated') {
+      throw NativeFailure(
+        'APPROVAL_UNAVAILABLE',
+        'This action has no trusted confirmation path.',
+      );
+    }
+    if (!['lan', 'cloud'].contains(route)) {
+      throw NativeFailure(
+        'INVALID_ARGUMENT',
+        'Choose one explicit connection.',
+      );
+    }
+    final preview = await approvalClient!.prepareApproval({
+      'schema_version': '1.0',
+      'request_id': uniqueId(),
+      'device_id': selectedDevice,
+      'component_id': component,
+      'capability': capabilityId,
+      'action': action,
+      'arguments': arguments,
+      'connection': route,
+      'timeout_ms': 10000,
+      'wait_for': 'verified',
+    });
+    if (epoch != _readEpoch) {
+      await approvalClient!.discardApproval(preview);
+      throw NativeFailure('CANCELLED', 'The confirmation was cancelled.');
+    }
+    approvalNeedsReceipt = false;
+    approvalPreview = preview;
+    approvalRequestId = preview.command['request_id'] as String;
+    _approvalTimer = Timer(preview.remaining, () {
+      discardApproval();
+      error = NativeFailure(
+        'APPROVAL_EXPIRED',
+        'Review the command again before confirming.',
+      );
+      notifyListeners();
+    });
+  });
+
+  Future<bool> confirmApproval() => perform(() async {
+    final preview = approvalPreview;
+    if (preview == null || preview.remaining == Duration.zero) {
+      discardApproval();
+      throw NativeFailure('APPROVAL_INVALID', 'Review a new confirmation.');
+    }
+    // Consume UI consent before awaiting. A failed/uncertain call is never replayed.
+    approvalPreview = null;
+    _approvalTimer?.cancel();
+    _approvalTimer = null;
+    receipt = null;
+    try {
+      receipt = await approvalClient!.executeApproved(preview);
+      approvalNeedsReceipt = false;
+    } catch (_) {
+      approvalNeedsReceipt = true;
+      rethrow;
+    }
+  });
+
+  Future<bool> execute(
+    String capabilityId,
+    String action,
+    Json arguments, {
+    String? componentId,
+  }) => perform(() async {
+    final target = componentId ?? component;
+    final descriptor =
+        componentCapability(target, capabilityId)?['actions']?[action] as Json?;
+    if (descriptor == null)
+      throw NativeFailure(
+        'CAPABILITY_UNSUPPORTED',
+        'This action is not available.',
+      );
+    if (descriptor['risk'] != 'low') {
+      throw NativeFailure(
+        'APPROVAL_UNAVAILABLE',
+        'Trusted approval is not available in this host.',
+      );
+    }
+    final command = {
+      'schema_version': '1.0',
+      'request_id': uniqueId(),
+      'device_id': selectedDevice,
+      'component_id': target,
+      'capability': capabilityId,
+      'action': action,
+      'arguments': arguments,
+      'connection': preferences.route(selectedDevice),
+      'timeout_ms': 10000,
+      'wait_for': 'verified',
+    };
+    await core.call('plan', {'command': command});
+    receipt = await core.call('execute', {'command': command}) as Json;
+    // Observations only change after an explicit read, never from a requested value.
+  });
+  List<Json> accounts = [];
+  Json? accountDetails, accountReport, accountRemoval, accountInventory;
+  String? selectedAccount;
+  List<String>? removalScope;
+  bool accountNeedsReload = false;
+  AccountClient? get accountClient =>
+      core is AccountClient ? core as AccountClient : null;
+  bool get isMock => accountClient?.adapter != 'midea.meiju';
+  Json? get account => accountDetails?['account'] as Json?;
+  bool get canSignIn =>
+      !isMock &&
+      accountClient!.supportsAccountConnection &&
+      (account?['credential_state'] != 'pending' ||
+          accountClient!.supportsPendingReauthorization) &&
+      account?['credential_state'] != 'removing';
+  List<String> get accountDeviceIds =>
+      (accountDetails?['device_ids'] as List? ?? []).cast<String>();
+  List<Json> get accountCards => cards
+      .where((card) => accountDeviceIds.contains(card['device']['id']))
+      .toList();
+
+  Future<void> reloadAccountViews() async {
+    accountInventory = null;
+    accounts = (await core.call('list_accounts') as List).cast<Json>();
+    await loadLocal();
+    if (selectedAccount != null) {
+      if (accounts.any((a) => a['id'] == selectedAccount)) {
+        accountDetails =
+            await core.call('get_account', {'account_id': selectedAccount})
+                as Json;
+      } else {
+        selectedAccount = null;
+        accountDetails = null;
+      }
+    }
+    final currentIds = cards.map((card) => card['device']['id']).toSet();
+    snapshots.removeWhere((id, _) => !currentIds.contains(id));
+    _componentSnapshots.removeWhere((key, _) => !currentIds.contains(key.$1));
+    _componentReadErrors.removeWhere((key, _) => !currentIds.contains(key.$1));
+    selection.removeWhere((id) => !currentIds.contains(id));
+    if (selectedDevice != null && !currentIds.contains(selectedDevice)) {
+      _readEpoch++;
+      selectedDevice = null;
+      description = null;
+      snapshot = null;
+    }
+    accountNeedsReload = false;
+  }
+
+  Future<bool> loadAccounts() => perform(reloadAccountViews);
+  Future<bool> selectAccount(String id) => perform(() async {
+    selectedAccount = id;
+    accountInventory = null;
+    accountDetails = null;
+    accountReport = null;
+    accountRemoval = null;
+    removalScope = null;
+    accountDetails = await core.call('get_account', {'account_id': id}) as Json;
+    await loadLocal();
+  });
+
+  Future<bool> inspectAccountInventory() => perform(() async {
+    accountInventory = null;
+    final id = selectedAccount;
+    if (id == null ||
+        account?['credential_state'] != 'stored' ||
+        !supports('inspect_account_inventory')) {
+      throw NativeFailure(
+        'UNSUPPORTED_OPERATION',
+        'Select a stored account with saved-inventory inspection support.',
+      );
+    }
+    final epoch = _readEpoch;
+    try {
+      final result =
+          await core.call('inspect_account_inventory', {'account_id': id})
+              as Json;
+      if (epoch != _readEpoch || selectedAccount != id) return;
+      accountInventory = result;
+    } catch (_) {
+      if (epoch != _readEpoch || selectedAccount != id) return;
+      rethrow;
+    }
+  });
+
+  Future<bool> renameAccount(String label) => perform(() async {
+    accountNeedsReload = true;
+    await core.call('rename_account', {
+      'account_id': selectedAccount,
+      'label': label.trim(),
+    });
+    await reloadAccountViews();
+  });
+
+  Future<bool> retrieveAccount({bool recover = false}) => perform(() async {
+    accountInventory = null;
+    accountNeedsReload = true;
+    accountReport = null;
+    accountReport =
+        await core.call(recover ? 'recover_account' : 'refresh_account', {
+              'account_id': selectedAccount,
+            })
+            as Json;
+    validateAccountReport(accountReport!);
+    await reloadAccountViews();
+  });
+
+  Future<bool> connectAccount(
+    Uint8List login,
+    Uint8List password,
+    String label,
+  ) async {
+    try {
+      return await perform(() async {
+        if (!canSignIn)
+          throw NativeFailure(
+            'AUTH_FLOW_UNSUPPORTED',
+            'This account flow is unavailable.',
+          );
+        accountNeedsReload = true;
+        accountReport = null;
+        accountReport = await accountClient!.connectAccount(
+          login: login,
+          password: password,
+          label: label,
+          accountId: selectedAccount,
+        );
+        validateAccountReport(accountReport!);
+        selectedAccount = accountReport!['account']['id'] as String;
+        await reloadAccountViews();
+      });
+    } finally {
+      login.fillRange(0, login.length, 0);
+      password.fillRange(0, password.length, 0);
+    }
+  }
+
+  void validateAccountReport(Json report) {
+    final retrieval = report['retrieval'] as Json;
+    if (!['complete', 'partial', 'failed'].contains(retrieval['status']) ||
+        !['succeeded', 'not_attempted'].contains(report['authentication']) ||
+        (retrieval['status'] == 'complete' && retrieval['error'] != null)) {
+      throw NativeFailure(
+        'UNSUPPORTED_OUTCOME',
+        'Unrecognized account result. Reload local accounts.',
+      );
+    }
+  }
+
+  Future<bool> reviewAccountRemoval() => perform(() async {
+    removalScope = null;
+    accountNeedsReload = true;
+    await reloadAccountViews();
+    if (selectedAccount == null)
+      throw NativeFailure(
+        'ACCOUNT_NOT_FOUND',
+        'The account is no longer saved.',
+      );
+    removalScope = List<String>.unmodifiable(accountDeviceIds);
+    accountRemoval = null;
+  });
+
+  Future<bool> removeAccount() => perform(() async {
+    final scope = removalScope;
+    if (scope == null || selectedAccount == null || accountNeedsReload) {
+      throw NativeFailure(
+        'INVALID_ARGUMENT',
+        'Review the local removal scope first.',
+      );
+    }
+    accountNeedsReload = true;
+    accountRemoval = null;
+    try {
+      accountRemoval =
+          await core.call('remove_account', {
+                'account_id': selectedAccount,
+                'expected_device_ids': scope,
+              })
+              as Json;
+      final status = accountRemoval!['status'];
+      if (!['removed', 'pending'].contains(status) ||
+          (status == 'removed' && accountRemoval!['error'] != null)) {
+        throw NativeFailure(
+          'UNSUPPORTED_OUTCOME',
+          'Unrecognized removal result. Reload local accounts.',
+        );
+      }
+      await reloadAccountViews();
+    } finally {
+      // Any new attempt must display and confirm a newly reviewed local scope.
+      removalScope = null;
+    }
+  });
+
+  bool supports(String method) =>
+      core is! NativeClient || (core as NativeClient).methods.contains(method);
+  int? cleanupCount;
+  LocalCleanup? cleanupResult;
+  bool cleanupNeedsReload = false;
+
+  Future<bool> clearLocalData(LocalCleanup scope) => perform(() async {
+    cleanupCount = null;
+    cleanupResult = null;
+    final method = scope == LocalCleanup.cachedState
+        ? 'clear_cached_state'
+        : 'clear_execution_history';
+    // Fence late reads and invalidate affected views even after a lost reply.
+    _readEpoch++;
+    cleanupNeedsReload = true;
+    Json result;
+    try {
+      result = await core.call(method) as Json;
+    } finally {
+      diagnostics = null;
+      if (scope == LocalCleanup.cachedState) {
+        snapshots.clear();
+        _componentSnapshots.clear();
+        _componentReadErrors.clear();
+        snapshot = null;
+      } else {
+        history = [];
+        receipt = null;
+        batchResult = null;
+      }
+    }
+    cleanupCount =
+        result[scope == LocalCleanup.cachedState
+                ? 'removed_snapshots'
+                : 'removed_receipts']
+            as int;
+    cleanupResult = scope;
+    await reloadAfterCleanup();
+  });
+
+  Future<void> reloadAfterCleanup() async {
+    await loadLocal();
+    history = (await core.call('recent_executions') as List).cast<Json>();
+    // No cached-state miss ever falls through to a live read.
+    if (selectedDevice != null &&
+        currentCard != null &&
+        description != null &&
+        description!['device']['support_status'] != 'unsupported') {
+      for (final part in components) {
+        try {
+          await readComponent(part['id'], cached: true);
+        } on NativeFailure catch (error) {
+          if (!['CACHE_MISS', 'STATE_UNAVAILABLE'].contains(error.code))
+            rethrow;
+        }
+      }
+    }
+    cleanupNeedsReload = false;
+  }
+
+  Future<bool> loadHistory({bool deviceOnly = false}) => perform(() async {
+    history =
+        (await core.call(
+                  deviceOnly ? 'device_executions' : 'recent_executions',
+                  deviceOnly ? {'device_id': selectedDevice} : {},
+                )
+                as List)
+            .cast<Json>();
+  });
+  Future<bool> executeSelectedPower(bool on) => perform(() async {
+    if (selection.isEmpty || selection.length > 32) {
+      throw NativeFailure('INVALID_ARGUMENT', 'Select 1–32 distinct devices.');
+    }
+    final commands = <Json>[];
+    for (final device in selection) {
+      final descriptor =
+          await core.call('describe_device', {'device': device}) as Json;
+      final candidates = <Json>[];
+      for (final part in descriptor['device']['components'] as List) {
+        for (final capability in descriptor['capabilities'] as List) {
+          if (capability['id'] == 'power' &&
+              (capability['component_id'] == null ||
+                  capability['component_id'] == part['id']) &&
+              capability['actions']?['set']?['risk'] == 'low' &&
+              capability['actions']?['set']?['parameters']?['properties']?['state']?['type'] ==
+                  'boolean') {
+            candidates.add({'component': part['id']});
+          }
+        }
+      }
+      if (candidates.length != 1) {
+        throw NativeFailure(
+          'CAPABILITY_UNSUPPORTED',
+          'Selection requires one unambiguous low-risk power control per device.',
+        );
+      }
+      commands.add({
+        'schema_version': '1.0',
+        'request_id': uniqueId(),
+        'device_id': device,
+        'component_id': candidates.single['component'],
+        'capability': 'power',
+        'action': 'set',
+        'arguments': {'state': on},
+        'connection': preferences.route(device),
+        'timeout_ms': 10000,
+        'wait_for': 'verified',
+      });
+    }
+    final batch = {'schema_version': '1.0', 'commands': commands};
+    await core.call('plan_batch', {'batch': batch});
+    batchResult = await core.call('execute_batch', {'batch': batch}) as Json;
+  });
+  Future<bool> loadReceipt(String id) => perform(() async {
+    receipt = await core.call('get_execution', {'request_id': id}) as Json;
+  });
+  Future<bool> loadDiagnostics() => perform(() async {
+    diagnostics = null;
+    final epoch = _readEpoch;
+    try {
+      final report = await core.call('diagnostics') as Json;
+      if (epoch == _readEpoch) diagnostics = report;
+    } catch (_) {
+      if (epoch == _readEpoch) rethrow;
+    }
+  });
+  Future<bool> savePreferences(Json changes) =>
+      perform(() => preferences.save(changes));
+}
+
+String? validateValue(dynamic value, Json schema) {
+  if (schema['enum'] is List && !(schema['enum'] as List).contains(value))
+    return 'Choose a supported value.';
+  if (schema['type'] == 'boolean' && value is! bool) return 'Choose On or Off.';
+  if (schema['type'] == 'number' || schema['type'] == 'integer') {
+    if (value is! num || !value.isFinite) return 'Enter a number.';
+    if (schema['type'] == 'integer' && value != value.roundToDouble())
+      return 'Use a whole number.';
+    if (schema['minimum'] is num && value < schema['minimum'])
+      return 'Minimum: ${schema['minimum']}';
+    if (schema['maximum'] is num && value > schema['maximum'])
+      return 'Maximum: ${schema['maximum']}';
+    if (schema['multipleOf'] case final num step) {
+      if ((value / step - (value / step).round()).abs() > 1e-8)
+        return 'Supported step: $step';
+    }
+  }
+  return null;
+}

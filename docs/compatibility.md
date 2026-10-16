@@ -162,6 +162,8 @@ acceptance remain pending. See [ADR-0028](adr/0028-local-account-removal.md).
 
 The native account vault under [ADR-0021](adr/0021-persistent-account-vault.md) adds SQLite schema 3 and internal Rust account APIs. Schema 1/2 upgrades preserve existing data and create verified backups; close older clients first. Schema-2 binaries reject the upgraded profile. Native UI API 1.0.0, its 22 methods, C symbols and execution semantics are unchanged. No public account operation or real-provider authentication is enabled by locally storing references.
 
+The Flutter application in `apps/mobile` is Mock-tested through the Linux native library and an actual Linux Flutter process. It pins Flutter 3.47.7 through FVM, packages the Linux library, and now incorporates Core API 1.14.1 and SQLite schema 4; Flutter account input, retrieval/recovery and local removal are synthetic-tested; real account/phone acceptance remains pending. Its isolated 82-state preview is fictional. Screenshot comparison still reports differences; Android APK packaging and x86_64 emulator Mock journeys are verified; iOS packaging, actual Keystore, physical-phone lifecycle, full localization/accessibility and real-platform support are unverified. See the [Flutter verification report](../apps/mobile/verification.md). No platform row is promoted by the UI implementation.
+
 Foreground authorization sharing is also planned and unverified for every candidate. Login support alone does not establish transferability. Before enabling sharing, record provider-specific evidence for permission scope, device binding, refresh-token behavior across installations, expiry, and revocation under [ADR-0008](adr/0008-foreground-authorization-sharing.md).
 
 | Status | Meaning |
@@ -325,6 +327,19 @@ passed. No Flutter worktree, real account or appliance was accessed by this phas
 Emulator startup, APK integration, Android Keystore and physical/off-LAN acceptance
 remain unverified; no emulator was available in the inspected SDK. See the
 [Android build and startup guide](development/08-android-native.md).
+
+## Android file-lock portability
+
+The first Android 15 x86_64 app launch exposed unsupported standard-library file
+locking in Rust 1.96. An isolated Android executable reproduced `Unsupported` for
+shared, exclusive and unlock operations. The storage implementation now uses
+Bionic `flock` only on Android, retaining nonblocking migration, device and account
+leases and release on close. Other targets retain their existing locking calls.
+All 13 storage tests passed on Linux and an Android 15 x86_64 emulator, including
+shared/exclusive contention, release, migrations, rollback and replay retention.
+There is no lock-free fallback or change to SQLite schema 4, the native API, lock
+filenames, write authority or outcome semantics. See the app's
+[verification report](../apps/mobile/verification.md) for runtime results.
 
 ## Meiju CLI account and read entrypoint
 
@@ -1676,3 +1691,45 @@ without partial results when relevant protected records cannot be inspected.
 C/JNI exports, JSON envelope, SQLite and protected-payload versions are unchanged.
 Older libraries reject the method. Explicit reconciliation, account transfer,
 Flutter interaction and real-account/physical acceptance remain pending.
+
+
+## Flutter native API 1.14.1 baseline
+
+Historical merge checkpoint: later Flutter consent and source-only work is recorded
+in the [current verification summary](../apps/mobile/verification.md#current-checkpoint).
+
+The frontend worktree merges committed Core `7db8e9b` and keeps the upstream
+Android Bionic lock implementation plus its additional contention regression.
+Existing Flutter account/cleanup/Mock pages remain compatible with the 31 ordinary
+methods. Trusted approval UI and explicit Meiju grant configuration are not yet
+wired; elevated controls stay unavailable and Meiju startup remains read-only.
+Protected payload version 3 and SQLite schema 4 are retained without downgrade.
+
+Local checks passed: 349 Rust tests (two opt-in tests ignored), formatting, Clippy,
+workspace build, 35 runtime cases, native ABI/approval/dishwasher admission, 33
+Python tests, six presentation tests, 68 Flutter tests and Flutter analysis.
+The dual-ABI Android AAR passed eleven-export and 16 KiB ELF checks; the ordinary
+APK passed alignment/install/cold-start and explicit Mock refresh. The complete
+Android click journey also passed with simulated picker/input/lifecycle. See the
+[Flutter verification report](../apps/mobile/verification.md) for evidence and
+limits. Pixel equality remains failed at 0/82; this phase establishes no physical
+account/appliance, iOS, remote CI or full mobile acceptance.
+
+
+## Flutter trusted confirmation bridge
+
+The frontend implements the existing API 1.13+ trusted prepare/execute/discard
+functions without changing native methods, authority, schema or receipt semantics.
+Deeply immutable, handle-owned previews require one explicit connection and a
+separate confirmation click. Dismissal, navigation, background and expiry revoke
+consent; a lost reply retains its original request ID for receipt lookup without
+replay. High-risk actions remain unavailable and default Meiju remains read-only;
+startup grant UI and physical acceptance are separate work.
+
+All 72 Flutter regressions, static analysis and six presentation tests passed.
+Four native approval scenarios also passed inside an Android 15 x86_64 app process,
+including clicks, real expiry and simulated lost-reply recovery. The ordinary APK
+rebuilt, passed alignment, installed and cold-started. The English catalog is
+bundled locally and checked against its shared source, correcting an Android
+asset-path failure found during integration. Strict prototype equality still
+fails at 0/82. See the [verification report](../apps/mobile/verification.md).

@@ -201,5 +201,8 @@
   "connection.link.interrupted": "The connection change was interrupted. Check saved connections before trying again.",
   "account.inspectDeviceConflicts": "Inspect duplicate device records",
   "account.deviceConflictsNotice": "These saved records may refer to the same appliance. Inspection does not confirm physical identity or merge devices.",
-  "error.MIDEA_CONFLICT_LIMIT": "Conflict inspection supports at most 64 mainland Meiju accounts."
+  "error.MIDEA_CONFLICT_LIMIT": "Conflict inspection supports at most 64 mainland Meiju accounts.",
+  "vendor.example.cycle.start": "Start fictional cycle",
+  "vendor.example.cycle.start.confirm": "Start one fictional cycle on {device} using {program}? This development action does not operate a physical appliance.",
+  "vendor.example.cycle.program.normal": "normal"
 }

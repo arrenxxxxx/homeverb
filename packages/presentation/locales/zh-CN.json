@@ -201,5 +201,8 @@
   "connection.link.interrupted": "连接变更已中断。再次尝试前，请先检查已保存的连接。",
   "account.inspectDeviceConflicts": "检查重复设备记录",
   "account.deviceConflictsNotice": "这些已保存记录可能指向同一台设备。检查结果不代表已确认实物身份，也不会合并设备。",
-  "error.MIDEA_CONFLICT_LIMIT": "冲突检查最多支持 64 个中国大陆美居账号。"
+  "error.MIDEA_CONFLICT_LIMIT": "冲突检查最多支持 64 个中国大陆美居账号。",
+  "vendor.example.cycle.start": "启动模拟运行",
+  "vendor.example.cycle.start.confirm": "在 {device} 上启动一次模拟的{program}运行？此开发功能不会操作真实家电。",
+  "vendor.example.cycle.program.normal": "标准"
 }

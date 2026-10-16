@@ -97,7 +97,7 @@ python3 scripts/validate_repository.py
 python3 scripts/validate_commits.py --all
 ```
 
-Run the Rust and runtime commands in `docs/testing.md` for application changes. Flutter is not installed or validated in this checkout. Never report unexecuted `cargo test`, mobile builds, physical-device tests, or remote CI as successful. Record a specific `blocked` reason when hardware, accounts, authentication evidence, or licensing is missing.
+Run the Rust and runtime commands in `docs/testing.md` for application changes. This frontend branch pins Flutter through FVM in `apps/mobile/.fvmrc`; executed Linux/Android emulator checks and remaining acceptance are recorded in `apps/mobile/verification.md`. Recheck local tool availability on each workstation. Never report unexecuted `cargo test`, mobile builds, physical-device tests, or remote CI as successful. Record a specific `blocked` reason when hardware, accounts, authentication evidence, or licensing is missing.
 
 ## Delivery workflow
 

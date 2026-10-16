@@ -11,7 +11,7 @@ REPO = ROOT.parents[2]
 data = json.loads((ROOT/'design.json').read_text())
 screens = [s for b in data['boards'] for s in b['screens']]
 assert len(screens) == 82
-assert len(data['interactions']) == 198
+assert len(data['interactions']) == 201
 assert data['skin']['available'] == [{'id':'window_light','name':'Window Light'}]
 
 template = (ROOT/'atlas-template.html').read_text()
@@ -28,8 +28,8 @@ coverage+='''## Window Light acceptance additions
 |---|---|
 | Apply one visual system to every state | All 82 panels use the shared locally rendered background, surface and accent tokens. |
 | Exactly one skin option | S02 and S11 use stable ID `window_light`; no alternate/dark/system option. |
-| Preserve future skin extensibility | [Flutter reference](flutter-reference/README.md) and [skin contract](../../../docs/ui-window-light.md); production persistence remains planned. |
-| Keep development coverage explicit | [Functional handoff](../../../docs/ui-functional-spec.md), [82-state inventory](../../../docs/ui-screen-inventory.md) and 14 acceptance groups. |
+| Preserve future skin extensibility | [Skin contract](../../../docs/ui-window-light.md) and [Flutter app](../../../apps/mobile/README.md); local preference persistence is implemented, while additional skins remain out of scope. |
+| Keep development coverage explicit | [Functional handoff](../../../docs/ui-functional-spec.md), [82-state inventory](../../../docs/ui-screen-inventory.md) and 15 acceptance groups. |
 | Honest rendering evidence | Local Python composition; no Flutter build, browser UI test or physical-device verification is implied. |
 
 ## Complete screen inventory
@@ -55,6 +55,35 @@ Each entry preserves its stable screen ID, visible content and explicit branch t
 The legacy S11 dark-appearance study is superseded by the one-option Window Light preview. There is no alternate skin in this release.
 
 '''
+# Retain contract amendments that do not have separate rendered states.
+runtime_notes = {
+    "P08": """Required runtime variants: P04 retains one Connecting and retrieving devices state until the combined call returns; no staged success or percentage is available. Cancel invalidates the pending UI result and requires local account summaries to be reloaded before retrying; it never automatically retries. P08 distinguishes complete-empty, partial and failed retrieval; partial does not supply a usable partial device list, so reload saved cards. AUTH_REQUIRED offers explicit reauthorization; pending credentials offer recovery or same-account sign-in. Do not send an identity conflict to a fictional merge control: native API 1.14.1 exposes no identity-linking method. Separate authoritative screenshots for these variants remain required; the base image alone does not establish their visual acceptance. Retrieve Devices is an explicit bounded refresh using the saved session. Reauthorization stays scoped to the selected account, removal requires exact local-scope confirmation, and View Devices uses locally reloaded cards.""",
+    "P10": """API 1.7 amendment: distinguish expired confirmed authorization from interrupted
+credential persistence. A pending account offers Recover Saved Authorization using
+`recover_account`, with finite progress/cancel and explicit failure/retry states.
+Inspect both the returned credential state and retrieval result; stored credentials
+with failed publication are not completed card loading. Recovery preserves known
+organization and sends no controls or new login. API 1.8 additionally offers explicit Sign In to the Original Account through the
+protected connection function when saved identity/bindings are intact, including
+expired pending sessions. Missing/corrupt material stays pending; explain the
+limitation without an automatic reconnect/removal loop.
+This is a functional amendment, not newly rendered or visually verified atlas states.""",
+    "P11": """API 1.5 amendment: obtain `get_account`, show the linked-card count and actual scope,
+then pass that exact ID set to `remove_account` after confirmation. Only
+`data.status: removed` leads to P01. `pending` keeps the account visible with cleanup
+errors and explicit retry; changed scope requires another review, and shared-route
+removal is unavailable. Rooms and operation receipts remain. These are functional
+requirements; the rendered dialog does not establish their visual acceptance.
+Provider revocation remains unavailable.""",
+    "S04": """API 1.6 amendment: Clear Cached State and Clear Recent Operations call separate
+native cleanup methods after scope confirmation. Report removed snapshot/receipt
+counts. Active journals block history clearing with `RESOURCE_BUSY`; retain the
+view and offer an explicit retry. Clearing history includes detailed unknown
+outcomes but keeps request-ID replay protection. Cached state may reappear from an
+already-running read. Reload local views after interrupted calls. Full Remove Local
+Data remains unavailable. These confirmation/busy/error/result variants are a
+functional amendment, not newly rendered or visually verified atlas states.""",
+}
 for b in data['boards']:
     inventory+='## '+b['title']+'\n\n'
     for s in b['screens']:
@@ -81,6 +110,8 @@ for b in data['boards']:
         for e in actions:inventory+=f"| {e['action'].replace('|','/')} | [{e['target']}](#{e['target'].lower()}--{next(z['title'] for z in screens if z['id']==e['target']).lower().replace(' ','-')}) |\n"
         if not actions:inventory+='| Back / Close | Return to the recorded caller |\n'
         inventory+='\n'
+        if sid in runtime_notes:
+            inventory += runtime_notes[sid] + '\n\n'
 # Stable local image links avoid markdown renderer-specific heading slug rules.
 inventory=re.sub(r'\[([A-Z][0-9]{2})\]\(#[^)]+\)',lambda m:f'[{m[1]}](../output/prototypes/homeverb-window-light-v1/screens/{m[1]}.png)',inventory)
 (REPO/'docs/ui-screen-inventory.md').write_text(inventory.rstrip()+'\n')

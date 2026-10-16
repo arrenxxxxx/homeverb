@@ -21,5 +21,6 @@ build/
 .dart_tool/
 .flutter-plugins-dependencies
 node_modules/
+output/flutter-verification/
 .DS_Store
 Thumbs.db

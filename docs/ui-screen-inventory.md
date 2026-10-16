@@ -6,8 +6,6 @@ Each entry preserves its stable screen ID, visible content and explicit branch t
 
 The legacy S11 dark-appearance study is superseded by the one-option Window Light preview. There is no alternate skin in this release.
 
-The October 15 Meiju account-flow amendment below changes P08 to automatic cloud device retrieval after authorization. The existing P08 image and atlas branch buttons still show the earlier manual discovery flow. The required transitions are recorded below for implementation; visual assets and interactive atlas updates remain pending. Other screen IDs retain their meaning.
-
 ## Everyday devices
 
 ### D01 — All devices
@@ -559,24 +557,23 @@ Visible content: Authorization expired / Start again to request a new authorizat
 | Start Again | [P03](../output/prototypes/homeverb-window-light-v1/screens/P03.png) |
 | Cancel | [P01](../output/prototypes/homeverb-window-light-v1/screens/P01.png) |
 
-### P08 — Platform connected
+### P08 — Account retrieval result
 
 [Rendered state](../output/prototypes/homeverb-window-light-v1/screens/P08.png) · Nested screen
 
-The rendered image is the earlier generic example: Authorization saved securely, Find Devices, and Done. For the required Meiju journey, authorization instead continues automatically into bounded account-device retrieval. Show Loading Devices with Cancel; then the actual supported/unsupported counts and Open Devices. Do not require Find Devices or individual device selection. Preserve an authorization-success message when retrieval fails, offer Retry Retrieval, and distinguish empty from partial results. New supported cards start Unassigned; reauthorization preserves existing organization. No raw token display or invented fresh device state.
+Completed combined account connection and automatic device retrieval, with two fictional returned cards. No second discovery or selection step is required. Retrieval does not establish physical state or grant controls. Retry is explicit; empty, partial, failed and interrupted results retain their separate native contract behavior.
 
-Required content, pending visual update: Authorization saved securely; Loading Devices; Cancel; retrieved device counts and unsupported reasons; Open Devices; optional room assignment. Error/partial variants offer Retry Retrieval and View Available Devices; a confirmed empty account explains that no devices were returned.
+Visible content: Device retrieval complete / Sign-in succeeded. Saved authorization · not checked.; 2 devices retrieved. Unsupported models remain visible. An empty result does not delete older saved cards.; Existing cards are reloaded from local storage. Retrieval does not establish physical state or grant appliance controls.; Retrieve Devices; Reauthorize; Remove From This Device; View Devices; Back to Accounts
 
 | Action or outcome | Review destination |
 |---|---|
-| Authorization saved | P08 retrieval variant, started automatically within the foreground connection flow |
-| Retrieval completed / Open Devices | [D01](../output/prototypes/homeverb-window-light-v1/screens/D01.png), using actual retrieved cards; empty variant when no devices are returned |
-| Retrieval failed or partial / Retry Retrieval | P08 retrieval variant; explicit bounded retry using the saved session when valid |
-| Partial result / View Available Devices | [D01](../output/prototypes/homeverb-window-light-v1/screens/D01.png), with incomplete retrieval disclosed |
-| Ambiguous identity | [A05](../output/prototypes/homeverb-window-light-v1/screens/A05.png), returning to the initiating account flow |
-| Assign local rooms | [R03](../output/prototypes/homeverb-window-light-v1/screens/R03.png), without gating retrieval or changing permissions |
-| Cancel retrieval | [P09](../output/prototypes/homeverb-window-light-v1/screens/P09.png), preserving securely saved authorization and known results without automatic resumption |
-| Done | [P01](../output/prototypes/homeverb-window-light-v1/screens/P01.png) |
+| Retrieve Devices | [P08](../output/prototypes/homeverb-window-light-v1/screens/P08.png) |
+| Reauthorize | [P03](../output/prototypes/homeverb-window-light-v1/screens/P03.png) |
+| Remove From This Device | [P11](../output/prototypes/homeverb-window-light-v1/screens/P11.png) |
+| View Devices | [D01](../output/prototypes/homeverb-window-light-v1/screens/D01.png) |
+| Back to Accounts | [P01](../output/prototypes/homeverb-window-light-v1/screens/P01.png) |
+
+Required runtime variants: P04 retains one Connecting and retrieving devices state until the combined call returns; no staged success or percentage is available. Cancel invalidates the pending UI result and requires local account summaries to be reloaded before retrying; it never automatically retries. P08 distinguishes complete-empty, partial and failed retrieval; partial does not supply a usable partial device list, so reload saved cards. AUTH_REQUIRED offers explicit reauthorization; pending credentials offer recovery or same-account sign-in. Do not send an identity conflict to a fictional merge control: native API 1.14.1 exposes no identity-linking method. Separate authoritative screenshots for these variants remain required; the base image alone does not establish their visual acceptance. Retrieve Devices is an explicit bounded refresh using the saved session. Reauthorization stays scoped to the selected account, removal requires exact local-scope confirmation, and View Devices uses locally reloaded cards.
 
 ## Manage access deliberately
 
@@ -597,18 +594,6 @@ Visible content: Home account · h***@example.invalid; Region / Europe / Devices
 
 ### P10 — Reconnect needed
 
-API 1.7 amendment: distinguish expired confirmed authorization from interrupted
-credential persistence. A pending account offers Recover Saved Authorization using
-`recover_account`, with finite progress/cancel and explicit failure/retry states.
-Inspect both the returned credential state and retrieval result; stored credentials
-with failed publication are not completed card loading. Recovery preserves known
-organization and sends no controls or new login. API 1.8 additionally offers explicit Sign In to the Original Account through the
-protected connection function when saved identity/bindings are intact, including
-expired pending sessions. Missing/corrupt material stays pending; explain the
-limitation without an automatic reconnect/removal loop.
-This is a functional amendment, not newly rendered or visually verified atlas states.
-
-
 [Rendered state](../output/prototypes/homeverb-window-light-v1/screens/P10.png) · Nested screen
 
 Same account detail with amber Sign-in needed / Your platform authorization has expired. Cached device count remains labelled Last known. Primary Reauthorize. Secondary View Devices and Remove From This Device. No other account auto-selection.
@@ -620,6 +605,17 @@ Visible content: Sign-in needed / Your platform authorization has expired.; Devi
 | Reauthorize | [P03](../output/prototypes/homeverb-window-light-v1/screens/P03.png) |
 | View cached devices | [D01](../output/prototypes/homeverb-window-light-v1/screens/D01.png) |
 | Remove locally | [P11](../output/prototypes/homeverb-window-light-v1/screens/P11.png) |
+
+API 1.7 amendment: distinguish expired confirmed authorization from interrupted
+credential persistence. A pending account offers Recover Saved Authorization using
+`recover_account`, with finite progress/cancel and explicit failure/retry states.
+Inspect both the returned credential state and retrieval result; stored credentials
+with failed publication are not completed card loading. Recovery preserves known
+organization and sends no controls or new login. API 1.8 additionally offers explicit Sign In to the Original Account through the
+protected connection function when saved identity/bindings are intact, including
+expired pending sessions. Missing/corrupt material stays pending; explain the
+limitation without an automatic reconnect/removal loop.
+This is a functional amendment, not newly rendered or visually verified atlas states.
 
 ### P11 — Remove local account
 
@@ -706,16 +702,6 @@ Visible content: Auto — prefer local when available / Local network only — n
 
 ### S04 — Local data
 
-API 1.6 amendment: Clear Cached State and Clear Recent Operations call separate
-native cleanup methods after scope confirmation. Report removed snapshot/receipt
-counts. Active journals block history clearing with `RESOURCE_BUSY`; retain the
-view and offer an explicit retry. Clearing history includes detailed unknown
-outcomes but keeps request-ID replay protection. Cached state may reappear from an
-already-running read. Reload local views after interrupted calls. Full Remove Local
-Data remains unavailable. These confirmation/busy/error/result variants are a
-functional amendment, not newly rendered or visually verified atlas states.
-
-
 [Rendered state](../output/prototypes/homeverb-window-light-v1/screens/S04.png) · Nested screen
 
 Back Local Data. Sections Device organization / Rooms and names; Cached device state / Last read snapshots; Recent operations / Latest 100 records. Clear Cached State and Clear Recent Operations distinct actions. Full Remove Local Data action at bottom, privacy note Authorizations are stored securely. No export token option.
@@ -726,6 +712,15 @@ Visible content: Device organization / Rooms and names / Cached device state / L
 |---|---|
 | Confirm removal | [S09](../output/prototypes/homeverb-window-light-v1/screens/S09.png) |
 | Back | [S01](../output/prototypes/homeverb-window-light-v1/screens/S01.png) |
+
+API 1.6 amendment: Clear Cached State and Clear Recent Operations call separate
+native cleanup methods after scope confirmation. Report removed snapshot/receipt
+counts. Active journals block history clearing with `RESOURCE_BUSY`; retain the
+view and offer an explicit retry. Clearing history includes detailed unknown
+outcomes but keeps request-ID replay protection. Cached state may reappear from an
+already-running read. Reload local views after interrupted calls. Full Remove Local
+Data remains unavailable. These confirmation/busy/error/result variants are a
+functional amendment, not newly rendered or visually verified atlas states.
 
 ## Send access nearby
 

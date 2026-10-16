@@ -1,0 +1,8 @@
+analyzer:
+  exclude:
+    - build/**
+    - .fvm/**
+    - android/**
+    - ios/**
+    - web/**
+    - linux/**

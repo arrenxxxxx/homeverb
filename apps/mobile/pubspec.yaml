@@ -1,0 +1,33 @@
+name: homeverb_mobile
+description: HomeVerb foreground native application.
+publish_to: none
+version: 0.2.0+1
+environment:
+  sdk: '>=3.8.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  ffi: ^2.1.4
+  path_provider: ^2.1.5
+  file_selector: ^1.0.3
+dev_dependencies:
+  file_selector_platform_interface: ^2.7.0
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+flutter:
+  uses-material-design: true
+  shaders:
+    - shaders/window_surface.frag
+  assets:
+    - assets/
+    - assets/fonts/LICENSE.txt
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.otf
+        - asset: assets/fonts/Inter-SemiBold.otf
+          weight: 600
