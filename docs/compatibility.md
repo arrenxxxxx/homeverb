@@ -1576,101 +1576,56 @@ acceptance remain open. The [previous storage phase](adr/0062-ios-keychain-crede
 passed all sixteen macOS tests and two complete iOS library builds on `3742e67`;
 that evidence does not by itself prove this new package format.
 
-## Isolated iOS Simulator acceptance harness
+## Isolated iOS Simulator acceptance
 
-Commit `d4525b1` passed the actual three-architecture release XCFramework build,
-extracted-package inspection and C consumer linkage in macOS job `116864097511`.
-MVP run `38867656947` and documentation run `38867657083` both succeeded.
+The [Simulator harness](development/09-ios-native.md#4-run-isolated-simulator-acceptance)
+embeds the production XCFramework in a test-only Objective-C app. A separate
+Simulator-only Rust helper exercises the actual iOS secret store with fictional
+bytes and a fresh UUID namespace; it is absent from the production framework and
+public header. Native API 1.20, 16 C functions, 33 ordinary methods, SQLite schema 5
+and protected payload 3 are unchanged.
 
-The separate [Simulator harness](development/09-ios-native.md#4-run-isolated-simulator-acceptance)
-embeds that production package in a test-only Objective-C app. A Simulator-only
-Rust static-library example exercises the real iOS secret-store implementation
-using fictional bytes and a fresh run UUID. Production exports, native API 1.20,
-33 ordinary methods, SQLite schema 5 and protected payload 3 remain unchanged.
+The runner creates a new Simulator and targets only its returned UUID. Two fresh
+reports tied to distinct launch PIDs are required. Checks cover Mock discovery,
+power/state, persisted cards/cache/receipt, explicit Core lifecycle calls and
+Keychain add/read/reopen/replace/isolation/pre-cancellation/delete. Failures stop
+without replay, and cleanup never targets an existing user Simulator. Diagnostics
+retain bounded test-app launch failures or fixed Boolean metadata flags; they
+never request credential data for diagnostics or report raw attributes.
 
-The harness creates a new device and targets only its returned UUID, checks embedded
-Simulator private-group entitlements, and requires two fresh reports tied to distinct launch
-PIDs. It checks Mock power/state, local persistence and explicit Core lifecycle
-calls, plus Keychain round trips, isolated references, pre-cancellation and deletion.
-Failures stop without replay; cleanup never targets an existing user Simulator.
-The test helper is not included in the production framework or public C header.
+Runtime investigation identified three corrections:
 
-Eight portable runner tests and eight existing package tests passed locally;
-the Simulator helper passed arm64 iOS Simulator Clippy with warnings denied.
-These are not app/Keychain runtime evidence. Actual execution requires the new
-macOS CI step; inspect its result for this commit. No real account, appliance,
-physical phone or separate Flutter worktree was accessed. Passcode/lock, physical
-entitlements, Flutter integration and provider/device acceptance remain pending.
+- The test app embeds XML/DER entitlements in the Simulator executable and uses
+  a plain ad-hoc host signature. Both sections and signature placement are checked.
+  This resolved the launch refusal exposed by `4b1bc11`; `e7da257` launched and
+  completed the first Core flow. Physical signing remains a separate mechanism.
+- Security returns the synchronization flag as an integer. `3e3f099` accepts only
+  Boolean or exact integer 0/1 representations, then still rejects synchronization.
+  Missing flags, floats, other integers and wrong types remain refused.
+- `2b7dbd3` confirmed an implicit access-control object alongside matching scope,
+  passcode-only protection and a persistent reference. `b01f205` creates an explicit
+  public zero-flag policy and compares returned objects against its complete value.
+  Wrong types, weaker protection, extra user-presence constraints and differently
+  represented existing objects remain refused. No automatic migration or recreation
+  occurs. [ADR-0062](adr/0062-ios-keychain-credentials.md) records the pinned sources.
 
-The first actual Simulator run on `806551c` built, signed and installed the app on
-iOS 26.2, but SpringBoard refused the first launch (`FBSOpenApplicationServiceErrorDomain`
-code 1). No Core or Keychain runtime checks ran. The harness now reads bounded,
-test-app-filtered launch diagnostics from only its newly created Simulator before
-cleanup, without relaunching. It never collects host logs or user-device diagnostics.
-A ninth portable runner test verifies this failure path and preserves the original
-launch error if diagnostics are unavailable.
+Local verification for the policy correction passed 21 secret-store tests with
+two environment-dependent tests ignored, device-target and Simulator all-targets
+Clippy, 62 Python tooling tests, formatting and documentation/contract/repository/
+commit validation. The Python suite includes twelve Simulator-runner tests.
+Linux cannot execute the real Security-object regression or the Simulator app.
 
-The follow-up `610d92c` reproduced the launch refusal, but later SpringBoard UI
-messages displaced the cause in the diagnostic tail. Structured log filtering
-now retains bounded failure messages independently of later UI noise; a regression
-test verifies that selection. This is diagnostic work, not runtime acceptance.
+The packaging baseline `d4525b1` passed all three release architectures,
+extracted-package inspection and C consumer linkage in macOS job `116864097511`;
+MVP run `38867656947` and documentation run `38867657083` succeeded. The corrected
+runtime for `b01f205` passed eighteen macOS object/orchestration tests and all
+package checks in job `116894113326`, but still refused the first Keychain read
+after add. The test app now distinguishes the complete returned policy from the
+exact persistent-reference lookup using metadata-only Boolean diagnostics. It
+does not read credential data for diagnostics or weaken production policy.
+No successful Keychain round trip is claimed yet.
 
-The `4b1bc11` log exposed the nested `Launchd job spawn failed` error (POSIX 162).
-Review against the pinned Apple/Swift Simulator build specification found that
-the test builder incorrectly put iOS entitlements in the host signature. It now
-embeds XML and DER in `__TEXT,__entitlements` and `__TEXT,__ents_der`, generates DER
-with Apple's `derq`, applies a plain ad-hoc seal, reads both sections back and
-refuses iOS entitlements in the host signature. Two regression tests cover wrong
-signature placement and missing/changed sections, bringing runner tests to twelve.
-This changes only the test app; production Keychain protection, private-group
-checks and framework packaging are unchanged. Runtime success is still contingent
-on the corrected CI run.
-
-On `e7da257`, the corrected app launched and completed its first Core flow, then
-failed at the first read after a successful fictional Keychain add
-(`SECRET_STORE_UNAVAILABLE`, two store checks). The app now reports only fixed
-boolean metadata-shape diagnostics on that failure; it never requests credential
-data for diagnostics or emits raw attributes. This isolates OS representation
-differences before changing any production admission rule.
-
-The `ffe10fe` run confirmed the exact scope and passcode-only metadata, with a
-numeric zero synchronization flag. The production decoder now accepts Boolean
-or exact integer 0/1 representations, while entry validation still refuses
-synchronization. Real Core Foundation regression cases cover both forms, negative
-and oversized integers, floats, strings, wrong types and missing flags. Access
-group, accessibility, access-control and persistent-reference checks are unchanged.
-This corrects an OS representation mismatch without changing native API 1.20,
-credential policy or storage formats. Local verification passed: 21 secret-store
-tests with two environment-dependent tests ignored; device-target and Simulator
-all-targets Clippy with warnings denied; 62 Python tooling tests; formatting,
-documentation, contract, repository and commit validation. Linux cannot execute
-the new Core Foundation regression or the Simulator; the next macOS result must
-be checked before treating the round trip as accepted.
-
-Commit `3e3f099` passed all seventeen macOS Core Foundation/orchestration tests
-and the three-architecture package checks, but the Simulator still refused the
-first Keychain read after add. Several test diagnostic C comparisons had been
-boxed as JSON integers and correctly omitted by the Boolean-only log filter.
-The test app now explicitly boxes every flag as a Boolean and checks service
-and account equality without reporting either value. The filter still rejects
-integer substitutes and arbitrary attributes; this test-only correction does
-not relax production credential policy or claim a successful round trip.
-
-The `2b7dbd3` Simulator metadata confirmed matching service/account/group,
-passcode-only accessibility, a persistent reference and numeric-zero synchronization,
-but also an implicit access-control object. Presence-only rejection therefore
-blocked the backend's own adds. New adds now use the public zero-flag
-`SecAccessControlCreateWithFlags` policy with the same passcode-only protection.
-Returned objects must have the expected type and compare equal to the complete
-explicit policy; wrong types, weaker protection and extra user-presence constraints
-remain refused. Existing differently represented objects are not migrated or
-rewritten. The [decision](adr/0062-ios-keychain-credentials.md) records pinned Apple
-source evidence and the new real-object positive/negative regression. Public API,
-storage formats, private groups and no-prompt behavior are unchanged. Actual runtime
-acceptance remains pending the corrected Simulator run.
-
-Local verification for this policy correction passed 21 secret-store tests
-(two environment-dependent tests ignored), both iOS target Clippy checks
-(all targets on Simulator), 62 Python tooling tests, formatting and the
-documentation/contract/repository/commit validators. macOS executes the new
-Security-object regression and actual Simulator app; Linux checks do not.
+No real account, appliance, physical phone or separate Flutter worktree was
+accessed. Simulator checks do not establish physical passcode/lock behavior,
+no-prompt enforcement, signed entitlements, reinstall/backup behavior, Flutter
+integration or provider/device/off-LAN acceptance. These remain open.

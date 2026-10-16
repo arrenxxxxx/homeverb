@@ -46,6 +46,14 @@ static id query(uint64_t handle, NSDictionary *request) {
 /* Test-only metadata shape diagnostics; never request or report credential data. */
 static NSNumber *metadataFlag(BOOL value) { return value ? @YES : @NO; }
 
+static BOOL matchesRequiredPolicy(id value) {
+    if (!value || CFGetTypeID((__bridge CFTypeRef)value) != SecAccessControlGetTypeID()) return NO;
+    SecAccessControlRef expected = SecAccessControlCreateWithFlags(NULL, kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly, 0, NULL);
+    BOOL matches = expected && CFEqual((__bridge CFTypeRef)value, expected);
+    if (expected) CFRelease(expected);
+    return matches;
+}
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 static NSDictionary *storeMetadata(NSString *runID) {
@@ -68,16 +76,40 @@ static NSDictionary *storeMetadata(NSString *runID) {
     if (![entry isKindOfClass:NSDictionary.class]) return @{@"dictionary": @NO};
     id sync = entry[(__bridge id)kSecAttrSynchronizable];
     id reference = entry[(__bridge id)kSecValuePersistentRef];
-    return @{
+    id policy = entry[(__bridge id)kSecAttrAccessControl];
+    NSMutableDictionary *shape = [@{
         @"scope": metadataFlag([entry[(__bridge id)kSecAttrAccessGroup] isEqual:@"SYNTHETIC.org.homeverb.test"]),
         @"service": metadataFlag([entry[(__bridge id)kSecAttrService] isEqual:request[(__bridge id)kSecAttrService]]),
         @"account": metadataFlag([entry[(__bridge id)kSecAttrAccount] isEqual:request[(__bridge id)kSecAttrAccount]]),
         @"passcode": metadataFlag([entry[(__bridge id)kSecAttrAccessible] isEqual:(__bridge id)kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly]),
         @"sync_present": metadataFlag(sync != nil), @"sync_boolean": metadataFlag(sync && CFGetTypeID((__bridge CFTypeRef)sync) == CFBooleanGetTypeID()),
         @"sync_number": metadataFlag([sync isKindOfClass:NSNumber.class]), @"sync_zero": metadataFlag([sync isEqual:@0]),
-        @"access_control": metadataFlag(entry[(__bridge id)kSecAttrAccessControl] != nil),
+        @"sync_integer": metadataFlag(sync && CFGetTypeID((__bridge CFTypeRef)sync) == CFNumberGetTypeID() && !CFNumberIsFloatType((__bridge CFNumberRef)sync)),
+        @"access_control": metadataFlag(policy != nil),
+        @"access_control_type": metadataFlag(policy && CFGetTypeID((__bridge CFTypeRef)policy) == SecAccessControlGetTypeID()),
+        @"access_control_expected": metadataFlag(matchesRequiredPolicy(policy)),
         @"persistent_ref": metadataFlag([reference isKindOfClass:NSData.class] && [reference length] > 0)
-    };
+    } mutableCopy];
+    if ([reference isKindOfClass:NSData.class] && [reference length] > 0) {
+        NSMutableDictionary *exact = [request mutableCopy];
+        exact[(__bridge id)kSecValuePersistentRef] = reference;
+        exact[(__bridge id)kSecAttrSynchronizable] = @NO;
+        exact[(__bridge id)kSecAttrAccessible] = (__bridge id)kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly;
+        exact[(__bridge id)kSecMatchLimit] = (__bridge id)kSecMatchLimitOne;
+        raw = NULL;
+        status = SecItemCopyMatching((__bridge CFDictionaryRef)exact, &raw);
+        id matched = CFBridgingRelease(raw);
+        shape[@"exact_match"] = metadataFlag(status == errSecSuccess);
+        shape[@"exact_missing"] = metadataFlag(status == errSecItemNotFound);
+        shape[@"exact_invalid"] = metadataFlag(status == errSecParam);
+        shape[@"exact_locked"] = metadataFlag(status == errSecInteractionNotAllowed || status == errSecAuthFailed);
+        shape[@"exact_dictionary"] = metadataFlag([matched isKindOfClass:NSDictionary.class]);
+        if ([matched isKindOfClass:NSDictionary.class]) {
+            shape[@"exact_reference"] = metadataFlag([matched[(__bridge id)kSecValuePersistentRef] isEqual:reference]);
+            shape[@"exact_policy"] = metadataFlag(matchesRequiredPolicy(matched[(__bridge id)kSecAttrAccessControl]));
+        }
+    }
+    return shape;
 }
 #pragma clang diagnostic pop
 

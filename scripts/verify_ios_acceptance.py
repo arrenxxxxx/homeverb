@@ -68,7 +68,9 @@ def validate_report(report, phase, run_id, pid, writer_pid):
         shape = report.get('metadata_shape', {}) if isinstance(report, dict) else {}
         safe_shape = {key: value for key, value in shape.items()
                       if key in {'array', 'dictionary', 'scope', 'service', 'account', 'passcode', 'sync_present', 'sync_boolean',
-                                 'sync_number', 'sync_zero', 'access_control', 'persistent_ref'}
+                                 'sync_number', 'sync_zero', 'sync_integer', 'access_control', 'access_control_type',
+                                 'access_control_expected', 'persistent_ref', 'exact_match', 'exact_missing',
+                                 'exact_invalid', 'exact_locked', 'exact_dictionary', 'exact_reference', 'exact_policy'}
                       and type(value) is bool} if isinstance(shape, dict) else {}
         raise ValueError(f'Acceptance evidence refused: phase={phase}, stage={safe_stage}, store_code={safe_code}, store_checks={safe_count}, metadata_shape={safe_shape}.')
 

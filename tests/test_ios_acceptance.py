@@ -69,13 +69,16 @@ class IosAcceptanceTests(unittest.TestCase):
         with self.assertRaises(ValueError) as failure:
             ios.validate_report(dict(report(), stage='fictional-sensitive-text', store_code='fictional-secret',
                                      metadata_shape={'scope': 'fictional-secret', 'unexpected': True, 'sync_number': True,
-                                                     'persistent_ref': False, 'sync_present': 1, 'account': True}),
+                                                     'persistent_ref': False, 'sync_present': 1, 'account': True,
+                                                     'exact_match': False, 'access_control_expected': True}),
                                 'write', RUN, 101, 101)
         self.assertNotIn('fictional', str(failure.exception))
         self.assertNotIn('unexpected', str(failure.exception))
         self.assertIn("'sync_number': True", str(failure.exception))
         self.assertIn("'persistent_ref': False", str(failure.exception))
         self.assertIn("'account': True", str(failure.exception))
+        self.assertIn("'exact_match': False", str(failure.exception))
+        self.assertIn("'access_control_expected': True", str(failure.exception))
         self.assertNotIn('sync_present', str(failure.exception))
 
     def test_signed_entitlements_must_match_exact_private_scope(self):
