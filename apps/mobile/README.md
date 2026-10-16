@@ -56,6 +56,13 @@ fvm flutter analyze
 fvm flutter test --reporter expanded
 ```
 
+Window Light button faces are four small local decorative assets; labels, focus,
+semantics and interaction remain native Flutter controls. Their 2x corner artwork
+preserves the prototype's inclusive pixel edges without stretching the corners.
+Regenerate them from this directory with `python3 tool/generate_button_assets.py`
+(Pillow required). Assets are committed, so normal Flutter builds do not require
+Python. High contrast retains Flutter's existing solid outlined controls.
+
 Build the library from the repository root before running native tests:
 
 ```sh

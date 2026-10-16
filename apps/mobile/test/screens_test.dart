@@ -426,6 +426,98 @@ void main() {
     await check(2);
   });
 
+  testWidgets('button faces preserve inclusive edges and native interactions', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 2;
+    tester.view.physicalSize = const Size(780, 600);
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+    final boundary = GlobalKey();
+    final clicks = <String>[];
+    final semantics = tester.ensureSemantics();
+    try {
+      await tester.pumpWidget(
+        RepaintBoundary(
+          key: boundary,
+          child: MaterialApp(
+            theme: windowTheme(),
+            home: Scaffold(
+              backgroundColor: Colors.white,
+              body: SizedBox(
+                width: 350,
+                child: Column(
+                  children: [
+                    for (final style in ['', 'secondary', 'danger', 'disabled'])
+                      ActionButton(
+                        style.isEmpty ? 'Continue' : style,
+                        style: style,
+                        onPressed: style == 'disabled'
+                            ? null
+                            : () => clicks.add(style),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(FilledButton), findsNWidgets(4));
+      for (var i = 0; i < 4; i++) {
+        expect(
+          tester.getSize(find.byType(FilledButton).at(i)),
+          const Size(350, 48),
+        );
+      }
+      await tester.runAsync(() async {
+        final image =
+            await (boundary.currentContext!.findRenderObject()
+                    as RenderRepaintBoundary)
+                .toImage(pixelRatio: 2);
+        final bytes = (await image.toByteData(
+          format: ui.ImageByteFormat.rawRgba,
+        ))!;
+        List<int> pixel(int x, int y) {
+          final offset = (y * image.width + x) * 4;
+          return [for (var i = 0; i < 4; i++) bytes.getUint8(offset + i)];
+        }
+
+        // The independent 2x prototype includes both terminal edges.
+        expect(pixel(700, 48), [185, 78, 41, 255]);
+        expect(pixel(100, 96), [185, 78, 41, 255]);
+        expect(pixel(700, 168), [215, 214, 207, 255]);
+        expect(pixel(100, 216), [215, 214, 207, 255]);
+        expect(pixel(701, 48), [255, 255, 255, 255]);
+        image.dispose();
+      });
+      for (final label in ['Continue', 'secondary', 'danger']) {
+        expect(
+          tester
+              .getSemantics(find.text(label))
+              .getSemanticsData()
+              .hasAction(ui.SemanticsAction.tap),
+          true,
+        );
+        await tester.tap(find.text(label));
+        await tester.pumpAndSettle();
+      }
+      await tester.tap(find.text('disabled'));
+      await tester.pumpAndSettle();
+      expect(clicks, ['', 'secondary', 'danger']);
+      expect(
+        tester.widget<FilledButton>(find.byType(FilledButton).last).onPressed,
+        isNull,
+      );
+      expect(tester.takeException(), isNull);
+    } finally {
+      semantics.dispose();
+    }
+  });
+
   testWidgets('long card names retain semantics without covering readings', (
     tester,
   ) async {

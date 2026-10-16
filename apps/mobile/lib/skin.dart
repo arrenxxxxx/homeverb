@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 const ink = Color(0xff292b2d),
     muted = Color(0xff626566),
@@ -21,13 +22,19 @@ class HomeVerbSkin extends ThemeExtension<HomeVerbSkin> {
 
 const skinRegistry = {'window_light': HomeVerbSkin()};
 ui.FragmentProgram? _surfaceProgram;
-Future<void>? _surfaceProgramLoad;
-Future<void> loadWindowSkin() => _surfaceProgramLoad ??=
-    ui.FragmentProgram.fromAsset('shaders/window_surface.frag').then<void>((
-      program,
-    ) {
-      _surfaceProgram = program;
-    });
+Future<void>? _skinAssetsLoad;
+final _buttonFaces = <String, ui.Image>{};
+Future<void> loadWindowSkin() => _skinAssetsLoad ??= () async {
+  _surfaceProgram = await ui.FragmentProgram.fromAsset(
+    'shaders/window_surface.frag',
+  );
+  for (final style in ['primary', 'secondary', 'danger', 'disabled']) {
+    final bytes = await rootBundle.load('assets/button-$style.png');
+    final codec = await ui.instantiateImageCodec(bytes.buffer.asUint8List());
+    _buttonFaces[style] = (await codec.getNextFrame()).image;
+    codec.dispose();
+  }
+}();
 ThemeData windowTheme({bool highContrast = false}) => ThemeData(
   fontFamily: 'Inter',
   useMaterial3: true,
@@ -326,52 +333,99 @@ class ActionButton extends StatelessWidget {
   final String label, style;
   final VoidCallback? onPressed;
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: 12),
-    child: FilledButton(
-      style: FilledButton.styleFrom(
-        minimumSize: const Size(double.infinity, 48),
-        disabledBackgroundColor: const Color(0xffe4e2dc),
-        disabledForegroundColor: MediaQuery.highContrastOf(context)
-            ? Colors.black
-            : const Color(0xff888781),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-        backgroundColor: MediaQuery.highContrastOf(context)
-            ? (style == '' ? Colors.black : Colors.white)
-            : style == 'danger'
-            ? const Color(0xfffae7df)
-            : style == ''
-            ? accent
-            : const Color(0xffeeebe3),
-        foregroundColor: MediaQuery.highContrastOf(context)
-            ? (style == '' ? Colors.white : Colors.black)
-            : style == 'danger'
-            ? const Color(0xff9e3421)
-            : style == ''
-            ? const Color(0xfffffaf5)
-            : ink,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-          side: MediaQuery.highContrastOf(context)
-              ? const BorderSide(color: Colors.black, width: 1.5)
-              : style == 'secondary'
-              ? const BorderSide(color: Color(0xffd7d6cf))
-              : BorderSide.none,
+  Widget build(BuildContext context) {
+    final face = MediaQuery.highContrastOf(context)
+        ? null
+        : _buttonFaces[onPressed == null
+              ? 'disabled'
+              : style == ''
+              ? 'primary'
+              : style];
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: CustomPaint(
+        painter: face == null
+            ? null
+            : _ButtonFace(face, MediaQuery.devicePixelRatioOf(context)),
+        child: FilledButton(
+          style: FilledButton.styleFrom(
+            minimumSize: const Size(double.infinity, 48),
+            disabledBackgroundColor: face == null
+                ? const Color(0xffe4e2dc)
+                : Colors.transparent,
+            disabledForegroundColor: MediaQuery.highContrastOf(context)
+                ? Colors.black
+                : const Color(0xff888781),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            backgroundColor: face != null
+                ? Colors.transparent
+                : MediaQuery.highContrastOf(context)
+                ? (style == '' ? Colors.black : Colors.white)
+                : style == 'danger'
+                ? const Color(0xfffae7df)
+                : style == ''
+                ? accent
+                : const Color(0xffeeebe3),
+            foregroundColor: MediaQuery.highContrastOf(context)
+                ? (style == '' ? Colors.white : Colors.black)
+                : style == 'danger'
+                ? const Color(0xff9e3421)
+                : style == ''
+                ? const Color(0xfffffaf5)
+                : ink,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+              side: face != null
+                  ? BorderSide.none
+                  : MediaQuery.highContrastOf(context)
+                  ? const BorderSide(color: Colors.black, width: 1.5)
+                  : style == 'secondary'
+                  ? const BorderSide(color: Color(0xffd7d6cf))
+                  : BorderSide.none,
+            ),
+          ),
+          onPressed: onPressed,
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              height: 1.4,
+              letterSpacing: 0,
+            ),
+          ),
         ),
       ),
-      onPressed: onPressed,
-      child: Text(
-        label,
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          height: 1.4,
-          letterSpacing: 0,
-        ),
+    );
+  }
+}
+
+class _ButtonFace extends CustomPainter {
+  const _ButtonFace(this.image, this.pixelRatio);
+  final ui.Image image;
+  final double pixelRatio;
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.save();
+    canvas.scale(.5);
+    canvas.drawImageNine(
+      image,
+      const Rect.fromLTRB(30, 30, 31, 31),
+      Rect.fromLTWH(
+        0,
+        0,
+        (size.width + 1 / pixelRatio) * 2,
+        (size.height + 1 / pixelRatio) * 2,
       ),
-    ),
-  );
+      Paint()..filterQuality = FilterQuality.low,
+    );
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(_ButtonFace old) =>
+      image != old.image || pixelRatio != old.pixelRatio;
 }
 
 class OperationProgress extends StatelessWidget {

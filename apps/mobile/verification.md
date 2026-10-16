@@ -65,7 +65,7 @@ Controller/FFI tests additionally cover persisted reopen, accepted/verified/fail
 
 The screenshot test captures every ID at the reference size: 780 x 1688, or 2048 x 1536 for W01/W02. It loads the licensed Inter fonts and approved product/background assets. All text, controls and semantics are widgets; complete screen images are never used as the app interface. Test status/navigation chrome is deterministic artwork, not a captured phone OS.
 
-The latest complete comparison has **0 of 82 exact matches**, with mean absolute channel error **1.3467 / 255**, down from 6.1482 before rendering refinements. Native switches now use the prototype's accent/gray tracks and light thumbs. A lower average alone does not establish correct states or layouts. These metrics measure differences, not an acceptance tolerance. Text rasterization, icons, surfaces, controls and layout still differ. P08's base result now follows the combined account/retrieval contract in both the independently rendered atlas and the Flutter catalog; its remaining pixel differences are still failures.
+The latest complete comparison has **0 of 82 exact matches**, with mean absolute channel error **1.2943 / 255**, down from 6.1482 before rendering refinements. Native switches now use the prototype's accent/gray tracks and light thumbs. A lower average alone does not establish correct states or layouts. These metrics measure differences, not an acceptance tolerance. Text rasterization, icons, surfaces, controls and layout still differ. P08's base result now follows the combined account/retrieval contract in both the independently rendered atlas and the Flutter catalog; its remaining pixel differences are still failures.
 
 The latest shared-widget refinement aligns the non-root header, raises button labels to the reference position, and measures actual label/value font widths before wrapping rows. Fan and refrigerator preview steppers now expose separate increase/decrease controls with explicit preview-only feedback. The added interaction check clicks all six controls without changing page or claiming a native write. All 29 Flutter tests, static analysis and the Linux release build passed after this refinement.
 
@@ -882,3 +882,50 @@ clicks opened Settings > Connections; its wrapped explanation was inspected,
 and Save Preference returned to Settings with Auto retained. The capture is
 `output/flutter-verification/android/paragraph-release-connections.png`.
 There was no real account, physical appliance, physical phone or iOS execution.
+
+## Inclusive button backgrounds — October 16, 2026
+
+Both bundled Inter fonts are byte-identical to the prototype renderer's fonts.
+The remaining differences are not caused by a different font file. One measured
+paint difference was the prototype's inclusive rounded-rectangle boundary: at
+2x, a 350-by-48 logical face includes 701-by-97 physical pixels, while the prior
+native face excluded the terminal right and bottom pixels.
+
+Four locally generated 61-by-61 decorative corner assets now paint button faces
+with nine-slice stretching and the inclusive terminal pixel. They contain no
+text or page images. Labels, hit targets, focus, semantics, disabled behavior and
+state feedback remain native FilledButton behavior. High contrast retains the
+existing solid outlined controls. The independent prototype is unchanged.
+`python3 apps/mobile/tool/generate_button_assets.py` reproduces these assets.
+
+All **77 Flutter tests** and static analysis passed. The new regression verifies
+both terminal edges, the secondary border, the unpainted pixel immediately beyond
+the edge, unchanged 350-by-48 native control bounds, enabled tap semantics and
+working/disabled callbacks. Existing narrow/large-text/high-contrast checks,
+201 simulated branch clicks and native Mock/account interactions also passed.
+The final-suite captures are byte-identical to the compared capture set.
+
+Strict comparison remains failed: **0/82 exact**, mean channel error
+**1.2943/255** (previously 1.3467). Sixty-five screens improve, 12 are unchanged
+and five regress. The largest regression is S10 (+0.0473); P08 improves from
+1.6800 to 1.5488. Four P08 button-background edge regions, excluding the label,
+now match exactly. Its label still starts at y=744 instead of reference y=745;
+partial-region equality is not whole-button or screen equality. Glyph placement,
+other primitives and remaining layout differences still require correction.
+
+Evidence: `output/flutter-verification/button-comparison.json` and
+`button-pixel-audit.json`. Logs: `/tmp/homeverb-button-tests.log`,
+`/tmp/homeverb-button-analyze.log` and `/tmp/homeverb-button-pixels.log`.
+
+The complete Android native Mock journey passed in 2m20s on API 35 x86_64.
+The ordinary dual-ABI development release rebuilt, passed 16 KiB ZIP alignment,
+and was installed and cold-launched. Both packaged Core libraries are unchanged
+from commit `55467c2`, and all four packaged decorative assets match source.
+The generated assets also reproduce byte-for-byte when the script is rerun.
+
+Ordinary native pointer clicks opened Add Platform and Back returned to the
+original Devices page. The new button backgrounds were inspected in
+`output/flutter-verification/android/button-release-home.png` and
+`button-release-platforms.png`; `button-release-clicks.json` records the result.
+The Android journey still injects text input, file picker and lifecycle events.
+No physical phone, real account, appliance or iOS execution was performed.

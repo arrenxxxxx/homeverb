@@ -29,6 +29,13 @@ Apply the same background and material tokens to Devices, Platforms, Settings, d
 
 The raster prototype uses logical 390 × 844 phone layouts and 1024 × 768 wide layouts rendered at 2×. These dimensions are reference compositions, not fixed Flutter canvas sizes. Do not render the screenshots as the production interface: all text, controls, focus and accessibility semantics must be native widgets. Product cutouts and the decorative background can be image assets.
 
+Button backgrounds may use the small generated Window Light corner assets with
+nine-slice stretching. These contain only fill/border pixels, never labels or
+page content. Keep the native FilledButton, focus, semantics, state feedback and
+48-logical-pixel minimum target. At 2x, the reference's terminal rectangle edges
+are inclusive; preserve that one-physical-pixel paint coverage without changing
+layout size. High contrast uses the native solid outlined fallback.
+
 ## Control alignment revision — October 16, 2026
 
 The owner requested vertical centering throughout the prototype, explicitly
