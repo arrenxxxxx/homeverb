@@ -27,6 +27,10 @@ A separate account-bound lookup ports the Meiju v2 request shape and six-byte
 UDP-ID derivation. It requires fresh unique home membership and strict token/key
 selection, returns protected handshake material, and omits upstream fallback,
 default keys, credential persistence and automatic method switching.
+The ordinary packet port bounds `5a5a` frames, checks the expected six-byte
+identity and strict padding before returning protected plaintext, and retains
+the source timestamp format without treating it as observation evidence. It
+does not copy permissive stream parsing, raw packet logging or status callbacks.
 Public fixed wire constants do not authenticate a device or protect HomeVerb
 credentials. LAN session authentication and physical compatibility are not
 established by this port.

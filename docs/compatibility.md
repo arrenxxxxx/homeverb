@@ -955,3 +955,31 @@ acceptance: 35 passed; native contract: 31 methods/51 fictional examples plus
 approval checks; Python tooling: 33 passed; presentation: six passed. All three
 Android AAR variants passed build/export/16 KiB ELF checks. No fresh emulator,
 phone, live credential, physical or off-LAN acceptance was performed.
+
+## Ordinary LAN packet envelopes
+
+[ADR-0048](adr/0048-bounded-lan-packet-envelopes.md) adds pure native encoding,
+bounded prefix lengths and exact decoding for ordinary `5a5a` packets. The codec
+checks the expected six-byte ID, salted MD5, declared length and PKCS#7 padding
+before returning protected plaintext. Its 4040-byte envelope cap fits V3's
+4096-byte frames. The explicit outgoing UTC timestamp has no freshness meaning.
+
+Seven independent positive vectors and sixteen negative vectors use fictional
+data and Python hashlib/OpenSSL. The unchanged pinned upstream PacketBuilder
+class, with a fixed clock and OpenSSL cipher substitute, independently matches
+all seven positive packets. Rust tests cover every truncation, concatenated frame
+boundaries, corrupt/unsupported packets, wrong IDs and reserved bytes, input/time
+limits, maximum V3 fit and an independently encrypted nested V3 response.
+
+No native JSON method, route, connection, credential lookup, storage format or
+write outcome changes. API 1.14.1, 31 methods/11 C and JNI exports, SQLite schema
+4, outer payload 3 and inner session formats 1/2 remain unchanged. A valid packet
+is not an authenticated peer, model observation or acknowledgement. Inner model
+codecs, protected endpoint admission and physical acceptance remain pending.
+
+On October 16, 2026, formatting, workspace Clippy, workspace/example builds and
+local validators passed. Rust tests: 365 passed, two explicitly ignored; runtime
+acceptance: 35 passed; native contract: 31 methods/51 fictional examples plus
+approval checks; Python tooling: 33 passed; presentation: six passed. All three
+Android AAR variants passed build/export/16 KiB ELF checks. No real account,
+household endpoint, Flutter worktree or fresh Android runtime was accessed.

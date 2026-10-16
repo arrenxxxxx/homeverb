@@ -171,6 +171,14 @@ sanitized read errors, including v2 rejection without v1 fallback. Cancellation
 and deadline stop all further requests. None of these outcomes sends an appliance
 command, changes saved membership or authorizes a credential retry against a peer.
 
+The [ordinary LAN envelope helpers](adr/0048-bounded-lan-packet-envelopes.md)
+return `INVALID_ARGUMENT` for an unencodable expected ID, outgoing message size
+or timestamp. Malformed type/length, truncated/coalesced packets, bad salted MD5
+or invalid PKCS#7 padding return fixed `MIDEA_RESPONSE_INVALID`. A complete,
+checksum-valid packet with another six-byte ID returns `DEVICE_IDENTITY_CONFLICT`
+without releasing plaintext. This does not authenticate either ID. No envelope
+error changes write transmission phases, triggers I/O or permits replay/fallback.
+
 The account-bound read path returns `DEVICE_IDENTITY_CONFLICT` before transport when the local device, selected connection or known model differs from the protected binding. Invalid components return `CAPABILITY_UNSUPPORTED`. Pending or unavailable credentials stop the request through the vault. Core rejects decoded but undeclared properties with `INVALID_OBSERVATION`; neither that rejection nor a protocol failure replaces the previous cache or triggers a retry.
 
 Protected inventory membership is independent of historical identity. API 1.9.1

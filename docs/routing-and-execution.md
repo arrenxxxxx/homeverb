@@ -287,3 +287,11 @@ lookup. Discovery hints cannot select provider IDs for it. A future registered
 route must separately reconcile the endpoint and validate its model/permissions
 before sending the token. Cloud failure does not trigger default keys, v1 lookup,
 alternate UDP methods or automatic route fallback.
+
+The [ordinary packet envelope codec](adr/0048-bounded-lan-packet-envelopes.md)
+requires the expected native appliance ID and rejects mismatched wire identity
+before exposing decrypted bytes. Its public checksum/key are forgeable. Valid
+framing and matching identity fields do not establish endpoint ownership, an
+inner model response, freshness or causal completion. The codec performs no I/O,
+returns no outcome/observation and never changes existing transmission markers.
+Model-aware validation remains necessary after `exchange_v3` releases its socket.

@@ -30,6 +30,7 @@ Start with the progressive development path. Reference documents define invarian
 - LAN foundation: [bounded discovery decoding and collection](adr/0045-bounded-lan-discovery-decoding.md), with unauthenticated native candidates, fictional loopback evidence and no route registration.
 - V3 LAN sessions: [protected handshake, bounded wire codec and operation-owned TCP exchange](adr/0046-bounded-v3-lan-codec.md), with fictional evidence and no identity or route admission.
 - LAN credentials: [account-bound v2 lookup](adr/0047-account-bound-lan-credentials.md), with fresh unique home resolution, protected native handshake output and no LAN peer access.
+- LAN packet envelopes: [bounded encoding and expected-ID decoding](adr/0048-bounded-lan-packet-envelopes.md), with independent fictional vectors and no model or write-outcome inference.
 - CLI control admission: [explicit owner-controlled Meiju startup grants](adr/0037-cli-meiju-control-grants.md).
 - Profile-scoped AC temperature: [selection, exact targets and physical evidence limits](adr/0041-profile-scoped-ac-temperature.md).
 - Protected product mapping evidence: [inventory and storage rules](adr/0040-protected-meiju-product-profiles.md).

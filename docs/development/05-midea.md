@@ -302,7 +302,7 @@ acceptance, device identity, freshness or physical execution. Protected identity
 membership, grants and exact-model admission must precede this low-level native
 call. Fictional loopback tests verify transport behavior; no real LAN route or
 native JSON method is enabled. Endpoint identity reconciliation,
-inner packet/model validation and physical acceptance remain pending.
+inner model validation and physical acceptance remain pending.
 
 ### Account-bound V3 credentials
 
@@ -330,6 +330,24 @@ connection. Scripted fictional tests exercise failure, ambiguity, lifecycle and
 unchanged-storage cases. No native JSON method or registered route calls it yet.
 Endpoint reconciliation, permissions, inner model codecs and physical acceptance
 remain necessary before these credentials can be used against a real peer.
+
+### Ordinary LAN packet envelopes
+
+[ADR-0048](../adr/0048-bounded-lan-packet-envelopes.md) adds pure native helpers
+for the `5a5a` envelope carried inside V3 traffic. `encode_lan_packet` requires
+the expected native appliance ID, protected inner message and explicit UTC time.
+`decode_lan_packet` validates one complete ordinary envelope against the expected
+six-byte ID, checksum and strict PKCS#7 padding before returning protected bytes.
+`lan_packet_len` only reports a bounded prefix length for future stream assembly.
+The 4040-byte packet/3983-byte plaintext limits fit the existing V3 frame cap.
+
+The public AES-ECB key and salted MD5 are compatibility material, not authentication.
+The helpers do not distinguish inner request/response/discovery semantics, decode
+model properties, correlate replies or mark writes accepted/verified. Do not use
+the outgoing timestamp or reserved ID-adjacent bytes as observation/identity proof.
+Inner message validation and protected endpoint/route admission remain required.
+Seven positive and sixteen negative independent vectors, all truncation lengths,
+identity and timestamp bounds, and nested V3 packets have fictional evidence only.
 
 ## Fit the embedded Core
 

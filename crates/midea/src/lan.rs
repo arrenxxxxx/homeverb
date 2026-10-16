@@ -8,6 +8,8 @@ mod v3;
 pub use v3::{V3Handshake, V3Response, V3Session, v3_frame_len};
 mod transport;
 pub use transport::exchange_v3;
+mod packet;
+pub use packet::{decode_lan_packet, encode_lan_packet, lan_packet_len};
 
 use crate::{ApplianceFamily, CloudId};
 use aes::{
