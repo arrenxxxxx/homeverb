@@ -63,7 +63,7 @@ void main() {
         });
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull, reason: id);
-        if (['D01', 'C01', 'C14', 'S01', 'R05'].contains(id)) {
+        if (['D01', 'C01', 'C14', 'S01', 'R05', 'P03'].contains(id)) {
           await tester.runAsync(() async {
             final image =
                 await (boundary.currentContext!.findRenderObject()

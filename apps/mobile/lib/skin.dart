@@ -27,6 +27,7 @@ ui.FragmentProgram? _surfaceProgram;
 Future<void>? _skinAssetsLoad;
 final _buttonFaces = <String, ui.Image>{};
 final _textInkBounds = <(int, double), Map<int, (double, double)>>{};
+final _editableInkBounds = <int, (double, double)>{};
 Future<void> loadWindowSkin() => _skinAssetsLoad ??= () async {
   _surfaceProgram = await ui.FragmentProgram.fromAsset(
     'shaders/window_surface.frag',
@@ -45,6 +46,16 @@ Future<void> loadWindowSkin() => _skinAssetsLoad ??= () async {
           (entry.value[1] as num).toDouble(),
         ),
     };
+    final editable = variant['editable_bounds'] as Map<String, dynamic>?;
+    if (editable != null) {
+      _editableInkBounds.addAll({
+        for (final entry in editable.entries)
+          entry.key.runes.single: (
+            (entry.value[0] as num).toDouble(),
+            (entry.value[1] as num).toDouble(),
+          ),
+      });
+    }
   }
   for (final style in ['primary', 'secondary', 'danger', 'disabled']) {
     final bytes = await rootBundle.load('assets/button-$style.png');
@@ -98,6 +109,55 @@ Color readableInk(BuildContext context, Color color) =>
     MediaQuery.highContrastOf(context)
     ? (color.computeLuminance() >= .5 ? Colors.white : Colors.black)
     : color;
+
+const windowFieldTextStyle = TextStyle(
+  fontFamily: 'Inter',
+  fontSize: 15,
+  fontWeight: FontWeight.w400,
+  height: 4 / 3,
+  letterSpacing: 0,
+  wordSpacing: 0,
+);
+
+EdgeInsets fieldTextPadding(BuildContext context, String text) {
+  const fallback = EdgeInsets.symmetric(horizontal: 15, vertical: 15);
+  final metrics = _editableInkBounds;
+  if (metrics.isEmpty ||
+      MediaQuery.boldTextOf(context) ||
+      MediaQuery.maybeLineHeightScaleFactorOverrideOf(context) != null ||
+      MediaQuery.maybeLetterSpacingOverrideOf(context) != null ||
+      MediaQuery.maybeWordSpacingOverrideOf(context) != null)
+    return fallback;
+  double? top, bottom;
+  for (final rune in text.runes) {
+    final glyph = metrics[rune];
+    if (glyph == null) return fallback;
+    if (glyph.$1 == glyph.$2) continue;
+    top = top == null ? glyph.$1 : math.min(top, glyph.$1);
+    bottom = bottom == null ? glyph.$2 : math.max(bottom, glyph.$2);
+  }
+  if (top == null || bottom == null) return fallback;
+  final scaler = MediaQuery.textScalerOf(context);
+  final scale = scaler.scale(15) / 30;
+  final painter = TextPainter(
+    text: TextSpan(
+      text: text,
+      style: Theme.of(context).textTheme.bodyLarge!.merge(windowFieldTextStyle),
+    ),
+    textDirection: Directionality.of(context),
+    textScaler: scaler,
+    maxLines: 1,
+  )..layout();
+  final inkTop =
+      painter
+          .computeDistanceToActualBaseline(TextBaseline.alphabetic)
+          .roundToDouble() +
+      top * scale;
+  final shift = (painter.height - (bottom - top) * scale) / 2 - inkTop;
+  painter.dispose();
+  // Move the native editable, caret and selection together; retain total height.
+  return EdgeInsets.fromLTRB(15, 15 + shift, 15, 15 - shift);
+}
 
 class Copy extends StatelessWidget {
   const Copy(
@@ -1098,8 +1158,13 @@ class _GlyphPainter extends CustomPainter {
 
     switch (name) {
       case 'drag':
-        for (final y in [6.0, 12.0, 18.0]) {
-          line([Offset(7.5, y), Offset(24, y)]);
+        p.style = PaintingStyle.fill;
+        // The three reference strokes include both horizontal endpoints.
+        for (final y in [3.0, 11.0, 19.0]) {
+          canvas.drawRect(
+            Rect.fromLTWH(0, y * 12 / 11, 24 + 12 / 11, 24 / 11),
+            p,
+          );
         }
       case 'back':
         line(const [Offset(15, 4), Offset(7, 12), Offset(15, 20)]);

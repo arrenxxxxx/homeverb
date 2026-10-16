@@ -1120,3 +1120,73 @@ mode. The Connections paragraph, climate value and sheet screenshots were
 inspected. Evidence: `android/body-ink-release-{settings,connections,device,mode}.png`
 and `android/body-ink-release-clicks.json` under `output/flutter-verification/`.
 Build log: `/tmp/homeverb-body-release.log`.
+
+## Native form and reorder alignment — October 16, 2026
+
+Form labels and validation messages now retain fractional line-box heights and
+the prototype's two-logical-pixel horizontal inset. Native TextField content
+padding centers the visible glyph bounds for each value or hint without changing
+total padding or field height. A controller listener updates the padding for
+both typed and programmatic changes; caret, selection and editing remain native.
+The shared font metadata adds the 15-point Regular variant used by inputs.
+Editable-specific bounds use nonempty glyph-mask rows: a dedicated bullet check
+reproduced a two-physical-pixel offset caused by blank rows in the font's layout
+bounds, then passed with the visible-ink bounds. Prototype text retains its
+separate font-anchor bounds, matching the reference renderer's anchor behavior.
+Existing control-ink checks also pass.
+Unsupported glyphs and system text overrides retain native padding fallback.
+The same padding is applied to device-parameter and protected account fields.
+Password geometry is measured from the masking bullet, never from hidden glyphs;
+a fixture assertion verifies identical padding for different hidden characters.
+Existing masking, IME-learning restrictions, validation and protected-buffer
+clearing remain intact. No real sign-in was performed.
+
+Displayed verification codes collapse repeated separator spaces in the same way
+as the independent reference renderer. This changes presentation only and does
+not implement provider verification. Reorder handles use the reference's narrow
+three inclusive strokes, with the corresponding value spacing. Native room and
+device reorder rows use centered labels; their drag/menu hit areas are retained.
+
+The final **84 Flutter tests** and static analysis pass. The new raster check
+covers numeric and descender-bearing values, live editing, selection position,
+programmatic clearing, hint centering and unchanged 50-logical-pixel field height.
+The complete suite covers all 82 captures, 201 simulated atlas branches, native
+Mock/fixture interactions, forms, keyboard avoidance and large-text layouts.
+A high-contrast P03 heading initially failed the contrast gate after fractional
+form alignment. One extra logical pixel of heading padding separates text from
+the thicker card border. The unchanged contrast gate now passes on all states,
+including 200% text. All default captures remain byte-identical after that
+high-contrast-only fix; P03 is retained as an additional accessibility capture.
+
+Strict visual acceptance remains failed: **0/82 exact**, mean channel error
+**0.6725/255**, previously 0.7289. Twelve states improve, 70 remain unchanged,
+and none regress. Reference images and the exact-match gate were not changed.
+No Core API, routing, approval, credential or execution semantics changed.
+
+Evidence: `output/flutter-verification/fields-comparison.json`, the full
+`index.html` report and `fields-{C14,P05,R05,R01,D03,P03}.png` review panels.
+Logs: `/tmp/homeverb-fields-targeted.log`, `/tmp/homeverb-fields-tests-final.log`,
+`/tmp/homeverb-fields-analyze-final.log`, `/tmp/homeverb-fields-contrast.log`
+(reproduced failure) and `/tmp/homeverb-fields-contrast-fixed.log`.
+
+The full Android native Mock journey passed on API 35 x86_64 in 2m25s after
+all three field paths were integrated and before the final glyph-mask asset
+refinement. Its input, picker and lifecycle transitions are injected; it does
+not establish physical-phone, real-provider, real-appliance or iOS acceptance.
+The log is `/tmp/homeverb-fields-android-final.log`.
+The final ordinary dual-ABI development-release APK rebuilt, passed 16 KiB ZIP
+alignment and retained unchanged Core libraries and source-matching packaged
+assets. The installed APK was exercised with real pointer and OS keyboard events:
+create Living Room, save with the keyboard open, open the reorder/menu handle,
+rename and cancel, force-stop and cold-launch, and verify the saved room persists.
+Long-press selection, the native Select all toolbar and replacement with Kitchen
+were verified; Cancel then preserved Living Room. An earlier keyboard-shortcut
+selection attempt appended text instead and was canceled; it is not counted as
+a successful replacement. Screenshots and UI label readbacks were inspected.
+
+Evidence: `output/flutter-verification/android/fields-release-{keyboard,rooms,restarted,selection-menu,selected-edit}.png`
+and `fields-release-clicks.json`. Build log: `/tmp/homeverb-fields-release-final.log`.
+Final APK SHA-256: `abc631f0a48b13891531a54838ada7bb140001913dcf8fecb23fb757ed274b15`.
+Full Android screen-reader acceptance remains unverified; the empty EditText's
+uiautomator node did not expose the wrapper label. No real account, appliance,
+physical phone or iOS execution was performed.

@@ -1510,10 +1510,11 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                         padding: const EdgeInsets.only(left: 16, right: 6),
                         child: Row(
                           children: [
-                            Expanded(child: Copy(r['name'])),
+                            Expanded(child: Copy(r['name'], control: true)),
                             const SizedBox(width: 10),
                             Copy(
                               roomDeviceCount(r['id']),
+                              control: true,
                               size: 12,
                               color: muted,
                             ),
@@ -1527,7 +1528,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                                   padding: EdgeInsets.zero,
                                   icon: const Glyph(
                                     'drag',
-                                    size: 16,
+                                    size: 11,
                                     color: muted,
                                   ),
                                   onSelected: (v) async {
@@ -1674,9 +1675,19 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                         padding: const EdgeInsets.only(left: 16, right: 4),
                         child: Row(
                           children: [
-                            Expanded(child: Copy(card['device']['alias'])),
+                            Expanded(
+                              child: Copy(
+                                card['device']['alias'],
+                                control: true,
+                              ),
+                            ),
                             if (card['preferences']['favorite'] == true)
-                              const Copy('Pinned', size: 12, color: muted),
+                              const Copy(
+                                'Pinned',
+                                size: 12,
+                                color: muted,
+                                control: true,
+                              ),
                             ReorderableDragStartListener(
                               index: index,
                               enabled: !c.busy,
@@ -1686,7 +1697,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                                 enabled: !c.busy,
                                 icon: const Glyph(
                                   'drag',
-                                  size: 20,
+                                  size: 11,
                                   color: muted,
                                 ),
                                 onSelected: (offset) =>

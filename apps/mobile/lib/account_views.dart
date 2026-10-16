@@ -404,33 +404,36 @@ class _AccountSignInState extends State<AccountSignIn>
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Copy(label, size: 12, color: muted),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 2),
+          child: Copy(label, size: 12, color: muted, paragraph: true),
+        ),
         const SizedBox(height: 5.2),
         Surface(
           radius: 14,
           child: Semantics(
             label: label,
-            child: TextField(
-              key: ValueKey('credential:$label'),
-              controller: controller,
-              obscureText: secret,
-              autocorrect: false,
-              enableSuggestions: false,
-              enableIMEPersonalizedLearning: false,
-              smartDashesType: SmartDashesType.disabled,
-              smartQuotesType: SmartQuotesType.disabled,
-              autofillHints: null,
-              keyboardType: TextInputType.visiblePassword,
-              style: const TextStyle(
-                fontSize: 15,
-                height: 4 / 3,
-                letterSpacing: 0,
-              ),
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 15,
-                  vertical: 15,
+            child: ValueListenableBuilder<TextEditingValue>(
+              valueListenable: controller,
+              builder: (context, value, _) => TextField(
+                key: ValueKey('credential:$label'),
+                controller: controller,
+                obscureText: secret,
+                autocorrect: false,
+                enableSuggestions: false,
+                enableIMEPersonalizedLearning: false,
+                smartDashesType: SmartDashesType.disabled,
+                smartQuotesType: SmartQuotesType.disabled,
+                autofillHints: null,
+                keyboardType: TextInputType.visiblePassword,
+                style: windowFieldTextStyle,
+                textAlignVertical: TextAlignVertical.center,
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  contentPadding: fieldTextPadding(
+                    context,
+                    secret && value.text.isNotEmpty ? '•' : value.text,
+                  ),
                 ),
               ),
             ),

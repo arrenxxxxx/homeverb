@@ -5,7 +5,7 @@ from pathlib import Path
 from PIL import ImageFont
 
 ASSETS = Path(__file__).resolve().parents[1] / 'assets'
-characters = set(chr(i) for i in range(32, 127)) | {'…'}
+characters = set(chr(i) for i in range(32, 127)) | {'…', '•'}
 
 
 def collect(value):
@@ -22,7 +22,7 @@ def collect(value):
 collect(json.loads((ASSETS / 'prototype.json').read_text()))
 variants = []
 for weight, sizes, filename in [
-    (400, [10, 11, 12, 13, 14, 16, 68], 'Inter-Regular.otf'),
+    (400, [10, 11, 12, 13, 14, 15, 16, 68], 'Inter-Regular.otf'),
     (600, [10, 11, 12, 13, 14, 15, 16, 17, 19, 22, 23, 24, 25, 26, 27, 28, 30, 32], 'Inter-SemiBold.otf'),
 ]:
     path = ASSETS / 'fonts' / filename
@@ -30,6 +30,7 @@ for weight, sizes, filename in [
         font = ImageFont.truetype(str(path), size * 2)
         missing = font.getmask(chr(0x10ffff))
         bounds = {}
+        editable_bounds = {}
         for character in sorted(characters):
             mask = font.getmask(character)
             # Keep missing glyphs on Flutter's ordinary font-fallback path.
@@ -37,10 +38,18 @@ for weight, sizes, filename in [
                 continue
             box = font.getbbox(character, anchor='ls')
             bounds[character] = [box[1], box[3]]
+            if (weight, size) == (400, 15):
+                # Native inputs center visible ink; prototype text uses font anchors.
+                ink, offset = font.getmask2(character, anchor='ls')
+                ink_box = ink.getbbox()
+                editable_bounds[character] = (
+                    [offset[1] + ink_box[1], offset[1] + ink_box[3]]
+                    if ink_box else [0, 0])
         variants.append({
             'weight': weight, 'size': size,
             'font_sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
             'bounds': bounds,
+            **({'editable_bounds': editable_bounds} if editable_bounds else {}),
         })
 (ASSETS / 'text-ink-metrics.json').write_text(json.dumps({
     'pixel_ratio': 2, 'variants': variants,

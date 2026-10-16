@@ -341,34 +341,38 @@ class _CapabilityActionFormState extends State<CapabilityActionForm> {
             else
               Semantics(
                 label: controlLabel(name),
-                child: TextField(
-                  textAlignVertical: TextAlignVertical.center,
-                  key: ValueKey('parameter:$name'),
-                  controller: controller,
-                  enabled: !saving,
-                  keyboardType: numeric
-                      ? const TextInputType.numberWithOptions(
-                          decimal: true,
-                          signed: true,
-                        )
-                      : TextInputType.text,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    height: 4 / 3,
-                    color: ink,
-                  ),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: const Color(0xfff8f5ee),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide.none,
+                child: ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: controller!,
+                  builder: (context, value, _) => TextField(
+                    textAlignVertical: TextAlignVertical.center,
+                    key: ValueKey('parameter:$name'),
+                    controller: controller,
+                    enabled: !saving,
+                    keyboardType: numeric
+                        ? const TextInputType.numberWithOptions(
+                            decimal: true,
+                            signed: true,
+                          )
+                        : TextInputType.text,
+                    style: windowFieldTextStyle.copyWith(color: ink),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: const Color(0xfff8f5ee),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: fieldTextPadding(
+                        context,
+                        value.text.isEmpty
+                            ? 'Enter ${controlLabel(name).toLowerCase()}'
+                            : value.text,
+                      ),
+                      hintText: 'Enter ${controlLabel(name).toLowerCase()}',
+                      suffixText: controlUnit(property['unit']),
                     ),
-                    contentPadding: const EdgeInsets.all(15),
-                    hintText: 'Enter ${controlLabel(name).toLowerCase()}',
-                    suffixText: controlUnit(property['unit']),
+                    onChanged: (_) => setState(() => message = null),
                   ),
-                  onChanged: (_) => setState(() => message = null),
                 ),
               ),
             if (numeric &&

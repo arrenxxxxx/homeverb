@@ -86,7 +86,10 @@ class Blocks extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Copy(label, size: 12, color: muted),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                child: Copy(label, size: 12, color: muted, paragraph: true),
+              ),
               const SizedBox(height: 5.2),
               Surface(
                 radius: 14,
@@ -94,47 +97,51 @@ class Blocks extends StatelessWidget {
                 borderWidth: b.length > 3 ? 1 : .6,
                 child: Semantics(
                   label: label,
-                  child: TextField(
-                    controller: field,
-                    textAlignVertical: TextAlignVertical.center,
-                    key: ValueKey('field:$label'),
-                    onChanged: (_) => onChanged?.call(),
-                    keyboardType: label == 'Target temperature'
-                        ? const TextInputType.numberWithOptions(
-                            decimal: true,
-                            signed: true,
-                          )
-                        : TextInputType.text,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      height: 4 / 3,
-                      letterSpacing: 0,
-                    ),
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 15,
-                        vertical: 15,
-                      ),
-                      border: InputBorder.none,
-                      hintText: 'Search by name',
-                      suffixIcon: label.startsWith('Search')
-                          ? IconButton(
-                              tooltip: 'Clear search',
-                              onPressed: () {
-                                field.clear();
-                                onChanged?.call();
-                              },
-                              icon: const Icon(Icons.close, size: 18),
+                  child: ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: field,
+                    builder: (context, value, _) => TextField(
+                      controller: field,
+                      textAlignVertical: TextAlignVertical.center,
+                      key: ValueKey('field:$label'),
+                      onChanged: (_) => onChanged?.call(),
+                      keyboardType: label == 'Target temperature'
+                          ? const TextInputType.numberWithOptions(
+                              decimal: true,
+                              signed: true,
                             )
-                          : null,
+                          : TextInputType.text,
+                      style: windowFieldTextStyle,
+                      decoration: InputDecoration(
+                        contentPadding: fieldTextPadding(
+                          context,
+                          value.text.isEmpty ? 'Search by name' : value.text,
+                        ),
+                        border: InputBorder.none,
+                        hintText: 'Search by name',
+                        suffixIcon: label.startsWith('Search')
+                            ? IconButton(
+                                tooltip: 'Clear search',
+                                onPressed: () {
+                                  field.clear();
+                                  onChanged?.call();
+                                },
+                                icon: const Icon(Icons.close, size: 18),
+                              )
+                            : null,
+                      ),
                     ),
                   ),
                 ),
               ),
               if (b.length > 3)
                 Padding(
-                  padding: const EdgeInsets.only(top: 9),
-                  child: Copy(b[3], size: 12, color: const Color(0xff9e3421)),
+                  padding: const EdgeInsets.fromLTRB(2, 9, 2, 0),
+                  child: Copy(
+                    b[3],
+                    size: 12,
+                    color: const Color(0xff9e3421),
+                    paragraph: true,
+                  ),
                 ),
             ],
           ),
@@ -466,6 +473,10 @@ class Blocks extends StatelessWidget {
           [b[1], '−       ${b[2]}       +'],
         ], onAction: onAction);
       case 'code':
+        final displayCode = (b[1] as String)
+            .split(' ')
+            .where((part) => part.isNotEmpty)
+            .join(' ');
         if (MediaQuery.textScalerOf(context).scale(13) <= 13) {
           return Padding(
             padding: const EdgeInsets.only(bottom: 15),
@@ -475,7 +486,7 @@ class Blocks extends StatelessWidget {
                 height: 94,
                 child: Center(
                   child: Copy(
-                    b[1],
+                    displayCode,
                     size: 32,
                     bold: true,
                     center: true,
@@ -492,7 +503,7 @@ class Blocks extends StatelessWidget {
             radius: 20,
             padding: const EdgeInsets.symmetric(vertical: 30),
             child: Copy(
-              b[1],
+              displayCode,
               size: 32,
               bold: true,
               center: true,
@@ -764,7 +775,10 @@ class Rows extends StatelessWidget {
         children: [
           if (title != null)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
+              padding: EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: MediaQuery.highContrastOf(context) ? 8 : 7,
+              ),
               child: Copy(title!, size: 14, bold: true, control: true),
             ),
           for (var i = 0; i < items.length; i++) ...[
@@ -891,10 +905,10 @@ class Rows extends StatelessWidget {
                                           size: 12,
                                           color: muted,
                                         ),
-                                        const SizedBox(width: 8),
+                                        const SizedBox(width: 13),
                                         const Glyph(
                                           'drag',
-                                          size: 20,
+                                          size: 11,
                                           color: muted,
                                         ),
                                       ],

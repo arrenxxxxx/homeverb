@@ -330,6 +330,18 @@ void main() {
       await tap('Sign In and Retrieve Devices');
       expect(core.connectionTargets, isEmpty);
       await tester.enterText(login, 'fixture@example.invalid');
+      await tester.enterText(password, 'gggg');
+      await tester.pump();
+      final maskedPadding = tester
+          .widget<TextField>(password)
+          .decoration!
+          .contentPadding;
+      await tester.enterText(password, 'AAAA');
+      await tester.pump();
+      expect(
+        tester.widget<TextField>(password).decoration!.contentPadding,
+        maskedPadding,
+      );
       await tester.enterText(password, 'fictional-pass');
       core.retrieval = 'complete';
       core.retrievalError = null;
