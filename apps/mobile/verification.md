@@ -87,6 +87,46 @@ now covers this setup, profile selection, checksums and installation. The final
 local artifact delivery is recorded separately below.
 
 
+### Phase 4: local APK delivery
+
+Both final release-mode APKs were built from clean application source at
+`c5f0a0758c342fb00df5ea3bd7d7d13a3b5710aa`, after Android integration tests,
+using Flutter 3.47.7, Rust 1.99.1, NDK 28.2.13676358 and JDK 21. They use local
+development signing, minimum API 28 and target API 36. Both have exactly two
+complete ABIs, arm64-v8a and x86_64, and no integration-test plugin. APK signature,
+ZIP alignment, all eight native libraries' 16 KiB ELF alignment, 17 Core exports
+per ABI, package identity and disabled backup were checked. The API version was
+also established by the Android runtime integration test, not archive inspection.
+
+Local outputs are under `output/flutter-verification/android/`:
+
+| Artifact | Bytes | SHA-256 |
+|---|---|---|
+| `homeverb-0.2.0-meiju-readonly.apk` | 66210688 | `ff8f39ec25431b6f8dc27a4e9409c99b9ec3721c9a78df4f0e5e24f120cc7699` |
+| `homeverb-0.2.0-mock.apk` | 66210688 | `d23430e3ab66c1ce668d26595aeccb2eeeb5a16c8275224bb070becd889605bf` |
+
+The adjacent JSON reports record source revision, clean-tree state, native hashes
+and AAR hash. `SHA256SUMS`, `runtime-evidence.json`, release screenshots and logs
+remain local ignored artifacts. A clone must rebuild them; nothing was uploaded.
+
+The final ordinary Mock APK installed and cold-started on the isolated emulator.
+Actual accessibility-driven Android taps selected Add Device, Discover Mock Device
+and Refresh State; the saved card displayed a 26.0 Celsius observation. The final
+Meiju APK installed and cold-started independently, showed an empty separate
+profile and its explicit read-only notice through Add Platform. No credentials
+were entered, and no provider request or physical write was made. The two APKs
+share a package ID and replace each other on installation; their profile directories
+remain separate. Physical Android/Keystore/provider acceptance, full localization,
+accessibility and pixel equality remain open, including the four macOS pixel-test
+failures recorded above.
+
+The temporary emulator was shut down after acceptance; its generated AVD, isolated
+Flutter configuration and dedicated ADB server were removed/stopped. The obsolete UI branch is
+fully contained in local main. Remote main push and remote branch removal are a
+separate owner-authorized step under AGENTS.md; no remote publication is implied
+by these local artifacts or commits.
+
+
 Date: October 16, 2026. Baseline: native UI contract 1.14.1 (pinned Core `7db8e9b`) and the approved Window Light atlas. This is an implementation checkpoint, not completion of the owner's pixel-identical acceptance requirement.
 
 ## Historical UI branch checkpoint
