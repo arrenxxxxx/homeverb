@@ -67,7 +67,7 @@ def validate_report(report, phase, run_id, pid, writer_pid):
         safe_count = count if type(count) is int and 0 <= count <= 10 else -1
         shape = report.get('metadata_shape', {}) if isinstance(report, dict) else {}
         safe_shape = {key: value for key, value in shape.items()
-                      if key in {'array', 'dictionary', 'scope', 'passcode', 'sync_present', 'sync_boolean',
+                      if key in {'array', 'dictionary', 'scope', 'service', 'account', 'passcode', 'sync_present', 'sync_boolean',
                                  'sync_number', 'sync_zero', 'access_control', 'persistent_ref'}
                       and type(value) is bool} if isinstance(shape, dict) else {}
         raise ValueError(f'Acceptance evidence refused: phase={phase}, stage={safe_stage}, store_code={safe_code}, store_checks={safe_count}, metadata_shape={safe_shape}.')

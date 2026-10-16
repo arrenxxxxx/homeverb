@@ -44,6 +44,8 @@ static id query(uint64_t handle, NSDictionary *request) {
 }
 
 /* Test-only metadata shape diagnostics; never request or report credential data. */
+static NSNumber *metadataFlag(BOOL value) { return value ? @YES : @NO; }
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 static NSDictionary *storeMetadata(NSString *runID) {
@@ -61,18 +63,20 @@ static NSDictionary *storeMetadata(NSString *runID) {
     OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)request, &raw);
     id result = CFBridgingRelease(raw);
     if (status != errSecSuccess || ![result isKindOfClass:NSArray.class] || [result count] != 1)
-        return @{@"status": @(status), @"array": @([result isKindOfClass:NSArray.class])};
+        return @{@"array": metadataFlag([result isKindOfClass:NSArray.class])};
     NSDictionary *entry = result[0];
     if (![entry isKindOfClass:NSDictionary.class]) return @{@"dictionary": @NO};
     id sync = entry[(__bridge id)kSecAttrSynchronizable];
     id reference = entry[(__bridge id)kSecValuePersistentRef];
     return @{
-        @"status": @(status), @"scope": @([entry[(__bridge id)kSecAttrAccessGroup] isEqual:@"SYNTHETIC.org.homeverb.test"]),
-        @"passcode": @([entry[(__bridge id)kSecAttrAccessible] isEqual:(__bridge id)kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly]),
-        @"sync_present": @(sync != nil), @"sync_boolean": @(sync && CFGetTypeID((__bridge CFTypeRef)sync) == CFBooleanGetTypeID()),
-        @"sync_number": @([sync isKindOfClass:NSNumber.class]), @"sync_zero": @([sync isEqual:@0]),
-        @"access_control": @(entry[(__bridge id)kSecAttrAccessControl] != nil),
-        @"persistent_ref": @([reference isKindOfClass:NSData.class] && [reference length] > 0)
+        @"scope": metadataFlag([entry[(__bridge id)kSecAttrAccessGroup] isEqual:@"SYNTHETIC.org.homeverb.test"]),
+        @"service": metadataFlag([entry[(__bridge id)kSecAttrService] isEqual:request[(__bridge id)kSecAttrService]]),
+        @"account": metadataFlag([entry[(__bridge id)kSecAttrAccount] isEqual:request[(__bridge id)kSecAttrAccount]]),
+        @"passcode": metadataFlag([entry[(__bridge id)kSecAttrAccessible] isEqual:(__bridge id)kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly]),
+        @"sync_present": metadataFlag(sync != nil), @"sync_boolean": metadataFlag(sync && CFGetTypeID((__bridge CFTypeRef)sync) == CFBooleanGetTypeID()),
+        @"sync_number": metadataFlag([sync isKindOfClass:NSNumber.class]), @"sync_zero": metadataFlag([sync isEqual:@0]),
+        @"access_control": metadataFlag(entry[(__bridge id)kSecAttrAccessControl] != nil),
+        @"persistent_ref": metadataFlag([reference isKindOfClass:NSData.class] && [reference length] > 0)
     };
 }
 #pragma clang diagnostic pop

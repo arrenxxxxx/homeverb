@@ -1646,3 +1646,12 @@ all-targets Clippy with warnings denied; 62 Python tooling tests; formatting,
 documentation, contract, repository and commit validation. Linux cannot execute
 the new Core Foundation regression or the Simulator; the next macOS result must
 be checked before treating the round trip as accepted.
+
+Commit `3e3f099` passed all seventeen macOS Core Foundation/orchestration tests
+and the three-architecture package checks, but the Simulator still refused the
+first Keychain read after add. Several test diagnostic C comparisons had been
+boxed as JSON integers and correctly omitted by the Boolean-only log filter.
+The test app now explicitly boxes every flag as a Boolean and checks service
+and account equality without reporting either value. The filter still rejects
+integer substitutes and arbitrary attributes; this test-only correction does
+not relax production credential policy or claim a successful round trip.
