@@ -1632,3 +1632,17 @@ failed at the first read after a successful fictional Keychain add
 boolean metadata-shape diagnostics on that failure; it never requests credential
 data for diagnostics or emits raw attributes. This isolates OS representation
 differences before changing any production admission rule.
+
+The `ffe10fe` run confirmed the exact scope and passcode-only metadata, with a
+numeric zero synchronization flag. The production decoder now accepts Boolean
+or exact integer 0/1 representations, while entry validation still refuses
+synchronization. Real Core Foundation regression cases cover both forms, negative
+and oversized integers, floats, strings, wrong types and missing flags. Access
+group, accessibility, access-control and persistent-reference checks are unchanged.
+This corrects an OS representation mismatch without changing native API 1.20,
+credential policy or storage formats. Local verification passed: 21 secret-store
+tests with two environment-dependent tests ignored; device-target and Simulator
+all-targets Clippy with warnings denied; 62 Python tooling tests; formatting,
+documentation, contract, repository and commit validation. Linux cannot execute
+the new Core Foundation regression or the Simulator; the next macOS result must
+be checked before treating the round trip as accepted.

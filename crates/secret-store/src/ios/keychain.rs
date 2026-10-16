@@ -9,7 +9,11 @@ use core_foundation_sys::{
         CFDictionaryCreateMutable, CFDictionaryGetTypeID, CFDictionaryGetValue, CFDictionaryRef,
         CFDictionarySetValue, kCFTypeDictionaryKeyCallBacks, kCFTypeDictionaryValueCallBacks,
     },
-    number::{CFNumberCreate, kCFBooleanFalse, kCFBooleanTrue, kCFNumberSInt32Type},
+    number::{
+        CFBooleanGetTypeID, CFNumberCreate, CFNumberGetTypeID, CFNumberGetValue,
+        CFNumberIsFloatType, kCFBooleanFalse, kCFBooleanTrue, kCFNumberSInt32Type,
+        kCFNumberSInt64Type,
+    },
     string::{CFStringCreateWithBytes, CFStringRef, kCFStringEncodingUTF8},
 };
 use std::ptr;
@@ -114,6 +118,34 @@ unsafe fn equal(left: CFTypeRef, right: CFTypeRef) -> bool {
     !left.is_null() && !right.is_null() && unsafe { CFEqual(left, right) != 0 }
 }
 
+unsafe fn decode_synchronizable(value: CFTypeRef) -> Result<bool> {
+    unsafe {
+        if value.is_null() {
+            return Err(unavailable());
+        }
+        if CFGetTypeID(value) == CFBooleanGetTypeID() {
+            return Ok(equal(value, kCFBooleanTrue.cast()));
+        }
+        // Security may return this flag as an integer CFNumber rather than CFBoolean.
+        if CFGetTypeID(value) != CFNumberGetTypeID() || CFNumberIsFloatType(value.cast()) != 0 {
+            return Err(unavailable());
+        }
+        let mut flag: i64 = 0;
+        if !CFNumberGetValue(
+            value.cast(),
+            kCFNumberSInt64Type,
+            (&mut flag as *mut i64).cast(),
+        ) {
+            return Err(unavailable());
+        }
+        match flag {
+            0 => Ok(false),
+            1 => Ok(true),
+            _ => Err(unavailable()),
+        }
+    }
+}
+
 unsafe fn copy_data(value: CFTypeRef, limit: usize) -> Result<SecretBytes> {
     unsafe {
         if value.is_null() || CFGetTypeID(value) != CFDataGetTypeID() {
@@ -200,10 +232,7 @@ unsafe fn decode_entry(value: CFTypeRef, scope: &Scope) -> Result<Entry> {
         let service = string(&scope.service)?;
         let account = string(&scope.account)?;
         let group = string(&scope.access_group)?;
-        let sync = attribute(value, kSecAttrSynchronizable);
-        if !equal(sync, kCFBooleanTrue.cast()) && !equal(sync, kCFBooleanFalse.cast()) {
-            return Err(unavailable());
-        }
+        let synchronizable = decode_synchronizable(attribute(value, kSecAttrSynchronizable))?;
         Ok(Entry {
             matches_scope: equal(attribute(value, kSecAttrService), service.0)
                 && equal(attribute(value, kSecAttrAccount), account.0)
@@ -212,7 +241,7 @@ unsafe fn decode_entry(value: CFTypeRef, scope: &Scope) -> Result<Entry> {
                 attribute(value, kSecAttrAccessible),
                 kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly.cast(),
             ),
-            synchronizable: equal(sync, kCFBooleanTrue.cast()),
+            synchronizable,
             access_control: !attribute(value, kSecAttrAccessControl).is_null(),
             persistent_ref: copy_data(attribute(value, kSecValuePersistentRef), MAX_REFERENCE)?,
         })
@@ -432,6 +461,71 @@ mod tests {
             let other_ref = data(&[2, 7, 1]).unwrap();
             set(&output, kSecValuePersistentRef, other_ref.0);
             assert!(decode_secret(output.0, &scope, &expected).is_err());
+        }
+    }
+
+    #[test]
+    fn real_cf_synchronization_flags_accept_only_boolean_or_integer_zero() {
+        use core_foundation_sys::{
+            dictionary::CFDictionaryRemoveValue, number::kCFNumberFloat64Type,
+        };
+
+        let scope = scope();
+        let expected = entry();
+        let output = protected_query(&scope, Some(&expected)).unwrap();
+        let secret = data(&[3, 1, 4]).unwrap();
+        // SAFETY: all values are owned CF objects retained by the synthetic result.
+        unsafe {
+            set(&output, kSecValueData, secret.0);
+            for (value, flag) in [(kCFBooleanFalse, false), (kCFBooleanTrue, true)] {
+                set(&output, kSecAttrSynchronizable, value.cast());
+                assert_eq!(decode_entry(output.0, &scope).unwrap().synchronizable, flag);
+                assert_eq!(decode_secret(output.0, &scope, &expected).is_ok(), !flag);
+            }
+            for flag in [i64::MIN, -1, 0, 1, 2, i64::MAX] {
+                let value = Owned::new(
+                    CFNumberCreate(
+                        ptr::null(),
+                        kCFNumberSInt64Type,
+                        (&flag as *const i64).cast(),
+                    )
+                    .cast(),
+                )
+                .unwrap();
+                set(&output, kSecAttrSynchronizable, value.0);
+                let decoded = decode_entry(output.0, &scope);
+                assert_eq!(decoded.is_ok(), matches!(flag, 0 | 1));
+                if let Ok(decoded) = decoded {
+                    assert_eq!(decoded.synchronizable, flag == 1);
+                }
+                assert_eq!(
+                    decode_secret(output.0, &scope, &expected).is_ok(),
+                    flag == 0
+                );
+            }
+            for flag in [0.0, 1.0, 0.5, f64::NAN, f64::INFINITY] {
+                let value = Owned::new(
+                    CFNumberCreate(
+                        ptr::null(),
+                        kCFNumberFloat64Type,
+                        (&flag as *const f64).cast(),
+                    )
+                    .cast(),
+                )
+                .unwrap();
+                set(&output, kSecAttrSynchronizable, value.0);
+                assert!(decode_entry(output.0, &scope).is_err());
+            }
+            for value in [
+                string("0").unwrap(),
+                string("false").unwrap(),
+                data(&[]).unwrap(),
+            ] {
+                set(&output, kSecAttrSynchronizable, value.0);
+                assert!(decode_entry(output.0, &scope).is_err());
+            }
+            CFDictionaryRemoveValue(output.0.cast_mut().cast(), kSecAttrSynchronizable.cast());
+            assert!(decode_entry(output.0, &scope).is_err());
         }
     }
 

@@ -44,7 +44,7 @@ HOMEVERB_IOS_KEYCHAIN_ACCESS_GROUP=SYNTHETIC.org.homeverb.test \
 
 Rust target checking can run on Linux with cached dependencies; it does not link
 Apple frameworks. The [MVP workflow](../../.github/workflows/mvp.yml) runs the same
-tests on macOS, where three additional tests construct real Core Foundation
+tests on macOS, where four additional tests construct real Core Foundation
 objects and check production query/result handling without Keychain access.
 On commit `3742e67`, all sixteen iOS tests and complete native-library builds for
 arm64 device/simulator passed. Commit `d4525b1` subsequently passed the actual
@@ -102,6 +102,11 @@ in ADR-0062. An OS-reported lock/authentication refusal is sanitized. This is no
 a general device-lock detector: metadata lookup or exact deletion may be permitted
 without reading protected bytes. Do not infer unlock state from a successful
 lookup/deletion or promise that deletion necessarily fails while locked.
+
+Security can return `kSecAttrSynchronizable` as an integer `CFNumber`. The decoder
+accepts Boolean values and exact integer 0/1 representations, then refuses every
+synchronizable entry. Missing flags, floating-point numbers, other integers and
+wrong object types are rejected; numeric zero does not relax any other policy.
 
 Deletion reads metadata only and targets the admitted persistent reference.
 Removing the passcode invalidates these credentials; a new passcode does not
