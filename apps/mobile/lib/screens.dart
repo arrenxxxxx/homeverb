@@ -174,7 +174,10 @@ class ScreenView extends StatelessWidget {
                           20,
                           dialog ? 25 : 11,
                           20,
-                          dialog ? 14 : 20,
+                          (dialog ? 14 : 20) +
+                              (dialog || testChrome
+                                  ? 0
+                                  : MediaQuery.paddingOf(context).bottom),
                         ),
                         child: SingleChildScrollView(
                           child: Column(

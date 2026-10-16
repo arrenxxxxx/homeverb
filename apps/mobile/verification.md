@@ -1036,3 +1036,37 @@ That defect remains pending a separate layout correction; the successful test
 journey does not establish unobscured system-inset behavior. No complete Android
 capture archive was retained for this run. No real account, appliance, physical
 phone or iOS execution was performed.
+
+## Native sheet bottom safe area — October 16, 2026
+
+The Android mode-sheet inspection exposed Cancel ending at physical y=2316,
+42 pixels below the navigation area's top at y=2274. Native bottom sheets now
+include the current bottom safe inset inside their scrollable content padding.
+Deterministic prototype chrome and centered dialogs retain their existing layout.
+Scaffold continues to handle keyboard resizing; the inset follows MediaQuery's
+current padding rather than adding keyboard height a second time.
+
+A regression using the emulator's 1080-by-2400 size, 2.625 pixel ratio and
+48-logical-pixel bottom inset failed before the change: the button ended at
+882.2857 instead of at or above the safe boundary of 866.2857 logical pixels.
+It now passes and taps near the bottom of the full-height action successfully.
+All **82 Flutter tests** and static analysis pass. All 82 prototype-sized captures
+are byte-identical to the preceding control-centering phase; strict comparison
+remains **0/82 exact**, mean channel error **0.9358/255**.
+
+The final ordinary dual-ABI APK rebuilt, passed 16 KiB ZIP alignment, and retained
+the same two Core library hashes and packaged assets. It was installed and
+cold-launched with the retained Mock card. Native pointer clicks opened the
+card, refreshed its fictional observation and opened Mode. Cancel now occupies
+physical bounds `[53,2064][1028,2190]`, clearing system navigation by 84 pixels.
+A tap four pixels above its bottom edge dismissed the sheet and preserved cool
+mode. The screenshots were inspected. No real account, appliance, physical
+phone or iOS execution was performed.
+
+Evidence: `output/flutter-verification/android/safe-area-release-mode.png`,
+`safe-area-release-device.png` and `safe-area-release-clicks.json`.
+Logs: `/tmp/homeverb-safe-area-before.log`, `/tmp/homeverb-safe-area-after.log`,
+`/tmp/homeverb-safe-area-tests.log`, `/tmp/homeverb-safe-area-analyze.log` and
+`/tmp/homeverb-safe-area-release.log`. The full Android native journey described
+above ran before this padding-only correction; the final APK's system-inset
+behavior was verified by the direct native pointer sequence recorded here.
