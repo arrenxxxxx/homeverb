@@ -1,5 +1,5 @@
 {
-  "api_version": "1.15.0",
+  "api_version": "1.16.0",
   "cases": [
     {
       "request": {
@@ -12,7 +12,7 @@
       },
       "response": {
         "data": {
-          "api_version": "1.15.0",
+          "api_version": "1.16.0",
           "limits": {
             "max_active_operations": 8,
             "max_request_bytes": 1048576,
@@ -62,6 +62,9 @@
               "response_kind": "query"
             },
             "inspect_account_inventory": {
+              "response_kind": "query"
+            },
+            "inspect_control_options": {
               "response_kind": "query"
             },
             "list_accounts": {
@@ -1823,7 +1826,7 @@
       },
       "response": {
         "data": {
-          "api_version": "1.15.0",
+          "api_version": "1.16.0",
           "limits": {
             "max_active_operations": 8,
             "max_request_bytes": 1048576,
@@ -1873,6 +1876,9 @@
               "response_kind": "query"
             },
             "inspect_account_inventory": {
+              "response_kind": "query"
+            },
+            "inspect_control_options": {
               "response_kind": "query"
             },
             "list_accounts": {
@@ -2605,6 +2611,28 @@
         "request": {
           "method": "inspect_account_inventory",
           "account_id": "00000000-0000-4000-8000-000000000001"
+        }
+      },
+      "response": {
+        "data": null,
+        "error": {
+          "code": "AUTH_FLOW_UNSUPPORTED",
+          "message": "This host has no admitted account connection flow.",
+          "retryable": false
+        },
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "inspect-options-example",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "inspect_control_options",
+          "device_id": "dev-mock-ac",
+          "connection_id": "cloud"
         }
       },
       "response": {

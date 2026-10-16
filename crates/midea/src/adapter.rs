@@ -24,6 +24,8 @@ const PROVIDER: &str = "midea.meiju";
 
 mod lan;
 pub use lan::LanScanOutcome;
+mod control_options;
+pub use control_options::ControlOption;
 
 // Exact model strings from the read-only cloud probe; not physical support certification.
 const READ_MODELS: &[(&str, ApplianceFamily)] = &[

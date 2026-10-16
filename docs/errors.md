@@ -61,6 +61,11 @@ After possible transmission, prefer `WRITE_OUTCOME_UNKNOWN` over a misleading `L
 
 ## Invariants
 
+`inspect_control_options` reuses account, membership, identity and lifecycle
+errors without contacting the provider. An empty successful option list means
+no reviewed controls; it must not replace a credential or identity error. A
+successful inspection supplies no grant, approval or live authorization evidence.
+
 `verified` includes verification evidence. `failed` includes an explicit error. `unknown` explains uncertainty and must not suggest blind retries. Batch aggregation preserves every item; `partial` never hides successes or failures. Contract version changes require explicit coordinated documentation and migration; do not silently treat an incompatible envelope as valid.
 
 `APPROVAL_EXPIRED` and `APPROVAL_INVALID` are pre-send failures with no attempts

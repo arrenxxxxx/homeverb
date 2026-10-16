@@ -1196,3 +1196,36 @@ storage formats are unchanged. Older libraries reject the new startup field.
 Flutter UI, owner-product matching, physical/off-LAN behavior and refrigerator
 writes remain pending. No real account, appliance, separate Flutter worktree,
 emulator or physical phone was accessed. Remote CI is inspected after push.
+
+## Read-only control-option inspection
+
+[ADR-0056](adr/0056-read-only-control-option-inspection.md) adds native API 1.16.0
+`inspect_control_options` for one exact saved device/connection. Default read-only
+sessions can project reviewed AC and dishwasher action definitions from protected
+listed membership and model/profile evidence before user permission selection.
+The same constructors/selectors supply enabled descriptors and execution limits;
+unsupported models/profiles and refrigerators have no write options. Nothing is
+published, granted, approved, sent or cached by inspection. Provider authorization
+and physical compatibility are not inferred from saved evidence.
+
+Seven synthetic host test groups cover exact profile domains and descriptor
+parity, unchanged read-only denial and explicit later grant selection, no account
+or Core mutation, protected identity/membership/storage failures, unrelated-account
+isolation, exact local IDs, metadata races, cancellation/deadline/background/close/
+drop and lease cleanup. Populated AC and empty refrigerator UI examples have
+closed response schemas, including negative authority/private-field fixtures.
+Actual C calls exercise the new method without credentials; successful protected
+inspection uses the synthetic Session/vault/SQLite tests.
+
+On October 16, 2026, formatting, workspace Clippy, workspace/example builds and
+local documentation/contract/repository/commit checks passed. Rust: 437 passed,
+two explicitly ignored; runtime: 35; native: 32 methods/52 fictional examples plus
+trusted approval/dishwasher checks; Python tooling: 33; presentation: six. The
+native suite initially found a stale 1.15.0 assertion in the dishwasher checker;
+it now compares the advertised API catalog and the rerun passed. All three Android
+AAR variants passed eleven-export and 16 KiB ELF checks. The additive method keeps
+JSON schema 1.0, ten public C functions plus Android JNI initialization, SQLite
+schema 4 and protected payload/session versions unchanged. Negotiate the new
+method before use; existing write gates and outcomes are unchanged. No real
+account, appliance, separate Flutter worktree, new emulator or phone was accessed.
+Remote CI is verified separately after the phase commit and push.

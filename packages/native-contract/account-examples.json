@@ -1,5 +1,5 @@
 {
-  "api_version": "1.15.0",
+  "api_version": "1.16.0",
   "provenance": "Fictional account DTO examples. Actual synthetic host responses are checked against the same schemas by crates/host/tests/meiju_accounts.rs. No live identities or credentials.",
   "connect_metadata": {
     "schema_version": "1.0",
@@ -480,6 +480,184 @@
               "membership": "unconfirmed"
             }
           ]
+        },
+        "warnings": [],
+        "error": null
+      }
+    },
+    {
+      "response_definition": "inspect_control_options",
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "inspect-options-ac",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "inspect_control_options",
+          "device_id": "00000000-0000-4000-8000-000000000002",
+          "connection_id": "00000000-0000-4000-8000-000000000003"
+        }
+      },
+      "response": {
+        "schema_version": "1.0",
+        "data": {
+          "device_id": "00000000-0000-4000-8000-000000000002",
+          "connection_id": "00000000-0000-4000-8000-000000000003",
+          "source": "saved_inventory",
+          "authorization": "not_checked",
+          "options": [
+            {
+              "component_id": "main",
+              "capability": "power",
+              "action": "set",
+              "definition": {
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "state": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "state"
+                  ],
+                  "additionalProperties": false
+                },
+                "transports": [
+                  "cloud"
+                ],
+                "idempotency": "set_value",
+                "risk": "low",
+                "atomic": false,
+                "independent_fields": false,
+                "verification": "unavailable"
+              }
+            },
+            {
+              "component_id": "main",
+              "capability": "vendor.midea.ac",
+              "action": "set_fan_speed",
+              "definition": {
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "wind_speed": {
+                      "type": "integer",
+                      "enum": [
+                        20,
+                        40,
+                        60,
+                        80,
+                        100,
+                        102
+                      ]
+                    }
+                  },
+                  "required": [
+                    "wind_speed"
+                  ],
+                  "additionalProperties": false
+                },
+                "transports": [
+                  "cloud"
+                ],
+                "idempotency": "set_value",
+                "risk": "low",
+                "atomic": false,
+                "independent_fields": false,
+                "verification": "unavailable"
+              }
+            },
+            {
+              "component_id": "main",
+              "capability": "vendor.midea.ac",
+              "action": "activate_mode",
+              "definition": {
+                "parameters": {
+                  "type": "object",
+                  "description": "Turn on the AC and activate the selected vendor mode in one cloud request.",
+                  "properties": {
+                    "mode": {
+                      "type": "string",
+                      "enum": [
+                        "cool",
+                        "heat",
+                        "auto",
+                        "dry",
+                        "fan"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "mode"
+                  ],
+                  "additionalProperties": false
+                },
+                "transports": [
+                  "cloud"
+                ],
+                "idempotency": "set_value",
+                "risk": "low",
+                "atomic": false,
+                "independent_fields": false,
+                "verification": "unavailable"
+              }
+            },
+            {
+              "component_id": "main",
+              "capability": "climate",
+              "action": "set",
+              "definition": {
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "target_temperature": {
+                      "type": "number",
+                      "minimum": 16,
+                      "maximum": 30,
+                      "multipleOf": 0.5
+                    }
+                  },
+                  "required": [
+                    "target_temperature"
+                  ],
+                  "additionalProperties": false
+                },
+                "transports": [
+                  "cloud"
+                ],
+                "idempotency": "set_value",
+                "risk": "low",
+                "atomic": false,
+                "independent_fields": false,
+                "verification": "unavailable"
+              }
+            }
+          ]
+        },
+        "warnings": [],
+        "error": null
+      }
+    },
+    {
+      "response_definition": "inspect_control_options",
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "inspect-options-fridge",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "inspect_control_options",
+          "device_id": "00000000-0000-4000-8000-000000000002",
+          "connection_id": "00000000-0000-4000-8000-000000000003"
+        }
+      },
+      "response": {
+        "schema_version": "1.0",
+        "data": {
+          "device_id": "00000000-0000-4000-8000-000000000002",
+          "connection_id": "00000000-0000-4000-8000-000000000003",
+          "source": "saved_inventory",
+          "authorization": "not_checked",
+          "options": []
         },
         "warnings": [],
         "error": null

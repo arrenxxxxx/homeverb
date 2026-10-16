@@ -25,6 +25,9 @@ mod mode;
 #[path = "meiju_accounts/inventory.rs"]
 mod inventory;
 
+#[path = "meiju_accounts/control_options.rs"]
+mod control_options;
+
 #[path = "meiju_accounts/lan_scan.rs"]
 mod lan_scan;
 
@@ -43,6 +46,12 @@ fn validate_response(value: &Value, definition: &str) {
         serde_json::from_str(include_str!("../../../schemas/native-response.schema.json")).unwrap();
     fn expand(value: &Value, root: &Value) -> Value {
         if let Some(reference) = value.get("$ref").and_then(Value::as_str) {
+            if let Some(pointer) = reference.strip_prefix("urn:homeverb:schema:capability#") {
+                let capability: Value =
+                    serde_json::from_str(include_str!("../../../schemas/capability.schema.json"))
+                        .unwrap();
+                return expand(capability.pointer(pointer).unwrap(), root);
+            }
             let name = reference
                 .strip_prefix("urn:homeverb:schema:native-response#/$defs/")
                 .expect("Account responses use only local account definitions.");
@@ -79,6 +88,7 @@ struct Secrets {
     deleted_entries: AtomicUsize,
     read_delay: AtomicBool,
     read_started: tokio::sync::Notify,
+    read_resume: tokio::sync::Notify,
     deletion: AtomicI32,
     delete_started: tokio::sync::Notify,
 }
@@ -89,7 +99,7 @@ impl SecretStore for Secrets {
         op.run(async {
             if self.read_delay.load(Ordering::Relaxed) {
                 self.read_started.notify_one();
-                std::future::pending::<()>().await;
+                self.read_resume.notified().await;
             }
             if self.unavailable.load(Ordering::Relaxed) {
                 return Err(Error::new(
@@ -344,6 +354,7 @@ impl Fixture {
                 | "recover_account"
                 | "get_account"
                 | "inspect_account_inventory"
+                | "inspect_control_options"
                 | "rename_account"
                 | "remove_account"
         ) {

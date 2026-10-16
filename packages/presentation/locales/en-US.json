@@ -168,5 +168,9 @@
   "vendor.midea.dishwasher.additional.9": "One extra rinse",
   "vendor.midea.dishwasher.additional.10": "Two extra rinses",
   "vendor.midea.dishwasher.additional.13": "Few dishes with one extra rinse",
-  "vendor.midea.dishwasher.additional.14": "Few dishes with two extra rinses"
+  "vendor.midea.dishwasher.additional.14": "Few dishes with two extra rinses",
+  "control.options": "Review control permissions",
+  "control.options.notice": "These options describe supported commands. Permission has not been checked and no control is enabled by this review.",
+  "control.options.empty": "No reviewed control options are available for this device.",
+  "control.options.allow": "Allow selected controls"
 }

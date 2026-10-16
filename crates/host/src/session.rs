@@ -34,6 +34,10 @@ pub enum Request {
     InspectAccountInventory {
         account_id: uuid::Uuid,
     },
+    InspectControlOptions {
+        device_id: String,
+        connection_id: String,
+    },
     RenameAccount {
         account_id: uuid::Uuid,
         label: String,
@@ -467,6 +471,35 @@ impl Session {
                 operation
                     .run(async { Ok(crate::accounts::inventory(inspection)) })
                     .await
+            }
+            Request::InspectControlOptions {
+                device_id,
+                connection_id,
+            } => {
+                let adapter = self
+                    .accounts
+                    .as_ref()
+                    .ok_or_else(crate::accounts::unsupported)?;
+                let descriptor = self.core.describe(&device_id)?;
+                if descriptor.device.id != device_id {
+                    return Err(Error::invalid());
+                }
+                let connection = descriptor
+                    .device
+                    .connections
+                    .iter()
+                    .find(|connection| connection.id == connection_id)
+                    .ok_or_else(Error::invalid)?;
+                let options = adapter
+                    .inspect_control_options(&descriptor.device, connection, &operation)
+                    .await?;
+                operation.run(async {
+                    if json!(self.core.describe(&device_id)?) != json!(descriptor) {
+                        return Err(Error::new("DEVICE_IDENTITY_CONFLICT", "The device metadata changed during inspection."));
+                    }
+                    Ok(json!({"device_id":device_id,"connection_id":connection_id,
+                        "source":"saved_inventory","authorization":"not_checked","options":options}))
+                }).await
             }
             Request::RenameAccount { account_id, label } => {
                 let adapter = self

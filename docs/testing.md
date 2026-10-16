@@ -177,6 +177,16 @@ replay, membership changes, cancellation/deadline and lease cleanup. Optional
 operator observations are raw/stale; malformed recognized values fail decoding.
 These checks establish no physical cycle behavior or owner-product match.
 
+## Read-only control-option inspection
+
+Native API 1.16 control-option tests exercise read-only Session inspection through
+the actual account vault/SQLite with fictional accounts. They compare reviewed
+action definitions to enabled descriptors, preserve exact temperature/program
+domains, reject identity/membership/storage failures, retain read-only denial,
+recheck metadata after an await and release leases on cancellation/background/
+close/deadline/drop. Native C/schema checks cover the new closed method, errors
+and fictional response fixtures; no provider or appliance is accessed.
+
 ## Unverified release gates
 
 Physical-device authentication and control, real-provider account recovery and token rotation, actual Android Keystore, Android APK/iOS builds and phone lifecycle, a target AI host, dependency/security review, package installation, and licensing remain pending. The mainland read-only Meiju pilot and Android library builds do not establish these acceptance gates. Real writes require explicit device-owner authorization. Two different protocol families must demonstrate equivalent capability calls before cross-platform support is claimed.

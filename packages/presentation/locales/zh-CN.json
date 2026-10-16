@@ -168,5 +168,9 @@
   "vendor.midea.dishwasher.additional.9": "额外漂洗一次",
   "vendor.midea.dishwasher.additional.10": "额外漂洗两次",
   "vendor.midea.dishwasher.additional.13": "少量餐具并额外漂洗一次",
-  "vendor.midea.dishwasher.additional.14": "少量餐具并额外漂洗两次"
+  "vendor.midea.dishwasher.additional.14": "少量餐具并额外漂洗两次",
+  "control.options": "查看控制权限",
+  "control.options.notice": "这些选项仅说明支持的指令，尚未检查权限；查看选项不会开启控制。",
+  "control.options.empty": "这台设备暂无已审核的控制选项。",
+  "control.options.allow": "允许所选控制"
 }

@@ -154,7 +154,7 @@ def verify_dishwasher():
                 handle = opened['data']['handle']
                 try:
                     assert call(handle, 'list_accounts')['data'] == []
-                    assert call(handle, 'get_api_info')['data']['api_version'] == '1.15.0'
+                    assert call(handle, 'get_api_info')['data']['api_version'] == load('packages/native-contract/api.json')['api_version']
                     descriptor['capabilities'] = [load('examples/capability.meiju-dishwasher-cycle.json')]
                     with sqlite3.connect(path / 'homeverb.sqlite3') as database:
                         database.execute('INSERT INTO devices VALUES (?,?)', (identifier, json.dumps(descriptor)))

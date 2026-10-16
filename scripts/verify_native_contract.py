@@ -29,7 +29,7 @@ def main():
     responses = {name: validator('native-response', name) for name in [*api['methods'], 'open']}
     query_error = validator('native-response', 'query_error')
     info_example = {'schema_version': '1.0', 'data': copy.deepcopy(api), 'warnings': [], 'error': None}
-    info_example['data']['api_version'] = '1.16.0'
+    info_example['data']['api_version'] = '1.17.0'
     info_example['data']['methods']['future_query'] = {'response_kind': 'query'}
     responses['get_api_info'].validate(info_example)
     info_example['data']['api_version'] = '2.0.0'
@@ -112,6 +112,7 @@ def main():
             assert call(handle, 'remove_account', account_id='00000000-0000-4000-8000-000000000001', expected_device_ids=[])['error']['code'] == 'AUTH_FLOW_UNSUPPORTED'
             assert call(handle, 'refresh_account', account_id='00000000-0000-4000-8000-000000000001')['error']['code'] == 'AUTH_FLOW_UNSUPPORTED'
             assert call(handle, 'recover_account', account_id='00000000-0000-4000-8000-000000000001')['error']['code'] == 'AUTH_FLOW_UNSUPPORTED'
+            assert call(handle, 'inspect_control_options', device_id='dev-mock-ac', connection_id='cloud')['error']['code'] == 'AUTH_FLOW_UNSUPPORTED'
             assert call(handle, 'list_device_cards')['data'] == []
             assert call(handle, 'list_rooms')['data'] == []
             devices = call(handle, 'discover')['data']
@@ -744,6 +745,22 @@ def main():
         validator('native-response', case['response_definition']).validate(case['response'])
         if 'request' in case:
             request_schema.validate(case['request'])
+        if case['response_definition'] == 'inspect_control_options':
+            for field, value in [('source', 'live'), ('authorization', 'granted'),
+                                 ('device_id', 'not-a-uuid'), ('connection_id', None),
+                                 ('product_profile', {}), ('approved', True)]:
+                bad = copy.deepcopy(case['response'])
+                bad['data'][field] = value
+                assert not responses['inspect_control_options'].is_valid(bad), (field, value)
+            if case['response']['data']['options']:
+                for field, value in [('component_id', 'unknown'), ('permission', 'granted'),
+                                     ('definition', {}), ('action', '')]:
+                    bad = copy.deepcopy(case['response'])
+                    bad['data']['options'][0][field] = value
+                    assert not responses['inspect_control_options'].is_valid(bad), (field, value)
+                bad = copy.deepcopy(case['response'])
+                bad['data']['options'] *= 2
+                assert not responses['inspect_control_options'].is_valid(bad)
         if case['response_definition'] == 'inspect_account_inventory':
             for field, value in [('membership', 'online'), ('membership', True),
                                  ('device_id', 'not-a-uuid'), ('connection_id', None),

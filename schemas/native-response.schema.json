@@ -436,6 +436,18 @@
                         "response_kind"
                       ],
                       "additionalProperties": false
+                    },
+                    "inspect_control_options": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": false
                     }
                   },
                   "required": [
@@ -469,7 +481,8 @@
                     "clear_cached_state",
                     "clear_execution_history",
                     "recover_account",
-                    "inspect_account_inventory"
+                    "inspect_account_inventory",
+                    "inspect_control_options"
                   ],
                   "additionalProperties": {
                     "type": "object",
@@ -2051,6 +2064,96 @@
               ],
               "additionalProperties": false,
               "description": "Saved protected inventory evidence for one account. Membership is not connectivity, provider authorization or write permission. This query performs no network or credential mutation."
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "urn:homeverb:schema:native-response#/$defs/query_error"
+        }
+      ]
+    },
+    "inspect_control_options": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "device_id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "connection_id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "source": {
+                  "const": "saved_inventory"
+                },
+                "authorization": {
+                  "const": "not_checked"
+                },
+                "options": {
+                  "type": "array",
+                  "maxItems": 4,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "component_id": {
+                        "const": "main"
+                      },
+                      "capability": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "action": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "definition": {
+                        "$ref": "urn:homeverb:schema:capability#/properties/actions/additionalProperties"
+                      }
+                    },
+                    "required": [
+                      "component_id",
+                      "capability",
+                      "action",
+                      "definition"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "device_id",
+                "connection_id",
+                "source",
+                "authorization",
+                "options"
+              ],
+              "additionalProperties": false,
+              "description": "Saved model-specific permission-form options, not executable descriptors or authority. No network or mutation."
             },
             "warnings": {
               "type": "array",

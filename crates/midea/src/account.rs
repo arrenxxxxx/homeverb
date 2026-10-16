@@ -592,6 +592,25 @@ impl MeijuAccount {
         connection: &Connection,
         operation: &Operation,
     ) -> Result<Appliance> {
+        let appliance = self
+            .bound_appliance(device_id, connection, operation)
+            .await?;
+        if !matches!(
+            appliance.family,
+            ApplianceFamily::AirConditioner | ApplianceFamily::Dishwasher
+        ) {
+            return Err(crate::control::unsupported());
+        }
+        Ok(appliance)
+    }
+
+    /// Resolve saved identity and listed membership without granting control authority.
+    pub(crate) async fn bound_appliance(
+        &self,
+        device_id: &str,
+        connection: &Connection,
+        operation: &Operation,
+    ) -> Result<Appliance> {
         let payload = self.load(operation).await?;
         let binding = payload
             .bindings
@@ -612,7 +631,8 @@ impl MeijuAccount {
         let family = match binding.family {
             0xac => ApplianceFamily::AirConditioner,
             0xe1 => ApplianceFamily::Dishwasher,
-            _ => return Err(crate::control::unsupported()),
+            0xca => ApplianceFamily::Refrigerator,
+            value => ApplianceFamily::Other(value),
         };
         Ok(Appliance {
             id: CloudId::parse(&serde_json::Value::String(binding.appliance_id.clone()))?,

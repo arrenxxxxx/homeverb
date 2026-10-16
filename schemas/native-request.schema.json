@@ -560,6 +560,28 @@
             "account_id"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "inspect_control_options"
+            },
+            "device_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "connection_id": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "method",
+            "device_id",
+            "connection_id"
+          ],
+          "additionalProperties": false
         }
       ]
     }

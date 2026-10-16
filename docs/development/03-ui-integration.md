@@ -20,6 +20,12 @@ descriptor-declared actions; all take empty arguments and require individual
 authority. Optional raw operator observations retain cloud staleness. Do not
 present a submitted pause/cancel as a verified cycle or safe-door state.
 
+API 1.16 adds [read-only control-option inspection](../native-ui-contract.md#inspect-control-options-before-permission-api-116)
+so permission forms can use exact protected model/profile definitions before
+trusted grants are supplied. Inspection does not enable controls or contact the
+provider; the existing consent, reopen, descriptor refresh and execution checks
+remain required.
+
 
 API 1.4 adds local `get_account` and `rename_account` for platform details and names.
 Use the [account metadata contract](../native-ui-contract.md#local-account-details-and-names)
