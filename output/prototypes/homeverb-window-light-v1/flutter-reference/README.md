@@ -2,24 +2,11 @@
 
 An isolated widget reference for the approved material system: bundled ambient/window-light background, porcelain/charcoal gradients, shadows, responsive cards, three root destinations and Appearance with exactly one included skin. All data is fictional. It makes no network/Core calls and holds no credentials. The full [82-state atlas](../index.html) remains the product design specification; this reference implements only representative visual components and local navigation/filtering.
 
-## Verification boundary
+## Historical reference only
 
-Flutter SDK is unavailable in the authoring environment. This source has **not** been compiled, analyzed, run on a phone, or performance-tested. The supplied images were locally rendered by Python, not captured from Flutter. Official painting/theme documentation supports the implementation approach; actual widget and native integration acceptance remains required.
+This early sample is superseded for development by the [FVM-managed application](../../../../apps/mobile/README.md). Use its [checkpoint](../../../../apps/mobile/RESUME.md) to continue work; do not treat this separate sample as the current app. It remains as design provenance and a generator asset target.
 
-## Run in a Flutter development environment
-
-The directory deliberately contains only the widget source, SDK-only package definition and bundled assets. Generate host scaffolding in a disposable copy so the handoff remains unchanged:
-
-```bash
-cp -R flutter-reference /tmp/homeverb-window-light-reference
-cd /tmp/homeverb-window-light-reference
-flutter create --platforms=android,ios,web --project-name homeverb_window_light_reference .
-flutter pub get
-flutter analyze lib
-flutter run -d chrome
-```
-
-Use a supported configured device instead of Chrome for phone acceptance. These are suggested commands, not executed results. Host scaffold generation may add Flutter's stock test; it is not a test of this reference. Review generated files before integrating into a real app.
+Flutter SDK was unavailable in the original authoring environment. This source has **not** been compiled, analyzed, run on a phone, or performance-tested. The supplied images were locally rendered by Python, not captured from Flutter. Official painting/theme documentation supports the implementation approach; actual widget and native integration acceptance remains required.
 
 ## Skin extension point
 

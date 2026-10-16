@@ -11,12 +11,15 @@ for development on another computer. Pixel-equality work remains paused.
 - Worktree: `/home/arren/.codex/worktrees/homeverb-flutter/homeverb`.
 - Retained branch: `codex/flutter-ui`.
 - Remote: `https://github.com/arrenxxxxx/homeverb.git`.
-- Last verified application commit: `d3d3395aea6c789449a77aa6f207098b10f1e92f`.
+- Source-only portable checkpoint: `2d4209cfe766c6bb94447ae00f6f7d7c723c0af9`.
+  All 84 Flutter tests and analysis passed; its surface experiment lacks Android
+  rendering acceptance.
+- Last Android-tested application commit: `d3d3395aea6c789449a77aa6f207098b10f1e92f`.
   It was pushed and the remote tip was read back successfully.
 - Prior native form-alignment commit: `6b588565c52737378fc19418aad92b143c5e2b81`.
 - Pinned Core: `7db8e9bc3e0c2be8ced4d2ab5ffb963d35df8987`; native API 1.14.1.
-- Flutter: FVM 4.3.1, Flutter 3.47.7. Run `/home/arren/.local/bin/fvm` from
-  `apps/mobile`, where `.fvmrc` is present.
+- Flutter: FVM 4.3.1, Flutter 3.47.7. Run `fvm` from `apps/mobile`,
+  where `.fvmrc` is present; install FVM on each development computer.
 - Full executed-check history: [verification.md](verification.md).
 - Native contract: [native-ui-contract.md](../../docs/native-ui-contract.md).
 
@@ -136,6 +139,17 @@ that checkout, check `git apply --check`
 against `working-tree.patch`, apply it once, and copy `new-files/` into the
 checkout preserving relative paths. Do not restore over unrelated changes.
 Build products and SDKs are not a substitute for rebuilding source.
+
+## Integration before phone testing
+
+This branch is not merged into main. A read-only assessment found conflicts in
+shared status documents and the two locale catalogs. Keep both sides' valid
+additions, synchronize the bundled English catalog, rebuild against main's Core
+and rerun integration before accepting a merged APK. Recheck conflicts against
+the actual target commit; old branch counts and preview results are not merge
+proof. Pixel equality remains paused, while real Flutter account/Keystore,
+physical lifecycle, full localization/accessibility and iOS integration remain
+separate work.
 
 ## Resume checklist
 

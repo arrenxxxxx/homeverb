@@ -1,6 +1,6 @@
 # Native UI contract
 
-Status: implemented Linux native contract, October 16, 2026, with Mock, default read-only Meiju startup, protected account connection and scoped experimental AC power, fan, mode activation and profile-scoped temperature grants. Six real devices passed the native read path; phone packaging and complete provider/physical acceptance remain pending. See [ADR-0019](adr/0019-native-ui-contract.md).
+Status: implemented Linux native contract, October 16, 2026, with Mock, default read-only Meiju startup, protected account connection and scoped experimental AC power, fan, mode activation and profile-scoped temperature grants. Six real devices passed the native read path; Android app packaging and emulator Mock journeys have separate Flutter evidence; complete provider/physical-phone and iOS app acceptance remain pending. See [ADR-0019](adr/0019-native-ui-contract.md).
 
 ## Start here in a Flutter worktree
 
@@ -179,7 +179,9 @@ The automated suite separately checks empty-account startup/discovery, invalid
 mode/grant/scenario combinations, lifecycle gating and closed handles without
 vendor calls. The [Android native package](development/08-android-native.md) supplies
 Keystore integration, a library build path and isolated AOSP Android 15 acceptance.
-Flutter APK/physical-phone journeys and iOS acceptance remain pending.
+Flutter APK startup and Mock emulator journeys are recorded in the
+[app verification report](../apps/mobile/verification.md). Real Flutter account/Keystore,
+physical-phone and iOS acceptance remain pending.
 
 The separate [AC developer probe](development/07-meiju-control.md) can persist
 experimental writable descriptors in a shared profile. Metadata is not authority:
@@ -826,7 +828,10 @@ cargo test -p homeverb-host --test native_contract --offline --locked
 
 The native suite also calls all three trusted approval exports using fictional data and checks exact scope, duplicate/concurrent consumption, cross-handle refusal, capacity, dismissal, lifecycle, metadata changes and independent adapter approval guards. Deterministic Rust tests cover expiry and background/foreground races. The native suite calls all 31 catalog methods, checks their schemas, verifies closed-field rejection, null success, pre-admission errors, composite/batch results, all execution outcomes, cancellation, foreground gating and closed handles. It also validates the saved examples and Meiju startup/account admission guards, caller-buffer clearing, local detail/rename persistence, removal admission/ledger replay, explicit cache/history clearing, retired-request refusal, recovery admission and account counterexamples without a live account. `--write-examples` regenerates those examples only from a successful fictional run; review and commit the changes together with the contract. Existing full MVP tests still cover execution and persistence behavior.
 
-This is Linux native verification. Dart FFI allocation, worker scheduling, mobile library packaging, secure stores, system-browser lifecycle, and physical-phone behavior must be tested in the Flutter worktree. No Flutter build has been run for this delivery.
+These commands verify the Linux native boundary. Separate Dart FFI, Linux app and
+Android packaging/emulator checks are recorded in the [Flutter verification
+report](../apps/mobile/verification.md); they do not establish real-account secure
+storage, system-browser flows, iOS app integration or physical-phone behavior.
 
 ## Missing devices and legacy account inventory
 

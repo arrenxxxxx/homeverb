@@ -47,9 +47,9 @@ follow the same rule. Titles, descriptions and status paragraphs retain their
 normal document flow.
 
 The prototype measures visible text bounds rather than applying a fixed top
-inset. Flutter controls use symmetric native line metrics and centered containers,
-without the former upward text translations; body copy retains its separate
-layout. Stepper symbols are centered vector marks in both implementations. A
+inset. Flutter uses bundled-font ink metrics and centered native control
+containers to align visible glyph bounds; unknown glyphs and system bold/spacing
+overrides retain native fallback layout. Body copy retains its separate layout. Stepper symbols are centered vector marks in both implementations. A
 32-pixel visible pill retains a 48-pixel interaction area, including wrapped runs.
 The change does not alter actions, state or native permissions.
 
@@ -67,12 +67,14 @@ comparison remains a separate gate in the [verification report](../apps/mobile/v
 
 ## Flutter feasibility and rendering strategy
 
-All selected effects have direct Flutter rendering paths. This conclusion is based on documented widget/painting capabilities, not a compiled phone test.
+The table records the original rendering strategy. The Flutter app now has
+Linux and Android emulator evidence; its current surface-mask experiment and
+physical-phone performance remain unaccepted. See the [checkpoint](../apps/mobile/RESUME.md).
 
 | Visual effect | Flutter implementation | Acceptance concern |
 |---|---|---|
 | Window shadows, subtle texture, reflected ambient light | Bundled image in a full-page `Stack`, `Positioned.fill`, `Image.asset` with `BoxFit.cover`; use `Alignment` to preserve the light direction across sizes | Keep decoration out of semantics and pointer hit testing. Decode/cache a suitable resolution; avoid visible tiling or oversized decoded textures. |
-| Porcelain and charcoal surfaces | `DecoratedBox` / `BoxDecoration` with `LinearGradient`, `BorderRadius`, a subtle `Border` and `BoxShadow` | Explicitly clip child imagery only where needed. Decoration radius does not automatically clip descendants. |
+| Porcelain and charcoal surfaces | Native gradient/shadow plus committed decorative corner/border masks; high contrast retains the solid native fallback | Explicitly clip child imagery only where needed. Decoration radius does not automatically clip descendants. |
 | Soft contact shadow | One low-opacity `BoxShadow`, modest blur/spread/offset | Avoid per-card live backdrop blur and deep nested opacity layers. Profile on a lower-end phone. |
 | Selected controls and navigation | Material 3 buttons/navigation widgets with custom color, radius and elevation tokens | Keep focus/pressed/disabled/error states and minimum target sizes; do not replace interactive semantics with painted icons. |
 | Sheets/dialogs | Transparent outer route and a rounded themed surface, safe insets and keyboard-aware scroll content | Verify background dimming, barrier labels, back behavior, input visibility and large text. |
@@ -105,14 +107,14 @@ The presentation-layer registry has this shape:
 
 Use a stable skin definition containing display name/localization key, light/dark surface roles where explicitly designed, background asset, semantic text/accent/status colors, card gradients, borders, radii and shadows. Current Window Light uses a single light appearance with charcoal cards; a charcoal card is not an application dark mode. Keep device behavior and capability metadata outside the skin object.
 
-Persist only the selected ID and preference schema version in local application preferences, not in credentials or an adapter. Missing, corrupt, or unknown IDs fall back to `window_light` and leave account/device/room data intact. A failed save retains the previous effective selection and shows a local error. Resolve the skin before presenting the application to avoid an unthemed flash. This defines a future production preference contract; the isolated reference uses in-memory state and does not claim restart persistence.
+Persist only the selected ID and preference schema version in local application preferences, not in credentials or an adapter. Missing, corrupt, or unknown IDs fall back to `window_light` and leave account/device/room data intact. A failed save retains the previous effective selection and shows a local error. Resolve the skin before presenting the application to avoid an unthemed flash. The Flutter app implements private local preference persistence and fallback. The earlier isolated reference uses in-memory state only; it is not the application or its persistence evidence.
 
 Later reviewed skins extend the registry and asset bundle, reuse the same components and pass all contrast/accessibility checks. A selection can update theme tokens without rebuilding navigation or reauthorizing platforms. No backend, executable download, credential access, wallpaper importer or marketplace is part of this extension point. Additional appearance modes require their own designed and reviewed tokens rather than automatic color inversion.
 
 ## Validation gates
 
 1. **Prototype completeness:** all 82 IDs rendered in Window Light; all 201 branches resolve; all 14 review journeys remain available. Appearance contains exactly one registered option.
-2. **Flutter compile and interaction:** use FVM, run dependency resolution and analysis, then build the preview and production UI. Linux and isolated web-preview checks are recorded in the application verification report. Phone builds, system dialogs and complete keyboard/accessibility acceptance remain pending.
+2. **Flutter compile and interaction:** use FVM, run dependency resolution and analysis, then build the preview and production UI. Linux and isolated web-preview checks are recorded in the application verification report. Android APK/emulator and selected OS-keyboard/export checks have passed; the latest surface checkpoint, physical phones, iOS app integration and full accessibility still need mobile acceptance.
 3. **Visual parity:** compare screenshots on narrow/regular phones and wide layouts against the approved home and representative control/platform/settings/share pages. Tune image fit and material tokens together.
 4. **Accessibility:** verify 100%, 150%, 200% text scaling, screen readers, long names, zh-CN/en-US, focus order, 48-pixel targets and contrast over the final composite background. Use an opaque readable surface when enhanced contrast requires it.
 5. **Performance:** use a profile build on representative physical phones; measure raster/UI frame time, memory and scrolling after images are decoded. Avoid claiming a frame-rate target from static artwork or desktop rendering.

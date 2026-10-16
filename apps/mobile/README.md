@@ -51,9 +51,13 @@ experiment; pixel equality and its Android rendering acceptance remain pending.
 
 ## Development
 
-Use FVM 4.3.1 and Flutter 3.47.7, pinned in `.fvmrc`.
+Use FVM 4.3.1 and Flutter 3.47.7, pinned in `.fvmrc`. On a Linux host,
+build the native library from the repository root before running the Flutter
+tests. Omit `--offline` on the first build so Cargo can obtain dependencies.
 
 ```sh
+cargo build -p homeverb-ffi --locked
+cd apps/mobile
 fvm install
 fvm flutter pub get
 fvm flutter analyze
@@ -79,13 +83,7 @@ it does not render or update reference pages. The masks contain no labels or
 whole controls. Flutter retains native hit targets, focus, selection and semantics,
 and tints the same masks for high contrast. Other sizes keep the vector fallback.
 
-Build the library from the repository root before running native tests:
-
-```sh
-cargo build -p homeverb-ffi --offline --locked
-```
-
-Build and run a Linux native application after building the library:
+Build and run a Linux native application from `apps/mobile` after the steps above:
 
 ```sh
 fvm flutter build linux --release
@@ -113,7 +111,7 @@ fvm flutter build web -t lib/main_preview.dart
 - Core owns metadata. Presentation preferences contain only skin, root, sharing display name and route choices. Save failures retain previous preferences.
 - Component selection uses exact IDs and each component's capability references. Observations are cached separately per device/component; a secondary compartment never replaces the primary card observation. Unsupported temperature actions remain read-only.
 - Components with separate climate scopes share a compact overview. Opening reads local caches only; explicit Refresh State reads the components. Targets always carry an exact component ID, and partial reads retain independent observations. Cancelling or backgrounding stops the read sequence.
-- Described scalar actions use typed parameter forms, exact bounds/steps/enums and explicit submission. Read-only, unsupported and trusted-approval actions remain unavailable. Isolated non-climate fixtures do not register additional native adapters.
+- Described scalar actions use typed parameter forms, exact bounds/steps/enums and explicit submission. Read-only and unsupported actions remain unavailable. Admitted elevated actions use the separate trusted confirmation flow below; high-risk actions remain unavailable. Isolated non-climate fixtures do not register additional native adapters.
 - Single-family light/fan/media/sensor/cycle components use dedicated Window Light controls. Sliders and fan steppers use the described range and step; mixed or coupled actions retain explicit forms. Missing and stale observations remain labelled, and high-risk actions remain unavailable.
 - Diagnostics show the loaded report in summary cards. Select the review note to inspect the complete report, including all retained receipts. Export saves that same snapshot; failed or cancelled reloads cannot expose an old or late report. Android uses the system Create Document picker restricted to local providers; cancellation writes nothing. The picker grants access to the selected document without broad storage permissions. Desktop builds use the file selector. iOS document export remains unverified.
 - Modal focus stays above the inactive backdrop; Tab/Enter and Escape support keyboard navigation. Fields, sliders and switches expose their purpose. Busy activity becomes static when the system requests reduced motion. System high contrast uses solid surfaces, stronger outlines and larger semibold text; disabling it restores the original Window Light appearance.
@@ -175,7 +173,7 @@ these builds are development artifacts, not distributable store releases.
 
 ## Verification boundary
 
-See [verification.md](verification.md) for executed checks and remaining acceptance gates. All 82 native-widget preview states render and all 198 simulated atlas event branches are clicked separately from the real Core tests. The actual Linux Flutter process also discovers, reads and writes the fictional Mock appliance through FFI. Screenshot equality has **not passed**; do not describe the application as a pixel-identical or phone-verified delivery.
+See [verification.md](verification.md) for executed checks and remaining acceptance gates. All 82 native-widget preview states render and all 201 simulated atlas event branches are clicked separately from the real Core tests. The actual Linux Flutter process also discovers, reads and writes the fictional Mock appliance through FFI. Screenshot equality has **not passed**; do not describe the application as a pixel-identical or phone-verified delivery.
 
 Generate the local comparison report from the repository root after screenshot tests:
 

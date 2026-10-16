@@ -21,6 +21,7 @@ Start with the progressive development path. Reference documents define invarian
 - Contracts: [domain](domain-model.md), [capabilities](capabilities.md), [adapters](adapter-contract.md), [routing/execution](routing-and-execution.md), [errors](errors.md), [schemas](../schemas/README.md).
 - Entry points: [CLI](cli.md), [native SDK](sdk.md), [mobile requirements](mobile-app.md), [MCP](mcp.md).
 - Flutter handoff: [versioned native contract](native-ui-contract.md), [callable catalog and examples](../packages/native-contract/README.md), [native contract decision](adr/0019-native-ui-contract.md).
+- Flutter implementation: [build and run](../apps/mobile/README.md), [current checkpoint and recovery](../apps/mobile/RESUME.md), [executed verification and remaining acceptance](../apps/mobile/verification.md).
 - UI delivery: [Window Light prototype](../output/prototypes/homeverb-window-light-v1/index.html), [functional handoff](ui-functional-spec.md), [82-state inventory](ui-screen-inventory.md), [Flutter visual system and one-skin extension](ui-window-light.md).
 - Persistence/security: [storage](storage.md), [authentication](authentication.md), [Android credential backend](adr/0032-android-native-credential-storage.md), [native account vault](adr/0021-persistent-account-vault.md), [local account removal](adr/0028-local-account-removal.md), [saved-session recovery](adr/0030-explicit-meiju-account-recovery.md), [pending-account reauthorization](adr/0031-pending-account-reauthorization.md), [cache/history clearing](adr/0029-local-cache-and-history-clearing.md), [security/privacy](security-and-privacy.md).
 - Delivery: [repository layout](repository.md), [testing](testing.md), [task status](task-breakdown.md), [roadmap](roadmap.md), [compatibility](compatibility.md), [commit conventions](commit-conventions.md), [private publishing](publishing.md).
@@ -34,7 +35,7 @@ Start with the progressive development path. Reference documents define invarian
 - Protected product mapping evidence: [inventory and storage rules](adr/0040-protected-meiju-product-profiles.md).
 - Explicit power-on and mode selection: [scoped AC activation](adr/0039-explicit-meiju-mode-activation.md).
 - MCP control admission: [session-scoped Meiju Core access](adr/0038-scoped-meiju-mcp.md).
-- Consequential actions: [typed single-command approval](adr/0042-trusted-single-command-approval.md) and [separate trusted native functions](adr/0043-native-trusted-approval-bridge.md); fictional bridge acceptance, with [reviewed dishwasher start mappings](adr/0044-profile-scoped-dishwasher-start.md); physical acceptance and Flutter consent UI pending.
+- Consequential actions: [typed single-command approval](adr/0042-trusted-single-command-approval.md) and [separate trusted native functions](adr/0043-native-trusted-approval-bridge.md); fictional bridge acceptance, with [reviewed dishwasher start mappings](adr/0044-profile-scoped-dishwasher-start.md); Flutter consent UI has fictional native evidence; real-platform consent and physical acceptance remain pending.
 - Evidence: [references](references.md), [fictional examples](../examples/README.md), [diagrams](diagrams/README.md).
 
 ## Decisions

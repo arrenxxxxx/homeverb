@@ -2,6 +2,28 @@
 
 Date: October 16, 2026. Baseline: native UI contract 1.14.1 (pinned Core `7db8e9b`) and the approved Window Light atlas. This is an implementation checkpoint, not completion of the owner's pixel-identical acceptance requirement.
 
+## Current checkpoint
+
+Source checkpoint: `2d4209c` on `codex/flutter-ui`, October 16, 2026. Native API
+1.14.1 and SQLite schema 4 remain pinned; this is not main's newer Core baseline.
+All 84 Flutter tests, static analysis and the native-library build passed for
+this source. The last Android-tested application source is `d3d3395`; the later
+surface experiment has not been rebuilt or exercised on Android.
+
+The preview covers 82 states and 201 simulated branches, not 201 native provider
+operations. Last recorded experimental comparison: 0/82 exact, mean channel error
+0.5268/255, with the S11 regression and endpoint-rounding issue still open.
+Pixel work remains paused. Real Flutter accounts/Keystore, physical phones, iOS
+app integration, complete localization/accessibility and performance remain
+unaccepted; sharing, identity merge and full-profile deletion remain unavailable.
+
+Use [RESUME.md](RESUME.md) for portable recovery and remaining work, and the final
+[source-only checkpoint entry](#source-only-paused-checkpoint--october-16-2026)
+for its exact commands. Earlier counts, API versions and APK hashes below are
+historical phase evidence, not the latest build state. Logs, captures, reports
+and APK paths are local artifacts excluded from Git; a fresh clone must regenerate
+them. Their absence does not mean source or required app assets are missing.
+
 ## Implemented scope
 
 The application pins Flutter 3.47.7 through FVM 4.3.1. It loads the native library in process, negotiates API availability, runs blocking work in isolates, gates background calls, cancels outstanding operations and preserves uncertain outcomes. No production HTTP bridge, CLI parsing, periodic refresh or account service was added.
@@ -10,9 +32,10 @@ The native Mock path provides first launch, three roots, local search, room filt
 
 All 82 atlas states have native-widget implementations in an isolated, visibly labelled preview. The 201 event buttons in that preview simulate atlas branches. They are **not 201 successful native operations**. Flutter account metadata, protected input, automatic-retrieval results, pending-session recovery/reauthorization and scoped removal are implemented. Their successful provider flows are tested with isolated contract fixtures, not real credentials. Nearby sharing, identity merge and full-profile deletion remain unavailable. Native cache/history cleanup is implemented with separate scope confirmations. Non-climate native forms consume described scalar properties/actions. A selected component with one light, fan, media, sensor or cycle family now uses a dedicated Window Light layout; mixed families retain the descriptor list. These isolated fixtures are not registered native adapters or physical-device support. The multi-compartment overview now groups exact component readings and target controls. Strict layout equality remains pending.
 
-## Executed verification
+## Earlier baseline verification
 
-Commands below ran in the isolated worktree; Flutter commands used the pinned FVM SDK. Temporary profiles contained only fictional data.
+The following table preserves earlier phase results; use the current checkpoint
+above for the latest test count and source. Commands below ran in the isolated worktree; Flutter commands used the pinned FVM SDK. Temporary profiles contained only fictional data.
 
 | Check | Evidence / result |
 |---|---|
@@ -99,9 +122,10 @@ The command verifies the complete 82-file set, writes `output/flutter-verificati
 | UI-14 | Linux process/bundle and Android debug/development-release APKs verified. Android 15 x86_64 journeys, cold launch, real IME and Home/resume checks passed. Physical phones, iOS, profiling and pixel equality remain unverified. |
 | UI-15 | Meiju Core and explicit read-only Flutter startup/account integration are present; real account and off-LAN acceptance remain pending. P08 base artwork now matches the combined retrieval result; separate runtime-variant artwork and real off-LAN acceptance remain pending. |
 
-## Compatibility and environment
+## Earlier compatibility and environment
 
-The frontend merged Core API 1.9 and SQLite schema 4 from pinned commit `00d44b7`, including the protected seventh C symbol. This cleanup UI uses the existing native methods without further schema changes. Presentation preferences are app-private JSON containing no credentials. No real-platform compatibility row is promoted. No real-device write, diagnostic upload or package publication was performed. The owner-authorized frontend implementation has been pushed to `origin/codex/flutter-ui`; the branch is retained. This is an incomplete acceptance checkpoint, not a merge into main or a claim that the pixel gate passed.
+This paragraph records the earlier cleanup phase, superseded by the API 1.14.1
+checkpoint above. The frontend merged Core API 1.9 and SQLite schema 4 from pinned commit `00d44b7`, including the protected seventh C symbol. This cleanup UI uses the existing native methods without further schema changes. Presentation preferences are app-private JSON containing no credentials. No real-platform compatibility row is promoted. No real-device write, diagnostic upload or package publication was performed. The owner-authorized frontend implementation has been pushed to `origin/codex/flutter-ui`; the branch is retained. This is an incomplete acceptance checkpoint, not a merge into main or a claim that the pixel gate passed.
 
 Android startup embeds the matching dual-ABI AAR, and debug/development-release
 APKs run on an isolated Android 15 x86_64 emulator. The task-local SDK/NDK and JDK

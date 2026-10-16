@@ -52,8 +52,8 @@ Scope: the owner-approved mobile requirements and room/card/platform/sharing ref
 |---|---|
 | Apply one visual system to every state | All 82 panels use the shared locally rendered background, surface and accent tokens. |
 | Exactly one skin option | S02 and S11 use stable ID `window_light`; no alternate/dark/system option. |
-| Preserve future skin extensibility | [Flutter reference](flutter-reference/README.md) and [skin contract](../../../docs/ui-window-light.md); production persistence remains planned. |
-| Keep development coverage explicit | [Functional handoff](../../../docs/ui-functional-spec.md), [82-state inventory](../../../docs/ui-screen-inventory.md) and 14 acceptance groups. |
+| Preserve future skin extensibility | [Skin contract](../../../docs/ui-window-light.md) and [Flutter app](../../../apps/mobile/README.md); local preference persistence is implemented, while additional skins remain out of scope. |
+| Keep development coverage explicit | [Functional handoff](../../../docs/ui-functional-spec.md), [82-state inventory](../../../docs/ui-screen-inventory.md) and 15 acceptance groups. |
 | Honest rendering evidence | Local Python composition; no Flutter build, browser UI test or physical-device verification is implied. |
 
 ## Complete screen inventory

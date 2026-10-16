@@ -1,8 +1,12 @@
 # Mobile app design
 
-Status: UI implementation is separate work. The native bridge and en-US/zh-CN resource contract are available in the [UI integration guide](development/03-ui-integration.md); physical-phone integration is not yet verified.
-
-Status: owner-approved functional design, October 14, 2026. The screens and sharing flows below are planned, not implemented or device-verified.
+Status: owner-approved product requirements, October 14, 2026; implementation
+status refreshed October 16. The [Flutter app](../apps/mobile/README.md) now
+implements the room/card/control/account UI and has Linux/Android emulator
+evidence. This document retains the complete product scope, including unavailable
+sharing and identity-merge flows. Use the [functional status table](ui-functional-spec.md)
+and [verification record](../apps/mobile/verification.md) to distinguish implemented
+behavior from pending development and physical-phone acceptance.
 
 ## Independent execution
 
@@ -10,13 +14,13 @@ Flutter UI -> in-process bindings -> Core -> in-process adapters -> appliance LA
 
 HomeVerb has no application account, registration, sign-in screen, or personal-account center. Users open the app directly; authentication applies only to third-party platforms or device pairing. Local configuration remains accessible without platform authorization.
 
-The first real account journey is Midea Meiju: connect an existing account, automatically retrieve its bound Midea/Hualing appliances, then read/control supported capabilities directly through Midea's cloud at home or away. Cloud operation requires no home gateway or LAN discovery. LAN can later become another connection to the same device. This is a requirement, not implemented support; see the [integration guide](development/05-midea.md).
+The first real account journey is Midea Meiju: connect an existing account, automatically retrieve its bound Midea/Hualing appliances, then read/control supported capabilities directly through Midea's cloud at home or away. Cloud operation requires no home gateway or LAN discovery. LAN can later become another connection to the same device. Protected connection/retrieval UI and experimental Core reads are implemented, but the complete Flutter real-account, off-LAN and control journey is not accepted; see the [integration guide](development/05-midea.md).
 
 ## Visual direction and navigation
 
 Use Flutter with Material 3, generous spacing, clear typography, restrained card surfaces, consistent line icons, and a small number of accent colors. The device home takes inspiration from the Mi Home room-switching and device-card pattern. Complex dashboards, historical charts, rule editors, and gateway settings are excluded.
 
-The owner-selected default visual direction is **Window Light (01)**, approved October 15, 2026: warm plaster light, diffuse window shadows, cool reflected light, and softly tinted porcelain card surfaces. The [complete Window Light prototype](../output/prototypes/homeverb-window-light-v1/index.html) applies it to 82 screen states, with 21 boards, 14 review journeys, and 198 interaction branches. This is a visual specification, not an implemented Flutter application.
+The owner-selected default visual direction is **Window Light (01)**, approved October 15, 2026: warm plaster light, diffuse window shadows, cool reflected light, and softly tinted porcelain card surfaces. The [complete Window Light prototype](../output/prototypes/homeverb-window-light-v1/index.html) applies it to 82 screen states, with 21 boards, 14 review journeys, and 201 interaction branches. This is a visual specification, not an implemented Flutter application.
 
 Settings > Appearance includes a skin extension point from the first release, with exactly one available option: **Window Light**, stable ID `window_light`, marked Current. Users can preview it; no alternate skins, dark/system-mode picker, wallpaper importer, or download store are included. Persist the selected skin locally and fall back to Window Light for an unknown ID. Additional reviewed skins can later reuse the same theme tokens and widgets. See the [visual system and Flutter handoff](ui-window-light.md) for implementation and phone-validation gates.
 

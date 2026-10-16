@@ -91,5 +91,5 @@ coverage=(ROOT/'coverage.md').read_text().split('## Window Light acceptance addi
 assert len(re.findall(r'^\| [^|]+ \|',coverage,re.M))-1==41
 print(json.dumps({'screens':82,'boards':21,'journeys':14,'branches':201,
     'requirement_groups':41,'skin_options':1,'images_verified':len(manifest),
-    'local_links_verified':checked,'layout_overflow':0,'flutter_build':'not_run_sdk_unavailable',
+    'local_links_verified':checked,'layout_overflow':0,'flutter_build':'not_run_by_atlas_validator',
     'browser_interaction_test':'not_run'},indent=2))
