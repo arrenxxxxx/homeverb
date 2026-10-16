@@ -119,7 +119,7 @@ void main() {
         for (final label in [
           'Copy Code and Retrieve Devices',
           'Copy Code\nRetrieve Devices',
-          'Continue →',
+          'Continue \u{1f9ed}',
         ]) {
           var tapped = false;
           await tester.pumpWidget(

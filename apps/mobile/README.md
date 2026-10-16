@@ -61,9 +61,10 @@ semantics and interaction remain native Flutter controls. Their 2x corner artwor
 preserves the prototype's inclusive pixel edges without stretching the corners.
 Regenerate them from this directory with `python3 tool/generate_button_assets.py`
 (Pillow required). Assets are committed, so normal Flutter builds do not require
-Python. The same generator records baseline-relative ink bounds from the bundled
-Inter SemiBold font. Button labels use those bounds and Flutter's actual baseline
-to center ascenders and descenders while retaining native text and wrapping.
+Python. Run `python3 tool/generate_text_metrics.py` to regenerate baseline-relative
+ink bounds for the bundled Inter Regular and SemiBold control styles. Buttons,
+row labels, tabs and codes use those bounds with the native painted baseline to
+center visible ascenders and descenders. Text, wrapping and semantics stay native.
 Unknown glyphs and system bold/spacing overrides retain ordinary native layout.
 High contrast retains Flutter's existing solid outlined controls.
 

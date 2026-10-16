@@ -26,22 +26,25 @@ const skinRegistry = {'window_light': HomeVerbSkin()};
 ui.FragmentProgram? _surfaceProgram;
 Future<void>? _skinAssetsLoad;
 final _buttonFaces = <String, ui.Image>{};
-final _buttonLabelBounds = <int, (double, double)>{};
+final _textInkBounds = <(int, double), Map<int, (double, double)>>{};
 Future<void> loadWindowSkin() => _skinAssetsLoad ??= () async {
   _surfaceProgram = await ui.FragmentProgram.fromAsset(
     'shaders/window_surface.frag',
   );
   final metrics =
-      jsonDecode(
-            await rootBundle.loadString('assets/button-label-metrics.json'),
-          )
+      jsonDecode(await rootBundle.loadString('assets/text-ink-metrics.json'))
           as Map<String, dynamic>;
-  for (final entry in (metrics['bounds'] as Map<String, dynamic>).entries) {
-    final bounds = entry.value as List;
-    _buttonLabelBounds[entry.key.runes.single] = (
-      (bounds[0] as num).toDouble(),
-      (bounds[1] as num).toDouble(),
-    );
+  for (final variant in metrics['variants'] as List) {
+    _textInkBounds[(
+      variant['weight'] as int,
+      (variant['size'] as num).toDouble(),
+    )] = {
+      for (final entry in (variant['bounds'] as Map<String, dynamic>).entries)
+        entry.key.runes.single: (
+          (entry.value[0] as num).toDouble(),
+          (entry.value[1] as num).toDouble(),
+        ),
+    };
   }
   for (final style in ['primary', 'secondary', 'danger', 'disabled']) {
     final bytes = await rootBundle.load('assets/button-$style.png');
@@ -130,11 +133,10 @@ class Copy extends StatelessWidget {
           : FontWeight.w400,
     );
     if (control) {
-      return Text(
+      return _InkCenteredText(
         text,
         textAlign: center ? TextAlign.center : TextAlign.start,
         maxLines: maxLines,
-        overflow: maxLines == null ? null : TextOverflow.ellipsis,
         style: style,
       );
     }
@@ -400,21 +402,132 @@ class ActionButton extends StatelessWidget {
             ),
           ),
           onPressed: onPressed,
-          child: _ButtonLabel(label),
+          child: _InkCenteredText(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              height: 1.4,
+              letterSpacing: 0,
+            ),
+          ),
         ),
       ),
     );
   }
 }
 
-class _ButtonLabel extends StatelessWidget {
-  const _ButtonLabel(this.label);
+class _InkCenteredText extends StatelessWidget {
+  const _InkCenteredText(
+    this.label, {
+    required this.style,
+    required this.textAlign,
+    this.maxLines,
+  });
   final String label;
+  final TextStyle style;
+  final TextAlign textAlign;
+  final int? maxLines;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Text(
+      label,
+      textAlign: textAlign,
+      maxLines: maxLines,
+      overflow: maxLines == null ? null : TextOverflow.ellipsis,
+      style: style,
+    );
+    final metrics = _textInkBounds[(style.fontWeight!.value, style.fontSize!)];
+    if (metrics == null ||
+        MediaQuery.boldTextOf(context) ||
+        MediaQuery.maybeLineHeightScaleFactorOverrideOf(context) != null ||
+        MediaQuery.maybeLetterSpacingOverrideOf(context) != null ||
+        MediaQuery.maybeWordSpacingOverrideOf(context) != null) {
+      return text;
+    }
+    final defaults = DefaultTextStyle.of(context);
+    final scaler = MediaQuery.textScalerOf(context);
+    final ratio = MediaQuery.devicePixelRatioOf(context);
+    return _CenteredInk(
+      painter: TextPainter(
+        text: TextSpan(text: label, style: defaults.style.merge(style)),
+        textAlign: textAlign,
+        maxLines: maxLines ?? defaults.maxLines,
+        ellipsis: maxLines != null || defaults.overflow == TextOverflow.ellipsis
+            ? '…'
+            : null,
+        textDirection: Directionality.of(context),
+        textScaler: scaler,
+        locale: Localizations.maybeLocaleOf(context),
+        textWidthBasis: defaults.textWidthBasis,
+        textHeightBehavior:
+            defaults.textHeightBehavior ??
+            DefaultTextHeightBehavior.maybeOf(context),
+      ),
+      metrics: metrics,
+      scale: scaler.scale(style.fontSize!) * ratio / (style.fontSize! * 2),
+      pixelRatio: ratio,
+      child: text,
+    );
+  }
+}
+
+// Preserve native intrinsic/dry layout for Chip and other baseline consumers.
+class _CenteredInk extends SingleChildRenderObjectWidget {
+  const _CenteredInk({
+    required this.painter,
+    required this.metrics,
+    required this.scale,
+    required this.pixelRatio,
+    required super.child,
+  });
+  final TextPainter painter;
+  final Map<int, (double, double)> metrics;
+  final double scale, pixelRatio;
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderCenteredInk(painter, metrics, scale, pixelRatio);
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _RenderCenteredInk renderObject,
+  ) => renderObject.configure(painter, metrics, scale, pixelRatio);
+}
+
+class _RenderCenteredInk extends RenderProxyBox {
+  _RenderCenteredInk(
+    this._painter,
+    this._metrics,
+    this._scale,
+    this._pixelRatio,
+  );
+  TextPainter _painter;
+  Map<int, (double, double)> _metrics;
+  double _scale, _pixelRatio;
+  double _top = 0, _height = 0;
+  bool _centerInk = false;
+
+  void configure(
+    TextPainter painter,
+    Map<int, (double, double)> metrics,
+    double scale,
+    double pixelRatio,
+  ) {
+    _painter.dispose();
+    _painter = painter;
+    _metrics = metrics;
+    _scale = scale;
+    _pixelRatio = pixelRatio;
+    markNeedsLayout();
+    markNeedsSemanticsUpdate();
+  }
 
   (double, double)? bounds(String line) {
     double? top, bottom;
     for (final rune in line.runes) {
-      final glyph = _buttonLabelBounds[rune];
+      final glyph = _metrics[rune];
       if (glyph == null) return null;
       if (glyph.$1 == glyph.$2) continue;
       top = top == null ? glyph.$1 : math.min(top, glyph.$1);
@@ -424,99 +537,34 @@ class _ButtonLabel extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    const style = TextStyle(
-      fontSize: 14,
-      fontWeight: FontWeight.w600,
-      height: 1.4,
-      letterSpacing: 0,
+  void performLayout() {
+    super.performLayout();
+    _centerInk = false;
+    _painter.layout(maxWidth: size.width);
+    if (_painter.didExceedMaxLines) return;
+    final label = _painter.text!.toPlainText();
+    final lines = _painter.computeLineMetrics();
+    if (lines.isEmpty) return;
+    final firstRange = _painter.getLineBoundary(const TextPosition(offset: 0));
+    final lastRange = _painter.getLineBoundary(
+      TextPosition(offset: label.length, affinity: TextAffinity.upstream),
     );
-    final text = Text(label, textAlign: TextAlign.center, style: style);
-    if (_buttonLabelBounds.isEmpty ||
-        MediaQuery.boldTextOf(context) ||
-        MediaQuery.maybeLineHeightScaleFactorOverrideOf(context) != null ||
-        MediaQuery.maybeLetterSpacingOverrideOf(context) != null ||
-        MediaQuery.maybeWordSpacingOverrideOf(context) != null) {
-      return text;
-    }
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final defaults = DefaultTextStyle.of(context);
-        final scaler = MediaQuery.textScalerOf(context);
-        final painter = TextPainter(
-          text: TextSpan(text: label, style: defaults.style.merge(style)),
-          textAlign: TextAlign.center,
-          textDirection: Directionality.of(context),
-          textScaler: scaler,
-          textHeightBehavior:
-              defaults.textHeightBehavior ??
-              DefaultTextHeightBehavior.maybeOf(context),
-        )..layout(maxWidth: constraints.maxWidth);
-        final lines = painter.computeLineMetrics();
-        final firstRange = painter.getLineBoundary(
-          const TextPosition(offset: 0),
-        );
-        final lastRange = painter.getLineBoundary(
-          TextPosition(offset: label.length, affinity: TextAffinity.upstream),
-        );
-        final first = bounds(label.substring(firstRange.start, firstRange.end));
-        final last = bounds(label.substring(lastRange.start, lastRange.end));
-        Widget result = text;
-        if (lines.isNotEmpty && first != null && last != null) {
-          final ratio = MediaQuery.devicePixelRatioOf(context);
-          final scale = scaler.scale(14) * ratio / 28;
-          // Line metrics can round leading differently from the painted baseline.
-          final baseline = painter.computeDistanceToActualBaseline(
-            TextBaseline.alphabetic,
-          );
-          final top = baseline * ratio + first.$1 * scale;
-          final bottom =
-              (baseline + lines.last.baseline - lines.first.baseline) * ratio +
-              last.$2 * scale;
-          result = _CenteredButtonInk(
-            top: top / ratio,
-            height: (bottom - top) / ratio,
-            pixelRatio: ratio,
-            child: text,
-          );
-        }
-        painter.dispose();
-        return result;
-      },
+    final first = bounds(label.substring(firstRange.start, firstRange.end));
+    final last = bounds(label.substring(lastRange.start, lastRange.end));
+    if (first == null || last == null) return;
+    final baseline = _painter.computeDistanceToActualBaseline(
+      TextBaseline.alphabetic,
     );
-  }
-}
-
-// Snap in screen coordinates: fractional paragraph and sheet origins matter.
-class _CenteredButtonInk extends SingleChildRenderObjectWidget {
-  const _CenteredButtonInk({
-    required this.top,
-    required this.height,
-    required this.pixelRatio,
-    required super.child,
-  });
-  final double top, height, pixelRatio;
-  @override
-  RenderObject createRenderObject(BuildContext context) =>
-      _RenderCenteredButtonInk(top, height, pixelRatio);
-  @override
-  void updateRenderObject(
-    BuildContext context,
-    _RenderCenteredButtonInk renderObject,
-  ) => renderObject.configure(top, height, pixelRatio);
-}
-
-class _RenderCenteredButtonInk extends RenderProxyBox {
-  _RenderCenteredButtonInk(this._top, this._height, this._pixelRatio);
-  double _top, _height, _pixelRatio;
-
-  void configure(double top, double height, double pixelRatio) {
-    if (top == _top && height == _height && pixelRatio == _pixelRatio) return;
-    _top = top;
-    _height = height;
-    _pixelRatio = pixelRatio;
-    markNeedsPaint();
-    markNeedsSemanticsUpdate();
+    // Native paragraph paint snaps each baseline before canvas scaling.
+    final top = baseline.roundToDouble() * _pixelRatio + first.$1 * _scale;
+    final bottom =
+        (baseline + lines.last.baseline - lines.first.baseline)
+                .roundToDouble() *
+            _pixelRatio +
+        last.$2 * _scale;
+    _top = top / _pixelRatio;
+    _height = (bottom - top) / _pixelRatio;
+    _centerInk = true;
   }
 
   // The independent renderer rounds exact half-pixels to the nearest even pixel.
@@ -528,6 +576,8 @@ class _RenderCenteredButtonInk extends RenderProxyBox {
   }
 
   Offset get _offset {
+    if (!_centerInk) return Offset.zero;
+    // Fractional paragraph and sheet origins must be rounded in screen space.
     final origin = localToGlobal(Offset.zero).dy;
     final target =
         roundPixel((origin + (size.height - _height) / 2) * _pixelRatio) /
@@ -554,6 +604,12 @@ class _RenderCenteredButtonInk extends RenderProxyBox {
         hitTest: (result, position) =>
             child!.hitTest(result, position: position),
       );
+
+  @override
+  void dispose() {
+    _painter.dispose();
+    super.dispose();
+  }
 }
 
 class _ButtonFace extends CustomPainter {

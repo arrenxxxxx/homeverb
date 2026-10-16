@@ -374,7 +374,10 @@ void main() {
         tester.getSize(find.byType(ChoiceTile)).height,
         closeTo(79.4, .001),
       );
-      final text = tester.getRect(find.text('Primary bedroom upstairs'));
+      // Check layout separately from the native glyph paint translation.
+      final text = tester.getRect(
+        find.widgetWithText(Copy, 'Primary bedroom upstairs'),
+      );
       final face = tester.getRect(find.byType(InkWell));
       expect(text.center.dy, closeTo(face.center.dy, .001));
       expect(tester.takeException(), isNull);

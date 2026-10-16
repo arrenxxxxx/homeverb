@@ -981,3 +981,58 @@ pointer clicks opened Add Platform and Back restored the original Devices page.
 Captures: `output/flutter-verification/android/label-release-home.png` and
 `label-release-platforms.png`; click evidence: `label-release-clicks.json`.
 No real account, appliance, physical phone or iOS execution was performed.
+
+## Shared control-text ink centering — October 16, 2026
+
+The font-derived centering now covers native control text as well as buttons:
+row labels/values, grouped headings, choices, tabs, freshness captions, skin
+labels and verification codes. The committed `text-ink-metrics.json` records
+independent bundled-font bounds for the eight used Regular/SemiBold variants
+from 10 to 32 points. `python3 apps/mobile/tool/generate_text_metrics.py`
+reproduces it; the four decorative button faces remain unchanged.
+
+The native paragraph snaps its painted alphabetic baseline in logical pixels
+before canvas scaling. Accounting for that step fixes the 10-point caption's
+one-pixel discrepancy without adding a per-font or per-screen pixel offset.
+The shared render wrapper measures after native layout and forwards intrinsic
+and dry sizing, preserving ChoiceChip and ActionChip behavior. Paint, semantics
+and hit testing use the same translation. Unknown glyphs, clipped text and
+system bold/spacing overrides retain native fallback behavior. No Core contract,
+reference image, screenshot tolerance or native operation semantics changed.
+
+All **81 Flutter tests** and static analysis passed. New raster checks compare
+ten labels across every bundled control style with independent visible bounds.
+The existing eight-button/four-origin pixel checks also pass. The full suite
+covers all 82 captures, 201 simulated branches, native Mock and account fixture
+interactions, narrow/large-text/high-contrast layouts and keyboard avoidance.
+An existing assertion now checks the unchanged native line-box layout separately
+from the new visible-glyph paint assertions.
+
+Strict comparison remains failed: **0/82 exact**, mean channel error
+**0.9358/255** (previously 1.2137). Sixty-nine states improve, 13 are unchanged,
+and none regress. Nine of C01-C10 improve; C03 remains unchanged. This does not
+resolve the earlier C03 body-text regression or establish complete screen parity.
+Remaining text rasterization, body-text origins and primitive/layout differences
+still require correction.
+
+Evidence: `output/flutter-verification/control-ink-comparison.json` and
+`control-ink-C01.png`, `control-ink-C04.png`, `control-ink-C05.png`,
+`control-ink-R01.png`, `control-ink-S10.png`, `control-ink-W02.png`.
+Logs: `/tmp/homeverb-control-targeted.log`, `/tmp/homeverb-control-tests-final.log`,
+`/tmp/homeverb-control-analyze-final.log` and `/tmp/homeverb-control-pixels.log`.
+
+The complete Android native Mock journey passed on API 35 x86_64 in 2m25s;
+text input, file picker and lifecycle transitions remain simulated. The ordinary
+APK rebuilt and passed 16 KiB ZIP alignment. Both Core binaries are unchanged
+from `f5b35c8`; packaged font metrics and button faces match source, and the
+obsolete button-only metric asset is absent.
+
+Native pointer clicks discovered Mock, opened its card, read target 26/cool/power
+off and opened Choose Mode. The device rows and selected/unselected labels were
+visually inspected in `output/flutter-verification/android/control-ink-release-device.png`
+and `control-ink-release-mode.png`. This inspection also exposed an existing
+sheet safe-area defect: part of Cancel overlaps the Android navigation area.
+That defect remains pending a separate layout correction; the successful test
+journey does not establish unobscured system-inset behavior. No complete Android
+capture archive was retained for this run. No real account, appliance, physical
+phone or iOS execution was performed.
