@@ -1,4 +1,5 @@
 import 'localization.dart';
+import 'credential_access.dart';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'controller.dart';
@@ -430,11 +431,13 @@ class AccountSignIn extends StatefulWidget {
     required this.onReload,
     required this.needsReload,
     required this.busy,
+    this.credentialAccess = const PlatformCredentialAccess(),
     super.key,
   });
   final Future<void> Function(Uint8List login, Uint8List password) onSubmit;
   final VoidCallback onCancel, onReload;
   final bool needsReload, busy;
+  final CredentialAccess credentialAccess;
   @override
   State<AccountSignIn> createState() => _AccountSignInState();
 }
@@ -443,10 +446,25 @@ class _AccountSignInState extends State<AccountSignIn>
     with WidgetsBindingObserver {
   final login = TextEditingController(), password = TextEditingController();
   String? error;
+  CredentialReadiness? readiness;
+  bool foreground = true, submitting = false;
+  int checkEpoch = 0;
+  bool get canEnter =>
+      readiness == CredentialReadiness.ready ||
+      readiness == CredentialReadiness.notApplicable;
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    checkReadiness();
+  }
+
+  Future<void> checkReadiness() async {
+    final epoch = ++checkEpoch;
+    setState(() => readiness = null);
+    final result = await widget.credentialAccess.check();
+    if (!mounted || !foreground || epoch != checkEpoch) return;
+    setState(() => readiness = result);
   }
 
   void clear() {
@@ -456,12 +474,20 @@ class _AccountSignInState extends State<AccountSignIn>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state != AppLifecycleState.resumed) clear();
+    foreground = state == AppLifecycleState.resumed;
+    if (!foreground) {
+      checkEpoch++;
+      clear();
+      setState(() => readiness = null);
+    } else {
+      checkReadiness();
+    }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    checkEpoch++;
     clear();
     login.dispose();
     password.dispose();
@@ -469,6 +495,12 @@ class _AccountSignInState extends State<AccountSignIn>
   }
 
   Future<void> submit() async {
+    if (!foreground ||
+        !canEnter ||
+        submitting ||
+        widget.busy ||
+        widget.needsReload)
+      return;
     if (!RegExp(r'^[\x21-\x7e]{1,256}$').hasMatch(login.text) ||
         !RegExp(r'^[\x20-\x7e]{1,256}$').hasMatch(password.text)) {
       setState(
@@ -480,12 +512,34 @@ class _AccountSignInState extends State<AccountSignIn>
     final loginBytes = Uint8List.fromList(login.text.codeUnits);
     final passwordBytes = Uint8List.fromList(password.text.codeUnits);
     clear();
-    setState(() => error = null);
+    final epoch = ++checkEpoch;
+    setState(() {
+      error = null;
+      submitting = true;
+    });
     try {
+      // Recheck immediately before dispatch; backgrounding invalidates this result.
+      final result = await widget.credentialAccess.check();
+      if (!mounted || !foreground || epoch != checkEpoch) return;
+      setState(() => readiness = result);
+      if (!canEnter) return;
       await widget.onSubmit(loginBytes, passwordBytes);
     } finally {
       loginBytes.fillRange(0, loginBytes.length, 0);
       passwordBytes.fillRange(0, passwordBytes.length, 0);
+      if (mounted) setState(() => submitting = false);
+    }
+  }
+
+  Future<void> openSecuritySettings() async {
+    clear();
+    final opened = await widget.credentialAccess.openSecuritySettings();
+    if (!mounted || !foreground) return;
+    if (!opened) {
+      setState(
+        () => error =
+            'Could not open Android security settings. Open them from the system Settings app.',
+      );
     }
   }
 
@@ -511,6 +565,7 @@ class _AccountSignInState extends State<AccountSignIn>
               valueListenable: controller,
               builder: (context, value, _) => TextField(
                 key: ValueKey('credential:$label'),
+                enabled: !widget.busy && !submitting,
                 controller: controller,
                 obscureText: secret,
                 autocorrect: false,
@@ -547,8 +602,31 @@ class _AccountSignInState extends State<AccountSignIn>
         color: muted,
       ),
       const SizedBox(height: 16),
-      field('Meiju account', login),
-      field('Password', password, secret: true),
+      if (canEnter) ...[
+        field('Meiju account', login),
+        field('Password', password, secret: true),
+      ] else ...[
+        Copy(switch (readiness) {
+          null => 'Checking Android credential protection…',
+          CredentialReadiness.screenLockRequired =>
+            'Set a screen-lock PIN, pattern or password in Android Settings, then unlock this device and return. HomeVerb cannot save authorization without a secure screen lock.',
+          CredentialReadiness.locked =>
+            'Unlock this device, then return to sign in.',
+          _ =>
+            'Android credential support is unavailable. Restart the app or install a matching native build before trying again.',
+        }),
+        if (readiness == CredentialReadiness.screenLockRequired)
+          ActionButton(
+            'Open Android Security Settings',
+            onPressed: openSecuritySettings,
+          ),
+        if (readiness != null)
+          ActionButton(
+            'Check Again',
+            style: 'secondary',
+            onPressed: checkReadiness,
+          ),
+      ],
       if (error != null) Copy(error!, color: const Color(0xff9e3421)),
       if (widget.busy)
         const Copy('Connecting and retrieving devices…')
@@ -557,8 +635,11 @@ class _AccountSignInState extends State<AccountSignIn>
           'Reload saved accounts before starting another connection. An interrupted sign-in may have saved authorization.',
         ),
         ActionButton('Reload Accounts', onPressed: widget.onReload),
-      ] else
-        ActionButton('Sign In and Retrieve Devices', onPressed: submit),
+      ] else if (canEnter)
+        ActionButton(
+          'Sign In and Retrieve Devices',
+          onPressed: submitting ? null : submit,
+        ),
       ActionButton('Cancel', style: 'secondary', onPressed: widget.onCancel),
     ],
   );

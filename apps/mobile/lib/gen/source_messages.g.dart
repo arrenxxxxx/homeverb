@@ -1557,6 +1557,18 @@ String? translateSource(
   ),
   "HOME" => t.mobileSectionHome,
   "PREFERENCES" => t.mobileSectionPreferences,
+  "Checking Android credential protection\u2026" =>
+    t.mobileCredentialProtectionChecking,
+  "Set a screen-lock PIN, pattern or password in Android Settings, then unlock this device and return. HomeVerb cannot save authorization without a secure screen lock." =>
+    t.mobileCredentialScreenLockRequired,
+  "Unlock this device, then return to sign in." =>
+    t.mobileCredentialDeviceLocked,
+  "Android credential support is unavailable. Restart the app or install a matching native build before trying again." =>
+    t.mobileCredentialBackendUnavailable,
+  "Open Android Security Settings" => t.mobileCredentialOpenSettings,
+  "Could not open Android security settings. Open them from the system Settings app." =>
+    t.mobileCredentialSettingsUnavailable,
+  "Check Again" => t.mobileCredentialCheckAgain,
   _ => null,
 };
 
@@ -3020,5 +3032,17 @@ String? sourceForKey(String key) => switch (key) {
   "mobile.valueStale_edf502" => "{value}{stale}",
   "mobile.sectionHome" => "HOME",
   "mobile.sectionPreferences" => "PREFERENCES",
+  "mobile.credentialProtectionChecking" =>
+    "Checking Android credential protection\u2026",
+  "mobile.credentialScreenLockRequired" =>
+    "Set a screen-lock PIN, pattern or password in Android Settings, then unlock this device and return. HomeVerb cannot save authorization without a secure screen lock.",
+  "mobile.credentialDeviceLocked" =>
+    "Unlock this device, then return to sign in.",
+  "mobile.credentialBackendUnavailable" =>
+    "Android credential support is unavailable. Restart the app or install a matching native build before trying again.",
+  "mobile.credentialOpenSettings" => "Open Android Security Settings",
+  "mobile.credentialSettingsUnavailable" =>
+    "Could not open Android security settings. Open them from the system Settings app.",
+  "mobile.credentialCheckAgain" => "Check Again",
   _ => null,
 };

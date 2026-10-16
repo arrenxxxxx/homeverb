@@ -1155,4 +1155,11 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String mobileValueStaleEdf502({required Object value, required Object stale}) => '${value}${stale}';
 	@override String get mobileSectionHome => '\u5bb6\u5ead';
 	@override String get mobileSectionPreferences => '\u504f\u597d\u8bbe\u7f6e';
+	@override String get mobileCredentialProtectionChecking => '\u6b63\u5728\u68c0\u67e5 Android \u51ed\u636e\u4fdd\u62a4\u2026';
+	@override String get mobileCredentialScreenLockRequired => '\u8bf7\u5728 Android \u8bbe\u7f6e\u4e2d\u8bbe\u7f6e\u9501\u5c4f PIN\u3001\u56fe\u6848\u6216\u5bc6\u7801\uff0c\u7136\u540e\u89e3\u9501\u8bbe\u5907\u5e76\u8fd4\u56de\u3002\u672a\u8bbe\u7f6e\u5b89\u5168\u9501\u5c4f\u65f6\uff0cHomeVerb \u65e0\u6cd5\u4fdd\u5b58\u6388\u6743\u3002';
+	@override String get mobileCredentialDeviceLocked => '\u8bf7\u5148\u89e3\u9501\u8bbe\u5907\uff0c\u518d\u8fd4\u56de\u767b\u5f55\u3002';
+	@override String get mobileCredentialBackendUnavailable => 'Android \u51ed\u636e\u5b58\u50a8\u652f\u6301\u4e0d\u53ef\u7528\u3002\u8bf7\u91cd\u542f\u5e94\u7528\u6216\u5b89\u88c5\u5339\u914d\u7684\u539f\u751f\u7248\u672c\u540e\u91cd\u8bd5\u3002';
+	@override String get mobileCredentialOpenSettings => '\u6253\u5f00 Android \u5b89\u5168\u8bbe\u7f6e';
+	@override String get mobileCredentialSettingsUnavailable => '\u65e0\u6cd5\u6253\u5f00 Android \u5b89\u5168\u8bbe\u7f6e\uff0c\u8bf7\u4ece\u7cfb\u7edf\u201c\u8bbe\u7f6e\u201d\u4e2d\u6253\u5f00\u3002';
+	@override String get mobileCredentialCheckAgain => '\u91cd\u65b0\u68c0\u67e5';
 }

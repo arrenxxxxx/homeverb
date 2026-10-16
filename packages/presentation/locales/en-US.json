@@ -1120,5 +1120,12 @@
   "mobile.lan": "LAN",
   "mobile.valueStale_edf502": "{value}{stale}",
   "mobile.sectionHome": "HOME",
-  "mobile.sectionPreferences": "PREFERENCES"
+  "mobile.sectionPreferences": "PREFERENCES",
+  "mobile.credentialProtectionChecking": "Checking Android credential protection…",
+  "mobile.credentialScreenLockRequired": "Set a screen-lock PIN, pattern or password in Android Settings, then unlock this device and return. HomeVerb cannot save authorization without a secure screen lock.",
+  "mobile.credentialDeviceLocked": "Unlock this device, then return to sign in.",
+  "mobile.credentialBackendUnavailable": "Android credential support is unavailable. Restart the app or install a matching native build before trying again.",
+  "mobile.credentialOpenSettings": "Open Android Security Settings",
+  "mobile.credentialSettingsUnavailable": "Could not open Android security settings. Open them from the system Settings app.",
+  "mobile.credentialCheckAgain": "Check Again"
 }

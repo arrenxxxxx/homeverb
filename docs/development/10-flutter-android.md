@@ -139,3 +139,19 @@ After changing shared catalogs, regenerate using the
 [internationalization guide](../../apps/mobile/README.md#internationalization)
 before building. Verify both language directions and a cold start on the target
 Android environment; host widget tests alone do not prove packaged font rendering.
+
+
+## Prepare protected account storage
+
+Before real sign-in, configure a PIN, pattern or password in the Android system
+security settings and leave the device unlocked. The production credential backend
+refuses an unsecured device with SECRET_STORE_UNAVAILABLE. The Flutter sign-in
+page now distinguishes this prerequisite from unavailable startup registration
+and a locked device, with a direct system-settings action. Credentials and the
+screen-lock secret must be entered only in their respective device UIs.
+
+The local preflight has a three-second deadline and runs on page entry, foreground
+return and explicit submission. It returns only fixed readiness labels; no key,
+credential, identifier or exception text crosses the channel. It is not Keystore
+read/write acceptance or provider authentication evidence. Continue to use Core's
+actual error and retained account outcome if the following operation fails.

@@ -1792,3 +1792,14 @@ remain literal. Known errors use localized catalog explanations; unknown errors
 retain the code with a generic localized explanation, never raw provider text.
 See the [verification record](../apps/mobile/verification.md) for actual checks and
 remaining provider/physical acceptance limits.
+
+
+## Android sign-in readiness
+
+The trusted Android host exposes a local Flutter-only metadata check for native
+credential-backend installation and secure/unlocked screen state, plus an explicit
+system-security-settings action. It does not add Core methods, change native API
+1.22, SQLite 5 or protected payload 3, or relax Android credential policy. Missing
+or invalid channel replies and bounded timeouts fail closed. Foreground return
+rechecks the flags; pending checks cannot dispatch login after navigation or
+backgrounding. Non-Android storage semantics remain in Core.

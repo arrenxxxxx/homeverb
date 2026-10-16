@@ -1120,5 +1120,12 @@
   "mobile.lan": "局域网",
   "mobile.valueStale_edf502": "{value}{stale}",
   "mobile.sectionHome": "家庭",
-  "mobile.sectionPreferences": "偏好设置"
+  "mobile.sectionPreferences": "偏好设置",
+  "mobile.credentialProtectionChecking": "正在检查 Android 凭据保护…",
+  "mobile.credentialScreenLockRequired": "请在 Android 设置中设置锁屏 PIN、图案或密码，然后解锁设备并返回。未设置安全锁屏时，HomeVerb 无法保存授权。",
+  "mobile.credentialDeviceLocked": "请先解锁设备，再返回登录。",
+  "mobile.credentialBackendUnavailable": "Android 凭据存储支持不可用。请重启应用或安装匹配的原生版本后重试。",
+  "mobile.credentialOpenSettings": "打开 Android 安全设置",
+  "mobile.credentialSettingsUnavailable": "无法打开 Android 安全设置，请从系统“设置”中打开。",
+  "mobile.credentialCheckAgain": "重新检查"
 }

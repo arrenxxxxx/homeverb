@@ -1,7 +1,9 @@
 package dev.homeverb.homeverb_mobile
 
 import android.app.Activity
+import android.app.KeyguardManager
 import android.content.Intent
+import android.provider.Settings
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -9,11 +11,43 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity : FlutterActivity() {
     private val exportRequest = 5821
     private var documents: MethodChannel? = null
+    private var credentialAccess: MethodChannel? = null
     private var pendingResult: MethodChannel.Result? = null
     private var pendingText: String? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        credentialAccess = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "dev.homeverb/credential_access")
+        credentialAccess?.setMethodCallHandler { call, result ->
+            when (call.method) {
+                "check" -> {
+                    // Metadata only. Core still checks the store on every operation.
+                    val status = try {
+                        val keyguard = getSystemService(KEYGUARD_SERVICE) as? KeyguardManager
+                        when {
+                            (application as? HomeVerbApplication)?.credentialBackendInstalled != true -> "unavailable"
+                            keyguard == null -> "unavailable"
+                            !keyguard.isDeviceSecure -> "screen_lock_required"
+                            keyguard.isDeviceLocked -> "locked"
+                            else -> "ready"
+                        }
+                    } catch (_: RuntimeException) {
+                        "unavailable"
+                    }
+                    result.success(status)
+                }
+                "openSecuritySettings" -> {
+                    val opened = try {
+                        startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
+                        true
+                    } catch (_: RuntimeException) {
+                        false
+                    }
+                    result.success(opened)
+                }
+                else -> result.notImplemented()
+            }
+        }
         documents = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "dev.homeverb/document_export")
         documents?.setMethodCallHandler { call, result ->
             if (call.method != "saveDiagnostics") {
@@ -85,6 +119,7 @@ class MainActivity : FlutterActivity() {
     }
 
     override fun onDestroy() {
+        credentialAccess?.setMethodCallHandler(null)
         documents?.setMethodCallHandler(null)
         pendingResult?.error("EXPORT_INTERRUPTED", "The document export was interrupted.", null)
         pendingResult = null

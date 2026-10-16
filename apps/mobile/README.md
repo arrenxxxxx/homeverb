@@ -37,6 +37,16 @@ This does not guarantee erasure of keyboard, OS or managed-string copies. Locked
 unavailable system storage is an error, never a plaintext fallback. Account connection supplies no write grants; exact session controls require the
 separate trusted permission review described below.
 
+On Android, the sign-in page first checks trusted startup registration and the
+system's secure-screen-lock/unlocked flags through a bounded local method channel.
+A missing PIN/pattern/password shows Open Android Security Settings before any
+credential fields. Returning to the foreground rechecks; submission checks again
+before calling Core. Backgrounding clears fields and invalidates late checks.
+These checks do not read credentials, open the Keystore, contact a provider or
+prove that later storage will succeed. Core still validates every operation.
+A missing backend, malformed reply or three-second timeout fails closed; there
+is no insecure storage fallback. Other platforms retain their Core storage checks.
+
 Account details offer explicit Inspect Saved Inventory when Core advertises the
 method. It reads only the selected account's protected local bindings, distinguishes
 listed/not-listed/unconfirmed membership, and joins a card only when both device

@@ -3401,4 +3401,25 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'PREFERENCES'
 	String get mobileSectionPreferences => 'PREFERENCES';
+
+	/// en-US: 'Checking Android credential protection\u2026'
+	String get mobileCredentialProtectionChecking => 'Checking Android credential protection\u2026';
+
+	/// en-US: 'Set a screen-lock PIN, pattern or password in Android Settings, then unlock this device and return. HomeVerb cannot save authorization without a secure screen lock.'
+	String get mobileCredentialScreenLockRequired => 'Set a screen-lock PIN, pattern or password in Android Settings, then unlock this device and return. HomeVerb cannot save authorization without a secure screen lock.';
+
+	/// en-US: 'Unlock this device, then return to sign in.'
+	String get mobileCredentialDeviceLocked => 'Unlock this device, then return to sign in.';
+
+	/// en-US: 'Android credential support is unavailable. Restart the app or install a matching native build before trying again.'
+	String get mobileCredentialBackendUnavailable => 'Android credential support is unavailable. Restart the app or install a matching native build before trying again.';
+
+	/// en-US: 'Open Android Security Settings'
+	String get mobileCredentialOpenSettings => 'Open Android Security Settings';
+
+	/// en-US: 'Could not open Android security settings. Open them from the system Settings app.'
+	String get mobileCredentialSettingsUnavailable => 'Could not open Android security settings. Open them from the system Settings app.';
+
+	/// en-US: 'Check Again'
+	String get mobileCredentialCheckAgain => 'Check Again';
 }

@@ -105,5 +105,8 @@ See the [verification scope](../apps/mobile/verification.md#flutter-session-cont
 Real-account login and physical AC control acceptance for this app remain pending.
 The Flutter app now uses slang for en-US/zh-CN with a persisted Settings > Language
 choice and system fallback. See the [internationalization guide](../apps/mobile/README.md#internationalization).
-The current emulator sign-in attempt is blocked by `SECRET_STORE_UNAVAILABLE`;
-this is not evidence of invalid provider credentials or successful AC control.
+The previous emulator sign-in returned `SECRET_STORE_UNAVAILABLE` with no secure
+screen lock configured. The owner has now configured the emulator lock, and the
+system reports secure/unlocked state. Flutter now checks that prerequisite before
+credential entry and submission. Real login/storage and AC control still require
+fresh acceptance; readiness alone is not provider or Keystore success.

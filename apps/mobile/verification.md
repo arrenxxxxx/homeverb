@@ -1533,3 +1533,33 @@ Real provider login remains blocked by the earlier `SECRET_STORE_UNAVAILABLE`
 attempt, which was not retried during this localization-first phase. No real-device
 write, physical-phone acceptance or remote push is claimed. Core API 1.22, SQLite 5,
 protected payload 3 and read-only startup authority remain unchanged.
+
+
+## Android credential-readiness correction
+
+Read-only Android system inspection found `secure=false` on the control emulator,
+matching the production backend's deliberate unsecured-device refusal. After the
+owner configured the lock directly in Android Settings, the system reported
+`secure=true`, `showing=false` and `inputRestricted=false`. No screen-lock secret
+was read or stored in the project.
+
+Trusted Application startup now retains the backend-install result. A local
+Flutter method channel exposes only that result and secure/unlocked metadata,
+with an explicit system-security-settings action. The sign-in page hides credential
+fields until this preflight passes, rechecks before submission and after foreground
+return, and invalidates late checks on background/disposal. Calls have a three-second
+deadline. Fields clear before dispatch/backgrounding, temporary buffers clear after
+completion, and missing/invalid/rejected replies fail closed. Core remains the
+actual authority for Keystore and provider operations; this metadata check neither
+opens stored credentials nor changes any grant or error contract.
+
+Executed checks: 17 focused Flutter credential/account/localization tests passed,
+including unsecured-device gating, changed protection before dispatch, background
+races, field clearing and zeroed temporary buffers. Flutter analysis passed;
+seven shared presentation tests, documentation/repository validators and contract
+fixtures passed. The dual-ABI release APK compiled successfully with the existing
+persistent development signature. The first regression run exposed an old test's
+assumption that backgrounded credential fields stay mounted; the updated assertion
+checks both retained controllers are empty and fields are absent until rechecking.
+No Core/Rust change or real provider write occurred in this correction phase.
+Actual APK installation/channel and real-login results are recorded separately.
