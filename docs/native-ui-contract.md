@@ -201,6 +201,11 @@ vendor calls. The [Android native package](development/08-android-native.md) sup
 Keystore integration, a library build path and isolated AOSP Android 15 acceptance.
 Flutter APK/physical-phone journeys and iOS acceptance remain pending.
 
+The [iOS Keychain backend](development/09-ios-native.md) uses the same protected
+account functions without an additional initializer. Its native build must supply
+the signed application's private access group. Native API 1.20 alone does not prove
+that configuration, signed framework packaging or Keychain/phone acceptance.
+
 The separate [AC developer probe](development/07-meiju-control.md) can persist
 experimental writable descriptors in a shared profile. Metadata is not authority:
 a default native host has no Meiju write grants and its adapter refuses controls.

@@ -30,6 +30,28 @@ jobs:
           python scripts/verify_native_contract.py
       - name: Verify localization
         run: node packages/presentation/test/i18n.test.mjs
+  ios-native:
+    runs-on: macos-15
+    timeout-minutes: 30
+    env:
+      RUSTUP_TOOLCHAIN: '1.96.0'
+      IPHONEOS_DEPLOYMENT_TARGET: '13.0'
+      # Fictional build scope: no signing, Keychain calls or account access.
+      HOMEVERB_IOS_KEYCHAIN_ACCESS_GROUP: 'SYNTHETIC.org.homeverb.test'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install the tested Rust targets
+        run: |
+          rustup toolchain install 1.96.0 --profile minimal --component clippy --target aarch64-apple-ios --target aarch64-apple-ios-sim
+          cargo fetch --locked
+      - name: Test Keychain orchestration and Core Foundation query objects
+        run: cargo test -p homeverb-secrets --offline --locked ios::
+      - name: Check and link the iOS native library
+        run: |
+          for target in aarch64-apple-ios aarch64-apple-ios-sim; do
+            cargo clippy -p homeverb-secrets --target "$target" --offline --locked -- -D warnings
+            cargo build -p homeverb-ffi --target "$target" --offline --locked
+          done
   android-native:
     runs-on: ubuntu-24.04
     timeout-minutes: 30

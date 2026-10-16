@@ -5,7 +5,7 @@ apps/cli/                  # One-shot CLI and local MCP host with explicit start
 crates/domain/             # Versioned DTOs and action-schema validation
 crates/core/               # Local organization, policy, routing, execution, verification
 crates/storage/            # SQLite metadata/journal, migration, retention, and device locks
-crates/secret-store/       # Linux Secret Service and Android JNI credential backends
+crates/secret-store/       # Linux Secret Service, Android JNI and iOS Keychain credential backends
 crates/mock/               # Persistent fictional appliance and fault scenarios
 crates/midea/              # Meiju account/cloud protocols, protected bindings and scoped controls
 crates/host/               # Composition root and foreground session contract

@@ -119,6 +119,21 @@ not evidence that remote CI ran; inspect the exact commit's job results.
 
 JSON Schema validation uses `jsonschema` 0.45.1 or a compatible patch, with default network-resolution features disabled and the resolved version in `Cargo.lock`. This version includes the [upstream correction for negative `multipleOf` values](https://github.com/Stranger6667/jsonschema/blob/master/CHANGELOG.md). Regression coverage exercises negative fractional temperatures through device constraints, trusted grants, writes, and live/cached observations.
 
+## iOS credential backend checks
+
+`cargo test -p homeverb-secrets --offline --locked ios::` runs portable tests for
+explicit namespaces, missing/duplicate/foreign/protection refusal, exact add/read/
+replace/delete, copy bounds, OS error mapping, pre-dispatch cancellation/deadlines
+and uncertain dispatched mutations without retry. On macOS, the same command also
+runs three production Core Foundation query/result tests with fictional objects;
+it does not access Keychain. Linux cannot execute those framework-object tests.
+
+The `ios-native` CI job checks both arm64 device/simulator targets and links
+`homeverb-ffi` using Apple's SDKs and a fictional access-group build value. This
+is not signed packaging or a Keychain/app runtime test. Follow the
+[iOS guide](development/09-ios-native.md) for explicit configuration and the
+remaining passcode/lock, lifetime, reinstall, backup and Flutter/iPhone gates.
+
 ## Linux Secret Service probe
 
 This opt-in integration test needs an existing unlocked default Secret Service collection and permission to access the user's D-Bus. It creates only synthetic bytes under fresh HomeVerb namespaces, checks replacement and isolation across instances/profiles, deletes those entries, verifies absence, and checks bounded socket cleanup. It does not enumerate or read existing account secrets. Default `cargo test` ignores it.

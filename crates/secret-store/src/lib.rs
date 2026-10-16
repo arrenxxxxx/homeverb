@@ -11,9 +11,12 @@ mod linux;
 #[cfg(any(target_os = "android", test))]
 pub mod android;
 
+#[cfg(any(target_os = "ios", test))]
+mod ios;
+
 /// Construction performs no I/O. The trusted host must persist its random profile namespace.
 pub struct SystemSecretStore {
-    #[cfg(any(target_os = "linux", target_os = "android"))]
+    #[cfg(any(target_os = "linux", target_os = "android", target_os = "ios"))]
     profile: Uuid,
 }
 
@@ -23,7 +26,7 @@ impl SystemSecretStore {
             return Err(Error::invalid());
         }
         Ok(Self {
-            #[cfg(any(target_os = "linux", target_os = "android"))]
+            #[cfg(any(target_os = "linux", target_os = "android", target_os = "ios"))]
             profile,
         })
     }
@@ -45,7 +48,11 @@ impl SecretStore for SystemSecretStore {
         {
             android::perform(self.profile, reference, android::Request::Get, operation).await
         }
-        #[cfg(not(any(target_os = "linux", target_os = "android")))]
+        #[cfg(target_os = "ios")]
+        {
+            ios::perform(self.profile, reference, ios::Request::Get, operation).await
+        }
+        #[cfg(not(any(target_os = "linux", target_os = "android", target_os = "ios")))]
         {
             homeverb_core::UnavailableSecretStore
                 .get(reference, operation)
@@ -76,7 +83,18 @@ impl SecretStore for SystemSecretStore {
             .await
             .map(|_| ())
         }
-        #[cfg(not(any(target_os = "linux", target_os = "android")))]
+        #[cfg(target_os = "ios")]
+        {
+            ios::perform(
+                self.profile,
+                reference,
+                ios::Request::Put(secret),
+                operation,
+            )
+            .await
+            .map(|_| ())
+        }
+        #[cfg(not(any(target_os = "linux", target_os = "android", target_os = "ios")))]
         {
             homeverb_core::UnavailableSecretStore
                 .put(reference, secret, operation)
@@ -97,7 +115,13 @@ impl SecretStore for SystemSecretStore {
                 .await
                 .map(|_| ())
         }
-        #[cfg(not(any(target_os = "linux", target_os = "android")))]
+        #[cfg(target_os = "ios")]
+        {
+            ios::perform(self.profile, reference, ios::Request::Delete, operation)
+                .await
+                .map(|_| ())
+        }
+        #[cfg(not(any(target_os = "linux", target_os = "android", target_os = "ios")))]
         {
             homeverb_core::UnavailableSecretStore
                 .delete(reference, operation)

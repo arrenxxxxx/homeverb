@@ -1,0 +1,454 @@
+//! Minimal Security/Core Foundation boundary. Owned results never escape a call.
+
+use super::*;
+use core_foundation_sys::{
+    array::{CFArrayGetCount, CFArrayGetTypeID, CFArrayGetValueAtIndex},
+    base::{CFEqual, CFGetTypeID, CFRelease, CFTypeRef},
+    data::{CFDataCreate, CFDataGetBytePtr, CFDataGetLength, CFDataGetTypeID},
+    dictionary::{
+        CFDictionaryCreateMutable, CFDictionaryGetTypeID, CFDictionaryGetValue, CFDictionaryRef,
+        CFDictionarySetValue, kCFTypeDictionaryKeyCallBacks, kCFTypeDictionaryValueCallBacks,
+    },
+    number::{CFNumberCreate, kCFBooleanFalse, kCFBooleanTrue, kCFNumberSInt32Type},
+    string::{CFStringCreateWithBytes, CFStringRef, kCFStringEncodingUTF8},
+};
+use std::ptr;
+
+#[link(name = "Security", kind = "framework")]
+unsafe extern "C" {
+    fn SecItemCopyMatching(query: CFDictionaryRef, result: *mut CFTypeRef) -> i32;
+    fn SecItemAdd(attributes: CFDictionaryRef, result: *mut CFTypeRef) -> i32;
+    fn SecItemUpdate(query: CFDictionaryRef, attributes: CFDictionaryRef) -> i32;
+    fn SecItemDelete(query: CFDictionaryRef) -> i32;
+    static kSecClass: CFStringRef;
+    static kSecClassGenericPassword: CFStringRef;
+    static kSecAttrService: CFStringRef;
+    static kSecAttrAccount: CFStringRef;
+    static kSecAttrAccessGroup: CFStringRef;
+    static kSecAttrAccessible: CFStringRef;
+    static kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly: CFStringRef;
+    static kSecAttrSynchronizable: CFStringRef;
+    static kSecAttrSynchronizableAny: CFStringRef;
+    static kSecAttrAccessControl: CFStringRef;
+    static kSecMatchLimit: CFStringRef;
+    static kSecMatchLimitOne: CFStringRef;
+    static kSecReturnAttributes: CFStringRef;
+    static kSecReturnPersistentRef: CFStringRef;
+    static kSecReturnData: CFStringRef;
+    static kSecValuePersistentRef: CFStringRef;
+    static kSecValueData: CFStringRef;
+    static kSecUseAuthenticationUI: CFStringRef;
+    static kSecUseAuthenticationUIFail: CFStringRef;
+}
+
+const NOT_FOUND: i32 = -25300;
+
+struct Owned(CFTypeRef);
+
+impl Owned {
+    // Only +1 references from Create/Copy functions may enter this wrapper.
+    fn new(value: CFTypeRef) -> Result<Self> {
+        if value.is_null() {
+            Err(unavailable())
+        } else {
+            Ok(Self(value))
+        }
+    }
+}
+
+impl Drop for Owned {
+    fn drop(&mut self) {
+        // SAFETY: this wrapper owns one nonnull Create/Copy reference.
+        unsafe { CFRelease(self.0) }
+    }
+}
+
+fn string(value: &str) -> Result<Owned> {
+    // SAFETY: Rust bytes remain valid for this copying constructor.
+    unsafe {
+        Owned::new(
+            CFStringCreateWithBytes(
+                ptr::null(),
+                value.as_ptr(),
+                value.len() as isize,
+                kCFStringEncodingUTF8,
+                0,
+            )
+            .cast(),
+        )
+    }
+}
+
+fn data(value: &[u8]) -> Result<Owned> {
+    // SAFETY: bounded input is copied during this call, not retained by pointer.
+    unsafe { Owned::new(CFDataCreate(ptr::null(), value.as_ptr(), value.len() as isize).cast()) }
+}
+
+fn dictionary() -> Result<Owned> {
+    // SAFETY: the standard CF callbacks retain every inserted key and value.
+    unsafe {
+        Owned::new(
+            CFDictionaryCreateMutable(
+                ptr::null(),
+                0,
+                &kCFTypeDictionaryKeyCallBacks,
+                &kCFTypeDictionaryValueCallBacks,
+            )
+            .cast(),
+        )
+    }
+}
+
+// SAFETY requirements for the following helpers: pointers are borrowed from a
+// live CF result or a declared framework constant; dictionary types are checked
+// before reading attributes. Created dictionaries are mutable until dispatch.
+unsafe fn set(dict: &Owned, key: CFStringRef, value: CFTypeRef) {
+    unsafe { CFDictionarySetValue(dict.0.cast_mut().cast(), key.cast(), value) }
+}
+
+unsafe fn attribute(dict: CFTypeRef, key: CFStringRef) -> CFTypeRef {
+    unsafe { CFDictionaryGetValue(dict.cast(), key.cast()) }
+}
+
+unsafe fn equal(left: CFTypeRef, right: CFTypeRef) -> bool {
+    !left.is_null() && !right.is_null() && unsafe { CFEqual(left, right) != 0 }
+}
+
+unsafe fn copy_data(value: CFTypeRef, limit: usize) -> Result<SecretBytes> {
+    unsafe {
+        if value.is_null() || CFGetTypeID(value) != CFDataGetTypeID() {
+            return Err(unavailable());
+        }
+        let length = CFDataGetLength(value.cast());
+        if length < 0 || length as usize > limit {
+            return Err(unavailable());
+        }
+        if length == 0 {
+            return Ok(SecretBytes::new(Vec::new()));
+        }
+        let bytes = CFDataGetBytePtr(value.cast());
+        if bytes.is_null() {
+            return Err(unavailable());
+        }
+        Ok(SecretBytes::new(
+            std::slice::from_raw_parts(bytes, length as usize).to_vec(),
+        ))
+    }
+}
+
+fn query(scope: &Scope) -> Result<Owned> {
+    let dict = dictionary()?;
+    let service = string(&scope.service)?;
+    let account = string(&scope.account)?;
+    let group = string(&scope.access_group)?;
+    // SAFETY: all values live through insertion and are retained by the dictionary.
+    unsafe {
+        set(&dict, kSecClass, kSecClassGenericPassword.cast());
+        set(&dict, kSecAttrService, service.0);
+        set(&dict, kSecAttrAccount, account.0);
+        set(&dict, kSecAttrAccessGroup, group.0);
+        // Deliberate deprecated fail-without-prompt policy; see ADR-0062.
+        set(
+            &dict,
+            kSecUseAuthenticationUI,
+            kSecUseAuthenticationUIFail.cast(),
+        );
+    }
+    Ok(dict)
+}
+
+fn protected_query(scope: &Scope, entry: Option<&Entry>) -> Result<Owned> {
+    let dict = query(scope)?;
+    // SAFETY: the dictionary retains these declared constants and copied data.
+    unsafe {
+        set(&dict, kSecAttrSynchronizable, kCFBooleanFalse.cast());
+        set(
+            &dict,
+            kSecAttrAccessible,
+            kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly.cast(),
+        );
+        if let Some(entry) = entry {
+            entry.validate()?;
+            let reference = data(entry.persistent_ref.expose())?;
+            set(&dict, kSecValuePersistentRef, reference.0);
+        }
+    }
+    Ok(dict)
+}
+
+fn search(query: &Owned) -> Result<Option<Owned>> {
+    let mut output = ptr::null();
+    // SAFETY: query is a valid CF dictionary; output receives a +1 reference.
+    let status = unsafe { SecItemCopyMatching(query.0.cast(), &mut output) };
+    let output = if output.is_null() {
+        None
+    } else {
+        Some(Owned(output))
+    };
+    match status {
+        0 => output.map(Some).ok_or_else(unavailable),
+        NOT_FOUND => Ok(None),
+        _ => Err(status_error(status)),
+    }
+}
+
+unsafe fn decode_entry(value: CFTypeRef, scope: &Scope) -> Result<Entry> {
+    unsafe {
+        if value.is_null() || CFGetTypeID(value) != CFDictionaryGetTypeID() {
+            return Err(unavailable());
+        }
+        let service = string(&scope.service)?;
+        let account = string(&scope.account)?;
+        let group = string(&scope.access_group)?;
+        let sync = attribute(value, kSecAttrSynchronizable);
+        if !equal(sync, kCFBooleanTrue.cast()) && !equal(sync, kCFBooleanFalse.cast()) {
+            return Err(unavailable());
+        }
+        Ok(Entry {
+            matches_scope: equal(attribute(value, kSecAttrService), service.0)
+                && equal(attribute(value, kSecAttrAccount), account.0)
+                && equal(attribute(value, kSecAttrAccessGroup), group.0),
+            passcode_only: equal(
+                attribute(value, kSecAttrAccessible),
+                kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly.cast(),
+            ),
+            synchronizable: equal(sync, kCFBooleanTrue.cast()),
+            access_control: !attribute(value, kSecAttrAccessControl).is_null(),
+            persistent_ref: copy_data(attribute(value, kSecValuePersistentRef), MAX_REFERENCE)?,
+        })
+    }
+}
+
+unsafe fn decode_secret(value: CFTypeRef, scope: &Scope, expected: &Entry) -> Result<SecretBytes> {
+    unsafe {
+        let observed = decode_entry(value, scope)?;
+        observed.validate()?;
+        if observed.persistent_ref.expose() != expected.persistent_ref.expose() {
+            return Err(unavailable());
+        }
+        copy_data(attribute(value, kSecValueData), MAX_BYTES)
+    }
+}
+
+pub(super) struct Keychain;
+
+impl Backend for Keychain {
+    fn find(&mut self, scope: &Scope) -> Result<Vec<Entry>> {
+        let query = query(scope)?;
+        // SAFETY: the result of this metadata-only, limit-two search is an array.
+        unsafe {
+            let limit: i32 = 2;
+            let limit = Owned::new(
+                CFNumberCreate(
+                    ptr::null(),
+                    kCFNumberSInt32Type,
+                    (&limit as *const i32).cast(),
+                )
+                .cast(),
+            )?;
+            set(&query, kSecMatchLimit, limit.0);
+            set(
+                &query,
+                kSecAttrSynchronizable,
+                kSecAttrSynchronizableAny.cast(),
+            );
+            set(&query, kSecReturnAttributes, kCFBooleanTrue.cast());
+            set(&query, kSecReturnPersistentRef, kCFBooleanTrue.cast());
+            let Some(output) = search(&query)? else {
+                return Ok(Vec::new());
+            };
+            if CFGetTypeID(output.0) != CFArrayGetTypeID() {
+                return Err(unavailable());
+            }
+            match CFArrayGetCount(output.0.cast()) {
+                1 => Ok(vec![decode_entry(
+                    CFArrayGetValueAtIndex(output.0.cast(), 0),
+                    scope,
+                )?]),
+                2.. => Err(conflict()),
+                _ => Err(unavailable()),
+            }
+        }
+    }
+
+    fn read(&mut self, scope: &Scope, entry: &Entry) -> Result<Option<SecretBytes>> {
+        let query = protected_query(scope, Some(entry))?;
+        // SAFETY: this exact one-item result requests attributes and data together.
+        unsafe {
+            set(&query, kSecMatchLimit, kSecMatchLimitOne.cast());
+            set(&query, kSecReturnAttributes, kCFBooleanTrue.cast());
+            set(&query, kSecReturnPersistentRef, kCFBooleanTrue.cast());
+            set(&query, kSecReturnData, kCFBooleanTrue.cast());
+            let Some(output) = search(&query)? else {
+                return Ok(None);
+            };
+            Ok(Some(decode_secret(output.0, scope, entry)?))
+        }
+    }
+
+    fn change(
+        &mut self,
+        scope: &Scope,
+        change: Change<'_>,
+        operation: &Operation,
+        dispatched: &mut bool,
+    ) -> Result<()> {
+        let entry = match &change {
+            Change::Add(_) => None,
+            Change::Update(entry, _) | Change::Delete(entry) => Some(*entry),
+        };
+        let query = protected_query(scope, entry)?;
+        let update = dictionary()?;
+        // SAFETY: prepare all objects before marking dispatch; OS calls retain no
+        // borrowed Rust data. Update/delete queries contain no return-result keys.
+        unsafe {
+            if let Change::Add(secret) | Change::Update(_, secret) = &change {
+                let bytes = data(secret.expose())?;
+                let target = if matches!(&change, Change::Add(_)) {
+                    &query
+                } else {
+                    &update
+                };
+                set(target, kSecValueData, bytes.0);
+            }
+            before_dispatch(operation)?;
+            *dispatched = true;
+            let status = match change {
+                Change::Add(_) => SecItemAdd(query.0.cast(), ptr::null_mut()),
+                Change::Update(_, _) => SecItemUpdate(query.0.cast(), update.0.cast()),
+                Change::Delete(_) => SecItemDelete(query.0.cast()),
+            };
+            if status == 0 || (status == NOT_FOUND && matches!(change, Change::Delete(_))) {
+                Ok(())
+            } else {
+                Err(status_error(status))
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn scope() -> Scope {
+        Scope::new(
+            Uuid::new_v4(),
+            &CredentialRef::new(),
+            Some("SYNTHETIC.org.homeverb.test"),
+        )
+        .unwrap()
+    }
+
+    fn entry() -> Entry {
+        Entry {
+            matches_scope: true,
+            passcode_only: true,
+            synchronizable: false,
+            access_control: false,
+            persistent_ref: SecretBytes::new(vec![3, 1, 4]),
+        }
+    }
+
+    #[test]
+    fn real_cf_queries_preserve_explicit_scope_protection_and_no_prompt_policy() {
+        // Construct the real backend vtable without invoking Security services.
+        let _: &mut dyn Backend = &mut Keychain;
+        let scope = scope();
+        let expected = entry();
+        let query = protected_query(&scope, Some(&expected)).unwrap();
+        // SAFETY: these are live dictionaries/constants made by production constructors.
+        unsafe {
+            for (key, text) in [
+                (kSecAttrService, &scope.service),
+                (kSecAttrAccount, &scope.account),
+                (kSecAttrAccessGroup, &scope.access_group),
+            ] {
+                let text = string(text).unwrap();
+                assert!(equal(attribute(query.0, key), text.0));
+            }
+            assert!(equal(
+                attribute(query.0, kSecClass),
+                kSecClassGenericPassword.cast()
+            ));
+            assert!(equal(
+                attribute(query.0, kSecAttrAccessible),
+                kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly.cast()
+            ));
+            assert!(equal(
+                attribute(query.0, kSecAttrSynchronizable),
+                kCFBooleanFalse.cast()
+            ));
+            assert!(equal(
+                attribute(query.0, kSecUseAuthenticationUI),
+                kSecUseAuthenticationUIFail.cast()
+            ));
+            assert_eq!(
+                copy_data(attribute(query.0, kSecValuePersistentRef), MAX_REFERENCE)
+                    .unwrap()
+                    .expose(),
+                expected.persistent_ref.expose()
+            );
+            for key in [
+                kSecReturnData,
+                kSecReturnAttributes,
+                kSecReturnPersistentRef,
+                kSecValueData,
+            ] {
+                assert!(attribute(query.0, key).is_null());
+            }
+        }
+    }
+
+    #[test]
+    fn real_cf_results_reject_wrong_types_foreign_scope_and_changed_references() {
+        let scope = scope();
+        let expected = entry();
+        let output = protected_query(&scope, Some(&expected)).unwrap();
+        let secret = data(&[0, 128, 255]).unwrap();
+        // SAFETY: synthetic CF results exercise production type checks, not the OS store.
+        unsafe {
+            set(&output, kSecValueData, secret.0);
+            assert_eq!(
+                decode_secret(output.0, &scope, &expected).unwrap().expose(),
+                &[0, 128, 255]
+            );
+            assert!(decode_secret(kCFBooleanFalse.cast(), &scope, &expected).is_err());
+            assert!(decode_secret(ptr::null(), &scope, &expected).is_err());
+            for key in [
+                kSecAttrService,
+                kSecAttrAccount,
+                kSecAttrAccessGroup,
+                kSecAttrAccessible,
+                kSecAttrSynchronizable,
+                kSecValuePersistentRef,
+                kSecValueData,
+            ] {
+                let malformed = protected_query(&scope, Some(&expected)).unwrap();
+                set(&malformed, kSecValueData, secret.0);
+                set(&malformed, key, kCFBooleanTrue.cast());
+                assert!(decode_secret(malformed.0, &scope, &expected).is_err());
+            }
+            let other_ref = data(&[2, 7, 1]).unwrap();
+            set(&output, kSecValuePersistentRef, other_ref.0);
+            assert!(decode_secret(output.0, &scope, &expected).is_err());
+        }
+    }
+
+    #[test]
+    fn real_cf_data_obeys_copy_limits_and_refuses_access_control_objects() {
+        let scope = scope();
+        let expected = entry();
+        let output = protected_query(&scope, Some(&expected)).unwrap();
+        // SAFETY: no borrowed pointer outlives its retained synthetic CF object.
+        unsafe {
+            let empty = data(&[]).unwrap();
+            assert!(copy_data(empty.0, MAX_BYTES).unwrap().expose().is_empty());
+            let oversized = data(&vec![7; MAX_BYTES + 1]).unwrap();
+            assert!(copy_data(oversized.0, MAX_BYTES).is_err());
+            set(&output, kSecValueData, empty.0);
+            set(&output, kSecAttrAccessControl, kCFBooleanTrue.cast());
+            assert!(decode_secret(output.0, &scope, &expected).is_err());
+        }
+    }
+}

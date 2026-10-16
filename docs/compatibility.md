@@ -1505,3 +1505,46 @@ symbols. Both CI workflows for `fe10afd` were confirmed successful; this phase's
 commit/push and exact remote CI are checked separately. No real account,
 household appliance, separate Flutter worktree or physical phone was accessed.
 No package is published.
+
+## iOS Keychain credential backend
+
+[ADR-0062](adr/0062-ios-keychain-credentials.md) adds an iOS implementation of the
+existing native secret-store interface. Every operation includes a trusted
+compile-time private access group, random profile service and credential reference.
+Missing configuration fails closed. New items use passcode-set/device-only
+accessibility with synchronization disabled. A bounded metadata lookup rejects
+ambiguous/foreign/weakened entries before exact-reference read/update/delete.
+Delete never reads credential data; no broad deletion or add/update retry exists.
+
+Synchronous OS calls retain the caller's operation lifetime and account lease
+until return. Pre-dispatch interruption keeps its normal error; unconfirmed
+dispatched writes become `SECRET_STORE_WRITE_UNKNOWN`. OS error text and secret
+bytes stay out of DTOs/logs. OS-reported lock/authentication failures are refused;
+metadata lookup/deletion does not establish device-unlock state. The deliberately
+deprecated fail-without-prompt option and its runtime gate are documented.
+
+Local verification on Linux passed thirteen portable iOS tests, including a
+barrier-controlled cancelled blocking call with retained caller lifetime, and
+both arm64 device/simulator target checks. iOS device-target Clippy also compiled
+the platform-specific Core Foundation tests with warnings denied. These tests
+execute only on Apple platforms: this local run does not establish their result.
+Final workspace verification passed 476 Rust tests with two explicitly ignored
+probes, formatting, Clippy and workspace/example builds. The runtime suite passed
+35 checks; native checks passed 33 methods/54 fictional examples and all trusted
+bridges. Python tooling passed 42 tests, presentation passed six, and document,
+contract, repository and existing commit-message validators passed. The new
+caller-lifetime test was added after the first full run and the final workspace
+test/lint run includes it. Android APK/emulator acceptance was not repeated.
+
+The MVP workflow now contains a macOS job for those Core Foundation object tests
+and complete iOS native-library linkage with a fictional group. It makes no
+Keychain calls, installs no app and signs/publishes no package. Remote success
+must be checked on the actual pushed commit. Signed entitlements, no-passcode and
+lock behavior, persistence, framework packaging and Flutter/iPhone acceptance
+remain pending; follow the [iOS guide](development/09-ios-native.md).
+
+Native API 1.20, all C signatures, 33 ordinary methods, SQLite schema 5, protected
+payload 3 and other platforms' storage behavior remain unchanged. The already
+locked `core-foundation-sys` 0.8.7 becomes a direct iOS dependency and a macOS
+test dependency; no dependency version changes. No real account, appliance,
+separate Flutter worktree or physical phone was accessed.

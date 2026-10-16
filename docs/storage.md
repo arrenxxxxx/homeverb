@@ -54,11 +54,21 @@ Account records contain only local references, provider/region, a local label, a
 
 [SecretStore](../crates/core/src/secrets.rs) defines asynchronous `get`, `put`, and `delete` with a shared Operation. `get` returns `Option<SecretBytes>`; `put` replaces an exact reference; deleting an absent reference succeeds. CredentialRef serializes a random UUID, while SecretBytes has redacted Debug, no serialization, and a zeroizing owned buffer. This does not erase copies made by callers, upstream libraries, or the operating system.
 
-[SystemSecretStore](../crates/secret-store/src/lib.rs) accepts a trusted random profile UUID. Construction has no I/O. On Linux, each operation opens an encrypted DH Secret Service session on the user's local D-Bus, selects the default unlocked collection, and searches only the application/profile/credential attributes. Generic labels contain no account information. Locked or duplicate matches fail closed. There is no collection creation, fallback search, plaintext file, or automatic Unlock call. Other operating systems use the unavailable provider. See [ADR-0011](adr/0011-system-secret-store.md) and [dependency evidence R10](references.md).
+[SystemSecretStore](../crates/secret-store/src/lib.rs) accepts a trusted random profile UUID. Construction has no I/O. On Linux, each operation opens an encrypted DH Secret Service session on the user's local D-Bus, selects the default unlocked collection, and searches only the application/profile/credential attributes. Generic labels contain no account information. Locked or duplicate matches fail closed. There is no collection creation, fallback search, plaintext file, or automatic Unlock call. Android uses the [Keystore/JNI backend](adr/0032-android-native-credential-storage.md), and iOS uses the explicitly scoped [Keychain backend](adr/0062-ios-keychain-credentials.md). Other operating systems use the unavailable provider. See [ADR-0011](adr/0011-system-secret-store.md) and [dependency evidence R10](references.md).
 
-Operations share the caller's deadline and cancellation. Create/delete may require a service-managed prompt during the explicit operation; HomeVerb does not start a separate unlock flow. An unconfirmed mutation returns `SECRET_STORE_WRITE_UNKNOWN`; it is never automatically repeated. The connection is closed after the operation, with at most 100 ms of additional cleanup waiting before handles are dropped. Tokio reclaims cancelled reader tasks asynchronously. Cleanup does not replace a confirmed mutation result or undo it.
+Linux operations share the caller's deadline and cancellation. Create/delete may require a service-managed prompt during the explicit operation; HomeVerb does not start a separate unlock flow. An unconfirmed mutation returns `SECRET_STORE_WRITE_UNKNOWN`; it is never automatically repeated. The connection is closed after the operation, with at most 100 ms of additional cleanup waiting before handles are dropped. Tokio reclaims cancelled reader tasks asynchronously. Cleanup does not replace a confirmed mutation result or undo it.
 
 The local synthetic test verifies create/read/reopen/replace, profile isolation, deletion/absence, and socket release within a bounded runtime cleanup window on the available GNOME Secret Service. Regular tests do not access a developer's keyring. This is not evidence of real-platform login, locked/prompted service integration, KWallet compatibility, or mobile support.
+
+The iOS backend requires a trusted compile-time private access group and uses
+passcode-set/device-only, non-synchronizable generic-password items. It checks a
+bounded metadata search before exact-reference read/update/delete; deletion never
+decrypts the credential. It refuses foreign/ambiguous/weakened entries and requests
+no authentication UI. OS-reported lock errors are refused, but metadata lookup or
+deletion is not a device-lock probe. Synchronous calls retain the caller's lease
+until return; unconfirmed dispatched mutations stay unknown. No plaintext or
+shared-group fallback exists. See the [iOS guide](development/09-ios-native.md)
+for configuration, deprecation rationale, actual evidence and signed runtime gates.
 
 `homeverb_host::open_accounts` composes the persisted profile namespace, SQLite account records and system secret store without accessing the keyring. Core's [AccountVault](../crates/core/src/accounts.rs) creates pending references or leases existing accounts; neither authenticates a provider. Attribute namespaces prevent accidental mixing; they do not isolate malicious processes running as the same OS user. No credential bytes are exposed through CLI, MCP, or native JSON requests.
 

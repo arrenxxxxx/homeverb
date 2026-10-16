@@ -19,6 +19,12 @@ zbus.workspace = true
 [target.'cfg(target_os = "android")'.dependencies]
 jni.workspace = true
 
+[target.'cfg(target_os = "ios")'.dependencies]
+core-foundation-sys.workspace = true
+
+[target.'cfg(target_os = "macos")'.dev-dependencies]
+core-foundation-sys.workspace = true
+
 [dev-dependencies]
 tokio-util.workspace = true
 jni = { workspace = true, features = ["invocation"] }

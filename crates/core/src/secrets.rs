@@ -98,7 +98,8 @@ pub trait SecretStore: Send + Sync {
         operation: &Operation,
     ) -> Result<()>;
     /// Deletes the exact local entry without reading its secret; confirmed absence succeeds.
-    /// Reject unavailable, locked or ambiguous storage. This does not revoke provider access.
+    /// Reject OS-reported unavailable/locked or ambiguous storage. This is not a lock-state probe
+    /// and does not revoke provider access.
     async fn delete(&self, reference: &CredentialRef, operation: &Operation) -> Result<()>;
 }
 

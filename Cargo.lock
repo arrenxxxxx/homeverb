@@ -965,6 +965,7 @@ name = "homeverb-secrets"
 version = "0.2.0"
 dependencies = [
  "async-trait",
+ "core-foundation-sys",
  "homeverb-core",
  "homeverb-domain",
  "jni",
