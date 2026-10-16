@@ -13,7 +13,7 @@ def main():
     parser.add_argument('--adb', default='adb')
     parser.add_argument('--adb-port', required=True, type=int)
     parser.add_argument('--serial', required=True)
-    parser.add_argument('--phase', required=True, choices=['unsecured', 'write', 'locked', 'read'])
+    parser.add_argument('--phase', required=True, choices=['unsecured', 'write', 'locked', 'read', 'controls'])
     args = parser.parse_args()
     if not 1 <= args.adb_port <= 65535:
         parser.error('Require a valid port for the isolated ADB server.')

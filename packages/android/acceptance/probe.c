@@ -21,10 +21,19 @@ JNIEXPORT jstring JNICALL Java_org_homeverb_AcceptanceRunner_request(
         for (size_t i = 0; i < sizeof(login); ++i) login[i] = 0;
         for (size_t i = 0; i < sizeof(password); ++i) password[i] = 0;
     }
+    if (action == 3) output = homeverb_prepare_approval((uint64_t)handle, input);
+    if (action == 4) output = homeverb_execute_approved((uint64_t)handle, input);
     (*env)->ReleaseStringUTFChars(env, json, input);
     jstring result = output ? (*env)->NewStringUTF(env, output) : NULL;
     homeverb_string_free(output);
     return result;
+}
+
+JNIEXPORT jboolean JNICALL Java_org_homeverb_AcceptanceRunner_discard(
+        JNIEnv *env, jclass type, jlong handle, jlong approval) {
+    (void)env;
+    (void)type;
+    return homeverb_discard_approval((uint64_t)handle, (uint64_t)approval) ? JNI_TRUE : JNI_FALSE;
 }
 
 JNIEXPORT void JNICALL Java_org_homeverb_AcceptanceRunner_foreground(

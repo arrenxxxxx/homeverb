@@ -199,6 +199,19 @@ on reopen without discovery, reject request/response authority injection and
 unknown IDs/connections, and exercise foreground/closed handles. No real account,
 provider, appliance or Flutter worktree is used.
 
+## Android native control flow
+
+The [isolated Android acceptance APK](development/08-android-native.md#exercise-native-controls-without-a-provider)
+adds a standalone `controls` phase. It exercises the production C approval exports
+and session-grant query on Android, including read-only reopen with retained
+actions, ordinary elevated denial, cross-handle/consumed/dismissed previews,
+background/close invalidation and accepted receipt lookup. A separate simulated
+write reaches its state commit before background cancellation, retains `unknown`
+across reopen and returns the same receipt without reapplying the command after
+a subsequent state change. Test-only JNI code remains outside production AARs;
+there is no Internet permission or provider account. Flutter consent, process-kill
+recovery and physical-phone behavior are not inferred from this test.
+
 ## Unverified release gates
 
 Physical-device authentication and control, real-provider account recovery and token rotation, actual Android Keystore, Android APK/iOS builds and phone lifecycle, a target AI host, dependency/security review, package installation, and licensing remain pending. The mainland read-only Meiju pilot and Android library builds do not establish these acceptance gates. Real writes require explicit device-owner authorization. Two different protocol families must demonstrate equivalent capability calls before cross-platform support is claimed.

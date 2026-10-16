@@ -228,6 +228,45 @@ Both lock/unlock tests initially ran before the OS transition completed; rerunni
 after the required state was visible passed. This is emulator evidence, not a
 physical phone, hardware-backed key, Flutter journey or 16 KiB-page runtime claim.
 
+### Exercise native controls without a provider
+
+The independent `controls` phase uses unique fictional Mock profiles and needs
+neither a secure screen lock nor account credentials:
+
+```bash
+.venv/bin/python scripts/verify_android_acceptance.py \
+  --adb-port 5047 --serial emulator-5588 --phase controls
+```
+
+It calls the production C ABI through test-only JNI wrappers to verify:
+
+- Current session grants, closed request fields and immediate read-only revocation
+  across reopening while saved action descriptors remain intact.
+- Ordinary elevated-action denial, immutable preparation, cross-handle refusal,
+  single-use confirmation, dismissal, accepted/unverified receipts and preview
+  invalidation on background/close. The harness supplies fictional consent; it
+  does not test actual Flutter user interaction or admit high-risk operations.
+- Background cancellation after a fictional appliance's state was committed but
+  before its acknowledgement. A bounded test-only SQLite observation establishes
+  that point; it is not production polling. The receipt remains `unknown` after
+  reopening. Changing the fictional state with another command then replaying the
+  original request proves that the original operation is not sent again.
+
+Every test profile is local to the disposable APK. This phase does not call the
+Meiju provider, obtain LAN credentials or send appliance traffic. The test APK
+still has no permissions, while production AAR contents and C exports are unchanged.
+Session reopening is tested here; forced process termination remains a separate
+mobile acceptance requirement.
+
+The subsequent API 1.17 control-flow run used a fresh disposable instance of the
+same AOSP Android 15 x86_64 image. The independent `controls` phase passed 93
+assertions both without a secure lock and while locked. The original `unsecured`,
+`write`, `locked` and separate-process `read` phases again passed 17, 17, 16 and 27
+assertions. Android lock state was checked before sensitive phases. Production
+AARs were unchanged; the rebuilt test APK passed signature, ABI, no-permission
+and 16 KiB ZIP-alignment checks. These results do not establish physical Keystore,
+Flutter consent, real account access or appliance behavior.
+
 Before enabling a phone release, repeat Keystore round trips across process
 restart, OS/OEM key invalidation, profile isolation, screen locking/unlocking, unavailable
 storage, backup/restore and uninstall/reinstall behavior, release shrinking rules,

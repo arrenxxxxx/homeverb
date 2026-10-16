@@ -1264,3 +1264,31 @@ handoff and English/Chinese catalogs distinguish local grants from capability
 metadata and protected control options. No real account, appliance, separate
 Flutter worktree, new emulator or physical phone was accessed. Remote CI is
 verified separately after the phase commit and push.
+
+## Android native control acceptance
+
+The isolated Android APK now includes an independent `controls` phase for the
+production session-grant and trusted approval boundaries. A fresh disposable
+AOSP Android 15 x86_64 instance passed 93 assertions without a secure lock and
+again while locked. Read-only reopening immediately removes grants while retaining
+actions; ordinary elevated execution is denied; confirmation is one-use and
+handle-bound; dismissal/background/close invalidate previews. A simulated
+post-transmission interruption persists `unknown` across reopening, and receipt
+replay does not overwrite a later simulated state change.
+
+On October 16, 2026, the rebuilt test APK passed Java/C compilation, production
+library export inspection, signature, exact ABI contents, no-permission and
+16 KiB ZIP-alignment checks. The original four Android credential phases passed
+17/17/16/27 assertions, including separate-process reads and actual emulator
+Keystore/lock behavior. All 33 Python tests and documentation, contract, repository
+and commit checks passed. Commit `5b7bddf` documentation and MVP CI runs were independently confirmed
+successful.
+
+Only the test harness and handoff documentation changed. Native API 1.17.0,
+production Java/Rust code, ten C exports plus JNI initialization, storage and
+permission semantics are unchanged. Test-only JNI wrappers do not enter the AAR.
+No provider account, appliance or separate Flutter worktree was accessed. The
+emulator installation and dedicated ADB server were cleaned up after acceptance.
+Actual Flutter consent, physical phones, forced process termination during control
+and real/off-LAN appliance behavior remain pending. Remote CI for this test phase
+is inspected after commit/push.

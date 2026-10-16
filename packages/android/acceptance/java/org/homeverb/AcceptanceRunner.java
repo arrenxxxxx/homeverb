@@ -30,9 +30,10 @@ public final class AcceptanceRunner extends Instrumentation {
     private Method operate;
     private String nativeError = "unavailable";
 
-    private static native String request(int action, long handle, String json);
-    private static native void foreground(long handle, boolean active);
-    private static native void close(long handle);
+    static native String request(int action, long handle, String json);
+    static native void foreground(long handle, boolean active);
+    static native void close(long handle);
+    static native boolean discard(long handle, long approval);
     private static native int holdLock(String path);
     private static native void releaseLock(int fd);
 
@@ -72,6 +73,8 @@ public final class AcceptanceRunner extends Instrumentation {
             } else if ("read".equals(phase)) {
                 check(keyguard.isDeviceSecure() && !keyguard.isDeviceLocked());
                 readAndClean(context);
+            } else if ("controls".equals(phase)) {
+                new ControlAcceptance(this, context).run();
             } else {
                 throw new AssertionError();
             }
@@ -88,7 +91,7 @@ public final class AcceptanceRunner extends Instrumentation {
         }
     }
 
-    private void check(boolean value) {
+    void check(boolean value) {
         if (!value) throw new AssertionError();
         assertions++;
     }
@@ -224,13 +227,13 @@ public final class AcceptanceRunner extends Instrumentation {
         keys.deleteEntry("homeverb." + profile);
     }
 
-    private JSONObject call(long handle, JSONObject operation) throws Exception {
+    JSONObject call(long handle, JSONObject operation) throws Exception {
         JSONObject envelope = new JSONObject().put("schema_version", "1.0")
             .put("operation_id", UUID.randomUUID().toString()).put("timeout_ms", 10000).put("request", operation);
         return new JSONObject(request(1, handle, envelope.toString()));
     }
 
-    private long open(JSONObject config) throws Exception {
+    long open(JSONObject config) throws Exception {
         JSONObject result = new JSONObject(request(0, 0, config.toString()));
         if (!result.isNull("error")) {
             String code = result.getJSONObject("error").getString("code");
