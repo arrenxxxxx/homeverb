@@ -1229,3 +1229,38 @@ schema 4 and protected payload/session versions unchanged. Negotiate the new
 method before use; existing write gates and outcomes are unchanged. No real
 account, appliance, separate Flutter worktree, new emulator or phone was accessed.
 Remote CI is verified separately after the phase commit and push.
+
+## Current session-grant inspection
+
+[ADR-0057](adr/0057-session-grant-inspection.md) adds native API 1.17.0
+`inspect_session_grants` for one exact local device/connection. It projects
+immutable Core policy for the selected transport without adapters, credentials,
+account leases or mutation. Complete argument rules remain separate, invalid
+schemas are excluded, and configured grants never establish action support,
+provider authorization or per-invocation approval. Read-only reopening reports
+empty rules immediately even when saved descriptors retain writable actions.
+Existing policy, risk, model/profile, membership and execution gates are unchanged.
+
+Three Core test groups cover exact scopes, complete argument combinations,
+invalid/boolean schemas, detached response mutation, unchanged capability/risk
+refusals, exact IDs and cancellation/deadline. A fictional Meiju Session test
+retains actions and a receipt across revocation with secret access disabled and
+the account lease held; inspection changes neither metadata nor provider calls.
+Actual C calls cover Mock and fictional Meiju grants, read-only reopen, retained
+actions, closed authority fields, unknown IDs/connections and lifecycle guards.
+
+On October 16, 2026, formatting, workspace Clippy, workspace/example builds and
+local documentation/contract/repository/commit checks passed. Rust: 441 passed,
+two explicitly ignored; runtime: 35; native: 33 methods/54 fictional examples plus
+trusted approval/dishwasher checks; Python tooling: 33; presentation: six. The
+initial C assertion compared a serialized descriptor to its unnormalized seed;
+it now compares the actual before/after descriptors and the rerun passed. All
+three Android AAR variants passed eleven-export and 16 KiB ELF checks.
+
+The additive method retains JSON schema 1.0, ten public C functions plus Android
+JNI initialization, SQLite schema 4 and protected payload/session versions.
+Older hosts reject the query; negotiate its advertised version/method. The UI
+handoff and English/Chinese catalogs distinguish local grants from capability
+metadata and protected control options. No real account, appliance, separate
+Flutter worktree, new emulator or physical phone was accessed. Remote CI is
+verified separately after the phase commit and push.

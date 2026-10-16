@@ -1,6 +1,6 @@
 # HomeVerb native contract
 
-Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.16.0 has 32 callable JSON methods, one separate protected account-connection function and three separate trusted approval functions; the JSON envelope schema is 1.0.
+Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.17.0 has 33 callable JSON methods, one separate protected account-connection function and three separate trusted approval functions; the JSON envelope schema is 1.0.
 
 - [api.json](api.json) is compiled into the `get_api_info` response.
 - [examples.json](examples.json) contains fictional requests and actual Mock native responses, including failures and lifecycle states. It is preview/test data, never a production device database.
@@ -56,3 +56,8 @@ API 1.16 adds `inspect_control_options` for a selected saved device/connection.
 It projects protected model-specific action definitions before trusted startup
 grants, without network access, publication or permission changes. See the
 [permission-selection flow](../../docs/native-ui-contract.md#inspect-control-options-before-permission-api-116).
+
+API 1.17 adds `inspect_session_grants` for the selected local device/connection.
+It projects current session policy without credentials, provider access or
+mutation. Reopening read-only yields empty grants even when saved descriptors
+retain actions. See the [permission-display contract](../../docs/native-ui-contract.md#inspect-current-session-grants-api-117).

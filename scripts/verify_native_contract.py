@@ -29,7 +29,7 @@ def main():
     responses = {name: validator('native-response', name) for name in [*api['methods'], 'open']}
     query_error = validator('native-response', 'query_error')
     info_example = {'schema_version': '1.0', 'data': copy.deepcopy(api), 'warnings': [], 'error': None}
-    info_example['data']['api_version'] = '1.17.0'
+    info_example['data']['api_version'] = '1.18.0'
     info_example['data']['methods']['future_query'] = {'response_kind': 'query'}
     responses['get_api_info'].validate(info_example)
     info_example['data']['api_version'] = '2.0.0'
@@ -118,6 +118,34 @@ def main():
             devices = call(handle, 'discover')['data']
             assert len(devices) == 1
             call(handle, 'describe_device', device=devices[0]['id'])
+            for transport in ['lan', 'cloud']:
+                grants = call(handle, 'inspect_session_grants', device_id=devices[0]['id'],
+                              connection_id='conn-example-' + transport)
+                assert grants['data'] == {
+                    'device_id': devices[0]['id'], 'connection_id': 'conn-example-' + transport,
+                    'transport': transport, 'source': 'session_policy',
+                    'provider_authorization': 'not_checked',
+                    'grants': [{'component_id': 'main', 'capability': capability, 'action': 'set',
+                                'argument_schema': {'type': 'object'}} for capability in ['power', 'climate']]}
+                for field, value in [('source', 'live'), ('provider_authorization', 'granted'),
+                                     ('transport', 'auto'), ('credential_ref', 'PRIVATE')]:
+                    bad = copy.deepcopy(grants)
+                    bad['data'][field] = value
+                    assert not responses['inspect_session_grants'].is_valid(bad)
+                bad = copy.deepcopy(grants)
+                bad['data']['grants'][0]['approved'] = True
+                assert not responses['inspect_session_grants'].is_valid(bad)
+
+            for device, connection, code in [
+                ('mock-ac', 'conn-example-cloud', 'INVALID_ARGUMENT'),
+                ('missing', 'conn-example-cloud', 'DEVICE_NOT_FOUND'),
+                ('dev-mock-ac', 'missing', 'INVALID_ARGUMENT'),
+            ]:
+                result = raw(handle, envelope('inspect_session_grants', device_id=device,
+                                              connection_id=connection))
+                responses['inspect_session_grants'].validate(result)
+                assert result['error']['code'] == code
+
             call(handle, 'read_state', device='dev-mock-ac', component='main', connection='auto', cached=False)
             call(handle, 'read_state', device='dev-mock-ac', component='main', connection='auto', cached=True)
             room = call(handle, 'create_room', name='Bedroom')['data']
@@ -500,6 +528,23 @@ def main():
                 with sqlite3.connect(Path(directory) / 'homeverb.sqlite3') as database:
                     database.execute('INSERT INTO devices (id, descriptor) VALUES (?, ?)',
                                      (grant_id, json.dumps({'device': device, 'capabilities': [power]})))
+                saved_descriptor = raw(handle, envelope('describe_device', device=grant_id))['data']
+                assert 'set' in saved_descriptor['capabilities'][0]['actions']
+                inspection = envelope('inspect_session_grants', device_id=grant_id,
+                                      connection_id='fictional-cloud')
+                result = raw(handle, inspection)
+                responses['inspect_session_grants'].validate(result)
+                assert result['data'] == {
+                    'device_id': grant_id, 'connection_id': 'fictional-cloud', 'transport': 'cloud',
+                    'source': 'session_policy', 'provider_authorization': 'not_checked',
+                    'grants': [{'component_id': 'main', 'capability': 'power', 'action': 'set',
+                                'argument_schema': {'const': {'state': entry['state']}}}
+                               for entry in grants]}
+                for field, value in [('grants', grants), ('approved', True), ('refresh', True)]:
+                    forged = copy.deepcopy(inspection)
+                    forged['request'][field] = value
+                    assert not request_schema.is_valid(forged)
+                    assert raw(handle, forged)['error']['code'] == 'INVALID_ARGUMENT'
                 for state in [False, True]:
                     plan = raw(handle, envelope('plan', command=command('native-power-plan', device_id=grant_id,
                                                                         arguments={'state': state}, connection='cloud')))
@@ -514,6 +559,25 @@ def main():
                 forged['request']['meiju_power_grants'] = [grant]
                 assert not request_schema.is_valid(forged)
                 assert raw(handle, forged)['error']['code'] == 'INVALID_ARGUMENT'
+            finally:
+                library.homeverb_close(handle)
+            assert raw(handle, inspection)['error']['code'] == 'HOST_CLOSED'
+            handle = open_host(directory, allow=False, adapter='midea.meiju')
+            try:
+                # Reopening revokes local authority even while saved actions remain visible.
+                result = raw(handle, inspection)
+                responses['inspect_session_grants'].validate(result)
+                assert result['data']['grants'] == []
+                descriptor = raw(handle, envelope('describe_device', device=grant_id))['data']
+                assert descriptor == saved_descriptor
+                denied = raw(handle, envelope('plan', command=command(
+                    'revoked-power-plan', device_id=grant_id, connection='cloud')))
+                assert denied['error']['code'] == 'POLICY_DENIED'
+                assert raw(handle, envelope('recent_executions'))['data'] == []
+                library.homeverb_set_foreground(handle, False)
+                assert raw(handle, inspection)['error']['code'] == 'HOST_BACKGROUND'
+                library.homeverb_set_foreground(handle, True)
+                assert raw(handle, inspection) == result
             finally:
                 library.homeverb_close(handle)
 

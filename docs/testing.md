@@ -187,6 +187,18 @@ recheck metadata after an await and release leases on cancellation/background/
 close/deadline/drop. Native C/schema checks cover the new closed method, errors
 and fictional response fixtures; no provider or appliance is accessed.
 
+## Current session-grant inspection
+
+API 1.17 tests retain complete rules, exact device/component/action/transport
+scopes and valid boolean schemas; invalid schemas confer no authority. Fictional
+Session tests reopen read-only with retained writable descriptors and receipts,
+refuse secret access and hold the account lease while proving inspection needs
+neither. Core risk/capability gates, metadata, receipts and provider calls remain
+unchanged. Actual C checks inspect Mock and fictional Meiju startup scopes, revoke
+on reopen without discovery, reject request/response authority injection and
+unknown IDs/connections, and exercise foreground/closed handles. No real account,
+provider, appliance or Flutter worktree is used.
+
 ## Unverified release gates
 
 Physical-device authentication and control, real-provider account recovery and token rotation, actual Android Keystore, Android APK/iOS builds and phone lifecycle, a target AI host, dependency/security review, package installation, and licensing remain pending. The mainland read-only Meiju pilot and Android library builds do not establish these acceptance gates. Real writes require explicit device-owner authorization. Two different protocol families must demonstrate equivalent capability calls before cross-platform support is claimed.

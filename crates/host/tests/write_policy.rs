@@ -304,3 +304,183 @@ async fn matching_grants_allow_bounded_fallback_and_valid_composites() {
     }
     assert_eq!(h.sends(), 2);
 }
+
+#[tokio::test]
+async fn session_grant_inspection_keeps_exact_scope_and_whole_argument_rules() {
+    let lan = grant(
+        vec![Transport::Lan],
+        json!({"const":{"mode":"cool","target_temperature":22}}),
+    );
+    let cloud = grant(
+        vec![Transport::Cloud],
+        json!({"const":{"mode":"heat","target_temperature":24}}),
+    );
+    let mut other_device = cloud.clone();
+    other_device.device_id = "other-device".into();
+    let mut other_component = cloud.clone();
+    other_component.component_id = "other-component".into();
+    let mut other_action = cloud.clone();
+    other_action.action = "other-action".into();
+    let invalid = grant(
+        vec![Transport::Cloud],
+        json!({"type":"invalid-json-schema-type"}),
+    );
+    let h = Fixture::new(
+        vec![
+            lan,
+            cloud.clone(),
+            other_device,
+            other_component,
+            other_action,
+            invalid,
+        ],
+        Scenario::Normal,
+    )
+    .await;
+    let before = json!(h.store.devices().unwrap());
+    let op = Operation::new(1000, CancellationToken::new()).unwrap();
+    let local = h
+        .core
+        .inspect_session_grants(DEVICE_ID, "conn-example-lan", &op)
+        .await
+        .unwrap();
+    assert_eq!(local["transport"], "lan");
+    assert_eq!(
+        local["grants"],
+        json!([{"component_id":"main","capability":"climate","action":"set","argument_schema":{"const":{"mode":"cool","target_temperature":22}}}])
+    );
+    let remote = h
+        .core
+        .inspect_session_grants(DEVICE_ID, "conn-example-cloud", &op)
+        .await
+        .unwrap();
+    assert_eq!(remote["source"], "session_policy");
+    assert_eq!(remote["provider_authorization"], "not_checked");
+    assert_eq!(remote["grants"].as_array().unwrap().len(), 3);
+    assert_eq!(
+        remote["grants"][0]["argument_schema"],
+        cloud.argument_schema
+    );
+    assert_eq!(remote["grants"][1]["component_id"], "other-component");
+    assert_eq!(remote["grants"][2]["action"], "other-action");
+    let denied = command(json!({"mode":"heat","target_temperature":22}));
+    assert_eq!(h.core.plan(&denied).unwrap_err().code, "POLICY_DENIED");
+    let mut edited = remote.clone();
+    edited["grants"][0]["argument_schema"] = json!(true);
+    assert_eq!(
+        h.core
+            .inspect_session_grants(DEVICE_ID, "conn-example-cloud", &op)
+            .await
+            .unwrap(),
+        remote
+    );
+    assert_eq!(json!(h.store.devices().unwrap()), before);
+    assert!(h.core.recent_executions().unwrap().is_empty());
+    assert_eq!(h.sends(), 0);
+}
+
+#[tokio::test]
+async fn inspected_rules_do_not_supply_risk_approval_or_action_support() {
+    for risk in [Risk::Elevated, Risk::High] {
+        let h = Fixture::new(
+            vec![grant(vec![Transport::Cloud], json!(true))],
+            Scenario::Normal,
+        )
+        .await;
+        let mut descriptor = MockAdapter::descriptor();
+        let action = descriptor
+            .capabilities
+            .iter_mut()
+            .find(|c| c.id == "climate")
+            .unwrap()
+            .actions
+            .get_mut("set")
+            .unwrap();
+        action.risk = risk;
+        action.independent_fields = false;
+        h.store.save_device(&descriptor).unwrap();
+        let op = Operation::new(1000, CancellationToken::new()).unwrap();
+        let before = h
+            .core
+            .inspect_session_grants(DEVICE_ID, "conn-example-cloud", &op)
+            .await
+            .unwrap();
+        assert_eq!(before["grants"][0]["argument_schema"], json!(true));
+        assert_eq!(
+            h.core
+                .plan(&command(json!({"target_temperature":24})))
+                .unwrap_err()
+                .code,
+            "POLICY_DENIED"
+        );
+        descriptor
+            .capabilities
+            .iter_mut()
+            .find(|c| c.id == "climate")
+            .unwrap()
+            .actions
+            .clear();
+        h.store.save_device(&descriptor).unwrap();
+        assert_eq!(
+            h.core
+                .inspect_session_grants(DEVICE_ID, "conn-example-cloud", &op)
+                .await
+                .unwrap(),
+            before
+        );
+        assert_eq!(
+            h.core
+                .plan(&command(json!({"target_temperature":24})))
+                .unwrap_err()
+                .code,
+            "CAPABILITY_UNSUPPORTED"
+        );
+        assert_eq!(h.sends(), 0);
+    }
+}
+
+#[tokio::test(start_paused = true)]
+async fn grant_inspection_refuses_aliases_unknown_connections_and_expired_operations() {
+    let h = Fixture::new(vec![], Scenario::Normal).await;
+    let op = Operation::new(1000, CancellationToken::new()).unwrap();
+    for (device, connection, code) in [
+        ("mock-ac", "conn-example-cloud", "INVALID_ARGUMENT"),
+        (DEVICE_ID, "missing", "INVALID_ARGUMENT"),
+        ("missing", "conn-example-cloud", "DEVICE_NOT_FOUND"),
+    ] {
+        assert_eq!(
+            h.core
+                .inspect_session_grants(device, connection, &op)
+                .await
+                .unwrap_err()
+                .code,
+            code
+        );
+    }
+    let empty = h
+        .core
+        .inspect_session_grants(DEVICE_ID, "conn-example-cloud", &op)
+        .await
+        .unwrap();
+    assert_eq!(empty["grants"], json!([]));
+    op.cancellation.cancel();
+    assert_eq!(
+        h.core
+            .inspect_session_grants(DEVICE_ID, "conn-example-cloud", &op)
+            .await
+            .unwrap_err()
+            .code,
+        "CANCELLED"
+    );
+    let expired = Operation::new(1, CancellationToken::new()).unwrap();
+    tokio::time::advance(std::time::Duration::from_millis(1)).await;
+    assert_eq!(
+        h.core
+            .inspect_session_grants(DEVICE_ID, "conn-example-cloud", &expired)
+            .await
+            .unwrap_err()
+            .code,
+        "DEADLINE_EXCEEDED"
+    );
+    assert_eq!(h.sends(), 0);
+}

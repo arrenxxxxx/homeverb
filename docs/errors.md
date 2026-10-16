@@ -61,6 +61,11 @@ After possible transmission, prefer `WRITE_OUTCOME_UNKNOWN` over a misleading `L
 
 ## Invariants
 
+`inspect_session_grants` reuses descriptor/identity and operation/lifecycle errors.
+A successful empty rule list means no configured local authority for the selected
+route. It neither indicates provider rejection nor hides invalid metadata or an
+inspection failure. Returned rules supply no per-invocation approval.
+
 `inspect_control_options` reuses account, membership, identity and lifecycle
 errors without contacting the provider. An empty successful option list means
 no reviewed controls; it must not replace a credential or identity error. A

@@ -5,7 +5,7 @@ Status: implemented Linux native contract, October 16, 2026, with Mock, default 
 ## Start here in a Flutter worktree
 
 The connection-linking foundation in [ADR-0052](adr/0052-trusted-connection-linking.md)
-is currently typed Rust Core/Session only. API 1.16.0 has no JSON/C/JNI link
+is currently typed Rust Core/Session only. API 1.17.0 has no JSON/C/JNI link
 method; Meiju does not opt in. Do not wire a confirmation button to discovery,
 invent a `confirmed` request field or add a duplicate LAN card. Native route
 admission and a separately versioned mobile bridge remain prerequisites.
@@ -15,7 +15,7 @@ admission and a separately versioned mobile bridge remain prerequisites.
 device and selected native network, then consume the 60-second preview only after
 actual user consent. Preparation performs local protected preflight; confirmation
 collects bounded hints for that device. There is no JSON/C/JNI scan method in
-1.16.0. Flutter permission/interface selection and a versioned bridge remain
+1.17.0. Flutter permission/interface selection and a versioned bridge remain
 pending. A unique candidate neither adds a LAN card/route nor authorizes credentials,
 state queries or controls. Scan consent and connection-link consent are separate.
 
@@ -31,7 +31,7 @@ The ten C functions in [homeverb.h](../crates/ffi/include/homeverb.h) remain the
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects saved-account cloud reads. `scenario` defaults to `normal`. Meiju requires `allow_mock_writes: false` and rejects any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms `homeverb.mock` or `midea.meiju`. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.16.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.17.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -77,6 +77,7 @@ All rows use query envelopes except the two execution methods. The schemas and a
 | `rename_account` | `account_id`, `label` | Updated local AccountSummary; no credential or permission changes |
 | `remove_account` | `account_id`, `expected_device_ids` | Local cleanup result: `removed` or `pending`; inspect the inner error |
 | `inspect_control_options` | `device_id`, `connection_id` | Saved model-specific permission-form options; no permission check, networking or control enablement |
+| `inspect_session_grants` | `device_id`, `connection_id` | Current local session rules for that route; no credential access, provider authorization check or control enablement |
 | `inspect_account_inventory` | `account_id` | Saved protected device/connection membership; no network or mutation |
 | `refresh_account` | `account_id` | Account and retrieval/publication result; no login |
 | `recover_account` | `account_id` | Explicit pending-session validation and card retrieval; same result shape as refresh |
@@ -697,8 +698,60 @@ Cancellation/background/close releases the account lease without later work.
 Mock returns `AUTH_FLOW_UNSUPPORTED`; [fictional account examples](../packages/native-contract/account-examples.json)
 include populated AC and empty refrigerator responses for isolated UI fixtures.
 The locale keys `control.options`, `control.options.notice`, `control.options.empty`
-and `control.options.allow` support permission selection. The API now has 32 JSON
+and `control.options.allow` support permission selection. That addition brought the API to 32 JSON
 methods; C/JNI exports, schema 1.0 and storage versions are unchanged.
+
+## Inspect current session grants (API 1.17)
+
+Require API 1.17 and `inspect_session_grants` in `get_api_info.data.methods`.
+Use exact saved local IDs, never aliases or provider identifiers:
+
+```json
+{
+  "method": "inspect_session_grants",
+  "device_id": "dev-mock-ac",
+  "connection_id": "conn-example-cloud"
+}
+```
+
+The query returns those IDs, `transport`, `source: session_policy`,
+`provider_authorization: not_checked` and `grants`. Each rule has `component_id`,
+`capability`, `action` and the complete `argument_schema`. It projects immutable
+trusted startup policy for the selected device and transport. Invalid argument
+schemas are omitted, as they add no authority during execution. Valid boolean
+schemas are retained. Preserve complete rules and their argument combinations;
+do not combine separate grants into a wider range or a new multi-field grant.
+
+Use three distinct sources in the control/permission UI:
+
+| Source | Meaning | Access |
+|---|---|---|
+| `describe_device` | Saved device/component capability metadata, including actions | Local metadata |
+| `inspect_control_options` | Reviewed model/profile choices for proposing permissions | Protected saved inventory; no network |
+| `inspect_session_grants` | Configured local rules for this session and transport | Local policy/metadata; no credentials or network |
+
+A rule is not proof that an action exists, is currently supported, can reach the
+provider or has user approval for this invocation. Match device/component/action
+and the whole argument object; Core remains the authority for planning and
+execution. Elevated actions still need separate trusted confirmation; high-risk
+actions remain denied. Ordinary JSON cannot add permissions or consume approval.
+
+After trusted consent changes permissions, close/reopen with the new grant list
+and inspect again. Empty rules mean no local write permission on that route,
+even if the saved descriptor retains actions from an earlier session. Do not
+refresh cloud inventory merely to update this permission display. Do not discard
+capabilities to represent revoked authority, and never import the response as
+trusted startup policy. A newly granted action may still require explicit account
+refresh to publish its reviewed descriptor before execution.
+
+The query works with Mock and Meiju and validates stored descriptors. Unknown
+IDs/connections, malformed metadata and cancelled/expired/background/closed calls
+retain existing errors; they are not successful empty permission lists. No adapter,
+account lease, credential store, cache or execution journal is accessed or changed.
+Use `control.permissions`, `control.permissions.empty` and
+`control.permissions.notice` for the local permission view. API 1.17 has 33 JSON
+methods with unchanged C/JNI exports, schema and storage versions. See
+[ADR-0057](adr/0057-session-grant-inspection.md).
 
 ## Scoped experimental AC temperature startup
 
@@ -1048,4 +1101,4 @@ identifier. This is separate from outer account payload version 3. Current
 libraries continue using version-1 sessions for existing cloud functions without
 rewriting them. Older libraries refuse inner version 2; upgrade rather than reset
 accounts or discard local bindings. No client identifier, Token/Key, LAN method or
-new consent flow is exposed to Flutter by this phase; API 1.16.0 exposes no scan method.
+new consent flow is exposed to Flutter by this phase; API 1.17.0 exposes no scan method.

@@ -38,6 +38,10 @@ pub enum Request {
         device_id: String,
         connection_id: String,
     },
+    InspectSessionGrants {
+        device_id: String,
+        connection_id: String,
+    },
     RenameAccount {
         account_id: uuid::Uuid,
         label: String,
@@ -500,6 +504,14 @@ impl Session {
                     Ok(json!({"device_id":device_id,"connection_id":connection_id,
                         "source":"saved_inventory","authorization":"not_checked","options":options}))
                 }).await
+            }
+            Request::InspectSessionGrants {
+                device_id,
+                connection_id,
+            } => {
+                self.core
+                    .inspect_session_grants(&device_id, &connection_id, &operation)
+                    .await
             }
             Request::RenameAccount { account_id, label } => {
                 let adapter = self

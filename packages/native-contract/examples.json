@@ -1,5 +1,5 @@
 {
-  "api_version": "1.16.0",
+  "api_version": "1.17.0",
   "cases": [
     {
       "request": {
@@ -12,7 +12,7 @@
       },
       "response": {
         "data": {
-          "api_version": "1.16.0",
+          "api_version": "1.17.0",
           "limits": {
             "max_active_operations": 8,
             "max_request_bytes": 1048576,
@@ -65,6 +65,9 @@
               "response_kind": "query"
             },
             "inspect_control_options": {
+              "response_kind": "query"
+            },
+            "inspect_session_grants": {
               "response_kind": "query"
             },
             "list_accounts": {
@@ -1826,7 +1829,7 @@
       },
       "response": {
         "data": {
-          "api_version": "1.16.0",
+          "api_version": "1.17.0",
           "limits": {
             "max_active_operations": 8,
             "max_request_bytes": 1048576,
@@ -1879,6 +1882,9 @@
               "response_kind": "query"
             },
             "inspect_control_options": {
+              "response_kind": "query"
+            },
+            "inspect_session_grants": {
               "response_kind": "query"
             },
             "list_accounts": {
@@ -2644,6 +2650,90 @@
         },
         "schema_version": "1.0",
         "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "session-grants-lan",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "inspect_session_grants",
+          "device_id": "dev-mock-ac",
+          "connection_id": "conn-example-lan"
+        }
+      },
+      "response": {
+        "schema_version": "1.0",
+        "data": {
+          "device_id": "dev-mock-ac",
+          "connection_id": "conn-example-lan",
+          "transport": "lan",
+          "source": "session_policy",
+          "provider_authorization": "not_checked",
+          "grants": [
+            {
+              "component_id": "main",
+              "capability": "power",
+              "action": "set",
+              "argument_schema": {
+                "type": "object"
+              }
+            },
+            {
+              "component_id": "main",
+              "capability": "climate",
+              "action": "set",
+              "argument_schema": {
+                "type": "object"
+              }
+            }
+          ]
+        },
+        "warnings": [],
+        "error": null
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "session-grants-cloud",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "inspect_session_grants",
+          "device_id": "dev-mock-ac",
+          "connection_id": "conn-example-cloud"
+        }
+      },
+      "response": {
+        "schema_version": "1.0",
+        "data": {
+          "device_id": "dev-mock-ac",
+          "connection_id": "conn-example-cloud",
+          "transport": "cloud",
+          "source": "session_policy",
+          "provider_authorization": "not_checked",
+          "grants": [
+            {
+              "component_id": "main",
+              "capability": "power",
+              "action": "set",
+              "argument_schema": {
+                "type": "object"
+              }
+            },
+            {
+              "component_id": "main",
+              "capability": "climate",
+              "action": "set",
+              "argument_schema": {
+                "type": "object"
+              }
+            }
+          ]
+        },
+        "warnings": [],
+        "error": null
       }
     }
   ]

@@ -448,6 +448,18 @@
                         "response_kind"
                       ],
                       "additionalProperties": false
+                    },
+                    "inspect_session_grants": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": false
                     }
                   },
                   "required": [
@@ -482,7 +494,8 @@
                     "clear_execution_history",
                     "recover_account",
                     "inspect_account_inventory",
-                    "inspect_control_options"
+                    "inspect_control_options",
+                    "inspect_session_grants"
                   ],
                   "additionalProperties": {
                     "type": "object",
@@ -2154,6 +2167,105 @@
               ],
               "additionalProperties": false,
               "description": "Saved model-specific permission-form options, not executable descriptors or authority. No network or mutation."
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "urn:homeverb:schema:native-response#/$defs/query_error"
+        }
+      ]
+    },
+    "inspect_session_grants": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "device_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "connection_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "transport": {
+                  "enum": [
+                    "lan",
+                    "cloud"
+                  ]
+                },
+                "source": {
+                  "const": "session_policy"
+                },
+                "provider_authorization": {
+                  "const": "not_checked"
+                },
+                "grants": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "component_id": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "capability": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "action": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "argument_schema": {
+                        "type": [
+                          "object",
+                          "boolean"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "component_id",
+                      "capability",
+                      "action",
+                      "argument_schema"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "device_id",
+                "connection_id",
+                "transport",
+                "source",
+                "provider_authorization",
+                "grants"
+              ],
+              "additionalProperties": false,
+              "description": "Current immutable local session grants for one device and transport. No provider or appliance authorization is established."
             },
             "warnings": {
               "type": "array",

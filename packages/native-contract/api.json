@@ -1,5 +1,5 @@
 {
-  "api_version": "1.16.0",
+  "api_version": "1.17.0",
   "methods": {
     "get_api_info": {
       "response_kind": "query"
@@ -95,6 +95,9 @@
       "response_kind": "query"
     },
     "inspect_control_options": {
+      "response_kind": "query"
+    },
+    "inspect_session_grants": {
       "response_kind": "query"
     }
   },

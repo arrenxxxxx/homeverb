@@ -1,6 +1,57 @@
 use homeverb_domain::*;
 use serde_json::Value;
 
+impl crate::Core {
+    /// Inspect local session authority without touching adapters, credentials or metadata.
+    /// Matching rules still require capability, risk and execution validation.
+    pub async fn inspect_session_grants(
+        &self,
+        device_id: &str,
+        connection_id: &str,
+        operation: &crate::Operation,
+    ) -> Result<Value> {
+        let result = operation
+            .run(async {
+                let descriptor = self.describe(device_id)?;
+                if descriptor.device.id != device_id {
+                    return Err(Error::invalid());
+                }
+                let connection = descriptor
+                    .device
+                    .connections
+                    .iter()
+                    .find(|connection| connection.id == connection_id)
+                    .ok_or_else(Error::invalid)?;
+                let grants: Vec<_> = self
+                    .policy
+                    .grants
+                    .iter()
+                    .filter(|grant| {
+                        grant.device_id == device_id
+                            && grant.transports.contains(&connection.transport)
+                            && jsonschema::validator_for(&grant.argument_schema).is_ok()
+                    })
+                    .map(|grant| {
+                        serde_json::json!({
+                            "component_id":grant.component_id,"capability":grant.capability,
+                            "action":grant.action,"argument_schema":grant.argument_schema
+                        })
+                    })
+                    .collect();
+                Ok(serde_json::json!({
+                    "device_id": device_id,
+                    "connection_id": connection_id,
+                    "transport": connection.transport,
+                    "source": "session_policy",
+                    "provider_authorization": "not_checked",
+                    "grants": grants
+                }))
+            })
+            .await?;
+        operation.run(async { Ok(result) }).await
+    }
+}
+
 /// Constructed by the trusted host, never deserialized from a command or tool call.
 #[derive(Clone, Default)]
 pub struct Policy {

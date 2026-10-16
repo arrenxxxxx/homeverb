@@ -28,6 +28,9 @@ mod inventory;
 #[path = "meiju_accounts/control_options.rs"]
 mod control_options;
 
+#[path = "meiju_accounts/session_grants.rs"]
+mod session_grants;
+
 #[path = "meiju_accounts/lan_scan.rs"]
 mod lan_scan;
 
@@ -355,6 +358,7 @@ impl Fixture {
                 | "get_account"
                 | "inspect_account_inventory"
                 | "inspect_control_options"
+                | "inspect_session_grants"
                 | "rename_account"
                 | "remove_account"
         ) {

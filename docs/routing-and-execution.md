@@ -8,6 +8,12 @@ Read/discovery operations may race safe routes within one shared budget. **Never
 
 Write routes must also satisfy the trusted grant for the complete command, including component and argument bounds. Explicitly requesting an ungranted route returns `POLICY_DENIED`. `auto` cannot use an ungranted route, even after a proven-unsent failure. Each non-atomic step must independently satisfy a complete grant and use only transports allowed for both parent and step. Dry-run performs this same preflight and returns per-step candidate transports. See [trusted policy](development/02-core.md) and [ADR-0010](adr/0010-scoped-write-grants.md).
 
+Native `inspect_session_grants` projects current local device/transport rules
+without credentials, adapters or mutation. Saved actions can outlive their prior
+session's grants; inspect current policy after reopening. Neither returned rules
+nor control-option definitions replace the execution gates above. See
+[ADR-0057](adr/0057-session-grant-inspection.md).
+
 ## Trusted native connection linking
 
 [ADR-0052](adr/0052-trusted-connection-linking.md) adds typed Rust

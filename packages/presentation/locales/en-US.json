@@ -172,5 +172,8 @@
   "control.options": "Review control permissions",
   "control.options.notice": "These options describe supported commands. Permission has not been checked and no control is enabled by this review.",
   "control.options.empty": "No reviewed control options are available for this device.",
-  "control.options.allow": "Allow selected controls"
+  "control.options.allow": "Allow selected controls",
+  "control.permissions": "Allowed controls for this session",
+  "control.permissions.empty": "No controls are allowed for this device on this connection.",
+  "control.permissions.notice": "These permissions apply to this session. Device availability and any confirmation needed are checked when you use a control."
 }

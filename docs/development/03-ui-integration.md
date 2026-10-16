@@ -27,6 +27,13 @@ provider; the existing consent, reopen, descriptor refresh and execution checks
 remain required.
 
 
+API 1.17 adds [session-grant inspection](../native-ui-contract.md#inspect-current-session-grants-api-117)
+for current local permission displays without credentials or network access. Saved
+descriptors describe capabilities; control options describe proposed permissions;
+session grants describe configured local authority. After closing/reopening to
+revoke grants, inspect again without cloud refresh. Retained actions do not imply
+permission, and matching rules do not replace Core planning or trusted approval.
+
 API 1.4 adds local `get_account` and `rename_account` for platform details and names.
 Use the [account metadata contract](../native-ui-contract.md#local-account-details-and-names)
 to show saved linked devices without a refresh or secret-store access. Local names
