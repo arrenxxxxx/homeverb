@@ -179,6 +179,13 @@ Simulator round trips do not establish passcode/lock protection, no-prompt polic
 reinstall/backup behavior or physical iPhone compatibility. Never weaken production
 Keychain accessibility or access-group checks to make Simulator acceptance pass.
 
+Commit `d02b10a` passed this actual runner in macOS job `116902983930` of workflow
+run `38879635016`, using arm64 iOS 26.2 and the iPhone SE (3rd generation) Simulator.
+The first process passed 40 Core and 10 Keychain checks; a distinct second process
+passed 41 Core and four Keychain checks. Eighteen macOS object/orchestration tests
+and the three-architecture release package/consumer checks also passed in that job.
+This establishes the isolated native round trip and process persistence only.
+
 ## 5. Accept on a signed disposable app before real accounts
 
 Use only fictional credentials and fresh random profile/reference namespaces.

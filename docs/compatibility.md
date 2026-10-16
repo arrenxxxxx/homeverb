@@ -1593,7 +1593,7 @@ without replay, and cleanup never targets an existing user Simulator. Diagnostic
 retain bounded test-app launch failures or fixed Boolean metadata flags; they
 never request credential data for diagnostics or report raw attributes.
 
-Runtime investigation identified three corrections:
+Runtime investigation identified four corrections:
 
 - The test app embeds XML/DER entitlements in the Simulator executable and uses
   a plain ad-hoc host signature. Both sections and signature placement are checked.
@@ -1608,30 +1608,35 @@ Runtime investigation identified three corrections:
   Wrong types, weaker protection, extra user-presence constraints and differently
   represented existing objects remain refused. No automatic migration or recreation
   occurs. [ADR-0062](adr/0062-ios-keychain-credentials.md) records the pinned sources.
+- `42ce428` confirmed that the complete policy matched but the exact lookup returned
+  `errSecParam`. `d02b10a` separates admitted persistent references from attribute
+  filters as required by Security. Metadata admission remains scoped to the exact
+  private group; reads revalidate returned namespace/policy/reference, and mutations
+  never fall back to a namespace or replay. Real-object regressions check the query
+  shape and reject unadmitted references. ADR-0062 records the same-entitlement
+  writer boundary of this OS API.
 
-Local verification for the policy and reference-selector corrections passed 21 secret-store tests with
-two environment-dependent tests ignored, device-target and Simulator all-targets
-Clippy, 62 Python tooling tests, formatting and documentation/contract/repository/
+Local verification for the policy and reference-selector corrections passed 21
+secret-store tests with two environment-dependent tests ignored, device-target and
+Simulator all-targets Clippy, 62 Python tooling tests, formatting and documentation/contract/repository/
 commit validation. The Python suite includes twelve Simulator-runner tests.
 Linux cannot execute the real Security-object regression or the Simulator app.
 
-The packaging baseline `d4525b1` passed all three release architectures,
-extracted-package inspection and C consumer linkage in macOS job `116864097511`;
-MVP run `38867656947` and documentation run `38867657083` succeeded. The corrected
-runtime for `b01f205` passed eighteen macOS object/orchestration tests and all
-package checks in job `116894113326`, but still refused the first Keychain read
-after add. The test app now distinguishes the complete returned policy from the
-exact persistent-reference lookup using metadata-only Boolean diagnostics. It
-does not read credential data for diagnostics or weaken production policy.
-On `42ce428`, the complete policy compared equal, but the exact lookup returned
-`errSecParam`. Apple's `s3dl_copy_matching` explicitly forbids a persistent
-reference combined with attribute filters. The backend now keeps exact-group
-metadata admission, then uses only class/reference/no-prompt selectors for reads
-and mutations. Reads still revalidate namespace, policy and reference; mutations
-never fall back to a namespace or replay. The real-object query regression now
-rejects mixed selectors and unadmitted references, while returned-attribute tests
-use independent result fixtures. ADR-0062 records the OS limitation and same-
-entitlement writer boundary. No successful Keychain round trip is claimed yet.
+On `d02b10a`, macOS job `116902983930` of run `38879635016` passed eighteen
+Core Foundation/Security and orchestration tests, all three release framework
+architectures, extracted-package inspection, C consumer linkage and the actual
+isolated app on arm64 iOS 26.2 / iPhone SE (3rd generation) Simulator:
+
+| Process phase | Core checks | Keychain checks |
+|---|---|---|
+| Initial write | 40 | 10 |
+| Read after process restart | 41 | 4 |
+
+Fresh reports and distinct launch PIDs established persistence across processes,
+including replacement and final exact deletion. All three jobs in MVP workflow
+`38879635016` and documentation workflow `38879635021` passed for that exact commit.
+This is isolated native runtime
+acceptance, not physical-phone or provider acceptance.
 
 No real account, appliance, physical phone or separate Flutter worktree was
 accessed. Simulator checks do not establish physical passcode/lock behavior,

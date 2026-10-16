@@ -27,8 +27,8 @@ requires rebuilding, not editing a runtime preference.
 
 The device deployment target is iOS 13.0. Simulator builds require iOS 14.0,
 consistent with the Rust arm64 Simulator target's minimum. These are compilation
-targets, not physical-device support claims. App/Flutter loading, actual Keychain
-behavior, lifecycle and appliance operations need their own acceptance evidence.
+targets, not physical-device support claims. Flutter loading, physical Keychain
+policy, phone lifecycle and appliance operations need their own acceptance evidence.
 The project license and release decision remain pending.
 
 `acceptance/main.m` is a separate test-only Simulator app, built and run by
@@ -36,7 +36,9 @@ The project license and release decision remain pending.
 the Simulator-only `ios_store_probe` Rust example for fictional Keychain checks.
 Neither test source nor test export is packaged in the XCFramework. The runner
 creates and deletes its own Simulator and requires fresh reports from two distinct
-app processes. See the guide for the exact command and physical-device limitations.
+app processes. The iOS 26.2 run passed on `d02b10a`, including Mock/Core and
+fictional Keychain persistence. See the guide for the exact command and
+physical-device limitations.
 
 The package format follows Apple's [XCFramework guidance](https://developer.apple.com/documentation/xcode/creating-a-multi-platform-binary-framework-bundle).
 Apple distinguishes [ad-hoc seals](https://developer.apple.com/documentation/security/seccodesignatureflags/adhoc)

@@ -125,7 +125,7 @@ JSON Schema validation uses `jsonschema` 0.45.1 or a compatible patch, with defa
 explicit namespaces, missing/duplicate/foreign/protection refusal, exact add/read/
 replace/delete, copy bounds, OS error mapping, pre-dispatch cancellation/deadlines
 and uncertain dispatched mutations without retry. On macOS, the same command also
-runs three production Core Foundation query/result tests with fictional objects;
+runs five production Core Foundation/Security query/result tests with fictional objects;
 it does not access Keychain. Linux cannot execute those framework-object tests.
 
 The `ios-native` CI job checks the arm64 targets and builds a development
@@ -147,11 +147,14 @@ creates a new compatible Simulator, verifies embedded Simulator entitlements and
 the plain ad-hoc seal, and requires
 fresh successful write/read reports with different launch PIDs. Mock Core, SQLite
 cache/receipt persistence, explicit lifecycle calls and fictional system Keychain
-round trips are exercised; no provider account or appliance is accessed. Eight
+round trips are exercised; no provider account or appliance is accessed. Twelve
 portable runner tests refuse stale/failed/incomplete reports, wrong process/scope,
 missing runtime evidence and unsafe simulator selection/cleanup. They do not prove
 actual Apple runtime behavior. The exact CI job must pass before claiming it.
 Simulator results do not establish physical passcode/lock or signed-device policy.
+On `d02b10a`, macOS job `116902983930` passed eighteen object/orchestration tests,
+all package/consumer checks and actual iOS 26.2 execution: 40 Core/10 Keychain
+checks in the writer, then 41 Core/four Keychain checks in a different process.
 
 ## Linux Secret Service probe
 
@@ -268,7 +271,14 @@ provider account is present, and this phase does not establish phone/OEM behavio
 
 ## Unverified release gates
 
-Physical-device authentication and control, real-provider account recovery and token rotation, actual Android Keystore, Android APK/iOS builds and phone lifecycle, a target AI host, dependency/security review, package installation, and licensing remain pending. The mainland read-only Meiju pilot and Android library builds do not establish these acceptance gates. Real writes require explicit device-owner authorization. Two different protocol families must demonstrate equivalent capability calls before cross-platform support is claimed.
+Physical-device authentication and control, provider account recovery/token rotation,
+physical Android/iOS secure-store policy and Flutter phone journeys, distribution
+signing/installation, a target AI host, dependency/security review and licensing
+remain pending. Isolated Android 15 and iOS 26.2 native apps and their development
+packages have runtime/build evidence; they do not establish phone/provider
+acceptance. Real writes require explicit device-owner authorization. Two different
+protocol families must demonstrate equivalent capability calls before cross-platform
+support is claimed.
 
 ## Trusted native scan bridge
 
