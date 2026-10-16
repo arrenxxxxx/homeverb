@@ -1,8 +1,9 @@
-# Android native credential package
+# Android native platform package
 
-This package supplies the Java side of the Rust Android secret-store backend.
+This package supplies the Java side of the Rust Android secret-store backend
+and explicit foreground network-selection metadata.
 It owns no Flutter views, account form, network service or background worker.
-The application still calls the ten functions in
+The application still calls the 13 C functions in
 [homeverb.h](../../crates/ffi/include/homeverb.h) directly.
 
 Use the [Android integration guide](../../docs/development/08-android-native.md)
@@ -22,7 +23,16 @@ The separate `acceptance/` package builds a network-disabled test APK with the
 production AAR. It owns no Flutter pages and must never enter a production AAR.
 Its [four-phase emulator procedure](../../docs/development/08-android-native.md#run-the-isolated-native-acceptance-apk)
 checks native Core, Android Keystore, process restart and local account cleanup
-using fictional material. The runner refuses physical devices.
+using fictional material. The additional `networks` phase reads only emulator
+connectivity metadata with `ACCESS_NETWORK_STATE`; the APK still lacks `INTERNET`.
+The runner refuses physical devices.
+
+`NativeLanNetworks` supplies instance-owned selections from Android-assigned
+Wi-Fi/Ethernet link properties. It starts backgrounded and reads metadata only on
+explicit `snapshot` / `requireCurrent` calls. Mirror foreground/close events,
+revalidate before preparing and confirming the native scan, and keep selections
+out of persistence/logs. It adds no socket, callback, worker or permission prompt.
+See the [network-selection handoff](../../docs/development/08-android-native.md#select-an-assigned-lan-interface).
 
 The implementation uses Android Keystore keys and authenticated ciphertext in the
 application no-backup directory. Missing keys, damaged ciphertext, unavailable

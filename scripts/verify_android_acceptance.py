@@ -81,7 +81,7 @@ def main():
     parser.add_argument('--adb', default='adb')
     parser.add_argument('--adb-port', required=True, type=int)
     parser.add_argument('--serial', required=True)
-    parser.add_argument('--phase', required=True, choices=['unsecured', 'write', 'locked', 'read', 'controls', 'force-stop'])
+    parser.add_argument('--phase', required=True, choices=['unsecured', 'write', 'locked', 'read', 'controls', 'force-stop', 'networks'])
     args = parser.parse_args()
     if not 1 <= args.adb_port <= 65535:
         parser.error('Require a valid port for the isolated ADB server.')
@@ -112,8 +112,12 @@ def main():
     if result.returncode or not passed:
         # Never relay arbitrary Android logs or exception messages into test reports.
         completed = re.search(r'^INSTRUMENTATION_RESULT: completed_assertions=(\d+)$', result.stdout, re.M)
+        network = re.search(r'^INSTRUMENTATION_RESULT: network_error=([A-Z_]+)$', result.stdout, re.M)
+        network_code = network.group(1) if network and network.group(1) in {
+            'LAN_NETWORK_CHANGED', 'LAN_NETWORK_PERMISSION_REQUIRED', 'LAN_NETWORK_UNAVAILABLE',
+            'LAN_NETWORK_UNSUPPORTED', 'HOST_BACKGROUND', 'HOST_CLOSED'} else 'unavailable'
         parser.exit(1, f'FAIL: Android {args.phase}; completed assertions: '
-                    f'{completed.group(1) if completed else "unavailable"}.\n')
+                    f'{completed.group(1) if completed else "unavailable"}; network error: {network_code}.\n')
     print(f'PASS: Android {args.phase}; {assertions.group(1)} assertions.')
 
 

@@ -245,3 +245,18 @@ suite does not access a provider account or perform UDP discovery. Android AAR
 inspection requires all 13 C functions and credential JNI initialization.
 Platform interface/permission selection, Flutter consent and physical acceptance
 remain pending.
+
+## Android assigned-interface selection
+
+`scripts/verify_android_store.py` now also compiles and runs
+`NativeLanNetworksTest` against the production helper, using fictional metadata
+and a monotonic test clock. It covers address/transport eligibility, ambiguous
+assignments, exact revalidation, selection ownership, expiry, lifecycle races,
+fixed errors and redacted display. The existing credential JVM/JNI checks remain.
+
+The isolated APK's `networks` phase reads actual disposable-emulator connectivity
+metadata and exercises selection/lifecycle behavior. It requires a provisioned
+virtual interface and checks that `INTERNET` is denied. The builder requires
+exactly `ACCESS_NETWORK_STATE`; Python counterexamples reject extra, duplicate,
+missing or differently scoped permissions. This does not test appliance traffic,
+Android 16/17 socket authorization, Flutter controller wiring or physical phones.

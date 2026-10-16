@@ -9,9 +9,31 @@ import zipfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 from build_android_native import ABIS, SYMBOLS, inspect_library, package_aar
+from build_android_acceptance import validate_acceptance_permissions
 
 
 class AndroidPackageTests(unittest.TestCase):
+    def test_acceptance_permissions_remain_metadata_only(self):
+        allowed = "uses-permission: name='android.permission.ACCESS_NETWORK_STATE'\n"
+        validate_acceptance_permissions("package: fictional\n" + allowed)
+        for denied in ['', allowed * 2, allowed + "uses-permission: name='android.permission.INTERNET'\n",
+                       allowed.replace('ACCESS_NETWORK_STATE', 'ACCESS_FINE_LOCATION'),
+                       allowed.replace('uses-permission:', 'uses-permission-sdk-23:')]:
+            with self.subTest(denied=denied), self.assertRaises(ValueError):
+                validate_acceptance_permissions(denied)
+
+    def test_missing_platform_helper_preserves_previous_archive(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            output = root / 'core.aar'
+            output.write_bytes(b'previous archive')
+            jar = root / 'classes.jar'
+            with zipfile.ZipFile(jar, 'w') as classes:
+                classes.writestr('org/homeverb/NativeCredentials.class', b'fictional class')
+            with self.assertRaises(ValueError):
+                package_aar(output, {}, jar)
+            self.assertEqual(output.read_bytes(), b'previous archive')
+
     def inspect(self, abi, changes=None):
         reports = {
             '--file-header': f'Machine: {ABIS[abi][1]}\n',
@@ -60,6 +82,7 @@ class AndroidPackageTests(unittest.TestCase):
             jar = root / 'classes.jar'
             with zipfile.ZipFile(jar, 'w') as classes:
                 classes.writestr('org/homeverb/NativeCredentials.class', b'fictional class')
+                classes.writestr('org/homeverb/NativeLanNetworks.class', b'fictional class')
             libraries = {}
             for abi in ABIS:
                 library = root / f'{abi}.so'
@@ -85,6 +108,7 @@ class AndroidPackageTests(unittest.TestCase):
             for extra in [True, False]:
                 with zipfile.ZipFile(jar, 'w') as classes:
                     classes.writestr('org/homeverb/NativeCredentials.class', b'fictional class')
+                    classes.writestr('org/homeverb/NativeLanNetworks.class', b'fictional class')
                     if extra:
                         classes.writestr('org/homeverb/TestCredentials.class', b'fictional test')
                 with self.assertRaises(ValueError if extra else FileNotFoundError):

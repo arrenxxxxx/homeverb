@@ -183,5 +183,9 @@
   "lan.scan.not_observed": "No matching candidate was observed.",
   "lan.scan.incomplete": "The scan was incomplete. No candidate was selected.",
   "lan.scan.ambiguous": "Conflicting candidates were found. No candidate was selected.",
-  "lan.scan.unique_candidate": "One candidate was found. Device verification and connection setup are still required."
+  "lan.scan.unique_candidate": "One candidate was found. Device verification and connection setup are still required.",
+  "error.LAN_NETWORK_PERMISSION_REQUIRED": "Allow network-state access before selecting a local network.",
+  "error.LAN_NETWORK_UNAVAILABLE": "Android network information is unavailable. Try again in the foreground.",
+  "error.LAN_NETWORK_CHANGED": "The selected network changed or expired. Select it again and review a new scan preview.",
+  "error.LAN_NETWORK_UNSUPPORTED": "Local scanning is unavailable with the current VPN route. Cloud operations remain separate."
 }

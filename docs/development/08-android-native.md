@@ -65,8 +65,8 @@ image or published release.
 The `android-native` job in [the MVP workflow](../../.github/workflows/mvp.yml)
 runs on pushes and pull requests on Ubuntu 24.04. It installs Rust 1.96.0, Temurin JDK 21,
 Android API 35 stubs and NDK r28c (28.2.13676358), fetches the locked dependencies,
-then runs the existing offline scripts. The job first checks the 54 synthetic
-encrypted-entry assertions and the Rust/JNI bridge. It then builds and inspects
+then runs the existing offline scripts. The job checks synthetic encrypted-entry
+and network-selection assertions, plus the Rust/JNI credential bridge. It then builds and inspects
 the arm64, x86_64 and combined AAR variants, including export and ELF alignment
 checks. `RUSTUP_TOOLCHAIN` also pins Cargo invocations inside the Python scripts.
 
@@ -112,6 +112,95 @@ account input through the protected connection function, and preserve foreground
 cancellation behavior. An uninstalled backend returns `SECRET_STORE_UNAVAILABLE`.
 Do not infer current key access from successful installation or API availability:
 the device may subsequently lock or invalidate keys.
+
+## Select an assigned LAN interface
+
+The production AAR includes `org.homeverb.NativeLanNetworks` under
+[ADR-0059](../adr/0059-android-lan-network-selection.md). It is a local Android
+metadata helper for API 1.18's [trusted scan bridge](../native-ui-contract.md#trusted-local-network-scan-api-118),
+not a scanner, platform authorization result or connection-link implementation.
+Construction performs no network query and starts backgrounded.
+
+The trusted Android controller owns the helper and its Selection objects:
+
+1. Construct it with the application context. Mirror actual foreground changes
+   with `setForeground`, alongside `homeverb_set_foreground`; close both owners
+   when disposing the native controller. Neither owner forwards lifecycle events
+   to the other. Background/close invalidates every previously returned selection.
+2. On an explicit foreground action, call `snapshot()` on a worker. Present the
+   returned interface, transport and local address/prefix. Keep the actual chosen
+   object in controller memory; do not reconstruct it from Dart/model JSON,
+   persist it or log its fields. An empty list means no unambiguous supported
+   assignment was returned, not that appliances are absent.
+3. Before preparing the native scan, call `requireCurrent(selection)`. Copy
+   `getLocalAddress()` (an unsigned IPv4 value represented as Java `long`) and
+   `getPrefixLength()` to the dedicated C arguments. Do not byte-swap the numeric
+   value or use DNS resolution. `getAddressText()` is for the local preview only.
+4. Show the native immutable device/network preview and obtain user consent.
+   Recheck the same Selection with `requireCurrent` immediately before native
+   confirmation. On failure, discard the native preview, select a current network
+   and obtain new consent. Never silently replace a selected network or reuse its
+   consent after a background transition.
+
+Selections last 60 monotonic seconds. Validation checks the exact Android network,
+interface, IPv4 address, prefix and transport, plus owner/lifecycle/expiry. Wi-Fi
+and Ethernet need not be Internet-validated. Other transports, ambiguous address
+assignments and the active default VPN are not admitted. No listener, callback,
+background polling, process-wide network binding, socket or permission prompt is
+created. Android calls are synchronous on the worker and cannot be preempted;
+foreground/close updates do not wait for them and late results are rejected.
+
+`Failure.getCode()` contains a fixed locale/error code; it never includes Android
+exception text. `toString()` is redacted. `LAN_NETWORK_PERMISSION_REQUIRED` refers
+only to metadata permission. The AAR declares normal `ACCESS_NETWORK_STATE` and
+the existing `INTERNET`; it does not add location, Wi-Fi scan or nearby-device
+runtime permissions. This helper does not check or grant local-socket authority.
+
+The controller must follow the
+[official local-network permission guidance](https://developer.android.com/privacy-and-security/local-network-permission)
+before invoking native discovery: Android 16's opt-in protection uses
+`NEARBY_WIFI_DEVICES`; Android 17 requires `ACCESS_LOCAL_NETWORK` when targeting
+SDK 37 or higher. Do not request the latter for a lower target SDK. Keep these
+runtime prompts in the mobile app and recheck permission after user interaction.
+Network changes after a check and socket permission failures remain possible;
+no successful metadata lookup authenticates an appliance or makes a LAN route.
+
+### Verify network metadata without socket permission
+
+The `networks` phase of the isolated APK requires a disposable emulator with an
+assigned direct Wi-Fi/Ethernet IPv4 interface. It reads Android link properties,
+checks selection ownership and foreground/close invalidation, and verifies that
+`INTERNET` is denied. It never invokes UDP discovery, credential lookup or control:
+
+```bash
+adb -P 5047 -s emulator-5588 shell svc wifi enable
+adb -P 5047 -s emulator-5588 shell ip -4 addr
+.venv/bin/python scripts/verify_android_acceptance.py \
+  --adb-port 5047 --serial emulator-5588 --phase networks
+```
+
+The APK builder permits exactly `ACCESS_NETWORK_STATE`, with no other permission.
+Run those setup commands only on the dedicated disposable emulator and wait for
+its assigned non-loopback IPv4 address before the phase. Use the cleanup procedure
+below. A booted emulator without a
+usable network must fail this phase; do not weaken the nonempty-selection check.
+Physical phones, Android 16/17 permission enforcement, Flutter controller/consent
+and actual local-network communication remain separate acceptance gates.
+
+On October 16, 2026, AOSP Android 15 x86_64 passed 19 network-selection assertions
+with the metadata-only APK. The existing unsecured/control phases passed 17/93
+assertions. Initial attempts failed the nonempty-selection check; diagnostics
+showed only loopback and no active network. Enabling virtual Wi-Fi and waiting
+for the disposable emulator's assigned IPv4 address made the unchanged production
+helper pass. This readiness wait belongs to the test host, never the app.
+The package, emulator and dedicated ADB server were removed/stopped afterwards.
+
+The Linux JVM additionally passed 70 fictional selection assertions and the
+existing 54 encrypted-entry assertions; the Rust/JNI credential test passed.
+All three AAR variants included the new production helper and passed exports/
+alignment inspection. The rebuilt APK passed signature, exact metadata-only
+permissions and 16 KiB ZIP alignment. No household scan, account or appliance
+was used, and these results do not verify Android 16/17 permission enforcement.
 
 ## Persistence, failure and lifecycle
 
@@ -189,8 +278,9 @@ adb -P 5047 -s emulator-5588 install -t target/android/homeverb-native-acceptanc
 Replace the example port/serial with the dedicated emulator's values after checking
 its AVD name. The builder uses an ephemeral development signing key; rebuilding
 requires uninstalling the old test package and restarting all phases. The APK
-requests no permissions, including Internet, disables backup, has no application
-UI and includes only production credential classes plus the test harness. The
+requests only `ACCESS_NETWORK_STATE` for local metadata inspection, never
+`INTERNET`. It disables backup, has no application UI and includes only
+production platform classes plus the test harness. The
 builder verifies native exports, signature, exact ABI libraries and 16 KiB ZIP
 alignment before replacing its output. Test classes and JNI wrappers never enter
 the production AAR.
@@ -253,8 +343,8 @@ It calls the production C ABI through test-only JNI wrappers to verify:
   original request proves that the original operation is not sent again.
 
 Every test profile is local to the disposable APK. This phase does not call the
-Meiju provider, obtain LAN credentials or send appliance traffic. The test APK
-still has no permissions, while production AAR contents and C exports are unchanged.
+Meiju provider, obtain LAN credentials or send appliance traffic. That control phase used a permission-free test APK. The later metadata-selection
+phase adds only `ACCESS_NETWORK_STATE`; C exports remain unchanged.
 This phase tests session reopening. The separate force-stop phase below covers
 process termination on the emulator; physical-phone acceptance remains separate.
 

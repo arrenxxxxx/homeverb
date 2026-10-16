@@ -17,6 +17,16 @@ ARGV = ['verify', '--adb-port', '5047', '--serial', 'emulator-5588', '--phase', 
 
 
 class AndroidAcceptanceTests(unittest.TestCase):
+    def test_network_failure_exports_only_fixed_codes(self):
+        for value, expected in [('LAN_NETWORK_UNAVAILABLE', 'LAN_NETWORK_UNAVAILABLE'),
+                                ('PRIVATE_NETWORK_DETAIL', 'unavailable')]:
+            result = f'INSTRUMENTATION_RESULT: network_error={value}\n'
+            code, output, _ = self.invoke([subprocess.CompletedProcess([], 0, '1\n', ''),
+                                          subprocess.CompletedProcess([], 0, result, '')], 'networks')
+            self.assertEqual(code, 1)
+            self.assertIn(f'network error: {expected}', output)
+            self.assertNotIn('PRIVATE', output)
+
     def invoke(self, replies, phase='write'):
         output = io.StringIO()
         with patch('sys.argv', ARGV[:-1] + [phase]), patch.object(MODULE.subprocess, 'run', side_effect=replies) as run:
@@ -29,7 +39,7 @@ class AndroidAcceptanceTests(unittest.TestCase):
             return code, output.getvalue(), run.call_args_list
 
     def test_physical_device_is_refused_before_instrumentation(self):
-        for phase in ['write', 'force-stop']:
+        for phase in ['write', 'force-stop', 'networks']:
             with self.subTest(phase=phase), patch.object(MODULE.subprocess, 'Popen') as start:
                 code, _, calls = self.invoke([subprocess.CompletedProcess([], 0, '0\n', '')], phase)
                 self.assertNotEqual(code, 0)

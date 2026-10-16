@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="org.homeverb.nativeacceptance">
     <uses-sdk android:minSdkVersion="28" android:targetSdkVersion="35" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <application android:label="HomeVerb Native Acceptance" android:debuggable="true"
         android:testOnly="true" android:allowBackup="false" android:extractNativeLibs="false"
         android:usesCleartextTraffic="false" />

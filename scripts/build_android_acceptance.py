@@ -12,6 +12,12 @@ import zipfile
 from build_android_native import ABIS, ROOT, inspect_library
 
 
+def validate_acceptance_permissions(report):
+    permissions = [line.strip() for line in report.splitlines() if 'uses-permission' in line]
+    if permissions != ["uses-permission: name='android.permission.ACCESS_NETWORK_STATE'"]:
+        raise ValueError('The acceptance APK may inspect network metadata but must not have Internet or other permissions.')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--aar', required=True, type=Path)
@@ -86,8 +92,7 @@ def main():
         run(args.build_tools / 'zipalign', '-c', '-P', '16', '4', signed)
         permissions = subprocess.check_output(
             [str(args.build_tools / 'aapt2'), 'dump', 'permissions', str(signed)], text=True)
-        if 'uses-permission' in permissions:
-            raise ValueError('The acceptance APK must not request permissions.')
+        validate_acceptance_permissions(permissions)
         with zipfile.ZipFile(signed) as apk:
             native = {name for name in apk.namelist() if name.startswith('lib/')}
             if apk.testzip() or native != {f'lib/{args.abi}/{name}' for name in
@@ -95,7 +100,7 @@ def main():
                 raise ValueError('Unexpected acceptance APK contents.')
         shutil.copyfile(signed, work / output.name)
         (work / output.name).replace(output)
-    print(f'PASS: signed test-only {args.abi} APK, no permissions, 16 KiB ZIP alignment: {output}')
+    print(f'PASS: signed test-only {args.abi} APK, network-state permission only, 16 KiB ZIP alignment: {output}')
     print('Building this APK does not prove Android runtime, Keystore or phone acceptance.')
 
 

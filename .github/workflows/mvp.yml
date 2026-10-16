@@ -49,7 +49,7 @@ jobs:
           rustup toolchain install 1.96.0 --profile minimal --target aarch64-linux-android --target x86_64-linux-android
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "platforms;android-35" "ndk;28.2.13676358"
           cargo fetch --locked
-      - name: Verify the credential engine and JNI bridge
+      - name: Verify platform helpers and the credential JNI bridge
         run: |
           python scripts/verify_android_store.py \
             --android-jar "$ANDROID_HOME/platforms/android-35/android.jar" \

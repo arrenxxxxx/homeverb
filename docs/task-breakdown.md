@@ -44,8 +44,11 @@ composes selected-device discovery/reconciliation through typed Rust Session
 preview and consuming confirmation. Synthetic tests cover lifecycle, identity,
 lease and deadline boundaries. It does not fetch keys, read state or publish a
 route. API 1.18 adds the [three trusted C scan functions](adr/0058-native-lan-scan-bridge.md)
-with bounded, one-use previews and endpoint-free results. Mobile interface/permission
-selection, consent UI and the remaining model/endpoint/linking gates are unfinished.
+with bounded, one-use previews and endpoint-free results. Android's
+`NativeLanNetworks` now supplies foreground assigned-interface selections and
+exact revalidation under [ADR-0059](adr/0059-android-lan-network-selection.md).
+Flutter controller/permission integration, consent UI and the remaining
+model/endpoint/linking gates are unfinished.
 
 The selected refrigerator's [write evidence review](development/05-midea.md#refrigerator-write-evidence)
 establishes model-specific manual bounds but leaves encoder preservation and

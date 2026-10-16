@@ -39,6 +39,10 @@
 | CONNECTION_LINK_EXPIRED | The native connection preview reached its 60-second monotonic expiry | Review a new preview and obtain fresh consent |
 | LAN_SCAN_INVALID | The native scan preview belongs to another Session or its lifecycle/device context changed | Review a new device/network preview before confirming |
 | LAN_SCAN_EXPIRED | The native scan preview reached its 60-second monotonic expiry | Obtain fresh foreground consent using a new preview |
+| LAN_NETWORK_PERMISSION_REQUIRED | Android denied access to network-state metadata | Integrate the normal ACCESS_NETWORK_STATE permission; this is separate from socket/runtime permission |
+| LAN_NETWORK_UNAVAILABLE | Android connectivity metadata could not be read | Retry explicitly in the foreground; never substitute a guessed interface |
+| LAN_NETWORK_CHANGED | An Android selection is foreign, expired, invalidated or no longer exactly assigned | Discard the native scan preview, select a current interface and obtain new consent |
+| LAN_NETWORK_UNSUPPORTED | The Android default route is a VPN | Keep local scanning unavailable; cloud access follows its existing policy |
 | AMBIGUOUS_DEVICE | Duplicate alias | Require an exact ID |
 | ROOM_NOT_FOUND | Unknown local room ID | Reload rooms before assigning or editing |
 | ROOM_NAME_CONFLICT | Room name already exists after lowercasing | Choose a distinct name |

@@ -344,7 +344,9 @@ Before enabling a product route, complete these separate gates:
    consent, with mobile permission/lifecycle acceptance. The typed Rust preview
    and consuming scan are implemented under ADR-0054; API 1.18 adds the separate
    [trusted C scan bridge](../adr/0058-native-lan-scan-bridge.md). Platform interface
-   selection, permissions and consent UI are still pending. Private address
+   selection has an Android assigned-interface helper under
+   [ADR-0059](../adr/0059-android-lan-network-selection.md); Flutter controller,
+   runtime-permission and consent integration remain pending. Private address
    syntax is not proof of interface ownership. Do not ask ordinary JSON callers to
    supply private addresses, keys or a confirmation boolean.
 2. Establish endpoint/account identity evidence and exact model/profile selection.

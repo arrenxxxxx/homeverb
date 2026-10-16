@@ -16,8 +16,10 @@ device and selected native network, then consume the 60-second preview only afte
 actual user consent. Preparation performs local protected preflight; confirmation
 collects bounded hints for that device. API 1.18 adds the
 [trusted C scan bridge](#trusted-local-network-scan-api-118); ordinary JSON and
-CLI/MCP cannot scan. Flutter permission/interface selection and consent remain
-pending. A unique candidate neither adds a LAN card/route nor authorizes credentials,
+CLI/MCP cannot scan. The Android AAR provides
+[assigned-interface selection](development/08-android-native.md#select-an-assigned-lan-interface);
+Flutter controller/runtime-permission integration and consent remain pending.
+A unique candidate neither adds a LAN card/route nor authorizes credentials,
 state queries or controls. Scan consent and connection-link consent are separate.
 
 Branch from a commit containing both the Mock MVP and this contract. Put the Flutter application in `apps/mobile/`; do not copy Rust code into the app. The UI worktree owns Flutter views, routing, accessibility, local UI preferences, Dart FFI wrappers, and mobile build configuration. Core work owns native methods, schemas, capability semantics, storage, adapters, and their fixtures. Agree on schema changes before depending on them. Each verified phase is a separate English Conventional Commit; a local commit does not imply a push.
@@ -1153,3 +1155,13 @@ Use the existing C string ownership and worker-thread rules. These functions are
 not an in-process sandbox and must not be exposed to model/plugin/remote callers.
 Flutter platform selection/permission, consent integration, authenticated
 endpoint/model admission, linking and physical acceptance remain separate work.
+
+On Android, use the AAR's `NativeLanNetworks` helper for assigned-interface
+snapshots and exact selection revalidation. Its Java lifecycle is mirrored
+alongside the native Session; neither instance drives the other automatically.
+Keep Selection objects in the trusted Android controller and invoke
+`requireCurrent` before preparation and confirmation. Copy only their unsigned
+numeric IPv4/prefix into the dedicated C arguments. A helper failure invalidates
+the UI flow: discard its native preview and obtain a new selection/consent.
+Socket/runtime permission remains the app's responsibility; this metadata helper
+does not grant or prove it. See [ADR-0059](adr/0059-android-lan-network-selection.md).

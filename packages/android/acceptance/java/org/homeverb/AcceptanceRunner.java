@@ -75,6 +75,8 @@ public final class AcceptanceRunner extends Instrumentation {
                 readAndClean(context);
             } else if ("controls".equals(phase)) {
                 new ControlAcceptance(this, context).run();
+            } else if ("networks".equals(phase)) {
+                new NetworkAcceptance(this, context).run();
             } else if ("crash_prepare".equals(phase)) {
                 new CrashAcceptance(this, context, arguments.getString("run_id", "")).prepare();
             } else if ("force-stop".equals(phase)) {
@@ -91,6 +93,9 @@ public final class AcceptanceRunner extends Instrumentation {
             result.putString("homeverb_result", "FAIL");
             result.putInt("completed_assertions", assertions);
             result.putString("native_error", nativeError);
+            if (failure instanceof NativeLanNetworks.Failure) {
+                result.putString("network_error", ((NativeLanNetworks.Failure) failure).getCode());
+            }
             finish(Activity.RESULT_CANCELED, result);
         }
     }

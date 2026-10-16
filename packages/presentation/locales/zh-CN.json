@@ -183,5 +183,9 @@
   "lan.scan.not_observed": "未发现匹配的候选设备。",
   "lan.scan.incomplete": "扫描结果不完整，未选择候选设备。",
   "lan.scan.ambiguous": "发现相互冲突的候选设备，未选择任何设备。",
-  "lan.scan.unique_candidate": "发现一个候选设备，仍需验证设备并配置连接。"
+  "lan.scan.unique_candidate": "发现一个候选设备，仍需验证设备并配置连接。",
+  "error.LAN_NETWORK_PERMISSION_REQUIRED": "请先允许读取网络状态，再选择局域网。",
+  "error.LAN_NETWORK_UNAVAILABLE": "无法读取 Android 网络信息，请在应用前台重试。",
+  "error.LAN_NETWORK_CHANGED": "所选网络已变化或过期，请重新选择并核对新的扫描预览。",
+  "error.LAN_NETWORK_UNSUPPORTED": "当前 VPN 路由下无法进行局域网扫描，云端操作不受此扫描限制影响。"
 }

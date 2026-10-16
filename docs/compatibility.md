@@ -1363,3 +1363,50 @@ phone was accessed by this phase. Mobile interface/permission selection, Flutter
 consent, endpoint/model admission, connection linking and physical/off-LAN
 acceptance remain pending. This phase is committed and pushed after local checks;
 its remote CI is inspected separately.
+
+## Android assigned-network selection
+
+[ADR-0059](adr/0059-android-lan-network-selection.md) adds the production Java
+`NativeLanNetworks` helper to all Android AAR variants. It reads assigned
+Wi-Fi/Ethernet IPv4 link properties on explicit foreground calls and returns
+instance-owned, immutable, expiring selections. `requireCurrent` rechecks the
+exact network/interface/address/prefix/transport tuple before native preparation
+and confirmation. Background/close invalidates selections without waiting for
+platform calls. Conflicting local-address assignments, unsupported transports
+and an active default VPN cannot select a route. Platform failures export only
+fixed codes; Selection and helper `toString` output is redacted.
+
+The helper owns no socket, listener, permission prompt or worker. It provides
+metadata evidence, not socket authority, peer authentication or scan consent.
+The production manifest adds normal `ACCESS_NETWORK_STATE` alongside existing
+`INTERNET`. Flutter still owns controller/lifecycle wiring and applicable Android
+16/17 runtime permission under the linked official guidance. Native API 1.18,
+33 ordinary methods, 13 C exports, Rust/storage/grant/cloud semantics are unchanged.
+
+On October 16, 2026, the Linux JVM passed 70 fictional network-selection assertions
+and the existing 54 encrypted-entry assertions; the explicit Rust/JNI credential
+test passed. All three AARs compiled production Java and passed ABI, 14-export,
+archive and 16 KiB ELF checks. Package tests now reject a missing platform helper
+without replacing a previous archive.
+
+The rebuilt isolated APK permits exactly `ACCESS_NETWORK_STATE`, without
+`INTERNET`. It passed Java/C compilation, signature, ABI and 16 KiB ZIP checks.
+A fresh AOSP Android 15 x86_64 emulator passed 19 actual network-metadata
+assertions, followed by the existing 17 unsecured and 93 control assertions.
+Initial attempts had no usable selection; emulator diagnostics showed only
+loopback and no active network. Enabling virtual Wi-Fi and waiting for its
+assigned address satisfied the test precondition without changing production
+selection rules or adding app polling. The test package, emulator and dedicated
+ADB server were cleaned up. No household discovery or account access occurred.
+
+Regression checks passed: 447 Rust tests with two explicitly ignored probes,
+formatting, Clippy, workspace/example builds, 35 runtime checks, 33 native methods
+with 54 fictional examples and trusted-function checks, 42 Python tests, six
+presentation tests and document/contract/repository/commit validation. Both CI
+workflows for the previous `5e0b848` commit were confirmed successful.
+
+Physical phones, Android 16/17 socket permission enforcement, Flutter integration,
+authenticated endpoint/model admission, actual LAN routes and real/off-LAN
+appliance acceptance remain pending. This phase accessed no real account,
+appliance or separate Flutter worktree. Its commit/push and remote CI are checked
+after local acceptance; no package is published.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compile the Android credential package and exercise synthetic JVM/JNI storage."""
+"""Compile Android platform helpers and exercise synthetic network selection and JVM/JNI storage."""
 
 import argparse
 import os
@@ -28,12 +28,14 @@ def main():
                         *map(str, sources)], check=True, cwd=ROOT)
         subprocess.run([str(java), '-ea', '-cp', directory,
                         'org.homeverb.EncryptedEntriesTest'], check=True, cwd=ROOT)
+        subprocess.run([str(java), '-ea', '-cp', os.pathsep.join([directory, str(args.android_jar)]),
+                        'org.homeverb.NativeLanNetworksTest'], check=True, cwd=ROOT)
         environment = {**os.environ, 'JAVA_HOME': str(args.java_home),
                        'HOMEVERB_ANDROID_TEST_CLASSES': directory}
         subprocess.run(['cargo', 'test', '-p', 'homeverb-secrets', '--offline', '--locked',
                         'android::tests::jvm_bridge', '--', '--ignored', '--exact'],
                        check=True, cwd=ROOT, env=environment)
-    print('PASS: Android Java compilation and synthetic JVM/JNI storage; no Android Keystore or phone acceptance.')
+    print('PASS: Android Java compilation, synthetic network selection and JVM/JNI storage; no Android Keystore or phone acceptance.')
 
 
 if __name__ == '__main__':

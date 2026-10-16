@@ -56,9 +56,9 @@ def build_library(tools, abi):
 
 def package_aar(output, libraries, jar):
     with zipfile.ZipFile(jar) as contents:
-        if ('org/homeverb/NativeCredentials.class' not in contents.namelist()
+        if (not {'org/homeverb/NativeCredentials.class', 'org/homeverb/NativeLanNetworks.class'}.issubset(contents.namelist())
                 or any('Test' in name for name in contents.namelist())):
-            raise ValueError('Require production-only credential classes.')
+            raise ValueError('Require production-only Android platform classes.')
     output.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='.homeverb-aar-', dir=output.parent) as directory:
         pending = Path(directory) / output.name

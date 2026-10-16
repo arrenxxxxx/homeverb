@@ -64,6 +64,13 @@ fictional material and no Internet permission. Android storage must use the
 reviewed Bionic file-lock path; standard Rust file locking is unsupported there.
 See the [Android acceptance guide](docs/development/08-android-native.md).
 
+The Android AAR also supplies `NativeLanNetworks` for explicit foreground
+assigned-interface snapshots and exact revalidation. Selections expire and are
+invalidated by background/close; they never grant socket permission or scan
+consent. Its Android 15 metadata acceptance APK has `ACCESS_NETWORK_STATE` only,
+without `INTERNET`; no discovery or appliance traffic is used. Flutter controller
+and Android 16/17 runtime-permission integration remain pending.
+
 Current checks:
 
 ```bash
