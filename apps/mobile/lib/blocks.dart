@@ -37,7 +37,7 @@ class Blocks extends StatelessWidget {
       case 'note':
         final note = Padding(
           padding: const EdgeInsets.fromLTRB(2, 2, 2, 10),
-          child: Copy('${b[1]}', color: muted),
+          child: Copy('${b[1]}', color: muted, paragraph: true),
         );
         return b.length > 2
             ? Semantics(

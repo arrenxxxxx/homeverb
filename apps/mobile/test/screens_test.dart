@@ -381,6 +381,51 @@ void main() {
     },
   );
 
+  testWidgets('paragraphs preserve fractional line height across wrapping', (
+    tester,
+  ) async {
+    Future<void> check(double scale) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: windowTheme(),
+          home: Scaffold(
+            body: MediaQuery(
+              data: MediaQueryData(textScaler: TextScaler.linear(scale)),
+              child: const SizedBox(
+                width: 346,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Copy(
+                      'First line\nSecond line\nThird line',
+                      paragraph: true,
+                    ),
+                    Copy('A two-line\nparagraph', size: 14, paragraph: true),
+                    Copy(
+                      '2 devices retrieved. Unsupported models remain visible. An empty result does not delete older saved cards.',
+                      paragraph: true,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final copies = find.byType(Copy);
+      expect(tester.getSize(copies.at(0)).height, closeTo(54.6 * scale, .001));
+      expect(tester.getSize(copies.at(1)).height, closeTo(39.2 * scale, .001));
+      expect(tester.getTopLeft(copies.at(2)).dy, closeTo(93.8 * scale, .001));
+      if (scale == 1) {
+        expect(tester.getSize(copies.at(2)).height, closeTo(36.4, .001));
+      }
+      expect(tester.takeException(), isNull);
+    }
+
+    await check(1);
+    await check(2);
+  });
+
   testWidgets('long card names retain semantics without covering readings', (
     tester,
   ) async {

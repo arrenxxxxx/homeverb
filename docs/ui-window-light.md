@@ -46,6 +46,14 @@ layout. Stepper symbols are centered vector marks in both implementations. A
 32-pixel visible pill retains a 48-pixel interaction area, including wrapped runs.
 The change does not alter actions, state or native permissions.
 
+Explanatory paragraphs reserve their specified 1.4 line-height multiple using
+the actual wrapped line count and system text scale. Keep fractional logical
+heights: three 13-point lines occupy 54.6 logical pixels, not 54. This prevents
+small rounding errors from shifting later controls. Native text and its semantics
+remain intact; this rule does not replace the separately centered control text
+or change the existing title layout.
+
+
 All 82 raster references and 21 boards were regenerated for this explicit design
 revision. This is not automatic acceptance of Flutter differences. The strict
 comparison remains a separate gate in the [verification report](../apps/mobile/verification.md).

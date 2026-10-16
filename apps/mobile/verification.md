@@ -65,7 +65,7 @@ Controller/FFI tests additionally cover persisted reopen, accepted/verified/fail
 
 The screenshot test captures every ID at the reference size: 780 x 1688, or 2048 x 1536 for W01/W02. It loads the licensed Inter fonts and approved product/background assets. All text, controls and semantics are widgets; complete screen images are never used as the app interface. Test status/navigation chrome is deterministic artwork, not a captured phone OS.
 
-The latest complete comparison has **0 of 82 exact matches**, with mean absolute channel error **1.3958 / 255**, down from 6.1482 before rendering refinements. Native switches now use the prototype's accent/gray tracks and light thumbs. A lower average alone does not establish correct states or layouts. These metrics measure differences, not an acceptance tolerance. Text rasterization, icons, surfaces, controls and layout still differ. P08's base result now follows the combined account/retrieval contract in both the independently rendered atlas and the Flutter catalog; its remaining pixel differences are still failures.
+The latest complete comparison has **0 of 82 exact matches**, with mean absolute channel error **1.3467 / 255**, down from 6.1482 before rendering refinements. Native switches now use the prototype's accent/gray tracks and light thumbs. A lower average alone does not establish correct states or layouts. These metrics measure differences, not an acceptance tolerance. Text rasterization, icons, surfaces, controls and layout still differ. P08's base result now follows the combined account/retrieval contract in both the independently rendered atlas and the Flutter catalog; its remaining pixel differences are still failures.
 
 The latest shared-widget refinement aligns the non-root header, raises button labels to the reference position, and measures actual label/value font widths before wrapping rows. Fan and refrigerator preview steppers now expose separate increase/decrease controls with explicit preview-only feedback. The added interaction check clicks all six controls without changing page or claiming a native write. All 29 Flutter tests, static analysis and the Linux release build passed after this refinement.
 
@@ -836,3 +836,49 @@ Logs: `/tmp/homeverb-p08-tests.log`, `/tmp/homeverb-p08-analyze.log`,
 `/tmp/homeverb-p08-pixels.log` and `/tmp/homeverb-p08-release.log`.
 No real account, appliance, physical phone or iOS test was performed. This phase
 does not complete strict visual acceptance or the full original goal.
+
+## Fractional paragraph heights — October 16, 2026
+
+A regression test reproduced a three-line 13-point paragraph occupying 54 logical
+pixels instead of the specified 54.6. The paragraph layout now measures its actual
+wrapped lines using the inherited font metrics and system text scale, then retains
+the fractional 1.4 line-height multiple. Only explanatory note blocks opt in;
+existing titles and vertically centered controls keep their established layout.
+Text remains a native Text widget with its semantics and wrapping intact.
+
+The regression covers explicit lines, natural wrapping, successive block origins,
+13- and 14-point sizes, and 100%/200% text. The full **76-test** suite and static
+analysis passed after narrowing the change to paragraph blocks. This includes
+all 82 screenshot states, 201 simulated branches, native Mock fixture interactions,
+account results and narrow/large-text/high-contrast checks.
+
+Strict comparison still fails: **0/82 exact**, mean channel error **1.3467/255**
+(previously 1.3958). Twenty-nine screens improve, 43 are unchanged and ten regress.
+P08 improves from 3.0031 to 1.6800; its primary button's top pixel at x=100 now
+matches reference y=708 instead of the previous y=706. The remaining one-pixel
+bottom-edge difference is still visible. S09 improves from 1.8609 to 1.4386.
+The largest remaining regressions are C14 (+0.2463) and D03 (+0.1356); their
+reference/before/after images were inspected and preserved. Fractional logical
+geometry does not establish identical glyph rasterization or pixel-aligned paint.
+No prototype images, screenshot tolerances or native contracts changed.
+
+Evidence: `output/flutter-verification/paragraph-comparison.json` and
+`paragraph-P08.png`, `paragraph-C14.png`, `paragraph-D03.png` in the same directory.
+Logs: `/tmp/homeverb-paragraph-before.log` (reproduced failure),
+`/tmp/homeverb-paragraph-tests-final.log`, `/tmp/homeverb-paragraph-analyze.log`
+and `/tmp/homeverb-paragraph-pixels-final.log`.
+
+The full Android native Mock click journey passed on API 35 x86_64 in 2m18s.
+Its text input, file picker and lifecycle transitions remain injected test inputs,
+not physical keyboard or operating-system picker acceptance. Integration teardown
+removed the test package before its on-device screenshot folder could be copied;
+no complete Android screenshot archive is claimed for that run. The retained log
+is `/tmp/homeverb-paragraph-android.log`.
+
+The ordinary dual-ABI development release rebuilt successfully, passed 16 KiB
+ZIP alignment, and was installed and cold-launched after test teardown. Both Core
+libraries are byte-identical to the preceding validated APK. Native pointer
+clicks opened Settings > Connections; its wrapped explanation was inspected,
+and Save Preference returned to Settings with Auto retained. The capture is
+`output/flutter-verification/android/paragraph-release-connections.png`.
+There was no real account, physical appliance, physical phone or iOS execution.

@@ -82,13 +82,14 @@ class Copy extends StatelessWidget {
     this.bold = false,
     this.center = false,
     this.control = false,
+    this.paragraph = false,
     this.maxLines,
     super.key,
   });
   final String text;
   final double size;
   final Color color;
-  final bool bold, center, control;
+  final bool bold, center, control, paragraph;
   final int? maxLines;
   @override
   Widget build(BuildContext context) {
@@ -115,36 +116,52 @@ class Copy extends StatelessWidget {
         style: style,
       );
     }
-    final measure = TextPainter(
-      text: TextSpan(text: text, style: style),
-      textDirection: Directionality.of(context),
-      textScaler: MediaQuery.textScalerOf(context),
-      textHeightBehavior: const TextHeightBehavior(
-        applyHeightToFirstAscent: false,
-        applyHeightToLastDescent: false,
-      ),
-    )..layout();
-    final glyphHeight = measure.height;
-    measure.textHeightBehavior = const TextHeightBehavior();
-    measure.layout();
-    final leading = math.max(0.0, measure.height - glyphHeight);
-    measure.dispose();
-    return Padding(
-      padding: EdgeInsets.only(bottom: leading),
-      child: Transform.translate(
-        offset: Offset(0, -size * .20),
-        child: Text(
-          text,
-          textAlign: center ? TextAlign.center : TextAlign.start,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const heightBehavior = TextHeightBehavior(
+          applyHeightToFirstAscent: false,
+          applyHeightToLastDescent: false,
+        );
+        final scaler = MediaQuery.textScalerOf(context);
+        final measuredStyle = DefaultTextStyle.of(context).style.merge(style);
+        final measure = TextPainter(
+          text: TextSpan(text: text, style: paragraph ? measuredStyle : style),
+          textDirection: Directionality.of(context),
+          textScaler: scaler,
           maxLines: maxLines,
-          overflow: maxLines == null ? null : TextOverflow.ellipsis,
-          textHeightBehavior: const TextHeightBehavior(
-            applyHeightToFirstAscent: false,
-            applyHeightToLastDescent: false,
+          ellipsis: maxLines == null ? null : '…',
+          textHeightBehavior: heightBehavior,
+        )..layout(maxWidth: paragraph ? constraints.maxWidth : double.infinity);
+        final glyphHeight = measure.height;
+        final double leading;
+        if (paragraph) {
+          // Preserve the specified line box despite native paragraph rounding.
+          final lineHeight = scaler.scale(textSize) * 1.4;
+          leading = math.max(
+            0.0,
+            measure.computeLineMetrics().length * lineHeight - glyphHeight,
+          );
+        } else {
+          measure.textHeightBehavior = const TextHeightBehavior();
+          measure.layout();
+          leading = math.max(0.0, measure.height - glyphHeight);
+        }
+        measure.dispose();
+        return Padding(
+          padding: EdgeInsets.only(bottom: leading),
+          child: Transform.translate(
+            offset: Offset(0, -size * .20),
+            child: Text(
+              text,
+              textAlign: center ? TextAlign.center : TextAlign.start,
+              maxLines: maxLines,
+              overflow: maxLines == null ? null : TextOverflow.ellipsis,
+              textHeightBehavior: heightBehavior,
+              style: style,
+            ),
           ),
-          style: style,
-        ),
-      ),
+        );
+      },
     );
   }
 }
