@@ -1,6 +1,10 @@
 # Platform and protocol adapter contract
 
-The implemented Mock subset is the Rust `Adapter` trait in [Core](../crates/core/src/lib.rs). Authentication, manifests for real protocols, and bounded device subscriptions remain future adapter work.
+The Rust `Adapter` trait in [Core](../crates/core/src/lib.rs) is implemented by Mock
+and the experimental Meiju cloud adapter. Meiju has separate native account/login
+functions; the generic authentication/manifest/subscription interfaces below remain
+design pseudocode. Native LAN helpers are not registered device routes; follow the
+[current integration boundaries](development/05-midea.md#remaining-route-admission-work).
 
 ## Responsibilities
 

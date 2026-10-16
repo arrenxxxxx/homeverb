@@ -27,7 +27,15 @@ T15 does not establish real-platform sharing support. Its security and compatibi
 
 Use the [progressive guides](index.md). UI development can proceed against the native room/card request contract and locale catalogs. Local organization, schema migration, detailed-receipt retention, and the native account vault with Linux secret-store composition are implemented. The owner selected Midea/Hualing air conditioners, dishwashers, and refrigerators. Follow the [pinned community-source integration plan](development/05-midea.md): secure account connection and automatic cloud device retrieval, cloud reads through Core, authorized cloud writes with physical evidence, then additional LAN connections. The complete mobile journey must work away from home without a gateway or manual IP/Token entry. A read-only stage or LAN-only control does not complete T10.
 
-Research and offline contract/protocol implementation can proceed before exact model details arrive; account/region evidence gates real authentication and model/firmware evidence gates physical compatibility claims. The inspected refrigerator LAN setter is empty, while cloud mappings include compartment temperature settings; assess those routes separately. Mobile needs its own secure-store implementation. Preserve specific blockers for live access and mobile tooling. Authorization sharing remains gated by ADR-0008.
+Research and offline contract/protocol implementation can proceed before exact model details arrive; account/region evidence gates real authentication and model/firmware evidence gates physical compatibility claims. The inspected refrigerator LAN setter is empty, while cloud mappings include compartment temperature settings; assess those routes separately. Android storage has synthetic/emulator evidence; physical-phone acceptance and iOS storage remain pending. Preserve specific blockers for live access and mobile tooling. Authorization sharing remains gated by ADR-0008.
+
+The [LAN integration sequence and remaining gates](development/05-midea.md#implemented-native-lan-building-blocks)
+separate implemented helpers from unfinished endpoint/model admission, trusted
+network selection, explicit connection linking and physical acceptance. Core's
+ordinary rediscovery intentionally rejects a new connection on an established
+device; a reviewed linking path is required before publishing the additional route.
+The source's default AC decoder and the six cloud models do not establish a LAN
+model allowlist. These gaps do not require reimplementing the completed codecs.
 
 The selected refrigerator's [write evidence review](development/05-midea.md#refrigerator-write-evidence)
 establishes model-specific manual bounds but leaves encoder preservation and

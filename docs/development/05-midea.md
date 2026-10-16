@@ -2,13 +2,13 @@
 
 The owner selected Midea and Hualing air conditioners, dishwashers, and refrigerators as the first real-device scope. The primary journey uses appliances already bound in Midea Meiju: authorize that account inside HomeVerb, automatically retrieve its accessible devices, and read/control supported capabilities through Midea's cloud at home or away. HomeVerb has no account of its own. Re-pairing, manual IP/Token entry, and a home gateway are not prerequisites.
 
-Daily cloud control is required in the first real integration. LAN is an additional route for the same physical devices, not a substitute for cloud control. The owner has physical products; exact models, firmware, app version, and account region remain to be recorded. This guide records scoped implementation and source evidence on October 15, 2026; no model is physically verified.
+Daily cloud control is required in the first real integration. LAN is an additional route for the same physical devices, not a substitute for cloud control. A mainland account and six exact cloud model/family pairs have been observed. Firmware, app-version and model-specific physical acceptance remain incomplete. This guide reflects implementation through October 16, 2026; no model is physically verified.
 
-The native read protocols are implemented in [homeverb-midea](../../crates/midea/src/lib.rs): account-scoped home/appliance retrieval, code/data validation, deduplication, partial inventory failure, and bounded cloud-state decoding for the three selected families. The inventory/state decoders use an injected read transport and synthetic responses with the inspected wire fields. Native password login, signing, session-key decoding and restricted HTTPS are now implemented under ADR-0022 and tested against fictional responses and a local TLS server. One real mainland account has passed the read-only login/inventory probe below; the exact-model read-only Core adapter is available through `core-inspect`, and native API 1.1.0 startup selection. Native API 1.2.0 also provides protected account connection and local list/refresh; Flutter input and mobile secure stores remain pending. See [ADR-0020](../adr/0020-midea-cloud-inventory.md) and [ADR-0023](../adr/0023-meiju-cloud-state-evidence.md).
+The native read protocols are implemented in [homeverb-midea](../../crates/midea/src/lib.rs): account-scoped home/appliance retrieval, code/data validation, deduplication, partial inventory failure, and bounded cloud-state decoding for the three selected families. The inventory/state decoders use an injected read transport and synthetic responses with the inspected wire fields. Native password login, signing, session-key decoding and restricted HTTPS are now implemented under ADR-0022 and tested against fictional responses and a local TLS server. One real mainland account has passed the read-only login/inventory probe below; the exact-model read-only Core adapter is available through `core-inspect` and native startup selection. The current [native API 1.14.1](../native-ui-contract.md) provides protected connection, account management and explicit refresh/recovery. Android storage has synthetic JVM and isolated emulator evidence; Flutter input, physical phone acceptance and iOS storage remain pending. See [ADR-0020](../adr/0020-midea-cloud-inventory.md) and [ADR-0023](../adr/0023-meiju-cloud-state-evidence.md).
 
 The native account vault now persists random local references, composes Linux secure storage, and coordinates session read/update work through account leases. Meiju's private account payload also preserves appliance-to-local-ID bindings with the session. Interrupted or uncertain updates remain pending until trusted validation and recovery. Native API 1.7 provides an explicit [recovery and retrieval flow](../native-ui-contract.md#recover-interrupted-account-storage) that validates saved material without another login. The explicit native connection coordinator now uses this storage and the admitted login client; real account identity and session validity still require live acceptance. See [ADR-0021](../adr/0021-persistent-account-vault.md), [ADR-0024](../adr/0024-meiju-private-device-bindings.md) and the [credential integration guide](04-add-adapter.md#integrate-native-credentials).
 
-The next implemented phase adds an explicitly opted-in AC `power.set` path and
+The implemented experimental controls include an explicitly opted-in AC `power.set` path and
 [preview-first control probe](07-meiju-control.md). Its Core grants and TLS send
 progress are synthetic-tested. Native API 1.9 also adds independent vendor fan controls with exact-device/code grants.
 API 1.12 adds protected-profile AC temperature control; API 1.12.1 also uses that
@@ -234,142 +234,95 @@ exercised the production adapter on October 15, 2026: six real cards and seven C
 component reads succeeded with zero failures. No controls were sent. Unit/integration
 tests separately cover exact and unsupported models, forged admission, partial and
 empty retrieval, historical cross-account conflicts, preserved preferences/cache,
-secure-store unavailability, cancellation/deadlines and lease release. Native UI
-API 1.1.0 adds explicit Meiju startup while preserving the Mock default and existing
-22 request methods. SQLite schema 3 is unchanged; see the [Flutter handoff](../native-ui-contract.md#real-meiju-read-only-startup).
+secure-store unavailability, cancellation/deadlines and lease release. The current native UI API 1.14.1 retains explicit Meiju startup and the Mock default,
+with 31 JSON methods and SQLite schema 4. See the [Flutter handoff](../native-ui-contract.md#real-meiju-read-only-startup)
+for current callable contracts; the original read-only probe is not evidence for
+subsequently added controls.
 
 ## Daily cloud control and the additional LAN route
 
-HomeVerb connects directly to Midea's servers for cloud reads and writes; the appliance must remain reachable through that vendor service. The phone can be on mobile data or another external network. No HA installation, home computer, NAS, project backend, VPN, LAN scan, or local-network permission is required for this cloud journey. A viable independent native authentication path is still required.
+HomeVerb connects directly to Midea's servers for cloud reads and writes; the appliance must remain reachable through that vendor service. The phone can be on mobile data or another external network. No HA installation, home computer, NAS, project backend, VPN, LAN scan, or local-network permission is required for this cloud journey. The admitted mainland native authentication path is implemented under ADR-0022; provider changes, other regions and real reauthorization remain separate acceptance conditions.
 
 The [LAN setup documentation][ha] describes cloud onboarding to retrieve Token/Key material, followed by local operation. The [library connection code][device-source] uses a token/key handshake for V3; its V2 path does not invoke that handshake. Discovery, transport version, and appliance-message version are separate concerns. LAN-only credential import may support a separate local workflow; it does not satisfy the required account/cloud journey.
 
 Use one physical Device with cloud and, when established safely, LAN connections. Preserve existing [routing rules](../routing-and-execution.md): explicit cloud works independently of LAN, explicit LAN never falls back, and Auto chooses a permitted action-supported route with LAN preferred when available. Never race writes or replay a possibly-sent write on another route. A cloud API success is not physical verification; keep accepted or uncertain outcomes honest when fresh evidence is unavailable.
 
-### LAN discovery foundation
+### Implemented native LAN building blocks
 
-`homeverb_midea::lan` implements the fixed discovery request and a pure, bounded
-V2/V3-wrapped response decoder under
-[ADR-0045](../adr/0045-bounded-lan-discovery-decoding.md). Independent fictional
-packets cover AC, E1, CA and unknown family hints. The decoder checks inner length,
-checksum, AES padding, the six-byte ID, TCP port and SSID family; datagrams are
-limited to 512 bytes. The endpoint uses the supplied datagram peer address.
+The following functions are implemented and tested with fictional data. None is invoked by
+ordinary Core discovery, native JSON, CLI or MCP, and none publishes a LAN route.
+The sequence below describes integration dependencies, not an enabled App flow.
 
-Candidates are native-only, redacted and unauthenticated. The public checksum and
-wire key do not prove identity; serial, MAC, SSID and model text are discarded.
-The decoder itself opens no sockets or connections. The separate `discover`
-function accepts a trusted `DiscoveryNetwork` built from an assigned private or
-link-local interface address and prefix after network consent. It sends one probe
-to each reviewed port on that subnet, receives for at most five seconds within
-the inherited Operation, and releases its socket on every exit. Reports retain
-conflicting hints and expose `limit_reached` at 64 candidates or 256 datagrams.
-They are not complete account inventories and never remove existing cards.
+| Step | Callable implementation | Evidence and boundary |
+|---|---|---|
+| Collect hints | `lan::discover(network, operation)` and `decode_discovery` | [ADR-0045](../adr/0045-bounded-lan-discovery-decoding.md): explicit private/link-local subnet, five-second total window, 64 candidates/256 datagrams, cancellation and socket closure. V2/V3 hints are unauthenticated; V1 XML is unsupported |
+| Match the saved device | `MeijuAccount::reconcile_lan_candidate(selected, network, report, operation)` | [ADR-0050](../adr/0050-protected-lan-candidate-reconciliation.md): exact protected binding and listed membership; `NotObserved`, `Incomplete`, `Ambiguous` or a borrowed `UniqueCandidate`. No keys, networking, identity merge or route publication |
+| Resolve V3 credentials | `MeijuAccount::lan_v3_handshake(transport, selected, method, operation)` | [ADR-0047](../adr/0047-account-bound-lan-credentials.md): fresh complete cloud home listing, one consistent target and one v2 token lookup. Explicit big/little-endian UDP-ID method; no default key, v1 fallback, alternate method, persistence or peer connection |
+| Process V3 frames | `V3Handshake`, `V3Session`, `v3_frame_len` | [ADR-0046](../adr/0046-bounded-v3-lan-codec.md): protected buffers, bounded frames, direction/digest checks and nonwrapping request counters. No identity, freshness or acknowledgement inference |
+| Process ordinary packets | `encode_lan_packet`, `decode_lan_packet`, `lan_packet_len` | [ADR-0048](../adr/0048-bounded-lan-packet-envelopes.md): bounded envelopes and expected six-byte target checks. Public AES/checksum material does not authenticate a peer |
+| Perform one admitted exchange | `lan::exchange_v3` | [ADR-0046](../adr/0046-bounded-v3-lan-codec.md): one operation-owned TCP connection; command-send progress survives uncertainty. No retry, acceptance inference or persistent session |
+| Query one AC candidate | `lan::query_ac_v3` | [ADR-0051](../adr/0051-bounded-ac-lan-read-sequence.md): one handshake, appliance-message version query, then one AC query on the same connection. Both replies validate expected target and inner context; one inherited deadline and per-packet clock reads |
 
-Loopback tests cover the collector; no real LAN scan has been performed. No native
-JSON method, startup scan or LAN connection is registered. Host network selection
-and consent, protected identity reconciliation, token/key retrieval and inner
-packet/model codecs remain next gates. V1 XML is
-unsupported, and physical LAN acceptance remains unverified.
+Credential lookup requires cloud connectivity. Protected inner session version 2
+retains the original login client identifier needed by this request. Legacy inner
+session version 1 still supports existing cloud reads/controls but requires
+explicit same-account reauthorization before LAN credential lookup. It is not
+silently rewritten. Outer protected payload 3 and SQLite schema 4 remain unchanged.
+Older binaries cannot read inner session version 2.
 
-### V3 handshake and frame codec
+The composed query takes an already-admitted endpoint, protected handshake,
+expected private target, injected `Clock`, explicit query sequence and existing
+`Operation`. It does not select an endpoint or obtain credentials. Appliance
+message version is negotiated before the status query; it is distinct from outer
+V3 transport and is not a model/subtype identifier. Failure at either query,
+cancellation, deadline or drop closes the socket without retry or partial state.
 
-[ADR-0046](../adr/0046-bounded-v3-lan-codec.md) implements native `V3Handshake`,
-`V3Session` and the bounded `v3_frame_len` helper. Explicit protected token/key
-buffers produce a handshake request; one valid response derives a session key.
-The session encodes type-6 requests and checks type-3 responses before releasing
-plaintext, including aligned payloads where the digest must still count toward
-frame length. Frames are capped at 4096 bytes, and request counters never wrap
-within a session. Keys and packet contents are excluded from Debug and JSON.
+The pure `encode_appliance_query`/`decode_appliance_protocol` helpers admit AC,
+E1 and CA message-version frames. Only the AC composed status query exists.
+`encode_ac_status_query` and `decode_ac_c0_status` implement the standard AC/C0
+path under [ADR-0049](../adr/0049-ac-lan-query-and-c0-decoding.md). Their raw
+mode/fan codes and optional ambient values have no proven observation time.
+`query_ac_v3` returns these native `AcC0Status` candidates, not a Core Snapshot.
+No E1/CA LAN status mapping, LAN control encoder or physical support is implied.
 
-Independent fictional vectors cover the wire codec. It opens no TCP socket and
-does not fetch, persist or guess credentials. Key confirmation and response
-sequence numbers do not prove device identity, freshness or physical execution.
-Protected account binding, response correlation and inner packet/model evidence
-remain required before route admission.
+### Remaining route-admission work
 
-### Operation-owned TCP exchange
+Do not call the sequence above automatically after a unique discovery result.
+Public IDs/checksums and saved membership do not authorize credential transmission.
+Before enabling a product route, complete these separate gates:
 
-`exchange_v3` performs one direct TCP connection, handshake, request and response
-within the supplied Operation, then releases the socket. The endpoint must be a
-non-self host in the selected subnet with a nonzero port. Header-first bounded
-reads preserve fragmented/coalesced frame boundaries. No step resets the budget,
-and no reconnect, retry, background worker or retained connection is introduced.
+1. Implement trusted host selection of an assigned network and foreground network
+   consent, with mobile permission/lifecycle acceptance. Do not ask ordinary JSON
+   callers to supply private addresses, keys or a confirmation boolean.
+2. Establish endpoint/account identity evidence and exact model/profile selection.
+   The [six cloud model mappings](../compatibility.md#observed-cloud-read-models)
+   are not evidence of LAN compatibility. Do not infer a protocol from a brand,
+   marketing name, an A0 message-version reply or a successful public checksum.
+3. Add an explicit, reviewed connection-linking path that preserves the existing
+   physical device, its cloud connection and local organization. Ordinary Core
+   rediscovery currently rejects added or replaced connections under
+   [ADR-0013](../adr/0013-preserve-device-connection-identity.md); bypassing that
+   guard or creating a duplicate card is not route integration.
+4. Map only model-supported fields into declared component capabilities, with
+   honest stale/freshness semantics. Register the route only after identity and
+   contract validation; do not weaken cloud routing or uncertain-write rules.
+5. Validate exact-model behavior on authorized hardware, then perform separately
+   authorized controls and off-LAN cloud acceptance. Fictional vectors and
+   loopback peers do not satisfy this gate.
 
-The helper marks possible command transmission only after the handshake and before
-writing the command frame. Handshake failures remain command-not-sent; later
-failures retain possible transmission. Even a valid response does not establish
-acceptance, device identity, freshness or physical execution. Protected identity,
-membership, grants and exact-model admission must precede this low-level native
-call. Fictional loopback tests verify transport behavior; no real LAN route or
-native JSON method is enabled. Endpoint identity reconciliation,
-inner model validation and physical acceptance remain pending.
+The pinned AC source illustrates why model selection matters:
 
-### Account-bound V3 credentials
+| Protected source profile | Source evidence | Consequence for HomeVerb |
+|---|---|---|
+| Product `22013279` | C0 temperatures can be stale; a separate 0x7e temperature layout is model-scoped | Do not publish its C0 temperatures as usable model observations; that alternative decoder is not implemented |
+| Product `23096633`, subtype `1` | The source selects BB queries and model-specific offsets | Do not select the standard composed C0 path for this profile; BB is not implemented |
+| Product `22251759`, subtype `32773` | The source notes useful C0 outdoor temperature and warns that another model's 0x7e mapping would suppress it | This is a field-specific source observation, not certification of all fields or the owner's appliances |
+| Other or missing profile evidence | The upstream implementation has defaults and runtime detection | Defaults are not exact-model evidence; HomeVerb has no admitted LAN model table yet |
 
-[ADR-0047](../adr/0047-account-bound-lan-credentials.md) adds the native
-`MeijuAccount::lan_v3_handshake` helper. Supply the exact local `DeviceBinding`
-and explicitly select `LanUdpIdMethod::BigEndian` or `LittleEndian`. The helper
-checks protected membership/session/region, lists at most 32 homes, and requires
-one target occurrence with consistent family, model and product evidence before
-requesting `/v2/iot/secure/getToken` once. The body contains the resolved string
-`homegroupId`, one-element `applianceCodes` array and derived `udpid`, plus the
-reviewed general app fields, UTC stamp and original login client identifier.
-
-New logins retain that identifier in protected inner session version 2. Legacy
-version-1 sessions still support existing cloud reads/controls and are not rewritten
-by restoration or this lookup. The new helper refuses them with `AUTH_REQUIRED`
-before networking; explicit same-account reauthorization supplies the missing
-identifier while preserving local bindings. Outer payload version 3 and SQLite
-schema 4 are unchanged. Older binaries cannot use inner session version 2.
-
-Only one matching token entry is admitted. The returned opaque `V3Handshake`
-uses zeroizing credential ownership; no token/key or home identifier is saved,
-and no account inventory is republished. This operation requires cloud access.
-There is no v1 fallback, default key, automatic alternate method, retry or LAN
-connection. Scripted fictional tests exercise failure, ambiguity, lifecycle and
-unchanged-storage cases. No native JSON method or registered route calls it yet.
-Endpoint reconciliation, permissions, inner model codecs and physical acceptance
-remain necessary before these credentials can be used against a real peer.
-
-### Ordinary LAN packet envelopes
-
-[ADR-0048](../adr/0048-bounded-lan-packet-envelopes.md) adds pure native helpers
-for the `5a5a` envelope carried inside V3 traffic. `encode_lan_packet` requires
-the expected native appliance ID, protected inner message and explicit UTC time.
-`decode_lan_packet` validates one complete ordinary envelope against the expected
-six-byte ID, checksum and strict PKCS#7 padding before returning protected bytes.
-`lan_packet_len` only reports a bounded prefix length for future stream assembly.
-The 4040-byte packet/3983-byte plaintext limits fit the existing V3 frame cap.
-
-The public AES-ECB key and salted MD5 are compatibility material, not authentication.
-The helpers do not distinguish inner request/response/discovery semantics, decode
-model properties, correlate replies or mark writes accepted/verified. Do not use
-the outgoing timestamp or reserved ID-adjacent bytes as observation/identity proof.
-Inner message validation and protected endpoint/route admission remain required.
-Seven positive and sixteen negative independent vectors, all truncation lengths,
-identity and timestamp bounds, and nested V3 packets have fictional evidence only.
-
-### Standard AC queries and C0 candidates
-
-[ADR-0049](../adr/0049-ac-lan-query-and-c0-decoding.md) adds
-`encode_ac_status_query(protocol_version, sequence)` and
-`decode_ac_c0_status(expected_protocol_version, message)`. The encoder builds one
-standard 0x41 query with an explicit sequence (1..253), body CRC-8 and AA sum
-checksum. The decoder accepts one length/checksum-valid AC query/C0 frame with
-the expected protocol byte. It returns redacted native candidates for power,
-raw mode/fan codes, target Celsius and optional indoor/outdoor Celsius values.
-
-Missing sensors remain unknown; nonzero decimals follow the source's signed
-truncation rule only for extended bodies. Invalid decimals and explicit Fahrenheit
-are refused. Set acknowledgements, notifications and alternate formats are not
-silently parsed as this query response. No process counter, retry or socket is added.
-
-These values have no observation timestamp or proven freshness and do not publish
-capabilities or snapshots. The source explicitly warns that product 22013279 has
-stale C0 temperatures and other profiles need BB/new-protocol paths. Future route
-admission must select protected model/profile evidence before using the decoder.
-Physical compatibility, endpoint admission and model-specific field validation
-remain separate work; existing cloud behavior and native UI contracts are unchanged.
+See the pinned [AC device source][ac-device-source]. No correspondence between
+these source profiles and the owner's six marketing models has been established
+by this repository's LAN work. Do not read private account data or contact an
+appliance merely to fill this documentation gap.
 
 ## Fit the embedded Core
 
@@ -427,6 +380,7 @@ CloudState retains account/appliance identity privately and has redacted Debug w
 [e1-guide]: https://github.com/georgezhao2010/midea_ac_lan/blob/7c5231ca0588d364aa30e3bb2b887b37d4359719/doc/E1.md
 [ca-guide]: https://github.com/georgezhao2010/midea_ac_lan/blob/7c5231ca0588d364aa30e3bb2b887b37d4359719/doc/CA.md
 [ac-source]: https://github.com/midea-lan/midea-local/blob/ef28169926914d15f40fe521b9cc3d3c2f553c59/midealocal/devices/ac/message.py
+[ac-device-source]: https://github.com/midea-lan/midea-local/blob/ef28169926914d15f40fe521b9cc3d3c2f553c59/midealocal/devices/ac/__init__.py
 [e1-source]: https://github.com/midea-lan/midea-local/blob/ef28169926914d15f40fe521b9cc3d3c2f553c59/midealocal/devices/e1/__init__.py
 [ca-source]: https://github.com/midea-lan/midea-local/blob/ef28169926914d15f40fe521b9cc3d3c2f553c59/midealocal/devices/ca/__init__.py
 [device-source]: https://github.com/midea-lan/midea-local/blob/ef28169926914d15f40fe521b9cc3d3c2f553c59/midealocal/device.py
@@ -469,26 +423,3 @@ code. Tests use fictional accounts and do not access the saved pilot profile.
 See the [Flutter contract](../native-ui-contract.md#profile-scoped-dishwasher-starts-api-114)
 for dynamic fields, confirmation and accepted/unknown receipts. Physical/off-LAN
 behavior and preservation of other settings remain acceptance work.
-
-## Reconcile a LAN hint with a saved account
-
-Use `MeijuAccount::reconcile_lan_candidate` with the selected `DeviceBinding`,
-explicit `DiscoveryNetwork`, `DiscoveryReport` and existing `Operation`.
-It reads the protected map under the account lease and performs no networking.
-Handle all four `LanCandidateMatch` variants: `NotObserved`, `Incomplete`,
-`Ambiguous` and `UniqueCandidate`. The last borrows private protocol hints only;
-it does not create a second card or add a connection to the cloud descriptor.
-See [ADR-0050](../adr/0050-protected-lan-candidate-reconciliation.md) for conflict
-and report validation rules. Do not turn a successful match into automatic token
-transmission. Trusted endpoint admission, model evidence and network consent
-remain prerequisites for a future composed route; cloud model admission is not
-LAN compatibility. Public native JSON methods do not expose this helper yet.
-
-For an already-admitted native endpoint and protected handshake, `query_ac_v3`
-performs one bounded connection with appliance-message negotiation before the
-standard AC query. Supply the expected private target, injected `Clock`, explicit
-query sequence and existing `Operation`. Do not hardcode the message version or
-confuse it with outer V3 transport. The result is still `AcC0Status` candidates,
-subject to the model-specific stale C0/BB caveats; it is not a Core observation.
-The helper neither obtains keys nor turns a discovery match into endpoint
-authorization. See [ADR-0051](../adr/0051-bounded-ac-lan-read-sequence.md).
