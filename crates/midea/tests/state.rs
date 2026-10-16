@@ -622,3 +622,66 @@ async fn scalar_target_decoding_never_overrides_subtype_or_guesses_missing_evide
         );
     }
 }
+
+#[tokio::test]
+async fn additional_observations_require_the_reviewed_profile_and_preserve_unknown_codes() {
+    let key = "vendor.midea.dishwasher.additional";
+    for value in [
+        json!(null),
+        json!(0),
+        json!(9),
+        json!(10),
+        json!(13),
+        json!(14),
+        json!(255),
+        json!("9"),
+    ] {
+        let mut transport = Transport::new("E1", json!({"additional":value}));
+        transport.product = json!({"modelNumber":1,"sn8":"760Y0026"});
+        let state = read(&transport).await.unwrap();
+        let snapshot = state.snapshot("dev-local", "main").unwrap();
+        if value.is_null() {
+            assert!(!snapshot.observations.contains_key(key));
+        } else {
+            let observation = &snapshot.observations[key];
+            assert_eq!(
+                observation.value,
+                if value.is_string() { json!(9) } else { value }
+            );
+            assert!(observation.stale && observation.observed_at.is_none());
+            assert_eq!(observation.source, Route::Cloud);
+        }
+    }
+    for value in [
+        json!(true),
+        json!(-1),
+        json!(9.5),
+        json!("unknown"),
+        json!({}),
+        json!(4294967296_u64),
+    ] {
+        let mut transport = Transport::new("E1", json!({"additional":value}));
+        transport.product = json!({"modelNumber":1,"sn8":"760Y0026"});
+        assert_eq!(
+            read(&transport).await.unwrap_err().code,
+            "MIDEA_RESPONSE_INVALID"
+        );
+    }
+    for profile in [
+        json!({}),
+        json!({"sn8":"760Y0026"}),
+        json!({"modelNumber":1,"sn8":"7600016L"}),
+        json!({"modelNumber":1,"sn8":"76006481"}),
+    ] {
+        let mut transport = Transport::new("E1", json!({"additional":"unreviewed"}));
+        transport.product = profile;
+        let state = read(&transport).await.unwrap();
+        assert!(
+            !state
+                .snapshot("dev-local", "main")
+                .unwrap()
+                .observations
+                .contains_key(key)
+        );
+    }
+}

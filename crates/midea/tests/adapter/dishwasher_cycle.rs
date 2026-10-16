@@ -400,3 +400,56 @@ async fn additional_cycle_options_are_required_and_rechecked_after_public_schema
     }
     assert!(f.wire.controls.lock().unwrap().is_empty());
 }
+
+#[tokio::test]
+async fn read_only_additional_observation_survives_refresh_and_never_becomes_write_authority() {
+    let f = Fixture::new(inventory(json!({"modelNumber":1,"sn8":"760Y0026"}))).await;
+    let device = f.discover().await.remove(0);
+    let descriptor = f.core.describe(&device.id).unwrap();
+    let cap = descriptor.capability("main", CAPABILITY).unwrap();
+    assert_eq!(cap.revision, 5);
+    assert!(cap.actions.is_empty());
+    assert_eq!(cap.properties["additional"]["writable"], false);
+    *f.wire.state.lock().unwrap() = Some(json!({"additional":9}));
+    let observed = f.read(&device, "main", false).await.unwrap();
+    assert_eq!(
+        observed.observations["vendor.midea.dishwasher.additional"].value,
+        9
+    );
+    let mut legacy = descriptor.clone();
+    legacy.capabilities[0].revision = 3;
+    legacy.capabilities[0].properties.remove("additional");
+    f.store.save_device(&legacy).unwrap();
+    assert!(f.read(&device, "main", false).await.is_err());
+    assert_eq!(
+        json!(f.store.snapshot(&device.id, "main").unwrap().unwrap()),
+        json!(observed)
+    );
+    // A later inventory omitting product fields retains protected profile evidence.
+    *f.wire.inventories.lock().unwrap().get_mut("FIRST").unwrap() = inventory(json!({}));
+    f.discover().await;
+    assert_eq!(
+        f.core.describe(&device.id).unwrap().capabilities[0].revision,
+        5
+    );
+    *f.wire.state.lock().unwrap() = Some(json!({"additional":255}));
+    let unknown = f.read(&device, "main", false).await.unwrap();
+    assert_eq!(
+        unknown.observations["vendor.midea.dishwasher.additional"].value,
+        255
+    );
+    *f.wire.state.lock().unwrap() = Some(json!({"additional":false}));
+    assert!(f.read(&device, "main", false).await.is_err());
+    assert_eq!(
+        json!(f.store.snapshot(&device.id, "main").unwrap().unwrap()),
+        json!(unknown)
+    );
+    let enabled = core(&f, &device, true);
+    enabled.discover(&operation()).await.unwrap();
+    assert!(
+        enabled
+            .prepare_user_approval(command(&device, DishwasherCycleAction::PauseCycle))
+            .is_err()
+    );
+    assert!(f.wire.controls.lock().unwrap().is_empty());
+}

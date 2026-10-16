@@ -56,3 +56,15 @@ required/invalid arguments despite forged public schemas, immutable previews and
 cache/receipt preservation. Existing outcome and lifecycle tests remain required.
 Only fictional accounts and local fixtures are used; actual product identity,
 Flutter confirmation, mobile/off-LAN behavior and physical acceptance remain open.
+
+## Read-only observation extension
+
+Capability revision 5 additionally declares optional read-only `additional` only
+for the same protected product 760Y0026, including sessions without write grants.
+Use retained protected profile evidence when a later inventory omits product
+fields. The decoder admits unsigned integer codes, retaining unknown codes as
+observations without expanding writable choices. Missing/null values remain
+absent; malformed recognized values fail the whole snapshot and preserve cache.
+No observation supplies a command argument or approval. Explicit rediscovery is
+required to upgrade old descriptors. API 1.21.0, methods, exports and storage
+formats remain unchanged; other product capabilities keep their revisions.

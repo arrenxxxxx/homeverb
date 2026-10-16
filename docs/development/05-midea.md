@@ -100,6 +100,11 @@ current; reused Lua state adds another dependency. The 310A1792 source also
 changes temperature interpretation under `colmo_cool_freeze_mode`. Do not infer
 an exact-model step or writable contract from these integer vectors.
 
+A follow-up inspection on October 16 also checked the latest refrigerator-path
+commits exposed by the public repositories. The [cloud CA file](https://github.com/sususweet/midea_auto_cloud/blob/72ef689f4f41747f2a110c6bd3062cd096276149/custom_components/midea_auto_cloud/device_mapping/T0xCA.py) is identical to the pinned file and has
+only a `default` mapping. The [LAN CA setter](https://github.com/midea-lan/midea-local/blob/d2e31e44885f81fe82b8d80878fe8b46449abe37/midealocal/devices/ca/__init__.py) still contains only its docstring.
+Neither revision supplies the missing exact-model write evidence.
+
 The write gate is **blocked: exact-model encoder preservation and temperature
 step are unproven**. Continue with public model/codec evidence; do not derive
 control defaults from the manual, enable the generic family mapping, or copy
@@ -491,6 +496,15 @@ Each action has independent startup permission and separate trusted approval,
 with elevated non-idempotent execution, conservative cloud outcomes and no retry,
 pre/post read, cache mutation or copied state. The [native handoff](../native-ui-contract.md#profile-scoped-dishwasher-cycle-operations-api-115)
 defines the versioned startup contract and localized confirmation behavior.
+Revision 5 also reads the optional `additional` code for protected product
+760Y0026. This works in read-only sessions and uses retained protected profile
+evidence across inventories omitting product fields. Explicitly refresh inventory
+after upgrading, then request state on demand. Show known codes with existing
+localized labels; keep unknown codes numeric and missing values unknown. Preserve
+stale cloud evidence and never auto-fill a write from it. Tests cover default
+read-only admission, retained profiles, legacy-descriptor refusal/recovery,
+malformed-value cache preservation and absence of write authority.
+
 Raw optional operator observations remain stale; physical cycle behavior and
 off-LAN acceptance are unverified. This stage uses fictional accounts only.
 
@@ -507,18 +521,21 @@ See the [Flutter contract](../native-ui-contract.md#profile-scoped-dishwasher-st
 for dynamic fields, confirmation and accepted/unknown receipts. Physical/off-LAN
 behavior and preservation of other settings remain acceptance work.
 
-## Explicit cycle-option implementation checkpoint
+## Dishwasher integration checkpoint
 
 The API 1.21 phase extends product 760Y0026 cycle controls with explicit additional
-options, exact startup grants, revision-4 fixtures and both supported confirmation
-locales. The original four cycle profiles retain their contracts. No account or
-appliance was accessed during this phase.
+options, exact startup grants and both supported confirmation locales. The
+read-only extension adds revision-5 fixtures and protected additional-option
+observations. The original four cycle profiles retain their contracts. No account
+or appliance was accessed during these phases.
 
 Local verification on October 16, 2026 passed `cargo test --workspace --offline
---locked` (478 passed; two environment-dependent tests ignored), workspace build,
+--locked` (480 passed; two environment-dependent tests ignored), workspace build,
 Clippy and formatting; `scripts/verify_mvp.py` (35 tests),
 `scripts/verify_native_contract.py` (33 methods, 54 examples and trusted C suites),
-Python tooling tests (62) and presentation tests (6). Documentation, contract and
+presentation tests (7). The preceding control phase also passed 62 Python tooling
+tests and all Linux/Android/iOS jobs in remote run `38882708424` on commit
+`406b212`; those remote results do not verify this subsequent observation change. Documentation, contract and
 repository validation passed. An independent AST inspection of the pinned E1
 source matched all 27 product/action/option combinations. These results establish
 synthetic implementation behavior, not the owner's product identity, Flutter

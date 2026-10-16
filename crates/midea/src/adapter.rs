@@ -78,9 +78,7 @@ fn descriptors(
     let temperature = profile
         .filter(|_| adapter.ac_temperature)
         .and_then(crate::ProductProfile::temperature);
-    let dishwasher = profile
-        .filter(|_| adapter.dishwasher || adapter.dishwasher_cycle)
-        .and_then(crate::ProductProfile::dishwasher);
+    let dishwasher = profile.and_then(crate::ProductProfile::dishwasher);
     let family = appliance
         .model
         .as_deref()
@@ -153,13 +151,17 @@ fn descriptors(
                 ],
             );
             cycle.revision = 3;
+            if dishwasher == Some(crate::dishwasher::DishwasherProfile::Additional) {
+                cycle.revision = 5;
+                cycle.properties.insert(
+                    "additional".into(),
+                    json!({"type":"integer","readable":true,"writable":false}),
+                );
+            }
             if let Some(profile) = dishwasher.filter(|_| adapter.dishwasher) {
                 cycle.actions.insert("start_cycle".into(), profile.action());
             }
             if let Some(profile) = dishwasher.filter(|_| adapter.dishwasher_cycle) {
-                if profile == crate::dishwasher::DishwasherProfile::Additional {
-                    cycle.revision = 4;
-                }
                 for action in crate::DISHWASHER_CYCLE_ACTIONS {
                     cycle
                         .actions
@@ -527,7 +529,15 @@ impl MeijuAdapter {
                 }
             }
             if let Some(bound) = bound {
-                let profiles = if self.ac_temperature || self.dishwasher || self.dishwasher_cycle {
+                let profiles = if self.ac_temperature
+                    || self.dishwasher
+                    || self.dishwasher_cycle
+                    || bound
+                        .inventory
+                        .appliances
+                        .iter()
+                        .any(|appliance| appliance.family == ApplianceFamily::Dishwasher)
+                {
                     account.product_profiles(operation).await?
                 } else {
                     Default::default()

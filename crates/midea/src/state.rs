@@ -265,6 +265,17 @@ fn decode(
         }
         ApplianceFamily::Dishwasher => {
             let readings = output.entry("main").or_default();
+            if appliance.product_profile.dishwasher()
+                == Some(crate::dishwasher::DishwasherProfile::Additional)
+            {
+                field(
+                    readings,
+                    data,
+                    "additional",
+                    "vendor.midea.dishwasher.additional",
+                    vendor_code,
+                )?;
+            }
             for wire in ["mode", "work_status", "operator"] {
                 field(
                     readings,

@@ -1654,3 +1654,11 @@ No C signatures, ordinary methods, SQLite or protected-payload versions change.
 Older native libraries reject the new grant field. This is synthetic evidence,
 not a match to the owner's product or physical/off-LAN support. Product 7600016L
 and refrigerator writes remain unadmitted.
+
+The subsequent read-only extension gives that protected product capability
+revision 5, including sessions without write grants, and adds optional raw
+`vendor.midea.dishwasher.additional` observations. Known labels use existing
+locales; unknown codes remain visible without becoming writable. Old descriptors
+must be explicitly refreshed; malformed new values preserve the previous cache.
+API 1.21.0 and storage/export formats remain unchanged. Other product profiles
+neither gain this property nor inherit its code meanings.

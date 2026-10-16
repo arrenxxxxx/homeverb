@@ -971,7 +971,7 @@ confirmation. When `additional` is required, demand an explicit selection using
 `vendor.midea.dishwasher.additional.<code>` and display the corresponding
 `vendor.midea.dishwasher.<action>.confirmAdditional` text with `{device}` and
 `{additional}` from the immutable preview. The operation sets that option; never
-claim the cached setting was preserved. See the revision-4
+claim the cached setting was preserved. See the revision-5
 [capability](../examples/capability.meiju-dishwasher-cycle-additional.json) and
 [command](../examples/command.meiju-dishwasher-cycle-additional.json) examples.
 Resume may consume water/heat; cancellation may terminate a program.
@@ -983,6 +983,14 @@ capability revision 3 includes optional read-only raw `operator` as well as
 `work_status`, with unproven cloud freshness. Never infer a running/paused boolean,
 optimistically change the card, retry an uncertain action or immediately request
 another action as compensation. A later explicit read is separate evidence.
+For protected product 760Y0026, revision 5 also declares optional read-only
+`vendor.midea.dishwasher.additional`. Display known codes using the existing
+option labels and unknown codes numerically. Missing/null is unknown, never zero.
+The cloud timestamp remains unproven: show its stale marker and never use this
+observation to fill command arguments or bypass explicit selection/confirmation.
+An explicit inventory refresh upgrades saved descriptors before reading the new
+property; opening alone does not. Other product profiles do not expose this field.
+
 There are no new ordinary methods or C/JNI symbols. Flutter consent UI, exact
 owner-product match and physical/off-LAN behavior remain pending.
 

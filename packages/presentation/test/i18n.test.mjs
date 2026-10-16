@@ -102,3 +102,21 @@ test('numeric observations use property-specific labels without changing values 
   assert.equal(presentObservation(observation, 'en-US', 'vendor.midea.ac.wind_speed').label, 'Auto');
   assert.deepEqual(observation, original);
 });
+
+test('dishwasher option observations keep unknown codes and stale evidence', () => {
+  for (const locale of supportedLocales) {
+    const translator = createTranslator(locale);
+    for (const value of [0, 9, 10, 13, 14, 255]) {
+      const observation = { value, stale: true, observed_at: null, received_at: '2026-10-16T01:00:00Z' };
+      const shown = presentObservation(observation, locale, 'vendor.midea.dishwasher.additional');
+      assert.equal(shown.value, value);
+      assert.equal(shown.label, value === 255 ? translator.number(value)
+        : translator.t(`vendor.midea.dishwasher.additional.${value}`));
+      assert.equal(shown.stale, true);
+      assert.equal(shown.observedAt, null);
+      assert.equal(shown.receivedAt, observation.received_at);
+    }
+    assert.equal(presentObservation(null, locale, 'vendor.midea.dishwasher.additional').label,
+      translator.t('device.unknown'));
+  }
+});

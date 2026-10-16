@@ -426,3 +426,9 @@ grants remain `POLICY_DENIED`. Other unreviewed centralized profiles remain
 unsupported for these actions. Missing or malformed operator observations never
 become a successful cycle-state confirmation; malformed recognized data preserves
 the previous cache through the existing whole-snapshot failure rule.
+
+For protected dishwasher product 760Y0026, malformed non-null `additional`
+observations return `MIDEA_RESPONSE_INVALID`; the whole previous snapshot remains
+unchanged. Missing/null values are absent, and valid unknown unsigned codes are
+observable without granting a corresponding write. An old descriptor without the
+new property still fails Core snapshot admission until explicit rediscovery.
