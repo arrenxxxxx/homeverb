@@ -1172,4 +1172,5 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get mobileNotSupportedYet => '\u6682\u4e0d\u652f\u6301';
 	@override String get mobileSelectingModeTurnsOn => '\u9009\u62e9\u6a21\u5f0f\u4e5f\u4f1a\u5f00\u542f\u7a7a\u8c03\u3002';
 	@override String get mobileUpdatingDevice => '\u6b63\u5728\u66f4\u65b0\u8bbe\u5907\u2026';
+	@override String mobileUnrecognizedControlValue({required Object value}) => '\u672a\u8bc6\u522b\uff08${value}\uff09';
 }

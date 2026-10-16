@@ -3452,4 +3452,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Updating device\u2026'
 	String get mobileUpdatingDevice => 'Updating device\u2026';
+
+	/// en-US: 'Unrecognized ({value})'
+	String mobileUnrecognizedControlValue({required Object value}) => 'Unrecognized (${value})';
 }

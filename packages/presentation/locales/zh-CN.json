@@ -1137,5 +1137,6 @@
   "mobile.airDirection": "风向",
   "mobile.notSupportedYet": "暂不支持",
   "mobile.selectingModeTurnsOn": "选择模式也会开启空调。",
-  "mobile.updatingDevice": "正在更新设备…"
+  "mobile.updatingDevice": "正在更新设备…",
+  "mobile.unrecognizedControlValue": "未识别（{value}）"
 }

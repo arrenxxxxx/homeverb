@@ -92,13 +92,19 @@ class _ClimateControlsState extends State<ClimateControls>
     if (sheet != null && sheet.mounted) Navigator.of(sheet).pop();
   }
 
-  Object choiceValue(ClimateChoice? choice) => choice == null
-      ? 'Not supported yet'
-      : propertyValue(
-          c.observed(choice.property),
-          choice.capability['properties']?[choice.parameter] as Json? ?? {},
-          propertyId: choice.property,
-        );
+  Object choiceValue(ClimateChoice? choice) {
+    if (choice == null) return 'Not supported yet';
+    final observed = c.observed(choice.property);
+    final value = propertyValue(
+      observed,
+      choice.capability['properties']?[choice.parameter] as Json? ?? {},
+      propertyId: choice.property,
+    );
+    if (observed != null && !choice.values.contains(observed)) {
+      return UiMessage('Unrecognized ({value})', {'value': value});
+    }
+    return value;
+  }
 
   Future<void> choose(String title, ClimateChoice choice) async {
     if (c.busy || !c.isForeground) return;
@@ -216,7 +222,7 @@ class _ClimateControlsState extends State<ClimateControls>
 
     Widget button(
       String title,
-      IconData icon,
+      Widget icon,
       ClimateChoice? choice,
     ) => OutlinedButton(
       key: ValueKey('climate-button:$title'),
@@ -228,7 +234,7 @@ class _ClimateControlsState extends State<ClimateControls>
       onPressed: c.busy || choice == null ? null : () => choose(title, choice),
       child: Column(
         children: [
-          Icon(icon, size: 26, color: choice == null ? muted : accent),
+          icon,
           const SizedBox(height: 8),
           Copy(title, bold: true, center: true),
           const SizedBox(height: 5),
@@ -335,9 +341,29 @@ class _ClimateControlsState extends State<ClimateControls>
               runSpacing: 8,
               children: [
                 for (final item in [
-                  ('Mode', Icons.ac_unit, mode),
-                  ('Air direction', Icons.air, direction),
-                  ('Fan speed', Icons.toys, fan),
+                  (
+                    'Mode',
+                    Icon(
+                      Icons.ac_unit,
+                      size: 26,
+                      color: mode == null ? muted : accent,
+                    ),
+                    mode,
+                  ),
+                  (
+                    'Air direction',
+                    Icon(
+                      Icons.swap_vert,
+                      size: 26,
+                      color: direction == null ? muted : accent,
+                    ),
+                    direction,
+                  ),
+                  (
+                    'Fan speed',
+                    Glyph('fan', size: 26, color: fan == null ? muted : accent),
+                    fan,
+                  ),
                 ])
                   SizedBox(
                     width: (constraints.maxWidth - (columns - 1) * 8) / columns,

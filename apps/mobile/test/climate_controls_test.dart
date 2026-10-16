@@ -140,6 +140,11 @@ void main() {
       );
       expect(direction.onPressed, isNull);
       expect(find.text('Not supported yet'), findsOneWidget);
+      core.observations['vendor.midea.ac.wind_speed'] = 101;
+      await c.refresh();
+      await tester.pumpAndSettle();
+      expect(find.text('Unrecognized (101)'), findsOneWidget);
+      core.observations['vendor.midea.ac.wind_speed'] = 40;
       core.calls.clear();
       await tap(tester, find.byKey(const ValueKey('climate-button:Mode')));
       expect(

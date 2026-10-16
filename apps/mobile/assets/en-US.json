@@ -1137,5 +1137,6 @@
   "mobile.airDirection": "Air direction",
   "mobile.notSupportedYet": "Not supported yet",
   "mobile.selectingModeTurnsOn": "Selecting a mode also turns this device on.",
-  "mobile.updatingDevice": "Updating device…"
+  "mobile.updatingDevice": "Updating device…",
+  "mobile.unrecognizedControlValue": "Unrecognized ({value})"
 }

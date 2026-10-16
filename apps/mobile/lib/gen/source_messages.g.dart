@@ -1584,6 +1584,9 @@ String? translateSource(
   "Not supported yet" => t.mobileNotSupportedYet,
   "Selecting a mode also turns this device on." => t.mobileSelectingModeTurnsOn,
   "Updating device\u2026" => t.mobileUpdatingDevice,
+  "Unrecognized ({value})" => t.mobileUnrecognizedControlValue(
+    value: args["value"] ?? "{value}",
+  ),
   _ => null,
 };
 
@@ -3075,5 +3078,6 @@ String? sourceForKey(String key) => switch (key) {
   "mobile.selectingModeTurnsOn" =>
     "Selecting a mode also turns this device on.",
   "mobile.updatingDevice" => "Updating device\u2026",
+  "mobile.unrecognizedControlValue" => "Unrecognized ({value})",
   _ => null,
 };

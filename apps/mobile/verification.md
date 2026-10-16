@@ -1683,3 +1683,10 @@ journey exposed a status message covering a later page; navigation now clears it
 The final complete suite includes both corrections. Shared presentation tests passed
 7/7; document/repository checks and contracts (20 schemas, 45 positive and 250
 negative fixtures) passed. Android packaging and installed UI results follow below.
+
+Actual Android visual inspection then exposed a misleading generic icon and an
+unmapped observed fan code. The final view reuses the existing Window Light fan
+glyph, uses direction arrows, and labels unrecognized values explicitly while
+retaining their raw value. It does not invent an automatic-speed meaning or add
+that observation to the allowed choices. The final focused climate/localization
+selection passed 11 tests and analysis passed after this presentation correction.
