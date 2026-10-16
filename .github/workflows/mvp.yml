@@ -36,7 +36,7 @@ jobs:
     env:
       RUSTUP_TOOLCHAIN: '1.96.0'
       IPHONEOS_DEPLOYMENT_TARGET: '13.0'
-      # Fictional build scope: local ad-hoc seals only; no Keychain/account access.
+      # Fictional scope for a disposable Simulator app; no provider accounts.
       HOMEVERB_IOS_KEYCHAIN_ACCESS_GROUP: 'SYNTHETIC.org.homeverb.test'
     steps:
       - uses: actions/checkout@v4
@@ -56,6 +56,8 @@ jobs:
           done
       - name: Build and inspect the development XCFramework and consumers
         run: python scripts/build_ios_native.py
+      - name: Run isolated Core and Keychain Simulator acceptance
+        run: python scripts/verify_ios_acceptance.py
   android-native:
     runs-on: ubuntu-24.04
     timeout-minutes: 30

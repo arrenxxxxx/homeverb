@@ -31,6 +31,13 @@ targets, not physical-device support claims. App/Flutter loading, actual Keychai
 behavior, lifecycle and appliance operations need their own acceptance evidence.
 The project license and release decision remain pending.
 
+`acceptance/main.m` is a separate test-only Simulator app, built and run by
+`scripts/verify_ios_acceptance.py`. It embeds this production framework and links
+the Simulator-only `ios_store_probe` Rust example for fictional Keychain checks.
+Neither test source nor test export is packaged in the XCFramework. The runner
+creates and deletes its own Simulator and requires fresh reports from two distinct
+app processes. See the guide for the exact command and physical-device limitations.
+
 The package format follows Apple's [XCFramework guidance](https://developer.apple.com/documentation/xcode/creating-a-multi-platform-binary-framework-bundle).
 Apple distinguishes [ad-hoc seals](https://developer.apple.com/documentation/security/seccodesignatureflags/adhoc)
 from signatures carrying an identity. Both references were inspected October 16, 2026.

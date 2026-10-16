@@ -28,3 +28,7 @@ core-foundation-sys.workspace = true
 [dev-dependencies]
 tokio-util.workspace = true
 jni = { workspace = true, features = ["invocation"] }
+
+[[example]]
+name = "ios_store_probe"
+crate-type = ["staticlib"]

@@ -4,7 +4,8 @@ This guide follows the [Android embedding guide](08-android-native.md). The iOS
 Keychain backend is implemented under [ADR-0062](../adr/0062-ios-keychain-credentials.md).
 Portable tests and target compilation are distinct from signed-device acceptance.
 The [development package](../../packages/ios/README.md) adds XCFramework packaging
-and consumer-link checks. An installable app and Flutter integration are still required.
+and consumer-link checks. A separate disposable Simulator app exercises runtime
+behavior; Flutter integration and physical-phone acceptance are still required.
 
 ## 1. Supply the trusted build scope
 
@@ -46,7 +47,9 @@ Apple frameworks. The [MVP workflow](../../.github/workflows/mvp.yml) runs the s
 tests on macOS, where three additional tests construct real Core Foundation
 objects and check production query/result handling without Keychain access.
 On commit `3742e67`, all sixteen iOS tests and complete native-library builds for
-arm64 device/simulator passed. This did not run Keychain or an iOS app.
+arm64 device/simulator passed. Commit `d4525b1` subsequently passed the actual
+three-architecture XCFramework build, extracted-package inspection and consumer
+linkage in macOS CI. Neither phase ran Keychain or an iOS app.
 
 On macOS with Xcode, Python 3.11+ and cached dependencies, create the release
 development package with the trusted group from step 1:
@@ -107,7 +110,53 @@ local removal. Keychain persistence across reinstall, backup/restore behavior,
 prompt refusal and latency require the acceptance below. No local deletion proves
 vendor revocation or forensic erasure.
 
-## 4. Accept on a signed disposable app before real accounts
+## 4. Run isolated Simulator acceptance
+
+On macOS with Xcode and an installed iOS 14+ Simulator runtime, build the fictional
+package and run the isolated app:
+
+```bash
+export HOMEVERB_IOS_KEYCHAIN_ACCESS_GROUP=SYNTHETIC.org.homeverb.test
+python3 scripts/build_ios_native.py
+python3 scripts/verify_ios_acceptance.py
+```
+
+The runner selects an installed compatible iPhone runtime/type, creates a new
+Simulator, and targets only its returned UUID. It never uses `booted`, `all`, a
+physical phone or an existing user Simulator. All app builds and operations are
+bounded. The new Simulator is shut down and deleted even after a returned failure;
+an externally killed runner may require manual cleanup of its named test device.
+There is no app/write retry after missing or failed evidence.
+
+The test app embeds the inspected production framework and calls the public C ABI
+from a worker. It verifies Mock discovery, power execution and reading, persisted
+cards/cache/receipt after a separate process launch, explicit Core foreground
+refusal/restoration and closed-handle refusal. It does not implement a Flutter
+view or establish UIKit background-delivery/forced-termination behavior.
+
+A Simulator-only Rust static-library example calls the actual `SystemSecretStore`
+with hardcoded fictional bytes in fresh UUID namespaces. It verifies missing and
+isolated references, add/read/reopen/replace, pre-cancelled read/write/delete
+refusal, persistence across different PIDs, exact deletion and absent deletion.
+Its test export is absent from the production framework and public header.
+The runner reads back the ad-hoc signed app's exact fictional private group.
+This verifies the test bundle's scope configuration, not physical entitlement
+enforcement or distribution signing.
+
+Reports contain only run/process identity, fixed stages, counts and numeric store
+codes: 0 success, 1 test/runtime failure, 2 locked, 3 unavailable, 4 uncertain
+mutation, 5 conflict, 6 cancelled, 7 deadline exceeded. No secret, account,
+native response or OS error text is exported. A new run ID, exact launch PID,
+different reader PID and complete successful reports are all required. Portable
+runner tests are not evidence that this app ran; inspect the exact macOS CI job.
+
+The app makes only Mock and fictional Keychain calls. iOS has no Android-style
+Internet manifest permission, so this is not a claim of OS-enforced network denial.
+Simulator round trips do not establish passcode/lock protection, no-prompt policy,
+reinstall/backup behavior or physical iPhone compatibility. Never weaken production
+Keychain accessibility or access-group checks to make Simulator acceptance pass.
+
+## 5. Accept on a signed disposable app before real accounts
 
 Use only fictional credentials and fresh random profile/reference namespaces.
 Keep test identifiers, raw Keychain output and secret bytes out of reports.

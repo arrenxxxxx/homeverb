@@ -1575,3 +1575,29 @@ embedding, Flutter/Dart loading, Keychain system behavior and physical iPhone
 acceptance remain open. The [previous storage phase](adr/0062-ios-keychain-credentials.md)
 passed all sixteen macOS tests and two complete iOS library builds on `3742e67`;
 that evidence does not by itself prove this new package format.
+
+## Isolated iOS Simulator acceptance harness
+
+Commit `d4525b1` passed the actual three-architecture release XCFramework build,
+extracted-package inspection and C consumer linkage in macOS job `116864097511`.
+MVP run `38867656947` and documentation run `38867657083` both succeeded.
+
+The separate [Simulator harness](development/09-ios-native.md#4-run-isolated-simulator-acceptance)
+embeds that production package in a test-only Objective-C app. A Simulator-only
+Rust static-library example exercises the real iOS secret-store implementation
+using fictional bytes and a fresh run UUID. Production exports, native API 1.20,
+33 ordinary methods, SQLite schema 5 and protected payload 3 remain unchanged.
+
+The harness creates a new device and targets only its returned UUID, checks signed
+private-group entitlements, and requires two fresh reports tied to distinct launch
+PIDs. It checks Mock power/state, local persistence and explicit Core lifecycle
+calls, plus Keychain round trips, isolated references, pre-cancellation and deletion.
+Failures stop without replay; cleanup never targets an existing user Simulator.
+The test helper is not included in the production framework or public C header.
+
+Eight portable runner tests and eight existing package tests passed locally;
+the Simulator helper passed arm64 iOS Simulator Clippy with warnings denied.
+These are not app/Keychain runtime evidence. Actual execution requires the new
+macOS CI step; inspect its result for this commit. No real account, appliance,
+physical phone or separate Flutter worktree was accessed. Passcode/lock, physical
+entitlements, Flutter integration and provider/device acceptance remain pending.

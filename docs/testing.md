@@ -141,6 +141,17 @@ This is not distribution signing or a Keychain/app runtime test. Follow the
 [iOS guide](development/09-ios-native.md) for explicit configuration and the
 remaining passcode/lock, lifetime, reinstall, backup and Flutter/iPhone gates.
 
+The separate `scripts/verify_ios_acceptance.py` step builds an isolated native app
+with the production framework and a Simulator-only Rust secret-store helper. It
+creates a new compatible Simulator, verifies exact ad-hoc entitlements, and requires
+fresh successful write/read reports with different launch PIDs. Mock Core, SQLite
+cache/receipt persistence, explicit lifecycle calls and fictional system Keychain
+round trips are exercised; no provider account or appliance is accessed. Eight
+portable runner tests refuse stale/failed/incomplete reports, wrong process/scope,
+missing runtime evidence and unsafe simulator selection/cleanup. They do not prove
+actual Apple runtime behavior. The exact CI job must pass before claiming it.
+Simulator results do not establish physical passcode/lock or signed-device policy.
+
 ## Linux Secret Service probe
 
 This opt-in integration test needs an existing unlocked default Secret Service collection and permission to access the user's D-Bus. It creates only synthetic bytes under fresh HomeVerb namespaces, checks replacement and isolation across instances/profiles, deletes those entries, verifies absence, and checks bounded socket cleanup. It does not enumerate or read existing account secrets. Default `cargo test` ignores it.
