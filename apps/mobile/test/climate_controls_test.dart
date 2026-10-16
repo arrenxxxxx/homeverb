@@ -140,7 +140,7 @@ void main() {
         find.byKey(const ValueKey('climate-button:Air direction')),
       );
       expect(direction.onPressed, isNull);
-      expect(find.text('Not supported yet'), findsOneWidget);
+      expect(find.text('Not connected in HomeVerb'), findsOneWidget);
       core.observations['vendor.midea.ac.wind_speed'] = 101;
       await c.refresh();
       await tester.pumpAndSettle();

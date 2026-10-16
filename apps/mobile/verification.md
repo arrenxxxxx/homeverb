@@ -1753,3 +1753,9 @@ Validation on October 16, 2026:
 
 This phase changes no Rust code, native ABI, startup grants, storage or admitted
 Meiju control. No new physical AC write is part of these checks.
+
+The first emulator review prompted a small presentation correction: keep the
+Celsius unit beside the target, select the mode icon from the observed semantic
+mode, and describe the unconnected direction control as an integration gap.
+Static analysis and the final climate/localization subset passed (13 tests).
+The full suite above was not repeated for these label/icon/layout-only changes.

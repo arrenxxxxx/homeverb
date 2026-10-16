@@ -98,7 +98,7 @@ class _ClimateControlsState extends State<ClimateControls>
   }
 
   Object choiceValue(ClimateChoice? choice) {
-    if (choice == null) return 'Not supported yet';
+    if (choice == null) return 'Not connected in HomeVerb';
     final observed = c.observed(choice.property);
     final value = propertyValue(
       observed,
@@ -427,13 +427,21 @@ class _ClimateControlsState extends State<ClimateControls>
                     Expanded(
                       child: Semantics(
                         liveRegion: true,
-                        child: Text(
-                          target is num
-                              ? '${draftTarget ?? target}'.replaceFirst(
-                                  RegExp(r'\.0$'),
-                                  '',
-                                )
-                              : '—',
+                        child: Text.rich(
+                          TextSpan(
+                            text: target is num
+                                ? '${draftTarget ?? target}'.replaceFirst(
+                                    RegExp(r'\.0$'),
+                                    '',
+                                  )
+                                : '—',
+                            children: const [
+                              TextSpan(
+                                text: ' °C',
+                                style: TextStyle(fontSize: 18, color: muted),
+                              ),
+                            ],
+                          ),
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 58,
@@ -444,11 +452,6 @@ class _ClimateControlsState extends State<ClimateControls>
                         ),
                       ),
                     ),
-                    const Text(
-                      '°C',
-                      style: TextStyle(fontSize: 18, color: muted),
-                    ),
-                    const SizedBox(width: 12),
                     IconButton.filledTonal(
                       key: const ValueKey('climate-increase'),
                       tooltip: localize(context, 'Increase target'),
@@ -525,7 +528,13 @@ class _ClimateControlsState extends State<ClimateControls>
               selector(
                 'Mode',
                 Icon(
-                  Icons.ac_unit,
+                  switch (mode == null ? null : c.observed(mode.property)) {
+                    'cool' => Icons.ac_unit,
+                    'heat' => Icons.wb_sunny_outlined,
+                    'dry' => Icons.water_drop_outlined,
+                    'fan' => Icons.air,
+                    _ => Icons.tune,
+                  },
                   size: 28,
                   color: mode == null ? muted : climateBlue,
                 ),
