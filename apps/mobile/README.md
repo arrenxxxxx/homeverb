@@ -60,6 +60,9 @@ The UI is merged into `main`. See [verification.md](verification.md) for current
 and historical evidence. The preserved surface experiment still has no whole-screen
 pixel-equality acceptance; prototype references are unchanged.
 
+See the [integrated Android build/install guide](../../docs/development/10-flutter-android.md)
+for local APK packaging, profile selection and verification.
+
 ## Development
 
 Use FVM and Flutter 3.47.7, pinned in `.fvmrc`. On a Linux or macOS host,

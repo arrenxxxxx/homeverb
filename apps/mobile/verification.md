@@ -56,6 +56,37 @@ and emulator results belong to the following delivery phase. No provider account
 physical appliance, physical phone, diagnostic upload or remote push was used.
 
 
+### Phase 3: Android runtime and packaging guard
+
+An isolated Android 15 / API 35 arm64 emulator passed the actual Flutter process
+checks: native discovery/control/cache/history cleanup and API 1.22 negotiation
+(one test), trusted confirmation scope/consumption, expiry, background cancellation
+and lost-reply receipt recovery (four tests), and empty Meiju account navigation
+with protected-input boundaries and no vendor request (one test). Commands were
+`fvm flutter test integration_test/native_smoke_test.dart`,
+`integration_test/approval_smoke_test.dart` and `integration_test/account_smoke_test.dart`,
+each with the isolated emulator selected explicitly. No physical device or account
+was used. The confirmation case waited for actual native expiry on Android.
+
+The first release-mode APK built, installed and cold-started successfully. Archive
+inspection found a transitive `armeabi-v7a/libdartjni.so` without the rest of the
+32-bit runtime, despite the requested two ABIs. Packaging now explicitly excludes
+unsupported 32-bit directories; the rebuilt Android test APK contains exactly
+arm64-v8a and x86_64. Final release artifacts must be rebuilt with this correction.
+The new `scripts/verify_flutter_apk.py` refuses incomplete ABI coverage, test-plugin
+contamination, wrong package/minimum SDK, debug mode, enabled backup, invalid
+signatures, missing Core exports and invalid 16 KiB alignment. Three negative
+archive tests passed; the complete Python suite now passes 66 tests.
+
+The initial SDK selection failed before compilation because an incomplete
+platform-tools directory was chosen. An isolated temporary Flutter configuration
+selected the existing complete SDK/NDK and JDK without changing global settings
+or accepting new licenses. Source hygiene, documentation/contract checks and
+`git diff --check` passed. The [Android app guide](../../docs/development/10-flutter-android.md)
+now covers this setup, profile selection, checksums and installation. The final
+local artifact delivery is recorded separately below.
+
+
 Date: October 16, 2026. Baseline: native UI contract 1.14.1 (pinned Core `7db8e9b`) and the approved Window Light atlas. This is an implementation checkpoint, not completion of the owner's pixel-identical acceptance requirement.
 
 ## Historical UI branch checkpoint

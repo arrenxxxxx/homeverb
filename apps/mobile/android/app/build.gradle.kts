@@ -38,6 +38,13 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+
+    packaging {
+        jniLibs {
+            // Transitive Dart JNI assets must not advertise unsupported 32-bit ABIs.
+            excludes += listOf("lib/armeabi-v7a/**", "lib/x86/**")
+        }
+    }
 }
 
 kotlin {

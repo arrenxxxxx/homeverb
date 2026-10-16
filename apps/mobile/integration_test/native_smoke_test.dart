@@ -24,6 +24,15 @@ void main() {
         libraryPath: path.isEmpty ? null : path,
         allowMockWrites: true,
       );
+      expect(core.apiAtLeast(22), true);
+      expect(
+        core.methods,
+        containsAll([
+          'inspect_session_grants',
+          'inspect_control_options',
+          'inspect_device_conflicts',
+        ]),
+      );
       final controller = HomeController(
         core,
         LocalPreferences(File('${dir.path}/ui.json')),

@@ -15,6 +15,7 @@ Start with the progressive development path. Reference documents define invarian
 | 7 | [Preview a Meiju AC control](development/07-meiju-control.md) | Exact-device power grant, tracked cloud outcomes and separately authorized physical acceptance |
 | 8 | [Embed the Android native library](development/08-android-native.md) | Native credential storage, arm64/x86_64 AAR builds and separate phone acceptance |
 | 9 | [Add iOS native credentials](development/09-ios-native.md) | Explicit Keychain scope, target checks and signed-device acceptance gates |
+| 10 | [Build the Flutter Android app](development/10-flutter-android.md) | Integrated Core, APK packaging, profile selection and installation |
 
 ## Reference
 
