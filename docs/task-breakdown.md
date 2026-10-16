@@ -15,10 +15,11 @@ Linux/Android UI evidence remains distinct from this merged revision's checks.
 
 Remaining product acceptance includes real account reauthorization, physical
 Android/iOS secure-store policy and phone lifecycle, separately authorized
-model-specific controls, off-LAN journeys, full localization/accessibility and
+model-specific controls, off-LAN journeys, broader localization/accessibility QA and
 pixel equality. LAN route admission, cross-account reconciliation and nearby
-sharing remain unavailable. No real appliance operations are authorized by this
-integration task. Do not inspect local pilot credentials by default.
+sharing remain unavailable. The owner subsequently authorized the selected wall
+AC acceptance recorded below; that does not authorize other appliances. Do not
+inspect local pilot credentials by default.
 
 Rebuild dependencies on each workstation; SDKs, app databases, secrets and generated
 artifacts are not source handoffs. Follow [testing](testing.md) and the
@@ -38,8 +39,8 @@ local success; earlier runs were blocked by the repository's billing limit.
 | T06 | CLI | Mock queries/writes and explicit batches; experimental Meiju protected terminal connection, account list/details/rename/removal/refresh/recovery/inventory, local organization, Core reads, exact receipt lookup/history, redacted diagnostics and explicit owner-controlled power, fan, mode activation and profile-scoped temperature grant files implemented | Live CLI login/read/control acceptance and adapter-specific diagnostics evidence |
 | T07 | Android embedding probe | Linux native ABI and foreground lifecycle tested; versioned [34-method UI contract 1.22.0](native-ui-contract.md), schemas and native examples implemented; API 28 arm64/x86_64 and combined AAR builds, exports and 16 KiB ELF alignment verified; isolated Android 15 test APK passes native Core/Keystore/lock/restart, grant revocation, trusted approval and uncertain-write/forced-stop recovery checks | Merged APK/runtime evidence in the app verification record; physical Android Keystore and phone acceptance; see the [Android guide](development/08-android-native.md) |
 | T08 | Local MCP | Mock/Meiju reads and exact receipt lookup; explicit Meiju startup grants admit command planning/execution with unchanged Core policy; protocol, outcome and shutdown harnesses implemented | Target AI host validation and real Meiju read/control acceptance |
-| T09 | First native authentication | Scoped community flow admitted under [ADR-0022](adr/0022-meiju-community-cloud-admission.md); native codec, restricted HTTPS and protected connection tested; one real mainland account login and independent saved-session refresh returned six appliances | Native account connection/list/details/rename/removal/refresh/recovery, protected saved-inventory inspection and read-only control-option inspection before grants and local session-grant inspection are callable; connection uses separate secret buffers and can reauthorize an explicitly selected pending account without resetting intact bindings. Verify real reauthorization identity, Flutter input/mobile storage and off-LAN behavior |
-| T10 | First real adapter | Default read-only Meiju adapter admits six exact models and checks protected complete-inventory membership before live access and retains private product mapping evidence for reviewed profile-specific temperature contracts; real Core/native reads passed for six cards/seven components; protected product 760Y0026 additionally has synthetic-tested optional read-only additional-option observations. Explicit experimental AC power, vendor fan, power-on/mode and profile-scoped temperature controls, scoped power probe, independent native AC grants, and profile-scoped dishwasher starts and independently granted pause/resume/cancel operations (including explicit additional options for product 760Y0026) through trusted confirmation are synthetic-tested with conservative cloud outcomes; bounded LAN discovery/collection, V3/ordinary packet codecs, standard AC/E1/CA read candidates, one-operation TCP exchanges, account-bound v2 credential lookup, protected candidate reconciliation and composed family reads with message-version negotiation have fictional evidence only | Flutter account input/mobile integration, reauthorization identity, explicit cross-account reconciliation (saved candidate inspection is implemented), physical AC power acceptance deferred by the owner; Flutter consent UI, physical AC temperature/preservation and dishwasher start acceptance, remaining unreviewed dishwasher mappings and refrigerator controls, then LAN and model-specific physical/off-LAN acceptance |
+| T09 | First native authentication | Scoped community flow admitted under [ADR-0022](adr/0022-meiju-community-cloud-admission.md); native codec, restricted HTTPS and protected connection tested; one real mainland account login and independent saved-session refresh returned six appliances | Native account connection/list/details/rename/removal/refresh/recovery, protected saved-inventory inspection and read-only control-option inspection before grants and local session-grant inspection are callable; connection uses separate secret buffers and can reauthorize an explicitly selected pending account without resetting intact bindings. Verify real reauthorization identity, physical-phone storage and off-LAN behavior; emulator login and saved-account reuse passed |
+| T10 | First real adapter | Default read-only Meiju adapter admits six exact models and checks protected complete-inventory membership before live access and retains private product mapping evidence for reviewed profile-specific temperature contracts; real Core/native reads passed for six cards/seven components; protected product 760Y0026 additionally has synthetic-tested optional read-only additional-option observations. Explicit experimental AC power, vendor fan, power-on/mode and profile-scoped temperature controls, scoped power probe, independent native AC grants, and profile-scoped dishwasher starts and independently granted pause/resume/cancel operations (including explicit additional options for product 760Y0026) through trusted confirmation are synthetic-tested with conservative cloud outcomes; bounded LAN discovery/collection, V3/ordinary packet codecs, standard AC/E1/CA read candidates, one-operation TCP exchanges, account-bound v2 credential lookup, protected candidate reconciliation and composed family reads with message-version negotiation have fictional evidence only | Physical-phone integration, reauthorization identity, explicit cross-account reconciliation (saved candidate inspection is implemented), broader physical AC power acceptance beyond the owner-observed shutdown below; physical AC temperature/preservation and dishwasher start acceptance, remaining unreviewed dishwasher mappings and refrigerator controls, then LAN and model-specific physical/off-LAN acceptance |
 | T11 | Flutter room/card UI, platform management, and dynamic device controls | Flutter app merged against Core 1.22 with room/card metadata, protected account input, confirmed cleanup and local inspection; Window Light visual specification retained | Continue the [functional acceptance checklist](ui-functional-spec.md), [82-state inventory](ui-screen-inventory.md), and [one-skin extension contract](ui-window-light.md); physical-phone and visual acceptance remain unverified. No HomeVerb login; rooms preserve device identity |
 | T12 | Second protocol family | Planned after T10 | Equivalent capability calls on heterogeneous hardware |
 | T13 | Security review | Mock component, argument, route, composite-policy, uncertainty, and diagnostic allowlist/marker tests implemented | Real credential, dependency, live-adapter log and diagnostic review |
@@ -102,14 +103,19 @@ Flutter embedding/runtime and Keychain/phone policy acceptance remain open.
 The trusted Flutter host now prepares reviewed AC controls automatically when
 opening a device, following the owner-approved [default policy](adr/0065-default-app-device-controls.md).
 The former session-permission selection/review/revocation UI has been removed.
-See the [verification scope](../apps/mobile/verification.md#flutter-session-control-permissions).
+See the [verification scope](../apps/mobile/verification.md#default-device-controls-owner-directed-revision).
 One real account has now logged in and retrieved its devices on the Android
 emulator, and the selected AC returned live power-off and temperature readings.
-Physical AC control acceptance remains pending.
+The updated APK preserves this account and Chinese preference. The owner confirmed
+physical shutdown after one App power-off command; its receipt remains unknown.
+A separate restoring power-on command was accepted and a subsequent read reported
+on. See the [bounded evidence](../apps/mobile/verification.md#default-control-apk-and-owner-observed-power-acceptance);
+other controls and broad model/phone acceptance remain pending.
 The Flutter app now uses slang for en-US/zh-CN with a persisted Settings > Language
 choice and system fallback. See the [internationalization guide](../apps/mobile/README.md#internationalization).
 The previous emulator sign-in returned `SECRET_STORE_UNAVAILABLE` with no secure
 screen lock configured. The owner has now configured the emulator lock, and the
 system reports secure/unlocked state. Flutter now checks that prerequisite before
-credential entry and submission. Real login/storage and AC control still require
-fresh acceptance; readiness alone is not provider or Keystore success.
+credential entry and submission. Subsequent real login, account persistence across
+upgrade and the bounded power test are recorded above; readiness alone was not
+provider or Keystore success.

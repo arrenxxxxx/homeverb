@@ -1612,3 +1612,41 @@ showed complete device retrieval and the selected wall AC; explicit refresh
 returned power off and 27.4 degrees Celsius. This proves the app's real account
 and read path on this emulator, not physical effects or appliance-write success.
 No command was sent before the owner requested this policy revision.
+
+
+### Default-control APK and owner-observed power acceptance
+
+Source `493b8f2199a85d7047945d2d3e61873915d15fad` built successfully with
+`fvm flutter build apk --release --target-platform android-arm64,android-x64
+--dart-define=HOMEVERB_ADAPTER=midea.meiju` using the persistent development key.
+`scripts/verify_flutter_apk.py` passed both complete ABIs, 17 Core exports per ABI,
+signature, backup exclusions and 16 KiB ZIP/ELF alignment.
+
+- Artifact: `output/flutter-verification/android/homeverb-0.2.0-meiju.apk`
+- Bytes: 67931172
+- SHA-256: `ce7e0b7a65d26429142ab38a1ac8e187becb0dbf7b58e5787d2b409f18e46611`
+- Archive report: `output/flutter-verification/android/homeverb-0.2.0-meiju.json`
+
+`adb -s emulator-5586 install -r` succeeded on the Android 15 arm64 emulator.
+The existing real account, retrieved cards and Chinese preference survived the
+upgrade and new process. Opening the owner's selected wall AC prepared power,
+mode and fan controls without checkboxes or a permission page. Device Information
+showed only ordinary metadata and recent operations. This target's temperature
+setter remains unavailable; opening a device cannot invent unsupported mappings.
+
+The owner separately authorized operations on this AC. An explicit pre-write read
+reported power on and 26.0 degrees Celsius; the older saved power-off observation
+was not used as current evidence. Exactly two commands were sent through the App:
+
+| Command | UTC start / recorded | Retained outcome | Independent evidence |
+|---|---|---|---|
+| Power off | 2026-10-16 14:33:26.343977 / 14:33:36.355521 | `unknown`, `WRITE_OUTCOME_UNKNOWN`, one attempt, no verification evidence | Explicit subsequent read reported off and 23.3 degrees Celsius; the owner confirmed the physical AC had switched off |
+| Power on, restoring the pre-test state | 2026-10-16 14:36:57.478409 / 14:37:01.980193 | `accepted`, `VERIFICATION_PENDING`, one attempt, no verification evidence | Explicit subsequent read reported on and 22.9 degrees Celsius; physical restoration was not independently observed by tooling |
+
+No uncertain command was replayed. Later reads did not rewrite either receipt.
+This establishes real App power actuation with an owner-observed shutdown for
+this selected appliance, not protocol-level `verified`, broad model certification,
+physical-phone acceptance, temperature/fan/mode actuation or off-LAN acceptance.
+Cloud observations lack trustworthy source time. No native API, schemas, routing
+or execution semantics changed. No credentials or live device identifiers were
+captured, and no artifact was uploaded or newer commit pushed.

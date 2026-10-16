@@ -1,6 +1,6 @@
 # Platform and device compatibility matrix
 
-> The fictional `homeverb.mock` adapter is implemented and Mock-tested on Linux. The six listed Meiju models have experimental cloud reads; real-platform rows do not claim verified physical support. No physical-device verification records exist.
+> The fictional `homeverb.mock` adapter is implemented and Mock-tested on Linux. The six listed Meiju models have experimental cloud reads; real-platform rows do not claim verified physical support. One owner-observed wall-AC shutdown is recorded below; this does not establish protocol-level verification or broad model support.
 
 | Candidate | Potential route | Evidence still required | Project status |
 |---|---|---|---|
@@ -1816,3 +1816,19 @@ are removed. No appliance command is sent during setup; there is no startup or
 background account refresh. Exact model/routing checks and existing outcome,
 confirmation and replay semantics remain in Core. Native API 1.22, SQLite 5,
 protected payload 3 and non-App host defaults are unchanged.
+
+
+## Owner-observed Flutter power actuation
+
+The default-control APK from `493b8f2` preserved the real account and Chinese
+preference across an Android 15 emulator upgrade. The selected wall AC exposed
+power, mode and fan controls immediately, without session-permission UI; its
+temperature setter stayed unavailable. One owner-authorized power-off request
+returned `unknown` after ten seconds, followed by an explicit off reading and
+owner confirmation of physical shutdown. A separate restoring power-on request
+returned `accepted` with `VERIFICATION_PENDING`; an independent read reported on.
+Neither receipt is `verified`, and no uncertain write was replayed.
+
+See the [exact runtime and artifact evidence](../apps/mobile/verification.md#default-control-apk-and-owner-observed-power-acceptance).
+Other action/model, physical-phone and off-LAN acceptance remain open. Native API
+1.22, SQLite 5, protected payload 3 and execution semantics are unchanged.
