@@ -1690,3 +1690,33 @@ glyph, uses direction arrows, and labels unrecognized values explicitly while
 retaining their raw value. It does not invent an automatic-speed meaning or add
 that observation to the allowed choices. The final focused climate/localization
 selection passed 11 tests and analysis passed after this presentation correction.
+
+### Climate interaction APK delivery
+
+Final source: `612a296854c2faa5042acbd188c741df19e13365`.
+The dual-ABI Meiju release build passed with the existing persistent development
+signature. The APK verifier passed complete arm64-v8a/x86_64 contents, 17 Core
+exports per ABI, signature, backup exclusions and 16 KiB ZIP/ELF alignment.
+
+- Artifact: `output/flutter-verification/android/homeverb-0.2.0-meiju-climate.apk`
+- Bytes: 68324780
+- SHA-256: `5b59edbc02151dad19d3b42ea744aa399133ed9cca3bf286e75a9e609e6d2212`
+- Report: `output/flutter-verification/android/homeverb-0.2.0-meiju-climate.json`
+- Screenshot: `output/flutter-verification/android/climate-controls-zh-CN.png`
+
+`adb -s emulator-5586 install -r` succeeded and the app cold-started with its
+existing account/cards and Chinese preference. Actual UI inspection confirmed
+three adjacent buttons, enabled mode/fan selectors and explicitly unavailable
+direction. Selector runtime checks used `c13791d`; the final `612a296` upgrade
+repeated saved-account opening and screenshot review after the icon/value fix.
+The mode sheet showed five translated modes and the power-on notice;
+the fan sheet showed six reviewed translated choices. Apply stayed disabled until
+selection, and cancellation returned to the device page. Final screenshot review
+confirmed the corrected fan glyph and explicit unrecognized reading without
+clipping. The app remains on the selected wall-AC control page.
+
+This revision's real-account checks opened/cancelled selectors only: no new
+household-appliance command was sent. Stay-on-page execution and outcome recovery
+were exercised by widget and actual native Mock tests; the earlier owner-observed
+physical power evidence retains its original scope. No phone acceptance, new
+physical mode/fan/direction support, remote push or artifact publication is claimed.
