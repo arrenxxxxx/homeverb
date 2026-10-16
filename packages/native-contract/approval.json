@@ -1,0 +1,24 @@
+{
+  "api_version": "1.14.1",
+  "functions": {
+    "homeverb_prepare_approval": {
+      "request": "native-approval#/$defs/prepare",
+      "response": "native-approval#/$defs/prepare_result"
+    },
+    "homeverb_execute_approved": {
+      "request": "native-approval#/$defs/execute",
+      "response": "native-approval#/$defs/execute_result"
+    },
+    "homeverb_discard_approval": {
+      "parameters": [
+        "uint64 handle",
+        "uint64 approval_id"
+      ],
+      "response": "bool"
+    }
+  },
+  "limits": {
+    "max_pending_approvals": 8,
+    "approval_ttl_ms": 60000
+  }
+}

@@ -4,7 +4,7 @@ fn inspect(id: Uuid) -> Value {
     json!({"method":"inspect_account_inventory","account_id":id})
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn inspection_reports_saved_membership_without_network_mutation_or_private_identifiers() {
     let mut f = Fixture::new();
     f.connect(None).await;
@@ -60,7 +60,7 @@ async fn inspection_reports_saved_membership_without_network_mutation_or_private
     assert_eq!(f.call(inspect(account.id)).await, initial);
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn inspection_preserves_legacy_and_unpublished_bindings_without_inventing_cards() {
     let f = Fixture::new();
     f.connect(None).await;
@@ -106,7 +106,7 @@ async fn inspection_preserves_legacy_and_unpublished_bindings_without_inventing_
     assert_eq!(f.store.devices().unwrap().len(), 2);
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn inspection_errors_preserve_data_and_never_fall_back_to_refresh() {
     let f = Fixture::new();
     f.connect(None).await;
@@ -171,7 +171,7 @@ async fn inspection_errors_preserve_data_and_never_fall_back_to_refresh() {
     assert_eq!(f.secrets.deletes.load(Ordering::Relaxed), 0);
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn inspection_isolates_account_and_region_without_touching_other_secrets() {
     let f = Fixture::new();
     f.connect(None).await;

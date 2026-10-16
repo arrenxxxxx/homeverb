@@ -25,7 +25,8 @@
         "slow-after-send",
         "stale-read",
         "partial",
-        "correlated-completion"
+        "correlated-completion",
+        "approval-required"
       ]
     },
     "adapter": {
@@ -90,6 +91,126 @@
         "additionalProperties": false
       },
       "description": "Trusted startup-only permission for one local AC and one reviewed vendor wind_speed code over cloud. Independent of power grants; never a percentage, wildcard or ordinary request field."
+    },
+    "meiju_mode_grants": {
+      "type": "array",
+      "maxItems": 64,
+      "uniqueItems": true,
+      "default": [],
+      "items": {
+        "type": "object",
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "cool",
+              "heat",
+              "auto",
+              "dry",
+              "fan"
+            ]
+          }
+        },
+        "required": [
+          "device_id",
+          "mode"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Trusted startup-only permission to turn on one exact local AC and activate one reviewed vendor mode over cloud. This includes power-on; it grants no independent power, fan or temperature action."
+    },
+    "meiju_temperature_grants": {
+      "type": "array",
+      "maxItems": 256,
+      "uniqueItems": true,
+      "default": [],
+      "items": {
+        "type": "object",
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "target_temperature": {
+            "type": "number",
+            "minimum": 16,
+            "maximum": 30,
+            "multipleOf": 0.5
+          }
+        },
+        "required": [
+          "device_id",
+          "target_temperature"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Trusted startup-only permission for one exact local AC and Celsius target over cloud. This union of reviewed setpoints does not define device capability bounds; the protected product mapping and action schema must also admit the target. No power, mode, fan or other target authority."
+    },
+    "meiju_dishwasher_grants": {
+      "type": "array",
+      "maxItems": 64,
+      "uniqueItems": true,
+      "default": [],
+      "items": {
+        "type": "object",
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "arguments": {
+            "type": "object",
+            "properties": {
+              "program": {
+                "type": "string",
+                "enum": [
+                  "auto_wash",
+                  "strong_wash",
+                  "standard_wash",
+                  "eco_wash",
+                  "glass_wash",
+                  "90min_wash",
+                  "fast_wash",
+                  "soak_wash",
+                  "hour_wash",
+                  "quietnight_wash",
+                  "germ",
+                  "self_clean",
+                  "fruit_wash",
+                  "soft_wash",
+                  "single_disinfect",
+                  "seafood_wash",
+                  "hotpot_wash"
+                ]
+              },
+              "additional": {
+                "type": "integer",
+                "enum": [
+                  0,
+                  9,
+                  10,
+                  13,
+                  14
+                ]
+              }
+            },
+            "required": [
+              "program"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "device_id",
+          "arguments"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Trusted startup-only exact dishwasher start permission over cloud. The selected protected profile further limits programs and requires or forbids additional. Every start also requires the separate trusted user approval path; ordinary execution remains denied."
     }
   },
   "required": [
@@ -98,7 +219,7 @@
     "allow_mock_writes"
   ],
   "additionalProperties": false,
-  "description": "Trusted native startup. data_dir must be an absolute private OS path. adapter defaults to homeverb.mock; scenario defaults to normal. Meiju defaults to read-only; optional meiju_power_grants and meiju_fan_grants separately admit exact-device AC power states and vendor fan codes over cloud. Meiju rejects Mock grants or fault scenarios. Opening never authenticates, discovers or controls.",
+  "description": "Trusted native startup. data_dir must be an absolute private OS path. adapter defaults to homeverb.mock; scenario defaults to normal. Meiju defaults to read-only; optional meiju_power_grants, meiju_fan_grants, meiju_mode_grants and meiju_temperature_grants separately admit exact-device power, fan, explicit power-on/mode activation and profile-scoped temperature targets over cloud. Meiju rejects Mock grants or fault scenarios. Opening never authenticates, discovers or controls. Optional meiju_dishwasher_grants admit reviewed elevated starts only through separate trusted confirmation.",
   "allOf": [
     {
       "if": {
@@ -127,6 +248,15 @@
             "maxItems": 0
           },
           "meiju_fan_grants": {
+            "maxItems": 0
+          },
+          "meiju_mode_grants": {
+            "maxItems": 0
+          },
+          "meiju_temperature_grants": {
+            "maxItems": 0
+          },
+          "meiju_dishwasher_grants": {
             "maxItems": 0
           }
         }

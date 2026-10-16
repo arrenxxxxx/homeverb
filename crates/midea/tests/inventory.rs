@@ -341,3 +341,113 @@ async fn equal_vendor_ids_in_different_accounts_stay_separate() {
     assert_eq!(first.appliances.len(), 1);
     assert_eq!(second.appliances.len(), 1);
 }
+
+#[tokio::test]
+async fn product_profiles_preserve_unknowns_and_normalize_numeric_subtypes() {
+    async fn profile(extra: Value) -> ProductProfile {
+        let mut entry = appliance(json!(10), "AC");
+        entry
+            .as_object_mut()
+            .unwrap()
+            .extend(extra.as_object().unwrap().clone());
+        let transport = Transport::new(vec![homes(&[1]), devices(1, vec![entry])]);
+        retrieve_inventory(&transport, transport.account, &operation())
+            .await
+            .unwrap()
+            .appliances
+            .remove(0)
+            .product_profile
+    }
+    for value in [
+        json!({}),
+        json!({"sn8":null,"modelNumber":null,"category":null}),
+        json!({"sn8":"","modelNumber":"","category":""}),
+        json!({"sn8":"00000000","modelNumber":"000"}),
+    ] {
+        assert_eq!(profile(value).await, ProductProfile::default());
+    }
+    let expected =
+        profile(json!({"sn8":"TEST1234","modelNumber":524,"category":"test-wall-ac"})).await;
+    assert_ne!(expected, ProductProfile::default());
+    assert_eq!(format!("{expected:?}"), "ProductProfile([REDACTED])");
+    assert_eq!(
+        expected,
+        profile(json!({"sn8":"TEST1234","modelNumber":"00524","category":"test-wall-ac"})).await
+    );
+}
+
+#[tokio::test]
+async fn malformed_product_profiles_fail_the_home_without_defaulting_or_retry() {
+    for (field, value) in [
+        ("sn8", json!(12345678)),
+        ("sn8", json!("PRIVATE-LONG-CODE")),
+        ("sn8", json!("ABC\n1234")),
+        ("sn8", json!("abc/1234")),
+        ("modelNumber", json!(true)),
+        ("modelNumber", json!(-1)),
+        ("modelNumber", json!(1.5)),
+        ("modelNumber", json!("+5")),
+        ("modelNumber", json!("1e2")),
+        ("modelNumber", json!("18446744073709551616")),
+        ("category", json!([])),
+        ("category", json!("x".repeat(129))),
+        ("category", json!("PRIVATE\nCATEGORY")),
+    ] {
+        let mut entry = appliance(json!(10), "AC");
+        entry[field] = value;
+        let transport = Transport::new(vec![homes(&[1]), devices(1, vec![entry])]);
+        let inventory = retrieve_inventory(&transport, transport.account, &operation())
+            .await
+            .unwrap();
+        assert!(inventory.appliances.is_empty());
+        assert_eq!(inventory.failures.len(), 1);
+        assert_eq!(inventory.failures[0].error.code, "MIDEA_RESPONSE_INVALID");
+        assert!(!format!("{inventory:?}").contains("PRIVATE"));
+        assert_eq!(transport.calls.lock().unwrap().len(), 2);
+    }
+}
+
+#[tokio::test]
+async fn cross_home_product_evidence_merges_missing_fields_and_rejects_conflicts() {
+    let mut first = appliance(json!(10), "AC");
+    first["sn8"] = json!("TEST1234");
+    let mut second = appliance(json!(10), "AC");
+    second["modelNumber"] = json!(524);
+    let transport = Transport::new(vec![
+        homes(&[1, 2]),
+        devices(1, vec![first.clone()]),
+        devices(2, vec![second.clone()]),
+    ]);
+    let merged = retrieve_inventory(&transport, transport.account, &operation())
+        .await
+        .unwrap();
+    first["modelNumber"] = json!("524");
+    let expected = Transport::new(vec![homes(&[1]), devices(1, vec![first.clone()])]);
+    let expected = retrieve_inventory(&expected, expected.account, &operation())
+        .await
+        .unwrap();
+    assert_eq!(merged.appliances.len(), 1);
+    assert_eq!(
+        merged.appliances[0].product_profile,
+        expected.appliances[0].product_profile
+    );
+    first["category"] = json!("test-wall-ac");
+    for (key, value) in [
+        ("sn8", json!("TEST5678")),
+        ("modelNumber", json!(525)),
+        ("category", json!("different-category")),
+    ] {
+        second = first.clone();
+        second[key] = value;
+        let transport = Transport::new(vec![
+            homes(&[1, 2]),
+            devices(1, vec![first.clone()]),
+            devices(2, vec![second]),
+        ]);
+        let error = retrieve_inventory(&transport, transport.account, &operation())
+            .await
+            .unwrap_err();
+        assert_eq!(error.code, "DEVICE_IDENTITY_CONFLICT");
+        assert!(!error.message.contains("TEST"));
+    }
+}

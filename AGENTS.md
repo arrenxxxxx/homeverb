@@ -28,7 +28,13 @@ Validate identity, permissions, arguments, routing, and risk before sending anyt
 
 Use `accepted`, `verified`, `failed`, and `unknown`; use per-item results and `partial` for batches. `verified` requires timestamped evidence and does not establish physical causality by itself. HTTP 200, stale cache entries, and optimistic state are not verification.
 
-When changing execution semantics, update `docs/routing-and-execution.md`, `docs/errors.md`, the corresponding schemas, and positive/negative fixtures. Cancelling an already-sent request is not a physical rollback.
+When changing execution semantics, update `docs/routing-and-execution.md`, `docs/errors.md`, the corresponding schemas, and positive/negative fixtures. Cancelling an already-sent request is not a physical rollback. Typed Rust elevated
+approval follows ADR-0042: retain the immutable preview, require actual trusted UI
+consent before consuming it, and invalidate/cancel on lifecycle changes. It is not
+available in ordinary JSON, CLI or MCP. ADR-0043 exposes three separate trusted C
+functions with a bounded session-owned preview registry; high-risk actions remain denied.
+Consequential adapters must check Core's approval marker independently of public
+risk metadata.
 
 ## Security
 
@@ -46,7 +52,13 @@ Use `<type>(<optional-scope>): <English imperative summary>`. Allowed types: `fe
 
 ## Implementation status and test honesty
 
-The Rust Mock MVP, Linux Secret Service library, and native account vault are implemented. Read the progressive guides in `docs/development/` before changing them. Native Meiju login, protected connection and automatic inventory are synthetic-tested with a local read-only probe. One real mainland account has passed login/inventory and saved-session refresh; six exact models have experimental read-only Core/native mappings. Native API 1.10.0 provides local account details/rename/removal and explicit cache/history clearing, selects Mock by default or explicit Meiju reads, lists/refreshes/recovers accounts and accepts protected connection buffers outside general JSON, including explicit pending-account reauthorization with intact protected identity. Trusted startup can independently grant exact-device AC power states or reviewed vendor fan codes over cloud; ordinary requests cannot edit authority. An explicitly opted-in AC power probe is synthetic-tested; default native Meiju sessions remain read-only and real writes require separate owner authorization. An Android Keystore/JNI backend has synthetic JVM evidence, and its API 28 arm64/x86_64 AAR cross-build passed archive/export/alignment checks. The Flutter worktree has verified Android APK startup and Mock journeys on an Android 15 x86_64 emulator. Real reauthorization, real Flutter account acceptance, Android Keystore/physical-phone acceptance, iOS credentials/packaging, and physical-device support remain pending; see `docs/task-breakdown.md`. A real adapter is `verified` only after model-specific physical-device testing.
+The Rust Mock MVP, Linux Secret Service library, and native account vault are implemented. Read the progressive guides in `docs/development/` before changing them. Native Meiju login, protected connection and automatic inventory are synthetic-tested with a local read-only probe. One real mainland account has passed login/inventory and saved-session refresh; six exact models have experimental read-only Core/native mappings. Native API 1.14.1 provides local account details/rename/removal and explicit cache/history clearing, selects Mock by default or explicit Meiju reads, lists/refreshes/recovers accounts and accepts protected connection buffers outside general JSON, including explicit pending-account reauthorization with intact protected identity. Trusted startup can independently grant exact-device AC power states, reviewed vendor fan codes, explicit power-on/mode activation or protected-profile temperature targets over cloud; ordinary requests cannot edit authority. Exact dishwasher program/argument startup grants additionally require a reviewed protected product mapping and separate trusted user confirmation; ordinary plan/execute remain denied for this elevated non-idempotent action. An explicitly opted-in AC power probe is synthetic-tested; default native Meiju sessions remain read-only and real writes require separate owner authorization. An Android Keystore/JNI backend has synthetic JVM evidence, and its API 28 arm64 AAR cross-build passed archive/export/alignment checks. The Flutter worktree has verified Android APK startup and Mock journeys on an Android 15 x86_64 emulator using API 1.14.1. Real reauthorization, real Flutter account acceptance, physical Android Keystore/phone acceptance, iOS credentials/packaging, and physical-device support remain pending; see `docs/task-breakdown.md`. A real adapter is `verified` only after model-specific physical-device testing.
+
+An isolated test APK has passed native Core and Android Keystore checks on AOSP
+Android 15 x86_64, including process restart and lock-screen refusal. It uses
+fictional material and no Internet permission. Android storage must use the
+reviewed Bionic file-lock path; standard Rust file locking is unsupported there.
+See the [Android acceptance guide](docs/development/08-android-native.md).
 
 Current checks:
 

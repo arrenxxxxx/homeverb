@@ -1,7 +1,7 @@
 # Repository layout
 
 ```text
-apps/cli/                  # One-shot CLI and local read-only MCP host
+apps/cli/                  # One-shot CLI and local MCP host with explicit startup policy
 crates/domain/             # Versioned DTOs and action-schema validation
 crates/core/               # Local organization, policy, routing, execution, verification
 crates/storage/            # SQLite metadata/journal, migration, retention, and device locks

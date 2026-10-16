@@ -21,6 +21,7 @@ def checked_formats() -> FormatChecker:
 def main() -> int:
     formats = checked_formats()
     pairs = [
+        ("cli-meiju-grants", "cli-meiju-grants"),
         ("device", "device"), ("capability", "capability.climate"),
         ("room", "room"), ("device-preferences", "device-preferences"),
         ("room-assignment", "room-assignment"),
@@ -43,6 +44,11 @@ def main() -> int:
         ("device", "device.refrigerator"),
         ("capability", "capability.fridge"), ("capability", "capability.freezer"),
         ("capability", "capability.meiju-fan"), ("command", "command.meiju-fan"),
+        ("capability", "capability.meiju-mode"), ("command", "command.meiju-mode"),
+        ("capability", "capability.meiju-temperature"), ("command", "command.meiju-temperature"),
+        ("capability", "capability.meiju-dishwasher"), ("command", "command.meiju-dishwasher"),
+        ("capability", "capability.approved-cycle"), ("command", "command.approved-cycle"),
+        ("command-result", "command-result.approval-expired"),
     ]
     validators = {}
     for path in (ROOT / "schemas").glob("*.schema.json"):
@@ -51,6 +57,9 @@ def main() -> int:
         validators[path.name.removesuffix(".schema.json")] = Draft202012Validator(sch, format_checker=formats)
     for sch, fixture in pairs:
         validators[sch].validate(load(f"examples/{fixture}.json"))
+    for key in ("meiju_power_grants", "meiju_fan_grants", "meiju_mode_grants", "meiju_temperature_grants"):
+        assert load("schemas/cli-meiju-grants.schema.json")["properties"][key] == load("schemas/native-open.schema.json")["properties"][key]
+    validators["cli-meiju-grants"].validate({"schema_version": "1.0"})
     assert load("schemas/batch-command.schema.json")["$defs"]["command"] == load("schemas/command.schema.json")
     nested_execution = json.loads(json.dumps(load("schemas/command-result.schema.json")).replace(
         '"$ref": "#"', '"$ref": "#/$defs/execution"'))
@@ -70,6 +79,21 @@ def main() -> int:
     action_validator.validate(load("examples/command.json")["arguments"])
     fan_validator = Draft202012Validator(load("examples/capability.meiju-fan.json")["actions"]["set_fan_speed"]["parameters"])
     fan_validator.validate(load("examples/command.meiju-fan.json")["arguments"])
+    temperature_validator = Draft202012Validator(load("examples/capability.meiju-temperature.json")["actions"]["set"]["parameters"])
+    temperature_validator.validate(load("examples/command.meiju-temperature.json")["arguments"])
+    for value in [16, 30.5, 26.25, "26", True, None]:
+        assert not temperature_validator.is_valid({"target_temperature":value})
+    for arguments in [{}, {"target_temperature":26, "mode":"cool"}, {"target_temperature":26, "state":True}]:
+        assert not temperature_validator.is_valid(arguments)
+    mode_validator = Draft202012Validator(load("examples/capability.meiju-mode.json")["actions"]["activate_mode"]["parameters"])
+    mode_validator.validate(load("examples/command.meiju-mode.json")["arguments"])
+    for mode in ["cool", "heat", "auto", "dry", "fan"]:
+        mode_validator.validate({"mode": mode})
+        validators["cli-meiju-grants"].validate({"schema_version":"1.0", "meiju_mode_grants":[
+            {"device_id":"30000000-0000-4000-8000-000000000001", "mode":mode}]})
+    for args in [{}, {"mode":"off"}, {"mode":"fan_only"}, {"mode":"COOL"}, {"mode":1},
+                 {"mode":"cool", "power":"off"}, {"mode":"cool", "temperature":26}]:
+        assert not mode_validator.is_valid(args), args
     for speed in [20, 40, 60, 80, 100, 102, 20.0]:
         fan_validator.validate({"wind_speed": speed})
     for args in [{}, {"wind_speed": "40"}, {"wind_speed": 40.5}, {"wind_speed": 101},
@@ -105,7 +129,43 @@ def main() -> int:
         fresh = load("examples/capability.climate.json")
         fresh["properties"]["target_temperature"]["max_age_ms"] = max_age_ms
         validators["capability"].validate(fresh)
+    approved_action = Draft202012Validator(load("examples/capability.approved-cycle.json")["actions"]["start"]["parameters"])
+    approved_action.validate(load("examples/command.approved-cycle.json")["arguments"])
     negative = []
+    for code in ["APPROVAL_INVALID", "APPROVAL_EXPIRED"]:
+        bad = load("examples/command-result.approval-expired.json")
+        bad["error"]["code"] = code
+        validators["command-result"].validate(bad)
+        bad["attempts"] = [{"transport":"cloud", "phase":"possibly_sent", "duration_ms":1}]
+        negative.append((f"sent {code} receipt", validators["command-result"], bad))
+    for field in ["approved", "user_approved", "approval_id"]:
+        bad = load("examples/command.approved-cycle.json")
+        bad[field] = True
+        negative.append((f"forged command approval {field}", validators["command"], bad))
+    for value in [15.5, 30.5, 26.25, "26", True, None]:
+        bad = {"schema_version":"1.0", "meiju_temperature_grants":[
+            {"device_id":"30000000-0000-4000-8000-000000000001", "target_temperature":value}]}
+        negative.append((f"invalid CLI setpoint {value}", validators["cli-meiju-grants"], bad))
+    capacity = [{'device_id':f'30000000-0000-4000-8000-{index:012d}', 'target_temperature':26}
+                for index in range(1, 258)]
+    validators["cli-meiju-grants"].validate({"schema_version":"1.0", "meiju_temperature_grants":capacity[:256]})
+    negative.append(("257 distinct temperature grants", validators["cli-meiju-grants"],
+                     {"schema_version":"1.0", "meiju_temperature_grants":capacity}))
+    for mode in [None, True, 1, "off", "fan_only", "COOL"]:
+        bad = {"schema_version":"1.0", "meiju_mode_grants":[
+            {"device_id":"30000000-0000-4000-8000-000000000001", "mode":mode}]}
+        negative.append((f"invalid CLI activation mode {mode}", validators["cli-meiju-grants"], bad))
+    for key, value in [("schema_version", "2.0"), ("confirmed", True), ("principal", "owner"),
+                       ("password", "PRIVATE"), ("meiju_power_grants", None)]:
+        bad = load("examples/cli-meiju-grants.json"); bad[key] = value
+        negative.append((f"invalid CLI grant field {key}", validators["cli-meiju-grants"], bad))
+    for key in ("meiju_power_grants", "meiju_fan_grants"):
+        for field, value in [("device_id", "*"), ("device_id", "provider-appliance-id"),
+                             ("connection", "lan"), ("action", "start")]:
+            bad = load("examples/cli-meiju-grants.json"); bad[key][0][field] = value
+            negative.append((f"invalid CLI grant scope {key}/{field}/{value}", validators["cli-meiju-grants"], bad))
+        bad = load("examples/cli-meiju-grants.json"); bad[key] *= 2
+        negative.append((f"duplicate CLI grants {key}", validators["cli-meiju-grants"], bad))
     bad = load("examples/command-result.meiju-not-listed.json")
     bad["status"] = "verified"
     negative.append(("inventory refusal promoted without evidence", validators["command-result"], bad))
@@ -231,6 +291,26 @@ def main() -> int:
     negative.append(("unbounded diagnostic receipts", validators["diagnostics"], bad))
     bad = load("examples/diagnostics.json"); bad["recent_receipts"][0]["attempts"] *= 33
     negative.append(("unbounded diagnostic attempts", validators["diagnostics"], bad))
+    cycle = Draft202012Validator(load("examples/capability.meiju-dishwasher.json")["actions"]["start_cycle"]["parameters"])
+    cycle.validate(load("examples/command.meiju-dishwasher.json")["arguments"])
+    for arguments in [{"program":"eco_wash"}, {"program":"neutral_gear","additional":0},
+                      {"program":"eco_wash","additional":1}, {"program":"eco_wash","additional":None},
+                      {"program":"eco_wash","additional":0,"confirmed":True}]:
+        negative.append(("invalid dishwasher start scope", cycle, arguments))
+    # Resolve native definition references locally, without provider or network access.
+    from native_contract import validator as native_validator
+    approval = load("packages/native-contract/approval-examples.json")
+    assert approval["api_version"] == load("packages/native-contract/api.json")["api_version"]
+    for definition in ["prepare", "execute"]:
+        shape = native_validator("native-approval", definition)
+        shape.validate(approval[definition])
+        for field, value in [("approved", True), ("principal", "admin"),
+                             ("operation_id", ""), ("schema_version", "2.0")]:
+            bad = json.loads(json.dumps(approval[definition])); bad[field] = value
+            negative.append((f"approval {definition} rejects {field}", shape, bad))
+    for value in [0, -1, 18446744073709551616, "1", True]:
+        bad = dict(approval["execute"]); bad["approval_id"] = value
+        negative.append(("invalid native approval ID", native_validator("native-approval", "execute"), bad))
     for name, validator, data in negative:
         if validator.is_valid(data):
             raise AssertionError(f"Counterexample was not rejected: {name}")
@@ -238,7 +318,7 @@ def main() -> int:
     verified = load("examples/command-result.verified.json")
     assert verified["verification"]["received_at"] >= verified["started_at"]
     assert load("examples/device.json")["id"] == load("examples/command.json")["device_id"]
-    print(f"PASS: {len(validators)} schemas; {len(pairs)} positive fixtures; action arguments and observed values; {len(negative)} negative fixtures.")
+    print(f"PASS: {len(validators)} schemas; {len(pairs) + 2} positive fixtures; action arguments and observed values; {len(negative)} negative fixtures.")
     print("Only documentation contracts were validated; no device or application code was executed.")
     return 0
 if __name__ == "__main__":

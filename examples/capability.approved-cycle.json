@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "id": "vendor.example.cycle",
+  "component_id": "main",
+  "revision": 1,
+  "properties": {},
+  "actions": {
+    "start": {
+      "parameters": {
+        "type": "object",
+        "properties": {"program": {"type": "string", "enum": ["normal"]}},
+        "required": ["program"],
+        "additionalProperties": false
+      },
+      "transports": ["cloud"],
+      "idempotency": "non_idempotent",
+      "risk": "elevated",
+      "atomic": false,
+      "independent_fields": false,
+      "verification": "unavailable"
+    }
+  },
+  "events": {}
+}

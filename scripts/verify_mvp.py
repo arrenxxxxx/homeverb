@@ -5,22 +5,26 @@ from __future__ import annotations
 
 import ctypes
 import copy
+import fcntl
 from contextlib import closing
 from datetime import datetime, timedelta, timezone
 import json
 import os
+import pty
 from pathlib import Path
 import selectors
 import signal
 import sqlite3
 import subprocess
 import tempfile
+import termios
 import threading
 import time
 import unittest
 
 from jsonschema import Draft202012Validator
 from validate_contracts import checked_formats
+from native_contract import validator
 
 ROOT = Path(__file__).resolve().parents[1]
 BINARY = ROOT / 'target/debug/homeverb'
@@ -55,6 +59,233 @@ class RuntimeAcceptance(unittest.TestCase):
     def schema(self, name, value):
         schema = json.loads((ROOT / f'schemas/{name}.schema.json').read_text())
         Draft202012Validator(schema, format_checker=self.formats).validate(value)
+
+    def meiju(self, *arguments, expected=0, profile='meiju', response_definition=None, execution_schema=None):
+        result = subprocess.run([str(BINARY), '--adapter', 'midea.meiju', '--data-dir',
+                                 self.directory.name, '--profile', profile, *arguments],
+                                capture_output=True, text=True, timeout=5,
+                                env={**os.environ, 'DBUS_SESSION_BUS_ADDRESS':
+                                     f'unix:path={self.directory.name}/absent-bus'})
+        self.assertEqual(result.returncode, expected, result.stdout + result.stderr)
+        self.assertEqual(result.stderr, '')
+        response = json.loads(result.stdout)
+        if execution_schema:
+            self.schema(execution_schema, response)
+            return response
+        if response['error'] is not None:
+            definition = 'query_error'
+        elif response_definition:
+            definition = response_definition
+        elif arguments[0] == 'account':
+            definition = {'list': 'list_accounts', 'show': 'get_account',
+                          'rename': 'rename_account', 'remove': 'remove_account',
+                          'inventory': 'inspect_account_inventory', 'refresh': 'refresh_account',
+                          'recover': 'recover_account', 'connect': 'connect_account'}[arguments[1]]
+        elif arguments[0] == 'device':
+            definition = {'discover': 'discover', 'cards': 'list_device_cards',
+                          'state': 'read_state'}[arguments[1]]
+        else:
+            definition = {'execution': 'get_execution', 'diagnostics': 'diagnostics'}[arguments[0]]
+        validator('native-response', definition).validate(response)
+        return response
+
+    def test_meiju_grants_require_secure_explicit_files_and_request_ids_before_startup(self):
+        path = Path(self.directory.name) / 'grants.json'
+        value = json.loads((ROOT / 'examples/cli-meiju-grants.json').read_text())
+        path.write_text(json.dumps(value))
+        path.chmod(0o600)
+        target = value['meiju_power_grants'][0]['device_id']
+        result = self.meiju('--meiju-grants', str(path), 'power', 'set', target, '--off', expected=2)
+        self.assertEqual(result['error']['code'], 'INVALID_ARGUMENT')
+        self.assertFalse((path.parent / 'meiju').exists())
+        for mode in [0o620, 0o602]:
+            path.chmod(mode)
+            result = self.meiju('--meiju-grants', str(path), '--request-id', 'grant-check',
+                                'power', 'set', target, '--off', expected=6)
+            self.assertEqual(result['error']['code'], 'POLICY_DENIED')
+            self.assertFalse((path.parent / 'meiju').exists())
+        path.chmod(0o600)
+        value['meiju_fan_grants'][0]['wind_speed'] = 101
+        path.write_text(json.dumps(value))
+        result = self.meiju('--meiju-grants', str(path), 'account', 'list', expected=2)
+        self.assertEqual(result['error']['code'], 'INVALID_ARGUMENT')
+        self.assertFalse((path.parent / 'meiju').exists())
+        path.write_text('{"schema_version":"1.0"}')
+        result = self.meiju('--meiju-grants', str(path), '--request-id', 'grant-check',
+                            'power', 'set', target, '--off', expected=6)
+        self.assertEqual(result['error']['code'], 'POLICY_DENIED')
+        self.assertFalse((path.parent / 'meiju').exists())
+
+    def seed_meiju_controls(self):
+        self.cli('device', 'discover')
+        base = self.cli('device', 'describe', 'mock-ac')['data']
+        power = next(item for item in base['capabilities'] if item['id'] == 'power')
+        power['actions']['set'].update(transports=['cloud'], verification='unavailable', atomic=False)
+        fan = json.loads((ROOT / 'examples/capability.meiju-fan.json').read_text())
+        grants = json.loads((ROOT / 'examples/cli-meiju-grants.json').read_text())
+        target = grants['meiju_power_grants'][0]['device_id']
+        other = '30000000-0000-4000-8000-000000000002'
+        account = '40000000-0000-4000-8000-000000000001'
+        path = Path(self.directory.name) / 'grants.json'
+        path.write_text(json.dumps(grants))
+        path.chmod(0o600)
+        options = ['--meiju-grants', str(path)]
+        self.assertEqual(self.meiju(*options, 'account', 'list', response_definition='list_accounts')['data'], [])
+        database = path.parent / 'meiju/homeverb.sqlite3'
+        with closing(sqlite3.connect(database)) as connection, connection:
+            connection.execute('INSERT INTO accounts VALUES (?, ?, ?, ?, ?, ?)',
+                               (account, 'midea.meiju', 'CN', 'Fictional pending account',
+                                '50000000-0000-4000-8000-000000000001', 'pending'))
+            for index, device_id in enumerate([target, other]):
+                device = copy.deepcopy(base['device'])
+                device.update(id=device_id, alias=f'Fictional AC {index}', model='KFR-35G/WF2',
+                              support_status='experimental', components=[{'id':'main', 'capabilities':['power', 'vendor.midea.ac']}],
+                              connections=[{'id':f'fictional-cloud-{index}', 'adapter':'midea.meiju',
+                                            'transport':'cloud', 'account_id':account, 'identity_ref':f'fictional-binding-{index}'}])
+                connection.execute('INSERT INTO devices VALUES (?, ?)',
+                                   (device_id, json.dumps({'device':device, 'capabilities':[power, fan]})))
+        return path, grants, target, other, database
+
+    def test_meiju_grants_bound_real_cli_plans_execution_refusals_and_receipt_replay(self):
+        path, grants, target, other, database = self.seed_meiju_controls()
+        options = ['--meiju-grants', str(path)]
+        plan = self.meiju(*options, '--request-id', 'scoped-power', '--dry-run', 'power', 'set', target, '--off',
+                          response_definition='plan')['data']
+        self.assertEqual(plan['transports'], ['cloud'])
+        for state, selected, route in [('--on', target, 'auto'), ('--off', other, 'auto'), ('--off', target, 'lan')]:
+            denied = self.meiju(*options, '--request-id', 'denied-plan', '--connection', route, '--dry-run',
+                                'power', 'set', selected, state, expected=6)
+            self.assertEqual(denied['error']['code'], 'POLICY_DENIED')
+        fan_args = ['device', 'execute', target, '--capability', 'vendor.midea.ac', '--action', 'set_fan_speed',
+                    '--arguments', '{"wind_speed":40}']
+        self.meiju(*options, '--request-id', 'scoped-fan', '--dry-run', *fan_args, response_definition='plan')
+        grants['meiju_fan_grants'] = []
+        path.write_text(json.dumps(grants))
+        denied = self.meiju(*options, '--request-id', 'scoped-fan', '--dry-run', *fan_args, expected=6)
+        self.assertEqual(denied['error']['code'], 'POLICY_DENIED')
+        batch = {'schema_version':'1.0', 'commands':[plan['command'], {**plan['command'], 'device_id':other, 'request_id':'other-batch'}]}
+        batch_path = path.parent / 'batch.json'
+        batch_path.write_text(json.dumps(batch))
+        denied = self.meiju(*options, 'batch', '--file', str(batch_path), expected=6)
+        self.assertEqual(denied['error']['code'], 'POLICY_DENIED')
+        with closing(sqlite3.connect(database)) as connection:
+            self.assertEqual(connection.execute('SELECT COUNT(*) FROM executions').fetchone()[0], 0)
+        arguments = [*options, '--request-id', 'scoped-power', 'power', 'set', target, '--off']
+        receipt = self.meiju(*arguments, expected=3, execution_schema='command-result')
+        self.assertEqual(receipt['status'], 'failed')
+        self.assertEqual(receipt['error']['code'], 'ACCOUNT_SESSION_UNCONFIRMED')
+        self.assertEqual([attempt['phase'] for attempt in receipt['attempts']], ['not_sent'])
+        self.assertEqual(self.meiju(*arguments, expected=3, execution_schema='command-result'), receipt)
+        grants['meiju_power_grants'].append({'device_id':target, 'state':True})
+        path.write_text(json.dumps(grants))
+        changed = self.meiju(*arguments[:-1], '--on', expected=7, execution_schema='command-result')
+        self.assertEqual(changed['error']['code'], 'REQUEST_CONFLICT')
+        self.assertEqual(self.meiju('execution', 'scoped-power')['data'], receipt)
+        self.assertEqual(self.meiju('--request-id', 'scoped-power', 'power', 'set', target, '--off', expected=6)['error']['code'], 'POLICY_DENIED')
+        self.assertFalse((database.parent / 'mock-appliance.sqlite3').exists())
+
+    def test_meiju_cli_metadata_inventory_refusal_and_recoverable_removal(self):
+        self.assertEqual(self.meiju('account', 'list')['data'], [])
+        self.assertEqual(self.meiju('device', 'discover')['data'], [])
+        self.assertEqual(self.meiju('device', 'cards')['data'], [])
+        account = '40000000-0000-4000-8000-000000000001'
+        reference = '50000000-0000-4000-8000-000000000001'
+        database = Path(self.directory.name) / 'meiju/homeverb.sqlite3'
+        with closing(sqlite3.connect(database)) as connection, connection:
+            connection.execute('INSERT INTO accounts VALUES (?, ?, ?, ?, ?, ?)',
+                               (account, 'midea.meiju', 'CN', 'Fictional account', reference, 'pending'))
+        details = self.meiju('account', 'show', account)['data']
+        self.assertEqual(details['device_ids'], [])
+        self.assertEqual(details['account']['authorization'], 'not_checked')
+        self.assertNotIn(reference, json.dumps(details))
+        renamed = self.meiju('account', 'rename', account, '  Family appliances  ')['data']
+        self.assertEqual(renamed['label'], 'Family appliances')
+        self.assertEqual(renamed['credential_state'], 'pending')
+        self.assertEqual(self.meiju('account', 'list')['data'][0]['label'], 'Family appliances')
+        for command in ['inventory', 'refresh']:
+            result = self.meiju('account', command, account, expected=3)
+            error = result['error'] if command == 'inventory' else result['data']['retrieval']['error']
+            self.assertEqual(error['code'], 'ACCOUNT_SESSION_UNCONFIRMED')
+        result = self.meiju('account', 'recover', account, expected=3)
+        self.assertEqual(result['data']['retrieval']['error']['code'], 'SECRET_STORE_UNAVAILABLE')
+        result = self.meiju('account', 'remove', account, '--expected-device-id', 'unexpected', expected=7)
+        self.assertEqual(result['error']['code'], 'ACCOUNT_SCOPE_CHANGED')
+        result = self.meiju('account', 'remove', account, expected=3)
+        self.assertIsNone(result['error'])
+        self.assertEqual(result['data']['status'], 'pending')
+        self.assertEqual(result['data']['error']['code'], 'SECRET_STORE_UNAVAILABLE')
+        self.assertEqual(self.meiju('account', 'show', account)['data']['account']['credential_state'], 'removing')
+        self.assertFalse((database.parent / 'mock-appliance.sqlite3').exists())
+
+    def test_meiju_cli_rejects_writes_mock_options_and_unsafe_login_input(self):
+        for arguments, expected, code in [
+            (['power', 'set', 'unknown', '--on'], 6, 'POLICY_DENIED'),
+            (['--dry-run', 'power', 'set', 'unknown', '--off'], 6, 'POLICY_DENIED'),
+            (['batch', '--file', 'does-not-exist'], 6, 'POLICY_DENIED'),
+            (['--mock', 'device', 'list'], 2, 'INVALID_ARGUMENT'),
+            (['--scenario', 'normal', 'device', 'list'], 4, 'CAPABILITY_UNSUPPORTED'),
+            (['--dry-run', 'account', 'list'], 2, 'INVALID_ARGUMENT'),
+            (['account', 'connect', '--label', 'Fictional'], 3, 'INPUT_UNAVAILABLE'),
+            (['account', 'connect', '--label', 'Fictional', '--password', 'FICTIONAL_PRIVATE_MARKER'], 2, 'INVALID_ARGUMENT'),
+            (['account', 'connect', '--label', 'Fictional', '--account-id', 'not-a-uuid'], 2, 'INVALID_ARGUMENT'),
+            (['--timeout-ms', '0', 'account', 'connect', '--label', 'Fictional'], 2, 'INVALID_ARGUMENT'),
+        ]:
+            with self.subTest(arguments=arguments):
+                result = self.meiju(*arguments, expected=expected)
+                self.assertEqual(result['error']['code'], code)
+                self.assertNotIn('FICTIONAL_PRIVATE_MARKER', json.dumps(result))
+                self.assertFalse((Path(self.directory.name) / 'meiju').exists())
+
+    def test_meiju_cli_reuses_core_cards_cache_and_history_without_mock_startup(self):
+        self.cli('device', 'discover')
+        state = self.cli('device', 'state', 'mock-ac', '--fresh')['data']
+        receipt = self.cli('--request-id', 'fictional-receipt', 'power', 'set', 'mock-ac', '--on')
+        cached = self.meiju('device', 'state', 'mock-ac', '--cached', profile='acceptance')['data']
+        self.assertTrue(cached['from_cache'])
+        self.assertEqual(set(cached['observations']), set(state['observations']))
+        self.assertEqual(self.meiju('execution', 'fictional-receipt', profile='acceptance')['data'], receipt)
+        self.assertEqual(self.meiju('device', 'cards', profile='acceptance')['data'][0]['device']['id'], 'dev-mock-ac')
+        refused = self.meiju('device', 'state', 'mock-ac', '--fresh', expected=5, profile='acceptance')
+        self.assertEqual(refused['error']['code'], 'LAN_UNREACHABLE')
+        self.schema('diagnostics', self.meiju('diagnostics', profile='acceptance')['data'])
+
+    def test_meiju_cli_defaults_isolate_profiles_and_preflight_storage_before_input(self):
+        base = [str(BINARY), '--data-dir', self.directory.name]
+        result = subprocess.run([*base, '--adapter', 'midea.meiju', 'account', 'list'],
+                                capture_output=True, text=True, timeout=5)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(json.loads(result.stdout)['data'], [])
+        self.assertTrue((Path(self.directory.name) / 'meiju/homeverb.sqlite3').exists())
+        self.assertFalse((Path(self.directory.name) / 'mock').exists())
+        result = subprocess.run([*base, '--mock', 'device', 'list'],
+                                capture_output=True, text=True, timeout=5)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertTrue((Path(self.directory.name) / 'mock/mock-appliance.sqlite3').exists())
+        for options in [['--request-id', 'not-a-command'], ['--dry-run'], ['--timeout-ms', '1000'],
+                        ['--connection', 'cloud'], ['--wait', 'accepted']]:
+            result = subprocess.run([*base, '--adapter', 'midea.meiju', '--profile', 'refused',
+                                     *options, 'mcp', '--stdio'], capture_output=True, text=True, timeout=5)
+            self.assertEqual(result.returncode, 2)
+            self.assertEqual(result.stdout, '')
+            self.assertIn('INVALID_ARGUMENT', result.stderr)
+            self.assertFalse((Path(self.directory.name) / 'refused').exists())
+        master, slave = pty.openpty()
+        try:
+            before = termios.tcgetattr(slave)
+            result = subprocess.run([*base, '--adapter', 'midea.meiju', 'account', 'connect', '--label', 'Fictional'],
+                                    stdin=slave, stderr=slave, stdout=subprocess.PIPE, text=True, timeout=5,
+                                    env={**os.environ, 'DBUS_SESSION_BUS_ADDRESS':
+                                         f'unix:path={self.directory.name}/absent-bus'})
+            self.assertEqual(result.returncode, 3, result.stdout)
+            self.assertEqual(json.loads(result.stdout)['error']['code'], 'SECRET_STORE_UNAVAILABLE')
+            self.assertEqual(termios.tcgetattr(slave), before)
+            os.set_blocking(master, False)
+            with self.assertRaises(BlockingIOError):
+                os.read(master, 1024)
+            self.assertEqual(self.meiju('account', 'list')['data'], [])
+        finally:
+            os.close(master)
+            os.close(slave)
 
     def test_cli_discovery_state_validation_and_persistence(self):
         self.assertEqual(self.cli('device', 'list')['data'], [])
@@ -783,12 +1014,26 @@ class RuntimeAcceptance(unittest.TestCase):
         self.assertEqual(stderr, '')
         self.assertEqual(json.loads(stdout)['status'], 'unknown')
 
-    def test_mcp_protocol_read_tools_policy_and_eof_exit(self):
-        self.cli('device', 'discover')
-        receipt = self.cli('--scenario', 'lost-ack', '--request-id', 'mcp-receipt',
-                           'power', 'set', 'mock-ac', '--on', expected=11)
-        process = subprocess.Popen([*self.base, 'mcp', '--stdio'], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE, text=True, bufsize=1)
+    def assert_no_internet_sockets(self, process):
+        # Tokio may use Unix socket pairs for signals; check Internet sockets only.
+        if Path(f'/proc/{process.pid}/fd').exists():
+            socket_inodes = set()
+            for descriptor in Path(f'/proc/{process.pid}/fd').iterdir():
+                try:
+                    target = os.readlink(descriptor)
+                    if target.startswith('socket:['):
+                        socket_inodes.add(target[8:-1])
+                except FileNotFoundError:
+                    pass
+            for table in ['tcp', 'tcp6', 'udp', 'udp6']:
+                for row in Path(f'/proc/{process.pid}/net/{table}').read_text().splitlines()[1:]:
+                    self.assertNotIn(row.split()[9], socket_inodes)
+
+    def start_mcp(self, base):
+        process = subprocess.Popen([*base, 'mcp', '--stdio'], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE, text=True, bufsize=1,
+                                   env={**os.environ, 'DBUS_SESSION_BUS_ADDRESS':
+                                        f'unix:path={self.directory.name}/absent-bus'})
         self.addCleanup(self.close_process, process)
 
         def send(value):
@@ -800,6 +1045,14 @@ class RuntimeAcceptance(unittest.TestCase):
                 selector.register(process.stdout, selectors.EVENT_READ)
                 self.assertTrue(selector.select(timeout=3), 'MCP response timed out')
             return json.loads(process.stdout.readline())
+
+        return process, send, response
+
+    def test_mcp_protocol_read_tools_policy_and_eof_exit(self):
+        self.cli('device', 'discover')
+        receipt = self.cli('--scenario', 'lost-ack', '--request-id', 'mcp-receipt',
+                           'power', 'set', 'mock-ac', '--on', expected=11)
+        process, send, response = self.start_mcp(self.base)
 
         send({'jsonrpc': '2.0', 'id': 1, 'method': 'initialize', 'params': {
             'protocolVersion': '2025-06-18', 'capabilities': {}, 'clientInfo': {'name': 'acceptance', 'version': '1'}}})
@@ -830,25 +1083,268 @@ class RuntimeAcceptance(unittest.TestCase):
         missing = response()['result']
         self.assertTrue(missing['isError'])
         self.assertEqual(missing['structuredContent']['error']['code'], 'REQUEST_NOT_FOUND')
-        # Tokio may use Unix socket pairs for signals; check Internet sockets only.
-        if Path(f'/proc/{process.pid}/fd').exists():
-            socket_inodes = set()
-            for descriptor in Path(f'/proc/{process.pid}/fd').iterdir():
-                try:
-                    target = os.readlink(descriptor)
-                    if target.startswith('socket:['):
-                        socket_inodes.add(target[8:-1])
-                except FileNotFoundError:
-                    pass
-            for table in ['tcp', 'tcp6', 'udp', 'udp6']:
-                for row in Path(f'/proc/{process.pid}/net/{table}').read_text().splitlines()[1:]:
-                    self.assertNotIn(row.split()[9], socket_inodes)
+        self.assert_no_internet_sockets(process)
         process.stdin.close()
         process.wait(timeout=2)
         self.assertEqual(process.returncode, 0)
         self.assertEqual(process.stderr.read(), '')
         process.stdout.close()
         process.stderr.close()
+
+    def test_meiju_mcp_scopes_live_reads_controls_and_receipts_without_credentials(self):
+        path, grants, target, other, database = self.seed_meiju_controls()
+        snapshot = json.loads((ROOT / 'examples/state.json').read_text())
+        snapshot['device_id'] = target
+        observation = snapshot['observations'].pop('climate.target_temperature')
+        observation.update(value=False, source='cloud')
+        snapshot['observations']['power.state'] = observation
+        with closing(sqlite3.connect(database)) as connection, connection:
+            connection.execute('INSERT INTO snapshots VALUES (?, ?, ?)', (target, 'main', json.dumps(snapshot)))
+        base = [str(BINARY), '--adapter', 'midea.meiju', '--data-dir', self.directory.name, '--profile', 'meiju']
+        command = {'schema_version':'1.0', 'request_id':'mcp-scoped-power', 'device_id':target,
+                   'component_id':'main', 'capability':'power', 'action':'set', 'arguments':{'state':False},
+                   'connection':'cloud', 'timeout_ms':10000, 'wait_for':'verified'}
+        receipt = None
+        for enabled in [False, True, False]:
+            with self.subTest(controls=enabled, has_receipt=receipt is not None):
+                process, send, response = self.start_mcp([*base, *(['--meiju-grants', str(path)] if enabled else [])])
+                send({'jsonrpc':'2.0', 'id':1, 'method':'initialize'})
+                self.assertEqual(response()['result']['protocolVersion'], '2025-06-18')
+                send({'jsonrpc':'2.0', 'method':'notifications/initialized'})
+                send({'jsonrpc':'2.0', 'id':2, 'method':'tools/list'})
+                catalog = response()['result']['tools']
+                expected = {'device_list', 'device_describe', 'device_get_state', 'execution_get'}
+                if enabled:
+                    expected.update(['command_plan', 'command_execute'])
+                self.assertEqual({tool['name'] for tool in catalog}, expected)
+                self.assert_no_internet_sockets(process)
+                sequence = 2
+
+                def call(name, arguments):
+                    nonlocal sequence
+                    sequence += 1
+                    send({'jsonrpc':'2.0', 'id':sequence, 'method':'tools/call',
+                          'params':{'name':name, 'arguments':arguments}})
+                    reply = response()
+                    self.assertEqual(reply['id'], sequence)
+                    result = reply['result']
+                    self.assertEqual(json.loads(result['content'][0]['text']), result['structuredContent'])
+                    return result
+
+                listed = call('device_list', {})['structuredContent']
+                validator('native-response', 'list_devices').validate(listed)
+                self.assertEqual({device['id'] for device in listed['data']}, {target, other})
+                described = call('device_describe', {'device':target})['structuredContent']
+                validator('native-response', 'describe_device').validate(described)
+                cached = call('device_get_state', {'device':target, 'cached':True})['structuredContent']
+                validator('native-response', 'read_state').validate(cached)
+                self.assertTrue(cached['data']['from_cache'])
+                self.assertTrue(cached['data']['observations']['power.state']['stale'])
+                live = call('device_get_state', {'device':target})
+                self.assertTrue(live['isError'])
+                self.assertEqual(live['structuredContent']['error']['code'], 'ACCOUNT_SESSION_UNCONFIRMED')
+                for name, arguments in [('account_connect', {}), ('device_discover', {}),
+                                        ('command_execute', {'command':command, 'principal':'admin'})]:
+                    self.assertTrue(call(name, arguments)['isError'])
+                if not enabled:
+                    for name in ['command_plan', 'command_execute']:
+                        denied = call(name, {'command':command})
+                        self.assertEqual(denied['structuredContent']['error']['code'], 'POLICY_DENIED')
+                else:
+                    for tool in catalog:
+                        if tool['name'].startswith('command_'):
+                            self.assertEqual(tool['inputSchema']['properties']['command'],
+                                             json.loads((ROOT / 'schemas/command.schema.json').read_text()))
+                            Draft202012Validator(tool['inputSchema']).validate({'command':command})
+                    plan = call('command_plan', {'command':command})
+                    self.assertFalse(plan['isError'])
+                    validator('native-response', 'plan').validate(plan['structuredContent'])
+                    for changes in [{'device_id':other}, {'arguments':{'state':True}}, {'connection':'lan'}]:
+                        denied = call('command_plan', {'command':{**command, **changes}})
+                        self.assertEqual(denied['structuredContent']['error']['code'], 'POLICY_DENIED')
+                    fan = {**command, 'capability':'vendor.midea.ac', 'action':'set_fan_speed', 'arguments':{'wind_speed':40}}
+                    self.assertFalse(call('command_plan', {'command':fan})['isError'])
+                    denied = call('command_plan', {'command':{**fan, 'arguments':{'wind_speed':60}}})
+                    self.assertEqual(denied['structuredContent']['error']['code'], 'POLICY_DENIED')
+                    # Startup policy is immutable for this host session; replacement requires restart.
+                    path.write_text('{"schema_version":"1.0"}')
+                    self.assertFalse(call('command_plan', {'command':command})['isError'])
+                    with closing(sqlite3.connect(database)) as connection:
+                        self.assertEqual(connection.execute('SELECT COUNT(*) FROM executions').fetchone()[0], 0)
+                    result = call('command_execute', {'command':command})
+                    receipt = result['structuredContent']
+                    self.schema('command-result', receipt)
+                    self.assertTrue(result['isError'])
+                    self.assertEqual(receipt['status'], 'failed')
+                    self.assertEqual(receipt['error']['code'], 'ACCOUNT_SESSION_UNCONFIRMED')
+                    self.assertEqual([attempt['phase'] for attempt in receipt['attempts']], ['not_sent'])
+                    self.assertEqual(call('command_execute', {'command':command}), result)
+                if receipt:
+                    lookup = call('execution_get', {'request_id':command['request_id']})
+                    self.assertFalse(lookup['isError'])
+                    self.assertEqual(lookup['structuredContent']['data'], receipt)
+                self.assert_no_internet_sockets(process)
+                process.stdin.close()
+                process.wait(timeout=2)
+                self.assertEqual(process.returncode, 0)
+                self.assertEqual(process.stderr.read(), '')
+        self.assertFalse((database.parent / 'mock-appliance.sqlite3').exists())
+
+    def test_mode_only_cli_and_mcp_grants_plan_activation_and_refuse_unconfirmed_send(self):
+        path, _, target, other, database = self.seed_meiju_controls()
+        capability = json.loads((ROOT / 'examples/capability.meiju-mode.json').read_text())
+        with closing(sqlite3.connect(database)) as connection, connection:
+            for device_id in [target, other]:
+                descriptor = json.loads(connection.execute('SELECT descriptor FROM devices WHERE id=?', (device_id,)).fetchone()[0])
+                vendor = next(item for item in descriptor['capabilities'] if item['id']=='vendor.midea.ac')
+                vendor['actions'].update(capability['actions'])
+                vendor['properties']['mode']['writable'] = True
+                vendor['revision'] = 3
+                connection.execute('UPDATE devices SET descriptor=? WHERE id=?', (json.dumps(descriptor),device_id))
+        path.write_text(json.dumps({'schema_version':'1.0', 'meiju_mode_grants':[{'device_id':target,'mode':'cool'}]}))
+        options = ['--meiju-grants',str(path)]
+        args = ['device','execute',target,'--capability','vendor.midea.ac','--action','activate_mode','--arguments','{"mode":"cool"}']
+        plan = self.meiju(*options,'--request-id','mode-preview','--dry-run',*args,response_definition='plan')['data']
+        self.assertEqual(plan['transports'],['cloud'])
+        self.assertEqual(plan['command']['arguments'],{'mode':'cool'})
+        denied = self.meiju(*options,'--request-id','mode-denied','--dry-run',*args[:-1],'{"mode":"heat"}',expected=6)
+        self.assertEqual(denied['error']['code'],'POLICY_DENIED')
+        for action in [['power','set',target,'--on'],
+                       ['device','execute',target,'--capability','vendor.midea.ac','--action','set_fan_speed','--arguments','{"wind_speed":40}']]:
+            self.assertEqual(self.meiju(*options,'--request-id','mode-denied','--dry-run',*action,expected=6)['error']['code'],'POLICY_DENIED')
+        receipt = self.meiju(*options,'--request-id','mode-cli-write',*args,expected=3,execution_schema='command-result')
+        self.assertEqual(receipt['error']['code'],'ACCOUNT_SESSION_UNCONFIRMED')
+        self.assertEqual(receipt['attempts'][0]['phase'],'not_sent')
+        base = [str(BINARY),'--adapter','midea.meiju','--data-dir',self.directory.name,'--profile','meiju',*options]
+        process, send, response = self.start_mcp(base)
+        send({'jsonrpc':'2.0','id':1,'method':'initialize'})
+        response()
+        send({'jsonrpc':'2.0','method':'notifications/initialized'})
+        command = {**plan['command'],'request_id':'mode-mcp-write'}
+        for index, name in [(2,'command_plan'), (3,'command_execute')]:
+            send({'jsonrpc':'2.0','id':index,'method':'tools/call','params':{'name':name,'arguments':{'command':command}}})
+            result = response()['result']
+            if name == 'command_plan':
+                validator('native-response','plan').validate(result['structuredContent'])
+                self.assertFalse(result['isError'])
+            else:
+                self.schema('command-result',result['structuredContent'])
+                self.assertTrue(result['isError'])
+                self.assertEqual(result['structuredContent']['error']['code'],'ACCOUNT_SESSION_UNCONFIRMED')
+        process.stdin.close()
+        process.wait(timeout=2)
+        self.assertEqual(process.returncode,0)
+        self.assertEqual(process.stderr.read(),'')
+
+    def test_temperature_only_cli_and_mcp_grants_keep_exact_setpoints_and_pre_send_guards(self):
+        path, _, target, other, database = self.seed_meiju_controls()
+        capability = json.loads((ROOT / 'examples/capability.meiju-temperature.json').read_text())
+        with closing(sqlite3.connect(database)) as connection, connection:
+            for device_id in [target, other]:
+                descriptor = json.loads(connection.execute('SELECT descriptor FROM devices WHERE id=?', (device_id,)).fetchone()[0])
+                descriptor['capabilities'].append(capability)
+                descriptor['device']['components'][0]['capabilities'].append('climate')
+                connection.execute('UPDATE devices SET descriptor=? WHERE id=?', (json.dumps(descriptor),device_id))
+        path.write_text(json.dumps({'schema_version':'1.0', 'meiju_temperature_grants':[{'device_id':target,'target_temperature':26.5}]}))
+        options = ['--meiju-grants',str(path)]
+        args = ['device','execute',target,'--capability','climate','--action','set','--arguments','{"target_temperature":26.5}']
+        plan = self.meiju(*options,'--request-id','temperature-preview','--dry-run',*args,response_definition='plan')['data']
+        self.assertEqual(plan['transports'],['cloud'])
+        self.assertEqual(plan['command']['arguments'],{'target_temperature':26.5})
+        denied = self.meiju(*options,'--request-id','temperature-denied','--dry-run',*args[:-1],'{"target_temperature":27}',expected=6)
+        self.assertEqual(denied['error']['code'],'POLICY_DENIED')
+        for action in [['power','set',target,'--on'],
+                       ['device','execute',target,'--capability','vendor.midea.ac','--action','set_fan_speed','--arguments','{"wind_speed":40}']]:
+            self.assertEqual(self.meiju(*options,'--request-id','temperature-denied','--dry-run',*action,expected=6)['error']['code'],'POLICY_DENIED')
+        receipt = self.meiju(*options,'--request-id','temperature-cli-write',*args,expected=3,execution_schema='command-result')
+        self.assertEqual(receipt['error']['code'],'ACCOUNT_SESSION_UNCONFIRMED')
+        self.assertEqual(receipt['attempts'][0]['phase'],'not_sent')
+        base = [str(BINARY),'--adapter','midea.meiju','--data-dir',self.directory.name,'--profile','meiju',*options]
+        process, send, response = self.start_mcp(base)
+        send({'jsonrpc':'2.0','id':1,'method':'initialize'})
+        response()
+        send({'jsonrpc':'2.0','method':'notifications/initialized'})
+        command = {**plan['command'],'request_id':'temperature-mcp-write'}
+        for index, name in [(2,'command_plan'), (3,'command_execute')]:
+            send({'jsonrpc':'2.0','id':index,'method':'tools/call','params':{'name':name,'arguments':{'command':command}}})
+            result = response()['result']
+            if name == 'command_plan':
+                validator('native-response','plan').validate(result['structuredContent'])
+                self.assertFalse(result['isError'])
+            else:
+                self.schema('command-result',result['structuredContent'])
+                self.assertTrue(result['isError'])
+                self.assertEqual(result['structuredContent']['error']['code'],'ACCOUNT_SESSION_UNCONFIRMED')
+        process.stdin.close()
+        process.wait(timeout=2)
+        self.assertEqual(process.returncode,0)
+        self.assertEqual(process.stderr.read(),'')
+
+    def test_four_ac_temperature_grants_fit_cli_and_mcp_without_widening_authority(self):
+        path, _, target, other, database = self.seed_meiju_controls()
+        device_ids = [target, other, '30000000-0000-4000-8000-000000000003',
+                      '30000000-0000-4000-8000-000000000004']
+        capability = json.loads((ROOT / 'examples/capability.meiju-temperature.json').read_text())
+        with closing(sqlite3.connect(database)) as connection, connection:
+            original = json.loads(connection.execute('SELECT descriptor FROM devices WHERE id=?', (target,)).fetchone()[0])
+            for index, device_id in enumerate(device_ids):
+                descriptor = copy.deepcopy(original)
+                descriptor['device']['id'] = device_id
+                descriptor['device']['connections'][0].update(id=f'fictional-cloud-{index}', identity_ref=f'fictional-binding-{index}')
+                descriptor['device']['components'][0]['capabilities'].append('climate')
+                descriptor['capabilities'].append(capability)
+                connection.execute('INSERT OR REPLACE INTO devices VALUES (?, ?)', (device_id, json.dumps(descriptor)))
+        grants = [{'device_id':device_id, 'target_temperature':half / 2}
+                  for device_id in device_ids for half in range(32, 61)]
+        self.assertEqual(len(grants), 116)
+        config = {'schema_version':'1.0', 'meiju_temperature_grants':grants}
+        self.schema('cli-meiju-grants', config)
+        path.write_text(json.dumps(config, separators=(',', ':')))
+        self.assertLess(path.stat().st_size, 32 * 1024)
+        options = ['--meiju-grants',str(path)]
+        plans = []
+        for index, device_id in enumerate(device_ids):
+            args = ['device','execute',device_id,'--capability','climate','--action','set',
+                    '--arguments','{"target_temperature":26.5}']
+            plan = self.meiju(*options,'--request-id',f'fleet-{index}','--dry-run',*args,response_definition='plan')['data']
+            self.assertEqual(plan['transports'], ['cloud'])
+            plans.append(plan['command'])
+        denied = self.meiju(*options,'--request-id','fleet-power','--dry-run','power','set',target,'--on',expected=6)
+        self.assertEqual(denied['error']['code'], 'POLICY_DENIED')
+        base = [str(BINARY),'--adapter','midea.meiju','--data-dir',self.directory.name,'--profile','meiju',*options]
+        process, send, response = self.start_mcp(base)
+        send({'jsonrpc':'2.0','id':1,'method':'initialize'})
+        response()
+        send({'jsonrpc':'2.0','method':'notifications/initialized'})
+        for index, command in enumerate(plans):
+            send({'jsonrpc':'2.0','id':index + 2,'method':'tools/call',
+                  'params':{'name':'command_plan','arguments':{'command':command}}})
+            result = response()['result']
+            self.assertFalse(result['isError'])
+            validator('native-response','plan').validate(result['structuredContent'])
+            self.assertEqual(result['structuredContent']['data']['command'], command)
+        send({'jsonrpc':'2.0','id':6,'method':'tools/call',
+              'params':{'name':'command_execute','arguments':{'command':plans[-1]}}})
+        receipt = response()['result']['structuredContent']
+        self.schema('command-result', receipt)
+        self.assertEqual(receipt['error']['code'], 'ACCOUNT_SESSION_UNCONFIRMED')
+        self.assertEqual([attempt['phase'] for attempt in receipt['attempts']], ['not_sent'])
+        process.stdin.close()
+        process.wait(timeout=2)
+        self.assertEqual(process.returncode, 0)
+        self.assertEqual(process.stderr.read(), '')
+        capacity = [{'device_id':f'30000000-0000-4000-8000-{index:012d}', 'target_temperature':26}
+                    for index in range(1, 258)]
+        config['meiju_temperature_grants'] = capacity[:256]
+        self.schema('cli-meiju-grants', config)
+        path.write_text(json.dumps(config, separators=(',', ':')))
+        self.assertEqual(self.meiju(*options,'account','list',profile='capacity',response_definition='list_accounts')['data'], [])
+        config['meiju_temperature_grants'] = capacity
+        path.write_text(json.dumps(config, separators=(',', ':')))
+        self.assertLess(path.stat().st_size, 32 * 1024)
+        denied = self.meiju(*options,'account','list',profile='excess',expected=2)
+        self.assertEqual(denied['error']['code'], 'INVALID_ARGUMENT')
+        self.assertFalse((path.parent / 'excess').exists())
 
     def test_native_bridge_independence_and_foreground_lifecycle(self):
         library = ctypes.CDLL(str(LIBRARY))
@@ -960,6 +1456,24 @@ class RuntimeAcceptance(unittest.TestCase):
         self.assertEqual(rejected_report['error']['code'], 'INVALID_ARGUMENT')
         library.homeverb_close(handle)
         self.assertEqual(call('list-4', {'method': 'list_devices'})['error']['code'], 'HOST_CLOSED')
+
+    def test_mcp_closed_or_stalled_output_exits_without_waiting_for_host_input(self):
+        for stalled in [False, True]:
+            with self.subTest(stalled=stalled):
+                process, send, response = self.start_mcp(self.base)
+                send({'jsonrpc':'2.0', 'id':1, 'method':'initialize'})
+                response()
+                send({'jsonrpc':'2.0', 'method':'notifications/initialized'})
+                if stalled:
+                    fcntl.fcntl(process.stdout, fcntl.F_SETPIPE_SZ, 4096)
+                    for index in range(2, 22):
+                        send({'jsonrpc':'2.0', 'id':index, 'method':'tools/list'})
+                else:
+                    process.stdout.close()
+                    send({'jsonrpc':'2.0', 'id':2, 'method':'ping'})
+                process.wait(timeout=5)
+                self.assertEqual(process.returncode, 10)
+                self.assertIn('MCP_IO_ERROR', process.stderr.read())
 
     def test_mcp_sigint_exits_even_when_host_stdin_remains_open(self):
         process = subprocess.Popen([*self.base, 'mcp', '--stdio'], stdin=subprocess.PIPE,

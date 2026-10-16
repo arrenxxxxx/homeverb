@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0",
+  "id": "climate",
+  "component_id": "main",
+  "revision": 2,
+  "properties": {
+    "current_temperature": {
+      "type": "number",
+      "readable": true,
+      "writable": false,
+      "unit": "celsius"
+    },
+    "target_temperature": {
+      "type": "number",
+      "readable": true,
+      "writable": true,
+      "unit": "celsius"
+    }
+  },
+  "actions": {
+    "set": {
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "target_temperature": {
+            "type": "number",
+            "minimum": 17,
+            "maximum": 30,
+            "multipleOf": 0.5
+          }
+        },
+        "required": [
+          "target_temperature"
+        ],
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "set_value",
+      "risk": "low",
+      "atomic": false,
+      "independent_fields": false,
+      "verification": "unavailable"
+    }
+  },
+  "events": {}
+}

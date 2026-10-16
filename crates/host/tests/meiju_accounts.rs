@@ -19,6 +19,9 @@ use uuid::Uuid;
 #[path = "meiju_accounts/fan.rs"]
 mod fan;
 
+#[path = "meiju_accounts/mode.rs"]
+mod mode;
+
 #[path = "meiju_accounts/inventory.rs"]
 mod inventory;
 
@@ -166,6 +169,7 @@ struct Wire {
     homes_code: AtomicI32,
     extra_device: AtomicBool,
     empty_inventory: AtomicBool,
+    product_fields: Mutex<Option<Value>>,
     delay: Mutex<Option<CloudEndpoint>>,
     started: tokio::sync::Notify,
     resume: tokio::sync::Notify,
@@ -182,6 +186,7 @@ impl Default for Wire {
             homes_code: AtomicI32::new(0),
             extra_device: AtomicBool::new(false),
             empty_inventory: AtomicBool::new(false),
+            product_fields: Mutex::new(None),
             delay: Mutex::new(None),
             started: tokio::sync::Notify::new(),
             resume: tokio::sync::Notify::new(),
@@ -239,6 +244,14 @@ impl CloudTransport for Wire {
             ),
             _ => panic!("Account connection must not request state or controls."),
         };
+        if request.endpoint() == CloudEndpoint::HomeAppliances
+            && let Some(fields) = self.product_fields.lock().unwrap().as_ref()
+        {
+            data["homeList"][0]["roomList"][0]["applianceList"][0]
+                .as_object_mut()
+                .unwrap()
+                .extend(fields.as_object().unwrap().clone());
+        }
         if request.endpoint() == CloudEndpoint::HomeAppliances
             && self.extra_device.load(Ordering::Relaxed)
         {
@@ -362,7 +375,7 @@ impl Fixture {
     }
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn local_account_details_and_rename_preserve_bindings_without_secret_access() {
     let f = Fixture::new();
     let connected = f.connect(None).await;
@@ -419,7 +432,7 @@ async fn local_account_details_and_rename_preserve_bindings_without_secret_acces
     }
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn local_account_edits_reject_conflicts_and_leave_pending_sessions_pending() {
     let f = Fixture::new();
     let lease = f
@@ -480,7 +493,7 @@ async fn local_account_edits_reject_conflicts_and_leave_pending_sessions_pending
     assert!(f.secrets.values.lock().unwrap().is_empty());
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn connect_publishes_cards_once_and_reconnect_keeps_identity_and_preferences() {
     let f = Fixture::new();
     assert_eq!(
@@ -556,7 +569,7 @@ async fn connect_publishes_cards_once_and_reconnect_keeps_identity_and_preferenc
     }
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn failed_or_partial_retrieval_keeps_stored_authentication_and_retry_never_logs_in() {
     for (code, expected) in [(999, "partial"), (7400, "failed")] {
         let f = Fixture::new();
@@ -585,7 +598,7 @@ async fn failed_or_partial_retrieval_keeps_stored_authentication_and_retry_never
     }
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn wrong_subject_and_cross_account_duplicates_never_replace_existing_cards() {
     let f = Fixture::new();
     let connected = f.connect(None).await;
@@ -616,7 +629,7 @@ async fn wrong_subject_and_cross_account_duplicates_never_replace_existing_cards
     );
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn uncertain_inventory_storage_returns_current_pending_state_without_resetting_bindings() {
     let f = Fixture::new();
     let connected = f.connect(None).await;
@@ -639,7 +652,7 @@ async fn uncertain_inventory_storage_returns_current_pending_state_without_reset
     assert_eq!(f.store.accounts().unwrap().len(), 1);
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn unavailable_credentials_and_invalid_metadata_stop_before_login() {
     let f = Fixture::new();
     f.secrets.unavailable.store(true, Ordering::Relaxed);
@@ -728,7 +741,7 @@ async fn connection_shares_foreground_operation_ids_deadlines_and_lease_cleanup(
     }
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn publication_refuses_unregistered_foreign_or_invalid_descriptor_batches() {
     let f = Fixture::new();
     let core = Core::new(
@@ -789,7 +802,7 @@ fn power_command(device: &str, state: bool) -> Value {
         "arguments":{"state":state},"connection":"cloud","timeout_ms":1000,"wait_for":"verified"})
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn complete_empty_refresh_preserves_cards_and_reports_unsent_membership_refusals() {
     let mut f = Fixture::new();
     let connected = f.connect(None).await;
@@ -836,7 +849,7 @@ async fn complete_empty_refresh_preserves_cards_and_reports_unsent_membership_re
     assert_eq!(f.calls(), calls);
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn native_power_grants_scope_actual_session_plans_outcomes_and_reopening() {
     let mut f = Fixture::new();
     let connected = f.connect(None).await;
@@ -912,7 +925,7 @@ async fn native_power_grants_scope_actual_session_plans_outcomes_and_reopening()
     assert_eq!(f.calls(), before);
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn native_power_background_cancel_and_close_preserve_unknown_and_release_account() {
     let mut f = Fixture::new();
     let connected = f.connect(None).await;
@@ -989,3 +1002,9 @@ mod recovery;
 
 #[path = "meiju_accounts/reauthorization.rs"]
 mod reauthorization;
+
+#[path = "meiju_accounts/product.rs"]
+mod product;
+
+#[path = "meiju_accounts/temperature.rs"]
+mod temperature;

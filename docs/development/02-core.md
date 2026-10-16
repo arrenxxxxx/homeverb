@@ -76,7 +76,9 @@ let grant = Grant {
 
 These bounds describe this example permission, not universal device limits. `auto` may choose only transports authorized for that complete command. Unsent fallback cannot escape the grant. Non-atomic commands require both whole-command and per-step authorization; each step uses their route intersection. A grant requiring both fields may intentionally prevent splitting unless separate matching step grants are also supplied. Dry-run uses the same authorization preflight and includes per-step `items` with their allowed transports.
 
-Grants are trusted in-memory configuration, not JSON inputs accepted by CLI, native calls, or MCP tools. The Mock host's explicit write option grants `main` power/climate actions over both simulated transports; MCP supplies no grants. Elevated/high-risk actions remain denied. See [ADR-0010](../adr/0010-scoped-write-grants.md) for the unreleased Rust API migration and [policy tests](../../crates/host/tests/write_policy.rs).
+Grants are trusted host configuration, never ordinary CLI command JSON, native method arguments or MCP tool inputs. Native startup can supply exact Meiju power, fan, mode activation and profile-scoped temperature grants; the Linux CLI or MCP host can explicitly load the same scopes from an [owner-controlled startup file](../cli.md#scoped-meiju-controls). MCP snapshots that policy until restart. The Mock host's explicit write option grants `main` power/climate actions over both simulated transports; default Meiju and all Mock MCP sessions supply no grants. Ordinary calls still deny elevated/high-risk actions. The separate typed
+[trusted approval path](../adr/0042-trusted-single-command-approval.md) can admit
+one explicitly confirmed elevated action; high-risk actions remain denied. See [ADR-0010](../adr/0010-scoped-write-grants.md) for the unreleased Rust API migration and [policy tests](../../crates/host/tests/write_policy.rs).
 
 Next: [Connect the UI](03-ui-integration.md).
 
@@ -99,3 +101,32 @@ This is useful after a lost acknowledgement or restart. A receipt remains the ev
 ## Local diagnostics
 
 `Core::diagnostics(&operation)` returns dedicated allowlisted DTOs from local metadata and retained receipts. It shares the caller's budget and checks it between synchronous storage reads. It does not call adapters or the credential store, and it does not mutate the journal. The projection is in [diagnostics.rs](../../crates/core/src/diagnostics.rs); the closed [schema](../../schemas/diagnostics.schema.json) and marker-injection tests define the export boundary. Add export fields deliberately rather than serializing private records wholesale. See [privacy and sampling limits](../security-and-privacy.md#local-diagnostic-reports).
+
+## Prepare one consequential action for trusted UI confirmation
+
+Use `Core::prepare_user_approval(command)` only from trusted host code. It returns
+`PendingApproval` with immutable command, descriptor, action, connection and expiry
+views. Display those exact values and effects. Preparation alone is not consent.
+After the user confirms, move the same value into
+`Core::execute_user_approved(preview, &operation)`; never reconstruct a command
+from editable form state after confirmation. The value cannot be cloned or
+serialized. Dropping it dismisses the confirmation without a device call.
+
+A complete existing grant must match. Only elevated risk, one explicit route and
+one connection are supported; high risk, batches and independent-field actions
+are excluded. Metadata changes, another Core, invalidation or the fixed 60-second
+expiry refuse before send. Execution consumes the value on every attempt and
+uses the shorter of command, operation and approval deadlines. Existing receipt
+lookup, non-replay, locking, storage-failure and uncertain-send rules still apply.
+
+`Session` exposes the same two typed methods with an operation ID and owns
+foreground gating, cancellation and invalidation on background/close. Direct
+Core hosts call `invalidate_user_approvals()` and cancel active operation tokens
+on equivalent lifecycle changes. Consequential adapters must check
+`ValidatedCommand::has_user_approval()` plus fixed protocol/identity constraints;
+public descriptor risk alone is insufficient. [ADR-0043](../adr/0043-native-trusted-approval-bridge.md)
+bridges these functions through three separate trusted C exports and a bounded
+session registry, never ordinary JSON/CLI/MCP. The Meiju adapter also admits reviewed elevated dishwasher starts through
+protected profile selection, exact grants and trusted approval; see
+[ADR-0044](../adr/0044-profile-scoped-dishwasher-start.md). Use [synthetic tests](../../crates/host/tests/user_approval.rs) as the
+integration example before adding reviewed model-specific controls.

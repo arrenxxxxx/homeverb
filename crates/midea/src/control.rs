@@ -8,11 +8,49 @@ use serde::{Deserialize, Serialize};
 // Pinned default AC mapping, admitted only for the explicitly reviewed model list.
 pub const AC_FAN_SPEEDS: [u8; 6] = [20, 40, 60, 80, 100, 102];
 
+/// Reviewed vendor mode codes; activating any of them also powers on the AC.
+#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq, Hash)]
+#[serde(rename_all = "snake_case")]
+pub enum AcMode {
+    Cool,
+    Heat,
+    Auto,
+    Dry,
+    Fan,
+}
+
+pub const AC_MODES: [AcMode; 5] = [
+    AcMode::Cool,
+    AcMode::Heat,
+    AcMode::Auto,
+    AcMode::Dry,
+    AcMode::Fan,
+];
+
 #[derive(Serialize)]
 #[serde(untagged)]
-pub(crate) enum AcControl {
-    Power { power: &'static str },
-    FanSpeed { wind_speed: u8 },
+pub(crate) enum CloudControl {
+    Power {
+        power: &'static str,
+    },
+    FanSpeed {
+        wind_speed: u8,
+    },
+    ActivateMode {
+        power: &'static str,
+        mode: AcMode,
+    },
+    DishwasherStart {
+        work_status: &'static str,
+        mode: String,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        additional: Option<u8>,
+    },
+    Temperature {
+        temperature: u8,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        small_temperature: Option<f64>,
+    },
 }
 
 #[derive(Deserialize)]
@@ -56,13 +94,13 @@ pub(crate) async fn execute(
     session: &MeijuSession,
     transport: &dyn CloudTransport,
     appliance: &CloudId,
-    control: AcControl,
+    control: CloudControl,
     progress: &WriteProgress,
     operation: &Operation,
 ) -> Result<AdapterOutcome> {
     operation
         .run(async {
-            let request = session.ac_control_request(appliance, control)?;
+            let request = session.control_request(appliance, control)?;
             let response = transport.send_control(&request, progress, operation).await;
             let (phase, error) = match response {
                 Ok(body) => match reply(&body) {

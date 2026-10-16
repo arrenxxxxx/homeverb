@@ -15,3 +15,12 @@ Trusted Rust hosts construct explicit component/argument/transport-scoped `Grant
 JSON schema version remains `1.0`; native host requests reject other versions and unknown fields. Keep generated frontend bindings synchronized when changing DTOs. Public contract changes require an ADR and positive/negative fixtures.
 
 Android embeds the same C ABI with a platform-only JNI credential initializer. The [native Android guide](development/08-android-native.md) supplies the Java package, arm64/x86_64 AAR builder and synthetic JVM/JNI verification. OS Keystore, APK and physical-phone acceptance remain separate; no Flutter page or background worker is introduced.
+
+API 1.13 exposes three separate trusted user-approval C functions, backed by
+Core's immutable single-command preview and Session's bounded registry. They are
+absent from the ordinary JSON/MCP method catalog. Follow the [confirmation
+contract](native-ui-contract.md#trusted-single-command-approval-api-113) for actual
+user consent, single-use IDs, foreground invalidation and receipt recovery. The
+fictional Mock scenario does not establish a real appliance's control capability.
+API 1.14 separately adds reviewed dishwasher mappings with exact startup grants;
+physical acceptance remains pending.

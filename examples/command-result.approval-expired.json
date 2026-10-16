@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "request_id": "fictional-cycle-approval",
+  "device_id": "30000000-0000-4000-8000-000000000001",
+  "status": "failed",
+  "started_at": "2026-10-16T00:00:00Z",
+  "completed_at": "2026-10-16T00:00:00Z",
+  "data": null,
+  "error": {
+    "code": "APPROVAL_EXPIRED",
+    "message": "The prepared approval expired; review a new preview before confirming.",
+    "retryable": false
+  },
+  "verification": null,
+  "attempts": []
+}

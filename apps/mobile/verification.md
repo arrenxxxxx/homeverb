@@ -1,6 +1,6 @@
 # Flutter implementation verification
 
-Date: October 16, 2026. Baseline: native UI contract 1.10.0 (pinned Core `10a094d` plus the Android lock fix) and the approved Window Light atlas. This is an implementation checkpoint, not completion of the owner's pixel-identical acceptance requirement.
+Date: October 16, 2026. Baseline: native UI contract 1.14.1 (pinned Core `7db8e9b`) and the approved Window Light atlas. This is an implementation checkpoint, not completion of the owner's pixel-identical acceptance requirement.
 
 ## Implemented scope
 
@@ -609,3 +609,43 @@ actions and screenshots. The delivery APK/hash manifest was refreshed.
 The owner's main-worktree native contract has advanced to API 1.14.1, while this
 verified frontend build remains pinned to API 1.10.0. Integration of that later
 contract is outstanding; this checkpoint does not claim current-main parity.
+
+
+## Native API 1.14.1 integration checkpoint
+
+The frontend branch merges committed Core baseline `7db8e9b`, preserving its
+Flutter pages and earlier runtime evidence. Uncommitted main-worktree LAN changes
+are excluded. Both independently developed Android file-lock fixes implement the
+same Bionic behavior; the merge retains the upstream implementation and the
+frontend's additional contention regression. SQLite schema 4 and protected account
+payload 3 follow the current native contract. Existing protected profiles must not
+be downgraded to a library that cannot read their payload version.
+
+The 31 ordinary JSON methods remain compatible. This checkpoint does not yet
+wire the three separate trusted approval exports or the new startup grant UI.
+Elevated actions remain explicitly unavailable in Flutter, and Meiju startup stays
+read-only. No owner account or appliance is used by the integration checks.
+
+Executed native checks passed: formatting, warnings-denied workspace Clippy,
+offline locked workspace build and tests (349 passed, two explicitly ignored),
+35 CLI/runtime cases, the 31-method/51-example native ABI suite including trusted
+approval and dishwasher admission, 33 Python tooling tests, six presentation
+tests, and document/contract/repository validators. The system Python lacked the
+required date-time checker; rerunning with the existing dependency-complete
+virtual environment passed. The dual-ABI Android AAR rebuilt with eleven exports
+per ABI and 16 KiB ELF alignment checks.
+
+All 68 Flutter tests and static analysis passed against the rebuilt Linux library.
+The complete Android native click journey passed in the actual Android 15 x86_64
+application process (92 captures across 27 screen IDs; injected text input,
+picker and lifecycle remain explicitly simulated). The ordinary dual-ABI APK
+then rebuilt, passed 16 KiB ZIP alignment, installed and cold-started. Actual taps
+opened the retained fictional device and refreshed its unknown state to the Mock
+observation (26 degrees, cool, power off). Screenshots are retained as
+`api-114-release-home.png`, `api-114-release-device.png` and
+`api-114-release-read.png` under `output/flutter-verification/android/`.
+
+Strict comparison was rerun after the full Flutter suite: **0/82 exact**, mean
+channel error **1.4822/255**. The seven prior row-geometry regressions remain.
+No visual acceptance, real-account/physical-device support, iOS validation or
+trusted Flutter approval flow is claimed by this integration checkpoint.

@@ -55,6 +55,43 @@ A timeout includes validation, local storage/lock work, connection, necessary se
 
 Persist a pending phase before transmission and update after acknowledgement. On restart, unresolved records permit a warning or explicit read-based verification, never automatic replay. There is no atomic transaction spanning local storage and the appliance.
 
+## Trusted single-command approval
+
+[ADR-0042](adr/0042-trusted-single-command-approval.md) adds typed Core/Session
+preparation and execution for one elevated action. Ordinary plan/execute remain
+restricted to low-risk grants. Preparation does not send, journal, authenticate
+or prove live preconditions. It requires a complete existing grant and one explicit
+transport with exactly one admitted connection. The immutable preview expires
+in 60 seconds; only the trusted UI may execute that same preview after consent.
+No batch, independent-field decomposition, automatic routing or high-risk action
+is admitted. No ordinary request field can supply approval.
+
+Execution consumes the preview even on failure, revalidates descriptor/authority
+and rejects a different Core, invalidated generation or expired preview before
+send. Its budget is capped by the monotonic expiry. Existing device locks and
+journaling prevent concurrent duplicate sends and preserve uncertainty on crashes.
+A fixed receipt warning records that approval was supplied for the exact command.
+The adapter receives Core's approval marker only on this path and must check it
+before consequential effects, independently of cached risk metadata.
+
+Native background/close invalidates pending previews and cancels in-flight work;
+direct Rust hosts must implement the same lifecycle. Invalidation cannot undo a
+sent command. Pending expiry/refusal stays unsent; expiry/cancellation after a
+possible send stays unknown. Inspect the original request receipt rather than
+creating an automatic retry. [ADR-0043](adr/0043-native-trusted-approval-bridge.md)
+adds separate trusted C preparation/execution/dismissal functions. Session holds
+at most eight pending previews and prunes expired entries during preparation.
+A decoded execution consumes its matching ID before admission, including refusal;
+malformed undecodable input does not. Missing/consumed/foreign/pruned IDs return
+`APPROVAL_INVALID`; a retained expired preview returns `APPROVAL_EXPIRED`.
+Background/close clears the registry; a generation check prevents publishing a
+preview across a background/foreground race. No registry lock spans execution.
+Ordinary JSON/CLI/MCP remain unchanged. Flutter consent UI and physical acceptance remain separate work.
+[ADR-0044](adr/0044-profile-scoped-dishwasher-start.md) uses this path for reviewed
+experimental dishwasher starts: elevated, non-idempotent, exact arguments, one
+cloud request, no replay/readback/optimistic cache. Explicit additional settings
+are part of the confirmed command; stale cached state is never silently copied.
+
 ## Composite and batch operations
 
 Treat multi-field `climate.set` as atomic only when the adapter declares it so. Split and track sub-steps only with an explicit `independent_fields: true` declaration, which requires a non-atomic `set_value` action. Otherwise pass the complete argument object to the adapter; absence of atomicity is not evidence that options may become separate commands. Batches return per-device outcomes with bounded concurrency. Do not compensate or roll back automatically: that would perform more physical changes without a reliable transaction boundary.
@@ -135,6 +172,42 @@ protected model/binding checks and conservative outcomes, sending only one revie
 power, mode or temperature to force an effect; mode-dependent effectiveness remains
 unverified. No read, optimistic cache update, fallback or retry follows acceptance.
 
+API 1.11 adds explicit `vendor.midea.ac.activate_mode` under
+[ADR-0039](adr/0039-explicit-meiju-mode-activation.md). Each independent startup
+grant permits one exact device/mode and its combined power-on effect. The adapter
+sends `power: on` and that mode in one request, never separate power/mode calls.
+Neither power nor fan grants admit it. `atomic` and `independent_fields` are false;
+accepted/unknown handling, protected checks and replay rules remain unchanged.
+It neither copies cached status nor writes temperature/fan values. Model behavior
+and preservation of unrelated settings remain unverified without physical evidence.
+
+API 1.12 adds profile-scoped `climate.set {target_temperature}` under
+[ADR-0041](adr/0041-profile-scoped-ac-temperature.md). After explicit discovery,
+only admitted AC models with reviewed protected product evidence expose the action.
+Its parameters carry the selected Celsius bounds and step; property observation
+domains stay readable outside write limits. Authority names one device and exact
+target. The adapter rechecks the protected selector and arguments before transport,
+even when public descriptors were weakened. It sends only the selected temperature
+field(s), without rounding, cached status, extra provider reads, optimistic cache
+updates, replay or restoration. Missing evidence and explicit unsupported overrides
+refuse before send. Atomicity/independent fields stay false; accepted/unknown
+outcomes and physical-preservation limitations are unchanged.
+
+The Linux CLI can supply these same independent grants through an explicit
+owner-controlled file under [ADR-0037](adr/0037-cli-meiju-control-grants.md).
+It requires explicit request IDs for single writes and previews, and never
+refreshes capabilities implicitly before execution. Removing the file from a
+later invocation revokes its permissions without erasing recorded receipts.
+Default startup remains read-only; transport and outcome semantics are unchanged.
+
+Under [ADR-0038](adr/0038-scoped-meiju-mcp.md), local Meiju MCP hosts can snapshot
+the same grants at startup. Only those sessions expose `command_plan` and
+`command_execute`; tool arguments cannot change authority. Commands retain their
+explicit request IDs and budgets. RPC IDs identify cancellation/response messages,
+not execution receipts. EOF/SIGINT and stdio failure cancel active work and drain
+cleanup; lookup after restart preserves outcomes without replay. Removing a grant
+file affects subsequent startup, not a currently running session.
+
 The current Core attempts each permitted route at most once. Only a proven-unsent reachability failure allows the next write route. A possibly-sent write returns `unknown` immediately; an explicit later read does not silently rewrite its receipt. State-match verification performs one bounded live read. All live snapshots, including verification reads, must use schema 1.0, match the requested device/component, and have every observation sourced from the selected transport. A source observation cannot be later than its local receipt, and a live receipt cannot be in the future. Empty warning strings are invalid. The entire snapshot is checked before saving; a valid target field cannot hide malformed unrelated fields.
 
 The live-read rule applies to `state_match`. For `correlated_completion`, Core instead uses successful completion evidence returned by the same bounded adapter execution. The adapter validates protocol correlation; Core requires an exact match of request, device, component, and selected connection IDs. Receipt time must be at or after attempt start and no later than the current clock. If available, trustworthy completion time must be between attempt start and receipt. Evidence is used only after acceptance and when the caller requests verification. Missing or invalid evidence keeps `accepted` with `VERIFICATION_PENDING`, without a state-read fallback or another send. An enqueue acknowledgement is never completion.
@@ -176,3 +249,32 @@ newer protected exclusion. Static plans and cached reads remain local and do not
 check membership; execution can therefore refuse a previously valid plan. This
 is last-retrieval evidence, not an online signal or current authorization proof.
 No change is made to accepted/unknown writes, existing receipt lookup or journaling.
+
+## Midea LAN candidate collection
+
+The [bounded LAN collector](adr/0045-bounded-lan-discovery-decoding.md) uses the
+caller's existing Operation and a selected private/link-local subnet. It sends
+two fixed probes once, caps setup/collection at five seconds, and closes its
+socket on completion, error, cancellation or future drop. Source filtering,
+datagram/candidate limits and exact-tuple deduplication do not authenticate a
+peer. A normal or limited report is not a complete inventory and must not remove
+cards, merge identities, add routes or authorize TCP connections. CLI, native
+JSON and MCP do not invoke this foundation yet. Public request/result schemas,
+cloud routing and write outcome semantics remain unchanged.
+
+The [V3 codec](adr/0046-bounded-v3-lan-codec.md) supplies only handshake and frame
+processing. Key confirmation does not authenticate an advertised appliance ID or
+authorize endpoint reuse. A valid response digest/sequence is not fresh state or
+command acknowledgement. A future TCP adapter must retain identity, account
+membership, operation lifetime, request correlation and write-progress checks;
+codec success cannot change routing or replay an uncertain command.
+
+The native `exchange_v3` helper now owns one socket for one inherited Operation.
+It rejects invalid subnet endpoints/payloads and reused progress markers before
+network access, then performs one handshake and command exchange with no retries.
+Only the command write marks `possibly_sent`; connection/handshake failures leave
+it unsent. Valid framing does not mark acceptance. Disconnects, cancellation,
+deadline and future drop close the socket while preserving transmission evidence.
+No adapter or entry point invokes this helper yet, so public schemas and cloud
+write behavior remain unchanged; protected identity, grants and model evidence
+still gate future route admission.

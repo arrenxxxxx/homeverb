@@ -6,6 +6,8 @@ use homeverb_mock::{DEVICE_ID, MockAdapter, Scenario};
 use homeverb_storage::SqliteStore;
 use std::{path::Path, sync::Arc};
 
+mod native_approval;
+pub use native_approval::{ExecuteApprovalRequest, PrepareApprovalRequest};
 mod session;
 pub use session::{HostRequest, Request, Session};
 mod accounts;
@@ -14,6 +16,22 @@ mod power_grants;
 pub use power_grants::{MeijuPowerGrant, meiju_power_policy};
 mod fan_grants;
 pub use fan_grants::{MeijuFanGrant, meiju_fan_policy};
+mod mode_grants;
+pub use mode_grants::{MeijuModeGrant, meiju_mode_policy};
+mod dishwasher_grants;
+pub use dishwasher_grants::{MeijuDishwasherGrant, meiju_dishwasher_policy};
+mod temperature_grants;
+pub use temperature_grants::{MeijuTemperatureGrant, meiju_temperature_policy};
+
+/// Trusted startup configuration only; ordinary requests cannot deserialize it.
+#[derive(Default)]
+pub struct MeijuControlGrants<'a> {
+    pub power: &'a [MeijuPowerGrant],
+    pub fan: &'a [MeijuFanGrant],
+    pub mode: &'a [MeijuModeGrant],
+    pub temperature: &'a [MeijuTemperatureGrant],
+    pub dishwasher: &'a [MeijuDishwasherGrant],
+}
 
 /// Compose a native account vault without reading credentials or starting authentication.
 pub fn open_accounts(directory: &Path) -> Result<homeverb_core::AccountVault> {
@@ -28,7 +46,39 @@ pub fn open_accounts(directory: &Path) -> Result<homeverb_core::AccountVault> {
 /// Compose the real read-only adapter without loading credentials or contacting the provider.
 /// Account connection is a separate trusted native operation; there are no write grants.
 pub fn open_meiju_read_only(directory: &Path) -> Result<Core> {
-    meiju_parts(directory, &[], &[]).map(|(core, _)| core)
+    open_meiju_with_control_grants(directory, &[], &[])
+}
+
+/// Trusted startup for direct Core hosts; validates all grants before opening a profile.
+pub fn open_meiju_with_control_grants(
+    directory: &Path,
+    power: &[MeijuPowerGrant],
+    fan: &[MeijuFanGrant],
+) -> Result<Core> {
+    open_meiju_with_scoped_grants(directory, power, fan, &[])
+}
+
+/// Trusted startup with independent power, fan and combined power-on/mode authority.
+pub fn open_meiju_with_scoped_grants(
+    directory: &Path,
+    power: &[MeijuPowerGrant],
+    fan: &[MeijuFanGrant],
+    mode: &[MeijuModeGrant],
+) -> Result<Core> {
+    open_meiju_with_grants(
+        directory,
+        MeijuControlGrants {
+            power,
+            fan,
+            mode,
+            ..Default::default()
+        },
+    )
+}
+
+/// Compose exact independent control permissions before any profile or credential access.
+pub fn open_meiju_with_grants(directory: &Path, grants: MeijuControlGrants<'_>) -> Result<Core> {
+    meiju_parts(directory, grants).map(|(core, _)| core)
 }
 
 /// Compose foreground account operations and the read-only Core with one adapter instance.
@@ -50,17 +100,49 @@ pub fn open_meiju_session_with_control_grants(
     power: &[MeijuPowerGrant],
     fan: &[MeijuFanGrant],
 ) -> Result<Session> {
-    let (core, adapter) = meiju_parts(directory, power, fan)?;
+    open_meiju_session_with_scoped_grants(directory, power, fan, &[])
+}
+
+/// Native sessions capture reviewed mode activation independently of other actions.
+pub fn open_meiju_session_with_scoped_grants(
+    directory: &Path,
+    power: &[MeijuPowerGrant],
+    fan: &[MeijuFanGrant],
+    mode: &[MeijuModeGrant],
+) -> Result<Session> {
+    open_meiju_session_with_grants(
+        directory,
+        MeijuControlGrants {
+            power,
+            fan,
+            mode,
+            ..Default::default()
+        },
+    )
+}
+
+/// Capture trusted startup permissions for one foreground native session.
+pub fn open_meiju_session_with_grants(
+    directory: &Path,
+    grants: MeijuControlGrants<'_>,
+) -> Result<Session> {
+    let (core, adapter) = meiju_parts(directory, grants)?;
     Ok(Session::with_accounts(core, adapter))
 }
 
 fn meiju_parts(
     directory: &Path,
-    grants: &[MeijuPowerGrant],
-    fan: &[MeijuFanGrant],
+    grants: MeijuControlGrants<'_>,
 ) -> Result<(Core, Arc<homeverb_midea::MeijuAdapter>)> {
-    let mut policy = meiju_power_policy(grants)?;
-    policy.grants.extend(meiju_fan_policy(fan)?.grants);
+    let mut policy = meiju_power_policy(grants.power)?;
+    policy.grants.extend(meiju_fan_policy(grants.fan)?.grants);
+    policy.grants.extend(meiju_mode_policy(grants.mode)?.grants);
+    policy
+        .grants
+        .extend(meiju_temperature_policy(grants.temperature)?.grants);
+    policy
+        .grants
+        .extend(meiju_dishwasher_policy(grants.dishwasher)?.grants);
     let store = Arc::new(SqliteStore::open(directory)?);
     let vault = Arc::new(open_accounts(directory)?);
     let clock = Arc::new(SystemClock);
@@ -69,11 +151,20 @@ fn meiju_parts(
         Arc::new(homeverb_midea::MeijuHttps),
         clock.clone(),
     );
-    if !grants.is_empty() {
+    if !grants.power.is_empty() {
         adapter = adapter.with_ac_power_control();
     }
-    if !fan.is_empty() {
+    if !grants.fan.is_empty() {
         adapter = adapter.with_ac_fan_control();
+    }
+    if !grants.mode.is_empty() {
+        adapter = adapter.with_ac_mode_control();
+    }
+    if !grants.temperature.is_empty() {
+        adapter = adapter.with_ac_temperature_control();
+    }
+    if !grants.dishwasher.is_empty() {
+        adapter = adapter.with_dishwasher_control();
     }
     let adapter = Arc::new(adapter);
     Ok((
@@ -90,7 +181,7 @@ pub fn open_mock(directory: &Path, scenario: Scenario, allow_writes: bool) -> Re
         clock.clone(),
         scenario,
     )?);
-    let grants = if allow_writes {
+    let mut grants: Vec<Grant> = if allow_writes {
         ["power", "climate"]
             .into_iter()
             .map(|capability| Grant {
@@ -105,5 +196,15 @@ pub fn open_mock(directory: &Path, scenario: Scenario, allow_writes: bool) -> Re
     } else {
         vec![]
     };
+    if allow_writes && scenario == Scenario::ApprovalRequired {
+        grants.push(Grant {
+            device_id: DEVICE_ID.into(),
+            component_id: "main".into(),
+            capability: "vendor.example.cycle".into(),
+            action: "start".into(),
+            transports: vec![Transport::Cloud],
+            argument_schema: serde_json::json!({"const":{"program":"normal"}}),
+        });
+    }
     Ok(Core::new(store, vec![adapter], clock, Policy { grants }))
 }

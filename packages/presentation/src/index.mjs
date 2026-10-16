@@ -56,11 +56,10 @@ export function presentObservation(observation, locale = 'en-US', property = '')
   if (typeof value === 'boolean') {
     label = property === 'power.state' ? translator.t(value ? 'power.on' : 'power.off')
       : translator.t(`boolean.${value}`);
-  } else if (typeof value === 'number') {
-    label = translator.number(value);
   } else if (value != null) {
     const key = `${property}.${value}`;
-    label = Object.hasOwn(enUS, key) ? translator.t(key) : String(value);
+    label = Object.hasOwn(enUS, key) ? translator.t(key)
+      : typeof value === 'number' ? translator.number(value) : String(value);
   }
   return {
     value: value ?? null,

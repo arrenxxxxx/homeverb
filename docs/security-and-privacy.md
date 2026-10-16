@@ -12,7 +12,31 @@ Default to read access. Write grants bind a principal, device ID, component, cap
 
 The current Core enforces exact device/component/action binding, local argument-schema constraints, and allowed transports through trusted in-memory grants. Its principal is fixed by host construction. Each command must match one complete grant; permissions for separate parameters are not merged. Eligible transports are the intersection of matching grants, action support, and requested routing policy. Multiple complete matching grants may contribute routes. Invalid grant schemas add no authority. Composite steps cannot expand the parent command's route authority. See [ADR-0010](adr/0010-scoped-write-grants.md).
 
+Typed Rust hosts can now prepare one elevated command for trusted user review
+under [ADR-0042](adr/0042-trusted-single-command-approval.md). A matching complete
+grant is still required. The opaque preview binds the immutable command, device
+descriptor, one explicit connection, Core instance and 60-second lifetime. Only
+trusted UI code may consume it after user consent. Native backgrounding/close
+invalidates pending previews and cancels active operations. [ADR-0043](adr/0043-native-trusted-approval-bridge.md)
+adds separate trusted C preparation/execution/dismissal functions. Ordinary JSON,
+CLI and MCP have no preparation/confirmation entry point. Approval IDs stay in
+trusted UI memory, never logs, persistence or model tools; possession of an ID
+is not proof of consent. The separate execution call asserts user interaction. Adapters
+must independently require Core's approval marker for consequential actions.
+The reviewed dishwasher adapter enforces that marker before account access and
+then checks protected model/family/product membership plus exact program arguments.
+Startup grants cannot bypass confirmation or broaden a device's selected mapping.
+No elevated grant list is exposed to ordinary CLI/MCP entry points.
+
 Generic AI tools do not expose high-risk actions initially. Future support requires trusted user interaction, short-lived approval, and auditable binding to the exact action. Model-supplied confirmation, special prompts, and generic `execute` cannot bypass policy.
+
+Meiju MCP defaults to four read-only tools. A trusted host may explicitly load the
+same exact-device power, fan, mode activation and temperature [startup grants](cli.md#scoped-meiju-controls) used by
+the CLI; only then are plan/execute tools visible. Core policy remains authoritative
+even if a client forges a hidden tool call. Grants are immutable for that MCP
+session: file edits require host restart, and stopping a session cannot roll back
+an already sent command. No tool accepts account credentials, a different profile,
+principal or replacement permissions. See [ADR-0038](adr/0038-scoped-meiju-mcp.md).
 
 ## Connections and endpoints
 

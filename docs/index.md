@@ -27,6 +27,14 @@ Start with the progressive development path. Reference documents define invarian
 - Cleanup recovery: [remove unreadable local credentials](adr/0033-delete-unreadable-account-credentials.md) through the existing confirmed account-removal flow.
 - Inventory inspection: [foreground saved account evidence](adr/0036-local-account-inventory-inspection.md) for the native UI.
 - Inventory admission: [retain identity while gating live Meiju requests](adr/0035-meiju-inventory-membership.md).
+- LAN foundation: [bounded discovery decoding and collection](adr/0045-bounded-lan-discovery-decoding.md), with unauthenticated native candidates, fictional loopback evidence and no route registration.
+- V3 LAN sessions: [protected handshake, bounded wire codec and operation-owned TCP exchange](adr/0046-bounded-v3-lan-codec.md), with fictional evidence and no identity or route admission.
+- CLI control admission: [explicit owner-controlled Meiju startup grants](adr/0037-cli-meiju-control-grants.md).
+- Profile-scoped AC temperature: [selection, exact targets and physical evidence limits](adr/0041-profile-scoped-ac-temperature.md).
+- Protected product mapping evidence: [inventory and storage rules](adr/0040-protected-meiju-product-profiles.md).
+- Explicit power-on and mode selection: [scoped AC activation](adr/0039-explicit-meiju-mode-activation.md).
+- MCP control admission: [session-scoped Meiju Core access](adr/0038-scoped-meiju-mcp.md).
+- Consequential actions: [typed single-command approval](adr/0042-trusted-single-command-approval.md) and [separate trusted native functions](adr/0043-native-trusted-approval-bridge.md); fictional bridge acceptance, with [reviewed dishwasher start mappings](adr/0044-profile-scoped-dishwasher-start.md); physical acceptance and Flutter consent UI pending.
 - Evidence: [references](references.md), [fictional examples](../examples/README.md), [diagrams](diagrams/README.md).
 
 ## Decisions

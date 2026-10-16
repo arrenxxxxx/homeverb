@@ -1,6 +1,8 @@
 //! Embedded execution policy shared by every host.
 
 mod account_removal;
+mod approval;
+pub use approval::PendingApproval;
 mod accounts;
 mod batch;
 mod descriptors;
@@ -76,10 +78,17 @@ impl Operation {
     }
 }
 
-pub struct ValidatedCommand(Command);
+pub struct ValidatedCommand {
+    command: Command,
+    user_approved: bool,
+}
 impl ValidatedCommand {
     pub fn command(&self) -> &Command {
-        &self.0
+        &self.command
+    }
+    /// Set only by Core after consuming a valid trusted user approval.
+    pub fn has_user_approval(&self) -> bool {
+        self.user_approved
     }
 }
 

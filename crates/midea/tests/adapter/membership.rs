@@ -149,7 +149,7 @@ async fn legacy_bindings_need_explicit_complete_retrieval_and_keep_the_same_ids(
     f.read(&device, "main", false).await.unwrap();
     for bytes in f.secrets.values.lock().unwrap().values() {
         let payload: Value = serde_json::from_slice(bytes).unwrap();
-        assert_eq!(payload["version"], 2);
+        assert_eq!(payload["version"], 3);
         assert_eq!(payload["bindings"][0]["listed"], true);
     }
     assert!(f.wire.controls.lock().unwrap().is_empty());

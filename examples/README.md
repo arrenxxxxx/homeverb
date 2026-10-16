@@ -8,7 +8,11 @@ Every device, account, timestamp, and result here is fictional data, not physica
 | [capability.climate.json](capability.climate.json) | Example climate attributes/actions; 16-30 Celsius and 0.5 steps are not universal model limits |
 | [device.refrigerator.json](device.refrigerator.json) | One fictional device with fridge and freezer components |
 | [capability.fridge.json](capability.fridge.json) / [capability.freezer.json](capability.freezer.json) | Distinct component-scoped definitions of `climate`; illustrative ranges, steps, and freshness only |
+| [capability.meiju-mode.json](capability.meiju-mode.json) / [command.meiju-mode.json](command.meiju-mode.json) | Experimental combined AC power-on and vendor mode selection; separate exact-mode authority and no physical verification |
+| [capability.meiju-temperature.json](capability.meiju-temperature.json) / [command.meiju-temperature.json](command.meiju-temperature.json) | Experimental protected-profile AC setpoint; illustrative 17–30 Celsius half-degree action limits, independent exact-target authority and no physical verification |
+| [capability.approved-cycle.json](capability.approved-cycle.json) / [command.approved-cycle.json](command.approved-cycle.json) / [command-result.approval-expired.json](command-result.approval-expired.json) | Fictional elevated cycle for the typed trusted-user approval tests; ordinary JSON cannot approve it, and expiry has no send attempts |
 | [command.json](command.json) | Brand-independent command envelope |
+| [cli-meiju-grants.json](cli-meiju-grants.json) | Fictional exact-device power-off and vendor fan-code permissions for explicit CLI startup; never an ordinary command |
 | [batch-command.json](batch-command.json) | Explicit commands for two fictional devices; not a runnable two-device Mock setup |
 | [batch-result.json](batch-result.json) | Mixed per-device outcomes with preserved evidence and uncertainty |
 | [command-result.verified.json](command-result.verified.json) | Result with state-match evidence |
@@ -30,3 +34,10 @@ Every device, account, timestamp, and result here is fictional data, not physica
 | [adapter-manifest.json](adapter-manifest.json) | Candidate metadata without a daemon or project backend |
 
 These show contract arguments, not vendor wire packets. No real passwords, serial numbers, or IP addresses are supplied. Human-readable fixture messages are English.
+
+The [dishwasher capability](capability.meiju-dishwasher.json) and
+[start command](command.meiju-dishwasher.json) illustrate the reviewed product
+profile requiring an explicit additional option. They use fictional IDs and are
+not an executable production authorization. The elevated action requires a
+matching grant and separate trusted user confirmation; no real model is verified
+by these examples.

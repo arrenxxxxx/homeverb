@@ -39,6 +39,14 @@ test('unknown observations and uncertain outcomes do not become optimistic state
   assert.equal(presentObservation({ value: false }, 'en-US', 'power.state').label, 'Off');
   assert.equal(presentObservation({ value: 'heat' }, 'en-US', 'climate.mode').label, 'Heat');
   assert.notEqual(presentObservation({ value: 'heat' }, 'zh-CN', 'climate.mode').label, 'Heat');
+  for (const locale of supportedLocales) {
+    const translator = createTranslator(locale);
+    assert.equal(presentObservation({value:'cool'}, locale, 'vendor.midea.ac.mode').label,
+      translator.t('vendor.midea.ac.mode.cool'));
+    assert.equal(presentObservation({value:'unrecognized'}, locale, 'vendor.midea.ac.mode').label, 'unrecognized');
+    const prompt = translator.t('vendor.midea.ac.activate_mode.confirm', {device:'Bedroom AC', mode:'Cool'});
+    assert.ok(prompt.includes('Bedroom AC') && prompt.includes('Cool'));
+  }
   const result = presentExecution({ status: 'unknown', data: { state: true } });
   assert.equal(result.requiresRefresh, true);
   assert.equal(result.evidence, null);
@@ -64,4 +72,33 @@ test('composite presentation retains evidence and requests refresh for uncertain
       assert.equal(composite.items[1].requiresRefresh, true);
     }
   }
+});
+
+test('numeric observations use property-specific labels without changing values or evidence', () => {
+  const observation = {
+    value: 102, stale: true, received_at: '2026-10-16T01:00:00Z', observed_at: null,
+  };
+  const original = structuredClone(observation);
+  for (const locale of supportedLocales) {
+    const translator = createTranslator(locale);
+    for (const value of [20, 40, 60, 80, 100, 102]) {
+      const shown = presentObservation({ ...observation, value }, locale, 'vendor.midea.ac.wind_speed');
+      assert.equal(shown.label, translator.t(`vendor.midea.ac.wind_speed.${value}`));
+      assert.equal(shown.value, value);
+      assert.equal(shown.stale, true);
+      assert.equal(shown.receivedAt, observation.received_at);
+      assert.equal(shown.observedAt, null);
+    }
+    assert.equal(presentObservation({ value: 101 }, locale, 'vendor.midea.ac.wind_speed').label,
+      translator.number(101));
+    assert.equal(presentObservation({ value: 102 }, locale, 'climate.current_temperature').label,
+      translator.number(102));
+    assert.equal(presentObservation({ value: -18.5 }, locale, 'climate.target_temperature').label,
+      translator.number(-18.5));
+    assert.equal(presentObservation({ value: 102 }, locale).label, translator.number(102));
+    assert.equal(presentObservation(null, locale, 'vendor.midea.ac.wind_speed').label,
+      translator.t('device.unknown'));
+  }
+  assert.equal(presentObservation(observation, 'en-US', 'vendor.midea.ac.wind_speed').label, 'Auto');
+  assert.deepEqual(observation, original);
 });

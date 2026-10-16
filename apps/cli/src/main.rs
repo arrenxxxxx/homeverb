@@ -1,4 +1,7 @@
+mod accounts;
+mod grants;
 mod mcp;
+mod terminal;
 
 use clap::{Args, Parser, Subcommand};
 use homeverb_core::Operation;
@@ -12,7 +15,7 @@ use tokio_util::sync::CancellationToken;
 #[command(
     name = "homeverb",
     version,
-    about = "HomeVerb Mock MVP: explicit on-demand appliance operations"
+    about = "HomeVerb: explicit on-demand appliance operations"
 )]
 struct Cli {
     #[arg(
@@ -21,18 +24,36 @@ struct Cli {
         help = "Use the fictional appliance; no real devices are contacted"
     )]
     mock: bool,
+    #[arg(long, global = true, conflicts_with = "mock", value_parser = ["midea.meiju"])]
+    adapter: Option<String>,
+    #[arg(
+        long,
+        global = true,
+        requires = "adapter",
+        conflicts_with = "mock",
+        help = "Explicit absolute path to an owner-controlled Meiju control grant file"
+    )]
+    meiju_grants: Option<PathBuf>,
     #[arg(long, global = true)]
     data_dir: Option<PathBuf>,
-    #[arg(long, global = true, default_value = "mock")]
-    profile: String,
-    #[arg(long, global = true, default_value = "normal")]
-    scenario: String,
+    #[arg(
+        long,
+        global = true,
+        help = "Local profile; defaults to mock or meiju for the selected adapter"
+    )]
+    profile: Option<String>,
+    #[arg(long, global = true, help = "Fictional fault scenario; Mock only")]
+    scenario: Option<String>,
     #[arg(long, global = true)]
     json: bool,
     #[arg(long, global = true, default_value = "auto")]
     connection: String,
-    #[arg(long, global = true, default_value_t = 10000)]
-    timeout_ms: u64,
+    #[arg(
+        long,
+        global = true,
+        help = "Operation budget: default 10000 ms, or 180000 ms for account connect after input"
+    )]
+    timeout_ms: Option<u64>,
     #[arg(long, global = true, default_value = "verified")]
     wait: String,
     #[arg(long, global = true)]
@@ -45,6 +66,10 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
+    Account {
+        #[command(subcommand)]
+        command: accounts::AccountCommand,
+    },
     Device {
         #[command(subcommand)]
         command: DeviceCommand,
@@ -184,7 +209,7 @@ fn main() -> ExitCode {
         }
     };
     let code = runtime.block_on(async_main());
-    // Tokio stdin uses a blocking read. Do not wait indefinitely for it after SIGINT.
+    // Tokio stdio uses blocking I/O. Do not wait indefinitely after cancellation or pipe failure.
     runtime.shutdown_timeout(std::time::Duration::from_millis(250));
     code
 }
@@ -229,28 +254,99 @@ async fn async_main() -> ExitCode {
 }
 
 async fn run(cli: Cli, cancellation: CancellationToken) -> Result<u8> {
-    if !cli.mock {
+    let meiju = cli.adapter.is_some();
+    if !cli.mock && !meiju {
         return Err(Error::new(
             "CAPABILITY_UNSUPPORTED",
-            "Only the explicit --mock adapter is available in this MVP.",
+            "Select --mock or --adapter midea.meiju explicitly.",
         ));
     }
-    if cli.profile.is_empty()
-        || cli.profile.len() > 64
-        || !cli
-            .profile
+    if meiju && cli.scenario.is_some() {
+        return Err(Error::new(
+            "CAPABILITY_UNSUPPORTED",
+            "Mock scenarios require --mock.",
+        ));
+    }
+    let is_mcp = matches!(cli.command, Commands::Mcp { .. });
+    if is_mcp
+        && (cli.dry_run
+            || cli.connection != "auto"
+            || cli.wait != "verified"
+            || cli.request_id.is_some()
+            || cli.timeout_ms.is_some())
+    {
+        return Err(Error::new(
+            "INVALID_ARGUMENT",
+            "MCP commands supply their own route, wait condition, request ID and timeout.",
+        ));
+    }
+    let is_write = matches!(
+        cli.command,
+        Commands::Power { .. }
+            | Commands::Climate { .. }
+            | Commands::Batch { .. }
+            | Commands::Device {
+                command: DeviceCommand::Execute { .. }
+            }
+    );
+    let grants = grants::Grants::load(cli.meiju_grants.as_deref())?;
+    if meiju && is_write && grants.is_empty() {
+        return Err(Error::new(
+            "POLICY_DENIED",
+            "The Meiju CLI requires explicit scoped startup grants for appliance writes.",
+        ));
+    }
+    if meiju
+        && is_write
+        && !matches!(cli.command, Commands::Batch { .. })
+        && cli.request_id.is_none()
+    {
+        return Err(Error::new(
+            "INVALID_ARGUMENT",
+            "Meiju writes and previews require an explicit --request-id.",
+        ));
+    }
+    if matches!(cli.command, Commands::Account { .. })
+        && (!meiju
+            || cli.dry_run
+            || cli.connection != "auto"
+            || cli.wait != "verified"
+            || cli.request_id.is_some())
+    {
+        return Err(Error::invalid());
+    }
+    let profile = cli
+        .profile
+        .as_deref()
+        .unwrap_or(if meiju { "meiju" } else { "mock" });
+    if profile.is_empty()
+        || profile.len() > 64
+        || !profile
             .bytes()
             .all(|b| b.is_ascii_alphanumeric() || b == b'-' || b == b'_')
     {
         return Err(Error::invalid());
     }
     let scenario: Scenario =
-        serde_json::from_value(json!(cli.scenario)).map_err(|_| Error::invalid())?;
+        serde_json::from_value(json!(cli.scenario.as_deref().unwrap_or("normal")))
+            .map_err(|_| Error::invalid())?;
     let route: Route =
         serde_json::from_value(json!(cli.connection)).map_err(|_| Error::invalid())?;
     let wait_for: WaitFor =
         serde_json::from_value(json!(cli.wait)).map_err(|_| Error::invalid())?;
-    let operation = Operation::new(cli.timeout_ms, cancellation.clone())?;
+    let timeout_ms = cli.timeout_ms.unwrap_or(
+        if matches!(
+            cli.command,
+            Commands::Account {
+                command: accounts::AccountCommand::Connect { .. }
+            }
+        ) {
+            180_000
+        } else {
+            10_000
+        },
+    );
+    let operation = Operation::new(timeout_ms, cancellation.clone())?;
     let directory = match &cli.data_dir {
         Some(path) => path.clone(),
         None => std::env::var_os("XDG_DATA_HOME")
@@ -264,11 +360,17 @@ async fn run(cli: Cli, cancellation: CancellationToken) -> Result<u8> {
             })?
             .join("homeverb"),
     }
-    .join(&cli.profile);
-    let is_mcp = matches!(cli.command, Commands::Mcp { .. });
-    let core = homeverb_host::open_mock(&directory, scenario, !is_mcp)?;
+    .join(profile);
+    if let Commands::Account { command } = cli.command {
+        return accounts::run(&directory, command, timeout_ms, cancellation, &grants).await;
+    }
+    let core = if meiju {
+        homeverb_host::open_meiju_with_grants(&directory, grants.controls())?
+    } else {
+        homeverb_host::open_mock(&directory, scenario, !is_mcp)?
+    };
     if is_mcp {
-        return mcp::serve(std::sync::Arc::new(core), cancellation).await;
+        return mcp::serve(std::sync::Arc::new(core), !grants.is_empty(), cancellation).await;
     }
     if let Commands::Batch { file } = &cli.command {
         if route != Route::Auto || wait_for != WaitFor::Verified || cli.request_id.is_some() {
@@ -372,7 +474,7 @@ async fn run(cli: Cli, cancellation: CancellationToken) -> Result<u8> {
             action: action.into(),
             arguments,
             connection: route,
-            timeout_ms: cli.timeout_ms,
+            timeout_ms,
             wait_for,
         };
         if cli.dry_run {
@@ -469,17 +571,34 @@ fn print_json(value: &impl serde::Serialize) {
 
 fn error_exit(error: &Error) -> u8 {
     match error.code.as_str() {
-        "INVALID_ARGUMENT" | "ROOM_NAME_CONFLICT" => 2,
-        "AUTH_REQUIRED" | "SECRET_STORE_UNAVAILABLE" => 3,
+        "INVALID_ARGUMENT" | "ROOM_NAME_CONFLICT" | "MIDEA_LOGIN_INPUT_UNSUPPORTED" => 2,
+        "AUTH_REQUIRED"
+        | "AUTH_EXPIRED"
+        | "SECRET_STORE_UNAVAILABLE"
+        | "SECRET_STORE_LOCKED"
+        | "INPUT_UNAVAILABLE"
+        | "ACCOUNT_SESSION_UNCONFIRMED"
+        | "MIDEA_INVENTORY_REQUIRED" => 3,
         "DEVICE_NOT_FOUND"
         | "REQUEST_NOT_FOUND"
         | "DEVICE_IDENTITY_CONFLICT"
         | "CAPABILITY_UNSUPPORTED"
         | "AMBIGUOUS_DEVICE"
-        | "ROOM_NOT_FOUND" => 4,
+        | "ROOM_NOT_FOUND"
+        | "ACCOUNT_NOT_FOUND"
+        | "ACCOUNT_IDENTITY_CONFLICT"
+        | "ACCOUNT_REMOVAL_UNSUPPORTED"
+        | "AUTH_FLOW_UNSUPPORTED"
+        | "MIDEA_DEVICE_NOT_LISTED" => 4,
         "LAN_UNREACHABLE" | "CLOUD_UNREACHABLE" | "DEADLINE_EXCEEDED" => 5,
         "POLICY_DENIED" => 6,
-        "RESOURCE_BUSY" | "REQUEST_CONFLICT" | "REQUEST_RETIRED" => 7,
+        "RESOURCE_BUSY"
+        | "REQUEST_CONFLICT"
+        | "REQUEST_RETIRED"
+        | "SECRET_STORE_CONFLICT"
+        | "ACCOUNT_SCOPE_CHANGED"
+        | "ACCOUNT_REMOVAL_PENDING" => 7,
+        "MIDEA_INVENTORY_PARTIAL" => 13,
         "CANCELLED" => 130,
         _ => 10,
     }

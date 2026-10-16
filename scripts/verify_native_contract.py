@@ -29,7 +29,7 @@ def main():
     responses = {name: validator('native-response', name) for name in [*api['methods'], 'open']}
     query_error = validator('native-response', 'query_error')
     info_example = {'schema_version': '1.0', 'data': copy.deepcopy(api), 'warnings': [], 'error': None}
-    info_example['data']['api_version'] = '1.11.0'
+    info_example['data']['api_version'] = '1.15.0'
     info_example['data']['methods']['future_query'] = {'response_kind': 'query'}
     responses['get_api_info'].validate(info_example)
     info_example['data']['api_version'] = '2.0.0'
@@ -176,6 +176,16 @@ def main():
             assert not request_schema.is_valid(bad)
             assert raw(handle, bad)['error']['code'] == 'INVALID_ARGUMENT'
             assert raw(handle, envelope('start_authentication'))['error']['code'] == 'INVALID_ARGUMENT'
+            # Typed trusted approvals must never become an ordinary JSON privilege path.
+            for name in ['prepare_user_approval', 'execute_user_approved']:
+                forged = envelope(name, command=load('examples/command.approved-cycle.json'))
+                assert not request_schema.is_valid(forged)
+                assert raw(handle, forged)['error']['code'] == 'INVALID_ARGUMENT'
+            for field in ['approved', 'user_approved', 'approval_id']:
+                forged = copy.deepcopy(by_method['execute'])
+                forged['request']['command'][field] = True
+                assert not request_schema.is_valid(forged)
+                assert raw(handle, forged)['error']['code'] == 'INVALID_ARGUMENT'
             assert not library.homeverb_cancel(handle, b'absent-operation')
             library.homeverb_set_foreground(handle, False)
             assert call(handle, 'get_api_info')['error']['code'] == 'HOST_BACKGROUND'
@@ -598,6 +608,124 @@ def main():
             assert decode(library.homeverb_open(json.dumps(config).encode()))['error']['code'] == 'INVALID_ARGUMENT'
             assert not private.exists()
 
+    mode_grant = {'device_id':grant_id, 'mode':'cool'}
+    for grants in [[], [mode_grant]]:
+        with tempfile.TemporaryDirectory(prefix='homeverb-ui-mode-grants-') as directory:
+            config = {'schema_version':'1.0', 'data_dir':directory, 'adapter':'midea.meiju',
+                      'allow_mock_writes':False, 'meiju_mode_grants':grants}
+            open_schema.validate(config)
+            result = decode(library.homeverb_open(json.dumps(config).encode()))
+            assert result['error'] is None, result
+            handle = result['data']['handle']
+            try:
+                assert raw(handle, envelope('list_accounts'))['data'] == []
+                assert raw(handle, envelope('discover'))['data'] == []
+                device = load('examples/device.json')
+                device.update(id=grant_id, model='KFR-35G/WF2', support_status='experimental',
+                              components=[{'id': 'main', 'capabilities': ['power', 'vendor.midea.ac']}],
+                              connections=[{'id': 'fictional-cloud', 'adapter': 'midea.meiju',
+                                            'transport': 'cloud', 'account_id': '40000000-0000-4000-8000-000000000001',
+                                            'identity_ref': 'fictional-binding'}])
+                mode_capability = load('examples/capability.meiju-mode.json')
+                mode_capability['actions'].update(load('examples/capability.meiju-fan.json')['actions'])
+                with sqlite3.connect(Path(directory) / 'homeverb.sqlite3') as database:
+                    database.execute('INSERT INTO devices VALUES (?, ?)',
+                                     (grant_id, json.dumps({'device':device, 'capabilities':[power, mode_capability]})))
+                for mode in ['cool', 'heat', 'auto', 'dry', 'fan']:
+                    request = command('native-mode-plan', device_id=grant_id, capability='vendor.midea.ac',
+                                      action='activate_mode', arguments={'mode':mode}, connection='cloud')
+                    plan = raw(handle, envelope('plan', command=request))
+                    responses['plan'].validate(plan)
+                    assert (plan['error'] is None) == (bool(grants) and mode == 'cool')
+                for capability, action, arguments in [('power','set',{'state':True}),
+                                                      ('vendor.midea.ac','set_fan_speed',{'wind_speed':40})]:
+                    request = command('independent-mode', device_id=grant_id, capability=capability,
+                                      action=action, arguments=arguments, connection='cloud')
+                    assert raw(handle, envelope('plan', command=request))['error']['code'] == 'POLICY_DENIED'
+                forged = envelope('list_devices')
+                forged['request']['meiju_mode_grants'] = [mode_grant]
+                assert not request_schema.is_valid(forged)
+                assert raw(handle, forged)['error']['code'] == 'INVALID_ARGUMENT'
+            finally:
+                library.homeverb_close(handle)
+    bad_modes = [None, True, {}, [mode_grant, mode_grant], [mode_grant]*65,
+                 [{'device_id':'*','mode':'cool'}], [{'device_id':grant_id}],
+                 [{**mode_grant,'confirmed':True}], [{**mode_grant,'power':'off'}]]
+    bad_modes.extend([{**mode_grant,'mode':mode}] for mode in [None, True, 1, 'off', 'COOL', 'fan_only'])
+    for grants, adapter in [(grants,'midea.meiju') for grants in bad_modes] + [([mode_grant],None), ([mode_grant],'homeverb.mock')]:
+        with tempfile.TemporaryDirectory(prefix='homeverb-ui-bad-mode-') as directory:
+            private = Path(directory) / 'must-not-create'
+            config = {'schema_version':'1.0', 'data_dir':str(private), 'allow_mock_writes':False,
+                      'meiju_mode_grants':grants}
+            if adapter:
+                config['adapter'] = adapter
+            assert not open_schema.is_valid(config), config
+            assert decode(library.homeverb_open(json.dumps(config).encode()))['error']['code'] == 'INVALID_ARGUMENT'
+            assert not private.exists()
+
+    temperature_grant = {'device_id':grant_id, 'target_temperature':26.5}
+    fleet_ids = [f'30000000-0000-4000-8000-{index:012d}' for index in range(1, 5)]
+    fleet_grants = [{'device_id':device_id, 'target_temperature':half / 2}
+                    for device_id in fleet_ids for half in range(32, 61)]
+    capacity_grants = [{'device_id':f'30000000-0000-4000-8000-{index:012d}', 'target_temperature':26.5}
+                       for index in range(1, 258)]
+    assert len(fleet_grants) == 116
+    for grants in [[], [temperature_grant], fleet_grants, capacity_grants[:256]]:
+        with tempfile.TemporaryDirectory(prefix='homeverb-ui-temperature-') as directory:
+            config = {'schema_version':'1.0', 'data_dir':directory, 'adapter':'midea.meiju',
+                      'allow_mock_writes':False, 'meiju_temperature_grants':grants}
+            open_schema.validate(config)
+            result = decode(library.homeverb_open(json.dumps(config).encode()))
+            assert result['error'] is None, result
+            handle = result['data']['handle']
+            try:
+                assert raw(handle, envelope('discover'))['data'] == []
+                for index, device_id in enumerate(fleet_ids if grants == fleet_grants else [grant_id]):
+                    device = load('examples/device.json')
+                    device.update(id=device_id, model='KFR-35G/WF2', support_status='experimental',
+                                  components=[{'id':'main','capabilities':['power','climate']}],
+                                  connections=[{'id':f'fictional-cloud-{index}','adapter':'midea.meiju','transport':'cloud',
+                                                'account_id':'40000000-0000-4000-8000-000000000001','identity_ref':f'fictional-binding-{index}'}])
+                    climate = load('examples/capability.meiju-temperature.json')
+                    limits = climate['actions']['set']['parameters']['properties']['target_temperature']
+                    if index % 2:
+                        limits.update(minimum=16, multipleOf=1)
+                    with sqlite3.connect(Path(directory) / 'homeverb.sqlite3') as database:
+                        database.execute('INSERT INTO devices VALUES (?, ?)',
+                                         (device_id, json.dumps({'device':device, 'capabilities':[power,climate]})))
+                    for value in ([half / 2 for half in range(32, 61)] if grants == fleet_grants else [26,26.5,27]):
+                        request = command('temperature-plan',device_id=device_id,capability='climate',action='set',
+                                          arguments={'target_temperature':value},connection='cloud')
+                        plan = raw(handle,envelope('plan',command=request))
+                        responses['plan'].validate(plan)
+                        allowed = {'device_id':device_id, 'target_temperature':value} in grants
+                        valid = value >= limits['minimum'] and value % limits['multipleOf'] == 0
+                        assert (plan['error'] is None) == (allowed and valid), (device_id, value, plan)
+                        if not valid:
+                            assert plan['error']['code'] == 'INVALID_ARGUMENT'
+                denied = command('independent-power',device_id=grant_id,arguments={'state':True},connection='cloud')
+                assert raw(handle,envelope('plan',command=denied))['error']['code'] == 'POLICY_DENIED'
+                forged = envelope('list_devices')
+                forged['request']['meiju_temperature_grants'] = [temperature_grant]
+                assert not request_schema.is_valid(forged)
+                assert raw(handle,forged)['error']['code'] == 'INVALID_ARGUMENT'
+            finally:
+                library.homeverb_close(handle)
+    bad_temperatures = [None,True,{},[temperature_grant]*2,capacity_grants,
+                        [{**temperature_grant,'device_id':'*'}],[{**temperature_grant,'confirmed':True}],
+                        [{'device_id':grant_id,'target_temperature':26},{'device_id':grant_id,'target_temperature':26.0}]]
+    bad_temperatures.extend([{**temperature_grant,'target_temperature':value}] for value in [None,True,'26',15.5,30.5,26.25])
+    for grants,adapter in [(grants,'midea.meiju') for grants in bad_temperatures] + [([temperature_grant],None),([temperature_grant],'homeverb.mock')]:
+        with tempfile.TemporaryDirectory(prefix='homeverb-ui-bad-temperature-') as directory:
+            private = Path(directory) / 'must-not-create'
+            config = {'schema_version':'1.0','data_dir':str(private),'allow_mock_writes':False,
+                      'meiju_temperature_grants':grants}
+            if adapter:
+                config['adapter'] = adapter
+            assert not open_schema.is_valid(config),config
+            assert decode(library.homeverb_open(json.dumps(config).encode()))['error']['code'] == 'INVALID_ARGUMENT'
+            assert not private.exists()
+
     example_path = ROOT / 'packages/native-contract/examples.json'
     if args.write_examples:
         example_path.write_text(json.dumps({'api_version': api['api_version'], 'cases': examples}, indent=2) + '\n')
@@ -649,8 +777,12 @@ def main():
             target = target[field]
         target[path[-1]] = value
         assert not connect_response.is_valid(bad), path
+    from verify_native_approval import verify_approvals
+    verify_approvals()
+    from verify_native_dishwasher import verify_dishwasher
+    verify_dishwasher()
     print(f"PASS: {len(api['methods'])} native methods; {len(examples)} live examples; closed-field, error, outcome, and lifecycle checks.")
-    print('Mock, empty Meiju startup, independent power/fan-grant admission and protected account-buffer guards verified on Linux; no live accounts, Flutter/mobile or physical-device verification in this suite.')
+    print('Mock, empty Meiju startup, independent AC and trusted dishwasher grant admission and protected account-buffer guards verified on Linux; no live accounts, Flutter/mobile or physical-device verification in this suite.')
 
 
 if __name__ == '__main__':

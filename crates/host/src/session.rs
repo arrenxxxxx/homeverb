@@ -1,10 +1,13 @@
-use homeverb_core::{Core, Operation, SecretBytes};
+use homeverb_core::{Core, Operation, PendingApproval, SecretBytes};
 use homeverb_domain::*;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use std::{
     collections::HashMap,
-    sync::{Arc, Mutex},
+    sync::{
+        Arc, Mutex,
+        atomic::{AtomicU64, Ordering},
+    },
 };
 use tokio_util::sync::CancellationToken;
 
@@ -102,10 +105,14 @@ pub enum Request {
     },
 }
 
+static NEXT_APPROVAL_ID: AtomicU64 = AtomicU64::new(1);
+
 struct State {
     foreground: bool,
     closed: bool,
     operations: HashMap<String, CancellationToken>,
+    approvals: HashMap<u64, PendingApproval>,
+    approval_generation: u64,
 }
 
 pub struct Session {
@@ -135,6 +142,8 @@ impl Session {
                 foreground: true,
                 closed: false,
                 operations: HashMap::new(),
+                approvals: HashMap::new(),
+                approval_generation: 0,
             }),
         }
     }
@@ -173,6 +182,9 @@ impl Session {
         if let Ok(mut state) = self.state.lock() {
             state.foreground = foreground;
             if !foreground {
+                self.core.invalidate_user_approvals();
+                state.approvals.clear();
+                state.approval_generation += 1;
                 for token in state.operations.values() {
                     token.cancel();
                 }
@@ -194,10 +206,156 @@ impl Session {
     pub fn close(&self) {
         if let Ok(mut state) = self.state.lock() {
             state.closed = true;
+            self.core.invalidate_user_approvals();
+            state.approvals.clear();
+            state.approval_generation += 1;
             for token in state.operations.values() {
                 token.cancel();
             }
         }
+    }
+
+    /// Trusted in-process UI only; this is intentionally absent from ordinary JSON.
+    pub async fn prepare_user_approval(
+        &self,
+        operation_id: String,
+        command: Command,
+    ) -> Result<PendingApproval> {
+        let (operation, _registration) =
+            self.register(SCHEMA_VERSION, operation_id, command.timeout_ms)?;
+        let preview = operation
+            .run(async { self.core.prepare_user_approval(command) })
+            .await?;
+        let state = self
+            .state
+            .lock()
+            .map_err(|_| Error::new("HOST_CLOSED", "The host session is unavailable."))?;
+        if state.closed {
+            return Err(Error::new("HOST_CLOSED", "The host session is closed."));
+        }
+        if !state.foreground {
+            return Err(Error::new(
+                "HOST_BACKGROUND",
+                "New operations require a foreground host.",
+            ));
+        }
+        Ok(preview)
+    }
+
+    /// Call only after trusted UI consent to this immutable preview; consumes it once.
+    pub async fn execute_user_approved(
+        &self,
+        operation_id: String,
+        approval: PendingApproval,
+    ) -> Result<Execution> {
+        let (operation, _registration) =
+            self.register(SCHEMA_VERSION, operation_id, approval.command().timeout_ms)?;
+        Ok(self.core.execute_user_approved(approval, &operation).await)
+    }
+
+    /// Separate trusted C bridge. A preview is not user consent or execution authority.
+    pub async fn prepare_native_approval(&self, input: crate::PrepareApprovalRequest) -> Value {
+        let result = async {
+            if input.schema_version != SCHEMA_VERSION {
+                return Err(Error::invalid());
+            }
+            let generation = self
+                .state
+                .lock()
+                .map_err(|_| Error::new("HOST_CLOSED", "The host session is unavailable."))?
+                .approval_generation;
+            let preview = self
+                .prepare_user_approval(input.operation_id, input.command)
+                .await?;
+            let mut state = self
+                .state
+                .lock()
+                .map_err(|_| Error::new("HOST_CLOSED", "The host session is unavailable."))?;
+            if state.closed {
+                return Err(Error::new("HOST_CLOSED", "The host session is closed."));
+            }
+            if !state.foreground {
+                return Err(Error::new(
+                    "HOST_BACKGROUND",
+                    "New operations require a foreground host.",
+                ));
+            }
+            if state.approval_generation != generation {
+                return Err(Error::new(
+                    "APPROVAL_INVALID",
+                    "The host lifecycle changed during approval preparation.",
+                ));
+            }
+            state.approvals.retain(|_, value| !value.is_expired());
+            if state.approvals.len() >= 8 {
+                return Err(Error::new(
+                    "RESOURCE_BUSY",
+                    "Dismiss a pending approval before preparing another.",
+                ));
+            }
+            let id = NEXT_APPROVAL_ID.fetch_add(1, Ordering::Relaxed);
+            let value = json!({
+                "approval_id": id,
+                "command": preview.command(),
+                "descriptor": preview.descriptor(),
+                "action": preview.action(),
+                "connection": preview.connection(),
+                "expires_at": preview.expires_at()
+            });
+            state.approvals.insert(id, preview);
+            Ok(value)
+        }
+        .await;
+        json!(Query::from_result(result))
+    }
+
+    /// Only the trusted UI may call this after confirming the returned immutable preview.
+    pub async fn execute_native_approved(&self, input: crate::ExecuteApprovalRequest) -> Value {
+        let result = async {
+            if input.approval_id == 0 {
+                return Err(Error::invalid());
+            }
+            let approval = {
+                let mut state = self
+                    .state
+                    .lock()
+                    .map_err(|_| Error::new("HOST_CLOSED", "The host session is unavailable."))?;
+                let approval = state.approvals.remove(&input.approval_id);
+                if state.closed {
+                    return Err(Error::new("HOST_CLOSED", "The host session is closed."));
+                }
+                if !state.foreground {
+                    return Err(Error::new(
+                        "HOST_BACKGROUND",
+                        "New operations require a foreground host.",
+                    ));
+                }
+                approval.ok_or_else(|| {
+                    Error::new(
+                        "APPROVAL_INVALID",
+                        "The approval is unavailable for this host; review the command again.",
+                    )
+                })?
+            };
+            if input.schema_version != SCHEMA_VERSION {
+                return Err(Error::invalid());
+            }
+            self.execute_user_approved(input.operation_id, approval)
+                .await
+        }
+        .await;
+        match result {
+            Ok(receipt) => json!(receipt),
+            Err(error) => json!(Query::<Value>::from_result(Err(error))),
+        }
+    }
+
+    /// Dismissal is local-only and cannot revoke an already consumed/sent command.
+    pub fn discard_native_approval(&self, approval_id: u64) -> bool {
+        self.state
+            .lock()
+            .ok()
+            .is_some_and(|mut state| state.approvals.remove(&approval_id).is_some())
     }
 
     pub async fn call(&self, input: HostRequest) -> Value {

@@ -6,6 +6,13 @@ default to read-only; API 1.3 adds separately configured
 [scoped power permissions](../native-ui-contract.md#scoped-experimental-ac-power-startup). This developer probe is a separate
 trusted Core host, not a production CLI dependency for Flutter.
 
+The formal Linux CLI now supports the same exact power, fan, mode activation and profile-scoped temperature authority through
+[explicit startup grant files](../cli.md#scoped-meiju-controls). Its dry run is
+local-only and requires a separate account refresh to publish descriptors; the
+probe below deliberately includes inventory reads in its preview. Both paths
+retain the same physical acceptance limits and require owner authorization for
+real sends.
+
 ## Admitted scope and evidence
 
 The four exact AC models in [the observed model table](../compatibility.md#observed-cloud-read-models)
@@ -24,14 +31,19 @@ uses explicit on/off values. The power action sends only `{"power":"on"}` or
 state into the command, downloads Lua, or sends an automatic restoring command.
 No model-specific physical success follows from this source mapping.
 
-AC temperature constraints, further fan modes, dishwasher program/start semantics, and refrigerator
-compartment writes remain pending. The dishwasher mappings can require preserving
+Reviewed protected profiles now supply experimental AC temperature constraints;
+see the [temperature startup contract](../native-ui-contract.md#scoped-experimental-ac-temperature-startup)
+and [ADR-0041](../adr/0041-profile-scoped-ac-temperature.md). Missing or unsupported
+profiles expose no setter. Physical temperature/preservation acceptance, further
+fan modes, dishwasher program/start semantics and refrigerator compartment writes
+remain pending. The dishwasher mappings can require preserving
 other options when starting; the mere presence of an operator field does not admit
 a generic cycle command. Refrigerator cooling changes need separate risk review.
 
 ## Outcome contract
 
-The existing Command/Execution schemas and native API version remain unchanged.
+The existing Command/Execution schemas and outcome semantics remain unchanged.
+Native startup additions are versioned separately in the UI contract.
 See the synthetic [accepted](../../examples/command-result.meiju-accepted.json) and
 [unknown](../../examples/command-result.meiju-unknown.json) fixtures.
 
@@ -122,3 +134,12 @@ preserves power, mode and temperature without it; a single-field request alone
 does not prove that the appliance changes only that field. Offline tests cover exact bodies, protected identities, no cache
 changes, permission separation, receipts and cancellation. Real fan operations
 remain deferred by the owner.
+
+## Explicit power-on and mode activation
+
+Native API 1.11, the formal CLI and local MCP can admit separately scoped
+[mode activation](../native-ui-contract.md#scoped-experimental-ac-mode-activation-startup).
+This sends `power: on` and one reviewed mode in a single request and requires
+consent for both effects. The power-only probe above is unchanged. Activation
+cannot establish physical atomicity or verify either effect; physical acceptance
+must also check preservation of unrelated settings without cached status context.

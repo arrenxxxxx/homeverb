@@ -2,7 +2,11 @@
 
 use homeverb_core::SecretBytes;
 use homeverb_domain::{Error, Query};
-use homeverb_host::{ConnectRequest, HostRequest, MeijuFanGrant, MeijuPowerGrant, Session};
+use homeverb_host::{
+    ConnectRequest, ExecuteApprovalRequest, HostRequest, MeijuControlGrants, MeijuDishwasherGrant,
+    MeijuFanGrant, MeijuModeGrant, MeijuPowerGrant, MeijuTemperatureGrant, PrepareApprovalRequest,
+    Session,
+};
 use homeverb_mock::Scenario;
 use serde::Deserialize;
 use serde_json::{Value, json};
@@ -42,6 +46,12 @@ struct Config {
     meiju_power_grants: Vec<MeijuPowerGrant>,
     #[serde(default)]
     meiju_fan_grants: Vec<MeijuFanGrant>,
+    #[serde(default)]
+    meiju_mode_grants: Vec<MeijuModeGrant>,
+    #[serde(default)]
+    meiju_temperature_grants: Vec<MeijuTemperatureGrant>,
+    #[serde(default)]
+    meiju_dishwasher_grants: Vec<MeijuDishwasherGrant>,
     #[serde(default)]
     scenario: Scenario,
 }
@@ -113,7 +123,11 @@ pub unsafe extern "C" fn homeverb_open(config: *const c_char) -> *mut c_char {
             );
         }
         if config.adapter != AdapterMode::Meiju
-            && (!config.meiju_power_grants.is_empty() || !config.meiju_fan_grants.is_empty())
+            && (!config.meiju_power_grants.is_empty()
+                || !config.meiju_fan_grants.is_empty()
+                || !config.meiju_mode_grants.is_empty()
+                || !config.meiju_temperature_grants.is_empty()
+                || !config.meiju_dishwasher_grants.is_empty())
         {
             return error(
                 "INVALID_ARGUMENT",
@@ -132,10 +146,15 @@ pub unsafe extern "C" fn homeverb_open(config: *const c_char) -> *mut c_char {
             ),
             AdapterMode::Meiju => (
                 "midea.meiju",
-                homeverb_host::open_meiju_session_with_control_grants(
+                homeverb_host::open_meiju_session_with_grants(
                     &config.data_dir,
-                    &config.meiju_power_grants,
-                    &config.meiju_fan_grants,
+                    MeijuControlGrants {
+                        power: &config.meiju_power_grants,
+                        fan: &config.meiju_fan_grants,
+                        mode: &config.meiju_mode_grants,
+                        temperature: &config.meiju_temperature_grants,
+                        dishwasher: &config.meiju_dishwasher_grants,
+                    },
                 ),
             ),
         };
@@ -215,6 +234,54 @@ pub unsafe extern "C" fn homeverb_connect_account(
     })
 }
 
+/// Prepare an immutable elevated-action preview for trusted user review only.
+/// This function is not an ordinary JSON tool; preparation is not consent.
+/// # Safety
+/// `request` must be NULL or a valid NUL-terminated UTF-8 string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn homeverb_prepare_approval(
+    handle: u64,
+    request: *const c_char,
+) -> *mut c_char {
+    output(|| {
+        let Some(host) = host(handle) else {
+            return error("HOST_CLOSED", "The native host handle is closed.");
+        };
+        let Some(request) = (unsafe { input_json::<PrepareApprovalRequest>(request) }) else {
+            return error("INVALID_ARGUMENT", "Invalid approval preparation metadata.");
+        };
+        host.runtime
+            .block_on(host.session.prepare_native_approval(request))
+    })
+}
+
+/// Trusted UI only: call after explicit user consent to the returned immutable preview.
+/// A decoded request consumes its matching pending approval, even on admission failure.
+/// # Safety
+/// `request` must be NULL or a valid NUL-terminated UTF-8 string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn homeverb_execute_approved(
+    handle: u64,
+    request: *const c_char,
+) -> *mut c_char {
+    output(|| {
+        let Some(host) = host(handle) else {
+            return error("HOST_CLOSED", "The native host handle is closed.");
+        };
+        let Some(request) = (unsafe { input_json::<ExecuteApprovalRequest>(request) }) else {
+            return error("INVALID_ARGUMENT", "Invalid approval execution metadata.");
+        };
+        host.runtime
+            .block_on(host.session.execute_native_approved(request))
+    })
+}
+
+/// Drop a pending preview without touching an already sent command or its receipt.
+#[unsafe(no_mangle)]
+pub extern "C" fn homeverb_discard_approval(handle: u64, approval_id: u64) -> bool {
+    host(handle).is_some_and(|host| host.session.discard_native_approval(approval_id))
+}
+
 /// Execute a request synchronously on a host worker thread. Free the returned string once.
 /// # Safety
 /// `request` must be NULL or a valid NUL-terminated UTF-8 string.
@@ -261,7 +328,7 @@ pub extern "C" fn homeverb_close(handle: u64) {
 }
 
 /// # Safety
-/// `value` must be NULL or an unfreed pointer returned by homeverb_open/homeverb_call.
+/// `value` must be NULL or an unfreed output pointer returned by a HomeVerb C function.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn homeverb_string_free(value: *mut c_char) {
     if !value.is_null() {

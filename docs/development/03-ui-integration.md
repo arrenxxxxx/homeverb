@@ -12,6 +12,15 @@ remains Mock; an explicit Meiju build uses a separate read-only private profile.
 Fixture clicks and native admission checks do not establish real account, secure
 storage or phone acceptance. See the [verification report](../../apps/mobile/verification.md).
 
+API 1.13 adds separate trusted C prepare/execute/discard functions for one elevated
+command. Follow the [confirmation contract](../native-ui-contract.md#trusted-single-command-approval-api-113)
+for immutable preview display, explicit consent, expiry and lifecycle handling.
+Use the fictional `approval-required` Mock scenario for integration. These are not
+ordinary JSON methods. API 1.14 adds [profile-scoped Meiju dishwasher starts](../native-ui-contract.md#profile-scoped-dishwasher-starts-api-114)
+through exact startup grants plus this confirmation path. Actual Flutter/physical
+acceptance remains pending.
+
+
 API 1.4 adds local `get_account` and `rename_account` for platform details and names.
 Use the [account metadata contract](../native-ui-contract.md#local-account-details-and-names)
 to show saved linked devices without a refresh or secret-store access. Local names
@@ -46,6 +55,11 @@ Methods: `list_devices`, `discover`, `describe_device` with `device`, `read_stat
 The general JSON bridge never accepts a principal, grant, profile change, password, or model-supplied confirmation in a request. API 1.2 adds local account list/refresh plus a separate protected native connection function; follow its [buffer and result contract](../native-ui-contract.md#account-connection-and-refresh). `allow_mock_writes` is a startup-only grant for the fictional device's `main` power/climate actions over both simulated transports, not a general real-device authorization mechanism. API 1.3 adds separate session-scoped Meiju AC power permissions; ordinary requests still cannot edit grants. Core checks action arguments and route scope before sending. A composite plan includes per-step commands and permitted transports in `items`.
 
 When rendering a component, resolve each referenced capability against that component. `describe_device` may return two definitions with the same capability ID and different `component_id` values. Omitted scope means shared; exact scope means that component only. Core rejects shared/scoped mixing of one ID, so there is no override precedence. Do not pick the first capability by ID or copy one compartment's temperature limits into another. Command and read-state component fields are unchanged. See [component scopes](../adr/0018-component-capability-scopes.md). Older strict readers must be updated before consuming scoped definitions; the C ABI functions do not change.
+
+API 1.11 adds independent [mode activation startup grants](../native-ui-contract.md#scoped-experimental-ac-mode-activation-startup).
+Render `activate_mode` as turning on the AC and selecting the exact vendor mode;
+use its explicit consent label. It grants no independent power/fan authority and
+cannot verify either physical effect from the current cloud response.
 
 ## Explicit device batches
 
@@ -125,6 +139,14 @@ This adds a native request method without changing existing payloads, the C ABI,
 Use canonical locales `en-US` and `zh-CN`. `EnUs`/`ZhCN` aliases normalize to these values. Unsupported locales fall back to English. Keep locale selection in the presentation layer; never translate public identifiers, capability IDs, action arguments, or stored outcomes.
 
 [Locale catalogs](../../packages/presentation/locales/en-US.json) share identical keys and placeholders. The only permitted Chinese source text is [zh-CN.json](../../packages/presentation/locales/zh-CN.json). Native frontends can load these JSON resources directly. JavaScript-based designs can use [presentation helpers](../../packages/presentation/src/index.mjs); they have no framework dependency.
+
+For numeric and string observations, look up the exact `<property>.<value>` label
+before formatting an unknown value. For example, `vendor.midea.ac.wind_speed`
+value `102` displays the existing Auto label; the same number on a temperature
+property remains numeric. Unknown numeric codes use locale number formatting and
+unknown strings remain visible. Translation changes only the label, never the
+typed value, freshness or timestamps. A label does not admit a writable option;
+the component action schema remains authoritative.
 
 Render translation results as text, not raw HTML. Present requested values separately from observations. Missing/null state means unknown. `accepted` is unverified; `unknown` means it may have executed and should be refreshed. Display non-atomic receipts item by item, retaining their evidence and warnings. A partial receipt needs a refresh action when any child is accepted, unknown, or references a retired request. Refresh means an explicit state read, never automatic replay.
 

@@ -340,3 +340,621 @@ shared/exclusive contention, release, migrations, rollback and replay retention.
 There is no lock-free fallback or change to SQLite schema 4, the native API, lock
 filenames, write authority or outcome semantics. See the app's
 [verification report](../apps/mobile/verification.md) for runtime results.
+
+## Meiju CLI account and read entrypoint
+
+The CLI accepts explicit `--adapter midea.meiju` and reuses the native account
+session for protected Linux terminal connection, listing/details, rename/removal,
+saved membership inspection, refresh and recovery. Device reads and local
+organization/history/diagnostics use the same Core. The default Meiju profile is
+separate from Mock; explicit profile selection can reopen existing native data.
+Account and credential mutations retain the existing identity, lease, pending
+state and uncertainty rules. No password, provider identifier or session material
+is accepted in CLI arguments, piped input or ordinary JSON.
+
+This phase supplied no Meiju appliance grants and refused writes before profile
+startup; the following scoped-control phase adds explicit admission. Mock behavior
+and its MCP surface remain compatible. No native API,
+capability, SQLite or protected payload version changes; native API 1.10.0 still
+has 31 methods and seven C functions. Terminal login requires Linux; this does not
+provide mobile input or storage. See the [CLI contract](cli.md).
+
+Local verification passed 265 Rust tests (two opt-in system probes ignored),
+Clippy with warnings denied, formatting/build checks, 28 runtime cases, the
+31-method/51-example native ABI suite, 29 Python tests, five presentation tests,
+and document/contract/repository checks. The final input-buffer bound was rechecked
+with the CLI unit suite and Clippy. Tests use fictional profiles, local PTYs and
+an unavailable test D-Bus address. No owner profile, vendor login/read, device
+write, Flutter worktree, phone or remote CI acceptance was performed by this phase.
+
+## Explicit Meiju CLI control grants
+
+The Linux CLI now accepts an explicitly selected `--meiju-grants` file containing
+exact local-device power states and independent vendor fan codes. It reuses the
+existing native grant validation, Core execution and protected adapter checks.
+Default startup remains read-only; a file cannot admit elevated-risk actions or
+other appliance controls. Whole-file validation, ownership/mode checks, final
+symlink/nonregular-file refusal and a 32 KiB bound precede profile startup.
+See [ADR-0037](adr/0037-cli-meiju-control-grants.md) and the
+[CLI workflow](cli.md#scoped-meiju-controls).
+
+Single Meiju writes and previews require explicit request IDs. Existing batch
+files retain per-command IDs, complete preflight and individual receipts.
+Discovery/account refresh explicitly publishes the admitted actions; planning
+does not refresh them or contact the provider. Control still distinguishes
+not-sent failures, acceptance and uncertainty without automatic retry or physical
+verification. Receipt lookup remains available without grants.
+
+Mock commands and MCP are unchanged. This adds a CLI option, one schema/fictional
+fixture and an additive Rust host helper; native API 1.10.0 still has 31 JSON
+methods and seven C functions. SQLite schema 4, protected payload version 2,
+capabilities and execution outcomes are unchanged. No mobile artifact rebuild is
+required by the CLI option.
+
+Local verification passed 268 Rust tests (two opt-in system probes ignored),
+Clippy with warnings denied, formatting and workspace build, 30 actual CLI runtime
+cases, the 31-method/51-example native ABI suite, 29 Python tests and five
+presentation tests. Contract validation passed 17 schemas, 30 positive fixtures
+and 105 negative fixtures; document/repository/commit checks also passed. The
+runtime grant cases use fictional SQLite profiles, pending accounts and an
+unavailable test D-Bus endpoint. No owner profile, vendor request, appliance
+control, Flutter worktree, phone or remote CI was tested by this phase. Physical
+model, off-LAN and real CLI acceptance remain pending.
+
+## Meiju local MCP and scoped command tools
+
+Explicit Meiju MCP startup reuses the connected profile and embedded Core. Default
+sessions expose the four existing read tools; nonempty owner-controlled startup
+grants add `command_plan` and `command_execute`. Each command includes its own
+request ID, bounded timeout, route and wait condition. Core permissions, exact
+model admission, protected account/membership checks and conservative outcomes
+remain unchanged. Tool parameters cannot select credentials, profile, principal
+or new permissions. No account/discovery/batch tool is added. Mock MCP stays
+read-only. See [ADR-0038](adr/0038-scoped-meiju-mcp.md) and the [MCP guide](mcp.md).
+
+This supersedes the earlier Meiju MCP startup refusal. MCP now rejects formerly
+ignored global request/deadline/dry-run and nondefault route/wait options. Query
+tools preserve their envelopes; command execution returns the existing Execution
+envelope with outcome-aware `isError`. Plans do not send or journal. RPC IDs and
+durable command IDs remain separate. Grant-file edits take effect only after
+session restart. Native API 1.10.0, its 31 methods/seven C functions, SQLite schema
+4 and protected payload version 2 are unchanged.
+
+EOF/SIGINT, input/output failures and a two-second output-backpressure deadline
+cancel active operations and drain their cleanup. Synthetic sent operations retain
+unknown receipts after reopening; no automatic replay or physical rollback occurs.
+The existing bounded CLI runtime shutdown also prevents blocked stdio workers
+from keeping the process alive. Actual pipe closure/backpressure tests passed.
+
+Local verification passed 271 Rust tests (two opt-in system probes ignored),
+Clippy with warnings denied, formatting/workspace build, 32 runtime acceptance
+cases, the 31-method/51-example native suite, 29 Python tests, five presentation
+tests and document/contract/repository/commit checks. The sandboxed SIGINT case
+timed out; the focused and complete runtime suites passed with ordinary process
+signal access. Tests use fictional profiles and no owner credentials, vendor
+requests or appliance controls. No target AI host configuration, Flutter worktree,
+phone, physical/off-LAN behavior or remote CI was tested by this phase.
+
+## Explicit AC power-on and mode activation
+
+Native API 1.11.0 adds `meiju_mode_grants` for
+`main / vendor.midea.ac.activate_mode`. Each exact local-device/mode grant covers
+both turning on the AC and selecting `cool`, `heat`, `auto`, `dry` or `fan` in one
+cloud request. Existing power and fan grants remain independent; default startup
+is read-only. The four previously admitted AC models expose this candidate action
+only after explicit opt-in and discovery/refresh. The mode-enabled vendor
+capability has revision 3. See [ADR-0039](adr/0039-explicit-meiju-mode-activation.md)
+and the [native handoff](native-ui-contract.md#scoped-experimental-ac-mode-activation-startup).
+
+The formal CLI and MCP accept the same optional grant list. Ordinary commands
+cannot change permissions. The action sends only power-on and the selected mode;
+no cached status, temperature or fan values and no separate power request are
+sent. Acceptance remains unverified; possible sends retain unknown outcomes
+without retry, cache mutation or a restoring command. UI labels and consent name
+both effects. Physical behavior and preservation of unrelated settings remain
+unverified, including the missing status-context limitation from ADR-0034.
+
+Existing Rust host helpers, 31 JSON methods, seven C functions, command/result
+schemas, SQLite schema 4 and protected payload version 2 remain compatible.
+Older binaries reject the new startup field; negotiate API 1.11 before supplying
+it. The English/Chinese catalogs include mode labels and explicit power-on consent.
+
+Local verification passed 278 Rust tests (two opt-in system probes ignored),
+Clippy with warnings denied, formatting/workspace build, 33 runtime cases,
+the 31-method/51-example native ABI suite, 29 Python tests and five presentation
+tests. Contract checks passed 17 schemas, 32 positive and 111 negative fixtures;
+document/repository/commit checks passed. The full Rust/runtime suites ran with
+ordinary local socket and signal access. The API 28 arm64/x86_64 combined AAR was
+rebuilt with NDK r28c, JDK 21 and API 35 stubs; archive contents, eight exports per
+ABI and 16 KiB ELF alignment passed. This does not establish APK, emulator,
+Android Keystore or phone acceptance.
+
+Tests used fictional profiles, synthetic protected storage and local protocol
+fixtures. This phase accessed no owner account or appliance and did not modify
+the separate Flutter worktree. Physical/off-LAN acceptance remains deferred;
+model-specific AC temperature bounds, dishwasher/refrigerator controls and the
+complete mobile journey remain incomplete. Remote CI was not verified.
+
+## Protected product mapping evidence 1.11.1
+
+The existing Meiju inventory now retains optional `sn8`, `modelNumber` and
+`category` as private product mapping evidence under
+[ADR-0040](adr/0040-protected-meiju-product-profiles.md). Numeric subtype
+representations are canonicalized, absent/placeholder fields remain unknown,
+and conflicting nonempty evidence refuses the whole binding update. Malformed
+fields invalidate that home's response; partial retrieval preserves cards and
+established membership. No additional endpoint, full serial-number decoding,
+Lua/plugin download, device control or automatic refresh is introduced.
+
+Protected account payload version 3 stores this evidence with existing immutable
+bindings. Versions 1 and 2 open without writes or invented values; a later explicit
+protected mutation writes version 3. Missing later fields, session replacement,
+pending reauthorization and recovery retain established evidence and local IDs.
+Uncertain storage keeps the account pending. Older binaries cannot reopen version
+3; preserve the profile and upgrade the library instead of resetting accounts.
+Native API 1.11.1 identifies this storage change, with the same 31 JSON methods,
+seven C functions, public DTOs and SQLite schema 4. Source inventory gains an
+opaque, nonserializable `ProductProfile`; external Rust literal constructors must
+initialize its new field. No new model or control is admitted by this evidence.
+
+Local verification on October 16, 2026 passed 287 Rust tests (two opt-in system
+probes ignored), Clippy with warnings denied, formatting, the workspace build,
+`cargo build --workspace --examples --offline --locked`, 33 runtime cases,
+the 31-method/51-example native ABI suite, 29 Python tests and five presentation
+tests. Contract checks passed 17 schemas, 32 positive and 111 negative fixtures;
+document/repository/commit checks passed. Rust/runtime suites used ordinary local
+socket and signal access. Native session tests cover protected evidence capture,
+unchanged descriptors, pending reauthorization, exact-byte recovery without
+relogin, and absent profile markers in public responses and SQLite/WAL.
+
+The API 28 arm64, x86_64 and combined Android AARs were rebuilt using NDK r28c,
+JDK 21 and API 35 stubs; production archive contents, eight exports per ABI and
+16 KiB ELF alignment passed. No APK, emulator, Android Keystore, phone, real
+account/profile, appliance or remote CI acceptance was performed. The separate
+Flutter worktree was untouched. Model-specific temperature/program constraints,
+physical/off-LAN controls and the complete mobile journey remain incomplete.
+
+## Profile-scoped AC temperature 1.12
+
+Native API 1.12.0 adds independent `meiju_temperature_grants` for one exact local
+AC and Celsius target under [ADR-0041](adr/0041-profile-scoped-ac-temperature.md).
+Native, CLI and MCP use the same startup-only policy; ordinary commands cannot
+change authority. The startup target union never overrides the selected action's
+bounds/step. Existing Rust host helpers remain compatible wrappers around the
+new borrowed `MeijuControlGrants` bundle. Older native binaries reject the new
+field. The 31 JSON methods, seven C functions, SQLite schema 4 and protected
+account payload 3 remain unchanged.
+
+Only the four existing experimental AC models with reviewed protected product
+evidence expose `main / climate.set {target_temperature}` after explicit refresh
+or discovery. Selection preserves subtype/product/category priority, normalized
+category spellings and explicit unsupported overrides, including fresh-air product
+26096947. Missing evidence never selects a generic family default. Retained
+profiles survive later omitted inventory fields and are used without another
+provider request. Public descriptors contain selected constraints, not raw
+product evidence. Writable limits do not suppress valid historical observations.
+
+The adapter reselects the protected mapping before transport and sends only exact
+whole/half-degree temperature field(s). It does not round invalid input, include
+power/mode/fan or cached status, update optimistic state, read after acceptance,
+retry, fall back or restore settings. Cloud acknowledgement remains accepted;
+uncertain transmission remains unknown. Source mappings do not prove physical
+support or preservation of unrelated settings without upstream status context.
+
+Local verification on October 16, 2026 passed 296 Rust tests (two opt-in system
+probes ignored), formatting, Clippy with warnings denied, workspace and example
+builds using `--offline --locked`, 34 runtime cases, the 31-method/51-example
+native ABI suite, 29 Python tests and five presentation tests. Contract checks
+passed 17 schemas, 34 positive and 117 negative fixtures; document, repository
+and commit checks passed. Rust/runtime suites used ordinary local socket and
+signal access. Tests cover all reviewed selector groups, missing/conflicting
+admission conditions, exact encoding, weakened descriptors, independent policy,
+protected membership, receipts/replay and foreground interruption.
+
+The API 28 arm64, x86_64 and combined Android AARs were rebuilt with NDK r28c,
+JDK 21 and API 35 stubs. Production archive contents, eight exports per ABI and
+16 KiB ELF alignment passed. This phase used fictional profiles and synthetic
+storage/transport only. No owner account, credential profile or appliance was
+accessed; the separate Flutter worktree was untouched. APK/emulator/Keystore/phone,
+physical/off-LAN controls, dishwasher/refrigerator writes and remote CI remain
+unverified. The full real-device MVP remains incomplete.
+
+## Profile-aware scalar AC readings 1.12.1
+
+The prior decoder required `small_temperature` for every AC target. This dropped
+a valid `temperature` reading for the reviewed single-field mapping even though
+API 1.12 could send its scalar setpoint. API 1.12.1 uses the existing protected
+selector for reads as well: product code 23096245 with a known non-overriding
+subtype reads `temperature` alone, matching the pinned climate getter. Subtype
+524, compound profiles and missing evidence retain the two-field contract.
+No extra provider request, implicit refresh, control opt-in or raw-profile export
+is introduced. Missing/null values remain absent, invalid scalar values refuse
+the response without overwriting cache, and historical values are not constrained
+by write bounds or steps. Cloud freshness and write outcomes remain unchanged.
+
+The new regression was executed against the prior committed decoder and failed
+because the expected target 26 was absent. After the fix, local verification on
+October 16, 2026 passed 299 Rust tests (two opt-in system probes ignored),
+formatting, Clippy with warnings denied, workspace and example builds using
+`--offline --locked`, 34 runtime cases, the 31-method/51-example native ABI suite,
+29 Python tests and five presentation tests. Contract validation passed 17 schemas,
+34 positive and 117 negative fixtures; document/repository/commit checks passed.
+Tests cover scalar/compound selection, subtype priority, numeric strings,
+malformed/nonfinite targets, missing fields, unproven freshness, retained protected
+evidence after sparse inventory, read-only Core sessions and cache preservation.
+
+All three API 28 Android AARs (arm64, x86_64 and combined) were rebuilt using
+NDK r28c, JDK 21 and API 35 stubs; archive contents, eight exports per ABI and
+16 KiB ELF alignment passed. Native methods, C functions, public schemas,
+SQLite schema 4 and protected payload 3 are unchanged. No real account,
+credential profile or appliance was accessed; the separate Flutter worktree was
+untouched. Physical/off-LAN, phone/Keystore/APK and remote CI acceptance remain
+unverified. Dishwasher and refrigerator controls remain incomplete.
+
+## Typed trusted single-command approval foundation
+
+[ADR-0042](adr/0042-trusted-single-command-approval.md) adds Rust Core/Session
+preparation and one-use execution for one elevated action. A complete matching
+grant, one explicit transport and exactly one registered connection remain
+required. The opaque preview binds its command, descriptor, Core instance,
+approval generation and 60-second monotonic lifetime. Preparation performs no
+adapter/credential/network work and does not constitute consent. Trusted UI code
+must display and confirm the immutable view before consuming it. Wrong-host,
+expired, changed or invalidated scopes refuse before sending; high-risk, batch
+and independently decomposed actions remain excluded.
+
+Core supplies an approval marker to adapters only on this validated path.
+Consequential adapters must check it independently of public risk metadata.
+Session background/close invalidates pending previews and cancels active tokens;
+a possible send still becomes unknown without replay or rollback. Existing
+journaling, device locking, retained receipts and request retirement remain
+in force. A fixed warning records approval for the exact journaled command.
+`APPROVAL_INVALID` and `APPROVAL_EXPIRED` are explicitly unsent in the shared
+receipt schemas and have English/Chinese presentation messages.
+
+This is a Rust integration foundation, not a new appliance capability. Native
+API 1.12.1, 31 JSON methods, seven C functions, startup grants, SQLite schema 4
+and protected payload 3 are unchanged. Existing JSON/C/CLI/MCP entry points cannot
+prepare or consume approval. The trusted C/Flutter bridge, UI consent and
+model-specific dishwasher/refrigerator preservation/control mappings remain
+incomplete; this phase does not admit household operation.
+
+Local verification on October 16, 2026 passed 309 Rust tests (two opt-in system
+probes ignored), formatting, Clippy with warnings denied, offline locked workspace
+and example builds, 34 runtime cases, the 31-method/51-example native ABI suite,
+29 Python tests and five presentation tests. The new eight-case Rust suite also
+validates actual typed receipts against the shared JSON schema. Tests cover exact
+scope/grants, risk and route refusal, ownership, expiry, descriptor changes,
+revocation, duplicate preparation/replay, retired IDs, journal failures, adapter
+marker enforcement, host lifecycle and uncertainty. Two compile-fail checks
+prevent cloning/serialization. Actual C calls reject invented approval methods
+and forged command fields. Contract checks passed 17 schemas, 37 positive and
+122 negative fixtures; document/repository/commit checks passed.
+
+All three API 28 Android AARs were rebuilt with NDK r28c, JDK 21 and API 35 stubs;
+archive contents, eight exports per ABI and 16 KiB alignment passed. Only fictional
+devices, temporary profiles, synthetic storage and local protocol fixtures were
+used. No owner account or appliance was accessed, and the separate Flutter
+worktree was untouched. Phone/Keystore/APK, physical/off-LAN and remote CI
+acceptance remain unverified. The full real-device MVP is still incomplete.
+
+## Trusted native single-command approval 1.13.0
+
+[ADR-0043](adr/0043-native-trusted-approval-bridge.md) extends the typed approval
+foundation with three separate trusted C functions: prepare an immutable preview,
+execute it after actual user consent, and discard it locally. Session retains at
+most eight previews with the existing 60-second monotonic expiry. Confirmation
+consumes a matching ID before admission; cross-handle, reused, discarded or pruned
+IDs fail. Background/close clears previews and cancels active work, and a
+lifecycle generation check rejects preparation spanning background/foreground.
+No registry lock spans execution or networking. Normal journaling, non-replay,
+uncertain outcomes and original-request receipt recovery remain unchanged.
+
+Native API 1.13.0 has ten C functions and still 31 ordinary JSON methods. Approval
+IDs are temporary trusted-controller state, never durable data, model arguments
+or proof of consent. No general JSON/CLI/MCP confirmation path was added. Existing
+clients can use the previous exports; new clients must negotiate 1.13 before
+resolving the added symbols. SQLite schema 4 and protected account payload 3 are
+unchanged. The new closed approval definition bundle, fictional inputs and native
+contract describe query errors versus admitted Execution receipts.
+
+The explicit Mock-only `approval-required` scenario adds a fictional elevated
+cycle and exact grant alongside the existing simulated setters. Its adapter
+requires Core's private approval marker even if cached risk metadata is weakened.
+The scenario is refused for Meiju before profile creation. Every real Meiju
+permission and mapping remains unchanged; no real account was opened or appliance
+operated. Actual Flutter consent UI, real consequential mappings, mobile secure
+store/runtime and physical/off-LAN acceptance remain pending.
+
+Validation performed on October 16, 2026:
+
+- `cargo fmt --all -- --check`, workspace Clippy with warnings denied, workspace
+  build and example build passed, using locked offline dependencies.
+- `cargo test --workspace --offline --locked`: 313 passed, 2 ignored. The approval
+  suite has 12 tests, including native capacity/pruning, retained expiry,
+  admission-failure consumption, cross-session isolation, concurrent confirmation
+  and a deterministic background/foreground preparation race.
+- `scripts/verify_mvp.py`: 34 runtime cases passed with local socket/signal access.
+- `scripts/verify_native_contract.py`: 31 methods and 51 live fictional examples
+  passed, plus actual calls of all three trusted exports. Dedicated checks cover
+  scope, duplicate/concurrent consumption, dismissal/capacity, closed input,
+  lifecycle, metadata changes, adapter marker enforcement and receipt lookup.
+  `scripts/verify_native_approval.py` also passed the Meiju scenario refusal.
+- Python tooling: 29 tests passed; presentation catalogs: 5 tests passed.
+  Contract validation: 18 schemas, 39 positive fixtures and 135 negative fixtures.
+  Documentation, repository hygiene and Conventional Commit checks passed.
+- The combined, arm64-v8a and x86_64 Android AARs were rebuilt using NDK r28c,
+  JDK 21 and API 35 stubs. Production archive contents, eleven exports per ABI
+  (ten C functions plus JNI), ELF architectures and 16 KiB alignment passed.
+  These are library artifacts, not APK, emulator, Keystore or phone acceptance.
+
+## Profile-scoped dishwasher starts 1.14.0
+
+[ADR-0044](adr/0044-profile-scoped-dishwasher-start.md) adds experimental elevated,
+non-idempotent `vendor.midea.dishwasher.start_cycle` on `main`. Admission requires
+the existing exact dishwasher model, protected known subtype/product evidence,
+explicit adapter opt-in, an exact startup argument grant and trusted single-command
+user confirmation. Ordinary plan/execute/CLI/MCP cannot approve it. The adapter
+checks Core's marker before account access, then independently checks protected
+family/model, identity, inventory membership, product mapping and arguments.
+Public descriptor edits cannot supply missing authority or product evidence.
+
+Five reviewed product codes select short, suffixed or reduced program lists.
+760Y0026 requires an explicit additional-setting code in the confirmed command;
+other admitted profiles reject that field. The start list excludes its cancellation
+option. 7600016L remains unavailable because complete wash-region/door-preservation
+domains have not been established. Unknown/missing products do not use the family
+default. The owner's protected product-code match was not inspected in this phase.
+
+Native API 1.14 adds `meiju_dishwasher_grants` with at most 64 distinct exact
+local UUID-v4 / arguments pairs. Empty/absent lists preserve read-only startup.
+The startup union does not establish any device's program support. Existing AC
+authority is independent; CLI/MCP grant files have no elevated dishwasher field.
+The unreleased Rust grant bundle gains a `dishwasher` slice; existing helper
+functions preserve behavior and callers can use default fields. The 31 ordinary
+methods, ten C functions, SQLite schema 4 and protected payload 3 are unchanged.
+English/Chinese vendor-program, additional-option and confirmation labels were
+added; the public identifiers stay English.
+
+One cloud request contains only work status, the reviewed mode and any explicitly
+required additional option. No implicit pre/post read, cached-state copying,
+optimistic cache update, retry, fallback or restoration occurs. An acknowledgement
+is accepted, possible transmission remains unknown, and original request receipts
+prevent automatic duplicate starts. Protocol encoding and existing cloud outcome
+handling do not establish physical completion or preservation of unrelated settings.
+
+Validation performed on October 16, 2026:
+
+- Formatting, workspace Clippy with warnings denied, workspace build and example
+  build passed with locked offline dependencies.
+- `cargo test --workspace --offline --locked`: 321 passed, 2 ignored. Six new
+  dishwasher adapter tests cover every admitted program/encoding and additional
+  option, read-only defaults, retained profiles, forged public metadata,
+  protected model/family/product gates, host opt-in, approval enforcement, cloud
+  outcomes, cancelled possible sends, receipt replay and inventory membership.
+  Two host policy tests cover exact grant scope, invalid/duplicate lists and
+  refusal before profile creation.
+- `scripts/verify_mvp.py`: 34 runtime cases passed with local socket/signal access.
+- `scripts/verify_native_contract.py`: 31 methods, 51 live fictional examples,
+  existing trusted-approval checks and new native dishwasher startup/confirmation
+  checks passed. New native tests use a fictional descriptor with no account:
+  confirmation stops with `ACCOUNT_NOT_FOUND` before credential/provider access.
+- Python tooling: 29 tests passed; presentation catalogs: 5 tests passed.
+  Contract validation: 18 schemas, 41 positive fixtures and 140 negative fixtures.
+  Documentation, repository hygiene and Conventional Commit checks passed.
+- Combined, arm64-v8a and x86_64 Android AARs were rebuilt using NDK r28c, JDK 21
+  and API 35 stubs. Production archives, eleven exports per ABI, ELF architectures
+  and 16 KiB alignment passed. APK/emulator/Keystore/phone runtime remains untested.
+
+No real account or appliance was accessed. Physical/off-LAN dishwasher operation,
+remaining product mappings, refrigerator writes, Flutter consent and mobile
+acceptance remain outstanding; this stage does not complete T10 or the MVP goal.
+
+## Refrigerator evidence review and presentation correction
+
+On October 16, 2026, the [refrigerator review](development/05-midea.md#refrigerator-write-evidence)
+compared the exact-model manufacturer manual with the pinned community mapping
+and centralized setter. This documents a write-admission blocker, not implemented
+refrigerator control. Existing read descriptors and observation ranges are unchanged.
+
+The presentation helper now resolves numeric observation labels by exact property
+and value, so the existing AC code 102 displays Auto. Unknown codes still use
+locale number formatting; typed values and evidence remain intact. A regression
+test reproduced the numeric-label failure before the fix. All six presentation
+tests and 29 Python tooling tests passed; documentation, contracts and repository
+hygiene checks passed. These changes do not alter the native API, C exports,
+SQLite schema or protected account format. No Rust/Android build, Flutter/mobile
+runtime or real account/device test was performed for these changes.
+
+## Android file locks and isolated native APK acceptance
+
+The first isolated AOSP Android 15 x86_64 run failed to open a native profile.
+A minimal target executable showed Rust 1.96 `File::try_lock_shared` and
+`File::try_lock` returning `Unsupported`, while Bionic `flock` succeeded. Android
+storage now uses nonblocking Bionic locks for migration, device and account leases;
+other platforms keep standard-library locking. File names, ownership lifetimes,
+contention errors, native API 1.14.0, SQLite 4 and protected payload 3 are unchanged.
+The existing locked `libc` version is now an explicit Android storage dependency.
+
+The [test-only APK](development/08-android-native.md#run-the-isolated-native-acceptance-apk)
+embeds the production AAR with no requested permissions, including Internet.
+On October 16, 2026, image revision 2 and Emulator 37.2.12 passed unsecured, write,
+locked and read phases with 17/17/16/27 assertions. Evidence covers native Mock
+execution/lifecycle, independent lock contention, Android Keystore round trips and
+nonexportable keys, persistence in a different process, tampered ciphertext,
+deliberately removed keys without regeneration, and Rust/JNI inspection/removal
+of a fictional protected account. A failed lock-state precondition is not store
+evidence; both OS transitions were confirmed before successful reruns.
+
+Formatting, Linux workspace and Android-storage Clippy passed with warnings denied.
+Workspace and example builds passed; Rust tests: 321 passed, 2 ignored. The MVP
+runtime suite passed 34 cases; native checks passed 31 methods/51 live fictional
+examples plus trusted approval/dishwasher cases. Python tooling: 33 passed;
+presentation: 6 passed. All three AAR variants were rebuilt and inspected; the
+x86_64 test APK passed signing, permission and 16 KiB ZIP-alignment checks.
+
+Physical/OEM Keystore behavior, successful provider login/session replacement,
+Flutter APK journeys, release shrinking, actual 16 KiB-page execution and real
+appliance operation remain unverified. No owner account, real device, separate
+Flutter worktree or published package was used in this phase.
+
+## Temperature grant capacity correction 1.14.1
+
+The original 64-entry startup limit rejected a four-AC configuration containing
+29 exact candidate targets per device (116 pairs). A host regression reproduced
+that refusal before the correction. API 1.14.1 permits 256 temperature pairs in
+native startup and explicit CLI/MCP grant files. Other grant limits remain 64;
+the CLI file limit remains 32 KiB. Each device's action constraints and protected
+product mapping still apply independently; candidate targets do not establish
+model support. There are no wildcard grants or changes to write outcomes.
+
+On October 16, 2026, the native C ABI accepted 116 and 256 entries and rejected
+257 distinct entries before profile creation. Planning all 116 candidate pairs
+across four fictional descriptors preserved different minimum and whole/half-degree
+step constraints. Actual CLI/MCP processes accepted the four-device configuration,
+retained independent power denial and refused a pending-account execution before
+sending. CLI also accepted 256 entries and rejected 257 before profile creation.
+
+Formatting, workspace Clippy, workspace/example builds and local validation passed:
+322 Rust tests with two explicitly ignored integration tests; 35 MVP runtime cases;
+31 native methods and 51 live fictional examples plus trusted approval/dishwasher
+checks; 33 Python tooling tests; six presentation tests; 18 schemas, 41 positive
+fixtures and 141 negative fixtures. All three Android AAR variants were rebuilt
+with eleven exports per ABI and 16 KiB ELF alignment checks. The prior isolated
+Android runtime acceptance was not rerun for this capacity correction.
+
+Clients must negotiate API 1.14.1 before supplying more than 64 temperature pairs;
+older libraries reject the larger configuration, so never silently truncate it.
+JSON shapes, methods, C exports, SQLite schema 4 and protected payload 3 are
+unchanged. No real account, appliance operation, Flutter worktree change, mobile
+runtime acceptance or package publication was performed in this phase.
+
+## Bounded LAN discovery decoding
+
+[ADR-0045](adr/0045-bounded-lan-discovery-decoding.md) adds the fixed Midea probe
+and an offline V2/V3-wrapped discovery decoder. Eight independently generated
+positive vectors and fifteen negative vectors cover family hints, minimum and
+maximum sizes, checksums, padding, lengths and field validation. Every truncation
+boundary is rejected. The six-byte ID excludes adjacent reserved bytes; the
+endpoint uses the actual supplied datagram source. Candidates have redacted Debug
+and no serialization implementation, and retain no serial, MAC, SSID or model.
+
+The public wire key/checksum do not authenticate a device. No sockets, account
+access, pairing, identity merge, LAN route registration or control are implemented
+by this module. Native API 1.14.1, its 31 methods and eleven C/JNI exports, SQLite
+schema 4, protected payload 3 and cloud execution semantics remain unchanged.
+Bounded collection, protected reconciliation, V3 session authentication, TCP/model
+codecs and authorized physical/off-LAN acceptance remain separate gates. This
+phase does not complete T10 or establish support for a physical product.
+
+On October 16, 2026, formatting, workspace Clippy, workspace/example builds and
+local validators passed. Rust tests: 326 passed, two explicitly ignored; runtime
+acceptance: 35 passed; native contract: 31 methods/51 fictional examples plus
+approval checks; Python tooling: 33 passed; presentation: six passed. All three
+Android AAR variants passed build/export/16 KiB ELF checks. No real account,
+appliance, Flutter worktree or new Android runtime test was used in this phase.
+
+## Bounded LAN collection
+
+The follow-up to [ADR-0045](adr/0045-bounded-lan-discovery-decoding.md) adds a native
+UDP collector for an explicitly selected private/link-local subnet. It binds to
+the supplied local interface, sends one probe per reviewed port with TTL 1, and
+uses a fixed five-second window within the existing Operation. All datagrams
+count toward the 256-response limit; 64 distinct candidates also ends collection
+with `limit_reached`. Identical hints are deduplicated while conflicts remain
+untrusted candidates. No result establishes a complete inventory or permission.
+
+Six loopback tests exercise real UDP sockets with fictional responses, including
+invalid scope/source refusal, malformed and oversized packets, duplicate and
+conflicting hints, both limits, deadline/cancellation and rebinding after normal
+completion or future drop. The public scope rejects loopback; destination and
+scope overrides are private test fixtures. No household scan was performed.
+
+Native API 1.14.1, its methods/exports, SQLite schema 4, protected payload 3 and
+cloud execution are unchanged. The collector is not registered in Core or any
+entry point. Host network selection/consent, protected identity reconciliation,
+V3 authentication, TCP/model codecs and physical LAN acceptance remain pending.
+
+On October 16, 2026, formatting, workspace Clippy, workspace/example builds and
+local validators passed. Rust tests: 333 passed, two explicitly ignored; runtime
+acceptance: 35 passed; native contract: 31 methods/51 fictional examples plus
+approval checks; Python tooling: 33 passed; presentation: six passed. All three
+Android AAR variants passed build/export/16 KiB ELF checks. No Android network
+runtime, real account, appliance operation or separate Flutter worktree was used.
+
+## Bounded V3 LAN wire codec
+
+[ADR-0046](adr/0046-bounded-v3-lan-codec.md) adds protected native handshake and
+session codecs. Independent OpenSSL/hashlib vectors cover handshake key
+confirmation and twelve aligned/unaligned encrypted request/response frames.
+Malformed, truncated, oversized, wrong-direction and failed-digest inputs expose
+no plaintext. Outgoing counters stop before wrap; the 4096-byte frame limit and
+credential sizes are scoped admission limits, not physical compatibility claims.
+
+The encoder includes digest bytes in the declared length even when no random
+padding is required. Keys and plaintext use protected buffers and enabled CBC/AES
+cleanup features; constant-time digest checks and OS randomness reuse existing
+locked dependencies. No dependency version changed. Native API 1.14.1, JSON
+methods, C exports, SQLite schema 4 and protected payload 3 are unchanged.
+
+No TCP connection, live credential retrieval, persistence, route admission or
+appliance operation is implemented by this codec. A valid digest/sequence does
+not establish device identity, freshness, anti-replay or physical execution.
+Protected identity/credentials, bounded TCP transport, inner packet/model checks
+and physical acceptance remain separate gates.
+
+On October 16, 2026, formatting, workspace Clippy, workspace/example builds and
+local validators passed. Rust tests: 340 passed, two explicitly ignored; runtime
+acceptance: 35 passed; native contract: 31 methods/51 fictional examples plus
+approval checks; Python tooling: 33 passed; presentation: six passed. All three
+Android AAR variants passed build/export/16 KiB ELF checks. No Android network
+runtime, real account, appliance operation or separate Flutter worktree was used.
+
+## Operation-owned V3 TCP exchange
+
+The transport follow-up to [ADR-0046](adr/0046-bounded-v3-lan-codec.md) adds one
+scoped TCP connection, handshake and command exchange within the inherited
+Operation. Header-first reads bound allocation and preserve frame boundaries.
+Preflight rejects out-of-scope/self/broadcast/network endpoints, port zero,
+invalid payload sizes and reused transmission markers. There is no reconnect,
+retry, pooling, background worker or connection returned to the caller.
+
+Eight loopback tests cover exact fictional handshake/command bytes, fragmented
+and coalesced frames, connection and handshake refusal, malformed/lost responses,
+and socket closure before/after command transmission on cancellation, deadline
+and dropped futures. Handshake failures leave the command not sent; starting its
+write marks possible transmission, which errors cannot clear. A valid response
+does not mark acceptance or prove identity, freshness or physical execution.
+
+On October 16, 2026, formatting, workspace Clippy, workspace/example builds and
+local validators passed. Rust tests: 348 passed, two explicitly ignored; runtime
+acceptance: 35 passed; native contract: 31 methods/51 fictional examples plus
+approval checks; Python tooling: 33 passed; presentation: six passed. All three
+Android AAR variants passed build/export/16 KiB ELF checks. Android network runtime
+and physical device acceptance were not exercised.
+
+Native API 1.14.1, JSON methods, exports, SQLite schema 4, protected payload 3 and
+cloud behavior are unchanged. No adapter/entry point invokes this low-level
+helper yet. Protected identity/credentials, current membership, grants, model
+admission and inner response evidence must gate future real LAN access. No real
+account, household endpoint or separate Flutter worktree was accessed.
+
+
+## Flutter native API 1.14.1 baseline
+
+The frontend worktree merges committed Core `7db8e9b` and keeps the upstream
+Android Bionic lock implementation plus its additional contention regression.
+Existing Flutter account/cleanup/Mock pages remain compatible with the 31 ordinary
+methods. Trusted approval UI and explicit Meiju grant configuration are not yet
+wired; elevated controls stay unavailable and Meiju startup remains read-only.
+Protected payload version 3 and SQLite schema 4 are retained without downgrade.
+
+Local checks passed: 349 Rust tests (two opt-in tests ignored), formatting, Clippy,
+workspace build, 35 runtime cases, native ABI/approval/dishwasher admission, 33
+Python tests, six presentation tests, 68 Flutter tests and Flutter analysis.
+The dual-ABI Android AAR passed eleven-export and 16 KiB ELF checks; the ordinary
+APK passed alignment/install/cold-start and explicit Mock refresh. The complete
+Android click journey also passed with simulated picker/input/lifecycle. See the
+[Flutter verification report](../apps/mobile/verification.md) for evidence and
+limits. Pixel equality remains failed at 0/82; this phase establishes no physical
+account/appliance, iOS, remote CI or full mobile acceptance.

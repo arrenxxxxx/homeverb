@@ -11,8 +11,11 @@ The native account vault now persists random local references, composes Linux se
 The next implemented phase adds an explicitly opted-in AC `power.set` path and
 [preview-first control probe](07-meiju-control.md). Its Core grants and TLS send
 progress are synthetic-tested. Native API 1.9 also adds independent vendor fan controls with exact-device/code grants.
-Real control acceptance, temperature constraints, other settings, dishwasher/refrigerator
-writes and Flutter consent UI remain pending.
+API 1.12 adds protected-profile AC temperature control; API 1.12.1 also uses that
+profile's selected temperature wire shape on explicit reads.
+API 1.14 adds reviewed profile-scoped dishwasher starts through exact native grants
+and trusted confirmation. Remaining dishwasher mappings, refrigerator writes,
+Flutter consent UI and physical acceptance remain pending.
 
 ## Reuse the community protocol work
 
@@ -33,6 +36,44 @@ The projects have separate histories and cloud/LAN paths. Check their feature se
 | Refrigerator | `0xCA`; [cloud mapping][ca-cloud-source], [HA feature guide][ca-guide], and [LAN implementation][ca-source] | Cloud compartment temperatures and supported settings, with separate component capabilities | The cloud mapping declares refrigerator/freezer target temperatures. The LAN `MideaCADevice.set_attribute` is empty at the inspected revision; this limits that LAN path, not the cloud scope. Neither source verifies the owner's models or universal ranges |
 
 Select the adapter and message variant using protocol evidence. The same implementation can serve Midea or Hualing devices using the same protocol, but a brand label is insufficient evidence. Midea and Hualing using one protocol family do not satisfy the separate two-protocol release gate.
+
+## Refrigerator write evidence
+
+Reviewed on October 16, 2026. `BCD-600WUFIPZM(E)` remains read-only in HomeVerb.
+The [official product page](https://www.midea.cn/detail/index?itemid=10000000004006921296985)
+links the [manufacturer manual](https://dsdcp.smartmidea.net/mcsp/prod/20250825/ef3a35a69dac4982bfad119f0b8150d2.pdf),
+document `16131000031244`, drawing `SMS-2810`. Its cover names the exact model
+alongside `BCD-600WUFGPZM`; distinguish their model-specific instructions.
+
+| Evidence | Established fact | Remaining gap |
+|---|---|---|
+| Manual, printed pages 12-13 (PDF page 9) | Ordinary fridge targets are 2-8 Celsius; ordinary freezer targets are -24 to -16 Celsius. Quick-cool/quick-freeze are separate modes | The temperature paragraph does not establish a wire step or cloud encoding |
+| Manual, printed pages 14-15 (PDF page 10) | The selected model uses Meiju to activate deep cooling | No reviewed wire-field correspondence to a deep-cooling action |
+| Pinned [CA mapping][ca-cloud-source] | Only a family default; generic fridge range -10 to 10 and freezer range -30 to -10, with half-degree precision metadata | No exact-model/product override; these defaults must not become this model's writable contract |
+| Pinned [device control implementation][cloud-device-source] | Setters copy 16 centralized fields from retained attributes, overlay requested changes and supply status to the encoder | No evidence that a one-field command preserves other settings, or that copied cloud state is current |
+
+The centralized fields cover eight modes (`freezing_mode`, `intelligent_mode`,
+`energy_saving_mode`, `holiday_mode`, `moisturize_mode`, `preservation_mode`,
+`acme_freezing_mode`, `variable_mode`), four power fields (`storage_power`,
+`freezing_power`, `left_flexzone_power`, `right_flexzone_power`) and the matching
+four temperature fields. This list is protocol research, not a declaration that
+all those zones or modes exist on the selected model. Similar names do not prove
+that a manual mode equals a particular wire field.
+
+The write gate is **blocked: exact-model encoder preservation and temperature
+step are unproven**. Continue with public model/codec evidence; do not derive
+control defaults from the manual, enable the generic family mapping, or copy
+stale cloud observations into writes. Before adding an action, establish the
+protected product selector, exact input domain and behavior of omitted settings,
+then add positive/negative offline fixtures. Physical preservation and off-LAN
+acceptance require a separately authorized test. No account or appliance access
+was performed for this review.
+
+Existing temperature observations must remain visible even outside ordinary
+setpoint bounds. The manual does not justify narrowing readable properties,
+clamping values, manufacturing mode observations or adding UI sliders. The
+[native handoff](../native-ui-contract.md#refrigerator-read-only-presentation)
+describes the currently available experience.
 
 ## Account authorization and automatic device retrieval
 
@@ -134,7 +175,7 @@ real reauthorization and off-LAN acceptance remain to be recorded.
 
 ## Native account identity and device persistence
 
-`MeijuAccount` owns an AccountVault lease for one bounded operation. After admitted native authentication validates an account subject and session, `create(vault, region, label, subject, session, operation)` reserves a fresh local account and stores a private version-1 payload. For an existing account, acquire its lease and use `open`; it never initializes or resets an absent/corrupt map. `record()` exposes local metadata, and `session(operation)` returns protected native bytes. These remain low-level Rust calls; the native UI exposes reviewed projections and operations through API 1.2 without returning private payloads.
+`MeijuAccount` owns an AccountVault lease for one bounded operation. After admitted native authentication validates an account subject and session, `create(vault, region, label, subject, session, operation)` reserves a fresh local account and stores a private version-3 payload. For an existing account, acquire its lease and use `open`; it never initializes or resets an absent/corrupt map. `record()` exposes local metadata, and `session(operation)` returns protected native bytes. These remain low-level Rust calls; the native UI exposes reviewed projections and operations through API 1.2 without returning private payloads.
 
 The opaque subject must come from reviewed provider evidence, not a nickname or mutable login spelling. The native login flow below binds a successful password proof to the exact server-issued login ID; the storage layer itself does not infer a provider field. `replace_session` requires that exact subject and keeps the bindings. A mismatch returns `ACCOUNT_IDENTITY_CONFLICT` without changing stored state. Neither opening a payload nor matching the subject proves live authorization.
 
@@ -142,7 +183,18 @@ After retrieval, `bind_inventory` validates the inventory's credential reference
 
 Repeated inventories preserve IDs. Missing entries never remove mappings, including after a complete empty list. Names, vendor rooms and online hints do not affect identity. Known family/model conflicts reject the whole update; an absent model can become known. Unknown families receive bindings without gaining capabilities. Unchanged identities and membership require no secret-store write. This storage helper does not publish Core descriptors. The read-only adapter checks protected current and historical bindings across accounts before publishing; ambiguity fails without silently merging devices.
 
-The protected payload contains the immutable local account binding, subject/session bytes and private appliance map. Limits are 1 MiB total, 1024 subject bytes, 65536 session bytes, 4096 bindings, and 256 UTF-8 bytes per model. The system secret store protects the payload; SQLite contains no provider identifiers or session data. Debug/errors are redacted. Pending writes need exact-byte recovery through the vault before `open` can succeed; never retry by resetting or recreating the account. Tests use synthetic secrets and real SQLite, including unchanged local preferences after descriptor rediscovery. The Linux connect/refresh probe has exercised real account persistence; reauthorization and phone support remain pending.
+The protected payload contains the immutable local account binding, subject/session bytes and private appliance map.
+Under [ADR-0040](../adr/0040-protected-meiju-product-profiles.md), each binding may
+also retain private `sn8`, `modelNumber` (as canonical `subtype`) and `category`
+evidence from the existing inventory request. These inform later reviewed mapping
+selection; they are not public descriptors or permission to use a family default.
+Missing fields preserve known evidence; conflicting known fields reject the whole
+binding update. Invalid fields invalidate that home's response. The full serial
+number, downloaded Lua and plugins are neither used nor retained. Versions 1 and 2
+open without writes; the next explicit protected mutation writes version 3, which
+old binaries cannot reopen. Do not reset an account to downgrade.
+
+Limits are 1 MiB total, 1024 subject bytes, 65536 session bytes, 4096 bindings, and 256 UTF-8 bytes per model. The system secret store protects the payload; SQLite contains no provider identifiers or session data. Debug/errors are redacted. Pending writes need exact-byte recovery through the vault before `open` can succeed; never retry by resetting or recreating the account. Tests use synthetic secrets and real SQLite, including unchanged local preferences after descriptor rediscovery. The Linux connect/refresh probe has exercised real account persistence; reauthorization and phone support remain pending.
 
 For a Core adapter's default state read, use `read_bound_state(transport, device, component, connection, clock, operation)` on the leased account. It checks the exact local device and full cloud connection against the protected map, known model evidence, confirmed membership in the last complete inventory, and the requested component before issuing one request. The private appliance target comes from the map, not from UI arguments. Use an operation-scoped transport that already resolves the correct session under this lease; do not reacquire the account lock inside the transport. This helper does not discover capabilities or turn read properties into actions.
 
@@ -194,6 +246,64 @@ The [LAN setup documentation][ha] describes cloud onboarding to retrieve Token/K
 
 Use one physical Device with cloud and, when established safely, LAN connections. Preserve existing [routing rules](../routing-and-execution.md): explicit cloud works independently of LAN, explicit LAN never falls back, and Auto chooses a permitted action-supported route with LAN preferred when available. Never race writes or replay a possibly-sent write on another route. A cloud API success is not physical verification; keep accepted or uncertain outcomes honest when fresh evidence is unavailable.
 
+### LAN discovery foundation
+
+`homeverb_midea::lan` implements the fixed discovery request and a pure, bounded
+V2/V3-wrapped response decoder under
+[ADR-0045](../adr/0045-bounded-lan-discovery-decoding.md). Independent fictional
+packets cover AC, E1, CA and unknown family hints. The decoder checks inner length,
+checksum, AES padding, the six-byte ID, TCP port and SSID family; datagrams are
+limited to 512 bytes. The endpoint uses the supplied datagram peer address.
+
+Candidates are native-only, redacted and unauthenticated. The public checksum and
+wire key do not prove identity; serial, MAC, SSID and model text are discarded.
+The decoder itself opens no sockets or connections. The separate `discover`
+function accepts a trusted `DiscoveryNetwork` built from an assigned private or
+link-local interface address and prefix after network consent. It sends one probe
+to each reviewed port on that subnet, receives for at most five seconds within
+the inherited Operation, and releases its socket on every exit. Reports retain
+conflicting hints and expose `limit_reached` at 64 candidates or 256 datagrams.
+They are not complete account inventories and never remove existing cards.
+
+Loopback tests cover the collector; no real LAN scan has been performed. No native
+JSON method, startup scan or LAN connection is registered. Host network selection
+and consent, protected identity reconciliation, token/key retrieval and inner
+packet/model codecs remain next gates. V1 XML is
+unsupported, and physical LAN acceptance remains unverified.
+
+### V3 handshake and frame codec
+
+[ADR-0046](../adr/0046-bounded-v3-lan-codec.md) implements native `V3Handshake`,
+`V3Session` and the bounded `v3_frame_len` helper. Explicit protected token/key
+buffers produce a handshake request; one valid response derives a session key.
+The session encodes type-6 requests and checks type-3 responses before releasing
+plaintext, including aligned payloads where the digest must still count toward
+frame length. Frames are capped at 4096 bytes, and request counters never wrap
+within a session. Keys and packet contents are excluded from Debug and JSON.
+
+Independent fictional vectors cover the wire codec. It opens no TCP socket and
+does not fetch, persist or guess credentials. Key confirmation and response
+sequence numbers do not prove device identity, freshness or physical execution.
+Protected account binding, response correlation and inner packet/model evidence
+remain required before route admission.
+
+### Operation-owned TCP exchange
+
+`exchange_v3` performs one direct TCP connection, handshake, request and response
+within the supplied Operation, then releases the socket. The endpoint must be a
+non-self host in the selected subnet with a nonzero port. Header-first bounded
+reads preserve fragmented/coalesced frame boundaries. No step resets the budget,
+and no reconnect, retry, background worker or retained connection is introduced.
+
+The helper marks possible command transmission only after the handshake and before
+writing the command frame. Handshake failures remain command-not-sent; later
+failures retain possible transmission. Even a valid response does not establish
+acceptance, device identity, freshness or physical execution. Protected identity,
+membership, grants and exact-model admission must precede this low-level native
+call. Fictional loopback tests verify transport behavior; no real LAN route or
+native JSON method is enabled. Credential retrieval, identity reconciliation,
+inner packet/model validation and physical acceptance remain pending.
+
 ## Fit the embedded Core
 
 Reuse or port reviewed cloud requests, capability mappings, and LAN codecs into in-process Rust adapters. Keep the existing Core, capability contracts, and host architecture. There is no requirement to install HA, run a Python companion service, or call HA's control API.
@@ -230,7 +340,7 @@ The native [state decoder](../../crates/midea/src/state.rs) uses these limited s
 
 | Family / decoder component | Fields and projection | Boundary |
 |---|---|---|
-| [AC][ac-cloud-source] / `main` | `power` -> `power.state`; `indoor_temperature` -> current temperature; `temperature` plus `small_temperature` -> target temperature | Both target parts are required. Mode and wind-speed codes remain `vendor.midea.ac.*`; no universal fan enums or setter ranges |
+| [AC][ac-cloud-source] / `main` | `power` -> `power.state`; `indoor_temperature` -> current temperature; `temperature` plus `small_temperature` -> target temperature | Both target parts are required unless the protected selector chooses the reviewed single-field product mapping (23096245 with a known non-overriding subtype); that mapping reads only `temperature`. Writable limits never filter historical observations. Mode and wind-speed codes remain `vendor.midea.ac.*`; no universal fan enums or setter ranges |
 | [CA][ca-cloud-source] / `fridge`, `freezer` | `storage_*` / `freezing_*` power and target fields; `refrigeration_real_temperature` / `freezing_real_temperature` -> current values | Two decoder slots for one local device, not proof of physical compartment support. Other zones remain unmapped |
 | [E1][e1-cloud-source] / `main` | Program `mode`, `work_status`, `doorswitch`, lack flags, temperature and remaining minutes under `vendor.midea.dishwasher.*` | Preserve model-specific codes. In the inspected `7600016L` mapping, door code 1 means closed; do not manufacture a universal door-open or cycle-running boolean |
 
@@ -240,6 +350,7 @@ CloudState retains account/appliance identity privately and has redacted Debug w
 
 [cloud-integration]: https://github.com/sususweet/midea_auto_cloud/tree/ce0c4b88224def0f6b53714312c19f71aa9c2a50
 [meiju-cloud-source]: https://github.com/sususweet/midea_auto_cloud/blob/ce0c4b88224def0f6b53714312c19f71aa9c2a50/custom_components/midea_auto_cloud/core/cloud.py
+[cloud-device-source]: https://github.com/sususweet/midea_auto_cloud/blob/ce0c4b88224def0f6b53714312c19f71aa9c2a50/custom_components/midea_auto_cloud/core/device.py
 [ca-cloud-source]: https://github.com/sususweet/midea_auto_cloud/blob/ce0c4b88224def0f6b53714312c19f71aa9c2a50/custom_components/midea_auto_cloud/device_mapping/T0xCA.py
 [ac-cloud-source]: https://github.com/sususweet/midea_auto_cloud/blob/ce0c4b88224def0f6b53714312c19f71aa9c2a50/custom_components/midea_auto_cloud/device_mapping/T0xAC.py
 [e1-cloud-source]: https://github.com/sususweet/midea_auto_cloud/blob/ce0c4b88224def0f6b53714312c19f71aa9c2a50/custom_components/midea_auto_cloud/device_mapping/T0xE1.py
@@ -278,3 +389,16 @@ Use it for explicit inspection of saved evidence; it performs no retrieval,
 reauthorization, publication or write. See the [native handoff](../native-ui-contract.md#inspect-saved-account-inventory).
 Existing local account details remain available without protected-store access.
 Inspection failures must not start a network fallback or clear historical cards.
+
+## Profile-scoped dishwasher cycle starts
+
+[ADR-0044](../adr/0044-profile-scoped-dishwasher-start.md) specifies reviewed E1
+product selectors, program encoding and explicit additional-setting requirements.
+Enable the adapter only through trusted host configuration; the matching exact
+startup grant alone is insufficient without the separate trusted approval path.
+Product 7600016L and unknown/default mappings remain unadmitted rather than losing
+centralized settings. No assumption is made about the owner's protected product
+code. Tests use fictional accounts and do not access the saved pilot profile.
+See the [Flutter contract](../native-ui-contract.md#profile-scoped-dishwasher-starts-api-114)
+for dynamic fields, confirmation and accepted/unknown receipts. Physical/off-LAN
+behavior and preservation of other settings remain acceptance work.

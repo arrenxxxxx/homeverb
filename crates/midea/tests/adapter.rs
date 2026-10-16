@@ -18,6 +18,9 @@ use uuid::Uuid;
 #[path = "adapter/fan.rs"]
 mod fan;
 
+#[path = "adapter/mode.rs"]
+mod mode;
+
 #[path = "adapter/membership.rs"]
 mod membership;
 
@@ -907,3 +910,9 @@ async fn unsent_loss_cancellation_and_deadline_keep_distinct_phases_without_repl
     let id = fixture.vault.list(&operation()).await.unwrap()[0].id;
     drop(fixture.vault.lease(id, &operation()).await.unwrap());
 }
+
+#[path = "adapter/temperature.rs"]
+mod temperature;
+
+#[path = "adapter/dishwasher.rs"]
+mod dishwasher;

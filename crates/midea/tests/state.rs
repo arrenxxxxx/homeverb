@@ -19,6 +19,7 @@ const APPLIANCE_ID: &str = "9007199254740993";
 struct Transport {
     account: CredentialRef,
     family: &'static str,
+    product: Value,
     replies: Mutex<VecDeque<Result<SecretBytes>>>,
     queries: Mutex<Vec<StateQuery>>,
     calls: AtomicUsize,
@@ -42,6 +43,7 @@ impl Transport {
         Self {
             account: CredentialRef::new(),
             family,
+            product: json!({}),
             replies: Mutex::new([Ok(bytes(json!({"code": "0", "data": data})))].into()),
             queries: Mutex::new(Vec::new()),
             calls: AtomicUsize::new(0),
@@ -72,9 +74,16 @@ impl ReadTransport for Transport {
             ReadEndpoint::Homes => Ok(bytes(
                 json!({"code": 0, "data": {"homeList": [{"homegroupId": 1}]}}),
             )),
-            ReadEndpoint::HomeAppliances(_) => Ok(bytes(
-                json!({"code": 0, "data": {"homeList": [{"roomList": [{"applianceList": [{"applianceCode": APPLIANCE_ID, "type": self.family}]}]}]}}),
-            )),
+            ReadEndpoint::HomeAppliances(_) => {
+                let mut appliance = json!({"applianceCode": APPLIANCE_ID, "type": self.family});
+                appliance
+                    .as_object_mut()
+                    .unwrap()
+                    .extend(self.product.as_object().unwrap().clone());
+                Ok(bytes(
+                    json!({"code": 0, "data": {"homeList": [{"roomList": [{"applianceList": [appliance]}]}]}}),
+                ))
+            }
             ReadEndpoint::ApplianceState { appliance, query } => {
                 assert_eq!(endpoint.path(), "/mjl/v1/device/status/lua/get");
                 assert_eq!(appliance.expose(), APPLIANCE_ID);
@@ -485,4 +494,93 @@ async fn cancellation_and_deadlines_prevent_or_drop_work_without_retries() {
     assert_eq!(result.unwrap_err().code, "CANCELLED");
     assert!(!transport.inflight.load(Ordering::SeqCst));
     assert_eq!(transport.calls.load(Ordering::SeqCst), 2);
+}
+
+#[tokio::test]
+async fn scalar_ac_targets_follow_protected_mapping_without_write_constraints() {
+    for (data, expected) in [
+        (json!({"temperature":26}), Some(json!(26.0))),
+        (json!({"temperature":"15.5"}), Some(json!(15.5))),
+        (json!({"temperature":31}), Some(json!(31.0))),
+        (
+            json!({"temperature":26,"small_temperature":0.5}),
+            Some(json!(26.0)),
+        ),
+        (
+            json!({"temperature":26,"small_temperature":"unrelated"}),
+            Some(json!(26.0)),
+        ),
+        (json!({"temperature":null,"small_temperature":0.5}), None),
+        (json!({"small_temperature":0.5}), None),
+    ] {
+        let mut transport = Transport::new("AC", data);
+        transport.product = json!({"modelNumber":1,"sn8":"23096245"});
+        let snapshot = read(&transport)
+            .await
+            .unwrap()
+            .snapshot("local-ac", "main")
+            .unwrap();
+        assert_eq!(
+            snapshot
+                .observations
+                .get("climate.target_temperature")
+                .map(|v| v.value.clone()),
+            expected
+        );
+        assert_eq!(transport.calls.load(Ordering::SeqCst), 1);
+        for observation in snapshot.observations.values() {
+            assert!(observation.stale && observation.observed_at.is_none());
+            assert_eq!(observation.received_at, FixedClock.now());
+        }
+    }
+    for value in [
+        json!(true),
+        json!({}),
+        json!("NaN"),
+        json!("inf"),
+        json!("bad"),
+    ] {
+        let mut transport = Transport::new("AC", json!({"temperature":value}));
+        transport.product = json!({"modelNumber":1,"sn8":"23096245"});
+        assert_eq!(
+            read(&transport).await.err().unwrap().code,
+            "MIDEA_RESPONSE_INVALID"
+        );
+        assert_eq!(transport.calls.load(Ordering::SeqCst), 1);
+    }
+}
+
+#[tokio::test]
+async fn scalar_target_decoding_never_overrides_subtype_or_guesses_missing_evidence() {
+    for product in [
+        json!({}),
+        json!({"sn8":"23096245"}),
+        json!({"modelNumber":524,"sn8":"23096245"}),
+        json!({"modelNumber":1,"sn8":"22397091"}),
+        json!({"modelNumber":1,"sn8":"TEST1234","category":"wall_air_conditioner"}),
+    ] {
+        let mut transport = Transport::new("AC", json!({"temperature":26}));
+        transport.product = product.clone();
+        let snapshot = read(&transport)
+            .await
+            .unwrap()
+            .snapshot("local-ac", "main")
+            .unwrap();
+        assert!(
+            !snapshot
+                .observations
+                .contains_key("climate.target_temperature")
+        );
+        let mut transport = Transport::new("AC", json!({"temperature":26,"small_temperature":0.5}));
+        transport.product = product;
+        let snapshot = read(&transport)
+            .await
+            .unwrap()
+            .snapshot("local-ac", "main")
+            .unwrap();
+        assert_eq!(
+            snapshot.observations["climate.target_temperature"].value,
+            json!(26.5)
+        );
+    }
 }
