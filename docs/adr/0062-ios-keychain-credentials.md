@@ -14,16 +14,22 @@ request parameter. Packaging must verify the entitlement and exclude shared grou
 syntax validation alone cannot establish app isolation. Do not use the implicit
 first group or search across all entitled groups.
 
-New items use `kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly` and explicitly
-disable synchronization. This requires a device passcode and unlocked access;
+New items use `kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly` through an explicit
+`SecAccessControlCreateWithFlags` object with zero additional flags, and explicitly
+disable synchronization. Add supplies `kSecAttrAccessControl`, not a conflicting
+second `kSecAttrAccessible` representation. This requires a device passcode and unlocked access;
 removing the passcode deletes these items, and they do not migrate to another
 device. Do not claim hardware backing, forensic erasure or vendor revocation.
 There is no plaintext fallback, background task or credential export.
 
 First request at most two metadata/persistent-reference matches, without password
 data, including synchronizable matches so a conflicting protection policy cannot
-be silently ignored. Reject ambiguity, foreign attributes, access-control objects,
-or protection weaker/different than the required policy. Then read, replace or
+be silently ignored. Reject ambiguity, foreign attributes, unreviewed access-control
+objects, or protection weaker/different than the required policy. A returned
+access-control object must have the Security framework's type and compare equal
+to a newly created complete policy with the exact protection and zero flags.
+Do not parse descriptions, inspect private APIs, or admit objects based only on
+their accessibility attribute. Then read, replace or
 delete the exact persistent reference with the namespace and protection attributes
 still present. On iOS the selector is `kSecValuePersistentRef`, not macOS's
 `kSecMatchItemList`. Return-data queries use one match only. Delete does not read
@@ -57,6 +63,10 @@ that guarantee.
 Native API 1.20, the 16 C functions, 33 ordinary methods, SQLite schema 5 and
 protected payload 3 remain unchanged. iOS gains a platform implementation with
 explicit build configuration; other platforms retain their existing behavior.
+The initial accessibility-only add path returned an implicit access-control object
+that the decoder rejected in isolated Simulator testing. Explicit policy creation
+and comparison correct this mismatch. Differently represented existing objects
+remain refused; no automatic migration, deletion or recreation is introduced.
 Use the existing locked `core-foundation-sys` 0.8.7 as a direct iOS dependency
 (MIT OR Apache-2.0). Security framework declarations follow Apple's public C API.
 
@@ -74,3 +84,5 @@ Keychain persistence or a Flutter/iPhone journey. Those remain release gates.
 - [Apple's public SecItem header](https://github.com/apple-oss-distributions/Security/blob/main/keychain/headers/SecItem.h), inspected October 16, 2026; it explicitly distinguishes iOS persistent-reference selectors from macOS selectors.
 - [Noninteractive authentication and deprecation](https://developer.apple.com/documentation/security/ksecuseauthenticationuifail).
 - [SecItem dictionary semantics](https://developer.apple.com/forums/thread/724023).
+- [Public access-control API](https://github.com/apple-oss-distributions/Security/blob/db15acbe6a7f257a859ad9a3bb86097bfe0679d9/keychain/headers/SecAccessControl.h) and [complete-object equality implementation](https://github.com/apple-oss-distributions/Security/blob/db15acbe6a7f257a859ad9a3bb86097bfe0679d9/OSX/sec/Security/SecAccessControl.m), inspected October 16, 2026.
+- [Returned access-control conversion](https://github.com/apple-oss-distributions/Security/blob/db15acbe6a7f257a859ad9a3bb86097bfe0679d9/OSX/sec/Security/SecItem.m) and [implicit protection construction](https://github.com/apple-oss-distributions/Security/blob/db15acbe6a7f257a859ad9a3bb86097bfe0679d9/keychain/securityd/SecDbQuery.c).

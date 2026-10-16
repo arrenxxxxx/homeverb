@@ -3,12 +3,13 @@
 use super::*;
 use core_foundation_sys::{
     array::{CFArrayGetCount, CFArrayGetTypeID, CFArrayGetValueAtIndex},
-    base::{CFEqual, CFGetTypeID, CFRelease, CFTypeRef},
+    base::{CFAllocatorRef, CFEqual, CFGetTypeID, CFOptionFlags, CFRelease, CFTypeID, CFTypeRef},
     data::{CFDataCreate, CFDataGetBytePtr, CFDataGetLength, CFDataGetTypeID},
     dictionary::{
         CFDictionaryCreateMutable, CFDictionaryGetTypeID, CFDictionaryGetValue, CFDictionaryRef,
         CFDictionarySetValue, kCFTypeDictionaryKeyCallBacks, kCFTypeDictionaryValueCallBacks,
     },
+    error::CFErrorRef,
     number::{
         CFBooleanGetTypeID, CFNumberCreate, CFNumberGetTypeID, CFNumberGetValue,
         CFNumberIsFloatType, kCFBooleanFalse, kCFBooleanTrue, kCFNumberSInt32Type,
@@ -20,6 +21,13 @@ use std::ptr;
 
 #[link(name = "Security", kind = "framework")]
 unsafe extern "C" {
+    fn SecAccessControlGetTypeID() -> CFTypeID;
+    fn SecAccessControlCreateWithFlags(
+        allocator: CFAllocatorRef,
+        protection: CFTypeRef,
+        flags: CFOptionFlags,
+        error: *mut CFErrorRef,
+    ) -> CFTypeRef;
     fn SecItemCopyMatching(query: CFDictionaryRef, result: *mut CFTypeRef) -> i32;
     fn SecItemAdd(attributes: CFDictionaryRef, result: *mut CFTypeRef) -> i32;
     fn SecItemUpdate(query: CFDictionaryRef, attributes: CFDictionaryRef) -> i32;
@@ -31,6 +39,10 @@ unsafe extern "C" {
     static kSecAttrAccessGroup: CFStringRef;
     static kSecAttrAccessible: CFStringRef;
     static kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly: CFStringRef;
+    #[cfg(test)]
+    static kSecAttrAccessibleWhenUnlocked: CFStringRef;
+    #[cfg(test)]
+    static kSecAttrAccessibleAfterFirstUnlock: CFStringRef;
     static kSecAttrSynchronizable: CFStringRef;
     static kSecAttrSynchronizableAny: CFStringRef;
     static kSecAttrAccessControl: CFStringRef;
@@ -146,6 +158,32 @@ unsafe fn decode_synchronizable(value: CFTypeRef) -> Result<bool> {
     }
 }
 
+fn access_control() -> Result<Owned> {
+    // SAFETY: public constants and no extra flags produce the required policy.
+    // No Keychain lookup or authentication is performed by this constructor.
+    unsafe {
+        Owned::new(SecAccessControlCreateWithFlags(
+            ptr::null(),
+            kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly.cast(),
+            0,
+            ptr::null_mut(),
+        ))
+    }
+}
+
+unsafe fn unsupported_access_control(value: CFTypeRef) -> Result<bool> {
+    unsafe {
+        if value.is_null() {
+            return Ok(false);
+        }
+        if CFGetTypeID(value) != SecAccessControlGetTypeID() {
+            return Ok(true);
+        }
+        // Compare the complete policy, not its description or accessibility alone.
+        Ok(!equal(value, access_control()?.0))
+    }
+}
+
 unsafe fn copy_data(value: CFTypeRef, limit: usize) -> Result<SecretBytes> {
     unsafe {
         if value.is_null() || CFGetTypeID(value) != CFDataGetTypeID() {
@@ -208,6 +246,18 @@ fn protected_query(scope: &Scope, entry: Option<&Entry>) -> Result<Owned> {
     Ok(dict)
 }
 
+fn add_attributes(scope: &Scope) -> Result<Owned> {
+    let dict = query(scope)?;
+    let protection = access_control()?;
+    // SAFETY: the dictionary retains this explicit policy and synchronization flag.
+    // Do not also supply kSecAttrAccessible: Security refuses conflicting forms.
+    unsafe {
+        set(&dict, kSecAttrAccessControl, protection.0);
+        set(&dict, kSecAttrSynchronizable, kCFBooleanFalse.cast());
+    }
+    Ok(dict)
+}
+
 fn search(query: &Owned) -> Result<Option<Owned>> {
     let mut output = ptr::null();
     // SAFETY: query is a valid CF dictionary; output receives a +1 reference.
@@ -242,7 +292,10 @@ unsafe fn decode_entry(value: CFTypeRef, scope: &Scope) -> Result<Entry> {
                 kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly.cast(),
             ),
             synchronizable,
-            access_control: !attribute(value, kSecAttrAccessControl).is_null(),
+            unsupported_access_control: unsupported_access_control(attribute(
+                value,
+                kSecAttrAccessControl,
+            ))?,
             persistent_ref: copy_data(attribute(value, kSecValuePersistentRef), MAX_REFERENCE)?,
         })
     }
@@ -326,7 +379,11 @@ impl Backend for Keychain {
             Change::Add(_) => None,
             Change::Update(entry, _) | Change::Delete(entry) => Some(*entry),
         };
-        let query = protected_query(scope, entry)?;
+        let query = if entry.is_none() {
+            add_attributes(scope)?
+        } else {
+            protected_query(scope, entry)?
+        };
         let update = dictionary()?;
         // SAFETY: prepare all objects before marking dispatch; OS calls retain no
         // borrowed Rust data. Update/delete queries contain no return-result keys.
@@ -374,7 +431,7 @@ mod tests {
             matches_scope: true,
             passcode_only: true,
             synchronizable: false,
-            access_control: false,
+            unsupported_access_control: false,
             persistent_ref: SecretBytes::new(vec![3, 1, 4]),
         }
     }
@@ -530,7 +587,7 @@ mod tests {
     }
 
     #[test]
-    fn real_cf_data_obeys_copy_limits_and_refuses_access_control_objects() {
+    fn real_cf_data_obeys_copy_limits_and_refuses_unsupported_access_control_objects() {
         let scope = scope();
         let expected = entry();
         let output = protected_query(&scope, Some(&expected)).unwrap();
@@ -543,6 +600,61 @@ mod tests {
             set(&output, kSecValueData, empty.0);
             set(&output, kSecAttrAccessControl, kCFBooleanTrue.cast());
             assert!(decode_secret(output.0, &scope, &expected).is_err());
+        }
+    }
+
+    #[test]
+    fn real_cf_access_control_admits_only_the_explicit_passcode_policy() {
+        let scope = scope();
+        let expected = entry();
+        let output = protected_query(&scope, Some(&expected)).unwrap();
+        let attributes = add_attributes(&scope).unwrap();
+        let secret = data(&[3, 1, 4]).unwrap();
+        // SAFETY: these are real policy objects and synthetic dictionaries only;
+        // no Keychain access, prompt or device authentication is requested.
+        unsafe {
+            let policy = attribute(attributes.0, kSecAttrAccessControl);
+            assert_eq!(CFGetTypeID(policy), SecAccessControlGetTypeID());
+            assert!(!unsupported_access_control(policy).unwrap());
+            assert!(attribute(attributes.0, kSecAttrAccessible).is_null());
+            assert!(equal(
+                attribute(attributes.0, kSecAttrSynchronizable),
+                kCFBooleanFalse.cast()
+            ));
+            for key in [
+                kSecAttrService,
+                kSecAttrAccount,
+                kSecAttrAccessGroup,
+                kSecUseAuthenticationUI,
+            ] {
+                assert!(equal(
+                    attribute(attributes.0, key),
+                    attribute(output.0, key)
+                ));
+            }
+            set(&output, kSecValueData, secret.0);
+            set(&output, kSecAttrAccessControl, policy);
+            assert_eq!(
+                decode_secret(output.0, &scope, &expected).unwrap().expose(),
+                &[3, 1, 4]
+            );
+
+            for (protection, flags) in [
+                (kSecAttrAccessibleWhenUnlocked.cast(), 0),
+                (kSecAttrAccessibleAfterFirstUnlock.cast(), 0),
+                // Public kSecAccessControlUserPresence; the protection still matches.
+                (kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly.cast(), 1),
+            ] {
+                let incompatible = Owned::new(SecAccessControlCreateWithFlags(
+                    ptr::null(),
+                    protection,
+                    flags,
+                    ptr::null_mut(),
+                ))
+                .unwrap();
+                set(&output, kSecAttrAccessControl, incompatible.0);
+                assert!(decode_secret(output.0, &scope, &expected).is_err());
+            }
         }
     }
 }

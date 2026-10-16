@@ -1655,3 +1655,22 @@ The test app now explicitly boxes every flag as a Boolean and checks service
 and account equality without reporting either value. The filter still rejects
 integer substitutes and arbitrary attributes; this test-only correction does
 not relax production credential policy or claim a successful round trip.
+
+The `2b7dbd3` Simulator metadata confirmed matching service/account/group,
+passcode-only accessibility, a persistent reference and numeric-zero synchronization,
+but also an implicit access-control object. Presence-only rejection therefore
+blocked the backend's own adds. New adds now use the public zero-flag
+`SecAccessControlCreateWithFlags` policy with the same passcode-only protection.
+Returned objects must have the expected type and compare equal to the complete
+explicit policy; wrong types, weaker protection and extra user-presence constraints
+remain refused. Existing differently represented objects are not migrated or
+rewritten. The [decision](adr/0062-ios-keychain-credentials.md) records pinned Apple
+source evidence and the new real-object positive/negative regression. Public API,
+storage formats, private groups and no-prompt behavior are unchanged. Actual runtime
+acceptance remains pending the corrected Simulator run.
+
+Local verification for this policy correction passed 21 secret-store tests
+(two environment-dependent tests ignored), both iOS target Clippy checks
+(all targets on Simulator), 62 Python tooling tests, formatting and the
+documentation/contract/repository/commit validators. macOS executes the new
+Security-object regression and actual Simulator app; Linux checks do not.

@@ -34,7 +34,7 @@ fn entry() -> Entry {
         matches_scope: true,
         passcode_only: true,
         synchronizable: false,
-        access_control: false,
+        unsupported_access_control: false,
         persistent_ref: SecretBytes::new(REFERENCE.to_vec()),
     }
 }
@@ -227,7 +227,7 @@ async fn ambiguous_foreign_or_weakened_entries_never_read_or_mutate() {
                 1 => item.matches_scope = false,
                 2 => item.passcode_only = false,
                 3 => item.synchronizable = true,
-                4 => item.access_control = true,
+                4 => item.unsupported_access_control = true,
                 5 => item.persistent_ref = SecretBytes::new(Vec::new()),
                 _ => item.persistent_ref = SecretBytes::new(vec![7; MAX_REFERENCE + 1]),
             }

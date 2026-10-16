@@ -81,7 +81,7 @@ struct Entry {
     matches_scope: bool,
     passcode_only: bool,
     synchronizable: bool,
-    access_control: bool,
+    unsupported_access_control: bool,
     persistent_ref: SecretBytes,
 }
 
@@ -90,7 +90,7 @@ impl Entry {
         if !self.matches_scope
             || !self.passcode_only
             || self.synchronizable
-            || self.access_control
+            || self.unsupported_access_control
             || self.persistent_ref.expose().is_empty()
             || self.persistent_ref.expose().len() > MAX_REFERENCE
         {
