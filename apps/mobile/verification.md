@@ -1720,3 +1720,36 @@ household-appliance command was sent. Stay-on-page execution and outcome recover
 were exercised by widget and actual native Mock tests; the earlier owner-observed
 physical power evidence retains its original scope. No phone acceptance, new
 physical mode/fan/direction support, remote push or artifact publication is claimed.
+
+## Meiju-style climate composition phase
+
+The owner requested a fuller Meiju-style panel after reviewing the previous
+inline controls. The live AC page now has a light background, original vector
+appliance illustration, separate indoor reading, native temperature stepper and
+slider, and a two-column power/mode/fan/direction grid. Additional independent
+low-risk setters receive dedicated tiles when present in actual descriptors.
+The integration-status sheet distinguishes missing HomeVerb work from missing
+hardware. Full parity remains unfinished; see the
+[comparison and evidence gate](../../docs/development/10-meiju-ac-parity.md).
+
+Validation on October 16, 2026:
+
+- `fvm flutter analyze`: passed.
+- Focused `climate_controls_test.dart`, `localization_test.dart`, `app_test.dart`
+  and `outcome_click_test.dart`: all 17 passed, including native Mock execution.
+- Complete `fvm flutter test --reporter expanded`: 109 passed, four existing
+  macOS glyph-pixel failures in button labels, two control-label checks and field
+  alignment. The references/tolerances are unchanged. This is not a fully passing
+  visual suite or pixel parity claim.
+- Shared presentation tests: all seven passed.
+- Documentation and repository validators passed. `.venv/bin/python
+  scripts/validate_contracts.py`: 20 schemas, 45 positive and 250 negative
+  fixtures passed. The system Python lacks the contract validator dependency;
+  the existing virtual environment supplied it.
+- Drag-only changes do not send; release sends one target, validates exact bounds
+  and step, and retains observed state until a read. Background/resume invalidates
+  a late release. Coupled required fields hide the simple slider. Additional
+  fictional sleep control stays in place and cannot bypass its descriptor.
+
+This phase changes no Rust code, native ABI, startup grants, storage or admitted
+Meiju control. No new physical AC write is part of these checks.

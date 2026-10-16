@@ -28,6 +28,13 @@ local success; earlier runs were blocked by the repository's billing limit.
 
 ## Task status
 
+The owner subsequently requested complete parity with the selected AC's Meiju
+control page. The [AC parity review](development/10-meiju-ac-parity.md) tracks this
+unfinished task separately from the completed inline-power/UI revision. The light
+Flutter panel and generic additional-function tiles do not establish new Meiju
+controls. Exact-model screen references and protected protocol mappings remain
+required for the rest of the feature inventory.
+
 | ID | Task | Current status | Remaining acceptance |
 |---|---|---|---|
 | T00 | Documents and contracts | Implemented | Keep references synchronized |

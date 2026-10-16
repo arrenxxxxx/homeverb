@@ -8,6 +8,22 @@ Use the approved [01 / Window Light study](../output/prototypes/homeverb-window-
 
 Apply the same background and material tokens to Devices, Platforms, Settings, device controls, forms, empty/error states, sharing flows, sheets and dialogs. System/browser/permission/secure-storage/export surfaces remain owned by their providers or operating system. The atlas's illustrative provider consent page does not promise that HomeVerb can reskin a third-party website.
 
+### Owner-directed AC composition revision
+
+On October 16 the owner requested a Meiju-style AC panel and eventual feature
+parity for the selected appliance. The live climate-and-power page now uses a
+pale blue-to-white background, white rounded control cards and a blue interaction
+accent within the existing skin. Its original vector appliance illustration is
+decorative; power remains a separately labelled observation. This supersedes the
+charcoal climate card for the live panel, not the historical prototype or other
+screens. No second selectable skin is introduced.
+
+The [official public reference](https://www.smartmidea.net/projects/downloads-app/image/change/a66.png)
+informs the temperature, environmental reading and grouped control hierarchy.
+It is a marketing example, not evidence of the selected model's current app
+functions. See the [AC parity record](development/10-meiju-ac-parity.md) for
+implementation gaps and the exact-model reference still needed.
+
 ## Tokens and layout
 
 | Token | Initial value / use |

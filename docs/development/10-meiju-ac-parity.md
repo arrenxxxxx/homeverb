@@ -1,0 +1,63 @@
+# Meiju AC parity review
+
+Status: in progress. The owner requested complete functional and interaction
+parity with the selected AC's Meiju page. The redesigned Flutter panel is only
+the presentation phase; it does not complete that request.
+
+## Reference and evidence
+
+The [official public AC example](https://www.smartmidea.net/projects/downloads-app/image/change/a66.png)
+was viewed in a browser on October 16, 2026. It groups an appliance illustration,
+environmental readings, target adjustment, primary selectors and additional
+functions. HomeVerb uses original vector artwork and native widgets. It neither
+embeds that screenshot nor invents outdoor temperature or humidity readings.
+
+This reference is not the selected device's live Meiju page. Its exact current
+screens, expanded function drawer, selector options and app version are still
+needed to define and verify one-to-one parity. Do not use a generic marketing
+image as a complete model-specific feature inventory.
+
+The existing pinned [AC protocol mapping](https://github.com/sususweet/midea_auto_cloud/blob/ce0c4b88224def0f6b53714312c19f71aa9c2a50/custom_components/midea_auto_cloud/device_mapping/T0xAC.py)
+contains materially different temperature, swing, display and comfort mappings.
+For example, the portable subtype lacks horizontal swing, display writes can be
+numeric or string-valued, and some profiles require preserving additional fields.
+These are integration evidence, not proof that the selected appliance supports
+every mapping. Preserve the profile-selection rules in ADR-0040 and ADR-0041.
+
+## Current comparison
+
+| Function | HomeVerb implementation | Selected AC evidence / remaining work |
+|---|---|---|
+| Power | Direct card, in-place receipt and one bounded follow-up read | Earlier owner-observed shutdown; this redesign sends no new physical write |
+| Mode | Independent card and localized selector with explicit power-on effect | Existing exact-model actions; individual modes not physically verified |
+| Fan | Independent card, reviewed values only, preserves unknown observed codes | Observed code 101 has no reviewed label; do not guess that it means automatic |
+| Temperature | Descriptor-bounded plus/minus and slider; one command on gesture release | Selected AC currently exposes no admitted setter; protected mapping evidence remains unresolved |
+| Swing | Dedicated direction card and optional independent vertical/horizontal controls | Current Meiju adapter has no swing action or corresponding startup grants |
+| Anti-draft, sleep, energy saving, boost, display, auxiliary heat | Independent descriptor-driven tiles when actual low-risk setters exist; covered by fictional widget fixtures only | Meiju action encoding, model admission, exact grants and physical behavior remain unimplemented |
+| Timer / self-clean | No operational controls | Need selected-model app and protocol evidence, risk classification and native device execution contract; no project background scheduler |
+| Indoor temperature | Real observation shown separately from target | Existing stale cloud observation semantics retained |
+| Outdoor temperature / humidity / energy | No invented readings | Require protected model mappings, bounded reads and evidence |
+
+The Function support sheet distinguishes an unfinished HomeVerb integration from
+missing appliance hardware. It neither grants authority nor contacts the vendor.
+Unconnected functions cannot send commands. Generic descriptor presentation is
+not Meiju support; future adapter work must update the table and compatibility
+record with actual tests before enabling the corresponding controls.
+
+## Presentation acceptance
+
+Temperature bounds and steps come exclusively from the action descriptor. Coupled
+required fields, missing bounds and unsupported risk/idempotency omit the slider.
+Dragging changes only a local draft; release sends one validated target. Leaving
+the foreground invalidates the draft and late release, including after resume.
+Replies do not turn the requested value into an observation. Mode and additional
+selectors cancel without sending; operations remain on the appliance page.
+
+The English/Simplified Chinese catalogs share the existing slang generation path.
+Large text stacks control cards. Native controls retain focus and semantics;
+high contrast retains outlined surfaces. The historical 82-state prototype is
+unchanged and no longer a pixel-parity target for the owner-revised live AC panel.
+
+APK identity, checks and emulator captures belong in the app's
+[verification record](../../apps/mobile/verification.md). This phase changes no
+Rust ABI, native grants, storage, adapter model admission or transport behavior.

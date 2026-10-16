@@ -112,6 +112,7 @@ class ScreenView extends StatelessWidget {
         root = ui['root'] as String?,
         base = ui['base'] as String?;
     return LightBackground(
+      climate: ui['appearance'] == 'climate',
       child: LayoutBuilder(
         builder: (context, c) {
           final wide = c.maxWidth >= 800;

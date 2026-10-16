@@ -3455,4 +3455,55 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Unrecognized ({value})'
 	String mobileUnrecognizedControlValue({required Object value}) => 'Unrecognized (${value})';
+
+	/// en-US: 'Function support'
+	String get mobileClimateFunctionSupport => 'Function support';
+
+	/// en-US: 'This list describes HomeVerb integration, not the appliance hardware. Unconnected functions cannot send commands.'
+	String get mobileClimateSupportExplanation => 'This list describes HomeVerb integration, not the appliance hardware. Unconnected functions cannot send commands.';
+
+	/// en-US: 'Not connected in HomeVerb'
+	String get mobileClimateNotConnected => 'Not connected in HomeVerb';
+
+	/// en-US: 'Temperature control is not connected yet.'
+	String get mobileClimateTemperatureNotConnected => 'Temperature control is not connected yet.';
+
+	/// en-US: 'Indoor {temperature}'
+	String mobileClimateIndoorReading({required Object temperature}) => 'Indoor ${temperature}';
+
+	/// en-US: 'More functions'
+	String get mobileClimateMoreFunctions => 'More functions';
+
+	/// en-US: 'Vertical swing'
+	String get mobileClimateVerticalSwing => 'Vertical swing';
+
+	/// en-US: 'Horizontal swing'
+	String get mobileClimateHorizontalSwing => 'Horizontal swing';
+
+	/// en-US: 'Avoid direct airflow'
+	String get mobileClimateAvoidDirectAirflow => 'Avoid direct airflow';
+
+	/// en-US: 'Sleep'
+	String get mobileClimateSleep => 'Sleep';
+
+	/// en-US: 'Energy saving'
+	String get mobileClimateEnergySaving => 'Energy saving';
+
+	/// en-US: 'Boost'
+	String get mobileClimateBoost => 'Boost';
+
+	/// en-US: 'Display'
+	String get mobileClimateDisplay => 'Display';
+
+	/// en-US: 'Auxiliary heat'
+	String get mobileClimateAuxiliaryHeat => 'Auxiliary heat';
+
+	/// en-US: 'Timer'
+	String get mobileClimateTimer => 'Timer';
+
+	/// en-US: 'Self-clean'
+	String get mobileClimateSelfClean => 'Self-clean';
+
+	/// en-US: 'Available controls'
+	String get mobileClimateAvailableControls => 'Available controls';
 }

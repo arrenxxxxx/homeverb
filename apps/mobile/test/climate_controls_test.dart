@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:homeverb_mobile/climate_controls.dart';
+import 'package:homeverb_mobile/climate_panel.dart';
 import 'package:homeverb_mobile/controller.dart';
 import 'package:homeverb_mobile/localization.dart';
 import 'package:homeverb_mobile/main.dart';
@@ -132,10 +133,10 @@ void main() {
   );
 
   testWidgets(
-    'three buttons expose bounded mode and fan choices without extra navigation',
+    'control cards expose bounded mode and fan choices without extra navigation',
     (tester) async {
       final (core, c, app) = await open(tester);
-      final direction = tester.widget<OutlinedButton>(
+      final direction = tester.widget<ClimateTile>(
         find.byKey(const ValueKey('climate-button:Air direction')),
       );
       expect(direction.onPressed, isNull);
@@ -201,6 +202,133 @@ void main() {
       await tester.pumpWidget(const SizedBox());
     },
   );
+
+  testWidgets('temperature slider sends once on release within device bounds', (
+    tester,
+  ) async {
+    final (core, c, app) = await open(tester);
+    final climate = core.capabilities.first;
+    climate['properties']['target_temperature'] = {
+      'type': 'number',
+      'readable': true,
+      'writable': true,
+    };
+    climate['actions']['set'] = setter(
+      {
+        'target_temperature': {
+          'type': 'number',
+          'minimum': 18,
+          'maximum': 27,
+          'multipleOf': .5,
+        },
+      },
+      required: ['target_temperature'],
+    );
+    core.observations['climate.target_temperature'] = 24.0;
+    await c.refresh();
+    await tester.pumpAndSettle();
+    core.calls.clear();
+    var slider = tester.widget<Slider>(
+      find.byKey(const ValueKey('climate-temperature-slider')),
+    );
+    expect((slider.min, slider.max, slider.divisions), (18.0, 27.0, 18));
+    slider.onChangeStart!(24);
+    slider.onChanged!(25.5);
+    await tester.pump();
+    expect(core.calls, isEmpty);
+    slider.onChangeEnd!(25.5);
+    await tester.pumpAndSettle();
+    expect(app.currentState!.id, 'C01');
+    expect(
+      core.calls
+          .where((v) => v['method'] == 'execute')
+          .single['command']['arguments'],
+      {'target_temperature': 25.5},
+    );
+    expect(core.calls.where((v) => v['method'] == 'read_state').length, 1);
+    expect(c.observed('climate.target_temperature'), 24.0);
+    slider = tester.widget<Slider>(
+      find.byKey(const ValueKey('climate-temperature-slider')),
+    );
+    expect(
+      slider.value,
+      24.0,
+      reason: 'A requested target is not an observed state.',
+    );
+    core.calls.clear();
+    slider.onChangeStart!(24);
+    slider.onChangeEnd!(27.5);
+    slider.onChangeStart!(24);
+    slider.onChangeEnd!(25.25);
+    await tester.pumpAndSettle();
+    expect(core.calls, isEmpty);
+    slider.onChangeStart!(24);
+    slider.onChanged!(26);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    await tester.pumpAndSettle();
+    slider.onChangeEnd!(26);
+    await tester.pumpAndSettle();
+    expect(core.calls, isEmpty);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+    slider.onChangeEnd!(26);
+    await tester.pumpAndSettle();
+    expect(core.calls, isEmpty);
+    expect(
+      tester
+          .widget<Slider>(
+            find.byKey(const ValueKey('climate-temperature-slider')),
+          )
+          .value,
+      24,
+    );
+    climate['actions']['set']['parameters']['required'] = [
+      'target_temperature',
+      'mode',
+    ];
+    await c.refresh();
+    await tester.pumpAndSettle();
+    expect(find.byType(Slider), findsNothing);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('additional functions require actual independent capabilities', (
+    tester,
+  ) async {
+    final (core, c, app) = await open(tester);
+    expect(find.byKey(const ValueKey('climate-button:Sleep')), findsNothing);
+    final vendor = core.capabilities.last;
+    vendor['properties']['sleep'] = {
+      'type': 'boolean',
+      'readable': true,
+      'writable': true,
+    };
+    vendor['actions']['set_sleep'] = setter(
+      {
+        'sleep': {'type': 'boolean'},
+      },
+      required: ['sleep'],
+    );
+    core.observations['${vendor['id']}.sleep'] = false;
+    await c.refresh();
+    await tester.pumpAndSettle();
+    core.calls.clear();
+    await tap(tester, find.byKey(const ValueKey('climate-button:Sleep')));
+    await tap(tester, find.byKey(const ValueKey('climate-option:sleep:true')));
+    expect(core.calls, isEmpty);
+    await tap(tester, find.text('Apply'));
+    expect(
+      core.calls
+          .where((v) => v['method'] == 'execute')
+          .single['command']['arguments'],
+      {'sleep': true},
+    );
+    expect(app.currentState!.id, 'C01');
+    await tap(tester, find.text('Function support'));
+    expect(find.text('Not connected in HomeVerb'), findsWidgets);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
+  });
 
   testWidgets(
     'late writes do not refresh after navigation and failed reads retain outcomes',

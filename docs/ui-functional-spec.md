@@ -137,3 +137,12 @@ that the command caused the observed state. Preserve unknown outcomes and preven
 replay. Dismiss parameter selection on backgrounding. Device switching, navigation
 and background transitions invalidate follow-up work. Large text reflows the button
 row vertically. Quick card power leaves the user on the home page.
+
+The subsequent owner-requested Meiju-style revision replaces the large dark
+card with a light panel, an observed indoor-temperature strip and a two-column
+control grid. Temperature adjustment remains in place: use only descriptor bounds
+and steps, send once on slider release and discard a drag across background/resume.
+Never optimistically replace observations. Additional independent low-risk
+descriptor setters appear as separate tiles; generic tile support does not add
+Meiju adapter functions. The [parity record](development/10-meiju-ac-parity.md)
+tracks the remaining full-function request and exact-model reference gate.

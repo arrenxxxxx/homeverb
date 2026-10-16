@@ -1138,5 +1138,22 @@
   "mobile.notSupportedYet": "暂不支持",
   "mobile.selectingModeTurnsOn": "选择模式也会开启空调。",
   "mobile.updatingDevice": "正在更新设备…",
-  "mobile.unrecognizedControlValue": "未识别（{value}）"
+  "mobile.unrecognizedControlValue": "未识别（{value}）",
+  "mobile.climateFunctionSupport": "功能支持情况",
+  "mobile.climateSupportExplanation": "这里显示 HomeVerb 的功能接入进度，不代表空调硬件不支持。未接入的功能暂时无法控制。",
+  "mobile.climateNotConnected": "HomeVerb 尚未接入",
+  "mobile.climateTemperatureNotConnected": "这台设备的调温功能尚未接入",
+  "mobile.climateIndoorReading": "室内 {temperature}",
+  "mobile.climateMoreFunctions": "更多功能",
+  "mobile.climateVerticalSwing": "上下扫风",
+  "mobile.climateHorizontalSwing": "左右扫风",
+  "mobile.climateAvoidDirectAirflow": "防直吹",
+  "mobile.climateSleep": "睡眠",
+  "mobile.climateEnergySaving": "节能",
+  "mobile.climateBoost": "强劲",
+  "mobile.climateDisplay": "屏显",
+  "mobile.climateAuxiliaryHeat": "电辅热",
+  "mobile.climateTimer": "定时",
+  "mobile.climateSelfClean": "自清洁",
+  "mobile.climateAvailableControls": "已接入"
 }

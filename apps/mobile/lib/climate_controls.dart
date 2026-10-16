@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'blocks.dart';
+import 'climate_panel.dart';
 import 'controller.dart';
 import 'controls.dart';
 import 'localization.dart';
@@ -71,6 +72,8 @@ class _ClimateControlsState extends State<ClimateControls>
   HomeController get c => widget.controller;
   BuildContext? sheetContext;
   int selectionEpoch = 0;
+  double? draftTarget;
+  int? targetGestureEpoch;
   @override
   void initState() {
     super.initState();
@@ -81,6 +84,7 @@ class _ClimateControlsState extends State<ClimateControls>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     selectionEpoch++;
+    targetGestureEpoch = null;
     super.dispose();
   }
 
@@ -88,6 +92,7 @@ class _ClimateControlsState extends State<ClimateControls>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) return;
     selectionEpoch++;
+    if (mounted) setState(() => draftTarget = null);
     final sheet = sheetContext;
     if (sheet != null && sheet.mounted) Navigator.of(sheet).pop();
   }
@@ -155,16 +160,16 @@ class _ClimateControlsState extends State<ClimateControls>
                   ],
                 ),
                 const SizedBox(height: 20),
-                ActionButton(
-                  'Apply',
+                FilledButton(
                   onPressed: selected == null
                       ? null
                       : () => Navigator.of(context).pop(selected),
+                  style: FilledButton.styleFrom(backgroundColor: climateBlue),
+                  child: Text(localize(context, 'Apply')),
                 ),
-                ActionButton(
-                  'Cancel',
-                  style: 'secondary',
+                TextButton(
                   onPressed: () => Navigator.of(context).pop(),
+                  child: Text(localize(context, 'Cancel')),
                 ),
               ],
             ),
@@ -185,6 +190,127 @@ class _ClimateControlsState extends State<ClimateControls>
     });
   }
 
+  Json? get targetSchema {
+    final capability = c.capability('climate');
+    final action = capability?['actions']?['set'] as Json?;
+    if (capability == null ||
+        action == null ||
+        action['risk'] != 'low' ||
+        action['idempotency'] != 'set_value' ||
+        actionUnavailable(capability, action) != null)
+      return null;
+    final parameters = action['parameters'] as Json;
+    if ((parameters['minProperties'] as num? ?? 0) > 1 ||
+        (parameters['required'] as List? ?? []).any(
+          (key) => key != 'target_temperature',
+        ))
+      return null;
+    final schema = parameters['properties']?['target_temperature'] as Json?;
+    if (schema == null) return null;
+    final min = schema['minimum'],
+        max = schema['maximum'],
+        step = schema['multipleOf'];
+    if (min is! num ||
+        max is! num ||
+        step is! num ||
+        !min.isFinite ||
+        !max.isFinite ||
+        !step.isFinite ||
+        step <= 0 ||
+        max <= min ||
+        (max - min) / step > 1000 ||
+        (max - min) / step != ((max - min) / step).roundToDouble() ||
+        validateValue(min, schema) != null ||
+        validateValue(max, schema) != null)
+      return null;
+    return schema;
+  }
+
+  Future<void> setTarget(double value) async {
+    final schema = targetSchema;
+    setState(() => draftTarget = null);
+    if (c.busy ||
+        !c.isForeground ||
+        schema == null ||
+        validateValue(value, schema) != null ||
+        value == c.observed('climate.target_temperature'))
+      return;
+    await widget.onExecute('climate', 'set', {'target_temperature': value});
+  }
+
+  static const features = <(String, Set<String>, IconData)>[
+    ('Vertical swing', {'vertical_swing', 'swing_vertical'}, Icons.swap_vert),
+    (
+      'Horizontal swing',
+      {'horizontal_swing', 'swing_horizontal'},
+      Icons.swap_horiz,
+    ),
+    ('Avoid direct airflow', {'avoid_direct_airflow'}, Icons.air),
+    ('Sleep', {'sleep'}, Icons.bedtime_outlined),
+    ('Energy saving', {'energy_saving', 'eco'}, Icons.eco_outlined),
+    ('Boost', {'boost'}, Icons.bolt_outlined),
+    ('Display', {'display'}, Icons.light_mode_outlined),
+    ('Auxiliary heat', {'auxiliary_heat'}, Icons.waves),
+  ];
+
+  Future<void> showSupport() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      builder: (context) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: .7,
+        maxChildSize: .9,
+        builder: (context, scroll) => ListView(
+          controller: scroll,
+          padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+          children: [
+            const Copy('Function support', size: 24, bold: true),
+            const SizedBox(height: 12),
+            const Copy(
+              'This list describes HomeVerb integration, not the appliance hardware. Unconnected functions cannot send commands.',
+            ),
+            const SizedBox(height: 12),
+            for (final item in <(String, bool)>[
+              ('Target temperature', targetSchema != null),
+              ('Mode', climateChoice(c, {'mode'}) != null),
+              (
+                'Fan speed',
+                climateChoice(c, {'fan_speed', 'wind_speed'}) != null,
+              ),
+              (
+                'Air direction',
+                climateChoice(c, {'air_direction', 'swing', 'oscillation'}) !=
+                    null,
+              ),
+              for (final f in features) (f.$1, climateChoice(c, f.$2) != null),
+              ('Timer', false),
+              ('Self-clean', false),
+            ])
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(localize(context, item.$1)),
+                subtitle: Text(
+                  localize(
+                    context,
+                    item.$2
+                        ? 'Available controls'
+                        : 'Not connected in HomeVerb',
+                  ),
+                ),
+                trailing: Icon(
+                  item.$2 ? Icons.check_circle_outline : Icons.link_off,
+                  color: item.$2 ? climateBlue : muted,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final mode = climateChoice(c, {'mode'});
@@ -194,6 +320,17 @@ class _ClimateControlsState extends State<ClimateControls>
       'oscillation',
     });
     final fan = climateChoice(c, {'wind_speed', 'fan_speed'});
+    final extras = [
+      for (final f in features)
+        if (climateChoice(c, f.$2) case final ClimateChoice choice)
+          (f.$1, f.$3, choice),
+    ];
+    final primary = [
+      mode,
+      direction,
+      fan,
+      ...extras.map((f) => f.$3),
+    ].whereType<ClimateChoice>().toList();
     final power = c.observed('power.state');
     final powerCapability = c.capability('power');
     final powerAction = powerCapability?['actions']?['set'] as Json?;
@@ -207,11 +344,11 @@ class _ClimateControlsState extends State<ClimateControls>
             ) ==
             null;
     final target = c.observed('climate.target_temperature');
-    final targetAction = c.capability('climate')?['actions']?['set'] as Json?;
-    final canTarget =
-        targetAction != null &&
-        actionUnavailable(c.capability('climate')!, targetAction) == null &&
-        targetAction['parameters']['properties']['target_temperature'] != null;
+    final schema = targetSchema;
+    final bounded =
+        schema != null &&
+        target is num &&
+        validateValue(target, schema) == null;
     final receipt = c.receipt;
     final observations = (c.snapshot?['observations'] as Json? ?? {}).values
         .whereType<Map>();
@@ -219,233 +356,294 @@ class _ClimateControlsState extends State<ClimateControls>
         observations.map((v) => v['received_at']).whereType<String>().toList()
           ..sort();
     final stale = observations.any((v) => v['stale'] == true);
-
-    Widget button(
-      String title,
-      Widget icon,
-      ClimateChoice? choice,
-    ) => OutlinedButton(
-      key: ValueKey('climate-button:$title'),
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        backgroundColor: const Color(0xfff8f5ee),
-      ),
-      onPressed: c.busy || choice == null ? null : () => choose(title, choice),
-      child: Column(
-        children: [
-          icon,
-          const SizedBox(height: 8),
-          Copy(title, bold: true, center: true),
-          const SizedBox(height: 5),
-          Copy(choiceValue(choice), size: 12, color: muted, center: true),
-        ],
-      ),
+    final remaining = describedControls(
+      c,
+      excludeActions: {
+        for (final choice in primary)
+          '${choice.capability['id']}.${choice.action}',
+      },
+      excludeProperties: {for (final choice in primary) choice.property},
     );
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (c.components.length > 1)
-          Wrap(
-            spacing: 8,
-            children: [
-              for (final part in c.components)
-                ChoiceChip(
-                  label: Text(part['id']),
-                  selected: c.component == part['id'],
-                  onSelected: c.busy
-                      ? null
-                      : (_) => widget.onAction('component:${part['id']}'),
-                ),
-            ],
+    Widget selector(String title, Widget icon, ClimateChoice? choice) =>
+        ClimateTile(
+          key: ValueKey('climate-button:$title'),
+          title: title,
+          value: choiceValue(choice),
+          icon: icon,
+          onPressed: c.busy || choice == null
+              ? null
+              : () => choose(title, choice),
+        );
+    return Theme(
+      data: Theme.of(context).copyWith(
+        colorScheme: Theme.of(
+          context,
+        ).colorScheme.copyWith(primary: climateBlue),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (c.components.length > 1)
+            Wrap(
+              spacing: 8,
+              children: [
+                for (final part in c.components)
+                  ChoiceChip(
+                    label: Text(part['id']),
+                    selected: c.component == part['id'],
+                    onSelected: c.busy
+                        ? null
+                        : (_) => widget.onAction('component:${part['id']}'),
+                  ),
+              ],
+            ),
+          ClimateHero(
+            power: power,
+            indoor: c.observed('climate.current_temperature'),
           ),
-        Surface(
-          dark: true,
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              Copy(
-                power is bool
-                    ? (power ? 'Power on' : 'Power off')
-                    : 'Power unknown',
-                color: Colors.white,
-                bold: true,
-              ),
-              const SizedBox(height: 12),
-              InkWell(
-                onTap: !canTarget || c.busy
-                    ? null
-                    : () => widget.onAction('Target temperature'),
-                child: Copy(
-                  target is num
-                      ? '${target}°C'
-                      : propertyValue(
-                          c.observed('climate.current_temperature'),
-                          {'unit': 'celsius'},
-                        ),
-                  size: 44,
-                  color: Colors.white,
+          ClimateSurface(
+            child: Column(
+              children: [
+                const Copy(
+                  'Target temperature',
+                  color: muted,
+                  size: 13,
                   center: true,
                 ),
-              ),
-              Copy(
-                target is num ? 'Target temperature' : 'Current temperature',
-                color: Colors.white70,
-                size: 12,
-              ),
-              if (canTarget)
+                const SizedBox(height: 10),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    IconButton(
+                    IconButton.filledTonal(
+                      key: const ValueKey('climate-decrease'),
                       tooltip: localize(context, 'Decrease target'),
-                      onPressed: c.busy
+                      onPressed:
+                          !bounded || c.busy || target <= schema['minimum']
                           ? null
-                          : () => widget.onAction('Decrease target'),
-                      icon: const Icon(Icons.remove, color: Colors.white),
+                          : () => setTarget(
+                              (target - schema['multipleOf']).toDouble(),
+                            ),
+                      icon: const Icon(Icons.remove),
                     ),
-                    IconButton(
+                    Expanded(
+                      child: Semantics(
+                        liveRegion: true,
+                        child: Text(
+                          target is num
+                              ? '${draftTarget ?? target}'.replaceFirst(
+                                  RegExp(r'\.0$'),
+                                  '',
+                                )
+                              : '—',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 58,
+                            fontWeight: FontWeight.w300,
+                            color: readableInk(context, ink),
+                            height: 1.2,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const Text(
+                      '°C',
+                      style: TextStyle(fontSize: 18, color: muted),
+                    ),
+                    const SizedBox(width: 12),
+                    IconButton.filledTonal(
+                      key: const ValueKey('climate-increase'),
                       tooltip: localize(context, 'Increase target'),
-                      onPressed: c.busy
+                      onPressed:
+                          !bounded || c.busy || target >= schema['maximum']
                           ? null
-                          : () => widget.onAction('Increase target'),
-                      icon: const Icon(Icons.add, color: Colors.white),
+                          : () => setTarget(
+                              (target + schema['multipleOf']).toDouble(),
+                            ),
+                      icon: const Icon(Icons.add),
                     ),
                   ],
                 ),
-              const SizedBox(height: 12),
-              FilledButton.icon(
+                if (bounded)
+                  Slider(
+                    key: const ValueKey('climate-temperature-slider'),
+                    value: draftTarget ?? target.toDouble(),
+                    min: (schema['minimum'] as num).toDouble(),
+                    max: (schema['maximum'] as num).toDouble(),
+                    divisions:
+                        ((schema['maximum'] - schema['minimum']) /
+                                schema['multipleOf'])
+                            .round(),
+                    label: '${draftTarget ?? target}°C',
+                    semanticFormatterCallback: (v) => '${v}°C',
+                    onChangeStart: c.busy
+                        ? null
+                        : (_) => targetGestureEpoch = selectionEpoch,
+                    onChanged: c.busy
+                        ? null
+                        : (v) => setState(() => draftTarget = v),
+                    onChangeEnd: c.busy
+                        ? null
+                        : (value) {
+                            if (targetGestureEpoch != selectionEpoch) return;
+                            targetGestureEpoch = null;
+                            setTarget(value);
+                          },
+                  )
+                else
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: Copy(
+                      schema == null
+                          ? 'Temperature control is not connected yet.'
+                          : 'No reading',
+                      color: muted,
+                      size: 12,
+                      center: true,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          ClimateGrid(
+            children: [
+              ClimateTile(
                 key: const ValueKey('climate-power'),
+                title: 'Power',
+                value: power is bool
+                    ? (power ? 'Turn off' : 'Turn on')
+                    : 'Power unknown',
+                icon: Icon(
+                  Icons.power_settings_new,
+                  size: 28,
+                  color: power == true ? climateBlue : muted,
+                ),
+                active: power == true,
                 onPressed: c.busy || !canPower
                     ? null
                     : () => widget.onAction('Power'),
-                icon: const Icon(Icons.power_settings_new),
-                label: Copy(
-                  power == true ? 'Turn off' : 'Turn on',
-                  color: Colors.white,
+              ),
+              selector(
+                'Mode',
+                Icon(
+                  Icons.ac_unit,
+                  size: 28,
+                  color: mode == null ? muted : climateBlue,
                 ),
+                mode,
+              ),
+              selector(
+                'Fan speed',
+                Glyph(
+                  'fan',
+                  size: 28,
+                  color: fan == null ? muted : climateBlue,
+                ),
+                fan,
+              ),
+              selector(
+                'Air direction',
+                Icon(
+                  Icons.swap_vert,
+                  size: 28,
+                  color: direction == null ? muted : climateBlue,
+                ),
+                direction,
               ),
             ],
           ),
-        ),
-        const SizedBox(height: 16),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final columns =
-                constraints.maxWidth >= 300 &&
-                    MediaQuery.textScalerOf(context).scale(14) <= 21
-                ? 3
-                : 1;
-            return Wrap(
-              spacing: 8,
-              runSpacing: 8,
+          if (extras.isNotEmpty) ...[
+            const SizedBox(height: 22),
+            const Copy('More functions', size: 18, bold: true),
+            const SizedBox(height: 12),
+            ClimateGrid(
               children: [
-                for (final item in [
-                  (
-                    'Mode',
-                    Icon(
-                      Icons.ac_unit,
-                      size: 26,
-                      color: mode == null ? muted : accent,
-                    ),
-                    mode,
-                  ),
-                  (
-                    'Air direction',
-                    Icon(
-                      Icons.swap_vert,
-                      size: 26,
-                      color: direction == null ? muted : accent,
-                    ),
-                    direction,
-                  ),
-                  (
-                    'Fan speed',
-                    Glyph('fan', size: 26, color: fan == null ? muted : accent),
-                    fan,
-                  ),
-                ])
-                  SizedBox(
-                    width: (constraints.maxWidth - (columns - 1) * 8) / columns,
-                    child: button(item.$1, item.$2, item.$3),
-                  ),
+                for (final f in extras)
+                  selector(f.$1, Icon(f.$2, color: climateBlue), f.$3),
               ],
-            );
-          },
-        ),
-        const SizedBox(height: 16),
-        if (c.snapshot != null)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Copy(
-              UiMessage('Read: {time}{stale}', {
-                'time': receiptTime(times.lastOrNull, compact: true),
-                'stale': UiMessage(stale ? ' · Stale' : ''),
-              }),
-              size: 12,
-              color: muted,
             ),
-          ),
-        if (c.busy)
-          Semantics(liveRegion: true, child: const Copy('Updating device…')),
-        if (receipt != null && receipt['device_id'] == c.selectedDevice) ...[
-          Semantics(
-            liveRegion: true,
-            child: Surface(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Copy(outcomeLabel(receipt['status']), bold: true),
-                  Copy(outcomeSummary(receipt['status']), size: 12),
-                  TextButton(
-                    onPressed: c.busy
-                        ? null
-                        : () => widget.onAction('View Details'),
-                    child: const Copy('View Details'),
-                  ),
-                ],
+          ],
+          if (c.busy) ...[
+            const SizedBox(height: 12),
+            Semantics(
+              liveRegion: true,
+              child: const Copy(
+                'Updating device…',
+                color: climateBlue,
+                center: true,
               ),
             ),
+          ],
+          if (receipt != null && receipt['device_id'] == c.selectedDevice) ...[
+            const SizedBox(height: 16),
+            Semantics(
+              liveRegion: true,
+              child: ClimateSurface(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Copy(outcomeLabel(receipt['status']), bold: true),
+                    const SizedBox(height: 6),
+                    Copy(outcomeSummary(receipt['status']), size: 12),
+                    TextButton(
+                      onPressed: c.busy
+                          ? null
+                          : () => widget.onAction('View Details'),
+                      child: const Copy('View Details'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+          if (remaining.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Blocks(
+              remaining,
+              onAction: widget.onAction,
+              fields: {},
+              choices: {},
+              values: {},
+            ),
+          ],
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: c.snapshot == null
+                    ? const Copy('No reading', size: 11, color: muted)
+                    : Copy(
+                        UiMessage('Read: {time}{stale}', {
+                          'time': receiptTime(times.lastOrNull, compact: true),
+                          'stale': UiMessage(stale ? ' · Stale' : ''),
+                        }),
+                        size: 11,
+                        color: muted,
+                      ),
+              ),
+              TextButton.icon(
+                label: Text(localize(context, 'Refresh State')),
+                onPressed: c.busy
+                    ? null
+                    : () => widget.onAction('Refresh State'),
+                icon: const Icon(Icons.refresh),
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            children: [
+              TextButton(
+                onPressed: showSupport,
+                child: const Copy('Function support', size: 13),
+              ),
+              TextButton(
+                onPressed: () => widget.onAction('Device information'),
+                child: const Copy('Device information', size: 13),
+              ),
+            ],
+          ),
         ],
-        Blocks(
-          describedControls(
-            c,
-            excludeActions: {
-              for (final choice in [
-                mode,
-                direction,
-                fan,
-              ].whereType<ClimateChoice>())
-                '${choice.capability['id']}.${choice.action}',
-            },
-            excludeProperties: {
-              for (final choice in [
-                mode,
-                direction,
-                fan,
-              ].whereType<ClimateChoice>())
-                choice.property,
-            },
-          ),
-          onAction: widget.onAction,
-          fields: {},
-          choices: {},
-          values: {},
-        ),
-        ActionButton(
-          'Refresh State',
-          style: 'secondary',
-          onPressed: c.busy ? null : () => widget.onAction('Refresh State'),
-        ),
-        ActionButton(
-          'Device information',
-          style: 'secondary',
-          onPressed: () => widget.onAction('Device information'),
-        ),
-      ],
+      ),
     );
   }
 }

@@ -1849,3 +1849,9 @@ failed or unknown receipts, trigger a retry, or continue after a lifecycle chang
 Native API 1.22, SQLite 5, protected payload 3, grants, protocol support and Core
 execution/verification semantics are unchanged. This UI revision adds no new
 physical-device or model-support claim.
+
+The owner-requested Meiju-style Flutter AC panel adds direct bounded temperature
+interaction and descriptor-driven additional control tiles. It adds no adapter
+functions or physical support. The selected AC's missing temperature setter,
+swing and comfort controls remain tracked in the [AC parity review](development/10-meiju-ac-parity.md).
+Native API 1.22.0, SQLite schema 5 and protected payload 3 are unchanged.

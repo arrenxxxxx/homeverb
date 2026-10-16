@@ -303,3 +303,8 @@ limit the number of saved devices. Switching devices prepares their own values.
 A failed or interrupted setup remains an error; opening the device again retries
 setup without replaying any appliance command. Accepted/unknown receipts retain
 their existing meanings and uncertainty protections.
+
+The live AC panel now uses the owner-requested light Meiju-style composition,
+direct descriptor-bounded temperature adjustment and a separate integration-status
+sheet. This is not complete Meiju feature parity. See the [function comparison](../../docs/development/10-meiju-ac-parity.md)
+for unfinished model-specific controls and evidence requirements.

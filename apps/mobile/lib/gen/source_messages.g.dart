@@ -255,7 +255,7 @@ String? translateSource(
   "One-hour wash" => t.vendorMideaDishwasherProgramHourWash,
   "Quiet night wash" => t.vendorMideaDishwasherProgramQuietnightWash,
   "Hygiene wash" => t.vendorMideaDishwasherProgramGerm,
-  "Self-clean" => t.vendorMideaDishwasherProgramSelfClean,
+  "Self-clean" => t.mobileClimateSelfClean,
   "Fruit wash" => t.vendorMideaDishwasherProgramFruitWash,
   "Gentle wash" => t.vendorMideaDishwasherProgramSoftWash,
   "Disinfect only" => t.vendorMideaDishwasherProgramSingleDisinfect,
@@ -1587,6 +1587,26 @@ String? translateSource(
   "Unrecognized ({value})" => t.mobileUnrecognizedControlValue(
     value: args["value"] ?? "{value}",
   ),
+  "Function support" => t.mobileClimateFunctionSupport,
+  "This list describes HomeVerb integration, not the appliance hardware. Unconnected functions cannot send commands." =>
+    t.mobileClimateSupportExplanation,
+  "Not connected in HomeVerb" => t.mobileClimateNotConnected,
+  "Temperature control is not connected yet." =>
+    t.mobileClimateTemperatureNotConnected,
+  "Indoor {temperature}" => t.mobileClimateIndoorReading(
+    temperature: args["temperature"] ?? "{temperature}",
+  ),
+  "More functions" => t.mobileClimateMoreFunctions,
+  "Vertical swing" => t.mobileClimateVerticalSwing,
+  "Horizontal swing" => t.mobileClimateHorizontalSwing,
+  "Avoid direct airflow" => t.mobileClimateAvoidDirectAirflow,
+  "Sleep" => t.mobileClimateSleep,
+  "Energy saving" => t.mobileClimateEnergySaving,
+  "Boost" => t.mobileClimateBoost,
+  "Display" => t.mobileClimateDisplay,
+  "Auxiliary heat" => t.mobileClimateAuxiliaryHeat,
+  "Timer" => t.mobileClimateTimer,
+  "Available controls" => t.mobileClimateAvailableControls,
   _ => null,
 };
 
@@ -3079,5 +3099,24 @@ String? sourceForKey(String key) => switch (key) {
     "Selecting a mode also turns this device on.",
   "mobile.updatingDevice" => "Updating device\u2026",
   "mobile.unrecognizedControlValue" => "Unrecognized ({value})",
+  "mobile.climateFunctionSupport" => "Function support",
+  "mobile.climateSupportExplanation" =>
+    "This list describes HomeVerb integration, not the appliance hardware. Unconnected functions cannot send commands.",
+  "mobile.climateNotConnected" => "Not connected in HomeVerb",
+  "mobile.climateTemperatureNotConnected" =>
+    "Temperature control is not connected yet.",
+  "mobile.climateIndoorReading" => "Indoor {temperature}",
+  "mobile.climateMoreFunctions" => "More functions",
+  "mobile.climateVerticalSwing" => "Vertical swing",
+  "mobile.climateHorizontalSwing" => "Horizontal swing",
+  "mobile.climateAvoidDirectAirflow" => "Avoid direct airflow",
+  "mobile.climateSleep" => "Sleep",
+  "mobile.climateEnergySaving" => "Energy saving",
+  "mobile.climateBoost" => "Boost",
+  "mobile.climateDisplay" => "Display",
+  "mobile.climateAuxiliaryHeat" => "Auxiliary heat",
+  "mobile.climateTimer" => "Timer",
+  "mobile.climateSelfClean" => "Self-clean",
+  "mobile.climateAvailableControls" => "Available controls",
   _ => null,
 };

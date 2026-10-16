@@ -1138,5 +1138,22 @@
   "mobile.notSupportedYet": "Not supported yet",
   "mobile.selectingModeTurnsOn": "Selecting a mode also turns this device on.",
   "mobile.updatingDevice": "Updating device…",
-  "mobile.unrecognizedControlValue": "Unrecognized ({value})"
+  "mobile.unrecognizedControlValue": "Unrecognized ({value})",
+  "mobile.climateFunctionSupport": "Function support",
+  "mobile.climateSupportExplanation": "This list describes HomeVerb integration, not the appliance hardware. Unconnected functions cannot send commands.",
+  "mobile.climateNotConnected": "Not connected in HomeVerb",
+  "mobile.climateTemperatureNotConnected": "Temperature control is not connected yet.",
+  "mobile.climateIndoorReading": "Indoor {temperature}",
+  "mobile.climateMoreFunctions": "More functions",
+  "mobile.climateVerticalSwing": "Vertical swing",
+  "mobile.climateHorizontalSwing": "Horizontal swing",
+  "mobile.climateAvoidDirectAirflow": "Avoid direct airflow",
+  "mobile.climateSleep": "Sleep",
+  "mobile.climateEnergySaving": "Energy saving",
+  "mobile.climateBoost": "Boost",
+  "mobile.climateDisplay": "Display",
+  "mobile.climateAuxiliaryHeat": "Auxiliary heat",
+  "mobile.climateTimer": "Timer",
+  "mobile.climateSelfClean": "Self-clean",
+  "mobile.climateAvailableControls": "Available controls"
 }

@@ -1173,4 +1173,21 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get mobileSelectingModeTurnsOn => '\u9009\u62e9\u6a21\u5f0f\u4e5f\u4f1a\u5f00\u542f\u7a7a\u8c03\u3002';
 	@override String get mobileUpdatingDevice => '\u6b63\u5728\u66f4\u65b0\u8bbe\u5907\u2026';
 	@override String mobileUnrecognizedControlValue({required Object value}) => '\u672a\u8bc6\u522b\uff08${value}\uff09';
+	@override String get mobileClimateFunctionSupport => '\u529f\u80fd\u652f\u6301\u60c5\u51b5';
+	@override String get mobileClimateSupportExplanation => '\u8fd9\u91cc\u663e\u793a HomeVerb \u7684\u529f\u80fd\u63a5\u5165\u8fdb\u5ea6\uff0c\u4e0d\u4ee3\u8868\u7a7a\u8c03\u786c\u4ef6\u4e0d\u652f\u6301\u3002\u672a\u63a5\u5165\u7684\u529f\u80fd\u6682\u65f6\u65e0\u6cd5\u63a7\u5236\u3002';
+	@override String get mobileClimateNotConnected => 'HomeVerb \u5c1a\u672a\u63a5\u5165';
+	@override String get mobileClimateTemperatureNotConnected => '\u8fd9\u53f0\u8bbe\u5907\u7684\u8c03\u6e29\u529f\u80fd\u5c1a\u672a\u63a5\u5165';
+	@override String mobileClimateIndoorReading({required Object temperature}) => '\u5ba4\u5185 ${temperature}';
+	@override String get mobileClimateMoreFunctions => '\u66f4\u591a\u529f\u80fd';
+	@override String get mobileClimateVerticalSwing => '\u4e0a\u4e0b\u626b\u98ce';
+	@override String get mobileClimateHorizontalSwing => '\u5de6\u53f3\u626b\u98ce';
+	@override String get mobileClimateAvoidDirectAirflow => '\u9632\u76f4\u5439';
+	@override String get mobileClimateSleep => '\u7761\u7720';
+	@override String get mobileClimateEnergySaving => '\u8282\u80fd';
+	@override String get mobileClimateBoost => '\u5f3a\u52b2';
+	@override String get mobileClimateDisplay => '\u5c4f\u663e';
+	@override String get mobileClimateAuxiliaryHeat => '\u7535\u8f85\u70ed';
+	@override String get mobileClimateTimer => '\u5b9a\u65f6';
+	@override String get mobileClimateSelfClean => '\u81ea\u6e05\u6d01';
+	@override String get mobileClimateAvailableControls => '\u5df2\u63a5\u5165';
 }
