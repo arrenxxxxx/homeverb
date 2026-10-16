@@ -143,7 +143,8 @@ remaining passcode/lock, lifetime, reinstall, backup and Flutter/iPhone gates.
 
 The separate `scripts/verify_ios_acceptance.py` step builds an isolated native app
 with the production framework and a Simulator-only Rust secret-store helper. It
-creates a new compatible Simulator, verifies exact ad-hoc entitlements, and requires
+creates a new compatible Simulator, verifies embedded Simulator entitlements and
+the plain ad-hoc seal, and requires
 fresh successful write/read reports with different launch PIDs. Mock Core, SQLite
 cache/receipt persistence, explicit lifecycle calls and fictional system Keychain
 round trips are exercised; no provider account or appliance is accessed. Eight

@@ -84,6 +84,14 @@ def validate_entitlements(entitlements):
         raise ValueError('The isolated app must have only its exact fictional private Keychain scope.')
 
 
+def validate_simulator_entitlements(xml, der, expected_der, signed):
+    validate_entitlements(plistlib.loads(xml))
+    if not expected_der or der != expected_der:
+        raise ValueError('The embedded Simulator DER entitlements differ from the generated scope.')
+    if signed.strip() and plistlib.loads(signed) != {}:
+        raise ValueError('iOS Simulator entitlements belong in Mach-O sections, not the host code signature.')
+
+
 def launch_failure_messages(log):
     records = json.loads(log)
     messages = [record.get('eventMessage', '') for record in records if isinstance(record, dict)]
@@ -119,6 +127,10 @@ def build_app(directory):
         'UIDeviceFamily': [1], 'LSRequiresIPhoneOS': True, 'UILaunchScreen': {},
     }
     (app / 'Info.plist').write_bytes(plistlib.dumps(info))
+    entitlements = directory / 'entitlements.plist'
+    entitlements.write_bytes(plistlib.dumps({'application-identifier': GROUP, 'keychain-access-groups': [GROUP]}))
+    der = directory / 'entitlements.der'
+    command('/usr/bin/derq', 'query', '--raw', '-f', 'xml', '-i', entitlements, '-o', der)
     sdk = command('xcrun', '--sdk', 'iphonesimulator', '--show-sdk-path')
     command('xcrun', '--sdk', 'iphonesimulator', 'clang', '-target', f'{architecture}-apple-ios14.0-simulator',
             '-isysroot', sdk, '-Wall', '-Wextra', '-Werror', '-fobjc-arc', '-fmodules',
@@ -126,13 +138,18 @@ def build_app(directory):
             ROOT / f'target/{target}/release/examples/libios_store_probe.a',
             '-framework', 'HomeVerb', '-framework', 'UIKit', '-framework', 'Foundation',
             '-framework', 'Security', '-framework', 'CoreFoundation', '-lresolv', '-liconv',
+            '-Xlinker', '-sectcreate', '-Xlinker', '__TEXT', '-Xlinker', '__entitlements', '-Xlinker', entitlements,
+            '-Xlinker', '-sectcreate', '-Xlinker', '__TEXT', '-Xlinker', '__ents_der', '-Xlinker', der,
             '-Wl,-rpath,@executable_path/Frameworks', '-o', app / 'HomeVerbAcceptance', timeout=120)
-    entitlements = directory / 'entitlements.plist'
-    entitlements.write_bytes(plistlib.dumps({'application-identifier': GROUP, 'keychain-access-groups': [GROUP]}))
-    command('codesign', '--force', '--sign', '-', '--timestamp=none', '--entitlements', entitlements, app)
+    # Simulator entitlements are interpreted by iOS from these embedded sections.
+    # The macOS kernel must not receive iOS-only entitlements in the code signature.
+    command('codesign', '--force', '--sign', '-', '--timestamp=none', app)
     command('codesign', '--verify', '--deep', '--strict', app)
-    signed = command('codesign', '--display', '--entitlements', ':-', app)
-    validate_entitlements(plistlib.loads(signed.encode()))
+    xml_copy, der_copy = directory / 'embedded.plist', directory / 'embedded.der'
+    command('xcrun', 'segedit', app / 'HomeVerbAcceptance',
+            '-extract', '__TEXT', '__entitlements', xml_copy, '-extract', '__TEXT', '__ents_der', der_copy)
+    signed = command('codesign', '--display', '--entitlements', '-', '--xml', app)
+    validate_simulator_entitlements(xml_copy.read_bytes(), der_copy.read_bytes(), der.read_bytes(), signed.encode())
     return app
 
 

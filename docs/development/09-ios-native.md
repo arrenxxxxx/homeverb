@@ -139,9 +139,13 @@ with hardcoded fictional bytes in fresh UUID namespaces. It verifies missing and
 isolated references, add/read/reopen/replace, pre-cancelled read/write/delete
 refusal, persistence across different PIDs, exact deletion and absent deletion.
 Its test export is absent from the production framework and public header.
-The runner reads back the ad-hoc signed app's exact fictional private group.
-This verifies the test bundle's scope configuration, not physical entitlement
-enforcement or distribution signing.
+The runner embeds the exact fictional private group in the Simulator executable's
+`__TEXT,__entitlements` and `__TEXT,__ents_der` sections, reads both back, and verifies
+the plain ad-hoc seal. It refuses iOS entitlements in the host code signature.
+This follows the [Swift build system's Simulator specification](https://github.com/swiftlang/swift-build/blob/swift-6.3-RELEASE/Sources/SWBApplePlatform/Specs/Embedded-Simulator.xcspec):
+Simulator entitlement sections and physical app signing are different mechanisms.
+DER comes from Apple's local `derq` tool; no encoding dependency is added. These
+checks do not establish physical entitlement enforcement or distribution signing.
 
 Reports contain only run/process identity, fixed stages, counts and numeric store
 codes: 0 success, 1 test/runtime failure, 2 locked, 3 unavailable, 4 uncertain

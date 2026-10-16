@@ -1588,8 +1588,8 @@ Rust static-library example exercises the real iOS secret-store implementation
 using fictional bytes and a fresh run UUID. Production exports, native API 1.20,
 33 ordinary methods, SQLite schema 5 and protected payload 3 remain unchanged.
 
-The harness creates a new device and targets only its returned UUID, checks signed
-private-group entitlements, and requires two fresh reports tied to distinct launch
+The harness creates a new device and targets only its returned UUID, checks embedded
+Simulator private-group entitlements, and requires two fresh reports tied to distinct launch
 PIDs. It checks Mock power/state, local persistence and explicit Core lifecycle
 calls, plus Keychain round trips, isolated references, pre-cancellation and deletion.
 Failures stop without replay; cleanup never targets an existing user Simulator.
@@ -1614,3 +1614,14 @@ The follow-up `610d92c` reproduced the launch refusal, but later SpringBoard UI
 messages displaced the cause in the diagnostic tail. Structured log filtering
 now retains bounded failure messages independently of later UI noise; a regression
 test verifies that selection. This is diagnostic work, not runtime acceptance.
+
+The `4b1bc11` log exposed the nested `Launchd job spawn failed` error (POSIX 162).
+Review against the pinned Apple/Swift Simulator build specification found that
+the test builder incorrectly put iOS entitlements in the host signature. It now
+embeds XML and DER in `__TEXT,__entitlements` and `__TEXT,__ents_der`, generates DER
+with Apple's `derq`, applies a plain ad-hoc seal, reads both sections back and
+refuses iOS entitlements in the host signature. Two regression tests cover wrong
+signature placement and missing/changed sections, bringing runner tests to twelve.
+This changes only the test app; production Keychain protection, private-group
+checks and framework packaging are unchanged. Runtime success is still contingent
+on the corrected CI run.

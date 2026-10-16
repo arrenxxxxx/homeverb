@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import json
+import plistlib
 import sys
 import subprocess
 import tempfile
@@ -78,6 +79,20 @@ class IosAcceptanceTests(unittest.TestCase):
                         {**valid, 'application-identifier': 'SYNTHETIC.other'}]:
             with self.assertRaises(ValueError):
                 ios.validate_entitlements(invalid)
+
+    def test_simulator_scope_is_embedded_without_ios_host_signature_entitlements(self):
+        xml = plistlib.dumps({'application-identifier': ios.GROUP, 'keychain-access-groups': [ios.GROUP]})
+        ios.validate_simulator_entitlements(xml, b'fictional DER', b'fictional DER', b'')
+        ios.validate_simulator_entitlements(xml, b'fictional DER', b'fictional DER', plistlib.dumps({}))
+        with self.assertRaisesRegex(ValueError, 'host code signature'):
+            ios.validate_simulator_entitlements(xml, b'fictional DER', b'fictional DER', xml)
+
+    def test_missing_or_changed_embedded_scope_is_refused(self):
+        xml = plistlib.dumps({'application-identifier': ios.GROUP, 'keychain-access-groups': [ios.GROUP]})
+        for actual_xml, actual_der, expected_der in [(plistlib.dumps({}), b'expected', b'expected'),
+                                                    (xml, b'changed', b'expected'), (xml, b'', b'')]:
+            with self.assertRaises(ValueError):
+                ios.validate_simulator_entitlements(actual_xml, actual_der, expected_der, b'')
 
     def test_failure_cleans_only_the_new_simulator_and_never_retries_launch(self):
         for fail_at in ['boot', 'bootstatus', 'install', 'launch', 'report', None]:
