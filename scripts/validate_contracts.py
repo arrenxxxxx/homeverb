@@ -47,6 +47,7 @@ def main() -> int:
         ("capability", "capability.meiju-mode"), ("command", "command.meiju-mode"),
         ("capability", "capability.meiju-temperature"), ("command", "command.meiju-temperature"),
         ("capability", "capability.meiju-dishwasher"), ("command", "command.meiju-dishwasher"),
+        ("capability", "capability.meiju-dishwasher-cycle"), ("command", "command.meiju-dishwasher-cycle"),
         ("capability", "capability.approved-cycle"), ("command", "command.approved-cycle"),
         ("command-result", "command-result.approval-expired"),
     ]
@@ -293,6 +294,11 @@ def main() -> int:
     negative.append(("unbounded diagnostic attempts", validators["diagnostics"], bad))
     cycle = Draft202012Validator(load("examples/capability.meiju-dishwasher.json")["actions"]["start_cycle"]["parameters"])
     cycle.validate(load("examples/command.meiju-dishwasher.json")["arguments"])
+    for action in load("examples/capability.meiju-dishwasher-cycle.json")["actions"].values():
+        shape = Draft202012Validator(action["parameters"])
+        shape.validate(load("examples/command.meiju-dishwasher-cycle.json")["arguments"])
+        for arguments in [None, [], {"confirmed": True}, {"operator": "pause"}, {"program": "eco_wash"}]:
+            negative.append(("invalid dishwasher cycle scope", shape, arguments))
     for arguments in [{"program":"eco_wash"}, {"program":"neutral_gear","additional":0},
                       {"program":"eco_wash","additional":1}, {"program":"eco_wash","additional":None},
                       {"program":"eco_wash","additional":0,"confirmed":True}]:

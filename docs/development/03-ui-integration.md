@@ -14,6 +14,12 @@ ordinary JSON methods. API 1.14 adds [profile-scoped Meiju dishwasher starts](..
 through exact startup grants plus this confirmation path. Actual Flutter/physical
 acceptance remains pending.
 
+API 1.15 adds independent [dishwasher pause/resume/cancel permissions](../native-ui-contract.md#profile-scoped-dishwasher-cycle-operations-api-115)
+with the same trusted confirmation flow and no new C exports. Render only
+descriptor-declared actions; all take empty arguments and require individual
+authority. Optional raw operator observations retain cloud staleness. Do not
+present a submitted pause/cancel as a verified cycle or safe-door state.
+
 
 API 1.4 adds local `get_account` and `rename_account` for platform details and names.
 Use the [account metadata contract](../native-ui-contract.md#local-account-details-and-names)

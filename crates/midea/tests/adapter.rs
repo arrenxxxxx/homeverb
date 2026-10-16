@@ -916,3 +916,6 @@ mod temperature;
 
 #[path = "adapter/dishwasher.rs"]
 mod dishwasher;
+
+#[path = "adapter/dishwasher_cycle.rs"]
+mod dishwasher_cycle;

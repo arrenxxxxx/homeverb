@@ -44,6 +44,7 @@ impl Grants {
             mode: &self.meiju_mode_grants,
             temperature: &self.meiju_temperature_grants,
             dishwasher: &[],
+            dishwasher_cycle: &[],
         }
     }
 

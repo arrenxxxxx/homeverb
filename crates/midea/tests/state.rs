@@ -245,6 +245,44 @@ async fn dishwasher_preserves_model_specific_program_status_and_door_codes() {
 }
 
 #[tokio::test]
+async fn dishwasher_operator_is_optional_raw_stale_evidence_not_a_cycle_boolean() {
+    for value in [
+        json!(null),
+        json!("pause"),
+        json!("start"),
+        json!("future_operator"),
+    ] {
+        let state = read(&Transport::new("E1", json!({"operator":value})))
+            .await
+            .unwrap();
+        let snapshot = state.snapshot("dev-local", "main").unwrap();
+        if value.is_null() {
+            assert!(snapshot.observations.is_empty());
+        } else {
+            let observed = &snapshot.observations["vendor.midea.dishwasher.operator"];
+            assert_eq!(observed.value, value);
+            assert!(observed.stale && observed.observed_at.is_none());
+            assert_eq!(snapshot.observations.len(), 1);
+        }
+    }
+    for value in [
+        json!(0),
+        json!(true),
+        json!(""),
+        json!("private value"),
+        json!({"pause":true}),
+    ] {
+        assert_eq!(
+            read(&Transport::new("E1", json!({"operator":value})))
+                .await
+                .unwrap_err()
+                .code,
+            "MIDEA_RESPONSE_INVALID"
+        );
+    }
+}
+
+#[tokio::test]
 async fn missing_fields_and_partial_temperature_never_become_zero_or_false() {
     for (family, component, data) in [
         (

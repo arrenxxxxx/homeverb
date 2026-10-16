@@ -21,7 +21,8 @@ request signing, session-key decoding, login/read request shapes, protected prod
 mapping evidence and explicit AC
 power, vendor fan-preset, combined power-on/mode and protected-profile temperature
 selection/control encoding, and reviewed E1 dishwasher program/explicit additional-option
-encoding through exact grants and trusted approval, with bounded
+encoding and profile-scoped pause/resume/cancel payloads through independent exact
+grants and trusted approval, with optional raw operator observations and bounded
 operations, restricted HTTPS endpoints, conservative write outcomes, redacted native data and synthetic tests.
 No default appliance keys, SmartHome routing, executable Lua downloads, automatic
 reauthentication, retries, or background work are copied. The public compatibility

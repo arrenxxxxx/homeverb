@@ -36,6 +36,23 @@ local state after interruption. No appliance request, retry or execution receipt
 is generated. Mock/Meiju do not opt in; only synthetic tests exercise linking.
 No JSON, C/JNI, CLI or MCP linking method is exposed in this phase.
 
+## Reviewed dishwasher cycle operations
+
+[ADR-0055](adr/0055-profile-scoped-dishwasher-cycle-controls.md) admits separate
+`pause_cycle`, `resume_cycle` and `cancel_cycle` actions only for reviewed protected
+products with no centralized settings to preserve. Each requires its own exact
+cloud grant and trusted single-command confirmation, remains elevated and
+non-idempotent, and independently checks the approval marker in the adapter.
+Program-start permission and these three permissions do not imply one another.
+
+Send one action-specific cloud payload with no implicit state read, settings copy,
+program selection, retry, fallback or optimistic observation. Preserve accepted,
+failed and unknown outcomes and request-ID replay protection. Pause/cancel are
+protocol requests, not safe-door, completed-drain or physical rollback guarantees.
+Optional raw `operator` observations retain cloud staleness; neither a returned
+operator nor `work_status` proves command causality. All existing execution,
+approval expiry and foreground lifecycle semantics remain in force.
+
 ## Trusted foreground LAN candidate scan
 
 [ADR-0054](adr/0054-trusted-meiju-lan-candidate-scan.md) composes discovery and

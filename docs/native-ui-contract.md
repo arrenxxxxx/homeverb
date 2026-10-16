@@ -5,7 +5,7 @@ Status: implemented Linux native contract, October 16, 2026, with Mock, default 
 ## Start here in a Flutter worktree
 
 The connection-linking foundation in [ADR-0052](adr/0052-trusted-connection-linking.md)
-is currently typed Rust Core/Session only. API 1.14.1 has no JSON/C/JNI link
+is currently typed Rust Core/Session only. API 1.15.0 has no JSON/C/JNI link
 method; Meiju does not opt in. Do not wire a confirmation button to discovery,
 invent a `confirmed` request field or add a duplicate LAN card. Native route
 admission and a separately versioned mobile bridge remain prerequisites.
@@ -15,7 +15,7 @@ admission and a separately versioned mobile bridge remain prerequisites.
 device and selected native network, then consume the 60-second preview only after
 actual user consent. Preparation performs local protected preflight; confirmation
 collects bounded hints for that device. There is no JSON/C/JNI scan method in
-1.14.1. Flutter permission/interface selection and a versioned bridge remain
+1.15.0. Flutter permission/interface selection and a versioned bridge remain
 pending. A unique candidate neither adds a LAN card/route nor authorizes credentials,
 state queries or controls. Scan consent and connection-link consent are separate.
 
@@ -31,7 +31,7 @@ The ten C functions in [homeverb.h](../crates/ffi/include/homeverb.h) remain the
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects saved-account cloud reads. `scenario` defaults to `normal`. Meiju requires `allow_mock_writes: false` and rejects any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms `homeverb.mock` or `midea.meiju`. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.14.1`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.15.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -775,6 +775,51 @@ dishwasher mapping below; actual Flutter consent UI, refrigerator controls and
 physical acceptance remain pending. Existing AC controls, SQLite
 schema 4 and protected account payload 3 are unchanged.
 
+## Profile-scoped dishwasher cycle operations (API 1.15)
+
+[ADR-0055](adr/0055-profile-scoped-dishwasher-cycle-controls.md) adds independent
+`meiju_dishwasher_cycle_grants`. Negotiate native API 1.15.0 before including this
+startup field. Each entry selects one exact device and one action:
+
+```json
+{
+  "device_id": "abcdef00-1234-4567-89ab-123456abcdef",
+  "action": "pause_cycle"
+}
+```
+
+At most 64 distinct entries are accepted. Actions are `pause_cycle`, `resume_cycle`
+and `cancel_cycle` on `main / vendor.midea.dishwasher`, cloud only. Their ordinary
+Command arguments are exactly `{}`; the grant entry has no `arguments` field.
+Empty/omitted grants preserve existing behavior. Start grants and each cycle
+action are independent; no automatic authority follows from a previous start.
+
+Render only actions actually declared by the descriptor. The protected product
+must match a reviewed mapping with no centralized settings to preserve. Unsupported
+profiles cannot be enabled by adding a grant or passing extra settings. The
+[cycle capability](../examples/capability.meiju-dishwasher-cycle.json) and
+[pause command](../examples/command.meiju-dishwasher-cycle.json) are fictional
+integration examples; they do not identify an owner's appliance.
+
+Use the existing trusted prepare/display/execute/discard flow for all three
+elevated actions. Display the immutable device and action and the matching locale
+confirmation. Resume may consume water/heat; cancellation may terminate a program.
+Pause/cancel must not promise safe door opening, completed draining or rollback.
+Ordinary plan/execute still return `POLICY_DENIED`; `confirmed` is not consent.
+
+Display accepted/unknown receipts separately from observations. Dishwasher
+capability revision 3 includes optional read-only raw `operator` as well as
+`work_status`, with unproven cloud freshness. Never infer a running/paused boolean,
+optimistically change the card, retry an uncertain action or immediately request
+another action as compensation. A later explicit read is separate evidence.
+There are no new ordinary methods or C/JNI symbols. Flutter consent UI, exact
+owner-product match and physical/off-LAN behavior remain pending.
+
+After upgrading, explicitly refresh account inventory to rebuild legacy
+dishwasher descriptors before using new actions/observations. Opening the library
+does not refresh them. A live response containing an undeclared operator fails
+whole-snapshot validation and preserves the old cache until metadata is refreshed.
+
 ## Profile-scoped dishwasher starts (API 1.14)
 
 [ADR-0044](adr/0044-profile-scoped-dishwasher-start.md) adds optional trusted startup
@@ -946,4 +991,4 @@ identifier. This is separate from outer account payload version 3. Current
 libraries continue using version-1 sessions for existing cloud functions without
 rewriting them. Older libraries refuse inner version 2; upgrade rather than reset
 accounts or discard local bindings. No client identifier, Token/Key, LAN method or
-new consent flow is exposed to Flutter by this phase; API 1.14.1 is unchanged.
+new consent flow is exposed to Flutter by this phase; API 1.15.0 exposes no scan method.

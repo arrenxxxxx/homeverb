@@ -41,3 +41,9 @@ profile requiring an explicit additional option. They use fictional IDs and are
 not an executable production authorization. The elevated action requires a
 matching grant and separate trusted user confirmation; no real model is verified
 by these examples.
+
+The [cycle capability](capability.meiju-dishwasher-cycle.json) and
+[pause command](command.meiju-dishwasher-cycle.json) illustrate independently
+granted, trusted-confirmation-only pause/resume/cancel actions for reviewed
+non-centralized dishwasher profiles. All arguments are empty. Raw operator
+observations remain read-only and do not prove that a request took effect.

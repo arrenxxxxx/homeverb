@@ -1,8 +1,8 @@
-//! Exact dishwasher start authority, independently gated by trusted UI approval.
+//! Exact dishwasher action authority, independently gated by trusted UI approval.
 
 use homeverb_core::{Grant, Policy};
 use homeverb_domain::{Error, Result, Transport};
-use homeverb_midea::{DISHWASHER_ADDITIONAL, DISHWASHER_PROGRAMS};
+use homeverb_midea::{DISHWASHER_ADDITIONAL, DISHWASHER_PROGRAMS, DishwasherCycleAction};
 use serde::Deserialize;
 use serde_json::{Value, json};
 use std::collections::HashSet;
@@ -13,6 +13,40 @@ use uuid::Uuid;
 pub struct MeijuDishwasherGrant {
     pub device_id: String,
     pub arguments: Value,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct MeijuDishwasherCycleGrant {
+    pub device_id: String,
+    pub action: DishwasherCycleAction,
+}
+
+pub fn meiju_dishwasher_cycle_policy(grants: &[MeijuDishwasherCycleGrant]) -> Result<Policy> {
+    if grants.len() > 64 {
+        return Err(Error::invalid());
+    }
+    let mut seen = HashSet::new();
+    let mut policy = Policy::default();
+    for grant in grants {
+        let id = Uuid::parse_str(&grant.device_id).map_err(|_| Error::invalid())?;
+        if id.get_version_num() != 4
+            || id.get_variant() != uuid::Variant::RFC4122
+            || id.to_string() != grant.device_id
+            || !seen.insert((&grant.device_id, grant.action))
+        {
+            return Err(Error::invalid());
+        }
+        policy.grants.push(Grant {
+            device_id: grant.device_id.clone(),
+            component_id: "main".into(),
+            capability: "vendor.midea.dishwasher".into(),
+            action: grant.action.action_name().into(),
+            transports: vec![Transport::Cloud],
+            argument_schema: json!({"const":{}}),
+        });
+    }
+    Ok(policy)
 }
 
 pub fn meiju_dishwasher_policy(grants: &[MeijuDishwasherGrant]) -> Result<Policy> {

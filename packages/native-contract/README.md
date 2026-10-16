@@ -1,6 +1,6 @@
 # HomeVerb native contract
 
-Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.14.1 has 31 callable JSON methods, one separate protected account-connection function and three separate trusted approval functions; the JSON envelope schema is 1.0.
+Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.15.0 has 31 callable JSON methods, one separate protected account-connection function and three separate trusted approval functions; the JSON envelope schema is 1.0.
 
 - [api.json](api.json) is compiled into the `get_api_info` response.
 - [examples.json](examples.json) contains fictional requests and actual Mock native responses, including failures and lifecycle states. It is preview/test data, never a production device database.
@@ -44,3 +44,10 @@ The protected product mapping and action schema still restrict each device; this
 is not a universal temperature range. Negotiate 1.14.1 before supplying more than
 64 entries. Other grant limits, methods, C functions and storage versions are
 unchanged. CLI grant files retain their independent 32 KiB limit.
+
+API 1.15.0 adds independent exact `meiju_dishwasher_cycle_grants` for reviewed
+pause/resume/cancel actions. Each uses empty arguments and the existing trusted
+confirmation functions; program-start permission does not grant a cycle action.
+Dishwasher revision 3 adds optional raw operator observations with cloud staleness.
+See the [cycle contract](../../docs/native-ui-contract.md#profile-scoped-dishwasher-cycle-operations-api-115).
+The 31 methods, eleven exports and storage versions remain unchanged.

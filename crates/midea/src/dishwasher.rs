@@ -1,8 +1,52 @@
-//! Product-scoped E1 start mappings; never infer controls from a display model alone.
+//! Product-scoped E1 program and cycle mappings; never infer controls from a display model alone.
 
 use crate::control::CloudControl;
 use homeverb_domain::{Action, Idempotency, Risk, Transport, VerificationMethod};
 use serde_json::{Value, json};
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, serde::Deserialize, serde::Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DishwasherCycleAction {
+    PauseCycle,
+    ResumeCycle,
+    CancelCycle,
+}
+
+pub const DISHWASHER_CYCLE_ACTIONS: [DishwasherCycleAction; 3] = [
+    DishwasherCycleAction::PauseCycle,
+    DishwasherCycleAction::ResumeCycle,
+    DishwasherCycleAction::CancelCycle,
+];
+
+impl DishwasherCycleAction {
+    pub fn action_name(self) -> &'static str {
+        match self {
+            Self::PauseCycle => "pause_cycle",
+            Self::ResumeCycle => "resume_cycle",
+            Self::CancelCycle => "cancel_cycle",
+        }
+    }
+
+    pub(crate) fn parse(action: &str) -> Option<Self> {
+        DISHWASHER_CYCLE_ACTIONS
+            .into_iter()
+            .find(|value| value.action_name() == action)
+    }
+
+    fn description(self) -> &'static str {
+        match self {
+            Self::PauseCycle => {
+                "Request a pause of the dishwasher cycle. This is not a safe-door guarantee."
+            }
+            Self::ResumeCycle => {
+                "Request that the dishwasher cycle resume. This can consume water and heat."
+            }
+            Self::CancelCycle => {
+                "Request cancellation of the dishwasher cycle. This may terminate the program and does not confirm draining or rollback."
+            }
+        }
+    }
+}
 
 pub const DISHWASHER_PROGRAMS: &[&str] = &[
     "auto_wash",
@@ -90,6 +134,43 @@ pub(crate) enum DishwasherProfile {
 }
 
 impl DishwasherProfile {
+    pub(crate) fn cycle_action(self, action: DishwasherCycleAction) -> Option<Action> {
+        if self == Self::Additional {
+            return None;
+        }
+        Some(Action {
+            parameters: json!({"type":"object", "description":action.description(),
+                "properties":{}, "additionalProperties":false}),
+            transports: vec![Transport::Cloud],
+            idempotency: Idempotency::NonIdempotent,
+            risk: Risk::Elevated,
+            atomic: false,
+            independent_fields: false,
+            verification: VerificationMethod::Unavailable,
+        })
+    }
+
+    pub(crate) fn cycle_control(
+        self,
+        action: DishwasherCycleAction,
+        arguments: &Value,
+    ) -> homeverb_domain::Result<CloudControl> {
+        self.cycle_action(action)
+            .ok_or_else(crate::control::unsupported)?
+            .validate_arguments(arguments)?;
+        Ok(match action {
+            DishwasherCycleAction::PauseCycle => {
+                CloudControl::DishwasherOperator { operator: "pause" }
+            }
+            DishwasherCycleAction::ResumeCycle => {
+                CloudControl::DishwasherOperator { operator: "start" }
+            }
+            DishwasherCycleAction::CancelCycle => CloudControl::DishwasherCancel {
+                work_status: "cancel",
+            },
+        })
+    }
+
     pub(crate) fn action(self) -> Action {
         let programs = match self {
             Self::Short | Self::Standard => STANDARD,

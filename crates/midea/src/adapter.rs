@@ -77,7 +77,7 @@ fn descriptors(
         .filter(|_| adapter.ac_temperature)
         .and_then(crate::ProductProfile::temperature);
     let dishwasher = profile
-        .filter(|_| adapter.dishwasher)
+        .filter(|_| adapter.dishwasher || adapter.dishwasher_cycle)
         .and_then(crate::ProductProfile::dishwasher);
     let family = appliance
         .model
@@ -141,6 +141,7 @@ fn descriptors(
                 &[
                     ("mode", "string", None),
                     ("work_status", "string", None),
+                    ("operator", "string", None),
                     ("doorswitch", "integer", None),
                     ("water_lack", "integer", None),
                     ("softwater_lack", "integer", None),
@@ -149,9 +150,16 @@ fn descriptors(
                     ("remaining_minutes", "integer", Some("minutes")),
                 ],
             );
-            if let Some(profile) = dishwasher {
-                cycle.revision = 2;
+            cycle.revision = 3;
+            if let Some(profile) = dishwasher.filter(|_| adapter.dishwasher) {
                 cycle.actions.insert("start_cycle".into(), profile.action());
+            }
+            if let Some(profile) = dishwasher.filter(|_| adapter.dishwasher_cycle) {
+                for action in crate::DISHWASHER_CYCLE_ACTIONS {
+                    if let Some(contract) = profile.cycle_action(action) {
+                        cycle.actions.insert(action.action_name().into(), contract);
+                    }
+                }
             }
             capabilities.push(cycle);
         }
@@ -229,6 +237,7 @@ pub struct MeijuAdapter {
     ac_mode: bool,
     ac_temperature: bool,
     dishwasher: bool,
+    dishwasher_cycle: bool,
 }
 
 impl MeijuAdapter {
@@ -247,6 +256,7 @@ impl MeijuAdapter {
             ac_mode: false,
             ac_temperature: false,
             dishwasher: false,
+            dishwasher_cycle: false,
         }
     }
 
@@ -277,6 +287,12 @@ impl MeijuAdapter {
     /// Admit reviewed elevated dishwasher starts; exact grants and trusted approval remain required.
     pub fn with_dishwasher_control(mut self) -> Self {
         self.dishwasher = true;
+        self
+    }
+
+    /// Admit reviewed cycle operations independently of program-start authority.
+    pub fn with_dishwasher_cycle_control(mut self) -> Self {
+        self.dishwasher_cycle = true;
         self
     }
 
@@ -506,7 +522,7 @@ impl MeijuAdapter {
                 }
             }
             if let Some(bound) = bound {
-                let profiles = if self.ac_temperature || self.dishwasher {
+                let profiles = if self.ac_temperature || self.dishwasher || self.dishwasher_cycle {
                     account.product_profiles(operation).await?
                 } else {
                     Default::default()
@@ -590,12 +606,13 @@ impl Adapter for MeijuAdapter {
         if command.component_id != "main" {
             return Err(crate::control::unsupported());
         }
-        let dishwasher =
-            command.capability == "vendor.midea.dishwasher" && command.action == "start_cycle";
+        let cycle_action = crate::DishwasherCycleAction::parse(&command.action);
+        let dishwasher = command.capability == "vendor.midea.dishwasher"
+            && (command.action == "start_cycle" || cycle_action.is_some());
         if dishwasher && !validated.has_user_approval() {
             return Err(Error::new(
                 "POLICY_DENIED",
-                "Starting a dishwasher requires trusted user approval.",
+                "Controlling a dishwasher cycle requires trusted user approval.",
             ));
         }
         // Repeat the fixed adapter contract even if public stored metadata was modified.
@@ -626,6 +643,9 @@ impl Adapter for MeijuAdapter {
             }
             ("climate", "set") if self.ac_temperature => None,
             ("vendor.midea.dishwasher", "start_cycle") if self.dishwasher => None,
+            ("vendor.midea.dishwasher", _) if self.dishwasher_cycle && cycle_action.is_some() => {
+                None
+            }
             _ => return Err(crate::control::unsupported()),
         };
         let id = connection
@@ -654,11 +674,16 @@ impl Adapter for MeijuAdapter {
         }
         let control = match control {
             Some(control) => control,
-            None if dishwasher => appliance
-                .product_profile
-                .dishwasher()
-                .ok_or_else(crate::control::unsupported)?
-                .control(&command.arguments)?,
+            None if dishwasher => {
+                let profile = appliance
+                    .product_profile
+                    .dishwasher()
+                    .ok_or_else(crate::control::unsupported)?;
+                match cycle_action {
+                    Some(action) => profile.cycle_control(action, &command.arguments)?,
+                    None => profile.control(&command.arguments)?,
+                }
+            }
             None => {
                 let profile = appliance
                     .product_profile

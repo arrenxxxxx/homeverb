@@ -211,6 +211,35 @@
         "additionalProperties": false
       },
       "description": "Trusted startup-only exact dishwasher start permission over cloud. The selected protected profile further limits programs and requires or forbids additional. Every start also requires the separate trusted user approval path; ordinary execution remains denied."
+    },
+    "meiju_dishwasher_cycle_grants": {
+      "type": "array",
+      "maxItems": 64,
+      "uniqueItems": true,
+      "default": [],
+      "items": {
+        "type": "object",
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "pause_cycle",
+              "resume_cycle",
+              "cancel_cycle"
+            ]
+          }
+        },
+        "required": [
+          "device_id",
+          "action"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Trusted startup-only exact dishwasher cycle action over cloud. Requires reviewed protected product evidence and separate trusted confirmation. Grants no program start or other cycle action."
     }
   },
   "required": [
@@ -219,7 +248,7 @@
     "allow_mock_writes"
   ],
   "additionalProperties": false,
-  "description": "Trusted native startup. data_dir must be an absolute private OS path. adapter defaults to homeverb.mock; scenario defaults to normal. Meiju defaults to read-only; optional meiju_power_grants, meiju_fan_grants, meiju_mode_grants and meiju_temperature_grants separately admit exact-device power, fan, explicit power-on/mode activation and profile-scoped temperature targets over cloud. Meiju rejects Mock grants or fault scenarios. Opening never authenticates, discovers or controls. Optional meiju_dishwasher_grants admit reviewed elevated starts only through separate trusted confirmation.",
+  "description": "Trusted native startup. data_dir must be an absolute private OS path. adapter defaults to homeverb.mock; scenario defaults to normal. Meiju defaults to read-only; optional meiju_power_grants, meiju_fan_grants, meiju_mode_grants and meiju_temperature_grants separately admit exact-device power, fan, explicit power-on/mode activation and profile-scoped temperature targets over cloud. Meiju rejects Mock grants or fault scenarios. Opening never authenticates, discovers or controls. Optional meiju_dishwasher_grants admit reviewed elevated starts only through separate trusted confirmation. Optional meiju_dishwasher_cycle_grants independently admit reviewed pause, resume and cancel requests through trusted confirmation.",
   "allOf": [
     {
       "if": {
@@ -257,6 +286,9 @@
             "maxItems": 0
           },
           "meiju_dishwasher_grants": {
+            "maxItems": 0
+          },
+          "meiju_dishwasher_cycle_grants": {
             "maxItems": 0
           }
         }

@@ -165,6 +165,18 @@ explicit additional options, protected profile/model/family guards despite publi
 metadata tampering, no implicit reads/cache writes, receipt replay, membership,
 cancellation and cloud outcomes. No actual account or appliance is used.
 
+## Profile-scoped dishwasher cycle controls
+
+The same native dishwasher suite verifies independent pause/resume/cancel startup
+schema/runtime admission, rejected malformed grants before profile creation,
+ordinary denial and separate trusted C confirmation using fictional descriptors
+with no account. Rust tests compare twelve product/action payloads, preserve
+cache and receipts, reject centralized or forged profiles, independently enforce
+approval despite public risk changes, and cover pre-send/rejected/unknown outcomes,
+replay, membership changes, cancellation/deadline and lease cleanup. Optional
+operator observations are raw/stale; malformed recognized values fail decoding.
+These checks establish no physical cycle behavior or owner-product match.
+
 ## Unverified release gates
 
 Physical-device authentication and control, real-provider account recovery and token rotation, actual Android Keystore, Android APK/iOS builds and phone lifecycle, a target AI host, dependency/security review, package installation, and licensing remain pending. The mainland read-only Meiju pilot and Android library builds do not establish these acceptance gates. Real writes require explicit device-owner authorization. Two different protocol families must demonstrate equivalent capability calls before cross-platform support is claimed.

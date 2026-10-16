@@ -372,3 +372,12 @@ mappings or host opt-in remain `CAPABILITY_UNSUPPORTED`; a changed protected fam
 model or unsupported profile cannot be replaced by public descriptor edits.
 Argument, identity, membership and receipt errors keep their existing semantics.
 An accepted start is not verified; an uncertain start must never be auto-replayed.
+
+API 1.15.0 applies the same error/outcome rules to independent
+`meiju_dishwasher_cycle_grants`. Unknown actions, duplicate pairs, nonempty extra
+grant fields, invalid device IDs and non-Meiju startup fail before profile
+creation. Pause/resume/cancel require separate confirmation even if public risk
+metadata was changed. Profiles that require centralized settings remain
+unsupported for these actions. Missing or malformed operator observations never
+become a successful cycle-state confirmation; malformed recognized data preserves
+the previous cache through the existing whole-snapshot failure rule.

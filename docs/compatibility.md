@@ -1157,3 +1157,42 @@ Android AAR variants passed eleven-export and 16 KiB alignment checks. Native
 JSON API 1.14.1, C/JNI exports and storage formats remain unchanged. No owner
 account, appliance, separate Flutter worktree, emulator or phone was accessed.
 Remote CI is checked independently after the phase commit and push.
+
+## Profile-scoped dishwasher cycle operations
+
+[ADR-0055](adr/0055-profile-scoped-dishwasher-cycle-controls.md) adds independent
+cloud pause/resume/cancel permissions for the existing exact experimental E1
+model and protected products 7600020L, 76006481, 7600649Q and 7600V1E7. The clean
+pinned community source establishes twelve action payloads and empty centralized
+field lists. Products 760Y0026 and 7600016L remain excluded from these operations;
+their existing start admission is unchanged. No owner's product code was read
+or assumed. Optional raw operator observations remain stale and read-only.
+
+Native API 1.15.0 adds `meiju_dishwasher_cycle_grants`, with at most 64 distinct
+exact device/action pairs and no start authority. All actions require separate
+trusted confirmation and independently enforce the approval marker in the
+adapter. Their arguments are empty and no setting is copied from cache. Core
+retains accepted/failed/unknown semantics, durable receipts and replay guards;
+pause/cancel are not physical safety or rollback guarantees.
+
+Six adapter integration groups, two native-policy groups and a state-decoding
+group cover twelve exact payloads, protected model/profile/family and host
+admission, centralized-profile rejection, malformed arguments and metadata/risk
+tampering, independent permissions, unchanged observations, replay, membership,
+pre-send/rejected/unknown results, cancellation/deadline and lease cleanup. Actual
+C calls verify all three permissions through separate confirmation, and reject
+invalid startup before profile creation using fictional descriptors and no
+account. Explicit rediscovery upgrades old descriptors while preserving identity;
+undeclared new observations fail without replacing the cache beforehand. No
+CLI/MCP elevated permission is enabled.
+
+On October 16, 2026, formatting, workspace Clippy, workspace/example builds and
+documentation/contracts/repository/commit validators passed. Rust: 430 passed,
+two explicitly ignored; runtime: 35; native: 31 methods/51 fictional examples
+plus approval and cycle-control checks; Python tooling: 33; presentation: six.
+All three Android AAR variants passed eleven-export and 16 KiB alignment checks.
+The ten public C functions plus Android JNI initialization, JSON schema 1.0 and
+storage formats are unchanged. Older libraries reject the new startup field.
+Flutter UI, owner-product matching, physical/off-LAN behavior and refrigerator
+writes remain pending. No real account, appliance, separate Flutter worktree,
+emulator or physical phone was accessed. Remote CI is inspected after push.

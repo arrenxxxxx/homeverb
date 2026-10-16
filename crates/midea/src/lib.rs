@@ -12,7 +12,9 @@ mod product;
 mod temperature;
 pub use auth::{LoginCredentials, MeijuSession, SessionReads, login};
 pub use cloud::{CloudEndpoint, CloudTransport, MeijuHttps, SignedRequest};
-pub use dishwasher::{DISHWASHER_ADDITIONAL, DISHWASHER_PROGRAMS};
+pub use dishwasher::{
+    DISHWASHER_ADDITIONAL, DISHWASHER_CYCLE_ACTIONS, DISHWASHER_PROGRAMS, DishwasherCycleAction,
+};
 pub use product::ProductProfile;
 
 mod account;

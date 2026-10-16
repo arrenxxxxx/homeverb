@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "id": "vendor.midea.dishwasher",
+  "component_id": "main",
+  "revision": 3,
+  "properties": {
+    "mode": {
+      "type": "string",
+      "readable": true,
+      "writable": false
+    },
+    "work_status": {
+      "type": "string",
+      "readable": true,
+      "writable": false
+    },
+    "doorswitch": {
+      "type": "integer",
+      "readable": true,
+      "writable": false
+    },
+    "water_lack": {
+      "type": "integer",
+      "readable": true,
+      "writable": false
+    },
+    "softwater_lack": {
+      "type": "integer",
+      "readable": true,
+      "writable": false
+    },
+    "bright_lack": {
+      "type": "integer",
+      "readable": true,
+      "writable": false
+    },
+    "temperature": {
+      "type": "number",
+      "readable": true,
+      "writable": false,
+      "unit": "celsius"
+    },
+    "remaining_minutes": {
+      "type": "integer",
+      "readable": true,
+      "writable": false,
+      "unit": "minutes"
+    },
+    "operator": {
+      "type": "string",
+      "readable": true,
+      "writable": false
+    }
+  },
+  "actions": {
+    "pause_cycle": {
+      "parameters": {
+        "type": "object",
+        "description": "Request a pause of the dishwasher cycle. This is not a safe-door guarantee.",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "non_idempotent",
+      "risk": "elevated",
+      "atomic": false,
+      "independent_fields": false,
+      "verification": "unavailable"
+    },
+    "resume_cycle": {
+      "parameters": {
+        "type": "object",
+        "description": "Request that the dishwasher cycle resume. This can consume water and heat.",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "non_idempotent",
+      "risk": "elevated",
+      "atomic": false,
+      "independent_fields": false,
+      "verification": "unavailable"
+    },
+    "cancel_cycle": {
+      "parameters": {
+        "type": "object",
+        "description": "Request cancellation of the dishwasher cycle. This may terminate the program and does not confirm draining or rollback.",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "non_idempotent",
+      "risk": "elevated",
+      "atomic": false,
+      "independent_fields": false,
+      "verification": "unavailable"
+    }
+  },
+  "events": {}
+}

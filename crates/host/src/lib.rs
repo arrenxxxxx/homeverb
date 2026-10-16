@@ -19,7 +19,10 @@ pub use fan_grants::{MeijuFanGrant, meiju_fan_policy};
 mod mode_grants;
 pub use mode_grants::{MeijuModeGrant, meiju_mode_policy};
 mod dishwasher_grants;
-pub use dishwasher_grants::{MeijuDishwasherGrant, meiju_dishwasher_policy};
+pub use dishwasher_grants::{
+    MeijuDishwasherCycleGrant, MeijuDishwasherGrant, meiju_dishwasher_cycle_policy,
+    meiju_dishwasher_policy,
+};
 mod temperature_grants;
 pub use temperature_grants::{MeijuTemperatureGrant, meiju_temperature_policy};
 
@@ -31,6 +34,7 @@ pub struct MeijuControlGrants<'a> {
     pub mode: &'a [MeijuModeGrant],
     pub temperature: &'a [MeijuTemperatureGrant],
     pub dishwasher: &'a [MeijuDishwasherGrant],
+    pub dishwasher_cycle: &'a [MeijuDishwasherCycleGrant],
 }
 
 /// Compose a native account vault without reading credentials or starting authentication.
@@ -143,6 +147,9 @@ fn meiju_parts(
     policy
         .grants
         .extend(meiju_dishwasher_policy(grants.dishwasher)?.grants);
+    policy
+        .grants
+        .extend(meiju_dishwasher_cycle_policy(grants.dishwasher_cycle)?.grants);
     let store = Arc::new(SqliteStore::open(directory)?);
     let vault = Arc::new(open_accounts(directory)?);
     let clock = Arc::new(SystemClock);
@@ -165,6 +172,9 @@ fn meiju_parts(
     }
     if !grants.dishwasher.is_empty() {
         adapter = adapter.with_dishwasher_control();
+    }
+    if !grants.dishwasher_cycle.is_empty() {
+        adapter = adapter.with_dishwasher_cycle_control();
     }
     let adapter = Arc::new(adapter);
     Ok((

@@ -2,7 +2,7 @@ use super::*;
 use homeverb_domain::{Phase, Risk, Status, Transport};
 
 const CAPABILITY: &str = "vendor.midea.dishwasher";
-fn inventory(profile: Value) -> Vec<Value> {
+pub(super) fn inventory(profile: Value) -> Vec<Value> {
     let mut entry = appliances().pop().unwrap();
     entry
         .as_object_mut()

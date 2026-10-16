@@ -265,7 +265,7 @@ fn decode(
         }
         ApplianceFamily::Dishwasher => {
             let readings = output.entry("main").or_default();
-            for wire in ["mode", "work_status"] {
+            for wire in ["mode", "work_status", "operator"] {
                 field(
                     readings,
                     data,
