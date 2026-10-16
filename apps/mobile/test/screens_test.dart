@@ -426,6 +426,41 @@ void main() {
     await check(2);
   });
 
+  testWidgets('progress captions preserve fractional button origins', (
+    tester,
+  ) async {
+    for (final scale in [1.0, 2.0]) {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: windowTheme(),
+          home: MediaQuery(
+            data: MediaQueryData(textScaler: TextScaler.linear(scale)),
+            child: Scaffold(
+              body: SizedBox(
+                width: 350,
+                child: Blocks(
+                  const [
+                    ['progress', .6, 'Transfer active'],
+                    ['button', 'Cancel', 'secondary'],
+                  ],
+                  onAction: (_) {},
+                  fields: {},
+                  choices: {},
+                  values: {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(
+        tester.getTopLeft(find.byType(ActionButton)).dy,
+        closeTo(38 + 12 * 1.4 * scale, .001),
+      );
+      expect(tester.takeException(), isNull);
+    }
+  });
+
   testWidgets('button faces preserve inclusive edges and native interactions', (
     tester,
   ) async {

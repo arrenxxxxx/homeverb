@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 const ink = Color(0xff292b2d),
@@ -24,10 +26,23 @@ const skinRegistry = {'window_light': HomeVerbSkin()};
 ui.FragmentProgram? _surfaceProgram;
 Future<void>? _skinAssetsLoad;
 final _buttonFaces = <String, ui.Image>{};
+final _buttonLabelBounds = <int, (double, double)>{};
 Future<void> loadWindowSkin() => _skinAssetsLoad ??= () async {
   _surfaceProgram = await ui.FragmentProgram.fromAsset(
     'shaders/window_surface.frag',
   );
+  final metrics =
+      jsonDecode(
+            await rootBundle.loadString('assets/button-label-metrics.json'),
+          )
+          as Map<String, dynamic>;
+  for (final entry in (metrics['bounds'] as Map<String, dynamic>).entries) {
+    final bounds = entry.value as List;
+    _buttonLabelBounds[entry.key.runes.single] = (
+      (bounds[0] as num).toDouble(),
+      (bounds[1] as num).toDouble(),
+    );
+  }
   for (final style in ['primary', 'secondary', 'danger', 'disabled']) {
     final bytes = await rootBundle.load('assets/button-$style.png');
     final codec = await ui.instantiateImageCodec(bytes.buffer.asUint8List());
@@ -385,20 +400,160 @@ class ActionButton extends StatelessWidget {
             ),
           ),
           onPressed: onPressed,
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              height: 1.4,
-              letterSpacing: 0,
-            ),
-          ),
+          child: _ButtonLabel(label),
         ),
       ),
     );
   }
+}
+
+class _ButtonLabel extends StatelessWidget {
+  const _ButtonLabel(this.label);
+  final String label;
+
+  (double, double)? bounds(String line) {
+    double? top, bottom;
+    for (final rune in line.runes) {
+      final glyph = _buttonLabelBounds[rune];
+      if (glyph == null) return null;
+      if (glyph.$1 == glyph.$2) continue;
+      top = top == null ? glyph.$1 : math.min(top, glyph.$1);
+      bottom = bottom == null ? glyph.$2 : math.max(bottom, glyph.$2);
+    }
+    return top == null || bottom == null ? null : (top, bottom);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const style = TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      height: 1.4,
+      letterSpacing: 0,
+    );
+    final text = Text(label, textAlign: TextAlign.center, style: style);
+    if (_buttonLabelBounds.isEmpty ||
+        MediaQuery.boldTextOf(context) ||
+        MediaQuery.maybeLineHeightScaleFactorOverrideOf(context) != null ||
+        MediaQuery.maybeLetterSpacingOverrideOf(context) != null ||
+        MediaQuery.maybeWordSpacingOverrideOf(context) != null) {
+      return text;
+    }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final defaults = DefaultTextStyle.of(context);
+        final scaler = MediaQuery.textScalerOf(context);
+        final painter = TextPainter(
+          text: TextSpan(text: label, style: defaults.style.merge(style)),
+          textAlign: TextAlign.center,
+          textDirection: Directionality.of(context),
+          textScaler: scaler,
+          textHeightBehavior:
+              defaults.textHeightBehavior ??
+              DefaultTextHeightBehavior.maybeOf(context),
+        )..layout(maxWidth: constraints.maxWidth);
+        final lines = painter.computeLineMetrics();
+        final firstRange = painter.getLineBoundary(
+          const TextPosition(offset: 0),
+        );
+        final lastRange = painter.getLineBoundary(
+          TextPosition(offset: label.length, affinity: TextAffinity.upstream),
+        );
+        final first = bounds(label.substring(firstRange.start, firstRange.end));
+        final last = bounds(label.substring(lastRange.start, lastRange.end));
+        Widget result = text;
+        if (lines.isNotEmpty && first != null && last != null) {
+          final ratio = MediaQuery.devicePixelRatioOf(context);
+          final scale = scaler.scale(14) * ratio / 28;
+          // Line metrics can round leading differently from the painted baseline.
+          final baseline = painter.computeDistanceToActualBaseline(
+            TextBaseline.alphabetic,
+          );
+          final top = baseline * ratio + first.$1 * scale;
+          final bottom =
+              (baseline + lines.last.baseline - lines.first.baseline) * ratio +
+              last.$2 * scale;
+          result = _CenteredButtonInk(
+            top: top / ratio,
+            height: (bottom - top) / ratio,
+            pixelRatio: ratio,
+            child: text,
+          );
+        }
+        painter.dispose();
+        return result;
+      },
+    );
+  }
+}
+
+// Snap in screen coordinates: fractional paragraph and sheet origins matter.
+class _CenteredButtonInk extends SingleChildRenderObjectWidget {
+  const _CenteredButtonInk({
+    required this.top,
+    required this.height,
+    required this.pixelRatio,
+    required super.child,
+  });
+  final double top, height, pixelRatio;
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderCenteredButtonInk(top, height, pixelRatio);
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _RenderCenteredButtonInk renderObject,
+  ) => renderObject.configure(top, height, pixelRatio);
+}
+
+class _RenderCenteredButtonInk extends RenderProxyBox {
+  _RenderCenteredButtonInk(this._top, this._height, this._pixelRatio);
+  double _top, _height, _pixelRatio;
+
+  void configure(double top, double height, double pixelRatio) {
+    if (top == _top && height == _height && pixelRatio == _pixelRatio) return;
+    _top = top;
+    _height = height;
+    _pixelRatio = pixelRatio;
+    markNeedsPaint();
+    markNeedsSemanticsUpdate();
+  }
+
+  // The independent renderer rounds exact half-pixels to the nearest even pixel.
+  double roundPixel(double value) {
+    final lower = value.floor();
+    return value - lower == .5
+        ? (lower.isEven ? lower : lower + 1).toDouble()
+        : value.roundToDouble();
+  }
+
+  Offset get _offset {
+    final origin = localToGlobal(Offset.zero).dy;
+    final target =
+        roundPixel((origin + (size.height - _height) / 2) * _pixelRatio) /
+        _pixelRatio;
+    return Offset(0, target - origin - _top);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null) context.paintChild(child!, offset + _offset);
+  }
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    transform.translateByDouble(0, _offset.dy, 0, 1);
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) =>
+      child != null &&
+      result.addWithPaintOffset(
+        offset: _offset,
+        position: position,
+        hitTest: (result, position) =>
+            child!.hitTest(result, position: position),
+      );
 }
 
 class _ButtonFace extends CustomPainter {

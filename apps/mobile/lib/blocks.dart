@@ -441,7 +441,7 @@ class Blocks extends StatelessWidget {
                 backgroundColor: const Color(0xffdeded6),
               ),
               const SizedBox(height: 12),
-              Copy(b[2], size: 12, color: muted),
+              Copy(b[2], size: 12, color: muted, paragraph: true),
             ],
           ),
         );

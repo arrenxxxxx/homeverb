@@ -61,7 +61,11 @@ semantics and interaction remain native Flutter controls. Their 2x corner artwor
 preserves the prototype's inclusive pixel edges without stretching the corners.
 Regenerate them from this directory with `python3 tool/generate_button_assets.py`
 (Pillow required). Assets are committed, so normal Flutter builds do not require
-Python. High contrast retains Flutter's existing solid outlined controls.
+Python. The same generator records baseline-relative ink bounds from the bundled
+Inter SemiBold font. Button labels use those bounds and Flutter's actual baseline
+to center ascenders and descenders while retaining native text and wrapping.
+Unknown glyphs and system bold/spacing overrides retain ordinary native layout.
+High contrast retains Flutter's existing solid outlined controls.
 
 Build the library from the repository root before running native tests:
 

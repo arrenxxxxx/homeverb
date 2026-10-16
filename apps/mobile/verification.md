@@ -929,3 +929,55 @@ original Devices page. The new button backgrounds were inspected in
 `button-release-platforms.png`; `button-release-clicks.json` records the result.
 The Android journey still injects text input, file picker and lifecycle events.
 No physical phone, real account, appliance or iOS execution was performed.
+
+## Native button ink centering — October 16, 2026
+
+Button labels now center the visible glyph group using baseline-relative bounds
+from the bundled Inter SemiBold font. Native Text still paints every glyph;
+the metadata contains only per-character vertical bounds and the font hash.
+Flutter's actual alphabetic baseline is used because its rounded line metrics
+can differ by 0.4 logical pixels. Pixel rounding occurs in screen coordinates,
+so fractional paragraph and sheet origins do not add another one-pixel offset.
+Paint, semantic transforms and hit testing share the same translation. Unknown
+glyphs and system bold/spacing overrides retain ordinary native text layout.
+
+The progress caption now preserves its specified 16.8 logical pixel line height
+instead of rounding it to 17. This corrects the downstream button origin; it
+also exposes remaining glyph-placement differences in the following paragraph.
+No native contract, approved reference image or screenshot tolerance changed.
+
+All **80 Flutter tests** and static analysis passed. New raster coverage checks
+eight labels, including ascenders and descenders, at four fractional screen
+origins against independent font-derived bounds. Additional cases cover natural
+and explicit wrapping, 100%/200% text, unknown-glyph fallback, native semantics
+and taps. Progress-caption geometry is checked at both text sizes. Existing
+82-state captures, 201 simulated branches, native Mock interactions, account
+fixtures, high contrast and narrow layouts also pass their functional checks.
+
+Strict comparison still fails: **0/82 exact**, mean channel error **1.2137/255**
+(previously 1.2943). Sixty-four states improve, 16 are unchanged and two regress:
+C03 (+0.1206) and A03 (+0.0090). Their reference/before/after images were inspected;
+the fractional progress-caption correction is retained rather than restoring an
+incorrect line box to compensate for other glyph rasterization differences.
+This is not whole-screen visual acceptance. The remaining body/row glyph
+placement, antialiasing and layout differences still require correction.
+
+Evidence: `output/flutter-verification/label-comparison.json` and
+`label-C03.png`, `label-A03.png`, `label-H09.png`, `label-S09.png`, `label-P08.png`.
+Logs: `/tmp/homeverb-label-tests-final.log`,
+`/tmp/homeverb-label-analyze-final.log` and `/tmp/homeverb-label-pixels-final.log`.
+
+The final button renderer passed the full Android native Mock journey in 2m29s
+on API 35 x86_64. Text input, file picker and lifecycle remain injected inputs.
+A partial archive of 59 native journey captures was copied before teardown;
+it is not a complete screenshot archive. The subsequent progress-caption-only
+change is covered by the final widget suite and included in the ordinary APK.
+The native journey log is `/tmp/homeverb-label-android-final.log`.
+
+The ordinary dual-ABI APK rebuilt, passed 16 KiB ZIP alignment, and was installed
+and cold-launched. Both Core libraries are byte-identical to commit `21a35eb`;
+the four decorative faces and font metrics in the APK match source. Native
+pointer clicks opened Add Platform and Back restored the original Devices page.
+Captures: `output/flutter-verification/android/label-release-home.png` and
+`label-release-platforms.png`; click evidence: `label-release-clicks.json`.
+No real account, appliance, physical phone or iOS execution was performed.
