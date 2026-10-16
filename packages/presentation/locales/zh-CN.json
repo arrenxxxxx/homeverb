@@ -1127,5 +1127,11 @@
   "mobile.credentialBackendUnavailable": "Android 凭据存储支持不可用。请重启应用或安装匹配的原生版本后重试。",
   "mobile.credentialOpenSettings": "打开 Android 安全设置",
   "mobile.credentialSettingsUnavailable": "无法打开 Android 安全设置，请从系统“设置”中打开。",
-  "mobile.credentialCheckAgain": "重新检查"
+  "mobile.credentialCheckAgain": "重新检查",
+  "mobile.defaultControlsMessage1": "直接连接平台云端。打开支持的设备即可使用其可用控制。",
+  "mobile.defaultControlsMessage2": "使用已有的美居账号。登录后会自动获取绑定设备，打开支持的设备即可控制。",
+  "mobile.defaultControlsMessage3": "请登录原账号。身份必须一致，本地设备名称、房间和收藏会保留。打开支持的设备即可控制。",
+  "mobile.defaultControlsMessage4": "0.2.0 · 美居实验支持 · 设备控制",
+  "mobile.defaultControlsMessage5": "打开设备即可使用其支持的控制。兼容性取决于具体型号和地区。",
+  "mobile.defaultControlsMessage6": "实验性设备支持"
 }

@@ -216,7 +216,7 @@ List<dynamic> accountBlocks(HomeController c, String id) {
           'note',
           c.isMock
               ? 'Account connection is unavailable in this Mock build.'
-              : 'Direct cloud connection. Starts read-only; reviewed controls require separate permission.',
+              : 'Direct cloud connection. Open a supported device to use its available controls.',
         ],
         ['button', 'Compatibility Details', 'secondary'],
       ];
@@ -227,8 +227,8 @@ List<dynamic> accountBlocks(HomeController c, String id) {
         [
           'note',
           c.selectedAccount == null
-              ? 'Use your existing Meiju account. After sign-in, saved authorization is used to retrieve bound devices automatically. No appliance controls are granted.'
-              : 'Sign in to the original account. Identity must match; local device names, rooms and favorites are preserved. This does not grant new controls.',
+              ? 'Use your existing Meiju account. Sign-in retrieves bound devices automatically. Open a supported device to control it.'
+              : 'Sign in to the original account. Identity must match; local device names, rooms and favorites are preserved. Open a supported device to control it.',
         ],
         [
           'note',

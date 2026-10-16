@@ -1581,3 +1581,34 @@ SHA-256: `a45aedd66f6d3745484f92c4c03491bda52b7fab08f6fa306d460d1581f6cde5`.
 The adjacent report and `credential-readiness-runtime.json` record packaging and
 prerequisite evidence. Earlier bilingual artifacts remain historical builds.
 No real AC write, external upload or new remote push occurred in this phase.
+
+
+## Default device controls: owner-directed revision
+
+The owner requested removing the complete session-control option and making
+supported controls available without extra checkboxes. The Flutter host now
+prepares every reviewed low-risk AC value for the device being opened, using
+exact saved control-option inspection and existing native startup fields. Only
+that device's account is refreshed to publish admitted actions. The old permission
+widget and technical permission/revocation/capability-refresh UI are removed.
+Startup remains local-only, and no appliance command is part of device setup.
+See [ADR-0065](../../docs/adr/0065-default-app-device-controls.md).
+
+Seven focused tests passed: actual native startup with fictional exact grants,
+model constraints, automatic preparation with no startup refresh or write,
+same-device reuse, failed-refresh retry, foreign/late inspection rejection,
+backgrounded reopen cleanup/recovery and absence of the former UI. Flutter
+analysis passed. The earlier combined account/current-contract/localization run
+passed 22 tests and had one test-only header capitalization mismatch; correcting
+the expectation to the actual prototype header made the full focused group pass.
+The complete Flutter suite passed 101 tests and retained only the four known
+macOS glyph-pixel failures (button labels, two control-label cases and field
+alignment). References and tolerances were unchanged. Documentation/repository
+checks and all seven shared presentation tests passed. Rebuilt Android results
+are recorded separately below.
+
+Before this revision, the owner completed real Meiju login in the App. Actual UI
+showed complete device retrieval and the selected wall AC; explicit refresh
+returned power off and 27.4 degrees Celsius. This proves the app's real account
+and read path on this emulator, not physical effects or appliance-write success.
+No command was sent before the owner requested this policy revision.

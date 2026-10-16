@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-/// An exact startup permission selected in the trusted foreground controller.
+/// An exact startup permission derived by the trusted foreground controller.
 /// This is never loaded from ordinary preferences, a request or a descriptor.
 class SessionPermission {
   const SessionPermission._(
@@ -23,7 +23,7 @@ class SessionPermission {
   };
 
   // Host configuration translation, not vendor wire encoding. The UI derives
-  // choices from the exact inspected schema, never this mapping's union.
+  // values from the exact inspected schema, never this mapping's union.
   static const _startup = {
     ('power', 'set'): ('meiju_power_grants', 'state'),
     ('climate', 'set'): ('meiju_temperature_grants', 'target_temperature'),

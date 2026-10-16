@@ -54,10 +54,9 @@ fvm flutter build apk --release --target-platform android-arm64,android-x64 \
   --dart-define=HOMEVERB_ADAPTER=midea.meiju
 ```
 
-This second build starts read-only and exposes protected sign-in and explicit
-retrieval/reads. The trusted Device Information permission review can now reopen
-with exact session-only AC grants after actual user consent; see the
-[permission guide](../../apps/mobile/README.md#allow-exact-real-device-controls). Both APKs use the same Android package
+This second build exposes protected sign-in and device retrieval. Opening a
+supported device automatically prepares its reviewed controls without a separate
+permission form; see the [control guide](../../apps/mobile/README.md#device-controls). Both APKs use the same Android package
 `dev.homeverb.homeverb_mobile`, so installing one replaces the other. Their
 Mock and Meiju data directories are separate. Neither is a store release:
 release-mode compilation still uses a local development signing key.
@@ -95,7 +94,7 @@ python3 scripts/verify_flutter_apk.py --apk /absolute/homeverb.apk \
   --adapter homeverb.mock --report /absolute/homeverb.json
 ```
 
-Use `--adapter midea.meiju` for the explicit Meiju build, which starts read-only. The adapter value
+Use `--adapter midea.meiju` for the explicit Meiju app build. The adapter value
 is a build declaration, not runtime proof. Check both native ABIs and the Core
 exports, minimum SDK, package identity and backup exclusions. Preserve the APK checksum, source revision, native AAR checksum
 and toolchain versions together. Do not use an older successful artifact as proof

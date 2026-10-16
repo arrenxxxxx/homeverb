@@ -1127,5 +1127,11 @@
   "mobile.credentialBackendUnavailable": "Android credential support is unavailable. Restart the app or install a matching native build before trying again.",
   "mobile.credentialOpenSettings": "Open Android Security Settings",
   "mobile.credentialSettingsUnavailable": "Could not open Android security settings. Open them from the system Settings app.",
-  "mobile.credentialCheckAgain": "Check Again"
+  "mobile.credentialCheckAgain": "Check Again",
+  "mobile.defaultControlsMessage1": "Direct cloud connection. Open a supported device to use its available controls.",
+  "mobile.defaultControlsMessage2": "Use your existing Meiju account. Sign-in retrieves bound devices automatically. Open a supported device to control it.",
+  "mobile.defaultControlsMessage3": "Sign in to the original account. Identity must match; local device names, rooms and favorites are preserved. Open a supported device to control it.",
+  "mobile.defaultControlsMessage4": "0.2.0 · Experimental Meiju · Device controls",
+  "mobile.defaultControlsMessage5": "Supported controls are available when you open a device. Compatibility depends on its exact model and region.",
+  "mobile.defaultControlsMessage6": "Experimental device support"
 }

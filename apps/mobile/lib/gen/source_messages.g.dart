@@ -1569,6 +1569,17 @@ String? translateSource(
   "Could not open Android security settings. Open them from the system Settings app." =>
     t.mobileCredentialSettingsUnavailable,
   "Check Again" => t.mobileCredentialCheckAgain,
+  "Direct cloud connection. Open a supported device to use its available controls." =>
+    t.mobileDefaultControlsMessage1,
+  "Use your existing Meiju account. Sign-in retrieves bound devices automatically. Open a supported device to control it." =>
+    t.mobileDefaultControlsMessage2,
+  "Sign in to the original account. Identity must match; local device names, rooms and favorites are preserved. Open a supported device to control it." =>
+    t.mobileDefaultControlsMessage3,
+  "0.2.0 \u00b7 Experimental Meiju \u00b7 Device controls" =>
+    t.mobileDefaultControlsMessage4,
+  "Supported controls are available when you open a device. Compatibility depends on its exact model and region." =>
+    t.mobileDefaultControlsMessage5,
+  "Experimental device support" => t.mobileDefaultControlsMessage6,
   _ => null,
 };
 
@@ -3044,5 +3055,16 @@ String? sourceForKey(String key) => switch (key) {
   "mobile.credentialSettingsUnavailable" =>
     "Could not open Android security settings. Open them from the system Settings app.",
   "mobile.credentialCheckAgain" => "Check Again",
+  "mobile.defaultControlsMessage1" =>
+    "Direct cloud connection. Open a supported device to use its available controls.",
+  "mobile.defaultControlsMessage2" =>
+    "Use your existing Meiju account. Sign-in retrieves bound devices automatically. Open a supported device to control it.",
+  "mobile.defaultControlsMessage3" =>
+    "Sign in to the original account. Identity must match; local device names, rooms and favorites are preserved. Open a supported device to control it.",
+  "mobile.defaultControlsMessage4" =>
+    "0.2.0 \u00b7 Experimental Meiju \u00b7 Device controls",
+  "mobile.defaultControlsMessage5" =>
+    "Supported controls are available when you open a device. Compatibility depends on its exact model and region.",
+  "mobile.defaultControlsMessage6" => "Experimental device support",
   _ => null,
 };

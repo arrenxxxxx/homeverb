@@ -1803,3 +1803,16 @@ system-security-settings action. It does not add Core methods, change native API
 or invalid channel replies and bounded timeouts fail closed. Foreground return
 rechecks the flags; pending checks cannot dispatch login after navigation or
 backgrounding. Non-Android storage semantics remain in Core.
+
+
+## Default Flutter device controls
+
+The owner-approved [ADR-0065](adr/0065-default-app-device-controls.md) supersedes
+the Flutter session-permission UI described in the earlier historical phase.
+Opening a supported device now prepares every existing reviewed low-risk AC
+control value automatically, then refreshes that device's account to publish its
+actions. The selection/review/revocation and separate capability-refresh controls
+are removed. No appliance command is sent during setup; there is no startup or
+background account refresh. Exact model/routing checks and existing outcome,
+confirmation and replay semantics remain in Core. Native API 1.22, SQLite 5,
+protected payload 3 and non-App host defaults are unchanged.

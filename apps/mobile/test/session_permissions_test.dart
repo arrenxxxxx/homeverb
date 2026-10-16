@@ -3,11 +3,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:homeverb_mobile/permission_review.dart';
+import 'package:homeverb_mobile/main.dart';
+import 'package:homeverb_mobile/screens.dart' hide Json;
 import 'package:homeverb_mobile/controller.dart';
 import 'package:homeverb_mobile/native_client.dart';
 import 'package:homeverb_mobile/session_permissions.dart';
-import 'accounts_test.dart' show AccountFixture, AccountPreferences;
+import 'accounts_test.dart'
+    show AccountFixture, AccountPreferences, firstAccount;
 
 Json inspection() {
   final examples = jsonDecode(
@@ -24,10 +26,76 @@ Json inspection() {
 }
 
 class PermissionCore extends AccountFixture {
-  bool closed = false;
+  PermissionCore(this.inspected) {
+    cards.clear();
+    cards.add({
+      'device': {
+        'id': inspected['device_id'],
+        'alias': 'Fictional wall AC',
+        'model': 'Fixture',
+        'support_status': 'experimental',
+        'components': [
+          {
+            'id': 'main',
+            'capabilities': ['power'],
+          },
+        ],
+        'connections': [
+          {
+            'id': inspected['connection_id'],
+            'transport': 'cloud',
+            'account_id': firstAccount,
+          },
+        ],
+      },
+      'preferences': {'room_id': null, 'favorite': false},
+    });
+  }
+  final Json inspected;
+  bool closed = false, published = false, failRefresh = false;
+  Completer<Json>? inspectionGate;
   @override
   Future<void> close() async {
     closed = true;
+  }
+
+  @override
+  Future<dynamic> call(String method, [Json fields = const {}]) async {
+    if (method == 'inspect_control_options') {
+      requests.add({'method': method, ...fields});
+      return inspectionGate == null ? inspected : await inspectionGate!.future;
+    }
+    if (method == 'describe_device') {
+      requests.add({'method': method, ...fields});
+      return {
+        'device': cards.single['device'],
+        'capabilities': [
+          {
+            'id': 'power',
+            'version': 1,
+            'properties': {},
+            'actions': published
+                ? {'set': inspected['options'].first['definition']}
+                : {},
+          },
+        ],
+      };
+    }
+    if (method == 'read_state') {
+      requests.add({'method': method, ...fields});
+      throw NativeFailure('STATE_UNAVAILABLE', 'No fictional cached state.');
+    }
+    if (method == 'refresh_account') {
+      if (failRefresh) {
+        requests.add({'method': method, ...fields});
+        throw NativeFailure(
+          'NETWORK_UNAVAILABLE',
+          'Fictional refresh failure.',
+        );
+      }
+      published = true;
+    }
+    return super.call(method, fields);
   }
 }
 
@@ -55,43 +123,6 @@ void main() {
         await core?.close();
         await dir.delete(recursive: true);
       }
-    },
-  );
-  testWidgets(
-    'permission selection requires a separate review and consent click',
-    (tester) async {
-      final inspected = inspection();
-      inspected['options'] = [inspected['options'].first];
-      Set<String>? granted;
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SingleChildScrollView(
-              child: PermissionReview(
-                inspection: inspected,
-                deviceName: 'Fictional wall AC',
-                busy: false,
-                onConfirm: (values) async {
-                  granted = values;
-                  return true;
-                },
-              ),
-            ),
-          ),
-        ),
-      );
-      await tester.tap(find.text('Power off'));
-      await tester.pump();
-      expect(granted, isNull);
-      await tester.ensureVisible(find.text('Review Selected Permissions'));
-      await tester.tap(find.text('Review Selected Permissions'));
-      await tester.pumpAndSettle();
-      expect(granted, isNull);
-      expect(find.text('Power on'), findsNothing);
-      await tester.ensureVisible(find.text('Allow Selected Controls'));
-      await tester.tap(find.text('Allow Selected Controls'));
-      await tester.pump();
-      expect(granted, {SessionPermission.choices(inspected).first.identity});
     },
   );
   test(
@@ -133,9 +164,10 @@ void main() {
   );
 
   test(
-    'consent reopens without network or write and revocation removes all authority',
+    'opening a device admits all reviewed controls without a permission form or startup refresh',
     () async {
-      final old = PermissionCore(), next = PermissionCore();
+      final inspected = inspection();
+      final old = PermissionCore(inspected), next = PermissionCore(inspected);
       final starts = <List<SessionPermission>>[];
       final c = HomeController(
         old,
@@ -146,76 +178,165 @@ void main() {
           return next;
         },
       );
-      final inspected = inspection();
-      c.selectedDevice = inspected['device_id'];
-      c.description = {
-        'device': {
-          'connections': [
-            {'id': inspected['connection_id'], 'transport': 'cloud'},
-          ],
-        },
-      };
-      c.routeInspection = inspected;
-      final selected = SessionPermission.choices(inspected).first;
-      expect(await c.allowControlChoices(inspected, {selected.identity}), true);
-      expect(starts.single.single.identity, selected.identity);
-      expect(c.sessionPermissions.length, 1);
-      expect(next.requests.map((v) => v['method']), [
-        'list_rooms',
-        'list_device_cards',
-      ]);
+      expect(await c.initialize(), true);
+      expect(
+        old.requests.any(
+          (v) => [
+            'refresh_account',
+            'inspect_control_options',
+            'discover',
+          ].contains(v['method']),
+        ),
+        false,
+      );
+      expect(await c.selectDevice(inspected['device_id']), true);
+      expect(
+        starts.single.map((p) => p.identity).toSet(),
+        SessionPermission.choices(inspected).map((p) => p.identity).toSet(),
+      );
+      expect(c.capability('power')!['actions'], contains('set'));
+      expect(
+        next.requests
+            .where((v) => v['method'] == 'refresh_account')
+            .single['account_id'],
+        firstAccount,
+      );
+      expect(
+        next.requests.any(
+          (v) => ['execute', 'plan', 'discover'].contains(v['method']),
+        ),
+        false,
+      );
       expect(c.preferences.values, isEmpty);
-      expect(await c.revokeSessionControls(), true);
-      expect(starts.last, isEmpty);
-      expect(c.sessionPermissions, isEmpty);
+      expect(await c.selectDevice(inspected['device_id']), true);
+      expect(starts.length, 1);
+      expect(
+        next.requests.where((v) => v['method'] == 'refresh_account').length,
+        1,
+      );
       c.dispose();
     },
   );
 
   test(
-    'navigation, foreign values and background during reopen invalidate consent',
+    'failed descriptor refresh retries preparation on the next explicit device open',
     () async {
-      final old = PermissionCore(), next = PermissionCore();
+      final inspected = inspection();
+      final old = PermissionCore(inspected),
+          failing = PermissionCore(inspected)..failRefresh = true;
+      final recovered = PermissionCore(inspected);
+      var opens = 0;
+      final c = HomeController(
+        old,
+        AccountPreferences(),
+        reopen: (_) async => ++opens == 1 ? failing : recovered,
+      );
+      expect(await c.selectDevice(inspected['device_id']), false);
+      expect((c.error as NativeFailure).code, 'NETWORK_UNAVAILABLE');
+      expect(c.capability('power')!['actions'], isEmpty);
+      expect(await c.selectDevice(inspected['device_id']), true);
+      expect(opens, 2);
+      expect(c.capability('power')!['actions'], contains('set'));
+      c.dispose();
+    },
+  );
+
+  test(
+    'foreign inspection and navigation during inspection cannot install controls',
+    () async {
+      final inspected = inspection();
+      final old = PermissionCore(inspected);
+      var opens = 0;
+      final c = HomeController(
+        old,
+        AccountPreferences(),
+        reopen: (_) async {
+          opens++;
+          return PermissionCore(inspected);
+        },
+      );
+      old.inspectionGate = Completer<Json>();
+      final work = c.selectDevice(inspected['device_id']);
+      await Future<void>.delayed(Duration.zero);
+      c.cancelPending();
+      old.inspectionGate!.complete(inspected);
+      expect(await work, false);
+      expect(opens, 0);
+      old.inspectionGate = Completer<Json>()
+        ..complete({...inspected, 'connection_id': 'foreign'});
+      expect(await c.selectDevice(inspected['device_id']), false);
+      expect((c.error as NativeFailure).code, 'POLICY_DENIED');
+      expect(opens, 0);
+      c.dispose();
+    },
+  );
+
+  test(
+    'background during reopening closes the replacement and supports explicit recovery',
+    () async {
+      final inspected = inspection();
+      final old = PermissionCore(inspected),
+          lateCore = PermissionCore(inspected);
+      final readonly = PermissionCore(inspected),
+          recovered = PermissionCore(inspected);
       final pending = Completer<CoreClient>();
       var opens = 0;
       final c = HomeController(
         old,
         AccountPreferences(),
-        reopen: (grants) {
+        reopen: (_) {
           opens++;
-          return pending.future;
+          return opens == 1
+              ? pending.future
+              : Future.value(opens == 2 ? readonly : recovered);
         },
       );
-      final inspected = inspection();
-      final selected = SessionPermission.choices(inspected).first;
-      c.selectedDevice = inspected['device_id'];
-      c.description = {
-        'device': {
-          'connections': [
-            {'id': inspected['connection_id'], 'transport': 'cloud'},
-          ],
-        },
-      };
-      c.routeInspection = inspected;
-      expect(await c.allowControlChoices(inspected, {'foreign'}), false);
-      expect(opens, 0);
-      c.cancelPending();
-      expect(
-        await c.allowControlChoices(inspected, {selected.identity}),
-        false,
-      );
-      expect(opens, 0);
-      c.routeInspection = inspected;
-      final work = c.allowControlChoices(inspected, {selected.identity});
+      final work = c.selectDevice(inspected['device_id']);
       await Future<void>.delayed(Duration.zero);
       expect(opens, 1);
       c.setForeground(false);
-      pending.complete(next);
+      pending.complete(lateCore);
       expect(await work, false);
-      expect(next.closed, true);
-      expect(c.permissionSessionNeedsReopen, true);
-      expect(c.sessionPermissions, isEmpty);
-      expect(next.requests, isEmpty);
+      expect(lateCore.closed, true);
+      expect(lateCore.requests, isEmpty);
+      c.setForeground(true);
+      expect(await c.selectDevice(inspected['device_id']), true);
+      expect(opens, 3);
+      expect(c.capability('power')!['actions'], contains('set'));
+      c.dispose();
+    },
+  );
+
+  testWidgets(
+    'device information has no session-control selection or revoke actions',
+    (tester) async {
+      final inspected = inspection();
+      final c = HomeController(
+        PermissionCore(inspected),
+        AccountPreferences(),
+        reopen: (_) async => PermissionCore(inspected),
+      );
+      final key = GlobalKey<NativeAppState>();
+      final catalog = (await tester.runAsync(ScreenCatalog.load))!;
+      await tester.pumpWidget(
+        NativeApp(key: key, catalog: catalog, controller: c),
+      );
+      await tester.pumpAndSettle();
+      expect(await c.selectDevice(inspected['device_id']), true);
+      await key.currentState!.go('D06');
+      await tester.pumpAndSettle();
+      expect(find.text('Device information'), findsOneWidget);
+      for (final label in [
+        'Review control options',
+        'Allowed controls for this session',
+        'Revoke Session Controls',
+        'Allow controls for this session',
+        'Retrieve Control Capabilities',
+      ]) {
+        expect(find.text(label), findsNothing);
+      }
+      expect(find.byType(CheckboxListTile), findsNothing);
+      await tester.pumpWidget(const SizedBox());
       c.dispose();
     },
   );

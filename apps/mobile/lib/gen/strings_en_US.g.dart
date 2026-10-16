@@ -3422,4 +3422,22 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Check Again'
 	String get mobileCredentialCheckAgain => 'Check Again';
+
+	/// en-US: 'Direct cloud connection. Open a supported device to use its available controls.'
+	String get mobileDefaultControlsMessage1 => 'Direct cloud connection. Open a supported device to use its available controls.';
+
+	/// en-US: 'Use your existing Meiju account. Sign-in retrieves bound devices automatically. Open a supported device to control it.'
+	String get mobileDefaultControlsMessage2 => 'Use your existing Meiju account. Sign-in retrieves bound devices automatically. Open a supported device to control it.';
+
+	/// en-US: 'Sign in to the original account. Identity must match; local device names, rooms and favorites are preserved. Open a supported device to control it.'
+	String get mobileDefaultControlsMessage3 => 'Sign in to the original account. Identity must match; local device names, rooms and favorites are preserved. Open a supported device to control it.';
+
+	/// en-US: '0.2.0 \u00b7 Experimental Meiju \u00b7 Device controls'
+	String get mobileDefaultControlsMessage4 => '0.2.0 \u00b7 Experimental Meiju \u00b7 Device controls';
+
+	/// en-US: 'Supported controls are available when you open a device. Compatibility depends on its exact model and region.'
+	String get mobileDefaultControlsMessage5 => 'Supported controls are available when you open a device. Compatibility depends on its exact model and region.';
+
+	/// en-US: 'Experimental device support'
+	String get mobileDefaultControlsMessage6 => 'Experimental device support';
 }

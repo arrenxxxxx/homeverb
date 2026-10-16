@@ -99,10 +99,13 @@ Flutter embedding/runtime and Keychain/phone policy acceptance remain open.
 
 ### Flutter AC permission integration
 
-The trusted Flutter host now supports exact session-only AC startup grants with
-separate selection/review/consent, explicit descriptor refresh and revocation.
+The trusted Flutter host now prepares reviewed AC controls automatically when
+opening a device, following the owner-approved [default policy](adr/0065-default-app-device-controls.md).
+The former session-permission selection/review/revocation UI has been removed.
 See the [verification scope](../apps/mobile/verification.md#flutter-session-control-permissions).
-Real-account login and physical AC control acceptance for this app remain pending.
+One real account has now logged in and retrieved its devices on the Android
+emulator, and the selected AC returned live power-off and temperature readings.
+Physical AC control acceptance remains pending.
 The Flutter app now uses slang for en-US/zh-CN with a persisted Settings > Language
 choice and system fallback. See the [internationalization guide](../apps/mobile/README.md#internationalization).
 The previous emulator sign-in returned `SECRET_STORE_UNAVAILABLE` with no secure

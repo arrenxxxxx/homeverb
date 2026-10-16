@@ -2,21 +2,25 @@
 
 The native application embeds Core using native UI contract 1.22.0. The separate visual preview contains fictional Window Light fixtures and never opens Core. The default build opens an isolated Mock profile. Explicit Meiju builds provide protected account connection, local metadata, retrieval/recovery and scoped local removal; Android startup wiring and Mock process journeys are emulator-tested; actual Keystore and physical acceptance remain pending. Cache and history clearing are connected with separate confirmations. Nearby sharing and full-profile deletion remain unavailable. Their preview states are not live features.
 
-## Current Core inspection
+## Device controls
 
-Device Information provides explicit connection-scoped control-option and session
-permission inspection. Options never enable controls, and current local grants do
-not establish provider authorization. Account details show nullable historical
-complete-inventory time. Inspect Saved Inventory exposes per-binding duplicate
-record inspection, including unpublished bindings; it neither merges devices nor
-transfers authority. Query errors remain errors, and navigation/cancellation or
-backgrounding clears results and fences late responses. These operations do not
-refresh cloud accounts or open appliance connections.
+Open a supported device after sign-in or retrieval to use its available controls.
+There is no session-permission form, extra checkbox, review or revocation menu.
+The trusted app prepares all reviewed low-risk control values for the opened
+device using its exact saved model and cloud connection. It refreshes only that
+account to publish the available actions. Startup lists local metadata only;
+there is no periodic refresh, background setup or automatic appliance command.
+See [ADR-0065](../../docs/adr/0065-default-app-device-controls.md).
+
+Account details show nullable historical complete-inventory time. Inspect Saved
+Inventory exposes per-binding duplicate record inspection, including unpublished
+bindings; it neither merges devices nor transfers authority. Query errors remain
+errors, and navigation/cancellation or backgrounding fences late responses.
 
 ## Account integration
 
 The default adapter remains `homeverb.mock`. An explicit Linux development build
-can select the read-only Meiju session after reviewing the [native contract](../../docs/native-ui-contract.md):
+can select the Meiju app host after reviewing the [native contract](../../docs/native-ui-contract.md):
 
 ```sh
 fvm flutter run -d linux --dart-define=HOMEVERB_ADAPTER=midea.meiju
@@ -34,8 +38,8 @@ Credential controllers clear on submission, backgrounding and disposal. Owned
 managed byte arrays and native allocations clear on every wrapper return path.
 Only nonsecret metadata enters JSON; credentials use the separate native function.
 This does not guarantee erasure of keyboard, OS or managed-string copies. Locked or
-unavailable system storage is an error, never a plaintext fallback. Account connection supplies no write grants; exact session controls require the
-separate trusted permission review described below.
+unavailable system storage is an error, never a plaintext fallback. Account connection does not send appliance commands. Opening a supported device
+automatically prepares its available controls.
 
 On Android, the sign-in page first checks trusted startup registration and the
 system's secure-screen-lock/unlocked flags through a bounded local method channel.
@@ -232,8 +236,9 @@ for an explicit receipt lookup, without automatic replay.
 The `approval-required` Mock scenario provides the fictional development journey.
 Run `fvm flutter test test/approval_test.dart` or the device process suite
 `fvm flutter test integration_test/approval_smoke_test.dart -d DEVICE_ID`.
-This does not enable Meiju startup grants or operate a physical appliance. The
-production default remains normal Mock, or explicitly selected read-only Meiju.
+This Mock confirmation fixture does not operate a physical appliance. The
+production default remains Mock; explicitly selected Meiju uses the default
+device-control policy described above.
 
 ## Internationalization
 
@@ -270,17 +275,19 @@ semantics. Source and Android runtime results are recorded in
 provider login, secure-store availability or physical appliance support.
 
 
-## Allow exact real-device controls
+## Default controls and compatibility
 
-Meiju starts read-only on each process launch. After protected sign-in and device
-retrieval, open Device Information and Review control options for its cloud
-connection. Select exact supported values, review them, then choose Allow Selected
-Controls. Mode activation explicitly includes power-on. Consent changes only
-session startup authority; it does not operate the appliance.
+The owner has chosen default access to supported device controls. Core still
+checks exact device identity, reviewed model constraints, arguments and routing
+for each command. The app uses existing trusted startup fields internally and
+never imports authority from ordinary preferences or descriptors. Every supported
+AC power state, reviewed temperature target, fan code and mode is prepared without
+an extra user permission step. No new model support or elevated/high-risk action
+is created by this UI policy.
 
-Choose Retrieve Control Capabilities explicitly to refresh the account and
-publish admitted actions, then return to the device controls. Revoke Session
-Controls removes all session write permissions without erasing retained metadata
-or receipts. A cancelled/failed reopen offers Reopen Read-only. Permissions are
-not saved across process restarts. Physical effects and provider acceptance must
-be checked separately; accepted and unknown results must never trigger a replay.
+Preparation happens on explicit foreground device opening, including after a
+process restart. It is scoped to that device so native grant-size bounds do not
+limit the number of saved devices. Switching devices prepares their own values.
+A failed or interrupted setup remains an error; opening the device again retries
+setup without replaying any appliance command. Accepted/unknown receipts retain
+their existing meanings and uncertainty protections.

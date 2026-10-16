@@ -19,7 +19,6 @@ import 'controls.dart';
 import 'native_client.dart';
 import 'preferences.dart';
 import 'session_permissions.dart';
-import 'permission_review.dart';
 import 'receipts.dart';
 import 'screens.dart' hide Json;
 import 'skin.dart';
@@ -266,21 +265,6 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     }
     if (label.startsWith('conflicts:')) {
       await c.inspectDeviceConflicts(label.substring('conflicts:'.length));
-      return;
-    }
-    if (label.startsWith('grants:') || label.startsWith('options:')) {
-      await c.inspectRoute(
-        label.substring(label.indexOf(':') + 1),
-        options: label.startsWith('options:'),
-      );
-      return;
-    }
-    if (label == 'Retrieve Control Capabilities') {
-      await c.refreshControlCapabilities();
-      return;
-    }
-    if (label == 'Revoke Session Controls' || label == 'Reopen Read-only') {
-      await c.revokeSessionControls();
       return;
     }
     if (label == 'Inspect Saved Inventory') {
@@ -910,76 +894,6 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
               'capabilities': c.capabilities.map((v) => v['id']).join(' · '),
             }),
           ],
-          for (final connection in device?['connections'] as List? ?? [])
-            [
-              'card',
-              UiMessage('{transport} connection', {
-                'transport': UiMessage(routeLabel(connection['transport'])),
-              }),
-              [
-                if (c.supports('inspect_session_grants'))
-                  [
-                    'Allowed controls for this session',
-                    'Inspect local permission',
-                    'grants:${connection['id']}',
-                  ],
-                if (!c.isMock && c.supports('inspect_control_options'))
-                  [
-                    'Review control options',
-                    'Does not enable controls',
-                    'options:${connection['id']}',
-                  ],
-              ],
-            ],
-          if (c.routeInspection != null) ...[
-            [
-              'note',
-              c.routeInspection!['source'] == 'session_policy'
-                  ? 'Current local session permissions. Provider authorization and device availability are not checked. Core checks every command.'
-                  : 'Reviewed saved model options. Permission is not checked and no controls are enabled.',
-            ],
-            [
-              'note',
-              UiMessage('Connection: {connection}', {
-                'connection': c.routeInspection!['connection_id'],
-              }),
-            ],
-            if (((c.routeInspection!['grants'] ?? c.routeInspection!['options'])
-                    as List)
-                .isEmpty)
-              ['note', 'No controls are listed for this connection.'],
-            for (final rule
-                in (c.routeInspection!['grants'] ??
-                        c.routeInspection!['options'])
-                    as List)
-              [
-                'card',
-                '${rule['capability']}.${rule['action']}',
-                [
-                  ['Component', rule['component_id'], null],
-                  [
-                    'Exact constraints',
-                    jsonEncode(rule['argument_schema'] ?? rule['definition']),
-                    null,
-                  ],
-                ],
-              ],
-          ],
-          if (c.canConfigureControls && c.sessionPermissions.isNotEmpty) ...[
-            [
-              'note',
-              'Local controls are allowed for this session. Retrieve this account to update available actions. Each command is checked independently.',
-            ],
-            ['button', 'Retrieve Control Capabilities'],
-          ],
-          if (c.canConfigureControls)
-            [
-              'button',
-              c.permissionSessionNeedsReopen
-                  ? 'Reopen Read-only'
-                  : 'Revoke Session Controls',
-              'secondary',
-            ],
           ['button', 'Recent Operations', 'secondary'],
         ];
         break;
@@ -1446,9 +1360,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             'note',
             c.isMock
                 ? '0.2.0 · Native Mock host · Fictional devices'
-                : c.sessionPermissions.isEmpty
-                ? '0.2.0 · Experimental Meiju · Read-only session'
-                : '0.2.0 · Experimental Meiju · Scoped controls',
+                : '0.2.0 · Experimental Meiju · Device controls',
           ],
           [
             'rows',
@@ -1464,8 +1376,8 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         b = [
           [
             'status',
-            'Mock tested',
-            'Core contract 1.9 includes experimental Meiju reads and protected account connection. Physical account and phone acceptance of this UI remain pending.',
+            'Experimental device support',
+            'Supported controls are available when you open a device. Compatibility depends on its exact model and region.',
             'neutral',
           ],
           [
@@ -1545,31 +1457,6 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                     },
             ),
           Copy(t.mobileLanguageNotice),
-        ],
-      );
-    }
-    if (id == 'D06' &&
-        c.canConfigureControls &&
-        c.routeInspection?['source'] == 'saved_inventory') {
-      final inspected = c.routeInspection!;
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          PermissionReview(
-            key: ObjectKey(inspected),
-            inspection: inspected,
-            deviceName: c.currentCard?['device']?['alias'] ?? 'Device',
-            busy: c.busy,
-            onConfirm: (selected) => c.allowControlChoices(inspected, selected),
-          ),
-          Blocks(
-            screenFor(id)['blocks'] as List,
-            onAction: action,
-            fields: fields,
-            choices: choices,
-            values: values,
-            onChanged: changed,
-          ),
         ],
       );
     }
