@@ -30,8 +30,8 @@ every mapping. Preserve the profile-selection rules in ADR-0040 and ADR-0041.
 |---|---|---|
 | Power | Direct card, in-place receipt and one bounded follow-up read | Earlier owner-observed shutdown; this redesign sends no new physical write |
 | Mode | Independent card and localized selector with explicit power-on effect | Existing exact-model actions; individual modes not physically verified |
-| Fan | Independent card, reviewed values only, preserves unknown observed codes | Observed code 101 has no reviewed label; do not guess that it means automatic |
-| Temperature | Descriptor-bounded plus/minus and slider; one command on gesture release | Selected AC currently exposes no admitted setter; protected mapping evidence remains unresolved |
+| Fan | Independent card, reviewed values only, preserves unknown observed codes | Earlier code 101 has no reviewed label; later temperature acceptance read the reviewed automatic value. Do not relabel unknown codes |
+| Temperature | Descriptor-bounded plus/minus and slider; one command on gesture release | ADR-0066 resolves the optional-subtype admission defect. Selected AC accepted 28 to 27.5 to 28 Celsius with separate matching cloud observations; physical temperature behavior remains unverified |
 | Swing | Dedicated direction card and optional independent vertical/horizontal controls | Current Meiju adapter has no swing action or corresponding startup grants |
 | Anti-draft, sleep, energy saving, boost, display, auxiliary heat | Independent descriptor-driven tiles when actual low-risk setters exist; covered by fictional widget fixtures only | Meiju action encoding, model admission, exact grants and physical behavior remain unimplemented |
 | Timer / self-clean | No operational controls | Need selected-model app and protocol evidence, risk classification and native device execution contract; no project background scheduler |
@@ -59,5 +59,8 @@ high contrast retains outlined surfaces. The historical 82-state prototype is
 unchanged and no longer a pixel-parity target for the owner-revised live AC panel.
 
 APK identity, checks and emulator captures belong in the app's
-[verification record](../../apps/mobile/verification.md). This phase changes no
-Rust ABI, native grants, storage, adapter model admission or transport behavior.
+[verification record](../../apps/mobile/verification.md). The presentation phase
+changes no Rust ABI, native grants, storage, adapter model admission or transport
+behavior. The subsequent narrow temperature-admission correction is documented
+in [ADR-0066](../adr/0066-optional-wall-ac-subtype.md); it does not implement the
+remaining Meiju functions above.

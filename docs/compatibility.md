@@ -1852,8 +1852,9 @@ physical-device or model-support claim.
 
 The owner-requested Meiju-style Flutter AC panel adds direct bounded temperature
 interaction and descriptor-driven additional control tiles. It adds no adapter
-functions or physical support. The selected AC's missing temperature setter,
-swing and comfort controls remain tracked in the [AC parity review](development/10-meiju-ac-parity.md).
+functions or physical support. The selected AC's temperature admission defect
+was resolved by the subsequent correction below; swing and comfort controls
+remain tracked in the [AC parity review](development/10-meiju-ac-parity.md).
 Native API 1.22.0, SQLite schema 5 and protected payload 3 are unchanged.
 
 The optional-subtype correction in [ADR-0066](adr/0066-optional-wall-ac-subtype.md)
@@ -1863,3 +1864,10 @@ subtype priority and excluded/ambiguous products are unchanged. The selected
 wall AC was diagnosed using fixed missing/present flags only: its missing optional
 subtype caused the earlier omission. Runtime command/read-back evidence is recorded
 separately in the app verification record; model-wide physical support is not implied.
+
+The final APK's selected-AC acceptance sent one decrease from 28 to 27.5 Celsius
+and one restoration to 28 Celsius. Both receipts were `accepted` with matching
+separate cloud observations, without automatic navigation or write replay.
+These observations do not upgrade either receipt to `verified` or prove physical
+temperature behavior. The in-place upgrade retained the saved account and Chinese
+locale; native API 1.22.0, SQLite schema 5 and protected payload 3 remain unchanged.

@@ -1792,3 +1792,45 @@ Checks actually run:
 
 This source phase changes no public schemas, native API 1.22.0, SQLite schema 5
 or protected payload 3. APK/runtime temperature evidence is recorded separately.
+
+## Temperature APK delivery and selected-AC read-back
+
+Delivery completed on October 17, 2026 (Asia/Shanghai), from clean source
+`6c232a3c2f89b53e0ef3dd3bfa7473d3b7f5be68`. The local artifact is
+`output/flutter-verification/android/homeverb-0.2.0-meiju-temperature.apk`, with
+its archive report at the same path ending in `.json`. This supersedes the
+earlier `homeverb-0.2.0-meiju-panel.apk`.
+
+- Size: 68,333,888 bytes.
+- SHA-256: `eb8b0cff3bcb1e7b631063b1cd5d136ff02c63a46a8819a98f274f70fc210c20`.
+- Adapter: `midea.meiju`; arm64-v8a and x86_64, 17 Core exports per ABI.
+- APK signature and 16 KiB ZIP/Core ELF alignment passed archive verification.
+  Signing uses the existing local development key, not a distribution credential.
+- Release Flutter build and both native ABI builds completed. `adb install -r`
+  succeeded on the Android 15 arm64 emulator; the saved login and Chinese
+  preference remained available. The final binary contains no temporary
+  temperature-admission diagnostic logging.
+
+The owner had authorized controls on the selected wall AC. On this final APK,
+the initial cloud observation was power on, cooling, automatic fan and target
+28 Celsius. Each action below was one explicit stepper tap and one recorded
+attempt, followed by a separate bounded state read:
+
+| Action | Start (UTC, October 16, 2026) | Receipt recorded (UTC) | Receipt | Subsequent target observation |
+|---|---|---|---|---|
+| Decrease once | 15:58:33.816603 | 15:58:38.064950 | `accepted`, `VERIFICATION_PENDING` | 27.5 Celsius |
+| Restore once | 16:00:44.192753 | 16:00:45.200310 | `accepted`, `VERIFICATION_PENDING` | 28 Celsius |
+
+Both operations remained on the AC page. Receipt details were opened manually
+only for inspection, then closed. Neither operation was replayed. Power, cooling
+mode and automatic fan remained observed after the adjustments. These are cloud
+command/read-back results, not protocol verification or proof of physical
+temperature behavior; no verification evidence was added to either receipt.
+
+Local captures `output/flutter-verification/android/climate-temperature-readback-zh-CN.png`
+and `output/flutter-verification/android/climate-temperature-restored-zh-CN.png`
+show the observed targets, separate controls and inline accepted outcome. The
+emulator is left on the restored 28 Celsius AC page. No physical-phone, full
+Meiju feature parity, remote push or artifact publication is claimed. The preceding
+source-phase test limitations remain applicable; this delivery record does not
+turn the filtered Rust run or Flutter visual suite into an unfiltered pass.

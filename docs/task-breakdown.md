@@ -35,6 +35,16 @@ Flutter panel and generic additional-function tiles do not establish new Meiju
 controls. Exact-model screen references and protected protocol mappings remain
 required for the rest of the feature inventory.
 
+The optional-subtype admission defect is now corrected under ADR-0066. The final
+temperature APK was installed as an in-place emulator upgrade with the saved
+account and Chinese preference retained. Two owner-authorized commands changed
+the selected wall AC target from 28 to 27.5 and back to 28 Celsius. Both receipts
+were `accepted`, and separate bounded cloud reads matched each target; neither
+receipt is `verified`. The page stayed on the AC controls. This establishes the
+selected account's command/read-back path, not physical temperature behavior or
+full Meiju parity. See the app verification record for artifact identity and
+test limitations.
+
 | ID | Task | Current status | Remaining acceptance |
 |---|---|---|---|
 | T00 | Documents and contracts | Implemented | Keep references synchronized |
