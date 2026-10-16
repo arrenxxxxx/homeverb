@@ -302,3 +302,12 @@ checksum checks do not correlate an acknowledgement or establish freshness. Raw
 mode/fan codes remain native protocol values; a model-aware adapter must admit
 their semantics and reject known stale/alternate temperature layouts before
 publishing observations. No default query, route, outcome or retry is added.
+
+[Protected candidate reconciliation](adr/0050-protected-lan-candidate-reconciliation.md)
+compares one exact saved account binding with a bounded report and explicit subnet.
+It returns `NotObserved`, `Incomplete`, `Ambiguous` or a borrowed `UniqueCandidate`.
+Conflicting target addresses/protocols/families and endpoint identity collisions
+never choose a winner. Report limits prevent a unique result; no result changes
+cards, membership, grants or connections. A unique hint is neither authenticated
+nor globally unique and cannot authorize sending credentials or publishing state.
+This native-only helper performs no networking and retains the caller's Operation.

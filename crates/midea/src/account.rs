@@ -19,6 +19,7 @@ use uuid::Uuid;
 use zeroize::Zeroize;
 
 mod lan;
+pub use lan::LanCandidateMatch;
 
 const PROVIDER: &str = "midea.meiju";
 const MAX_BINDINGS: usize = 4096;

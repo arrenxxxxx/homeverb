@@ -1010,3 +1010,34 @@ acceptance: 35 passed; native contract: 31 methods/51 fictional examples plus
 approval checks; Python tooling: 33 passed; presentation: six passed. All three
 Android AAR variants passed build/export/16 KiB ELF checks. New emulator, phone,
 live credentials and physical/off-LAN behavior were not tested in this phase.
+
+## Protected LAN candidate reconciliation
+
+[ADR-0050](adr/0050-protected-lan-candidate-reconciliation.md) adds a native
+account helper that compares a selected protected local binding with an explicit
+network and discovery report. It requires saved listed membership, supported
+family and six-byte identity. It returns missing, incomplete or ambiguous hints,
+or borrows one unique candidate without creating a device/connection or sending
+credentials. Matching public fields is not peer authentication, current account
+authorization, model compatibility or globally complete discovery.
+
+Seven fictional account test groups cover the three families and V2/V3 hints,
+duplicate/reordered entries, selected identity/address/protocol/family conflicts,
+foreign IDs at one endpoint, unrelated conflicts, report limits/counters and
+invalid peer scopes. Exact local-reference and cross-account checks, unknown or
+absent membership, unsupported identities/families, unavailable secrets and
+cancelled/expired operations fail without fallback. Storage/card preservation,
+redacted Debug and a compile-fail serialization check are also verified.
+
+Native JSON API 1.14.1, C/JNI exports, SQLite schema 4, protected payload/session
+formats and cloud descriptors/execution remain unchanged. No public schemas or
+new error codes are introduced. Model-specific endpoint admission and composed
+LAN routes remain unfinished; T10 is not complete.
+
+On October 16, 2026, formatting, workspace Clippy, workspace/example builds and
+local validators passed. Rust tests: 379 passed, two explicitly ignored; runtime
+acceptance: 35 passed; native contract: 31 methods/51 fictional examples plus
+approval checks; Python tooling: 33 passed; presentation: six passed. All three
+Android AAR variants passed build/export/16 KiB ELF checks. No real account,
+appliance, separate Flutter worktree, fresh Android runtime or physical/off-LAN
+acceptance was used in this phase. Remote CI is verified separately after push.

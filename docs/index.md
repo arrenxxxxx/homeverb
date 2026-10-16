@@ -32,6 +32,7 @@ Start with the progressive development path. Reference documents define invarian
 - LAN credentials: [account-bound v2 lookup](adr/0047-account-bound-lan-credentials.md), with fresh unique home resolution, protected native handshake output and no LAN peer access.
 - LAN packet envelopes: [bounded encoding and expected-ID decoding](adr/0048-bounded-lan-packet-envelopes.md), with independent fictional vectors and no model or write-outcome inference.
 - AC LAN messages: [standard query and C0 candidates](adr/0049-ac-lan-query-and-c0-decoding.md), with strict AA checks and no model admission or freshness claim.
+- LAN identity hints: [protected account reconciliation](adr/0050-protected-lan-candidate-reconciliation.md), with explicit incomplete/ambiguous results and no route publication or credential transmission.
 - CLI control admission: [explicit owner-controlled Meiju startup grants](adr/0037-cli-meiju-control-grants.md).
 - Profile-scoped AC temperature: [selection, exact targets and physical evidence limits](adr/0041-profile-scoped-ac-temperature.md).
 - Protected product mapping evidence: [inventory and storage rules](adr/0040-protected-meiju-product-profiles.md).

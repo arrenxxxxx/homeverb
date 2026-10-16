@@ -44,7 +44,7 @@ impl DiscoveryNetwork {
         Ipv4Addr::from(u32::from(self.address) | !self.mask)
     }
 
-    pub(super) fn local_address(&self) -> Ipv4Addr {
+    pub(crate) fn local_address(&self) -> Ipv4Addr {
         self.address
     }
 
@@ -56,7 +56,7 @@ impl DiscoveryNetwork {
         }
     }
 
-    pub(super) fn admits(&self, source: Ipv4Addr) -> bool {
+    pub(crate) fn admits(&self, source: Ipv4Addr) -> bool {
         let network = u32::from(self.address) & self.mask;
         u32::from(source) & self.mask == network
             && u32::from(source) != network
@@ -75,6 +75,32 @@ pub struct DiscoveryReport {
     pub candidates: Vec<DiscoveryCandidate>,
     pub received_datagrams: usize,
     pub limit_reached: bool,
+}
+
+impl DiscoveryReport {
+    /// Public native fields are caller-constructible; consistency is not provenance.
+    pub(crate) fn validate(&self, network: &DiscoveryNetwork) -> Result<()> {
+        if self.candidates.len() > MAX_CANDIDATES
+            || self.received_datagrams > MAX_RESPONSES
+            || self.candidates.len() > self.received_datagrams
+            || (!self.limit_reached
+                && (self.candidates.len() == MAX_CANDIDATES
+                    || self.received_datagrams == MAX_RESPONSES))
+            || self.candidates.iter().any(|candidate| {
+                !network.admits(*candidate.endpoint.ip())
+                    || *candidate.endpoint.ip() == network.local_address()
+                    || candidate.endpoint.port() == 0
+                    || !candidate
+                        .appliance_id
+                        .expose()
+                        .parse::<u64>()
+                        .is_ok_and(|id| (1..=0xffff_ffff_ffff).contains(&id))
+            })
+        {
+            return Err(Error::invalid());
+        }
+        Ok(())
+    }
 }
 
 fn failed() -> Error {

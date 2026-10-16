@@ -469,3 +469,17 @@ code. Tests use fictional accounts and do not access the saved pilot profile.
 See the [Flutter contract](../native-ui-contract.md#profile-scoped-dishwasher-starts-api-114)
 for dynamic fields, confirmation and accepted/unknown receipts. Physical/off-LAN
 behavior and preservation of other settings remain acceptance work.
+
+## Reconcile a LAN hint with a saved account
+
+Use `MeijuAccount::reconcile_lan_candidate` with the selected `DeviceBinding`,
+explicit `DiscoveryNetwork`, `DiscoveryReport` and existing `Operation`.
+It reads the protected map under the account lease and performs no networking.
+Handle all four `LanCandidateMatch` variants: `NotObserved`, `Incomplete`,
+`Ambiguous` and `UniqueCandidate`. The last borrows private protocol hints only;
+it does not create a second card or add a connection to the cloud descriptor.
+See [ADR-0050](../adr/0050-protected-lan-candidate-reconciliation.md) for conflict
+and report validation rules. Do not turn a successful match into automatic token
+transmission. Trusted endpoint admission, model evidence and network consent
+remain prerequisites for a future composed route; cloud model admission is not
+LAN compatibility. Public native JSON methods do not expose this helper yet.

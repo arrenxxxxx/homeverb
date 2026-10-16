@@ -188,6 +188,16 @@ Non-query kinds, alternate body types and explicit Fahrenheit return
 error or zero-temperature observation. Failures return no partial candidate and
 do not query another format, update a cache or establish any device-write outcome.
 
+[LAN candidate reconciliation](adr/0050-protected-lan-candidate-reconciliation.md)
+uses `INVALID_ARGUMENT` for inconsistent report bounds/counters or unusable peer
+addresses, ports or IDs. An incorrect local binding returns `DEVICE_IDENTITY_CONFLICT`;
+unknown/unlisted membership retains `MIDEA_INVENTORY_REQUIRED`/`MIDEA_DEVICE_NOT_LISTED`.
+Unsupported protected families or IDs return `CAPABILITY_UNSUPPORTED`; a foreign
+region returns `AUTH_FLOW_UNSUPPORTED`. Vault and lifecycle errors propagate without
+a network fallback. Untrusted report conflicts return native `Ambiguous`, limits
+return `Incomplete` and no matching hint returns `NotObserved`, not an offline or
+revocation error. None of these results changes a public execution outcome.
+
 The account-bound read path returns `DEVICE_IDENTITY_CONFLICT` before transport when the local device, selected connection or known model differs from the protected binding. Invalid components return `CAPABILITY_UNSUPPORTED`. Pending or unavailable credentials stop the request through the vault. Core rejects decoded but undeclared properties with `INVALID_OBSERVATION`; neither that rejection nor a protocol failure replaces the previous cache or triggers a retry.
 
 Protected inventory membership is independent of historical identity. API 1.9.1

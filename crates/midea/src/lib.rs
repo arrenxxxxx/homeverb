@@ -17,7 +17,8 @@ pub use product::ProductProfile;
 
 mod account;
 pub use account::{
-    BoundInventory, ConnectReport, DeviceBinding, DeviceInventoryMembership, MeijuAccount, connect,
+    BoundInventory, ConnectReport, DeviceBinding, DeviceInventoryMembership, LanCandidateMatch,
+    MeijuAccount, connect,
 };
 mod adapter;
 pub use adapter::{AccountDiscovery, AccountInventory, MeijuAdapter};
