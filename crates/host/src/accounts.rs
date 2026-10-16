@@ -150,3 +150,14 @@ pub(crate) fn unsupported() -> Error {
         "This host has no admitted account connection flow.",
     )
 }
+
+pub(crate) fn conflicts(inspection: homeverb_midea::DeviceConflictInspection) -> serde_json::Value {
+    fn reference(entry: homeverb_midea::AccountDeviceReference) -> serde_json::Value {
+        serde_json::json!({"account_id":entry.account_id, "device_id":entry.device.device_id,
+        "connection_id":entry.device.connection_id, "membership":match entry.device.listed {
+            Some(true) => "listed", Some(false) => "not_listed", None => "unconfirmed",
+        }})
+    }
+    serde_json::json!({"source":"saved_inventory", "authorization":"not_checked", "physical_identity":"unverified",
+        "selected":reference(inspection.selected), "matches":inspection.matches.into_iter().map(reference).collect::<Vec<_>>()})
+}

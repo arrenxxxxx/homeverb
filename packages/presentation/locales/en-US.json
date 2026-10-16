@@ -198,5 +198,8 @@
   "connection.link.scope": "Review the existing device and the proposed connection. This keeps the same device and room assignments.",
   "connection.link.grants_hint": "The new route can affect automatic reads and enable existing permissions for that transport. It does not grant new permission.",
   "connection.link.confirm": "Add this connection",
-  "connection.link.interrupted": "The connection change was interrupted. Check saved connections before trying again."
+  "connection.link.interrupted": "The connection change was interrupted. Check saved connections before trying again.",
+  "account.inspectDeviceConflicts": "Inspect duplicate device records",
+  "account.deviceConflictsNotice": "These saved records may refer to the same appliance. Inspection does not confirm physical identity or merge devices.",
+  "error.MIDEA_CONFLICT_LIMIT": "Conflict inspection supports at most 64 mainland Meiju accounts."
 }

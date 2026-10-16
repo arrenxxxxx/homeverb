@@ -1,6 +1,6 @@
 # HomeVerb native contract
 
-Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.21.0 has 33 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions and three trusted connection-link functions; the JSON envelope schema is 1.0.
+Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.22.0 has 34 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions and three trusted connection-link functions; the JSON envelope schema is 1.0.
 
 API 1.19 adds nullable `last_complete_inventory_at` to account summaries. It is
 historical local retrieval metadata, not authorization or online status. SQLite
@@ -85,3 +85,12 @@ empty grants never authorize it. Read-only control options expose its domain,
 and trusted confirmation must display the chosen setting. Other admitted profiles
 still forbid extra arguments. There remain 33 ordinary methods and 16 C functions
 plus the Android-only JNI initializer. Storage formats are unchanged.
+
+
+API 1.22 adds `inspect_device_conflicts`, the 34th ordinary method. It diagnoses
+saved cross-account binding candidates from exact local account/device IDs,
+including unpublished records, without networking, merging or changing authority.
+At most 64 mainland Meiju accounts participate; any inaccessible relevant map
+fails the complete query. C/JNI and storage formats remain unchanged. Account
+choice and reconciliation remain separate work; see the
+[conflict contract](../../docs/native-ui-contract.md#inspect-saved-device-conflicts-api-122).

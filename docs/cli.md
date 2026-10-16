@@ -57,6 +57,7 @@ homeverb --adapter midea.meiju account connect --label "Home appliances" --accou
 homeverb --adapter midea.meiju account list
 homeverb --adapter midea.meiju account show <local-account-id>
 homeverb --adapter midea.meiju account inventory <local-account-id>
+homeverb --adapter midea.meiju account conflicts <local-account-id> <local-device-id>
 homeverb --adapter midea.meiju account refresh <local-account-id>
 homeverb --adapter midea.meiju account recover <local-account-id>
 homeverb --adapter midea.meiju account rename <local-account-id> "Home appliances"
@@ -96,6 +97,12 @@ See [account recovery and reauthorization](native-ui-contract.md#recover-interru
 set. A changed set refuses cleanup. A pending cleanup retains its nested error
 and can be retried explicitly with the same reviewed set. No provider revocation
 or appliance command follows removal.
+
+`conflicts` reuses native saved-device inspection and accepts local IDs from
+`inventory`, even when no card was published. It reports candidate references
+without provider traffic, card changes, merge or account selection. Historical
+membership is not online state. More than 64 relevant accounts returns
+`MIDEA_CONFLICT_LIMIT` (exit 7); inaccessible maps fail without partial results.
 
 Account responses retain the [native response shapes](../schemas/native-response.schema.json).
 Exit status inspects both the top-level error and nested retrieval/removal errors.

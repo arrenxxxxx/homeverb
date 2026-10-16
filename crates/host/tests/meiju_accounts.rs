@@ -25,6 +25,9 @@ mod mode;
 #[path = "meiju_accounts/inventory.rs"]
 mod inventory;
 
+#[path = "meiju_accounts/conflicts.rs"]
+mod conflicts;
+
 #[path = "meiju_accounts/inventory_time.rs"]
 mod inventory_time;
 
@@ -363,6 +366,7 @@ impl Fixture {
                 | "recover_account"
                 | "get_account"
                 | "inspect_account_inventory"
+                | "inspect_device_conflicts"
                 | "inspect_control_options"
                 | "inspect_session_grants"
                 | "rename_account"

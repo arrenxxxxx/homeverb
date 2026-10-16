@@ -198,5 +198,8 @@
   "connection.link.scope": "请核对现有设备和拟添加的连接。设备身份和房间归属保持不变。",
   "connection.link.grants_hint": "新路由可能影响自动读取，并使该传输方式的已有权限生效；它不会授予新权限。",
   "connection.link.confirm": "添加此连接",
-  "connection.link.interrupted": "连接变更已中断。再次尝试前，请先检查已保存的连接。"
+  "connection.link.interrupted": "连接变更已中断。再次尝试前，请先检查已保存的连接。",
+  "account.inspectDeviceConflicts": "检查重复设备记录",
+  "account.deviceConflictsNotice": "这些已保存记录可能指向同一台设备。检查结果不代表已确认实物身份，也不会合并设备。",
+  "error.MIDEA_CONFLICT_LIMIT": "冲突检查最多支持 64 个中国大陆美居账号。"
 }

@@ -1,5 +1,5 @@
 {
-  "api_version": "1.21.0",
+  "api_version": "1.22.0",
   "evidence": "Fictional opted-in adapter only; production Mock and Meiju refuse linking.",
   "prepare": {
     "schema_version": "1.0",

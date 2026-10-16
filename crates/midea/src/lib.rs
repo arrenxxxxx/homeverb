@@ -24,7 +24,8 @@ pub use account::{
 };
 mod adapter;
 pub use adapter::{
-    AccountDiscovery, AccountInventory, ControlOption, LanScanOutcome, MeijuAdapter,
+    AccountDeviceReference, AccountDiscovery, AccountInventory, ControlOption,
+    DeviceConflictInspection, LanScanOutcome, MeijuAdapter,
 };
 mod state;
 pub use state::{CloudState, StateQuery, read_cloud_state};

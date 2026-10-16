@@ -18,6 +18,7 @@ use std::{
 use uuid::Uuid;
 use zeroize::Zeroize;
 
+mod conflicts;
 mod lan;
 pub use lan::LanCandidateMatch;
 

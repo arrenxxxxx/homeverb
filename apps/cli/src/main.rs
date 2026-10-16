@@ -593,6 +593,7 @@ fn error_exit(error: &Error) -> u8 {
         "LAN_UNREACHABLE" | "CLOUD_UNREACHABLE" | "DEADLINE_EXCEEDED" => 5,
         "POLICY_DENIED" => 6,
         "RESOURCE_BUSY"
+        | "MIDEA_CONFLICT_LIMIT"
         | "REQUEST_CONFLICT"
         | "REQUEST_RETIRED"
         | "SECRET_STORE_CONFLICT"

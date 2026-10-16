@@ -4,7 +4,7 @@ The owner selected Midea and Hualing air conditioners, dishwashers, and refriger
 
 Daily cloud control is required in the first real integration. LAN is an additional route for the same physical devices, not a substitute for cloud control. A mainland account and six exact cloud model/family pairs have been observed. Firmware, app-version and model-specific physical acceptance remain incomplete. This guide reflects implementation through October 16, 2026; no model is physically verified.
 
-The native read protocols are implemented in [homeverb-midea](../../crates/midea/src/lib.rs): account-scoped home/appliance retrieval, code/data validation, deduplication, partial inventory failure, and bounded cloud-state decoding for the three selected families. The inventory/state decoders use an injected read transport and synthetic responses with the inspected wire fields. Native password login, signing, session-key decoding and restricted HTTPS are now implemented under ADR-0022 and tested against fictional responses and a local TLS server. One real mainland account has passed the read-only login/inventory probe below; the exact-model read-only Core adapter is available through `core-inspect` and native startup selection. The current [native API 1.21.0](../native-ui-contract.md) provides protected connection, account management and explicit refresh/recovery. Android storage has synthetic JVM and isolated emulator evidence; Flutter input, physical phone acceptance and signed iPhone credential acceptance remain pending. See [ADR-0020](../adr/0020-midea-cloud-inventory.md) and [ADR-0023](../adr/0023-meiju-cloud-state-evidence.md).
+The native read protocols are implemented in [homeverb-midea](../../crates/midea/src/lib.rs): account-scoped home/appliance retrieval, code/data validation, deduplication, partial inventory failure, and bounded cloud-state decoding for the three selected families. The inventory/state decoders use an injected read transport and synthetic responses with the inspected wire fields. Native password login, signing, session-key decoding and restricted HTTPS are now implemented under ADR-0022 and tested against fictional responses and a local TLS server. One real mainland account has passed the read-only login/inventory probe below; the exact-model read-only Core adapter is available through `core-inspect` and native startup selection. The current [native API 1.22.0](../native-ui-contract.md) provides protected connection, account management and explicit refresh/recovery. Android storage has synthetic JVM and isolated emulator evidence; Flutter input, physical phone acceptance and signed iPhone credential acceptance remain pending. See [ADR-0020](../adr/0020-midea-cloud-inventory.md) and [ADR-0023](../adr/0023-meiju-cloud-state-evidence.md).
 
 The native account vault now persists random local references, composes Linux secure storage, and coordinates session read/update work through account leases. Meiju's private account payload also preserves appliance-to-local-ID bindings with the session. Interrupted or uncertain updates remain pending until trusted validation and recovery. Native API 1.7 provides an explicit [recovery and retrieval flow](../native-ui-contract.md#recover-interrupted-account-storage) that validates saved material without another login. The explicit native connection coordinator now uses this storage and the admitted login client; real account identity and session validity still require live acceptance. See [ADR-0021](../adr/0021-persistent-account-vault.md), [ADR-0024](../adr/0024-meiju-private-device-bindings.md) and the [credential integration guide](04-add-adapter.md#integrate-native-credentials).
 
@@ -540,3 +540,27 @@ repository validation passed. An independent AST inspection of the pinned E1
 source matched all 27 product/action/option combinations. These results establish
 synthetic implementation behavior, not the owner's product identity, Flutter
 integration, mobile builds or physical/off-LAN acceptance.
+## Diagnose duplicate account bindings before reconciliation
+
+After `DEVICE_IDENTITY_CONFLICT`, inspect the selected account's saved inventory
+and pass its local account/device IDs to API 1.22 `inspect_device_conflicts`.
+The query holds the registration lock and all relevant account leases and reads
+saved protected maps without networking. It reports local counterpart references
+and historical membership even when a candidate never became a card. Do not
+turn those references into new cards or interpret equal IDs as physical proof.
+An unavailable relevant account fails the complete query rather than hiding a
+possible duplicate. See the [native contract](../native-ui-contract.md#inspect-saved-device-conflicts-api-122).
+
+This supplies the missing diagnostic input for a later trusted account-choice
+preview. That future operation still needs fresh protected identity/model
+comparison, an explicit choice, stable-ID preservation, authority review and
+recoverable atomic changes; this read-only query performs none of those writes.
+
+Local verification for this phase: `cargo test --workspace --offline --locked`
+passed 485 tests with two environment-dependent tests ignored; workspace build,
+Clippy and formatting passed. The native contract runner passed all 34 methods
+and generated 55 fictional examples; the CLI/MCP runtime runner passed 35 tests,
+Python tooling passed 62 tests and presentation passed seven tests. Documentation,
+contract and repository validators passed. The generated example ordering follows
+the current runner; the only additional method is conflict inspection. No live
+account, physical device, Flutter or mobile build was exercised in this phase.

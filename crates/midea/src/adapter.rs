@@ -22,6 +22,8 @@ use uuid::Uuid;
 
 const PROVIDER: &str = "midea.meiju";
 
+mod conflicts;
+pub use conflicts::{AccountDeviceReference, DeviceConflictInspection};
 mod lan;
 pub use lan::LanScanOutcome;
 mod control_options;

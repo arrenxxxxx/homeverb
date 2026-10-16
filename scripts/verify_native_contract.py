@@ -29,7 +29,7 @@ def main():
     responses = {name: validator('native-response', name) for name in [*api['methods'], 'open']}
     query_error = validator('native-response', 'query_error')
     info_example = {'schema_version': '1.0', 'data': copy.deepcopy(api), 'warnings': [], 'error': None}
-    info_example['data']['api_version'] = '1.21.0'
+    info_example['data']['api_version'] = '1.22.0'
     info_example['data']['methods']['future_query'] = {'response_kind': 'query'}
     responses['get_api_info'].validate(info_example)
     info_example['data']['api_version'] = '2.0.0'
@@ -108,6 +108,7 @@ def main():
             assert call(handle, 'list_accounts')['data'] == []
             assert call(handle, 'get_account', account_id='00000000-0000-4000-8000-000000000001')['error']['code'] == 'AUTH_FLOW_UNSUPPORTED'
             assert call(handle, 'inspect_account_inventory', account_id='00000000-0000-4000-8000-000000000001')['error']['code'] == 'AUTH_FLOW_UNSUPPORTED'
+            assert call(handle, 'inspect_device_conflicts', account_id='00000000-0000-4000-8000-000000000001', device_id='00000000-0000-4000-8000-000000000002')['error']['code'] == 'AUTH_FLOW_UNSUPPORTED'
             assert call(handle, 'rename_account', account_id='00000000-0000-4000-8000-000000000001', label='Family appliances')['error']['code'] == 'AUTH_FLOW_UNSUPPORTED'
             assert call(handle, 'remove_account', account_id='00000000-0000-4000-8000-000000000001', expected_device_ids=[])['error']['code'] == 'AUTH_FLOW_UNSUPPORTED'
             assert call(handle, 'refresh_account', account_id='00000000-0000-4000-8000-000000000001')['error']['code'] == 'AUTH_FLOW_UNSUPPORTED'
@@ -322,7 +323,18 @@ def main():
                 bad['request'][field] = value
                 assert not request_schema.is_valid(bad)
                 assert raw(handle, bad)['error']['code'] == 'INVALID_ARGUMENT'
+            conflict = envelope('inspect_device_conflicts', account_id='00000000-0000-4000-8000-000000000001', device_id='00000000-0000-4000-8000-000000000002')
+            request_schema.validate(conflict)
+            conflict_result = raw(handle, conflict)
+            responses['inspect_device_conflicts'].validate(conflict_result)
+            assert conflict_result['error']['code'] == 'ACCOUNT_NOT_FOUND'
+            for field, value in [('merge', True), ('refresh', True), ('preferred_account', 'PRIVATE')]:
+                bad = copy.deepcopy(conflict)
+                bad['request'][field] = value
+                assert not request_schema.is_valid(bad)
+                assert raw(handle, bad)['error']['code'] == 'INVALID_ARGUMENT'
             library.homeverb_set_foreground(handle, False)
+            assert raw(handle, conflict)['error']['code'] == 'HOST_BACKGROUND'
             assert raw(handle, inspection)['error']['code'] == 'HOST_BACKGROUND'
             result = raw(handle, envelope('discover'))
             query_error.validate(result)
@@ -835,6 +847,20 @@ def main():
                 bad = copy.deepcopy(case['response'])
                 bad['data']['options'] *= 2
                 assert not responses['inspect_control_options'].is_valid(bad)
+        if case['response_definition'] == 'inspect_device_conflicts':
+            for field, value in [('source', 'live'), ('authorization', 'granted'),
+                                 ('physical_identity', 'verified'), ('winner', {})]:
+                bad = copy.deepcopy(case['response'])
+                bad['data'][field] = value
+                assert not responses['inspect_device_conflicts'].is_valid(bad)
+            for field, value in [('membership', 'online'), ('account_id', 'PRIVATE'),
+                                 ('appliance_id', 'PRIVATE'), ('model', 'PRIVATE')]:
+                bad = copy.deepcopy(case['response'])
+                bad['data']['matches'][0][field] = value
+                assert not responses['inspect_device_conflicts'].is_valid(bad)
+            bad = copy.deepcopy(case['response'])
+            bad['data']['matches'] *= 2
+            assert not responses['inspect_device_conflicts'].is_valid(bad)
         if case['response_definition'] == 'inspect_account_inventory':
             for field, value in [('membership', 'online'), ('membership', True),
                                  ('device_id', 'not-a-uuid'), ('connection_id', None),

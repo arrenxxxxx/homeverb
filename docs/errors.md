@@ -432,3 +432,16 @@ observations return `MIDEA_RESPONSE_INVALID`; the whole previous snapshot remain
 unchanged. Missing/null values are absent, and valid unknown unsigned codes are
 observable without granting a corresponding write. An old descriptor without the
 new property still fails Core snapshot admission until explicit rediscovery.
+
+
+## Saved cross-account conflict inspection
+
+API 1.22 `inspect_device_conflicts` returns `MIDEA_CONFLICT_LIMIT` when more than
+64 mainland Meiju accounts would participate, before protected-store reads. It
+never truncates or returns partial candidates. Invalid UUID-v4 selections return
+`INVALID_ARGUMENT`; an absent/foreign account returns `ACCOUNT_NOT_FOUND`, and a
+device missing from the selected protected binding map returns
+`DEVICE_IDENTITY_CONFLICT`. Busy registration/account leases, pending/removing
+accounts and unavailable/corrupt protected entries retain their existing fixed
+errors. No error triggers refresh, recovery, merge, credentials changes or an
+empty-success fallback. Cancellation and deadlines release all acquired leases.

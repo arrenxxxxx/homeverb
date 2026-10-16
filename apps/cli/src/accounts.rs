@@ -26,6 +26,11 @@ pub enum AccountCommand {
     Inventory {
         account_id: Uuid,
     },
+    /// Inspect saved cross-account identity candidates without merging devices.
+    Conflicts {
+        account_id: Uuid,
+        device_id: Uuid,
+    },
     /// Retrieve devices using saved authorization; never logs in automatically.
     Refresh {
         account_id: Uuid,
@@ -95,6 +100,13 @@ pub async fn run(
                 AccountCommand::Inventory { account_id } => {
                     Request::InspectAccountInventory { account_id }
                 }
+                AccountCommand::Conflicts {
+                    account_id,
+                    device_id,
+                } => Request::InspectDeviceConflicts {
+                    account_id,
+                    device_id,
+                },
                 AccountCommand::Refresh { account_id } => Request::RefreshAccount { account_id },
                 AccountCommand::Recover { account_id } => Request::RecoverAccount { account_id },
                 AccountCommand::Rename { account_id, label } => {
@@ -240,6 +252,7 @@ mod tests {
     fn nested_outcomes_control_exit_without_hiding_saved_authorization() {
         for (pointer, code, expected) in [
             ("/error", "ACCOUNT_NOT_FOUND", 4),
+            ("/error", "MIDEA_CONFLICT_LIMIT", 7),
             ("/data/retrieval/error", "AUTH_REQUIRED", 3),
             ("/data/retrieval/error", "MIDEA_INVENTORY_PARTIAL", 13),
             ("/data/error", "SECRET_STORE_WRITE_UNKNOWN", 10),

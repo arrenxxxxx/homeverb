@@ -79,7 +79,7 @@ class RuntimeAcceptance(unittest.TestCase):
         elif arguments[0] == 'account':
             definition = {'list': 'list_accounts', 'show': 'get_account',
                           'rename': 'rename_account', 'remove': 'remove_account',
-                          'inventory': 'inspect_account_inventory', 'refresh': 'refresh_account',
+                          'inventory': 'inspect_account_inventory', 'conflicts': 'inspect_device_conflicts', 'refresh': 'refresh_account',
                           'recover': 'recover_account', 'connect': 'connect_account'}[arguments[1]]
         elif arguments[0] == 'device':
             definition = {'discover': 'discover', 'cards': 'list_device_cards',
@@ -189,11 +189,14 @@ class RuntimeAcceptance(unittest.TestCase):
         self.assertEqual(self.meiju('device', 'discover')['data'], [])
         self.assertEqual(self.meiju('device', 'cards')['data'], [])
         account = '40000000-0000-4000-8000-000000000001'
+        device = '60000000-0000-4000-8000-000000000001'
+        self.assertEqual(self.meiju('account', 'conflicts', account, device, expected=4)['error']['code'], 'ACCOUNT_NOT_FOUND')
         reference = '50000000-0000-4000-8000-000000000001'
         database = Path(self.directory.name) / 'meiju/homeverb.sqlite3'
         with closing(sqlite3.connect(database)) as connection, connection:
             connection.execute('INSERT INTO accounts (id, provider, region, label, credential_ref, credential_state) VALUES (?, ?, ?, ?, ?, ?)',
                                (account, 'midea.meiju', 'CN', 'Fictional account', reference, 'pending'))
+        self.assertEqual(self.meiju('account', 'conflicts', account, device, expected=3)['error']['code'], 'ACCOUNT_SESSION_UNCONFIRMED')
         details = self.meiju('account', 'show', account)['data']
         self.assertEqual(details['device_ids'], [])
         self.assertEqual(details['account']['authorization'], 'not_checked')

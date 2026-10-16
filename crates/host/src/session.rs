@@ -33,6 +33,10 @@ pub enum Request {
     GetAccount {
         account_id: uuid::Uuid,
     },
+    InspectDeviceConflicts {
+        account_id: uuid::Uuid,
+        device_id: uuid::Uuid,
+    },
     InspectAccountInventory {
         account_id: uuid::Uuid,
     },
@@ -475,6 +479,21 @@ impl Session {
                     .ok_or_else(crate::accounts::unsupported)?;
                 let account = adapter.account(account_id, &operation).await?;
                 crate::accounts::details(&self.core, account, &operation).await
+            }
+            Request::InspectDeviceConflicts {
+                account_id,
+                device_id,
+            } => {
+                let adapter = self
+                    .accounts
+                    .as_ref()
+                    .ok_or_else(crate::accounts::unsupported)?;
+                let inspection = adapter
+                    .inspect_device_conflicts(account_id, device_id, &operation)
+                    .await?;
+                operation
+                    .run(async { Ok(crate::accounts::conflicts(inspection)) })
+                    .await
             }
             Request::InspectAccountInventory { account_id } => {
                 let adapter = self

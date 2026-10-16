@@ -34,7 +34,7 @@ The 16 C functions in [homeverb.h](../crates/ffi/include/homeverb.h) form the na
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects saved-account cloud reads. `scenario` defaults to `normal`. Meiju requires `allow_mock_writes: false` and rejects any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms `homeverb.mock` or `midea.meiju`. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.21.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.22.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -82,6 +82,7 @@ All rows use query envelopes except the two execution methods. The schemas and a
 | `inspect_control_options` | `device_id`, `connection_id` | Saved model-specific permission-form options; no permission check, networking or control enablement |
 | `inspect_session_grants` | `device_id`, `connection_id` | Current local session rules for that route; no credential access, provider authorization check or control enablement |
 | `inspect_account_inventory` | `account_id` | Saved protected device/connection membership; no network or mutation |
+| `inspect_device_conflicts` | `account_id`, `device_id` | Saved duplicate-binding candidates across accounts; no merge or authority |
 | `refresh_account` | `account_id` | Account and retrieval/publication result; no login |
 | `recover_account` | `account_id` | Explicit pending-session validation and card retrieval; same result shape as refresh |
 | `list_devices` | None | Device array from local storage |
@@ -184,7 +185,8 @@ account inventories, `describe_device` for component-scoped read properties, and
 `read_state` with `connection: "cloud"`. Cache reads remain local. Complete empty
 inventory does not delete cards. Partial retrieval preserves old cards and returns
 `MIDEA_INVENTORY_PARTIAL`; conflicting historical/current cross-account bindings
-return `DEVICE_IDENTITY_CONFLICT`. No implicit reconciliation is available.
+return `DEVICE_IDENTITY_CONFLICT`. API 1.22 can inspect the saved candidates with
+`inspect_device_conflicts`; no implicit reconciliation is available.
 
 Only the six [observed model/family pairs](compatibility.md#observed-cloud-read-models)
 are experimental; other models remain visible as unsupported. Default discovery
@@ -1063,7 +1065,7 @@ cargo test -p homeverb-host --test native_contract --offline --locked
 .venv/bin/python scripts/verify_native_contract.py
 ```
 
-The native suite also calls all three trusted approval exports using fictional data and checks exact scope, duplicate/concurrent consumption, cross-handle refusal, capacity, dismissal, lifecycle, metadata changes and independent adapter approval guards. Deterministic Rust tests cover expiry and background/foreground races. The native suite calls all 31 catalog methods, checks their schemas, verifies closed-field rejection, null success, pre-admission errors, composite/batch results, all execution outcomes, cancellation, foreground gating and closed handles. It also validates the saved examples and Meiju startup/account admission guards, caller-buffer clearing, local detail/rename persistence, removal admission/ledger replay, explicit cache/history clearing, retired-request refusal, recovery admission and account counterexamples without a live account. `--write-examples` regenerates those examples only from a successful fictional run; review and commit the changes together with the contract. Existing full MVP tests still cover execution and persistence behavior.
+The native suite also calls all three trusted approval exports using fictional data and checks exact scope, duplicate/concurrent consumption, cross-handle refusal, capacity, dismissal, lifecycle, metadata changes and independent adapter approval guards. Deterministic Rust tests cover expiry and background/foreground races. The native suite calls all 34 catalog methods, checks their schemas, verifies closed-field rejection, null success, pre-admission errors, composite/batch results, all execution outcomes, cancellation, foreground gating and closed handles. It also validates the saved examples and Meiju startup/account admission guards, caller-buffer clearing, local detail/rename persistence, removal admission/ledger replay, explicit cache/history clearing, retired-request refusal, recovery admission and account counterexamples without a live account. `--write-examples` regenerates those examples only from a successful fictional run; review and commit the changes together with the contract. Existing full MVP tests still cover execution and persistence behavior.
 
 This is Linux native verification. Dart FFI allocation, worker scheduling, mobile library packaging, secure stores, system-browser lifecycle, and physical-phone behavior must be tested in the Flutter worktree. No Flutter build has been run for this delivery.
 
@@ -1179,7 +1181,7 @@ Require API 1.18 before resolving the three exports in
 [lan-scan.json](../packages/native-contract/lan-scan.json). Their
 [closed schemas](../schemas/native-lan-scan.schema.json) and
 [fictional examples](../packages/native-contract/lan-scan-examples.json) are
-separate from the 33 ordinary JSON methods. See [ADR-0058](adr/0058-native-lan-scan-bridge.md).
+separate from the ordinary JSON methods. See [ADR-0058](adr/0058-native-lan-scan-bridge.md).
 
 1. The trusted controller obtains an assigned IPv4 interface/prefix from the OS
    and handles local-network permission. Do not take addresses from tool input.
@@ -1273,5 +1275,51 @@ room organization. Losing user-visible callbacks on forced termination is possib
 This bridge preserves ADR-0052's exact adapter/account/identity constraints and
 transactional storage guard. It cannot merge accounts, replace/remove routes,
 grant authority or admit Meiju model/endpoints. SQLite schema 5, protected payload
-3 and the 33 ordinary methods remain unchanged. See
+3 and the ordinary method signatures remain unchanged by this bridge. See
 [ADR-0061](adr/0061-native-connection-link-bridge.md) for verification boundaries.
+
+
+## Inspect saved device conflicts (API 1.22)
+
+Require `inspect_device_conflicts` in the API catalog. Select the local account
+and device IDs from `inspect_account_inventory`; a conflict may have prevented
+that binding from becoming a card, so do not require `describe_device` first.
+
+```json
+{
+  "schema_version": "1.0",
+  "operation_id": "inspect-conflicts-1",
+  "timeout_ms": 10000,
+  "request": {
+    "method": "inspect_device_conflicts",
+    "account_id": "10000000-0000-4000-8000-000000000001",
+    "device_id": "20000000-0000-4000-8000-000000000001"
+  }
+}
+```
+
+The result contains `selected` and `matches`. Each entry has local `account_id`,
+`device_id`, `connection_id` and saved `membership`. Matches are sorted by local
+account ID. Display account labels from local account metadata, keeping
+unpublished bindings separate from device cards. Use
+`account.inspectDeviceConflicts` and `account.deviceConflictsNotice` in both
+supported locales. Never display a candidate as a confirmed merge, choose an
+account automatically or infer permission from membership.
+
+This foreground query reads protected saved maps for at most 64 mainland Meiju
+accounts under the registration lock and all account leases. It does not contact
+the provider, mutate credentials, publish cards, change rooms/history or add
+permissions. `source: saved_inventory`, `authorization: not_checked` and
+`physical_identity: unverified` are fixed. Historical and unconfirmed bindings
+participate; equal model names alone do not produce a match. Empty `matches`
+means only that the inspected saved maps have no equal provider appliance ID.
+
+Unavailable, pending, removing, corrupt or busy relevant accounts fail the whole
+query; do not render an error as an empty result. `MIDEA_CONFLICT_LIMIT` rejects
+more than 64 relevant accounts before secret reads. Invalid/missing selections
+use existing fixed errors. Cancellation releases all locks without a retry.
+See [ADR-0064](adr/0064-saved-device-conflict-inspection.md) and the fictional
+[account examples](../packages/native-contract/account-examples.json).
+
+This is diagnosis only. Explicit account choice and atomic reconciliation that
+preserves stable cards, organization and history remain unimplemented.

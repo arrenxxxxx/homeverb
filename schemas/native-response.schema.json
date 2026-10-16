@@ -460,6 +460,18 @@
                         "response_kind"
                       ],
                       "additionalProperties": false
+                    },
+                    "inspect_device_conflicts": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": false
                     }
                   },
                   "required": [
@@ -495,7 +507,8 @@
                     "recover_account",
                     "inspect_account_inventory",
                     "inspect_control_options",
-                    "inspect_session_grants"
+                    "inspect_session_grants",
+                    "inspect_device_conflicts"
                   ],
                   "additionalProperties": {
                     "type": "object",
@@ -2274,6 +2287,101 @@
               ],
               "additionalProperties": false,
               "description": "Current immutable local session grants for one device and transport. No provider or appliance authorization is established."
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "urn:homeverb:schema:native-response#/$defs/query_error"
+        }
+      ]
+    },
+    "account_device_reference": {
+      "type": "object",
+      "properties": {
+        "account_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "device_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "connection_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "membership": {
+          "enum": [
+            "listed",
+            "not_listed",
+            "unconfirmed"
+          ]
+        }
+      },
+      "required": [
+        "account_id",
+        "device_id",
+        "connection_id",
+        "membership"
+      ],
+      "additionalProperties": false
+    },
+    "inspect_device_conflicts": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "source": {
+                  "const": "saved_inventory"
+                },
+                "authorization": {
+                  "const": "not_checked"
+                },
+                "physical_identity": {
+                  "const": "unverified"
+                },
+                "selected": {
+                  "$ref": "urn:homeverb:schema:native-response#/$defs/account_device_reference"
+                },
+                "matches": {
+                  "type": "array",
+                  "maxItems": 63,
+                  "uniqueItems": true,
+                  "items": {
+                    "$ref": "urn:homeverb:schema:native-response#/$defs/account_device_reference"
+                  }
+                }
+              },
+              "required": [
+                "source",
+                "authorization",
+                "physical_identity",
+                "selected",
+                "matches"
+              ],
+              "additionalProperties": false
             },
             "warnings": {
               "type": "array",

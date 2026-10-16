@@ -604,6 +604,28 @@
             "connection_id"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "inspect_device_conflicts"
+            },
+            "account_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "device_id": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "required": [
+            "method",
+            "account_id",
+            "device_id"
+          ],
+          "additionalProperties": false
         }
       ]
     }

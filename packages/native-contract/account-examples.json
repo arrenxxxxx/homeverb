@@ -1,5 +1,5 @@
 {
-  "api_version": "1.21.0",
+  "api_version": "1.22.0",
   "provenance": "Fictional account DTO examples. Actual synthetic host responses are checked against the same schemas by crates/host/tests/meiju_accounts.rs. No live identities or credentials.",
   "connect_metadata": {
     "schema_version": "1.0",
@@ -670,6 +670,43 @@
           "source": "saved_inventory",
           "authorization": "not_checked",
           "options": []
+        },
+        "warnings": [],
+        "error": null
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "inspect-conflicts-example",
+        "timeout_ms": 1000,
+        "request": {
+          "method": "inspect_device_conflicts",
+          "account_id": "10000000-0000-4000-8000-000000000001",
+          "device_id": "20000000-0000-4000-8000-000000000001"
+        }
+      },
+      "response_definition": "inspect_device_conflicts",
+      "response": {
+        "schema_version": "1.0",
+        "data": {
+          "source": "saved_inventory",
+          "authorization": "not_checked",
+          "physical_identity": "unverified",
+          "selected": {
+            "account_id": "10000000-0000-4000-8000-000000000001",
+            "device_id": "20000000-0000-4000-8000-000000000001",
+            "connection_id": "30000000-0000-4000-8000-000000000001",
+            "membership": "listed"
+          },
+          "matches": [
+            {
+              "account_id": "10000000-0000-4000-8000-000000000002",
+              "device_id": "20000000-0000-4000-8000-000000000002",
+              "connection_id": "30000000-0000-4000-8000-000000000002",
+              "membership": "not_listed"
+            }
+          ]
         },
         "warnings": [],
         "error": null

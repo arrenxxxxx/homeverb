@@ -1662,3 +1662,17 @@ locales; unknown codes remain visible without becoming writable. Old descriptors
 must be explicitly refreshed; malformed new values preserve the previous cache.
 API 1.21.0 and storage/export formats remain unchanged. Other product profiles
 neither gain this property nor inherit its code meanings.
+
+
+## Saved cross-account conflict inspection (API 1.22)
+
+[ADR-0064](adr/0064-saved-device-conflict-inspection.md) adds the 34th ordinary
+native method, `inspect_device_conflicts`, with exact local account/device input.
+It returns only local binding references and saved membership for possible
+cross-account duplicates, including unpublished and historical records. Equal
+saved provider IDs do not prove physical identity or compatible product metadata.
+No cards, credentials, permissions or routes change. The bounded operation fails
+without partial results when relevant protected records cannot be inspected.
+C/JNI exports, JSON envelope, SQLite and protected-payload versions are unchanged.
+Older libraries reject the method. Explicit reconciliation, account transfer,
+Flutter interaction and real-account/physical acceptance remain pending.
