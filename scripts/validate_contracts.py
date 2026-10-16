@@ -336,6 +336,23 @@ def main() -> int:
     for value in [0, -1, 18446744073709551616, "1", True]:
         bad = dict(scan["confirm"]); bad["scan_id"] = value
         negative.append(("invalid scan ID", native_validator("native-lan-scan", "confirm"), bad))
+    link = load("packages/native-contract/connection-link-examples.json")
+    assert link["api_version"] == load("packages/native-contract/api.json")["api_version"]
+    for definition in ["prepare", "confirm", "prepare_result", "confirm_result"]:
+        shape = native_validator("native-connection-link", definition)
+        shape.validate(link[definition])
+        for field in ["confirmed", "principal", "endpoint", "token", "appliance_id"]:
+            bad = copy.deepcopy(link[definition]); bad[field] = "FORBIDDEN"
+            negative.append((f"link {definition} rejects {field}", shape, bad))
+    for value in [0, -1, 18446744073709551616, "1", True]:
+        bad = dict(link["confirm"]); bad["link_id"] = value
+        negative.append(("invalid link ID", native_validator("native-connection-link", "confirm"), bad))
+    for field in ["endpoint", "token", "appliance_id"]:
+        bad = copy.deepcopy(link["prepare"]); bad["connection"][field] = "FORBIDDEN"
+        negative.append((f"link connection rejects {field}", native_validator("native-connection-link", "prepare"), bad))
+    for field in ["descriptor", "anchor", "connection", "transport_grants", "expires_at"]:
+        bad = copy.deepcopy(link["prepare_result"]); del bad["data"][field]
+        negative.append((f"link preview requires {field}", native_validator("native-connection-link", "prepare_result"), bad))
     for name, validator, data in negative:
         if validator.is_valid(data):
             raise AssertionError(f"Counterexample was not rejected: {name}")

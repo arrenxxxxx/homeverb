@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 /* All strings are UTF-8. Inputs remain caller-owned; free each output exactly once. */
-/* Call open/call/connect/approval/scan/close on worker threads. Cancel and foreground updates may run concurrently. */
+/* Call open/call/connect/approval/scan/link/close on worker threads. Cancel and foreground updates may run concurrently. */
 char *homeverb_open(const char *config_json);
 char *homeverb_call(uint64_t handle, const char *request_json);
 /* Secret buffers are disjoint caller-owned writable memory; no concurrent access. */
@@ -27,6 +27,12 @@ char *homeverb_prepare_lan_scan(uint64_t handle, const char *request_json,
 /* Recheck interface/permission and obtain user consent before consuming the preview. */
 char *homeverb_confirm_lan_scan(uint64_t handle, const char *request_json);
 bool homeverb_discard_lan_scan(uint64_t handle, uint64_t scan_id);
+/* API 1.20+: trusted connection-link preview, actual user consent and dismissal. */
+/* Adapters must independently admit protected evidence; Mock/Meiju currently refuse. */
+/* Show the exact descriptor, anchor, proposed connection and potential transport grants. */
+char *homeverb_prepare_connection_link(uint64_t handle, const char *request_json);
+char *homeverb_confirm_connection_link(uint64_t handle, const char *request_json);
+bool homeverb_discard_connection_link(uint64_t handle, uint64_t link_id);
 bool homeverb_cancel(uint64_t handle, const char *operation_id);
 void homeverb_set_foreground(uint64_t handle, bool foreground);
 void homeverb_close(uint64_t handle);

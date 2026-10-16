@@ -1469,3 +1469,39 @@ Both CI workflows for `9014fcd` were confirmed successful; this phase's push and
 CI are checked separately. No real account, household appliance, physical phone
 or separate Flutter worktree was accessed. Flutter rendering, real inventory
 timing and physical-device acceptance remain unverified; no package is published.
+
+## Trusted native connection-link bridge
+
+[ADR-0061](adr/0061-native-connection-link-bridge.md) exposes three separate C
+functions for the existing typed Core connection-link operation. Native API 1.20
+retains immutable previews in a session-owned, eight-entry registry. Confirmation
+consumes the ID once, including decoded admission failures; background/close
+invalidates pending scope. The returned preview includes exact descriptor,
+anchor, proposed connection and existing potential transport grants. No endpoint,
+credential, ordinary JSON method or new grant is introduced. Mock and Meiju retain
+their default refusal; adapter identity/model/route evidence remains mandatory.
+
+Five new injected Session tests passed with real Core/SQLite and a fictional
+opted-in adapter. Together with the eleven existing connection-link tests they
+cover schema parity, exact scope/grants, metadata preservation, rediscovery and
+reopen, foreign-session/consent-kind isolation, capacity/expiry, consuming failed
+admission, metadata/evidence/account changes, concurrent confirmation and
+cancellation/background/close/deadline/drop. Actual Linux C exports passed
+closed-metadata and ordinary-dispatch refusal plus production Mock/Meiju refusal
+without account credentials or networking. Successful linking is Session-level
+synthetic evidence, not a production-adapter or physical-device claim.
+
+On October 16, 2026, verification passed: formatting, Clippy, 463 Rust tests with
+two explicitly ignored probes, workspace/example builds, 35 runtime checks,
+33 native methods/54 fictional examples and all trusted-function checks,
+42 Python tests, six presentation tests and document/contract/repository/commit
+checks. The arm64, x86_64 and combined AARs passed architecture, 17-export and
+16 KiB alignment inspection. No dependencies were added. No APK/emulator test
+was repeated for this bridge; physical Android/iOS and Flutter remain unverified.
+
+The 33 ordinary methods, prior C signatures, SQLite schema 5, protected payload 3
+and appliance outcomes are unchanged. Negotiate API 1.20 before resolving the new
+symbols. Both CI workflows for `fe10afd` were confirmed successful; this phase's
+commit/push and exact remote CI are checked separately. No real account,
+household appliance, separate Flutter worktree or physical phone was accessed.
+No package is published.

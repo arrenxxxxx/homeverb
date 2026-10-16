@@ -8,7 +8,7 @@ Account-flow amendment, October 15, 2026: Midea Meiju authorization must automat
 
 This document expands [mobile requirements](mobile-app.md). The [embedded Core boundary](sdk.md), schemas, and ADRs remain authoritative for execution semantics. Preserve existing Core work; do not infer a new network service from this handoff. Native request details below are an integration snapshot of separate local implementation work, not code delivered by this UI documentation commit.
 
-The [native UI contract 1.19.0](native-ui-contract.md) supplies 33 callable methods, schemas, actual Mock request/response examples, version negotiation, and screen coverage. It includes account management, explicit pending-account reauthorization with intact protected identity, separate cache/history cleanup, protected saved-inventory/control-option inspection and local session-grant inspection without provider traffic. Three separate trusted scan functions support selected-device/network preview and consuming consent; they require platform interface/permission integration and never add a route. Sharing, identity merge, provider revocation and full-profile deletion remain unavailable; UI previews must stay separate from production native state.
+The [native UI contract 1.20.0](native-ui-contract.md) supplies 33 callable methods, schemas, actual Mock request/response examples, version negotiation, and screen coverage. It includes account management, explicit pending-account reauthorization with intact protected identity, separate cache/history cleanup, protected saved-inventory/control-option inspection and local session-grant inspection without provider traffic. Three separate trusted scan functions support selected-device/network preview and consuming consent; they require platform interface/permission integration and never add a route. Sharing, identity merge, provider revocation and full-profile deletion remain unavailable; UI previews must stay separate from production native state.
 
 ## Product boundary
 
@@ -67,6 +67,12 @@ These statuses were checked against `crates/host/src/session.rs` and `docs/devel
 | Localization | en-US and zh-CN catalogs and presentation helpers | Add approved missing UI keys; keep public IDs and stored outcomes unchanged. Prototype copy is English. Match locale parity/placeholders before release. |
 
 ## Loading, empty, error, and navigation rules
+
+API 1.20 adds separate trusted connection-link preview/confirm/discard functions.
+Use the [linking handoff](native-ui-contract.md#trusted-connection-linking-api-120)
+for future adapter-admitted routes. Mock/Meiju currently return unsupported; do
+not enable a linking button from a scan result or treat visual fixtures as native
+route evidence. The actual Flutter confirmation screen remains pending.
 
 API 1.19 account summaries supply `last_complete_inventory_at` for platform
 details. Label it as the last complete device list, show null as no recorded

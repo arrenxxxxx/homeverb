@@ -54,7 +54,7 @@ pending. Real TLS and subprocess runtime suites continue to use real time.
 | Meiju CLI | Actual binary empty-account discovery, metadata rename/reopen, native response-schema validation, nested refresh/recovery/removal errors and exit codes, exact cleanup scope, isolated adapter defaults, cached cards/receipts, unavailable-keyring preflight and refusal of ungranted writes/Mock/credential arguments and command-only MCP options; isolated PTY tests cover hidden bounded input, cancellation, echo restoration and queued-input clearing. No live CLI login or provider request |
 | Meiju CLI grants | Strict schema/native-list parity, bounded file reads, final symlink/FIFO/directory/permission refusal, complete validation before profile creation, explicit request IDs, actual CLI exact-device/state/route plans, independent fan revocation, batch preflight without receipts, pending-account not-sent execution, replay/conflict and receipt lookup without grants; fictional profiles only |
 | Android credential storage | Production Java compilation against official API stubs, 54 synthetic encrypted-entry assertions (round trips, randomized ciphertext, profile/reference binding, tampering, key loss, bounded data, locks, symlinks and deletion), and an explicitly run JVM/JNI test for array clearing, status mapping, cancellation/deadlines and uncertain writes; separate emulator evidence below, no physical phone test |
-| Android native library | API 28 arm64/x86_64 and combined AAR cross-builds with NDK r28c, JDK 21 and API 35 stubs; production-only archives, eleven native exports per ABI and 16 KiB ELF alignment checked; six package admission/failure tests; separate test APK evidence below, no release-shrinking test |
+| Android native library | API 28 arm64/x86_64 and combined AAR cross-builds with NDK r28c, JDK 21 and API 35 stubs; production-only archives, seventeen native exports per ABI and 16 KiB ELF alignment checked; six package admission/failure tests; separate test APK evidence below, no release-shrinking test |
 | Trusted user approval | Fictional elevated action; exact immutable scope, complete grants, one explicit connection, expiry/wrong Core/metadata/invalidation refusal, nonserializable one-use preview, adapter marker guard despite weakened risk metadata, journal failure/retired IDs/replay, host background/close/cancel and in-flight expiry; ordinary JSON cannot approve and no real appliance action is admitted |
 | Meiju temperature control | Protected selector priority and exclusions, normalized categories, whole/half-degree constraints, exact temperature-only encoding, retained evidence, readable historical out-of-range values, descriptor/model/identity/membership refusals, exact-target native/CLI/MCP authority, receipts/replay and foreground cancellation; fictional profiles only, no physical controls |
 | Meiju mode activation | Four candidate AC models and five modes, exact combined power-on/mode body, no temperature/fan/cache changes, protected-target and weakened-metadata refusal, independent device/mode/cloud policy, native startup/schema checks, receipts and lifecycle cancellation, CLI/MCP mode-only plans and pre-send failures; fictional profiles only, no physical controls |
@@ -71,7 +71,8 @@ pending. Real TLS and subprocess runtime suites continue to use real time.
 | Trusted Meiju LAN scan | Actual Session/adapter/vault/SQLite with scripted discovery: zero calls during preparation, one confirmed collection for AC/E1/CA, retained lease, fixed-network preview, changed metadata/identity/membership, foreign/expired previews, limits/conflicts/invalid reports, cancellation/background/close/deadline/drop, preview-capped deadlines, unchanged secrets/cards/cloud calls and ordinary JSON refusal. No household traffic or mobile permission acceptance |
 | Composed AC V3 read | Source-checked appliance query/protocol vectors, independent nested replies and a fictional loopback peer; one handshake and two ordered queries, negotiated message version, separate packet timestamps, both reply identities, malformed/unsupported responses, no partial result/reconnect, preflight refusal and cancellation/deadline/drop at either query; no registered route or physical support |
 | Standard E1/CA V3 reads | Independent AA and nested packet vectors, pinned-source field comparison, flag polarity, raw codes, time-extension boundaries and signed/fractional Celsius; strict required prefixes without default values, all truncations/corruption, unsupported kinds/units/layouts, two negotiated loopback conversations, both reply identities and cancellation/deadline/drop without reconnect; no Core Snapshot or model admission |
-| Native UI contract | All 31 published methods called through the built C ABI, offline method-specific response validation, saved examples, closed-field rejection, null success, admission errors, all execution outcomes, explicit cancellation and foreground/closed-session refusal |
+| Native UI contract | All 33 published methods called through the built C ABI, offline method-specific response validation, saved examples, closed-field rejection, null success, admission errors, all execution outcomes, explicit cancellation and foreground/closed-session refusal |
+| Trusted connection-link bridge | Fictional opted-in Session adapter with real Core/SQLite; schema-valid immutable scope/grants, preserved metadata, capacity/expiry, session and consent-kind isolation, one-use failure/concurrency, cancellation/lifecycle/drop and ordinary JSON refusal. Actual C exports verify production Mock/Meiju refusal without credentials or networking |
 | Meiju authentication/HTTPS | Fictional login/signing/session vectors, private input/session validation, exact request bodies and account binding, code-first rejection at both login endpoints regardless of challenge data, strict successful payloads and bounded object envelopes, no retries, cancellation/deadlines, redaction and local TLS certificate/redirect/body-limit/socket-closure checks; no real account test |
 | Meiju inventory | Synthetic code/data envelopes, nested homes/appliances, candidate and unknown families, deduplication/conflicts, account isolation, malformed/partial/auth-expired responses, shared deadline/cancellation, no retries, and redacted native data; synthetic protocol evidence, not a device claim |
 | Meiju state | Synthetic AC numeric/compound and protected-profile scalar temperatures, retained read mappings, malformed-response cache preservation, fridge/freezer separation, vendor-specific dishwasher/AC codes, exact account/appliance/query routing, null/absent readings, malformed/oversized/rejected responses, unproven freshness, cancellation/deadlines, no retries, redaction and nonserializable source state; no live/model acceptance |
@@ -248,7 +249,7 @@ races, cancellation/deadline/drop and lease release. No household network is use
 parsing/admission checks on empty temporary profiles, plus closed request/result
 schema counterexamples. Successful scans use the injected Session tests; the C
 suite does not access a provider account or perform UDP discovery. Android AAR
-inspection requires all 13 C functions and credential JNI initialization.
+inspection now requires all 16 C functions and credential JNI initialization.
 Platform interface/permission selection, Flutter consent and physical acceptance
 remain pending.
 
@@ -266,3 +267,19 @@ virtual interface and checks that `INTERNET` is denied. The builder requires
 exactly `ACCESS_NETWORK_STATE`; Python counterexamples reject extra, duplicate,
 missing or differently scoped permissions. This does not test appliance traffic,
 Android 16/17 socket authorization, Flutter controller wiring or physical phones.
+
+## Trusted native connection-link bridge
+
+`cargo test -p homeverb-host --test connection_link --offline --locked` exercises
+the typed operation and session-owned native previews with a fictional opted-in
+adapter and real SQLite. It validates immutable descriptor/connection/grant scope,
+preserved metadata, consuming failure, capacity, expiry, session isolation and
+lifecycle/concurrency boundaries. Scan tests also reject scan/approval IDs in the
+link registry without consuming their original scope.
+
+`python3 scripts/verify_native_connection_link.py` loads the actual Linux C exports
+and checks closed metadata, ordinary-dispatch refusal and default Mock/Meiju
+adapter refusal with fictional local descriptors. It is included by
+`verify_native_contract.py`; neither path obtains credentials or opens appliance
+connections. Successful links are tested at the injected Session boundary.
+Android AAR inspection requires these symbols but does not prove phone behavior.

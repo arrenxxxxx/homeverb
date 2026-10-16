@@ -1,0 +1,339 @@
+{
+  "api_version": "1.20.0",
+  "evidence": "Fictional opted-in adapter only; production Mock and Meiju refuse linking.",
+  "prepare": {
+    "schema_version": "1.0",
+    "operation_id": "link-preview",
+    "timeout_ms": 1000,
+    "device_id": "dev-mock-ac",
+    "anchor_id": "conn-example-cloud",
+    "connection": {
+      "account_id": null,
+      "adapter": "homeverb.mock",
+      "id": "conn-linked-lan",
+      "identity_ref": "identity:fictional-cloud-1",
+      "transport": "lan"
+    }
+  },
+  "confirm": {
+    "schema_version": "1.0",
+    "operation_id": "link-confirm",
+    "timeout_ms": 1000,
+    "link_id": 1
+  },
+  "prepare_result": {
+    "schema_version": "1.0",
+    "data": {
+      "link_id": 1,
+      "descriptor": {
+        "capabilities": [
+          {
+            "actions": {
+              "set": {
+                "atomic": true,
+                "idempotency": "set_value",
+                "independent_fields": false,
+                "parameters": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "state": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "state"
+                  ],
+                  "type": "object"
+                },
+                "risk": "low",
+                "transports": [
+                  "lan",
+                  "cloud"
+                ],
+                "verification": "state_match"
+              }
+            },
+            "events": {},
+            "id": "power",
+            "properties": {
+              "state": {
+                "readable": true,
+                "type": "boolean",
+                "writable": true
+              }
+            },
+            "revision": 1,
+            "schema_version": "1.0"
+          },
+          {
+            "actions": {
+              "set": {
+                "atomic": false,
+                "idempotency": "set_value",
+                "independent_fields": true,
+                "parameters": {
+                  "additionalProperties": false,
+                  "minProperties": 1,
+                  "properties": {
+                    "mode": {
+                      "enum": [
+                        "cool",
+                        "heat",
+                        "fan",
+                        "dry",
+                        "auto"
+                      ]
+                    },
+                    "target_temperature": {
+                      "maximum": 30,
+                      "minimum": 16,
+                      "multipleOf": 0.5,
+                      "type": "number"
+                    }
+                  },
+                  "type": "object"
+                },
+                "risk": "low",
+                "transports": [
+                  "lan",
+                  "cloud"
+                ],
+                "verification": "state_match"
+              }
+            },
+            "events": {},
+            "id": "climate",
+            "properties": {
+              "mode": {
+                "enum": [
+                  "cool",
+                  "heat",
+                  "fan",
+                  "dry",
+                  "auto"
+                ],
+                "readable": true,
+                "type": "string",
+                "writable": true
+              },
+              "target_temperature": {
+                "maximum": 30,
+                "minimum": 16,
+                "multipleOf": 0.5,
+                "readable": true,
+                "type": "number",
+                "unit": "celsius",
+                "writable": true
+              }
+            },
+            "revision": 2,
+            "schema_version": "1.0"
+          }
+        ],
+        "device": {
+          "alias": "mock-ac",
+          "brand": "ExampleBrand",
+          "components": [
+            {
+              "capabilities": [
+                "power",
+                "climate"
+              ],
+              "id": "main"
+            }
+          ],
+          "connections": [
+            {
+              "account_id": null,
+              "adapter": "homeverb.mock",
+              "id": "conn-example-cloud",
+              "identity_ref": "identity:fictional-cloud-1",
+              "transport": "cloud"
+            }
+          ],
+          "id": "dev-mock-ac",
+          "model": "Fictional-AC-01",
+          "schema_version": "1.0",
+          "support_status": "mock-tested"
+        }
+      },
+      "anchor": {
+        "account_id": null,
+        "adapter": "homeverb.mock",
+        "id": "conn-example-cloud",
+        "identity_ref": "identity:fictional-cloud-1",
+        "transport": "cloud"
+      },
+      "connection": {
+        "account_id": null,
+        "adapter": "homeverb.mock",
+        "id": "conn-linked-lan",
+        "identity_ref": "identity:fictional-cloud-1",
+        "transport": "lan"
+      },
+      "transport_grants": [
+        {
+          "device_id": "dev-mock-ac",
+          "component_id": "main",
+          "capability": "power",
+          "action": "set",
+          "transports": [
+            "lan"
+          ],
+          "argument_schema": {
+            "const": {
+              "state": false
+            }
+          }
+        }
+      ],
+      "expires_at": "2026-10-16T06:01:00Z"
+    },
+    "warnings": [],
+    "error": null
+  },
+  "confirm_result": {
+    "schema_version": "1.0",
+    "data": {
+      "capabilities": [
+        {
+          "actions": {
+            "set": {
+              "atomic": true,
+              "idempotency": "set_value",
+              "independent_fields": false,
+              "parameters": {
+                "additionalProperties": false,
+                "properties": {
+                  "state": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "state"
+                ],
+                "type": "object"
+              },
+              "risk": "low",
+              "transports": [
+                "lan",
+                "cloud"
+              ],
+              "verification": "state_match"
+            }
+          },
+          "events": {},
+          "id": "power",
+          "properties": {
+            "state": {
+              "readable": true,
+              "type": "boolean",
+              "writable": true
+            }
+          },
+          "revision": 1,
+          "schema_version": "1.0"
+        },
+        {
+          "actions": {
+            "set": {
+              "atomic": false,
+              "idempotency": "set_value",
+              "independent_fields": true,
+              "parameters": {
+                "additionalProperties": false,
+                "minProperties": 1,
+                "properties": {
+                  "mode": {
+                    "enum": [
+                      "cool",
+                      "heat",
+                      "fan",
+                      "dry",
+                      "auto"
+                    ]
+                  },
+                  "target_temperature": {
+                    "maximum": 30,
+                    "minimum": 16,
+                    "multipleOf": 0.5,
+                    "type": "number"
+                  }
+                },
+                "type": "object"
+              },
+              "risk": "low",
+              "transports": [
+                "lan",
+                "cloud"
+              ],
+              "verification": "state_match"
+            }
+          },
+          "events": {},
+          "id": "climate",
+          "properties": {
+            "mode": {
+              "enum": [
+                "cool",
+                "heat",
+                "fan",
+                "dry",
+                "auto"
+              ],
+              "readable": true,
+              "type": "string",
+              "writable": true
+            },
+            "target_temperature": {
+              "maximum": 30,
+              "minimum": 16,
+              "multipleOf": 0.5,
+              "readable": true,
+              "type": "number",
+              "unit": "celsius",
+              "writable": true
+            }
+          },
+          "revision": 2,
+          "schema_version": "1.0"
+        }
+      ],
+      "device": {
+        "alias": "mock-ac",
+        "brand": "ExampleBrand",
+        "components": [
+          {
+            "capabilities": [
+              "power",
+              "climate"
+            ],
+            "id": "main"
+          }
+        ],
+        "connections": [
+          {
+            "account_id": null,
+            "adapter": "homeverb.mock",
+            "id": "conn-example-cloud",
+            "identity_ref": "identity:fictional-cloud-1",
+            "transport": "cloud"
+          },
+          {
+            "account_id": null,
+            "adapter": "homeverb.mock",
+            "id": "conn-linked-lan",
+            "identity_ref": "identity:fictional-cloud-1",
+            "transport": "lan"
+          }
+        ],
+        "id": "dev-mock-ac",
+        "model": "Fictional-AC-01",
+        "schema_version": "1.0",
+        "support_status": "mock-tested"
+      }
+    },
+    "warnings": [],
+    "error": null
+  }
+}

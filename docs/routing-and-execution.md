@@ -40,7 +40,11 @@ confirmation caps its budget at preview expiry. An in-flight wait reaching that
 cap returns `DEADLINE_EXCEEDED`. A commit already admitted is not rolled back by later cancellation; inspect
 local state after interruption. No appliance request, retry or execution receipt
 is generated. Mock/Meiju do not opt in; only synthetic tests exercise linking.
-No JSON, C/JNI, CLI or MCP linking method is exposed in this phase.
+API 1.20 exposes separate trusted C prepare/confirm/discard functions under
+[ADR-0061](adr/0061-native-connection-link-bridge.md). Ordinary JSON, CLI and MCP
+still cannot link. The session retains at most eight previews; background/close
+clears them. Confirmation consumes the ID before decoded request admission,
+without broadening adapter evidence, grants or Core's transactional rules.
 
 ## Reviewed dishwasher cycle operations
 

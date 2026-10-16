@@ -3,9 +3,10 @@
 use homeverb_core::SecretBytes;
 use homeverb_domain::{Error, Query};
 use homeverb_host::{
-    ConfirmLanScanRequest, ConnectRequest, ExecuteApprovalRequest, HostRequest, MeijuControlGrants,
-    MeijuDishwasherCycleGrant, MeijuDishwasherGrant, MeijuFanGrant, MeijuModeGrant,
-    MeijuPowerGrant, MeijuTemperatureGrant, PrepareApprovalRequest, PrepareLanScanRequest, Session,
+    ConfirmConnectionLinkRequest, ConfirmLanScanRequest, ConnectRequest, ExecuteApprovalRequest,
+    HostRequest, MeijuControlGrants, MeijuDishwasherCycleGrant, MeijuDishwasherGrant,
+    MeijuFanGrant, MeijuModeGrant, MeijuPowerGrant, MeijuTemperatureGrant, PrepareApprovalRequest,
+    PrepareConnectionLinkRequest, PrepareLanScanRequest, Session,
 };
 use homeverb_mock::Scenario;
 use serde::Deserialize;
@@ -338,6 +339,60 @@ pub unsafe extern "C" fn homeverb_confirm_lan_scan(
 #[unsafe(no_mangle)]
 pub extern "C" fn homeverb_discard_lan_scan(handle: u64, scan_id: u64) -> bool {
     host(handle).is_some_and(|host| host.session.discard_native_lan_scan(scan_id))
+}
+
+/// Trusted UI only: preview an adapter-admitted connection for an existing device.
+/// No provider identifiers, endpoints or credentials belong in this public metadata.
+/// # Safety
+/// `request` must be NULL or a valid NUL-terminated UTF-8 string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn homeverb_prepare_connection_link(
+    handle: u64,
+    request: *const c_char,
+) -> *mut c_char {
+    output(|| {
+        let Some(host) = host(handle) else {
+            return error("HOST_CLOSED", "The native host handle is closed.");
+        };
+        let Some(request) = (unsafe { input_json::<PrepareConnectionLinkRequest>(request) }) else {
+            return error(
+                "INVALID_ARGUMENT",
+                "Invalid connection-link preparation metadata.",
+            );
+        };
+        host.runtime
+            .block_on(host.session.prepare_native_connection_link(request))
+    })
+}
+
+/// Call only after actual trusted UI consent to the retained immutable preview.
+/// A decoded request consumes the matching preview, even when admission fails.
+/// # Safety
+/// `request` must be NULL or a valid NUL-terminated UTF-8 string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn homeverb_confirm_connection_link(
+    handle: u64,
+    request: *const c_char,
+) -> *mut c_char {
+    output(|| {
+        let Some(host) = host(handle) else {
+            return error("HOST_CLOSED", "The native host handle is closed.");
+        };
+        let Some(request) = (unsafe { input_json::<ConfirmConnectionLinkRequest>(request) }) else {
+            return error(
+                "INVALID_ARGUMENT",
+                "Invalid connection-link confirmation metadata.",
+            );
+        };
+        host.runtime
+            .block_on(host.session.confirm_native_connection_link(request))
+    })
+}
+
+/// Dismiss pending consent without removing an established connection.
+#[unsafe(no_mangle)]
+pub extern "C" fn homeverb_discard_connection_link(handle: u64, link_id: u64) -> bool {
+    host(handle).is_some_and(|host| host.session.discard_native_connection_link(link_id))
 }
 
 /// Execute a request synchronously on a host worker thread. Free the returned string once.

@@ -11,6 +11,9 @@ use std::sync::{
 };
 use tokio_util::sync::CancellationToken;
 
+#[path = "connection_link/native.rs"]
+mod native;
+
 const DEVICE: &str = "dev-mock-ac";
 const ANCHOR: &str = "conn-example-cloud";
 

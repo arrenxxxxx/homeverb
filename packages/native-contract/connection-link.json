@@ -1,0 +1,24 @@
+{
+  "api_version": "1.20.0",
+  "functions": {
+    "homeverb_prepare_connection_link": {
+      "request": "native-connection-link#/$defs/prepare",
+      "response": "native-connection-link#/$defs/prepare_result"
+    },
+    "homeverb_confirm_connection_link": {
+      "request": "native-connection-link#/$defs/confirm",
+      "response": "native-connection-link#/$defs/confirm_result"
+    },
+    "homeverb_discard_connection_link": {
+      "parameters": [
+        "uint64 handle",
+        "uint64 link_id"
+      ],
+      "response": "bool"
+    }
+  },
+  "limits": {
+    "max_pending_links": 8,
+    "link_ttl_ms": 60000
+  }
+}

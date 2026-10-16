@@ -304,6 +304,19 @@ async fn scan_ids_and_appliance_approval_ids_do_not_alias() {
     assert_eq!(prepared["error"], Value::Null, "{prepared}");
     let approval = prepared["data"]["approval_id"].as_u64().unwrap();
     assert_ne!(scan, approval);
+    for (target, identifier) in [(&*f.session, scan), (&session, approval)] {
+        let result = target
+            .confirm_native_connection_link(
+                serde_json::from_value(json!({
+                    "schema_version":"1.0", "operation_id":"wrong-consent-kind", "timeout_ms":1000,
+                    "link_id":identifier
+                }))
+                .unwrap(),
+            )
+            .await;
+        assert_eq!(result["error"]["code"], "CONNECTION_LINK_INVALID");
+        assert!(!target.discard_native_connection_link(identifier));
+    }
     assert!(!session.discard_native_approval(scan));
     assert!(!f.session.discard_native_lan_scan(approval));
     assert!(session.discard_native_approval(approval));

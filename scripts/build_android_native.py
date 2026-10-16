@@ -17,7 +17,9 @@ SYMBOLS = ['homeverb_open', 'homeverb_call', 'homeverb_connect_account',
            'homeverb_cancel', 'homeverb_set_foreground', 'homeverb_close',
            'homeverb_string_free', 'homeverb_prepare_approval', 'homeverb_execute_approved',
            'homeverb_discard_approval', 'homeverb_prepare_lan_scan', 'homeverb_confirm_lan_scan',
-           'homeverb_discard_lan_scan', 'Java_org_homeverb_NativeCredentials_nativeInstall']
+           'homeverb_discard_lan_scan', 'homeverb_prepare_connection_link',
+           'homeverb_confirm_connection_link', 'homeverb_discard_connection_link',
+           'Java_org_homeverb_NativeCredentials_nativeInstall']
 
 
 def inspect_library(readelf, library, abi):

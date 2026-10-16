@@ -52,7 +52,7 @@ It uses generated temporary paths and fictional keys, never Android or Linux
 account credentials. The ordinary Rust suite does not start a JVM or open a keyring.
 
 The builder compiles the complete Rust FFI library for each selected ABI at API 28,
-checks its ELF architecture, fourteen exports (13 C functions plus the Android JNI
+checks its ELF architecture, seventeen exports (16 C functions plus the Android JNI
 initializer), 16 KiB ELF segment alignment and absence of desktop runtime
 dependencies. It packages production Java, the selected native libraries, manifest
 and JNI consumer rules. Test providers cannot enter that archive. All checks must

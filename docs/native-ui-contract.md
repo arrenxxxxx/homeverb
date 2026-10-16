@@ -4,11 +4,11 @@ Status: implemented Linux native contract, October 16, 2026, with Mock, default 
 
 ## Start here in a Flutter worktree
 
-The connection-linking foundation in [ADR-0052](adr/0052-trusted-connection-linking.md)
-is currently typed Rust Core/Session only. API 1.19.0 has no JSON/C/JNI link
-method; Meiju does not opt in. Do not wire a confirmation button to discovery,
-invent a `confirmed` request field or add a duplicate LAN card. Native route
-admission and a separately versioned mobile bridge remain prerequisites.
+API 1.20 exposes the [trusted connection-link bridge](#trusted-connection-linking-api-120)
+for the Core/Session foundation in [ADR-0052](adr/0052-trusted-connection-linking.md).
+Mock and Meiju still refuse adapter admission. Do not wire confirmation to
+discovery, invent a `confirmed` field or add a duplicate LAN card. Protected route
+evidence, Meiju integration and actual Flutter consent remain prerequisites.
 
 [ADR-0054](adr/0054-trusted-meiju-lan-candidate-scan.md) adds typed Rust Session
 `prepare_meiju_lan_scan` / `scan_meiju_lan_candidate`. Display the immutable saved
@@ -30,11 +30,11 @@ Startup explicitly selects Mock or Meiju; Meiju remains read-only unless the tru
 
 ## Startup, ownership, and version negotiation
 
-The 13 C functions in [homeverb.h](../crates/ffi/include/homeverb.h) remain the native boundary. There is no project HTTP endpoint, CLI subprocess, or daemon.
+The 16 C functions in [homeverb.h](../crates/ffi/include/homeverb.h) form the native boundary. There is no project HTTP endpoint, CLI subprocess, or daemon.
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects saved-account cloud reads. `scenario` defaults to `normal`. Meiju requires `allow_mock_writes: false` and rejects any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms `homeverb.mock` or `midea.meiju`. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.19.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.20.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -1177,8 +1177,8 @@ separate from the 33 ordinary JSON methods. See [ADR-0058](adr/0058-native-lan-s
    and cancels active work. A restarted session must obtain fresh consent.
 
 At most eight previews are retained; expired entries are pruned when preparing
-another. Scan and appliance-approval IDs share a process-wide allocator but stay
-in separate registries, so one consent kind cannot alias the other. Neither is
+another. Scan, appliance-approval and connection-link IDs share a process-wide allocator
+but stay in separate registries, so one consent kind cannot alias another. None is
 a credential, durable ID or proof of consent. Missing, dismissed, consumed,
 cross-handle and pruned IDs return `LAN_SCAN_INVALID`; a retained expired preview
 returns `LAN_SCAN_EXPIRED`. Neither failure starts a retry. Use `lan.scan.*`
@@ -1198,3 +1198,47 @@ numeric IPv4/prefix into the dedicated C arguments. A helper failure invalidates
 the UI flow: discard its native preview and obtain a new selection/consent.
 Socket/runtime permission remains the app's responsibility; this metadata helper
 does not grant or prove it. See [ADR-0059](adr/0059-android-lan-network-selection.md).
+
+## Trusted connection linking (API 1.20)
+
+The [function catalog](../packages/native-contract/connection-link.json),
+[closed schema](../schemas/native-connection-link.schema.json) and
+[fictional opted-in examples](../packages/native-contract/connection-link-examples.json)
+cover three separate trusted controller functions. Negotiate API 1.20 before
+resolving these symbols. They are absent from `homeverb_call`, CLI and MCP.
+Production Mock and Meiju return `CONNECTION_LINK_UNSUPPORTED`; a scan result,
+public connection metadata or confirmation cannot replace adapter evidence.
+
+1. Call `homeverb_prepare_connection_link(handle, metadata)` on a worker with
+   schema `1.0`, a fresh operation ID, timeout, exact `device_id`, existing
+   `anchor_id` and proposed public `connection`. No endpoint, key, provider ID,
+   grant or confirmation boolean is accepted. The adapter must validate protected
+   route/model/identity evidence locally; preparation performs no network or save.
+2. Retain the returned `link_id` only in trusted controller memory. Display its
+   immutable `descriptor`, `anchor`, `connection`, `transport_grants` and
+   `expires_at`. Existing grants for the added transport may become usable and
+   automatic read routing may change. Do not infer additional permissions or
+   physical support. Use `connection.link.*` locale keys for the confirmation UI.
+3. Only after actual user consent call `homeverb_confirm_connection_link` with
+   a fresh operation ID, timeout and the same `link_id`. Do not resubmit a modified
+   connection or descriptor. Core rechecks evidence and stored metadata under the
+   device lock. Success returns the descriptor with the added connection; it is a
+   local transaction result, not an appliance `accepted` or `verified` receipt.
+4. On dismissal call `homeverb_discard_connection_link(handle, link_id)`. Its bool
+   means an unconsumed preview was removed, not that a committed link was undone.
+   Use `homeverb_cancel` for active work and existing foreground/close hooks.
+
+The registry holds at most eight previews per session for 60 monotonic seconds.
+An ID belongs to one session and consent kind; background/close clears all links.
+Every decoded confirmation consumes the matching ID before metadata/operation
+admission. Malformed JSON cannot reliably identify the intended ID; discard it
+from the controller's retained state. Never reuse IDs after interruption or retry
+confirmation automatically. A missing callback cannot prove the local transaction
+failed: inspect `describe_device` first, preserving the existing card identity and
+room organization. Losing user-visible callbacks on forced termination is possible.
+
+This bridge preserves ADR-0052's exact adapter/account/identity constraints and
+transactional storage guard. It cannot merge accounts, replace/remove routes,
+grant authority or admit Meiju model/endpoints. SQLite schema 5, protected payload
+3 and the 33 ordinary methods remain unchanged. See
+[ADR-0061](adr/0061-native-connection-link-bridge.md) for verification boundaries.

@@ -190,5 +190,10 @@
   "error.LAN_NETWORK_UNSUPPORTED": "当前 VPN 路由下无法进行局域网扫描，云端操作不受此扫描限制影响。",
   "account.inventory.last_complete": "最近完整获取设备列表：{time}",
   "account.inventory.never_recorded": "尚无完整获取设备列表的时间记录",
-  "account.inventory.time_hint": "此时间来自本机时钟，不代表当前授权有效或设备在线。"
+  "account.inventory.time_hint": "此时间来自本机时钟，不代表当前授权有效或设备在线。",
+  "connection.link.title": "添加连接",
+  "connection.link.scope": "请核对现有设备和拟添加的连接。设备身份和房间归属保持不变。",
+  "connection.link.grants_hint": "新路由可能影响自动读取，并使该传输方式的已有权限生效；它不会授予新权限。",
+  "connection.link.confirm": "添加此连接",
+  "connection.link.interrupted": "连接变更已中断。再次尝试前，请先检查已保存的连接。"
 }

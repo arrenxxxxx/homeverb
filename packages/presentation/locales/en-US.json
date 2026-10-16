@@ -190,5 +190,10 @@
   "error.LAN_NETWORK_UNSUPPORTED": "Local scanning is unavailable with the current VPN route. Cloud operations remain separate.",
   "account.inventory.last_complete": "Last complete device list: {time}",
   "account.inventory.never_recorded": "No complete device-list time recorded",
-  "account.inventory.time_hint": "Recorded using this device’s clock. This does not confirm current authorization or appliance status."
+  "account.inventory.time_hint": "Recorded using this device’s clock. This does not confirm current authorization or appliance status.",
+  "connection.link.title": "Add a connection",
+  "connection.link.scope": "Review the existing device and the proposed connection. This keeps the same device and room assignments.",
+  "connection.link.grants_hint": "The new route can affect automatic reads and enable existing permissions for that transport. It does not grant new permission.",
+  "connection.link.confirm": "Add this connection",
+  "connection.link.interrupted": "The connection change was interrupted. Check saved connections before trying again."
 }

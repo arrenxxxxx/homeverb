@@ -4,7 +4,7 @@ The owner selected Midea and Hualing air conditioners, dishwashers, and refriger
 
 Daily cloud control is required in the first real integration. LAN is an additional route for the same physical devices, not a substitute for cloud control. A mainland account and six exact cloud model/family pairs have been observed. Firmware, app-version and model-specific physical acceptance remain incomplete. This guide reflects implementation through October 16, 2026; no model is physically verified.
 
-The native read protocols are implemented in [homeverb-midea](../../crates/midea/src/lib.rs): account-scoped home/appliance retrieval, code/data validation, deduplication, partial inventory failure, and bounded cloud-state decoding for the three selected families. The inventory/state decoders use an injected read transport and synthetic responses with the inspected wire fields. Native password login, signing, session-key decoding and restricted HTTPS are now implemented under ADR-0022 and tested against fictional responses and a local TLS server. One real mainland account has passed the read-only login/inventory probe below; the exact-model read-only Core adapter is available through `core-inspect` and native startup selection. The current [native API 1.16.0](../native-ui-contract.md) provides protected connection, account management and explicit refresh/recovery. Android storage has synthetic JVM and isolated emulator evidence; Flutter input, physical phone acceptance and iOS storage remain pending. See [ADR-0020](../adr/0020-midea-cloud-inventory.md) and [ADR-0023](../adr/0023-meiju-cloud-state-evidence.md).
+The native read protocols are implemented in [homeverb-midea](../../crates/midea/src/lib.rs): account-scoped home/appliance retrieval, code/data validation, deduplication, partial inventory failure, and bounded cloud-state decoding for the three selected families. The inventory/state decoders use an injected read transport and synthetic responses with the inspected wire fields. Native password login, signing, session-key decoding and restricted HTTPS are now implemented under ADR-0022 and tested against fictional responses and a local TLS server. One real mainland account has passed the read-only login/inventory probe below; the exact-model read-only Core adapter is available through `core-inspect` and native startup selection. The current [native API 1.20.0](../native-ui-contract.md) provides protected connection, account management and explicit refresh/recovery. Android storage has synthetic JVM and isolated emulator evidence; Flutter input, physical phone acceptance and iOS storage remain pending. See [ADR-0020](../adr/0020-midea-cloud-inventory.md) and [ADR-0023](../adr/0023-meiju-cloud-state-evidence.md).
 
 The native account vault now persists random local references, composes Linux secure storage, and coordinates session read/update work through account leases. Meiju's private account payload also preserves appliance-to-local-ID bindings with the session. Interrupted or uncertain updates remain pending until trusted validation and recovery. Native API 1.7 provides an explicit [recovery and retrieval flow](../native-ui-contract.md#recover-interrupted-account-storage) that validates saved material without another login. The explicit native connection coordinator now uses this storage and the admitted login client; real account identity and session validity still require live acceptance. See [ADR-0021](../adr/0021-persistent-account-vault.md), [ADR-0024](../adr/0024-meiju-private-device-bindings.md) and the [credential integration guide](04-add-adapter.md#integrate-native-credentials).
 
@@ -308,7 +308,8 @@ Credential lookup requires cloud connectivity. Protected inner session version 2
 retains the original login client identifier needed by this request. Legacy inner
 session version 1 still supports existing cloud reads/controls but requires
 explicit same-account reauthorization before LAN credential lookup. It is not
-silently rewritten. Outer protected payload 3 and SQLite schema 4 remain unchanged.
+silently rewritten. Outer protected payload 3 remains unchanged; current SQLite schema 5 stores
+independent local account metadata.
 Older binaries cannot read inner session version 2.
 
 The composed query takes an already-admitted endpoint, protected handshake,
@@ -358,7 +359,9 @@ Before enabling a product route, complete these separate gates:
    adapter hook: implement protected model/identity evidence and discovery that
    retains the full linked set before opting in. Its current builder returns one
    cloud connection. The foundation preserves local organization but does not
-   provide Flutter consent or enable LAN routes. Ordinary discovery still rejects
+   provide Flutter consent or enable LAN routes. API 1.20 exposes the separate
+   [trusted C linking bridge](../adr/0061-native-connection-link-bridge.md), but
+   it cannot substitute for Meiju's adapter evidence. Ordinary discovery still rejects
    connection changes; bypassing that guard or duplicating cards is not integration.
 4. Map only model-supported fields into declared component capabilities, with
    honest stale/freshness semantics. Register the route only after identity and

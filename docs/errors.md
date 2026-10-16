@@ -108,12 +108,18 @@ The separate BatchExecution envelope carries status, timestamps, and per-device 
 
 Presentation resources translate stable codes; Core messages remain English. Unknown codes use a localized generic message and preserve the code for diagnosis.
 
-Connection-link errors belong to the typed Rust metadata operation in
-[ADR-0052](adr/0052-trusted-connection-linking.md), not command Execution receipts.
+Connection-link errors belong to the local metadata operation in
+[ADR-0052](adr/0052-trusted-connection-linking.md) and its
+[trusted C bridge](adr/0061-native-connection-link-bridge.md), not command Execution receipts.
 It can also return descriptor, account-removal, storage, lock, lifecycle and
 operation errors. Cancellation after local transaction admission does not undo
 a committed link. Inspect saved connections after an interrupted result; never
 auto-confirm another preview.
+The native registry returns `RESOURCE_BUSY` at eight pending links; dismiss an
+unused preview before preparing another. Unknown, consumed, foreign-session or
+other consent-kind IDs return `CONNECTION_LINK_INVALID`. A decoded confirmation
+consumes the matching ID even when its version, timeout or operation ID is invalid.
+Malformed JSON cannot reliably identify it: discard the controller's retained ID.
 
 The typed Rust scan in [ADR-0054](adr/0054-trusted-meiju-lan-candidate-scan.md)
 returns native outcomes, not Execution receipts. Protected account, identity,
