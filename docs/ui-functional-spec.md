@@ -120,3 +120,20 @@ Images alone never satisfy a gate.
 ## Scope control
 
 Do not add cloud sync, automation, background listeners, skin downloads, executable theme plugins, a fourth tab, charts or a HomeVerb account to fill apparent gaps in the mockups. Keep [task status](task-breakdown.md) and [compatibility evidence](compatibility.md) explicit. Functional scope changes should update this document, the screen inventory, atlas transitions and acceptance checklist together.
+
+
+## Owner-directed climate interaction revision
+
+For a device exposing climate and power capabilities, keep the user on its control
+page after a power, mode, fan or target-temperature operation. Put Mode, Air direction
+and Fan speed in separate prominent buttons with observed values. Open supported
+choices in a bottom sheet; unsupported controls are labelled unavailable. Never
+silently replace a mode-only operation with a power-on command: disclose the existing
+activation effect when that is the action exposed by the adapter.
+
+Show pending work and the retained outcome inline, with optional operation details.
+A single bounded foreground read may follow the command; it is not polling or proof
+that the command caused the observed state. Preserve unknown outcomes and prevent
+replay. Dismiss parameter selection on backgrounding. Device switching, navigation
+and background transitions invalidate follow-up work. Large text reflows the button
+row vertically. Quick card power leaves the user on the home page.

@@ -1650,3 +1650,36 @@ physical-phone acceptance, temperature/fan/mode actuation or off-LAN acceptance.
 Cloud observations lack trustworthy source time. No native API, schemas, routing
 or execution semantics changed. No credentials or live device identifiers were
 captured, and no artifact was uploaded or newer commit pushed.
+
+
+## In-place climate controls and prominent selectors
+
+The owner requested keeping AC operations on the control page and showing separate
+Mode, Air direction and Fan speed buttons. The climate-and-power view now uses
+these buttons with observed values and bottom-sheet choices from exact descriptors.
+Unsupported direction control stays explicitly unavailable. Mode activation states
+that it also powers on the device. Other descriptor controls remain accessible.
+No new protocol mapping, native grant, Core outcome or schema is introduced.
+
+Power and supported climate actions retain the current page and display their
+outcome inline, with optional View Details. Quick card power stays on the home
+page with a dismissible status message. One bounded foreground read updates observed
+state after a command; it never rewrites the retained outcome or repeats the write.
+Selection/background/navigation and device/component boundaries invalidate late work.
+Temperature-only components retain their previous specialized behavior.
+
+`fvm flutter analyze` passed. The complete `fvm flutter test --reporter expanded`
+run passed 107 tests and retained the same four known macOS glyph-pixel failures
+(button labels, two control-label cases, field alignment), without changing reference
+images or tolerances. Six new focused tests cover retained unknown outcomes, one
+read/no replay, explicit detail navigation, exact mode/fan values, unsupported
+direction, backgrounded selectors, navigation and background/resume during a pending
+write, failed post-write reads, Chinese large text and denied/coupled controls.
+The native click journeys now exercise stay-on-page outcomes and explicit details.
+
+The first selector tests exposed Flutter ChoiceChip dry-layout incompatibility
+with paragraph Copy; native localized Text labels fixed it. The existing native
+journey exposed a status message covering a later page; navigation now clears it.
+The final complete suite includes both corrections. Shared presentation tests passed
+7/7; document/repository checks and contracts (20 schemas, 45 positive and 250
+negative fixtures) passed. Android packaging and installed UI results follow below.

@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:file_selector/file_selector.dart';
 import 'blocks.dart';
 import 'appliance_controls.dart';
+import 'climate_controls.dart';
 import 'account_views.dart';
 import 'approval_review.dart';
 import 'compartment_controls.dart';
@@ -132,6 +133,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   String connectionLabel = 'Meiju account';
   bool _disposed = false;
   int navigation = 0;
+  int activityEpoch = 0;
   @override
   void initState() {
     super.initState();
@@ -147,6 +149,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) activityEpoch++;
     c.setForeground(state == AppLifecycleState.resumed);
   }
 
@@ -175,6 +178,10 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
 
   Future<void> go(String target, {bool back = false}) async {
     if (!mounted) return;
+    final navContext = navigator.currentContext;
+    if (navContext != null) {
+      ScaffoldMessenger.of(navContext).removeCurrentSnackBar();
+    }
     final deviceHistory = ['C01', 'C08', 'D06'].contains(id);
     c.cancelPending();
     setState(() {
@@ -196,6 +203,69 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   Future<void> finish(Future<bool> work, String destination) async {
     final epoch = navigation;
     if (await work && mounted && epoch == navigation) await go(destination);
+  }
+
+  Future<bool> executeOnDevice(
+    String capability,
+    String actionName,
+    Json arguments,
+  ) async {
+    final epoch = navigation;
+    final device = c.selectedDevice;
+    final component = c.component;
+    final foreground = activityEpoch;
+    final success = await c.execute(capability, actionName, arguments);
+    if (success &&
+        mounted &&
+        epoch == navigation &&
+        c.isForeground &&
+        foreground == activityEpoch &&
+        device == c.selectedDevice &&
+        component == c.component) {
+      // One foreground read updates observations; it never changes the receipt.
+      await c.refresh();
+      if (mounted &&
+          epoch == navigation &&
+          id == 'D01' &&
+          c.isForeground &&
+          foreground == activityEpoch) {
+        final context = navigator.currentContext;
+        if (context != null)
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                localize(context, outcomeSummary(c.receipt?['status'])),
+              ),
+              action: SnackBarAction(
+                label: localize(context, 'View Details'),
+                onPressed: () => action('View Details'),
+              ),
+            ),
+          );
+      }
+    }
+    return success &&
+        mounted &&
+        epoch == navigation &&
+        foreground == activityEpoch &&
+        c.isForeground &&
+        device == c.selectedDevice &&
+        component == c.component;
+  }
+
+  Future<void> executeClimateEdit(Json arguments) async {
+    if (c.capability('power') == null) {
+      await finish(c.execute('climate', 'set', arguments), 'S06');
+      return;
+    }
+    final epoch = navigation;
+    if (await executeOnDevice('climate', 'set', arguments) &&
+        mounted &&
+        epoch == navigation &&
+        c.isForeground &&
+        id != 'C01') {
+      await go('C01');
+    }
   }
 
   String input(String label) => fields[label]?.text ?? '';
@@ -395,7 +465,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           changed();
           return;
         }
-        await finish(c.execute('power', 'set', {'state': !state}), 'S06');
+        await executeOnDevice('power', 'set', {'state': !state});
       } else {
         await go(
           label.startsWith('menu:')
@@ -513,7 +583,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     if (label == 'Power') {
       final state = c.observed('power.state');
       if (state is bool)
-        await finish(c.execute('power', 'set', {'state': !state}), 'S06');
+        await executeOnDevice('power', 'set', {'state': !state});
       else {
         c.error = NativeFailure(
           'STATE_UNAVAILABLE',
@@ -547,10 +617,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         setState(() => formError = error);
         return;
       }
-      await finish(
-        c.execute('climate', 'set', {'target_temperature': value}),
-        'S06',
-      );
+      await executeClimateEdit({'target_temperature': value});
       return;
     }
     if (label == 'Save Mode') {
@@ -584,10 +651,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         setState(() => formError = error);
         return;
       }
-      await finish(
-        c.execute('climate', 'set', {'target_temperature': value}),
-        'S06',
-      );
+      await executeClimateEdit({'target_temperature': value});
       return;
     }
     if (label == 'Clear Cached State' || label == 'Clear Recent Operations') {
@@ -1503,6 +1567,17 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           }, componentId: component),
           'S06',
         ),
+      );
+    }
+    if (id == 'C01' &&
+        c.capability('climate') != null &&
+        c.capability('power') != null &&
+        c.currentCard?['device']['support_status'] != 'unsupported') {
+      return ClimateControls(
+        key: ValueKey('climate:${c.selectedDevice}:${c.component}'),
+        controller: c,
+        onAction: action,
+        onExecute: executeOnDevice,
       );
     }
     if (id == 'C01' && applianceFamily(c) != null) {

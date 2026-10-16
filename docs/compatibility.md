@@ -1832,3 +1832,20 @@ Neither receipt is `verified`, and no uncertain write was replayed.
 See the [exact runtime and artifact evidence](../apps/mobile/verification.md#default-control-apk-and-owner-observed-power-acceptance).
 Other action/model, physical-phone and off-LAN acceptance remain open. Native API
 1.22, SQLite 5, protected payload 3 and execution semantics are unchanged.
+
+
+## In-place Flutter climate controls
+
+Climate-and-power devices now show separate Mode, Air direction and Fan speed
+buttons derived from exact descriptor parameters. Existing reviewed mode and fan
+commands are reachable through bottom-sheet choices. Missing, ambiguous, coupled
+or non-low-risk setters are not invented or promoted. The selected Meiju wall AC
+still has no admitted direction setter; that button is explicitly unavailable.
+Mode activation retains its disclosed power-on effect and existing native mapping.
+
+Power and supported climate operations remain on the current control page; a single
+foreground read follows a retained command result. Reads do not rewrite accepted,
+failed or unknown receipts, trigger a retry, or continue after a lifecycle change.
+Native API 1.22, SQLite 5, protected payload 3, grants, protocol support and Core
+execution/verification semantics are unchanged. This UI revision adds no new
+physical-device or model-support claim.

@@ -12,6 +12,7 @@ class HomeController extends ChangeNotifier {
   final Future<CoreClient> Function(List<SessionPermission>)? reopen;
   List<SessionPermission> _controlPermissions = const [];
   bool _foreground = true;
+  bool get isForeground => _foreground;
   bool _coreNeedsReopen = false;
   bool get _canPrepareControls =>
       reopen != null &&

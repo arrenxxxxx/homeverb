@@ -3440,4 +3440,16 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Experimental device support'
 	String get mobileDefaultControlsMessage6 => 'Experimental device support';
+
+	/// en-US: 'Air direction'
+	String get mobileAirDirection => 'Air direction';
+
+	/// en-US: 'Not supported yet'
+	String get mobileNotSupportedYet => 'Not supported yet';
+
+	/// en-US: 'Selecting a mode also turns this device on.'
+	String get mobileSelectingModeTurnsOn => 'Selecting a mode also turns this device on.';
+
+	/// en-US: 'Updating device\u2026'
+	String get mobileUpdatingDevice => 'Updating device\u2026';
 }

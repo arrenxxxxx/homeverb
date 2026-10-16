@@ -1133,5 +1133,9 @@
   "mobile.defaultControlsMessage3": "Sign in to the original account. Identity must match; local device names, rooms and favorites are preserved. Open a supported device to control it.",
   "mobile.defaultControlsMessage4": "0.2.0 · Experimental Meiju · Device controls",
   "mobile.defaultControlsMessage5": "Supported controls are available when you open a device. Compatibility depends on its exact model and region.",
-  "mobile.defaultControlsMessage6": "Experimental device support"
+  "mobile.defaultControlsMessage6": "Experimental device support",
+  "mobile.airDirection": "Air direction",
+  "mobile.notSupportedYet": "Not supported yet",
+  "mobile.selectingModeTurnsOn": "Selecting a mode also turns this device on.",
+  "mobile.updatingDevice": "Updating device…"
 }

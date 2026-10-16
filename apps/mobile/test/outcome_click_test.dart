@@ -78,11 +78,14 @@ void main() {
         await tap('mock-ac');
         await tap('Refresh State');
         final before = controller.observed('power.state');
-        await tap('Power');
-        expect(app.currentState!.id, 'S06');
+        await tap(before == true ? 'Turn off' : 'Turn on');
+        expect(app.currentState!.id, 'C01');
         expect(find.text(outcomeLabel(scenario.value)), findsOneWidget);
         expect(controller.receipt!['status'], scenario.value);
-        expect(controller.observed('power.state'), before);
+        expect(
+          controller.observed('power.state'),
+          scenario.key == 'lost-ack' ? !before : before,
+        );
         final request = controller.receipt!['request_id'];
         await tester.runAsync(() => controller.loadHistory());
         final count = controller.history.length;
@@ -91,6 +94,8 @@ void main() {
         expect(controller.error, isNull);
         expect(controller.receipt!['request_id'], request);
         expect(controller.receipt!['status'], scenario.value);
+        await tap('View Details');
+        expect(app.currentState!.id, 'S06');
         await tap('View Operations');
         expect(controller.history.length, count);
         expect(

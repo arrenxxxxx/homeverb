@@ -68,6 +68,8 @@ String? actionUnavailable(
 List<dynamic> describedControls(
   HomeController c, {
   Set<String> exclude = const {},
+  Set<String> excludeActions = const {},
+  Set<String> excludeProperties = const {},
 }) {
   final result = <dynamic>[];
   for (var i = 0; i < c.capabilities.length; i++) {
@@ -82,11 +84,20 @@ List<dynamic> describedControls(
             ((actions['set']?['parameters']?['properties'] as Map?) ?? {}).keys
                 .any((p) => !['target_temperature', 'mode'].contains(p)));
     if (id == 'climate' && !extraClimate) continue;
+    final visibleProperties = properties.entries.where(
+      (entry) =>
+          entry.value['readable'] == true &&
+          !excludeProperties.contains('$id.${entry.key}'),
+    );
+    final visibleActions = actions.entries.where(
+      (entry) => !excludeActions.contains('$id.${entry.key}'),
+    );
+    if (visibleProperties.isEmpty && visibleActions.isEmpty) continue;
     result.add([
       'card',
       controlLabel(id),
       [
-        for (final entry in properties.entries)
+        for (final entry in visibleProperties)
           if (entry.value['readable'] == true)
             [
               controlLabel(entry.key),
@@ -107,7 +118,7 @@ List<dynamic> describedControls(
               }),
               null,
             ],
-        for (final entry in actions.entries)
+        for (final entry in visibleActions)
           [
             controlLabel(entry.key),
             actionUnavailable(

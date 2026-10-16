@@ -1133,5 +1133,9 @@
   "mobile.defaultControlsMessage3": "请登录原账号。身份必须一致，本地设备名称、房间和收藏会保留。打开支持的设备即可控制。",
   "mobile.defaultControlsMessage4": "0.2.0 · 美居实验支持 · 设备控制",
   "mobile.defaultControlsMessage5": "打开设备即可使用其支持的控制。兼容性取决于具体型号和地区。",
-  "mobile.defaultControlsMessage6": "实验性设备支持"
+  "mobile.defaultControlsMessage6": "实验性设备支持",
+  "mobile.airDirection": "风向",
+  "mobile.notSupportedYet": "暂不支持",
+  "mobile.selectingModeTurnsOn": "选择模式也会开启空调。",
+  "mobile.updatingDevice": "正在更新设备…"
 }

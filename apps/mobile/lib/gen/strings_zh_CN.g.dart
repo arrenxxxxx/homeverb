@@ -1168,4 +1168,8 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get mobileDefaultControlsMessage4 => '0.2.0 \u00b7 \u7f8e\u5c45\u5b9e\u9a8c\u652f\u6301 \u00b7 \u8bbe\u5907\u63a7\u5236';
 	@override String get mobileDefaultControlsMessage5 => '\u6253\u5f00\u8bbe\u5907\u5373\u53ef\u4f7f\u7528\u5176\u652f\u6301\u7684\u63a7\u5236\u3002\u517c\u5bb9\u6027\u53d6\u51b3\u4e8e\u5177\u4f53\u578b\u53f7\u548c\u5730\u533a\u3002';
 	@override String get mobileDefaultControlsMessage6 => '\u5b9e\u9a8c\u6027\u8bbe\u5907\u652f\u6301';
+	@override String get mobileAirDirection => '\u98ce\u5411';
+	@override String get mobileNotSupportedYet => '\u6682\u4e0d\u652f\u6301';
+	@override String get mobileSelectingModeTurnsOn => '\u9009\u62e9\u6a21\u5f0f\u4e5f\u4f1a\u5f00\u542f\u7a7a\u8c03\u3002';
+	@override String get mobileUpdatingDevice => '\u6b63\u5728\u66f4\u65b0\u8bbe\u5907\u2026';
 }

@@ -1580,6 +1580,10 @@ String? translateSource(
   "Supported controls are available when you open a device. Compatibility depends on its exact model and region." =>
     t.mobileDefaultControlsMessage5,
   "Experimental device support" => t.mobileDefaultControlsMessage6,
+  "Air direction" => t.mobileAirDirection,
+  "Not supported yet" => t.mobileNotSupportedYet,
+  "Selecting a mode also turns this device on." => t.mobileSelectingModeTurnsOn,
+  "Updating device\u2026" => t.mobileUpdatingDevice,
   _ => null,
 };
 
@@ -3066,5 +3070,10 @@ String? sourceForKey(String key) => switch (key) {
   "mobile.defaultControlsMessage5" =>
     "Supported controls are available when you open a device. Compatibility depends on its exact model and region.",
   "mobile.defaultControlsMessage6" => "Experimental device support",
+  "mobile.airDirection" => "Air direction",
+  "mobile.notSupportedYet" => "Not supported yet",
+  "mobile.selectingModeTurnsOn" =>
+    "Selecting a mode also turns this device on.",
+  "mobile.updatingDevice" => "Updating device\u2026",
   _ => null,
 };

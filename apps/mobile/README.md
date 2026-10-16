@@ -12,6 +12,18 @@ account to publish the available actions. Startup lists local metadata only;
 there is no periodic refresh, background setup or automatic appliance command.
 See [ADR-0065](../../docs/adr/0065-default-app-device-controls.md).
 
+The climate-and-power panel keeps power, mode, fan and temperature operations on
+the device page. Mode, air direction and fan speed have separate prominent buttons;
+only independently settable descriptor choices are enabled. An unsupported direction
+button stays explicitly unavailable. Mode activation discloses its power-on effect.
+A bottom sheet requires an explicit selection and Apply; cancellation/backgrounding
+sends nothing. Other descriptor controls remain available below the primary buttons.
+
+After a command, one bounded foreground read updates observations without rewriting
+its receipt or retrying the write. Navigation, device/component changes and background
+transitions prevent late reads. The outcome is shown inline with an optional View
+Details action; quick card power stays on the home page with a local status message.
+
 Account details show nullable historical complete-inventory time. Inspect Saved
 Inventory exposes per-binding duplicate record inspection, including unpublished
 bindings; it neither merges devices nor transfers authority. Query errors remain

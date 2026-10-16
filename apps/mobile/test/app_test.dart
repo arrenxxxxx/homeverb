@@ -220,7 +220,7 @@ void main({bool deviceRun = false}) {
           () => tester.tap(find.byTooltip('Power mock-ac')),
         );
         await settle();
-        expect(app.currentState!.id, 'S06');
+        expect(app.currentState!.id, 'D01');
         expect(controller.receipt!['status'], 'verified');
         await capture('Click quick power after reading state');
         await route('D01');
@@ -232,9 +232,9 @@ void main({bool deviceRun = false}) {
         await tap('mock-ac');
         await tap('Mode');
         expect(find.text('Bedroom AC'), findsNothing);
-        await tap('heat');
-        await tap('Save Mode');
-        expect(app.currentState!.id, 'S06');
+        await tap('Heat');
+        await tap('Apply');
+        expect(app.currentState!.id, 'C01');
         expect(controller.receipt!['status'], 'verified');
         await route('C14');
         await tester.enterText(
