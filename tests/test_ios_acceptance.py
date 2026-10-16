@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import sys
+import subprocess
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -116,6 +117,30 @@ class IosAcceptanceTests(unittest.TestCase):
             with patch.object(ios, 'command', return_value=output) as command, self.assertRaises(ValueError):
                 ios.exercise(Path('/fictional/app'), 'runtime', 'type')
             self.assertEqual(command.call_count, 1)
+
+    def test_launch_failure_diagnostics_stay_on_the_created_device_without_retry(self):
+        with tempfile.TemporaryDirectory() as directory:
+            calls = []
+
+            def command(*args, **kwargs):
+                calls.append(args)
+                action = args[2]
+                if action == 'create':
+                    return DEVICE
+                self.assertEqual(args[3], DEVICE)
+                if action == 'get_app_container':
+                    return directory
+                if action in ['launch', 'spawn']:
+                    raise subprocess.CalledProcessError(1, args)
+                return ''
+
+            with patch.object(ios, 'command', side_effect=command), self.assertRaises(subprocess.CalledProcessError):
+                ios.exercise(Path(directory) / 'app', 'runtime', 'type')
+            self.assertEqual([call[2] for call in calls].count('launch'), 1)
+            diagnostics = [call for call in calls if call[2] == 'spawn']
+            self.assertEqual(len(diagnostics), 1)
+            self.assertIn('org.homeverb.test', diagnostics[0][-1])
+            self.assertEqual([call[2] for call in calls[-2:]], ['shutdown', 'delete'])
 
 
 if __name__ == '__main__':

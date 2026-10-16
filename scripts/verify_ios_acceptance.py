@@ -146,7 +146,18 @@ def exercise(app, runtime, device_type):
             path = container / 'Documents' / (phase + '.json')
             if path.exists():
                 raise ValueError('Refuse a pre-existing acceptance report.')
-            pid = launched_pid(command('xcrun', 'simctl', 'launch', device, BUNDLE, phase, run_id))
+            try:
+                pid = launched_pid(command('xcrun', 'simctl', 'launch', device, BUNDLE, phase, run_id))
+            except subprocess.SubprocessError:
+                # Only this fresh fictional Simulator is queried; never collect host/user logs.
+                predicate = f'eventMessage CONTAINS "{BUNDLE}" OR eventMessage CONTAINS "HomeVerbAcceptance"'
+                try:
+                    log = command('xcrun', 'simctl', 'spawn', device, 'log', 'show', '--last', '2m',
+                                  '--style', 'compact', '--predicate', predicate, timeout=30)
+                    print('Isolated test-app launch diagnostics:\n' + log[-12000:], flush=True)
+                except subprocess.SubprocessError:
+                    print('Isolated test-app launch diagnostics unavailable.', flush=True)
+                raise
             if phase == 'write':
                 writer_pid = pid
             report = wait_report(path, phase, run_id, pid, writer_pid)

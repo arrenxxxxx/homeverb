@@ -1601,3 +1601,11 @@ These are not app/Keychain runtime evidence. Actual execution requires the new
 macOS CI step; inspect its result for this commit. No real account, appliance,
 physical phone or separate Flutter worktree was accessed. Passcode/lock, physical
 entitlements, Flutter integration and provider/device acceptance remain pending.
+
+The first actual Simulator run on `806551c` built, signed and installed the app on
+iOS 26.2, but SpringBoard refused the first launch (`FBSOpenApplicationServiceErrorDomain`
+code 1). No Core or Keychain runtime checks ran. The harness now reads bounded,
+test-app-filtered launch diagnostics from only its newly created Simulator before
+cleanup, without relaunching. It never collects host logs or user-device diagnostics.
+A ninth portable runner test verifies this failure path and preserves the original
+launch error if diagnostics are unavailable.
