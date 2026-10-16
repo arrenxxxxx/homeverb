@@ -1,3 +1,5 @@
+import 'localization.dart';
+import 'controls.dart';
 import 'package:flutter/material.dart';
 import 'native_client.dart';
 import 'session_permissions.dart';
@@ -29,7 +31,7 @@ class _PermissionReviewState extends State<PermissionReview> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Copy('Allow controls for this session', size: 23, bold: true),
-        Copy(widget.deviceName, size: 18, bold: true),
+        Copy(LiteralText(widget.deviceName), size: 18, bold: true),
         const SizedBox(height: 12),
         const Copy(
           'Choose exact values for this device over the cloud. These experimental controls can affect the real appliance. Mode activation also turns it on. Permission lasts until the app process closes or you revoke it.',
@@ -97,12 +99,21 @@ class _PermissionReviewState extends State<PermissionReview> {
   }
 }
 
-String permissionLabel(SessionPermission choice) =>
+Object permissionLabel(SessionPermission choice) =>
     switch ((choice.capability, choice.action)) {
       ('power', 'set') => choice.value == true ? 'Power on' : 'Power off',
-      ('climate', 'set') => 'Target temperature: ${choice.value}°C',
-      ('vendor.midea.ac', 'activate_mode') =>
-        'Turn on and select mode: ${choice.value}',
-      ('vendor.midea.ac', 'set_fan_speed') => 'Fan speed: ${choice.value}',
+      ('climate', 'set') => UiMessage('Target temperature: {value}°C', {
+        'value': choice.value,
+      }),
+      ('vendor.midea.ac', 'activate_mode') => UiMessage(
+        'Turn on and select mode: {mode}',
+        {'mode': UiMessage(controlLabel('${choice.value}'))},
+      ),
+      ('vendor.midea.ac', 'set_fan_speed') => UiMessage('Fan speed: {value}', {
+        'value': UiMessage(
+          sourceForKey('vendor.midea.ac.wind_speed.${choice.value}') ??
+              '${choice.value}',
+        ),
+      }),
       _ => '${choice.capability}.${choice.action}: ${choice.value}',
     };

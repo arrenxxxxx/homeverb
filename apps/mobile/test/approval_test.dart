@@ -316,7 +316,10 @@ void main({bool deviceRun = false}) {
         await tap('Review Command');
         expect(state.approvalPreview, isNotNull);
         expect(find.text('Arguments: {"program":"normal"}'), findsOneWidget);
-        expect(find.textContaining('Connection: cloud'), findsOneWidget);
+        expect(
+          find.textContaining('Connection: Provider cloud'),
+          findsOneWidget,
+        );
         expect(state.receipt, isNull);
         await capture('review');
         if (!deviceRun) {

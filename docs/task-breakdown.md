@@ -103,4 +103,7 @@ The trusted Flutter host now supports exact session-only AC startup grants with
 separate selection/review/consent, explicit descriptor refresh and revocation.
 See the [verification scope](../apps/mobile/verification.md#flutter-session-control-permissions).
 Real-account login and physical AC control acceptance for this app remain pending.
-Full en-US/zh-CN locale wiring is the next active presentation phase.
+The Flutter app now uses slang for en-US/zh-CN with a persisted Settings > Language
+choice and system fallback. See the [internationalization guide](../apps/mobile/README.md#internationalization).
+The current emulator sign-in attempt is blocked by `SECRET_STORE_UNAVAILABLE`;
+this is not evidence of invalid provider credentials or successful AC control.

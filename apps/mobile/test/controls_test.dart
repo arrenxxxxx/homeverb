@@ -417,7 +417,9 @@ void main() {
         await tap(find.text('Apply'));
         expect(app.currentState!.id, 'C10');
         expect(
-          find.textContaining('Fixture permission denied.'),
+          find.text(
+            'POLICY_DENIED: This operation needs permission from a trusted user interface.',
+          ),
           findsOneWidget,
         );
         await capture('Permission denied with draft retained');

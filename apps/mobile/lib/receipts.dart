@@ -1,3 +1,4 @@
+import 'localization.dart';
 import 'dart:convert';
 import 'native_client.dart';
 
@@ -60,7 +61,7 @@ List<dynamic> receiptBlocks(Json receipt, String deviceName) {
     [
       'rows',
       [
-        ['Device', deviceName, null],
+        ['Device', LiteralText(deviceName), null],
         ['Started', receiptTime(receipt['started_at']), null],
         ['Recorded', receiptTime(receipt['completed_at']), null],
       ],
@@ -72,7 +73,7 @@ List<dynamic> receiptBlocks(Json receipt, String deviceName) {
           ['Error', '${error['code']}', null],
         ],
       ],
-      ['note', '${error['message']}'],
+      ['note', UiError(error['code'])],
     ],
     if (verification != null) ...[
       [
@@ -120,8 +121,20 @@ List<dynamic> receiptBlocks(Json receipt, String deviceName) {
         [
           for (var i = 0; i < attempts.length; i++)
             [
-              'Attempt ${i + 1}',
-              '${routeLabel(attempts[i]['transport'])} · ${const {'not_sent': 'Not sent', 'possibly_sent': 'May have been sent', 'accepted': 'Accepted', 'rejected': 'Rejected'}[attempts[i]['phase']] ?? 'Unknown phase'} · ${attempts[i]['duration_ms']} ms',
+              UiMessage('Attempt {count}', {'count': i + 1}),
+              UiMessage('{route} · {phase} · {duration} ms', {
+                'route': UiMessage(routeLabel(attempts[i]['transport'])),
+                'phase': UiMessage(
+                  const {
+                        'not_sent': 'Not sent',
+                        'possibly_sent': 'May have been sent',
+                        'accepted': 'Accepted',
+                        'rejected': 'Rejected',
+                      }[attempts[i]['phase']] ??
+                      'Unknown phase',
+                ),
+                'duration': attempts[i]['duration_ms'],
+              }),
               null,
             ],
         ],
@@ -135,14 +148,17 @@ List<dynamic> receiptBlocks(Json receipt, String deviceName) {
         [
           for (var i = 0; i < items.length; i++)
             [
-              'Step ${i + 1}',
+              UiMessage('Step {count}', {'count': i + 1}),
               outcomeLabel(items[i]['status']),
               'receipt-item:$i',
             ],
         ],
       ],
     for (final warning in receipt['warnings'] as List? ?? [])
-      ['note', 'Warning: $warning'],
+      [
+        'note',
+        UiMessage('Warning: {warning}', {'warning': UiMessage(warning)}),
+      ],
     [
       'note',
       'Refresh reads device state; it never repeats this write or changes the retained outcome.',

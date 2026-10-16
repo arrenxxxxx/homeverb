@@ -1,3 +1,4 @@
+import 'localization.dart';
 import 'package:flutter/material.dart';
 import 'blocks.dart';
 import 'controller.dart';
@@ -101,8 +102,14 @@ class _ApplianceControlsState extends State<ApplianceControls> {
     await widget.onExecute(widget.family, action, arguments);
   }
 
-  String display(String property) =>
-      '${propertyValue(observed(property), properties[property] as Json)}${observation(property)?['stale'] == true ? ' · Stale' : ''}';
+  Object display(String property) => UiMessage('{value}{stale}', {
+    'value': UiMessage(
+      propertyValue(observed(property), properties[property] as Json),
+    ),
+    'stale': UiMessage(
+      observation(property)?['stale'] == true ? ' · Stale' : '',
+    ),
+  });
 
   Widget propertyControl(String name) {
     final property = properties[name] as Json;
@@ -195,11 +202,20 @@ class _ApplianceControlsState extends State<ApplianceControls> {
           if (draft != null || observation(name)?['stale'] == true)
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
-              child: Copy('Observed: ${display(name)}', size: 12, color: muted),
+              child: Copy(
+                UiMessage('Observed: {value}', {'value': display(name)}),
+                size: 12,
+                color: muted,
+              ),
             ),
           if (!usable)
             ActionButton(
-              'Set ${controlLabel(name).toLowerCase()}',
+              localize(
+                context,
+                UiMessage('Set {name}', {
+                  'name': localize(context, controlLabel(name)).toLowerCase(),
+                }),
+              ),
               style: 'secondary',
               onPressed: c.busy ? null : () => open(action),
             ),
@@ -432,13 +448,21 @@ class _ApplianceControlsState extends State<ApplianceControls> {
               case final String reason)
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
-              child: Copy('${controlLabel(entry.key)}: $reason', color: muted),
+              child: Copy(
+                UiMessage('{label}: {message}', {
+                  'label': UiMessage(controlLabel(entry.key)),
+                  'message': UiMessage(reason),
+                }),
+                color: muted,
+              ),
             ),
         if (times.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: Copy(
-              'Latest read: ${receiptTime(times.last, compact: true)}',
+              UiMessage('Latest read: {time}', {
+                'time': receiptTime(times.last, compact: true),
+              }),
               size: 12,
               color: muted,
             ),

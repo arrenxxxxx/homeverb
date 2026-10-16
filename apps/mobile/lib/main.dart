@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -24,6 +26,7 @@ import 'skin.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await applyLocalePreference(null);
   LicenseRegistry.addLicense(() async* {
     yield LicenseEntryWithLineBreaks([
       'Inter',
@@ -34,6 +37,7 @@ Future<void> main() async {
     final directory = await getApplicationSupportDirectory();
     final prefs = LocalPreferences(File('${directory.path}/presentation.json'));
     await prefs.load();
+    await applyLocalePreference(prefs.locale);
     const library = String.fromEnvironment('HOMEVERB_LIBRARY');
     const adapter = String.fromEnvironment(
       'HOMEVERB_ADAPTER',
@@ -50,46 +54,56 @@ Future<void> main() async {
       permissions: permissions,
     );
     runApp(
-      NativeApp(
-        catalog: catalog,
-        controller: HomeController(
-          await openSession(const []),
-          prefs,
-          reopen: adapter == 'midea.meiju' ? openSession : null,
-        ),
-      ),
-    );
-  } catch (e) {
-    runApp(
-      MaterialApp(
-        theme: windowTheme(),
-        highContrastTheme: windowTheme(highContrast: true),
-        home: Scaffold(
-          body: LightBackground(
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Copy('HomeVerb', size: 30, bold: true),
-                    const SizedBox(height: 24),
-                    const Copy('Native Core unavailable', size: 23, bold: true),
-                    const SizedBox(height: 16),
-                    Copy('$e'),
-                    const SizedBox(height: 20),
-                    const Copy(
-                      'Install the matching native library and restart. No device or account operation was started.',
-                    ),
-                  ],
-                ),
-              ),
-            ),
+      TranslationProvider(
+        child: NativeApp(
+          catalog: catalog,
+          controller: HomeController(
+            await openSession(const []),
+            prefs,
+            reopen: adapter == 'midea.meiju' ? openSession : null,
           ),
         ),
       ),
     );
+  } catch (e) {
+    runApp(TranslationProvider(child: StartupFailure(error: e)));
   }
+}
+
+class StartupFailure extends StatelessWidget {
+  const StartupFailure({required this.error, super.key});
+  final Object error;
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+    locale: translationsOf(context).$meta.locale.flutterLocale,
+    supportedLocales: AppLocaleUtils.supportedLocales,
+    localizationsDelegates: GlobalMaterialLocalizations.delegates,
+    theme: windowTheme(),
+    highContrastTheme: windowTheme(highContrast: true),
+    home: Scaffold(
+      body: LightBackground(
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Copy('HomeVerb', size: 30, bold: true),
+                const SizedBox(height: 24),
+                const Copy('Native Core unavailable', size: 23, bold: true),
+                const SizedBox(height: 16),
+                Copy(localizedError(context, error)),
+                const SizedBox(height: 20),
+                const Copy(
+                  'Install the matching native library and restart. No device or account operation was started.',
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 class NativeApp extends StatefulWidget {
@@ -611,7 +625,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       await showDialog<void>(
         context: navigator.currentContext!,
         builder: (context) => AlertDialog(
-          title: const Text('Diagnostic report'),
+          title: Text(localize(context, 'Diagnostic report')),
           backgroundColor: Theme.of(context).colorScheme.surface,
           surfaceTintColor: Colors.transparent,
           scrollable: true,
@@ -619,7 +633,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Close'),
+              child: Text(localize(context, 'Close')),
             ),
           ],
         ),
@@ -642,14 +656,17 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         await showDialog<void>(
           context: navigator.currentContext!,
           builder: (context) => AlertDialog(
-            title: const Text('Privacy'),
-            content: const Text(
-              'Explicit account connection and device retrieval can contact the admitted provider directly. No telemetry or diagnostic uploads. Credentials use the system secure store. Diagnostics are exported only when requested. Nearby sharing is unavailable.',
+            title: Text(localize(context, 'Privacy')),
+            content: Text(
+              localize(
+                context,
+                'Explicit account connection and device retrieval can contact the admitted provider directly. No telemetry or diagnostic uploads. Credentials use the system secure store. Diagnostics are exported only when requested. Nearby sharing is unavailable.',
+              ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Close'),
+                child: Text(localize(context, 'Close')),
               ),
             ],
           ),
@@ -666,6 +683,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       'Devices': 'D01',
       'Platforms': 'P01',
       'Settings': 'S01',
+      'Language': 'L01',
       'Search': 'D03',
       'Add device': 'A01',
       'Add Device': 'A01',
@@ -765,7 +783,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
 
   Json get screen => screenFor(id);
   Json screenFor(String id) {
-    final original = widget.catalog.ui(id);
+    final original = widget.catalog.ui(id == 'L01' ? 'S01' : id);
     final ui = Map<String, dynamic>.from(original);
     List<dynamic>? b;
     if (id.startsWith('P')) {
@@ -804,6 +822,30 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         device = card?['device'] as Json?,
         prefs = card?['preferences'] as Json?;
     switch (id) {
+      case 'L01':
+        ui.remove('root');
+        ui['header'] = 'Language';
+        b = [];
+        break;
+      case 'S01':
+        b = [
+          [
+            'rows',
+            [
+              [
+                'Language',
+                c.preferences.locale == null
+                    ? 'System default'
+                    : c.preferences.locale == 'zh-CN'
+                    ? 'Simplified Chinese'
+                    : 'English (United States)',
+                'Language',
+              ],
+            ],
+          ],
+          ...original['blocks'] as List,
+        ];
+        break;
       case 'D01':
       case 'D11':
       case 'D12':
@@ -827,7 +869,9 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         ];
         break;
       case 'D05':
-        ui['header'] = device?['alias'] ?? 'Device';
+        ui['header'] = device?['alias'] == null
+            ? 'Device'
+            : LiteralText(device!['alias']);
         b = [
           [
             'rows',
@@ -848,26 +892,30 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           [
             'hero',
             'ac',
-            device?['alias'] ?? 'Device',
-            c.roomName(prefs?['room_id']),
+            device?['alias'] == null ? 'Device' : LiteralText(device!['alias']),
+            roomPresentation(c, prefs?['room_id']),
           ],
           [
             'rows',
             [
-              ['Name', device?['alias'] ?? '—'],
-              ['Room', c.roomName(prefs?['room_id'])],
-              ['Model', device?['model'] ?? '—'],
+              ['Name', LiteralText(device?['alias'] ?? '—')],
+              ['Room', roomPresentation(c, prefs?['room_id'])],
+              ['Model', LiteralText(device?['model'] ?? '—')],
               ['Connection', c.preferences.route(c.selectedDevice)],
             ],
           ],
           [
             'note',
-            'Supported: ${c.capabilities.map((v) => v['id']).join(' · ')}',
+            UiMessage('Supported: {capabilities}', {
+              'capabilities': c.capabilities.map((v) => v['id']).join(' · '),
+            }),
           ],
           for (final connection in device?['connections'] as List? ?? [])
             [
               'card',
-              '${connection['transport']} connection',
+              UiMessage('{transport} connection', {
+                'transport': UiMessage(routeLabel(connection['transport'])),
+              }),
               [
                 if (c.supports('inspect_session_grants'))
                   [
@@ -890,7 +938,12 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                   ? 'Current local session permissions. Provider authorization and device availability are not checked. Core checks every command.'
                   : 'Reviewed saved model options. Permission is not checked and no controls are enabled.',
             ],
-            ['note', 'Connection: ${c.routeInspection!['connection_id']}'],
+            [
+              'note',
+              UiMessage('Connection: {connection}', {
+                'connection': c.routeInspection!['connection_id'],
+              }),
+            ],
             if (((c.routeInspection!['grants'] ?? c.routeInspection!['options'])
                     as List)
                 .isEmpty)
@@ -958,7 +1011,14 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           [
             'note',
             id == 'D08'
-                ? 'Available routes: ${connections.join(', ')}. Core validates every selected route.'
+                ? UiMessage(
+                    'Available routes: {routes}. Core validates every selected route.',
+                    {
+                      'routes': connections
+                          .map((v) => localize(context, routeLabel(v)))
+                          .join(', '),
+                    },
+                  )
                 : 'Device-specific preferences take priority. No background scanning.',
           ],
           ['button', 'Save Preference'],
@@ -984,7 +1044,9 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         ];
         break;
       case 'R04':
-        ui['header'] = 'Delete ${c.roomName(c.editingRoom)}?';
+        ui['header'] = UiMessage('Delete {room}?', {
+          'room': c.roomName(c.editingRoom),
+        });
         break;
       case 'R03':
         b = [
@@ -994,7 +1056,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           ],
           [
             'choices',
-            [...c.rooms.map((r) => r['name']), 'Unassigned'],
+            [...c.rooms.map((r) => LiteralText(r['name'])), 'Unassigned'],
             c.selectedRoom == null
                 ? 0
                 : c.rooms
@@ -1006,7 +1068,9 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         ];
         break;
       case 'C01':
-        ui['header'] = device?['alias'] ?? 'Device';
+        ui['header'] = device?['alias'] == null
+            ? 'Device'
+            : LiteralText(device!['alias']);
         if (device?['support_status'] == 'unsupported') {
           b = [
             [
@@ -1020,7 +1084,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           break;
         }
         ui['subtitle'] = applianceFamily(c) == null
-            ? c.roomName(prefs?['room_id'])
+            ? roomPresentation(c, prefs?['room_id'])
             : '';
         final temperature = c.observed('climate.target_temperature');
         final targetAction = c.capability('climate')?['actions']?['set'];
@@ -1055,7 +1119,14 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
               'climate',
               c.snapshot == null
                   ? 'No reading'
-                  : '${c.snapshot!['from_cache'] == true ? 'Cached' : 'Read'} observation',
+                  : localize(
+                      context,
+                      UiMessage('{source} observation', {
+                        'source': UiMessage(
+                          c.snapshot!['from_cache'] == true ? 'Cached' : 'Read',
+                        ),
+                      }),
+                    ),
               canEditTarget,
             ],
           if (c.capability('climate') != null && !canEditTarget)
@@ -1085,7 +1156,13 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                     null)
                   [
                     'Mode',
-                    '${c.observed('climate.mode') ?? 'Unknown'}  ›',
+                    UiMessage('{mode}  ›', {
+                      'mode': UiMessage(
+                        controlLabel(
+                          '${c.observed('climate.mode') ?? 'Unknown'}',
+                        ),
+                      ),
+                    }),
                     targetAction?['risk'] == 'low' ? 'Mode' : null,
                   ],
                 if (c.capability(
@@ -1111,7 +1188,9 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         ];
         break;
       case 'C08':
-        ui['header'] = device?['alias'] ?? 'Device';
+        ui['header'] = device?['alias'] == null
+            ? 'Device'
+            : LiteralText(device!['alias']);
         ui['subtitle'] = '';
         b = [];
         break;
@@ -1176,7 +1255,9 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                       i++
                     )
                       [
-                        receiptDeviceName(c.batchResult!['items'][i]),
+                        LiteralText(
+                          receiptDeviceName(c.batchResult!['items'][i]),
+                        ),
                         outcomeLabel(c.batchResult!['items'][i]['status']),
                         'batch-item:$i',
                       ],
@@ -1193,7 +1274,11 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         b = [
           [
             'note',
-            'Observed target remains ${c.observed('climate.target_temperature') ?? 'unknown'}.',
+            UiMessage('Observed target remains {value}.', {
+              'value':
+                  c.observed('climate.target_temperature') ??
+                  const UiMessage('Unknown'),
+            }),
           ],
           [
             'field',
@@ -1252,7 +1337,17 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             [
               'status',
               'Local cleanup completed',
-              '${c.cleanupCount} ${c.cleanupResult == LocalCleanup.cachedState ? 'saved snapshots' : 'detailed receipts'} removed. New operations can add data again.',
+              UiMessage(
+                '{count} {kind} removed. New operations can add data again.',
+                {
+                  'count': c.cleanupCount!,
+                  'kind': UiMessage(
+                    c.cleanupResult == LocalCleanup.cachedState
+                        ? 'saved snapshots'
+                        : 'detailed receipts',
+                  ),
+                },
+              ),
               'neutral',
             ],
           [
@@ -1397,7 +1492,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           s = c.snapshots[d['id']];
       return [
         '${d['alias']}',
-        c.roomName(p['room_id']),
+        roomPresentation(c, p['room_id']),
         s?['observations']?['climate.target_temperature']?['value'] == null
             ? '—'
             : '${s!['observations']['climate.target_temperature']['value']}°C',
@@ -1411,14 +1506,48 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     onAction: action,
   );
   Widget? special() => specialFor(id);
-  String roomDeviceCount(String? room) {
+  Object roomDeviceCount(String? room) {
     final count = c.cards
         .where((card) => card['preferences']['room_id'] == room)
         .length;
-    return '$count ${count == 1 ? 'device' : 'devices'}';
+    return UiMessage(count == 1 ? '{count} device' : '{count} devices', {
+      'count': count,
+    });
   }
 
   Widget? specialFor(String id) {
+    if (id == 'L01') {
+      final t = translationsOf(context);
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final locale in <String?>[null, 'en-US', 'zh-CN'])
+            ListTile(
+              key: ValueKey('locale:${locale ?? 'system'}'),
+              title: Text(
+                locale == null
+                    ? localize(context, 'System default')
+                    : locale == 'en-US'
+                    ? 'English'
+                    : AppLocale.zhCn.translations.mobileLanguageName,
+              ),
+              subtitle: locale == null ? null : Text(locale),
+              trailing: c.preferences.locale == locale
+                  ? const Icon(Icons.check, color: accent)
+                  : null,
+              onTap: c.busy
+                  ? null
+                  : () async {
+                      if (await c.savePreferences({'locale': locale})) {
+                        await applyLocalePreference(locale);
+                        changed();
+                      }
+                    },
+            ),
+          Copy(t.mobileLanguageNotice),
+        ],
+      );
+    }
     if (id == 'D06' &&
         c.canConfigureControls &&
         c.routeInspection?['source'] == 'saved_inventory') {
@@ -1470,7 +1599,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         cards: deviceCards(),
         roomNames: [
           'All',
-          ...c.rooms.map((v) => v['name'] as String),
+          ...c.rooms.map((v) => LiteralText(v['name'])),
           'Unassigned',
         ],
         filter: ['All', 'Unassigned'].contains(c.filter)
@@ -1514,7 +1643,11 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             const Copy(
               'The confirmation reply was interrupted. Look up the original receipt before considering another command.',
             ),
-            Copy('Request: ${c.approvalRequestId}'),
+            Copy(
+              UiMessage('Request: {request}', {
+                'request': c.approvalRequestId ?? '',
+              }),
+            ),
             ActionButton(
               'Look Up Receipt',
               onPressed: c.busy
@@ -1631,7 +1764,12 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                         padding: const EdgeInsets.only(left: 16, right: 6),
                         child: Row(
                           children: [
-                            Expanded(child: Copy(r['name'], control: true)),
+                            Expanded(
+                              child: Copy(
+                                LiteralText(r['name']),
+                                control: true,
+                              ),
+                            ),
                             const SizedBox(width: 10),
                             Copy(
                               roomDeviceCount(r['id']),
@@ -1645,7 +1783,12 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                                 width: 34,
                                 height: 44,
                                 child: PopupMenuButton<String>(
-                                  tooltip: 'Room actions ${r['name']}',
+                                  tooltip: localize(
+                                    context,
+                                    UiMessage('Room actions {name}', {
+                                      'name': r['name'],
+                                    }),
+                                  ),
                                   padding: EdgeInsets.zero,
                                   icon: const Glyph(
                                     'drag',
@@ -1686,7 +1829,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                                           .map(
                                             (v) => PopupMenuItem(
                                               value: v,
-                                              child: Text(v),
+                                              child: Text(localize(context, v)),
                                             ),
                                           )
                                           .toList(),
@@ -1724,7 +1867,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           for (final card in c.cards)
             ChoiceTile(
               key: ValueKey('select-device:${card['device']['id']}'),
-              label: card['device']['alias'],
+              label: LiteralText(card['device']['alias']),
               selected: c.selection.contains(card['device']['id']),
               multiple: true,
               onTap: c.busy
@@ -1761,7 +1904,11 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Copy(
-            '${c.filter == 'All' || c.filter == 'Unassigned' ? c.filter : c.roomName(c.filter)} · Drag handles change the visible order.',
+            UiMessage('{room} · Drag handles change the visible order.', {
+              'room': c.filter == 'All' || c.filter == 'Unassigned'
+                  ? UiMessage(c.filter)
+                  : LiteralText(c.roomName(c.filter)),
+            }),
             color: muted,
           ),
           const SizedBox(height: 12),
@@ -1798,7 +1945,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                           children: [
                             Expanded(
                               child: Copy(
-                                card['device']['alias'],
+                                LiteralText(card['device']['alias']),
                                 control: true,
                               ),
                             ),
@@ -1814,7 +1961,12 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                               enabled: !c.busy,
                               child: PopupMenuButton<int>(
                                 key: ValueKey('order-menu:$deviceId'),
-                                tooltip: 'Reorder ${card['device']['alias']}',
+                                tooltip: localize(
+                                  context,
+                                  UiMessage('Reorder {name}', {
+                                    'name': card['device']['alias'],
+                                  }),
+                                ),
                                 enabled: !c.busy,
                                 icon: const Glyph(
                                   'drag',
@@ -1827,12 +1979,12 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                                   PopupMenuItem(
                                     value: -1,
                                     enabled: index > 0,
-                                    child: const Text('Move up'),
+                                    child: Text(localize(context, 'Move up')),
                                   ),
                                   PopupMenuItem(
                                     value: 1,
                                     enabled: index + 1 < cards.length,
-                                    child: const Text('Move down'),
+                                    child: Text(localize(context, 'Move down')),
                                   ),
                                 ],
                               ),
@@ -1867,8 +2019,11 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             Rows([
               for (final receipt in c.history)
                 [
-                  receiptDeviceName(receipt),
-                  '${outcomeLabel(receipt['status'])} · ${receiptTime(receipt['completed_at'], compact: true)}',
+                  LiteralText(receiptDeviceName(receipt)),
+                  UiMessage('{outcome} · {time}', {
+                    'outcome': UiMessage(outcomeLabel(receipt['status'])),
+                    'time': receiptTime(receipt['completed_at'], compact: true),
+                  }),
                   'receipt:${receipt['request_id']}',
                 ],
             ], onAction: action),
@@ -1893,6 +2048,9 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) => MaterialApp(
     navigatorKey: navigator,
+    locale: translationsOf(context).$meta.locale.flutterLocale,
+    supportedLocales: AppLocaleUtils.supportedLocales,
+    localizationsDelegates: GlobalMaterialLocalizations.delegates,
     debugShowCheckedModeBanner: false,
     theme: windowTheme(),
     highContrastTheme: windowTheme(highContrast: true),

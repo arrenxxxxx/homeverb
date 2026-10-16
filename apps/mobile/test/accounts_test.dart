@@ -531,7 +531,10 @@ void main() {
     );
     await key.currentState!.go('P08');
     await tester.pumpAndSettle();
-    expect(key.currentState!.screenFor('P08'), catalog.ui('P08'));
+    expect(
+      jsonDecode(jsonEncode(key.currentState!.screenFor('P08'))),
+      catalog.ui('P08'),
+    );
     expect(core.connectionTargets, [firstAccount]);
     expect(
       core.requests.where((r) => r['method'] == 'refresh_account'),

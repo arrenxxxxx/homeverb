@@ -90,7 +90,7 @@ python3 scripts/verify_flutter_apk.py --apk /absolute/homeverb.apk \
   --adapter homeverb.mock --report /absolute/homeverb.json
 ```
 
-Use `--adapter midea.meiju` for the explicit read-only build. The adapter value
+Use `--adapter midea.meiju` for the explicit Meiju build, which starts read-only. The adapter value
 is a build declaration, not runtime proof. Check both native ABIs and the Core
 exports, minimum SDK, package identity and backup exclusions. Preserve the APK checksum, source revision, native AAR checksum
 and toolchain versions together. Do not use an older successful artifact as proof
@@ -123,3 +123,14 @@ after integration tests; never distribute the test APK as the app artifact.
 
 Actual commands, outcomes, known pixel failures, host-specific test limitations
 and delivery hashes are recorded in [app verification](../../apps/mobile/verification.md).
+
+
+## Select the app language
+
+Settings > Language offers System default, English and Simplified Chinese. The
+selection applies immediately and is stored only in local presentation preferences;
+process restart preserves it. It does not change Core authority or provider state.
+After changing shared catalogs, regenerate using the
+[internationalization guide](../../apps/mobile/README.md#internationalization)
+before building. Verify both language directions and a cold start on the target
+Android environment; host widget tests alone do not prove packaged font rendering.

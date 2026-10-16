@@ -1,3 +1,4 @@
+import 'localization.dart';
 import 'package:flutter/material.dart';
 import 'controller.dart';
 import 'native_client.dart';
@@ -5,6 +6,8 @@ import 'receipts.dart';
 import 'skin.dart';
 
 String controlLabel(String id) {
+  final shared = sourceForKey(id);
+  if (shared != null) return shared;
   final words = id.replaceAll('_', ' ');
   return words.isEmpty ? id : '${words[0].toUpperCase()}${words.substring(1)}';
 }
@@ -13,7 +16,9 @@ String controlUnit(dynamic unit) =>
     const {'celsius': '°C', 'percent': '%', 'kelvin': 'K'}[unit] ??
     (unit?.toString() ?? '');
 
-String propertyValue(dynamic value, Json property) {
+String propertyValue(dynamic value, Json property, {String? propertyId}) {
+  final label = propertyId == null ? null : sourceForKey('$propertyId.$value');
+  if (label != null) return label;
   if (value == null) return 'Unknown';
   final text = value is bool ? (value ? 'On' : 'Off') : '$value';
   final unit = controlUnit(property['unit']);
@@ -85,7 +90,21 @@ List<dynamic> describedControls(
           if (entry.value['readable'] == true)
             [
               controlLabel(entry.key),
-              "${propertyValue(c.observed('$id.${entry.key}'), entry.value as Json)}${c.snapshot?['observations']?['$id.${entry.key}']?['stale'] == true ? ' · Stale' : ''}",
+              UiMessage('{value}{stale}', {
+                'value': UiMessage(
+                  propertyValue(
+                    c.observed('$id.${entry.key}'),
+                    entry.value as Json,
+                    propertyId: '$id.${entry.key}',
+                  ),
+                ),
+                'stale': UiMessage(
+                  c.snapshot?['observations']?['$id.${entry.key}']?['stale'] ==
+                          true
+                      ? ' · Stale'
+                      : '',
+                ),
+              }),
               null,
             ],
         for (final entry in actions.entries)
@@ -170,15 +189,25 @@ class _CapabilityActionFormState extends State<CapabilityActionForm> {
       error ??= 'Choose one explicit connection.';
     for (final name in parameters['required'] as List? ?? []) {
       if (!args.containsKey(name)) {
-        error ??= 'Choose ${controlLabel(name)}.';
+        error ??= localize(
+          context,
+          UiMessage('Choose {name}.', {'name': UiMessage(controlLabel(name))}),
+        );
       }
     }
     if (args.length < (parameters['minProperties'] as num? ?? 0)) {
-      error ??= 'Choose at least ${parameters['minProperties']} value(s).';
+      error ??= localize(
+        context,
+        UiMessage('Choose at least {count} value(s).', {
+          'count': parameters['minProperties'],
+        }),
+      );
     }
     for (final entry in args.entries) {
       final problem = validateValue(entry.value, properties[entry.key] as Json);
-      if (problem != null) error ??= '${controlLabel(entry.key)}: $problem';
+      if (problem != null)
+        error ??=
+            '${localize(context, controlLabel(entry.key))}: ${localize(context, problem)}';
     }
     if (error != null) {
       setState(() => message = error);
@@ -195,7 +224,9 @@ class _CapabilityActionFormState extends State<CapabilityActionForm> {
     setState(() {
       saving = false;
       if (!success)
-        message = '${widget.error() ?? 'Operation was not completed.'}';
+        message = widget.error() == null
+            ? localize(context, 'Operation was not completed.')
+            : localizedError(context, widget.error()!);
     });
   }
 
@@ -229,7 +260,9 @@ class _CapabilityActionFormState extends State<CapabilityActionForm> {
           children: [
             for (final transport in descriptor['transports'] as List)
               ChoiceChip(
-                label: Text(controlLabel(transport as String)),
+                label: Text(
+                  localize(context, controlLabel(transport as String)),
+                ),
                 selected: route == transport,
                 onSelected: saving
                     ? null
@@ -271,28 +304,54 @@ class _CapabilityActionFormState extends State<CapabilityActionForm> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Copy(
-              '${controlLabel(name)}${required ? ' · Required' : ' · Optional'}',
+              UiMessage('{name} · {requirement}', {
+                'name': UiMessage(controlLabel(name)),
+                'requirement': UiMessage(required ? 'Required' : 'Optional'),
+              }),
               bold: true,
             ),
             const SizedBox(height: 8),
             Copy(
-              'Observed: ${propertyValue(observed, property)}',
+              UiMessage('Observed: {value}', {
+                'value': UiMessage(propertyValue(observed, property)),
+              }),
               size: 12,
               color: muted,
             ),
             if (observation != null)
               Copy(
-                'Read: ${receiptTime(observation['received_at'], compact: true)}${observation['stale'] == true ? ' · Stale' : ''}',
+                UiMessage('Read: {time}{stale}', {
+                  'time': receiptTime(
+                    observation['received_at'],
+                    compact: true,
+                  ),
+                  'stale': UiMessage(
+                    observation['stale'] == true ? ' · Stale' : '',
+                  ),
+                }),
                 size: 12,
                 color: muted,
               ),
             if (numeric)
               Copy(
                 [
-                  if (lower != null) 'Minimum $lower',
-                  if (upper != null) 'Maximum $upper',
+                  if (lower != null)
+                    localize(
+                      context,
+                      UiMessage('Minimum {value}', {'value': lower}),
+                    ),
+                  if (upper != null)
+                    localize(
+                      context,
+                      UiMessage('Maximum {value}', {'value': upper}),
+                    ),
                   if (schema['multipleOf'] != null)
-                    'Step ${schema['multipleOf']}',
+                    localize(
+                      context,
+                      UiMessage('Step {value}', {
+                        'value': schema['multipleOf'],
+                      }),
+                    ),
                 ].join(' · '),
                 size: 12,
                 color: muted,
@@ -315,7 +374,11 @@ class _CapabilityActionFormState extends State<CapabilityActionForm> {
                       showCheckmark: false,
                       label: Copy(
                         control: true,
-                        propertyValue(value, {}),
+                        propertyValue(
+                          value,
+                          {},
+                          propertyId: '${widget.capability['id']}.$name',
+                        ),
                         size: 12,
                         color:
                             selected.containsKey(name) &&
@@ -340,7 +403,7 @@ class _CapabilityActionFormState extends State<CapabilityActionForm> {
               )
             else
               Semantics(
-                label: controlLabel(name),
+                label: localize(context, controlLabel(name)),
                 child: ValueListenableBuilder<TextEditingValue>(
                   valueListenable: controller!,
                   builder: (context, value, _) => TextField(
@@ -365,10 +428,20 @@ class _CapabilityActionFormState extends State<CapabilityActionForm> {
                       contentPadding: fieldTextPadding(
                         context,
                         value.text.isEmpty
-                            ? 'Enter ${controlLabel(name).toLowerCase()}'
+                            ? localize(
+                                context,
+                                UiMessage('Enter {name}', {
+                                  'name': UiMessage(controlLabel(name)),
+                                }),
+                              )
                             : value.text,
                       ),
-                      hintText: 'Enter ${controlLabel(name).toLowerCase()}',
+                      hintText: localize(
+                        context,
+                        UiMessage('Enter {name}', {
+                          'name': UiMessage(controlLabel(name)),
+                        }),
+                      ),
                       suffixText: controlUnit(property['unit']),
                     ),
                     onChanged: (_) => setState(() => message = null),
@@ -396,7 +469,7 @@ class _CapabilityActionFormState extends State<CapabilityActionForm> {
                   min: lower.toDouble(),
                   max: upper.toDouble(),
                   semanticFormatterCallback: (v) =>
-                      '${controlLabel(name)} $v ${property['unit'] ?? ''}',
+                      '${localize(context, controlLabel(name))} $v ${controlUnit(property['unit'])}',
                   onChanged: saving
                       ? null
                       : (value) => setState(() {

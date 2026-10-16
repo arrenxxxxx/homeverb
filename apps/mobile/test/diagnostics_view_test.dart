@@ -61,7 +61,11 @@ void main() {
       expect(blocks[0][1][1], ['Generated', '2026-10-14 10:00 UTC', null]);
       expect(blocks[1][2][0], ['Outcome', 'Unknown', null]);
       expect(blocks[1][2][1], ['Error', 'WRITE_OUTCOME_UNKNOWN', null]);
-      expect(blocks[1][2][2], ['Phase', 'Possibly sent · LAN', null]);
+      expect(jsonDecode(jsonEncode(blocks[1][2][2])), [
+        'Phase',
+        'Possibly sent · LAN',
+        null,
+      ]);
       expect(jsonEncode(report), before);
       report['recent_receipts'][0]['attempts_omitted'] = 2;
       expect(

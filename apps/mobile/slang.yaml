@@ -1,0 +1,11 @@
+base_locale: en-US
+fallback_strategy: base_locale
+input_directory: .dart_tool/homeverb_i18n
+input_file_pattern: .json
+output_directory: lib/gen
+output_file_name: strings.g.dart
+string_interpolation: braces
+flat_map: false
+lazy: false
+timestamp: false
+statistics: false

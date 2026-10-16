@@ -1,3 +1,4 @@
+import 'localization.dart';
 import 'package:flutter/material.dart';
 import 'blocks.dart';
 import 'controller.dart';
@@ -42,7 +43,7 @@ class CompartmentControls extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      for (final part in controller.components) compartment(part),
+      for (final part in controller.components) compartment(context, part),
       const Padding(
         padding: EdgeInsets.fromLTRB(2, 0, 2, 12),
         child: Copy(
@@ -58,7 +59,7 @@ class CompartmentControls extends StatelessWidget {
     ],
   );
 
-  Widget compartment(Json part) {
+  Widget compartment(BuildContext context, Json part) {
     final id = part['id'] as String, label = controlLabel(id);
     final climate = controller.componentCapability(id, 'climate');
     final snapshot = controller.componentSnapshot(id);
@@ -95,7 +96,10 @@ class CompartmentControls extends StatelessWidget {
               validateValue(target + direction * step, schema) == null;
           trailing[rows.length] = InlineStepper(
             key: ValueKey('component-stepper:$id'),
-            label: '$label target',
+            label: localize(
+              context,
+              UiMessage('{component} target', {'component': UiMessage(label)}),
+            ),
             value: propertyValue(target, entry.value as Json),
             onIncrease: canStep(1)
                 ? () => onTarget(id, (target as num) + step)
@@ -151,7 +155,10 @@ class CompartmentControls extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: Copy(
-              '$label could not be read: $readError',
+              UiMessage('{component} could not be read: {error}', {
+                'component': UiMessage(label),
+                'error': localizedError(context, readError),
+              }),
               color: const Color(0xff9e3421),
             ),
           ),
@@ -159,8 +166,17 @@ class CompartmentControls extends StatelessWidget {
           padding: const EdgeInsets.only(left: 2, bottom: 12),
           child: Copy(
             times.isEmpty
-                ? '$label · No saved reading'
-                : '$label · ${snapshot?['from_cache'] == true ? 'Cached' : 'Read'} ${receiptTime(times.last, compact: true)}${stale ? ' · Stale' : ''}',
+                ? UiMessage('{component} · No saved reading', {
+                    'component': UiMessage(label),
+                  })
+                : UiMessage('{component} · {source} {time}{stale}', {
+                    'component': UiMessage(label),
+                    'source': UiMessage(
+                      snapshot?['from_cache'] == true ? 'Cached' : 'Read',
+                    ),
+                    'time': receiptTime(times.last, compact: true),
+                    'stale': UiMessage(stale ? ' · Stale' : ''),
+                  }),
             size: 12,
             color: muted,
           ),
@@ -170,8 +186,18 @@ class CompartmentControls extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 12),
             child: Copy(
               targetProperty['writable'] != true
-                  ? '$label target is read-only.'
-                  : '$label: ${action == null ? 'Target controls are unavailable.' : actionUnavailable(climate!, action) ?? 'Target controls are unavailable.'}',
+                  ? UiMessage('{component} target is read-only.', {
+                      'component': UiMessage(label),
+                    })
+                  : UiMessage('{label}: {message}', {
+                      'label': UiMessage(label),
+                      'message': UiMessage(
+                        action == null
+                            ? 'Target controls are unavailable.'
+                            : actionUnavailable(climate!, action) ??
+                                  'Target controls are unavailable.',
+                      ),
+                    }),
               size: 12,
               color: muted,
             ),

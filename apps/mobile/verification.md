@@ -1452,3 +1452,37 @@ existing account/current-contract/trusted-approval regression selection also
 passed (18 tests before the two new tests were added). This establishes host
 integration, not real-provider or physical AC success. Native API 1.22, SQLite 5,
 protected payload 3 and execution outcomes are unchanged.
+
+
+## Flutter internationalization: October 16, 2026
+
+The app adopts the LocalSend pattern using pinned slang/slang_flutter 4.19.0:
+generated typed catalogs, TranslationProvider, LocaleSettings, Material delegates
+and a persisted nullable language choice. Settings > Language supports system
+default, en-US and zh-CN. The generator stages 1,120 shared messages, validates
+keys/placeholders and preserves the existing English approval asset contract.
+Chinese authoring remains in the shared zh-CN JSON; generated Dart uses escapes.
+User/provider names remain literal, while authored labels, parameterized messages
+and known error explanations are localized. Core request IDs, action tokens,
+arguments, receipts, native API and storage formats are unchanged.
+
+Executed source checks include Flutter analysis; 25 focused account, approval,
+appliance, diagnostics and localization tests; then 13 affected inventory,
+organization, control, full Mock journey and localization tests after fixing the
+exact connection/card join and the privacy dialog intrinsic layout. Language
+checks exercise actual Settings clicks in both directions, persisted preference
+reopening, OS changes/manual overrides, unsupported-language fallback, 320-wide
+layouts at 2x text and Chinese unknown receipts/errors without changing commands.
+Seven shared presentation tests, 20 contract schemas with 45 positive and 250
+negative fixtures, documentation/repository validators and commit conventions
+passed. The final `fvm flutter test --reporter expanded` run passed 94 tests and failed
+only the four previously recorded macOS glyph-pixel assertions: one button-label,
+two control-label and one field-alignment case. Their one-pixel discrepancies,
+references and strict tolerances remain unchanged. This is not full pixel-equality
+acceptance. No Rust source or ABI changed in this phase.
+
+Android packaging and actual process language persistence are recorded in the
+subsequent delivery entry. The user's current emulator login attempt returned
+`SECRET_STORE_UNAVAILABLE`; provider credentials and actual AC operation are not
+validated by these presentation checks. No real-device writes, remote push or
+artifact upload occurred in this phase.

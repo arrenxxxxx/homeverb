@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'blocks.dart';
 import 'skin.dart';
+import 'localization.dart';
 
 typedef Json = Map<String, dynamic>;
 
@@ -118,7 +119,7 @@ class ScreenView extends StatelessWidget {
               id.startsWith('W') &&
               MediaQuery.textScalerOf(context).scale(13) <= 17)
             return wideReference(c.maxWidth);
-          final header = ui['header'] as String;
+          final header = ui['header'] as Object;
           final content =
               home ??
               ((ui['blocks'] as List).firstOrNull?[0] == 'home'
@@ -151,7 +152,12 @@ class ScreenView extends StatelessWidget {
                   color: const Color(0x5f14181b),
                   dismissible: true,
                   onDismiss: () => onAction('Back'),
-                  semanticsLabel: 'Dismiss $header',
+                  semanticsLabel: localize(
+                    context,
+                    UiMessage('Dismiss {name}', {
+                      'name': UiMessage(header.toString()),
+                    }),
+                  ),
                 ),
                 Align(
                   alignment: dialog ? Alignment.center : Alignment.bottomCenter,
@@ -212,7 +218,7 @@ class ScreenView extends StatelessWidget {
                                 Semantics(
                                   liveRegion: true,
                                   child: Copy(
-                                    '$error',
+                                    localizedError(context, error!),
                                     color: const Color(0xff9e3421),
                                   ),
                                 ),
@@ -408,7 +414,7 @@ class ScreenView extends StatelessWidget {
                                       [
                                         'status',
                                         'Could not complete this operation',
-                                        '$error',
+                                        localizedError(context, error!),
                                         'error',
                                       ],
                                     ]),
@@ -760,7 +766,7 @@ class DeviceHome extends StatelessWidget {
   final String mode, filter;
   final ActionHandler onAction;
   final Widget? cards;
-  final List<String>? roomNames;
+  final List<Object>? roomNames;
   @override
   Widget build(BuildContext context) {
     if (MediaQuery.textScalerOf(context).scale(13) <= 13) {
@@ -786,7 +792,7 @@ class DeviceHome extends StatelessWidget {
                   width: 48,
                   height: 48,
                   child: IconButton(
-                    tooltip: 'Manage rooms',
+                    tooltip: localize(context, 'Manage rooms'),
                     onPressed: () => onAction('Manage rooms'),
                     icon: const Glyph('settings', size: 20, color: muted),
                   ),
@@ -821,12 +827,12 @@ class DeviceHome extends StatelessWidget {
                                   labels[i],
                                   control: true,
                                   bold:
-                                      labels[i] ==
+                                      labels[i].toString() ==
                                       (mode == 'living'
                                           ? 'Living Room'
                                           : filter),
                                   color:
-                                      labels[i] ==
+                                      labels[i].toString() ==
                                           (mode == 'living'
                                               ? 'Living Room'
                                               : filter)
@@ -835,10 +841,10 @@ class DeviceHome extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            if (labels[i] ==
+                            if (labels[i].toString() ==
                                 (mode == 'living' ? 'Living Room' : filter))
                               Container(
-                                width: labels[i] == 'All' ? 17 : 58,
+                                width: labels[i].toString() == 'All' ? 17 : 58,
                                 height: 3,
                                 decoration: BoxDecoration(
                                   color: accent,
@@ -893,7 +899,7 @@ class DeviceHome extends StatelessWidget {
                   width: 48,
                   height: 48,
                   child: IconButton(
-                    tooltip: 'Refresh State',
+                    tooltip: localize(context, 'Refresh State'),
                     onPressed: () => onAction('Refresh State'),
                     icon: const Glyph('refresh', size: 16, color: muted),
                   ),
@@ -959,20 +965,20 @@ class DeviceHome extends StatelessWidget {
                           label,
                           control: true,
                           color:
-                              label ==
+                              label.toString() ==
                                   (mode == 'living' ? 'Living Room' : filter)
                               ? ink
                               : muted,
                           bold:
-                              label ==
+                              label.toString() ==
                               (mode == 'living' ? 'Living Room' : filter),
                         ),
                         const SizedBox(height: 12),
-                        if (label ==
+                        if (label.toString() ==
                             (mode == 'living' ? 'Living Room' : filter))
                           Container(
                             height: 3,
-                            width: label.length < 4 ? 18 : 58,
+                            width: label.toString().length < 4 ? 18 : 58,
                             decoration: BoxDecoration(
                               color: accent,
                               borderRadius: BorderRadius.circular(2),
@@ -1016,7 +1022,7 @@ class DeviceHome extends StatelessWidget {
               height: 26,
               child: IconButton(
                 padding: EdgeInsets.zero,
-                tooltip: 'Refresh State',
+                tooltip: localize(context, 'Refresh State'),
                 onPressed: () => onAction('Refresh State'),
                 icon: const Glyph('refresh', size: 16, color: muted),
               ),
@@ -1328,10 +1334,10 @@ class PreviewAppState extends State<PreviewApp> {
                 child: ListView(
                   children: [
                     ListTile(
-                      title: const Text('Isolated preview scenarios'),
-                      subtitle: const Text('Simulated events never call Core.'),
+                      title: Copy('Isolated preview scenarios'),
+                      subtitle: Copy('Simulated events never call Core.'),
                       trailing: IconButton(
-                        tooltip: 'Close catalog',
+                        tooltip: localize(context, 'Close catalog'),
                         icon: const Icon(Icons.close),
                         onPressed: () => setState(() => showCatalog = false),
                       ),
@@ -1363,7 +1369,7 @@ class PreviewAppState extends State<PreviewApp> {
               child: ListTile(
                 title: Text(message!),
                 trailing: IconButton(
-                  tooltip: 'Dismiss',
+                  tooltip: localize(context, 'Dismiss'),
                   onPressed: () => setState(() => message = null),
                   icon: const Icon(Icons.close),
                 ),

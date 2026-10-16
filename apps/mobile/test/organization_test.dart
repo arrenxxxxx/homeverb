@@ -213,7 +213,9 @@ void main() {
       expect(app.currentState!.choices.values.single, 1);
       expect(jsonEncode(core.cards), before);
       expect(
-        find.textContaining('destination room is unavailable'),
+        find.text(
+          'NOT_FOUND: The operation could not finish. Error code: NOT_FOUND',
+        ),
         findsOneWidget,
       );
       final failed = core.calls

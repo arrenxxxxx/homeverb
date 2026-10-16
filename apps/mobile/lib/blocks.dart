@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'skin.dart';
+import 'localization.dart';
 
 typedef ActionHandler = void Function(String label);
 
@@ -37,7 +38,7 @@ class Blocks extends StatelessWidget {
       case 'note':
         final note = Padding(
           padding: const EdgeInsets.fromLTRB(2, 2, 2, 10),
-          child: Copy('${b[1]}', color: muted, paragraph: true),
+          child: Copy(b[1], color: muted, paragraph: true),
         );
         return b.length > 2
             ? Semantics(
@@ -96,7 +97,7 @@ class Blocks extends StatelessWidget {
                 border: b.length > 3 ? const Color(0xffae452d) : null,
                 borderWidth: b.length > 3 ? 1 : .6,
                 child: Semantics(
-                  label: label,
+                  label: localize(context, label),
                   child: ValueListenableBuilder<TextEditingValue>(
                     valueListenable: field,
                     builder: (context, value, _) => TextField(
@@ -117,10 +118,10 @@ class Blocks extends StatelessWidget {
                           value.text.isEmpty ? 'Search by name' : value.text,
                         ),
                         border: InputBorder.none,
-                        hintText: 'Search by name',
+                        hintText: localize(context, 'Search by name'),
                         suffixIcon: label.startsWith('Search')
                             ? IconButton(
-                                tooltip: 'Clear search',
+                                tooltip: localize(context, 'Clear search'),
                                 onPressed: () {
                                   field.clear();
                                   onChanged?.call();
@@ -147,7 +148,7 @@ class Blocks extends StatelessWidget {
           ),
         );
       case 'choices':
-        final items = (b[1] as List).cast<String>();
+        final items = (b[1] as List).cast<Object>();
         final key = items.join('|');
         final initial = b.length > 2 ? b[2] : 0;
         final multiple = initial is List;
@@ -192,7 +193,7 @@ class Blocks extends StatelessWidget {
                   : label == '3';
               final measure = TextPainter(
                 text: TextSpan(
-                  text: label,
+                  text: localize(context, label),
                   style: const TextStyle(fontFamily: 'Inter', fontSize: 12),
                 ),
                 textDirection: Directionality.of(context),
@@ -371,7 +372,7 @@ class Blocks extends StatelessWidget {
             builder: (context, constraints) {
               final text = TextPainter(
                 text: TextSpan(
-                  text: b[2],
+                  text: localize(context, b[2]),
                   style: const TextStyle(fontFamily: 'Inter', fontSize: 12),
                 ),
                 textDirection: Directionality.of(context),
@@ -762,7 +763,7 @@ class Rows extends StatelessWidget {
     super.key,
   });
   final List items;
-  final String? title;
+  final Object? title;
   final Map<int, Widget> trailing;
   final ActionHandler onAction;
   @override
@@ -822,7 +823,7 @@ class Rows extends StatelessWidget {
                               MediaQuery.textScalerOf(context).scale(13) / 13;
                           final measurement = TextPainter(
                             text: TextSpan(
-                              text: value,
+                              text: localize(context, items[i][1]),
                               style: const TextStyle(
                                 fontFamily: 'Inter',
                                 fontSize: 12,
@@ -835,7 +836,7 @@ class Rows extends StatelessWidget {
                           )..layout();
                           final valueWidth = measurement.width;
                           measurement.text = TextSpan(
-                            text: label,
+                            text: localize(context, items[i][0]),
                             style: const TextStyle(
                               fontFamily: 'Inter',
                               fontSize: 13,
@@ -846,7 +847,7 @@ class Rows extends StatelessWidget {
                           measurement.layout();
                           final combinedWidth = measurement.width + valueWidth;
                           measurement.dispose();
-                          final leading = Copy(label, control: true);
+                          final leading = Copy(items[i][0], control: true);
                           final trailing =
                               this.trailing[i] ??
                               (stepper
@@ -872,7 +873,7 @@ class Rows extends StatelessWidget {
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Copy(
-                                          value,
+                                          items[i][1],
                                           size: 12,
                                           color: muted,
                                           control: true,
@@ -883,7 +884,7 @@ class Rows extends StatelessWidget {
                                           width: 44,
                                           child: FittedBox(
                                             child: Semantics(
-                                              label: label,
+                                              label: localize(context, label),
                                               child: Switch(
                                                 value: value == 'On',
                                                 onChanged: action == null
@@ -914,7 +915,7 @@ class Rows extends StatelessWidget {
                                       ],
                                     )
                                   : Copy(
-                                      value,
+                                      items[i][1],
                                       size: 12,
                                       color: muted,
                                       control: true,
@@ -1123,29 +1124,31 @@ class Climate extends StatelessWidget {
     );
   }
 
-  Widget _step(String text, String label, Color color) => Semantics(
-    label: label,
-    button: true,
-    enabled: enabled,
-    child: SizedBox(
-      width: 48,
-      height: 48,
-      child: InkWell(
-        onTap: enabled ? () => onAction(label) : null,
-        borderRadius: BorderRadius.circular(24),
-        child: Center(
-          child: Container(
-            width: 47,
-            height: 40,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Center(
-              child: Glyph(
-                text == '+' ? 'step-plus' : 'step-minus',
-                size: 24,
-                color: Colors.white,
+  Widget _step(String text, String label, Color color) => Builder(
+    builder: (context) => Semantics(
+      label: localize(context, label),
+      button: true,
+      enabled: enabled,
+      child: SizedBox(
+        width: 48,
+        height: 48,
+        child: InkWell(
+          onTap: enabled ? () => onAction(label) : null,
+          borderRadius: BorderRadius.circular(24),
+          child: Center(
+            child: Container(
+              width: 47,
+              height: 40,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Center(
+                child: Glyph(
+                  text == '+' ? 'step-plus' : 'step-minus',
+                  size: 24,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
@@ -1172,7 +1175,7 @@ class DeviceGrid extends StatelessWidget {
     super.key,
   });
   final List<String> keys;
-  final List<List<String>>? data;
+  final List<List<Object>>? data;
   final ActionHandler onAction;
   final bool cached, large;
   @override
@@ -1218,7 +1221,7 @@ class DeviceTile extends StatelessWidget {
   });
   final String deviceKey;
   final double compactHeight;
-  final List<String>? data;
+  final List<Object>? data;
   final ActionHandler onAction;
   final bool cached, large;
   @override
@@ -1232,10 +1235,10 @@ class DeviceTile extends StatelessWidget {
     final largeText = scale > 1.3;
     final active = kind != 'tv' && !cached;
     Widget power() => Semantics(
-      label: 'Power ${d[0]}',
+      label: localize(context, UiMessage('Power {name}', {'name': d[0]})),
       button: true,
       child: Tooltip(
-        message: 'Power ${d[0]}',
+        message: localize(context, UiMessage('Power {name}', {'name': d[0]})),
         child: InkWell(
           onTap: () => onAction('power:$deviceKey'),
           borderRadius: BorderRadius.circular(24),
@@ -1269,7 +1272,7 @@ class DeviceTile extends StatelessWidget {
       child: Stack(
         children: [
           Semantics(
-            label: 'Open ${d[0]}',
+            label: localize(context, UiMessage('Open {name}', {'name': d[0]})),
             button: true,
             child: InkWell(
               borderRadius: BorderRadius.circular(22),
@@ -1286,7 +1289,12 @@ class DeviceTile extends StatelessWidget {
                             child: Center(child: product(kind)),
                           ),
                           const SizedBox(height: 12),
-                          Copy(d[0], size: 19, bold: true, color: color),
+                          Copy(
+                            data == null ? d[0] : LiteralText(d[0]),
+                            size: 19,
+                            bold: true,
+                            color: color,
+                          ),
                           const SizedBox(height: 8),
                           Copy(d[1], size: 14, color: secondary),
                           const SizedBox(height: 12),
@@ -1315,7 +1323,7 @@ class DeviceTile extends StatelessWidget {
                               right: 14,
                               top: 23,
                               child: Copy(
-                                d[0],
+                                data == null ? d[0] : LiteralText(d[0]),
                                 maxLines: 2,
                                 size: 19,
                                 bold: true,
@@ -1360,7 +1368,7 @@ class DeviceTile extends StatelessWidget {
                             textAt(
                               117,
                               Copy(
-                                d[0],
+                                data == null ? d[0] : LiteralText(d[0]),
                                 size: 15,
                                 bold: true,
                                 color: color,
@@ -1412,10 +1420,16 @@ class DeviceTile extends StatelessWidget {
             right: 0,
             top: 0,
             child: Semantics(
-              label: 'Menu ${d[0]}',
+              label: localize(
+                context,
+                UiMessage('Menu {name}', {'name': d[0]}),
+              ),
               button: true,
               child: Tooltip(
-                message: 'Menu ${d[0]}',
+                message: localize(
+                  context,
+                  UiMessage('Menu {name}', {'name': d[0]}),
+                ),
                 child: InkWell(
                   onTap: () => onAction('menu:$deviceKey'),
                   child: const SizedBox(width: 48, height: 48),

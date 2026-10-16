@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'localization.dart';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -201,13 +202,14 @@ class Copy extends StatelessWidget {
     this.maxLines,
     super.key,
   });
-  final String text;
+  final Object text;
   final double size;
   final Color color;
   final bool bold, center, control, paragraph;
   final int? maxLines;
   @override
   Widget build(BuildContext context) {
+    final text = localize(context, this.text);
     final textSize = MediaQuery.highContrastOf(context)
         ? math.max(size, 12.0)
         : size;
@@ -619,7 +621,7 @@ class ActionButton extends StatelessWidget {
           ),
           onPressed: onPressed,
           child: _InkAlignedText(
-            label,
+            localize(context, label),
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontSize: 14,
@@ -664,6 +666,7 @@ class _InkAlignedText extends StatelessWidget {
     );
     final metrics = _textInkBounds[(style.fontWeight!.value, style.fontSize!)];
     if (metrics == null ||
+        label.runes.any((rune) => !metrics.containsKey(rune)) ||
         MediaQuery.boldTextOf(context) ||
         MediaQuery.maybeLineHeightScaleFactorOverrideOf(context) != null ||
         MediaQuery.maybeLetterSpacingOverrideOf(context) != null ||
@@ -951,7 +954,7 @@ class OperationProgress extends StatelessWidget {
   const OperationProgress({super.key});
   @override
   Widget build(BuildContext context) => Semantics(
-    label: 'Operation in progress',
+    label: localize(context, 'Operation in progress'),
     liveRegion: true,
     child: ExcludeSemantics(
       child: LinearProgressIndicator(
@@ -1004,7 +1007,12 @@ class InlineStepper extends StatelessWidget {
               width: 44,
               child: Semantics(
                 button: true,
-                label: '${increase ? 'Increase' : 'Decrease'} $label',
+                label: localize(
+                  context,
+                  UiMessage(increase ? 'Increase {name}' : 'Decrease {name}', {
+                    'name': UiMessage(label),
+                  }),
+                ),
                 enabled: (increase ? onIncrease : onDecrease) != null,
                 child: InkWell(
                   onTap: increase ? onIncrease : onDecrease,
@@ -1133,7 +1141,7 @@ class ChoiceTile extends StatelessWidget {
     this.multiple = false,
     super.key,
   });
-  final String label;
+  final Object label;
   final bool selected, multiple;
   final VoidCallback? onTap;
 
@@ -1157,7 +1165,7 @@ class ChoiceTile extends StatelessWidget {
               final scaler = MediaQuery.textScalerOf(context);
               final text = TextPainter(
                 text: TextSpan(
-                  text: label,
+                  text: localize(context, label),
                   style: TextStyle(
                     fontFamily: 'Inter',
                     fontSize: 13,
@@ -1463,7 +1471,7 @@ class IconAction extends StatelessWidget {
   final double size;
   @override
   Widget build(BuildContext context) => IconButton(
-    tooltip: label,
+    tooltip: localize(context, label),
     padding: EdgeInsets.zero,
     onPressed: onTap,
     icon: Glyph(icon, color: color, size: size),

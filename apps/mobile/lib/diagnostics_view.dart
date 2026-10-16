@@ -1,3 +1,4 @@
+import 'localization.dart';
 import 'native_client.dart';
 import 'receipts.dart';
 
@@ -65,7 +66,13 @@ List<dynamic> diagnosticsBlocks(Json? report, {required bool exporting}) {
           'Phase',
           attempt == null
               ? 'No attempts'
-              : '$phase · $transport${latest!['attempts_omitted'] > 0 ? ' (retained)' : ''}',
+              : UiMessage('{phase} · {transport}{suffix}', {
+                  'phase': UiMessage(phase ?? 'Unknown'),
+                  'transport': UiMessage(transport ?? 'Not provided'),
+                  'suffix': UiMessage(
+                    latest!['attempts_omitted'] > 0 ? ' (retained)' : '',
+                  ),
+                }),
           null,
         ],
         [

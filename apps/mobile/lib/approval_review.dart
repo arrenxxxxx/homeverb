@@ -1,3 +1,5 @@
+import 'localization.dart';
+import 'receipts.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'native_client.dart';
@@ -31,10 +33,14 @@ class ApprovalReview extends StatelessWidget {
             '${entry.value}',
     };
     final template = labels['$action.confirm'];
-    final effects = template?.replaceAllMapped(
-      RegExp(r'\{([^}]+)\}'),
-      (match) => values[match[1]] ?? match[0]!,
-    );
+    final effects = template == null
+        ? null
+        : UiMessage(template, {
+            for (final entry in values.entries)
+              entry.key: entry.key == 'device'
+                  ? LiteralText(entry.value)
+                  : UiMessage(entry.value),
+          });
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -52,16 +58,43 @@ class ApprovalReview extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Copy('Device: ${values['device']}'),
-              Copy('Local ID: ${command['device_id']}'),
-              Copy('Component: ${command['component_id']}'),
-              Copy('Action: ${labels[action] ?? action}'),
-              Copy('Arguments: ${jsonEncode(arguments)}'),
               Copy(
-                'Connection: ${preview.connection['transport']} · ${preview.connection['id']}',
+                UiMessage('Device: {device}', {'device': values['device']!}),
               ),
-              Copy('Expires: ${preview.expiresAt.toUtc().toIso8601String()}'),
-              Copy('Request: ${command['request_id']}'),
+              Copy(
+                UiMessage('Local ID: {value}', {'value': command['device_id']}),
+              ),
+              Copy(
+                UiMessage('Component: {value}', {
+                  'value': command['component_id'],
+                }),
+              ),
+              Copy(
+                UiMessage('Action: {value}', {
+                  'value': UiMessage(labels[action] ?? action),
+                }),
+              ),
+              Copy(
+                UiMessage('Arguments: {value}', {
+                  'value': jsonEncode(arguments),
+                }),
+              ),
+              Copy(
+                UiMessage('Connection: {transport} · {connection}', {
+                  'transport': UiMessage(
+                    routeLabel(preview.connection['transport']),
+                  ),
+                  'connection': preview.connection['id'],
+                }),
+              ),
+              Copy(
+                UiMessage('Expires: {value}', {
+                  'value': preview.expiresAt.toUtc().toIso8601String(),
+                }),
+              ),
+              Copy(
+                UiMessage('Request: {value}', {'value': command['request_id']}),
+              ),
             ],
           ),
         ),

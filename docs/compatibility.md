@@ -1776,3 +1776,19 @@ existing account/current-contract/trusted-approval regression selection also
 passed (18 tests before the two new tests were added). This establishes host
 integration, not real-provider or physical AC success. Native API 1.22, SQLite 5,
 protected payload 3 and execution outcomes are unchanged.
+
+
+## Flutter English and Simplified Chinese
+
+The Flutter presentation layer now uses pinned slang/slang_flutter 4.19.0,
+generated typed catalogs and Material localization delegates. Language selection
+supports en-US, zh-CN and a nullable system default, persisted in the existing
+version-1 presentation preferences. Unsupported system languages fall back to
+English. Existing preferences without a locale remain valid.
+
+No native API, SQLite schema, protected payload, action identifier, permission,
+receipt or routing format changes. User/provider names and machine identifiers
+remain literal. Known errors use localized catalog explanations; unknown errors
+retain the code with a generic localized explanation, never raw provider text.
+See the [verification record](../apps/mobile/verification.md) for actual checks and
+remaining provider/physical acceptance limits.

@@ -34,8 +34,8 @@ Credential controllers clear on submission, backgrounding and disposal. Owned
 managed byte arrays and native allocations clear on every wrapper return path.
 Only nonsecret metadata enters JSON; credentials use the separate native function.
 This does not guarantee erasure of keyboard, OS or managed-string copies. Locked or
-unavailable system storage is an error, never a plaintext fallback. No real-device
-write grants are supplied by this UI.
+unavailable system storage is an error, never a plaintext fallback. Account connection supplies no write grants; exact session controls require the
+separate trusted permission review described below.
 
 Account details offer explicit Inspect Saved Inventory when Core advertises the
 method. It reads only the selected account's protected local bindings, distinguishes
@@ -225,11 +225,39 @@ Run `fvm flutter test test/approval_test.dart` or the device process suite
 This does not enable Meiju startup grants or operate a physical appliance. The
 production default remains normal Mock, or explicitly selected read-only Meiju.
 
-Confirmation labels use the shared English presentation catalog. After changing
-that catalog, copy `../../packages/presentation/locales/en-US.json` to
-`assets/en-US.json` from this directory; the approval suite checks exact equality.
-Bundling a local asset keeps Android paths valid. Full app locale wiring is still
-pending; adding translated catalog entries alone is not localization acceptance.
+## Internationalization
+
+The app follows LocalSend's slang pattern: generated typed translations,
+`TranslationProvider`, `LocaleSettings`, Material localization delegates and a
+persisted nullable locale. Settings > Language offers System default, English
+(`en-US`) and Simplified Chinese (`zh-CN`). A manual choice applies immediately
+and survives process restart; System default follows OS locale changes, with
+English as the fallback for unsupported languages.
+
+The canonical catalogs are `packages/presentation/locales/en-US.json` and
+`packages/presentation/locales/zh-CN.json`. Only the latter contains authored
+Chinese text. From the repository root, after `fvm flutter pub get` in this app:
+
+```sh
+python3 scripts/generate_flutter_i18n.py --generate
+```
+
+The script checks key/placeholder parity, stages slang input under `.dart_tool`,
+generates typed Dart translations and the legacy presentation-token bridge, and
+synchronizes the existing English approval asset. Generated Dart uses Unicode
+escapes; edit the canonical catalogs rather than generated files. New widgets
+can use `translationsOf(context)` typed getters. Data-driven labels use `Copy`
+and explicit `UiMessage` parameters. Wrap user/provider names in `LiteralText`:
+localization must never change a device/account/room name, public identifier,
+command argument, error code, receipt or action callback token. Known errors use
+catalog explanations; unknown errors show their code without raw provider text.
+Evidence timestamps retain their original representation.
+
+Run `fvm flutter test test/localization_test.dart` for language switching,
+persistence, system fallback, narrow enlarged-text layouts and receipt/error
+semantics. Source and Android runtime results are recorded in
+[verification.md](verification.md). Localization does not establish successful
+provider login, secure-store availability or physical appliance support.
 
 
 ## Allow exact real-device controls

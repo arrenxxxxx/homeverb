@@ -1,3 +1,4 @@
+import 'localization.dart';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'controller.dart';
@@ -11,6 +12,20 @@ String credentialLabel(dynamic state) => switch (state) {
   _ => 'Unsupported account state',
 };
 
+Object roomPresentation(HomeController c, String? id) {
+  final room = c.rooms.where((r) => r['id'] == id).firstOrNull;
+  return room == null
+      ? const UiMessage('Unassigned')
+      : LiteralText(room['name']);
+}
+
+Object savedCardName(HomeController c, String id) {
+  final card = c.cards.where((v) => v['device']['id'] == id).firstOrNull;
+  return card == null
+      ? UiMessage('Saved card · {suffix}', {'suffix': id.split('-').last})
+      : LiteralText(card['device']['alias']);
+}
+
 List<dynamic> linkedCardRows(
   HomeController c,
   List<String> ids, {
@@ -18,12 +33,10 @@ List<dynamic> linkedCardRows(
 }) => [
   for (final id in ids)
     [
-      c.cards
-              .where((card) => card['device']['id'] == id)
-              .firstOrNull?['device']['alias'] ??
-          'Saved card · ${id.split('-').last}',
+      savedCardName(c, id),
       c.cards.any((card) => card['device']['id'] == id)
-          ? c.roomName(
+          ? roomPresentation(
+              c,
               c.cards.firstWhere(
                 (card) => card['device']['id'] == id,
               )['preferences']['room_id'],
@@ -34,6 +47,21 @@ List<dynamic> linkedCardRows(
           : null,
     ],
 ];
+
+Object savedBindingName(HomeController c, Json binding) {
+  final card = c.cards
+      .where(
+        (card) =>
+            card['device']['id'] == binding['device_id'] &&
+            (card['device']['connections'] as List).any(
+              (connection) => connection['id'] == binding['connection_id'],
+            ),
+      )
+      .firstOrNull;
+  return card == null
+      ? const UiMessage('Saved binding without a matching card')
+      : LiteralText(card['device']['alias']);
+}
 
 List<dynamic> savedInventoryBlocks(HomeController c) {
   final result = c.accountInventory;
@@ -52,17 +80,7 @@ List<dynamic> savedInventoryBlocks(HomeController c) {
     for (final binding in devices)
       [
         'card',
-        c.cards
-                .where(
-                  (card) =>
-                      card['device']['id'] == binding['device_id'] &&
-                      (card['device']['connections'] as List).any(
-                        (connection) =>
-                            connection['id'] == binding['connection_id'],
-                      ),
-                )
-                .firstOrNull?['device']['alias'] ??
-            'Saved binding without a matching card',
+        savedBindingName(c, binding),
         [
           [
             'Saved membership',
@@ -156,8 +174,17 @@ List<dynamic> accountBlocks(HomeController c, String id) {
             [
               for (final a in c.accounts)
                 [
-                  a['label'],
-                  '${credentialLabel(a['credential_state'])}${c.accounts.where((other) => other['label'] == a['label']).length > 1 ? ' · ${a['id'].split('-').last}' : ''}',
+                  LiteralText(a['label']),
+                  UiMessage('{state}{suffix}', {
+                    'state': UiMessage(credentialLabel(a['credential_state'])),
+                    'suffix':
+                        c.accounts
+                                .where((other) => other['label'] == a['label'])
+                                .length >
+                            1
+                        ? ' · ${a['id'].split('-').last}'
+                        : '',
+                  }),
                   c.supports('get_account') ? 'account:${a['id']}' : null,
                 ],
             ],
@@ -188,7 +215,7 @@ List<dynamic> accountBlocks(HomeController c, String id) {
           'note',
           c.isMock
               ? 'Account connection is unavailable in this Mock build.'
-              : 'Direct cloud connection. Supported devices use read-only access in this build.',
+              : 'Direct cloud connection. Starts read-only; reviewed controls require separate permission.',
         ],
         ['button', 'Compatibility Details', 'secondary'],
       ];
@@ -223,19 +250,28 @@ List<dynamic> accountBlocks(HomeController c, String id) {
               : 'Device retrieval failed',
           report == null
               ? 'No completed account report is available.'
-              : '${report['authentication'] == 'succeeded' ? 'Sign-in succeeded.' : 'No new sign-in was attempted.'} ${credentialLabel(report['account']['credential_state'])}.',
+              : UiMessage('{authentication} {storage}.', {
+                  'authentication': UiMessage(
+                    report['authentication'] == 'succeeded'
+                        ? 'Sign-in succeeded.'
+                        : 'No new sign-in was attempted.',
+                  ),
+                  'storage': UiMessage(
+                    credentialLabel(report['account']['credential_state']),
+                  ),
+                }),
           status == 'complete' ? 'neutral' : 'warning',
         ],
         if (status == 'complete')
           [
             'note',
-            '${(retrieval!['device_ids'] as List).length} devices retrieved. Unsupported models remain visible. An empty result does not delete older saved cards.',
+            UiMessage(
+              '{count} devices retrieved. Unsupported models remain visible. An empty result does not delete older saved cards.',
+              {'count': (retrieval!['device_ids'] as List).length},
+            ),
           ],
         if (retrieval?['error'] != null)
-          [
-            'note',
-            '${retrieval!['error']['code']}: ${retrieval['error']['message']}',
-          ],
+          ['note', UiError(retrieval!['error']['code'])],
         [
           'note',
           'Existing cards are reloaded from local storage. Retrieval does not establish physical state or grant appliance controls.',
@@ -252,7 +288,12 @@ List<dynamic> accountBlocks(HomeController c, String id) {
           ['button', 'Reload Accounts'],
         ];
       return [
-        ['hero', 'platform', account['label'], 'Meiju · ${account['region']}'],
+        [
+          'hero',
+          'platform',
+          LiteralText(account['label']),
+          UiMessage('Meiju · {region}', {'region': account['region']}),
+        ],
         [
           'status',
           credentialLabel(state),
@@ -262,9 +303,15 @@ List<dynamic> accountBlocks(HomeController c, String id) {
         [
           'rows',
           [
-            ['Devices', '${c.accountDeviceIds.length} saved cards', null],
+            [
+              'Devices',
+              UiMessage('{count} saved cards', {
+                'count': c.accountDeviceIds.length,
+              }),
+              null,
+            ],
             if (state != 'removing' && c.supports('rename_account'))
-              ['Account name', account['label'], 'Rename Account'],
+              ['Account name', LiteralText(account['label']), 'Rename Account'],
           ],
         ],
         if (c.accountDeviceIds.isNotEmpty)
@@ -281,14 +328,17 @@ List<dynamic> accountBlocks(HomeController c, String id) {
           [
             'status',
             'Local cleanup pending',
-            '${c.accountRemoval!['error']?['code']}: ${c.accountRemoval!['error']?['message']}',
+            UiError(c.accountRemoval!['error']?['code'] ?? 'UNKNOWN'),
             'warning',
           ],
         [
           'note',
           account['last_complete_inventory_at'] == null
               ? 'No complete device-list time recorded.'
-              : 'Last complete device list: ${account['last_complete_inventory_at']}. Recorded using this device’s clock; not current authorization or appliance status.',
+              : UiMessage(
+                  'Last complete device list: {time}. Recorded using this device’s clock; not current authorization or appliance status.',
+                  {'time': account['last_complete_inventory_at']},
+                ),
         ],
         if (c.accountConflicts != null) ...[
           [
@@ -297,7 +347,9 @@ List<dynamic> accountBlocks(HomeController c, String id) {
           ],
           [
             'note',
-            'Selected device: ${c.accountConflicts!['selected']['device_id']}',
+            UiMessage('Selected device: {device}', {
+              'device': c.accountConflicts!['selected']['device_id'],
+            }),
           ],
           if ((c.accountConflicts!['matches'] as List).isEmpty)
             ['note', 'No equal saved device identifiers were found.'],
@@ -321,7 +373,14 @@ List<dynamic> accountBlocks(HomeController c, String id) {
         [
           'status',
           'Remove from this device?',
-          'Remove ${account?['label'] ?? 'the selected account'}, its local credentials and ${c.removalScope?.length ?? c.accountDeviceIds.length} linked cards, preferences and saved readings.',
+          UiMessage(
+            'Remove {account}, its local credentials and {count} linked cards, preferences and saved readings.',
+            {
+              'account':
+                  account?['label'] ?? const UiMessage('the selected account'),
+              'count': c.removalScope?.length ?? c.accountDeviceIds.length,
+            },
+          ),
           'warning',
         ],
         if ((c.removalScope ?? c.accountDeviceIds).isNotEmpty)
@@ -447,7 +506,7 @@ class _AccountSignInState extends State<AccountSignIn>
         Surface(
           radius: 14,
           child: Semantics(
-            label: label,
+            label: localize(context, label),
             child: ValueListenableBuilder<TextEditingValue>(
               valueListenable: controller,
               builder: (context, value, _) => TextField(

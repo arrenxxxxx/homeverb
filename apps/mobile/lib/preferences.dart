@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
 import 'native_client.dart';
+import 'localization.dart';
 
 class LocalPreferences {
   LocalPreferences(this.file);
   final File file;
   Json values = {};
   String get skin => 'window_light';
+  String? get locale => canonicalLocale(values['locale']);
   String get sharingName => values['sharing_name'] as String? ?? 'Home phone';
   String get root => values['root'] as String? ?? 'D01';
   String route([String? device]) =>
@@ -32,6 +34,7 @@ class LocalPreferences {
                 ),
               )
             : {};
+        if (canonicalLocale(values['locale']) == null) values.remove('locale');
         if (values['sharing_name'] is! String) values.remove('sharing_name');
       }
     } on FileSystemException {
