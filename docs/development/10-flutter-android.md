@@ -47,15 +47,17 @@ fvm flutter build apk --release --target-platform android-arm64,android-x64
 The output is `apps/mobile/build/app/outputs/flutter-apk/app-release.apk` relative
 to the repository root. Save the Mock artifact before the next build overwrites
 that output. The default profile is fictional Mock and supports fictional writes.
-For the separately selected mainland Meiju read-only profile, run:
+For the separately selected mainland Meiju profile, run:
 
 ```sh
 fvm flutter build apk --release --target-platform android-arm64,android-x64 \
   --dart-define=HOMEVERB_ADAPTER=midea.meiju
 ```
 
-This second build exposes protected sign-in and explicit retrieval/reads; it
-supplies no real-device write grants. Both APKs use the same Android package
+This second build starts read-only and exposes protected sign-in and explicit
+retrieval/reads. The trusted Device Information permission review can now reopen
+with exact session-only AC grants after actual user consent; see the
+[permission guide](../../apps/mobile/README.md#allow-exact-real-device-controls). Both APKs use the same Android package
 `dev.homeverb.homeverb_mobile`, so installing one replaces the other. Their
 Mock and Meiju data directories are separate. Neither is a store release:
 release-mode compilation still uses a local development signing key.

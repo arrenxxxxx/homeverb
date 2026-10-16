@@ -1749,3 +1749,30 @@ Linux/Android records above retain their original source and evidence scope.
 Meiju Flutter startup remains explicitly selected and read-only; real account,
 physical-phone and appliance-control acceptance are separate. Native ABI signatures,
 storage formats and reviewed model support are unchanged by the UI merge.
+
+
+## Flutter session control permissions
+
+The Meiju app starts read-only. Device Information -> Review control options now
+renders exact model-scoped power, temperature, vendor fan and explicit power-on/mode
+choices from API 1.16 inspection. A separate review and consent click constructs
+only those existing startup grants. The trusted controller cancels work, closes
+Core and reopens the same private profile. Grants remain in process memory and are
+never imported from preferences or ordinary requests. Navigation/backgrounding
+invalidates pending consent, including while reopening; failures remain closed
+with an explicit Reopen Read-only recovery action.
+
+Consent itself performs no discovery, provider request or appliance write. The
+separate Retrieve Control Capabilities button explicitly refreshes the selected
+account and descriptor. Core and the adapter still check every command. Revoke
+Session Controls closes/reopens without grants; retained descriptors and receipts
+are preserved. Process restart also starts read-only. Dishwasher and high-risk
+permission setup are not added by this AC phase.
+
+Five focused Flutter tests passed, covering actual native startup with fictional
+exact grants, two-step UI consent, model-specific limits, unknown constraints,
+separate authority, no implicit networking, revocation and lifecycle races. The
+existing account/current-contract/trusted-approval regression selection also
+passed (18 tests before the two new tests were added). This establishes host
+integration, not real-provider or physical AC success. Native API 1.22, SQLite 5,
+protected payload 3 and execution outcomes are unchanged.

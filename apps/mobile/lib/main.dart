@@ -16,6 +16,8 @@ import 'diagnostics_view.dart';
 import 'controls.dart';
 import 'native_client.dart';
 import 'preferences.dart';
+import 'session_permissions.dart';
+import 'permission_review.dart';
 import 'receipts.dart';
 import 'screens.dart' hide Json;
 import 'skin.dart';
@@ -37,15 +39,25 @@ Future<void> main() async {
       'HOMEVERB_ADAPTER',
       defaultValue: 'homeverb.mock',
     );
-    final core = await NativeClient.open(
+    Future<CoreClient> openSession(
+      List<SessionPermission> permissions,
+    ) => NativeClient.open(
       dataDir:
           '${directory.path}/${adapter == 'homeverb.mock' ? 'native' : 'native-meiju'}',
       adapter: adapter,
       libraryPath: library.isEmpty ? null : library,
       allowMockWrites: adapter == 'homeverb.mock',
+      permissions: permissions,
     );
     runApp(
-      NativeApp(catalog: catalog, controller: HomeController(core, prefs)),
+      NativeApp(
+        catalog: catalog,
+        controller: HomeController(
+          await openSession(const []),
+          prefs,
+          reopen: adapter == 'midea.meiju' ? openSession : null,
+        ),
+      ),
     );
   } catch (e) {
     runApp(
@@ -247,6 +259,14 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         label.substring(label.indexOf(':') + 1),
         options: label.startsWith('options:'),
       );
+      return;
+    }
+    if (label == 'Retrieve Control Capabilities') {
+      await c.refreshControlCapabilities();
+      return;
+    }
+    if (label == 'Revoke Session Controls' || label == 'Reopen Read-only') {
+      await c.revokeSessionControls();
       return;
     }
     if (label == 'Inspect Saved Inventory') {
@@ -892,6 +912,21 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                 ],
               ],
           ],
+          if (c.canConfigureControls && c.sessionPermissions.isNotEmpty) ...[
+            [
+              'note',
+              'Local controls are allowed for this session. Retrieve this account to update available actions. Each command is checked independently.',
+            ],
+            ['button', 'Retrieve Control Capabilities'],
+          ],
+          if (c.canConfigureControls)
+            [
+              'button',
+              c.permissionSessionNeedsReopen
+                  ? 'Reopen Read-only'
+                  : 'Revoke Session Controls',
+              'secondary',
+            ],
           ['button', 'Recent Operations', 'secondary'],
         ];
         break;
@@ -1316,7 +1351,9 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             'note',
             c.isMock
                 ? '0.2.0 · Native Mock host · Fictional devices'
-                : '0.2.0 · Experimental Meiju · Read-only session',
+                : c.sessionPermissions.isEmpty
+                ? '0.2.0 · Experimental Meiju · Read-only session'
+                : '0.2.0 · Experimental Meiju · Scoped controls',
           ],
           [
             'rows',
@@ -1382,6 +1419,31 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   }
 
   Widget? specialFor(String id) {
+    if (id == 'D06' &&
+        c.canConfigureControls &&
+        c.routeInspection?['source'] == 'saved_inventory') {
+      final inspected = c.routeInspection!;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          PermissionReview(
+            key: ObjectKey(inspected),
+            inspection: inspected,
+            deviceName: c.currentCard?['device']?['alias'] ?? 'Device',
+            busy: c.busy,
+            onConfirm: (selected) => c.allowControlChoices(inspected, selected),
+          ),
+          Blocks(
+            screenFor(id)['blocks'] as List,
+            onAction: action,
+            fields: fields,
+            choices: choices,
+            values: values,
+            onChanged: changed,
+          ),
+        ],
+      );
+    }
     if (id == 'P04') {
       final epoch = navigation;
       return AccountSignIn(

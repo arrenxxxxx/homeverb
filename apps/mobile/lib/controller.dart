@@ -2,12 +2,131 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'native_client.dart';
 import 'preferences.dart';
+import 'session_permissions.dart';
 
 enum LocalCleanup { cachedState, executionHistory }
 
 class HomeController extends ChangeNotifier {
-  HomeController(this.core, this.preferences);
-  final CoreClient core;
+  HomeController(this.core, this.preferences, {this.reopen});
+  CoreClient core;
+  final Future<CoreClient> Function(List<SessionPermission>)? reopen;
+  List<SessionPermission> sessionPermissions = const [];
+  bool _foreground = true;
+  bool permissionSessionNeedsReopen = false;
+  bool get canConfigureControls =>
+      reopen != null &&
+      !isMock &&
+      (core is! NativeClient || (core as NativeClient).apiAtLeast(22));
+
+  Future<bool> allowControlChoices(
+    Json inspected,
+    Set<String> selected,
+  ) => perform(() async {
+    if (!_foreground ||
+        !canConfigureControls ||
+        !identical(routeInspection, inspected) ||
+        inspected['device_id'] != selectedDevice ||
+        selected.isEmpty) {
+      throw NativeFailure(
+        'POLICY_DENIED',
+        'Review this device again before allowing controls.',
+      );
+    }
+    final connections = description?['device']?['connections'] as List? ?? [];
+    if (!connections.any(
+      (v) => v['id'] == inspected['connection_id'] && v['transport'] == 'cloud',
+    )) {
+      throw NativeFailure(
+        'POLICY_DENIED',
+        'Choose the inspected cloud connection.',
+      );
+    }
+    final choices = SessionPermission.choices(inspected);
+    final exact = choices.where((p) => selected.contains(p.identity)).toList();
+    if (exact.length != selected.length) {
+      throw NativeFailure('POLICY_DENIED', 'Select only reviewed values.');
+    }
+    final next = <String, SessionPermission>{
+      for (final p in sessionPermissions) p.identity: p,
+      for (final p in exact) p.identity: p,
+    }.values.toList();
+    SessionPermission.startup(next); // Check bounded startup before closing.
+    await _replacePermissionSession(next);
+  });
+
+  Future<bool> revokeSessionControls() => perform(() async {
+    if (!_foreground || !canConfigureControls) {
+      throw NativeFailure(
+        'POLICY_DENIED',
+        'Return to the foreground to reopen read-only.',
+      );
+    }
+    await _replacePermissionSession(const []);
+  });
+
+  Future<bool> refreshControlCapabilities() => perform(() async {
+    final device = selectedDevice, epoch = _readEpoch;
+    final connections = description?['device']?['connections'] as List? ?? [];
+    final accounts = connections
+        .where((v) => v['transport'] == 'cloud')
+        .map((v) => v['account_id'])
+        .whereType<String>()
+        .toSet();
+    if (!_foreground ||
+        device == null ||
+        accounts.length != 1 ||
+        !sessionPermissions.any((p) => p.device == device)) {
+      throw NativeFailure(
+        'POLICY_DENIED',
+        'Review permissions for this device first.',
+      );
+    }
+    final result =
+        await core.call('refresh_account', {'account_id': accounts.single})
+            as Json;
+    if (epoch != _readEpoch) return;
+    accountReport = result;
+    await loadLocal();
+    final refreshed =
+        await core.call('describe_device', {'device': device}) as Json;
+    if (epoch == _readEpoch && selectedDevice == device)
+      description = refreshed;
+    final retrieval = result['retrieval'] as Map?;
+    if (retrieval?['status'] != 'complete') {
+      throw NativeFailure(
+        retrieval?['error']?['code'] ?? 'INVENTORY_INCOMPLETE',
+        'Device retrieval did not complete. Review the account result.',
+      );
+    }
+  });
+
+  Future<void> _replacePermissionSession(List<SessionPermission> next) async {
+    cancelPending();
+    final epoch = _readEpoch;
+    permissionSessionNeedsReopen = true;
+    sessionPermissions = const [];
+    await core.close();
+    if (!_foreground || epoch != _readEpoch) {
+      throw NativeFailure(
+        'CANCELLED',
+        'Permission change cancelled. Reopen read-only.',
+      );
+    }
+    final replacement = await reopen!(List.unmodifiable(next));
+    if (!_foreground || epoch != _readEpoch) {
+      await replacement.close();
+      throw NativeFailure(
+        'CANCELLED',
+        'Permission change cancelled. Reopen read-only.',
+      );
+    }
+    core = replacement;
+    sessionPermissions = List.unmodifiable(next);
+    permissionSessionNeedsReopen = false;
+    // No discovery, account refresh, command or state read follows consent.
+    await loadLocal();
+  }
+
   final LocalPreferences preferences;
   List<Json> rooms = [], cards = [], history = [];
   Json? description, snapshot, receipt, diagnostics, batchResult;
@@ -29,6 +148,7 @@ class HomeController extends ChangeNotifier {
   }
 
   void setForeground(bool foreground) {
+    _foreground = foreground;
     if (!foreground) {
       discardApproval();
       _readEpoch++;

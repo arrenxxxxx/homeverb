@@ -95,3 +95,12 @@ canonical C module metadata, local ad-hoc seals and consumer-link checks. The
 passed Mock/Core and fictional Keychain round trips across separate processes on
 `d02b10a` in macOS job `116902983930`. Physical app signing,
 Flutter embedding/runtime and Keychain/phone policy acceptance remain open.
+
+
+### Flutter AC permission integration
+
+The trusted Flutter host now supports exact session-only AC startup grants with
+separate selection/review/consent, explicit descriptor refresh and revocation.
+See the [verification scope](../apps/mobile/verification.md#flutter-session-control-permissions).
+Real-account login and physical AC control acceptance for this app remain pending.
+Full en-US/zh-CN locale wiring is the next active presentation phase.

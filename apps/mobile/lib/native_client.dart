@@ -5,6 +5,7 @@ import 'dart:isolate';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
+import 'session_permissions.dart';
 
 typedef Json = Map<String, dynamic>;
 
@@ -261,7 +262,15 @@ class NativeClient implements CoreClient, AccountClient, ApprovalClient {
     bool allowMockWrites = false,
     String scenario = 'normal',
     String adapter = 'homeverb.mock',
+    List<SessionPermission> permissions = const [],
   }) async {
+    if (permissions.isNotEmpty && adapter != 'midea.meiju') {
+      throw NativeFailure(
+        'POLICY_DENIED',
+        'This host cannot configure real controls.',
+      );
+    }
+    final grants = SessionPermission.startup(permissions);
     final path = libraryPath ?? defaultLibrary();
     final response = await Isolate.run(
       () => NativeBindings(path).request({
@@ -270,6 +279,7 @@ class NativeClient implements CoreClient, AccountClient, ApprovalClient {
         'allow_mock_writes': allowMockWrites,
         'scenario': scenario,
         if (adapter != 'homeverb.mock') 'adapter': adapter,
+        ...grants,
       }),
     );
     final data = decodeResponse(response) as Json;

@@ -230,3 +230,19 @@ that catalog, copy `../../packages/presentation/locales/en-US.json` to
 `assets/en-US.json` from this directory; the approval suite checks exact equality.
 Bundling a local asset keeps Android paths valid. Full app locale wiring is still
 pending; adding translated catalog entries alone is not localization acceptance.
+
+
+## Allow exact real-device controls
+
+Meiju starts read-only on each process launch. After protected sign-in and device
+retrieval, open Device Information and Review control options for its cloud
+connection. Select exact supported values, review them, then choose Allow Selected
+Controls. Mode activation explicitly includes power-on. Consent changes only
+session startup authority; it does not operate the appliance.
+
+Choose Retrieve Control Capabilities explicitly to refresh the account and
+publish admitted actions, then return to the device controls. Revoke Session
+Controls removes all session write permissions without erasing retained metadata
+or receipts. A cancelled/failed reopen offers Reopen Read-only. Permissions are
+not saved across process restarts. Physical effects and provider acceptance must
+be checked separately; accepted and unknown results must never trigger a replay.
