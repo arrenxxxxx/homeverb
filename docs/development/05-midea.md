@@ -298,11 +298,13 @@ Before enabling a product route, complete these separate gates:
    The [six cloud model mappings](../compatibility.md#observed-cloud-read-models)
    are not evidence of LAN compatibility. Do not infer a protocol from a brand,
    marketing name, an A0 message-version reply or a successful public checksum.
-3. Add an explicit, reviewed connection-linking path that preserves the existing
-   physical device, its cloud connection and local organization. Ordinary Core
-   rediscovery currently rejects added or replaced connections under
-   [ADR-0013](../adr/0013-preserve-device-connection-identity.md); bypassing that
-   guard or creating a duplicate card is not route integration.
+3. Integrate the typed Core/Session connection-linking foundation in
+   [ADR-0052](../adr/0052-trusted-connection-linking.md). Meiju still refuses its
+   adapter hook: implement protected model/identity evidence and discovery that
+   retains the full linked set before opting in. Its current builder returns one
+   cloud connection. The foundation preserves local organization but does not
+   provide Flutter consent or enable LAN routes. Ordinary discovery still rejects
+   connection changes; bypassing that guard or duplicating cards is not integration.
 4. Map only model-supported fields into declared component capabilities, with
    honest stale/freshness semantics. Register the route only after identity and
    contract validation; do not weaken cloud routing or uncertain-write rules.

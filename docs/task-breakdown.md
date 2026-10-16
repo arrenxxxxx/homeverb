@@ -31,9 +31,11 @@ Research and offline contract/protocol implementation can proceed before exact m
 
 The [LAN integration sequence and remaining gates](development/05-midea.md#implemented-native-lan-building-blocks)
 separate implemented helpers from unfinished endpoint/model admission, trusted
-network selection, explicit connection linking and physical acceptance. Core's
-ordinary rediscovery intentionally rejects a new connection on an established
-device; a reviewed linking path is required before publishing the additional route.
+network selection, Meiju connection-link integration and physical acceptance.
+The [typed Core/Session linking foundation](adr/0052-trusted-connection-linking.md)
+is synthetic-tested, with transactional storage and unchanged rediscovery guards.
+Meiju has not opted in: protected route evidence, full-set rediscovery and a
+trusted mobile consent flow are still required before publishing a LAN route.
 The source's default AC decoder and the six cloud models do not establish a LAN
 model allowlist. These gaps do not require reimplementing the completed codecs.
 

@@ -5,6 +5,8 @@ mod approval;
 pub use approval::PendingApproval;
 mod accounts;
 mod batch;
+mod connection_link;
+pub use connection_link::{PendingConnectionLink, ValidatedConnectionLink};
 mod descriptors;
 mod diagnostics;
 mod execution;
@@ -131,6 +133,16 @@ pub struct CorrelatedCompletion {
 #[async_trait]
 pub trait Adapter: Send + Sync {
     fn id(&self) -> &str;
+    /// Trusted local evidence only: no network I/O. Opt-in requires model/identity admission
+    /// and discovery that retains the complete established connection set.
+    async fn validate_connection_link(
+        &self,
+        _: &Descriptor,
+        _: &Connection,
+        _: &Operation,
+    ) -> Result<()> {
+        Err(connection_link::unsupported())
+    }
     async fn discover(&self, operation: &Operation) -> Result<Vec<Descriptor>>;
     async fn read(
         &self,
@@ -155,6 +167,10 @@ pub trait Store: Send + Sync {
     fn devices(&self) -> Result<Vec<Descriptor>>;
     /// Compare established identities and reject removed-account bindings in the save transaction.
     fn save_device(&self, descriptor: &Descriptor) -> Result<()>;
+    /// Atomically compare the effective descriptor and append only the validated connection.
+    fn link_connection(&self, _: ValidatedConnectionLink) -> Result<Descriptor> {
+        Err(connection_link::unsupported())
+    }
     fn snapshot(&self, device: &str, component: &str) -> Result<Option<Snapshot>>;
     /// Require a still-present device and reject removed-account bindings in the save transaction.
     fn save_snapshot(&self, snapshot: &Snapshot) -> Result<()>;

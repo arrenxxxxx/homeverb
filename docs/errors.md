@@ -34,6 +34,9 @@
 | SECRET_STORE_WRITE_UNKNOWN | A credential mutation started but did not return a confirmed result | Inspect the exact reference before recovery; no automatic retry |
 | DEVICE_NOT_FOUND | Unknown device ID | List local records or rediscover |
 | DEVICE_IDENTITY_CONFLICT | Rediscovery changes an established device connection binding | Preserve the existing identity; do not copy grants, replace bindings, or retry automatically |
+| CONNECTION_LINK_UNSUPPORTED | The adapter or store has not opted into trusted native connection linking | Keep the current connections; user consent cannot replace missing adapter evidence |
+| CONNECTION_LINK_INVALID | Invalid link proposal, changed effective descriptor, foreign Core or invalidated lifecycle generation | Review a new native preview before confirming; no connection was appended |
+| CONNECTION_LINK_EXPIRED | The native connection preview reached its 60-second monotonic expiry | Review a new preview and obtain fresh consent |
 | AMBIGUOUS_DEVICE | Duplicate alias | Require an exact ID |
 | ROOM_NOT_FOUND | Unknown local room ID | Reload rooms before assigning or editing |
 | ROOM_NAME_CONFLICT | Room name already exists after lowercasing | Choose a distinct name |
@@ -88,6 +91,13 @@ The separate BatchExecution envelope carries status, timestamps, and per-device 
 | INTERNAL_ERROR / MCP_IO_ERROR | Host execution or stdio transport failed |
 
 Presentation resources translate stable codes; Core messages remain English. Unknown codes use a localized generic message and preserve the code for diagnosis.
+
+Connection-link errors belong to the typed Rust metadata operation in
+[ADR-0052](adr/0052-trusted-connection-linking.md), not command Execution receipts.
+It can also return descriptor, account-removal, storage, lock, lifecycle and
+operation errors. Cancellation after local transaction admission does not undo
+a committed link. Inspect saved connections after an interrupted result; never
+auto-confirm another preview.
 
 If persistence fails after verification or while the result is already unknown or partial, optional English `warnings` preserve the infrastructure failure without replacing the stronger outcome. A verified result still has `error: null` and its original evidence, even if saving the observation failed. Existing rejection/cancellation errors are retained too. Composite items remain present and later unsent items keep `NOT_EXECUTED`, even if finalizing their receipt fails. The UI must display these warnings. The saved journal may still contain the earlier conservative receipt.
 

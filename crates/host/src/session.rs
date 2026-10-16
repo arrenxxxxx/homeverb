@@ -1,4 +1,4 @@
-use homeverb_core::{Core, Operation, PendingApproval, SecretBytes};
+use homeverb_core::{Core, Operation, PendingApproval, PendingConnectionLink, SecretBytes};
 use homeverb_domain::*;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
@@ -213,6 +213,32 @@ impl Session {
                 token.cancel();
             }
         }
+    }
+
+    /// Trusted in-process UI only; this is intentionally absent from ordinary JSON.
+    pub async fn prepare_connection_link(
+        &self,
+        operation_id: String,
+        device_id: &str,
+        anchor_id: &str,
+        connection: Connection,
+        timeout_ms: u64,
+    ) -> Result<PendingConnectionLink> {
+        let (operation, _registration) = self.register(SCHEMA_VERSION, operation_id, timeout_ms)?;
+        self.core
+            .prepare_connection_link(device_id, anchor_id, connection, &operation)
+            .await
+    }
+
+    /// Consume only after trusted UI consent; never expose through ordinary JSON.
+    pub async fn confirm_connection_link(
+        &self,
+        operation_id: String,
+        preview: PendingConnectionLink,
+        timeout_ms: u64,
+    ) -> Result<Descriptor> {
+        let (operation, _registration) = self.register(SCHEMA_VERSION, operation_id, timeout_ms)?;
+        self.core.confirm_connection_link(preview, &operation).await
     }
 
     /// Trusted in-process UI only; this is intentionally absent from ordinary JSON.

@@ -4,9 +4,9 @@ use serde_json::{Value, json};
 
 pub struct Core {
     pub(crate) store: Arc<dyn Store>,
-    adapters: Vec<Arc<dyn Adapter>>,
+    pub(crate) adapters: Vec<Arc<dyn Adapter>>,
     pub(crate) clock: Arc<dyn Clock>,
-    policy: Policy,
+    pub(crate) policy: Policy,
     pub(crate) approval_context: Arc<std::sync::atomic::AtomicU64>,
 }
 

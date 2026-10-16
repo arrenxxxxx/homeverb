@@ -56,7 +56,7 @@
       "items": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "title": "Connection",
-        "description": "The complete connection tuple is a stable binding. Rediscovery may reorder bindings but cannot silently replace, add, or remove them. identity_ref is a stable local reference, not a changing network address or credential.",
+        "description": "The complete connection tuple is a stable binding. Rediscovery may reorder bindings but cannot silently replace, add, or remove them. identity_ref is a stable local reference, not a changing network address or credential. ADR-0052 permits a separate trusted native same-identity append operation; this JSON shape provides no linking authority.",
         "type": "object",
         "properties": {
           "id": {

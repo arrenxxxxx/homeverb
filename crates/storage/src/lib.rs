@@ -1,6 +1,6 @@
 //! Local metadata, observations, and execution journal. Credentials are excluded.
 
-use homeverb_core::{DeviceLock, Store};
+use homeverb_core::{DeviceLock, Store, ValidatedConnectionLink};
 use homeverb_domain::*;
 use rusqlite::{Connection, OptionalExtension, params};
 use serde::{Serialize, de::DeserializeOwned};
@@ -13,6 +13,7 @@ use std::{
 };
 
 mod accounts;
+mod connection_link;
 mod file_lock;
 mod journal;
 mod migration;
@@ -142,6 +143,9 @@ impl Store for SqliteStore {
             params![descriptor.device.id, encode(descriptor)?]).map_err(storage_error)?;
         transaction.execute("INSERT INTO device_preferences (device_id, position) SELECT ?1, COALESCE(MAX(position)+1, 0) FROM device_preferences WHERE true ON CONFLICT(device_id) DO NOTHING", [&descriptor.device.id]).map_err(storage_error)?;
         transaction.commit().map_err(storage_error)
+    }
+    fn link_connection(&self, link: ValidatedConnectionLink) -> Result<Descriptor> {
+        self.append_connection(link)
     }
     fn snapshot(&self, device: &str, component: &str) -> Result<Option<Snapshot>> {
         let document = self

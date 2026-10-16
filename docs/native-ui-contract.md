@@ -4,6 +4,12 @@ Status: implemented Linux native contract, October 16, 2026, with Mock, default 
 
 ## Start here in a Flutter worktree
 
+The connection-linking foundation in [ADR-0052](adr/0052-trusted-connection-linking.md)
+is currently typed Rust Core/Session only. API 1.14.1 has no JSON/C/JNI link
+method; Meiju does not opt in. Do not wire a confirmation button to discovery,
+invent a `confirmed` request field or add a duplicate LAN card. Native route
+admission and a separately versioned mobile bridge remain prerequisites.
+
 Branch from a commit containing both the Mock MVP and this contract. Put the Flutter application in `apps/mobile/`; do not copy Rust code into the app. The UI worktree owns Flutter views, routing, accessibility, local UI preferences, Dart FFI wrappers, and mobile build configuration. Core work owns native methods, schemas, capability semantics, storage, adapters, and their fixtures. Agree on schema changes before depending on them. Each verified phase is a separate English Conventional Commit; a local commit does not imply a push.
 
 Read the [UI integration guide](development/03-ui-integration.md) for existing behavior and the [functional handoff](ui-functional-spec.md) for screens. Use [api.json](../packages/native-contract/api.json) as the callable-method catalog and [examples.json](../packages/native-contract/examples.json) as fictional request/response examples. The examples were obtained from the built native library. They contain temporary fictional IDs and observations, not defaults for a production device.

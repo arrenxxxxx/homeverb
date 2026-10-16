@@ -31,6 +31,15 @@ The SQLite `user_version` records the schema version. Each profile has its own d
 
 Batch room assignments resolve every selected device and destination inside one immediate transaction, then update only `room_id`. Any failure rolls back all selected devices. Responses follow request order without changing stored card order. No additional table or schema upgrade is needed.
 
+The separate `Store::link_connection` consumes a Core-created
+`ValidatedConnectionLink`; the default implementation refuses it. SQLite takes
+an immediate transaction, compares the complete effective descriptor including
+the local alias overlay, rechecks account-removal admission, and appends only the
+new connection to the raw descriptor. The raw provider alias and all other rows
+remain intact. Core holds the device lock, but discovery can still race it, so
+transactional comparison is mandatory. See
+[ADR-0052](adr/0052-trusted-connection-linking.md). Schema 4 is unchanged.
+
 Account records contain only local references, provider/region, a local label, and `pending`, `stored` or `removing` credential state. The profile namespace and account/credential references are random UUIDs persisted before credential writes. Account ID, provider, region, and credential reference cannot be rebound; rename changes only the label. Meiju's internal protected payload now stores exact subject matching and appliance-to-local-ID bindings; model-scoped descriptor publication is implemented; real reauthorization identity acceptance remains pending. JSON columns are not permission to hide secrets in the database. Export using explicit allowlists. See [ADR-0021](adr/0021-persistent-account-vault.md).
 
 ## Native credential storage

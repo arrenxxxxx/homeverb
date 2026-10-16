@@ -1074,3 +1074,30 @@ approval checks; Python tooling: 33 passed; presentation: six passed. All three
 Android AAR variants passed build/export/16 KiB ELF checks. No real account,
 household endpoint, separate Flutter worktree, new emulator/phone or physical
 acceptance was used. Remote CI is inspected independently after push.
+
+## Trusted native connection linking
+
+[ADR-0052](adr/0052-trusted-connection-linking.md) adds a typed Core/Session
+preview and consuming confirmation for one same-identity connection. Adapter
+evidence is rechecked within the bounded operation; SQLite compares effective
+metadata atomically before appending the route while preserving raw labels and
+local organization, cache and history. Existing potential transport grants are
+visible in the preview; cloud-only grants remain cloud-only. Ordinary discovery
+retains its strict connection-set guard.
+
+Eleven integration test groups and three compile-fail checks cover proposal
+scope, opaque previews, adapter refusal/revalidation, lifecycle/expiry/deadline,
+locks, competing metadata/alias/account removal, repeated confirmation, restart,
+preserved records, policy effects and ordinary JSON refusal. Mock and Meiju do
+not opt in. Meiju protected route/model evidence, complete linked-set discovery,
+mobile consent and physical acceptance remain unfinished.
+
+On October 16, 2026, formatting, workspace Clippy, workspace/example builds,
+documentation/contracts/repository/commit validators passed. Rust: 399 passed,
+two explicitly ignored; runtime: 35 passed; native: 31 methods/51 fictional
+examples plus trusted approval checks; Python tooling: 33 passed; presentation:
+six passed. All three Android AAR variants passed export and 16 KiB ELF checks.
+Native JSON API 1.14.1, eleven C/JNI exports and storage versions are unchanged.
+No real account, household appliance, separate Flutter worktree, new emulator,
+phone or physical/off-LAN acceptance was used. This phase is committed and pushed
+separately; remote CI results are checked after that push.

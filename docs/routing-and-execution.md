@@ -8,6 +8,34 @@ Read/discovery operations may race safe routes within one shared budget. **Never
 
 Write routes must also satisfy the trusted grant for the complete command, including component and argument bounds. Explicitly requesting an ungranted route returns `POLICY_DENIED`. `auto` cannot use an ungranted route, even after a proven-unsent failure. Each non-atomic step must independently satisfy a complete grant and use only transports allowed for both parent and step. Dry-run performs this same preflight and returns per-step candidate transports. See [trusted policy](development/02-core.md) and [ADR-0010](adr/0010-scoped-write-grants.md).
 
+## Trusted native connection linking
+
+[ADR-0052](adr/0052-trusted-connection-linking.md) adds typed Rust
+`prepare_connection_link` / `confirm_connection_link` to Core and Session. This
+local metadata operation appends one adapter-admitted route to an exact device,
+anchored to an existing connection with identical adapter/account/identity
+references. It cannot merge accounts, replace bindings or change capabilities.
+Ordinary discovery still refuses connection-set changes.
+
+Show the immutable descriptor, anchor, proposed connection and
+`transport_grants()` before trusted user consent. These are existing potential
+grants for the new transport, not new permission or physical compatibility.
+The new route participates in automatic reads and may activate existing matching
+write grants; all action, argument, risk and transport checks still apply.
+Cloud-only authority cannot authorize LAN writes.
+
+The preview expires after 60 monotonic seconds and is consumed on every confirm
+attempt. Core checks its instance/generation, locks the device, revalidates the
+effective descriptor and adapter evidence, then checks cancellation, deadline
+and preview again before transactional storage admission. Background/close
+invalidates previews and cancels active operations. Dropping a preview dismisses
+it. Adapter validation is asynchronous within the inherited Operation;
+confirmation caps its budget at preview expiry. An in-flight wait reaching that
+cap returns `DEADLINE_EXCEEDED`. A commit already admitted is not rolled back by later cancellation; inspect
+local state after interruption. No appliance request, retry or execution receipt
+is generated. Mock/Meiju do not opt in; only synthetic tests exercise linking.
+No JSON, C/JNI, CLI or MCP linking method is exposed in this phase.
+
 ## State machine
 
 ```mermaid
