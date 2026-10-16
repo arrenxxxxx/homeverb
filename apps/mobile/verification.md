@@ -17,7 +17,7 @@ Commands below ran in the isolated worktree; Flutter commands used the pinned FV
 | Check | Evidence / result |
 |---|---|
 | `fvm flutter analyze` | No issues found |
-| `fvm flutter test --reporter expanded` | Full 68-test suite passed, including two saved-inventory checks, two native account and five synthetic account checks, three cleanup regressions and all 11 prior native/controller checks and the inline-stepper interaction check. Other coverage: one extended native click scenario, three native outcome scenarios, two component checks, four compartment-overview checks, five accessibility checks, three system-contrast checks, two receipt checks, two descriptor-control checks, six dedicated appliance-layout checks, three organization checks, nine screen/interaction/reflow checks, two Android export-channel checks and three diagnostics-card checks |
+| `fvm flutter test --reporter expanded` | Full 72-test suite passed, including four trusted confirmation scenarios and two saved-inventory checks, two native account and five synthetic account checks, three cleanup regressions and all 11 prior native/controller checks and the inline-stepper interaction check. Other coverage: one extended native click scenario, three native outcome scenarios, two component checks, four compartment-overview checks, five accessibility checks, three system-contrast checks, two receipt checks, two descriptor-control checks, six dedicated appliance-layout checks, three organization checks, nine screen/interaction/reflow checks, two Android export-channel checks and three diagnostics-card checks |
 | `fvm flutter test integration_test/native_smoke_test.dart -d linux` under Xvfb | Actual Linux process loads the bundled Core library without a path override, discovers Mock, reads state, sets mode and verifies the returned receipt; process screenshot captured; the latest run also cancels and confirms cache cleanup and confirms history cleanup |
 | `fvm flutter build linux --release` | Linux bundle includes `libhomeverb_ffi.so`; the bundled Rust library is the checked debug build |
 | `fvm flutter build web -t lib/main_preview.dart` | Isolated preview compiles; web preview does not call native Core |
@@ -648,4 +648,50 @@ observation (26 degrees, cool, power off). Screenshots are retained as
 Strict comparison was rerun after the full Flutter suite: **0/82 exact**, mean
 channel error **1.4822/255**. The seven prior row-geometry regressions remain.
 No visual acceptance, real-account/physical-device support, iOS validation or
-trusted Flutter approval flow is claimed by this integration checkpoint.
+trusted Flutter approval flow is claimed by that integration checkpoint.
+
+
+## Trusted confirmation implementation
+
+The three separate trusted C exports are now lazily resolved only after API 1.13
+negotiation. Prepare and execute run in workers and free each owned response once;
+discard consumes its Boolean result without treating it as an owned string.
+Native previews are deeply immutable, handle-owned Dart objects. Controller/UI
+code retains the exact returned scope and original request ID, requires explicit
+route selection and a distinct Confirm Command click, and consumes consent before
+awaiting execution. Background/close/navigation and conservative monotonic expiry
+invalidate previews; late preparation cannot restore a cancelled confirmation.
+There is no automatic preparation, consent, retry or route fallback.
+
+The existing described-action sheet now renders elevated confirmation using
+Window Light surfaces and shared action-effect labels. High-risk controls and
+older libraries remain unavailable. An interrupted confirmation reply opens an
+explicit original-request lookup; returned accepted/unknown/failed receipts retain
+the existing outcome UI. Meiju remains read-only because startup grant UI is not
+part of this phase. Only fictional Mock profiles were exercised.
+
+Four added regression scenarios cover immutable nested arguments and transports,
+ordinary-policy refusal with zero attempts, handle ownership, single consumption,
+discard/navigation/background and a late preparation, older-version admission,
+read-only refusal, lost-reply receipt recovery without replay, and actual review,
+cancel, expiry, confirmation and receipt-lookup clicks. Captures with real fonts
+include the review, accepted outcome and lost-reply states; 320-logical-pixel
+review at 200% text is also checked. These are native-backed dynamic UI evidence,
+not new authoritative prototype references or pixel equality.
+
+
+Final checks for this phase passed: all 72 Flutter tests, static analysis, six
+presentation tests and document/contract/repository checks. The Android process
+suite passed all four approval scenarios, including a real 61-second expiry wait;
+foreground changes remain injected and lost replies are an explicit fixture.
+Android review/accepted/lost-reply captures are under
+`output/flutter-verification/android/approval/`. The ordinary dual-ABI APK then
+rebuilt, passed 16 KiB ZIP alignment, installed and cold-started with its saved
+Devices page and packaged labels. The earlier Android asset failure was fixed by
+bundling a local catalog copy whose exact source equality is tested; repository
+traversal asset paths are not used.
+
+The final strict 82-state run remains **0/82 exact**, mean channel error
+**1.4822/255**. No reference was changed or blessed. Meiju startup grant UI,
+real accounts/appliances, full localization, physical phones and iOS acceptance
+remain outstanding. This is a verified frontend phase, not goal completion.

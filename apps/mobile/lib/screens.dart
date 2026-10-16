@@ -16,12 +16,17 @@ class ScreenCatalog {
     branches = (data['interactions'] as List).cast<Json>();
   }
   final Map<String, Json> screens = {};
+  Map<String, String> labels = {};
   late final List<Json> branches;
   static Future<ScreenCatalog> load() async {
     await loadWindowSkin();
-    return ScreenCatalog(
+    final catalog = ScreenCatalog(
       jsonDecode(await rootBundle.loadString('assets/prototype.json')) as Json,
     );
+    catalog.labels =
+        (jsonDecode(await rootBundle.loadString('assets/en-US.json')) as Map)
+            .cast<String, String>();
+    return catalog;
   }
 
   Json ui(String id) => screens[id]!['ui'] as Json;

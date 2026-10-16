@@ -398,11 +398,18 @@ class _ApplianceControlsState extends State<ApplianceControls> {
                 style: 'secondary',
                 onPressed:
                     c.busy ||
-                        actionUnavailable(capability, entry.value as Json) !=
+                        actionUnavailable(
+                              capability,
+                              entry.value as Json,
+                              trustedApproval: c.supportsTrustedApproval,
+                            ) !=
                             null
                     ? null
                     : () {
-                        if ((entry.value['parameters']['properties'] as Map?)
+                        if (entry.value['risk'] == 'elevated') {
+                          open(entry.key);
+                        } else if ((entry.value['parameters']['properties']
+                                    as Map?)
                                 ?.isEmpty ==
                             true) {
                           send(entry.key, {});
@@ -413,7 +420,11 @@ class _ApplianceControlsState extends State<ApplianceControls> {
               ),
         if (family == 'media') ...controls,
         for (final entry in actions.entries)
-          if (actionUnavailable(capability, entry.value as Json)
+          if (actionUnavailable(
+                capability,
+                entry.value as Json,
+                trustedApproval: c.supportsTrustedApproval,
+              )
               case final String reason)
             Padding(
               padding: const EdgeInsets.only(bottom: 12),

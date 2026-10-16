@@ -171,3 +171,27 @@ python3 apps/mobile/tool/native_gallery.py
 The generated `output/flutter-verification/native-gallery.html` labels clicks, drag gestures and direct test navigation separately. Its reference column uses different sample data; this gallery does not replace strict pixel comparison or physical-phone acceptance.
 
 Android APK packaging and x86_64 emulator Mock journeys are verified separately from actual Keystore, physical-phone lifecycle, iOS packaging, accessibility and performance. The default build uses Mock; Meiju requires an explicit opt-in. Project release licensing remains undecided. Bundled Inter fonts use the adjacent SIL Open Font License.
+
+
+## Trusted single-command confirmation
+
+Native API 1.13 or later enables the separate prepare/execute/discard bridge for
+an elevated action already admitted by Core. The described control form requires
+an explicit connection, then displays Core's immutable device/component, exact
+arguments, selected connection, action effects and expiry. Only Confirm Command
+consumes that preview; ordinary execution still refuses elevated actions. Cancel,
+navigation, timeout and leaving the foreground revoke pending consent. High-risk
+actions remain unavailable. Interrupted replies retain the original request ID
+for an explicit receipt lookup, without automatic replay.
+
+The `approval-required` Mock scenario provides the fictional development journey.
+Run `fvm flutter test test/approval_test.dart` or the device process suite
+`fvm flutter test integration_test/approval_smoke_test.dart -d DEVICE_ID`.
+This does not enable Meiju startup grants or operate a physical appliance. The
+production default remains normal Mock, or explicitly selected read-only Meiju.
+
+Confirmation labels use the shared English presentation catalog. After changing
+that catalog, copy `../../packages/presentation/locales/en-US.json` to
+`assets/en-US.json` from this directory; the approval suite checks exact equality.
+Bundling a local asset keeps Android paths valid. Full app locale wiring is still
+pending; adding translated catalog entries alone is not localization acceptance.

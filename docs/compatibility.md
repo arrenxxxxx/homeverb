@@ -958,3 +958,22 @@ Android click journey also passed with simulated picker/input/lifecycle. See the
 [Flutter verification report](../apps/mobile/verification.md) for evidence and
 limits. Pixel equality remains failed at 0/82; this phase establishes no physical
 account/appliance, iOS, remote CI or full mobile acceptance.
+
+
+## Flutter trusted confirmation bridge
+
+The frontend implements the existing API 1.13+ trusted prepare/execute/discard
+functions without changing native methods, authority, schema or receipt semantics.
+Deeply immutable, handle-owned previews require one explicit connection and a
+separate confirmation click. Dismissal, navigation, background and expiry revoke
+consent; a lost reply retains its original request ID for receipt lookup without
+replay. High-risk actions remain unavailable and default Meiju remains read-only;
+startup grant UI and physical acceptance are separate work.
+
+All 72 Flutter regressions, static analysis and six presentation tests passed.
+Four native approval scenarios also passed inside an Android 15 x86_64 app process,
+including clicks, real expiry and simulated lost-reply recovery. The ordinary APK
+rebuilt, passed alignment, installed and cold-started. The English catalog is
+bundled locally and checked against its shared source, correcting an Android
+asset-path failure found during integration. Strict prototype equality still
+fails at 0/82. See the [verification report](../apps/mobile/verification.md).

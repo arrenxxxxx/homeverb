@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'native_client.dart';
 import 'preferences.dart';
@@ -18,6 +19,7 @@ class HomeController extends ChangeNotifier {
   final Set<String> selection = {};
   int _readEpoch = 0;
   void cancelPending() {
+    discardApproval();
     _readEpoch++;
     accountInventory = null;
     core.cancelAll();
@@ -25,6 +27,7 @@ class HomeController extends ChangeNotifier {
 
   void setForeground(bool foreground) {
     if (!foreground) {
+      discardApproval();
       _readEpoch++;
       accountInventory = null;
     }
@@ -327,6 +330,99 @@ class HomeController extends ChangeNotifier {
     }
     await loadLocal();
   }
+
+  ApprovalPreview? approvalPreview;
+  Timer? _approvalTimer;
+  String? approvalRequestId;
+  bool approvalNeedsReceipt = false;
+  ApprovalClient? get approvalClient =>
+      core is ApprovalClient ? core as ApprovalClient : null;
+  bool get supportsTrustedApproval =>
+      approvalClient?.supportsTrustedApproval ?? false;
+
+  void discardApproval() {
+    final previous = approvalPreview;
+    approvalPreview = null;
+    _approvalTimer?.cancel();
+    _approvalTimer = null;
+    if (previous != null) {
+      unawaited(
+        approvalClient!.discardApproval(previous).catchError((Object _) {
+          // Local consent is already revoked; native expiry/lifecycle also prevents reuse.
+        }),
+      );
+    }
+  }
+
+  Future<bool> prepareApproval(
+    String capabilityId,
+    String action,
+    Json arguments,
+    String route,
+  ) => perform(() async {
+    discardApproval();
+    final epoch = _readEpoch;
+    if (!supportsTrustedApproval ||
+        capability(capabilityId)?['actions']?[action]?['risk'] != 'elevated') {
+      throw NativeFailure(
+        'APPROVAL_UNAVAILABLE',
+        'This action has no trusted confirmation path.',
+      );
+    }
+    if (!['lan', 'cloud'].contains(route)) {
+      throw NativeFailure(
+        'INVALID_ARGUMENT',
+        'Choose one explicit connection.',
+      );
+    }
+    final preview = await approvalClient!.prepareApproval({
+      'schema_version': '1.0',
+      'request_id': uniqueId(),
+      'device_id': selectedDevice,
+      'component_id': component,
+      'capability': capabilityId,
+      'action': action,
+      'arguments': arguments,
+      'connection': route,
+      'timeout_ms': 10000,
+      'wait_for': 'verified',
+    });
+    if (epoch != _readEpoch) {
+      await approvalClient!.discardApproval(preview);
+      throw NativeFailure('CANCELLED', 'The confirmation was cancelled.');
+    }
+    approvalNeedsReceipt = false;
+    approvalPreview = preview;
+    approvalRequestId = preview.command['request_id'] as String;
+    _approvalTimer = Timer(preview.remaining, () {
+      discardApproval();
+      error = NativeFailure(
+        'APPROVAL_EXPIRED',
+        'Review the command again before confirming.',
+      );
+      notifyListeners();
+    });
+  });
+
+  Future<bool> confirmApproval() => perform(() async {
+    final preview = approvalPreview;
+    if (preview == null || preview.remaining == Duration.zero) {
+      discardApproval();
+      throw NativeFailure('APPROVAL_INVALID', 'Review a new confirmation.');
+    }
+    // Consume UI consent before awaiting. A failed/uncertain call is never replayed.
+    approvalPreview = null;
+    _approvalTimer?.cancel();
+    _approvalTimer = null;
+    receipt = null;
+    try {
+      receipt = await approvalClient!.executeApproved(preview);
+      approvalNeedsReceipt = false;
+    } catch (_) {
+      approvalNeedsReceipt = true;
+      rethrow;
+    }
+  });
 
   Future<bool> execute(
     String capabilityId,

@@ -156,5 +156,8 @@
   "vendor.midea.dishwasher.additional.9": "One extra rinse",
   "vendor.midea.dishwasher.additional.10": "Two extra rinses",
   "vendor.midea.dishwasher.additional.13": "Few dishes with one extra rinse",
-  "vendor.midea.dishwasher.additional.14": "Few dishes with two extra rinses"
+  "vendor.midea.dishwasher.additional.14": "Few dishes with two extra rinses",
+  "vendor.example.cycle.start": "Start fictional cycle",
+  "vendor.example.cycle.start.confirm": "Start one fictional cycle on {device} using {program}? This development action does not operate a physical appliance.",
+  "vendor.example.cycle.program.normal": "normal"
 }

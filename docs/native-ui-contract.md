@@ -756,8 +756,8 @@ The separate approved path returns `accepted`, with `VERIFICATION_PENDING` when
 verification is requested; it cannot claim physical completion. The Mock adapter
 also checks Core's private approval marker independently of cached risk metadata.
 This scenario is invalid for Meiju startup. API 1.14 adds the separate reviewed
-dishwasher mapping below; actual Flutter consent UI, refrigerator controls and
-physical acceptance remain pending. Existing AC controls, SQLite
+dishwasher mapping below; Flutter consent is implemented with fictional native integration tests; Meiju
+startup grant UI, refrigerator controls and physical acceptance remain pending. Existing AC controls, SQLite
 schema 4 and protected account payload 3 are unchanged.
 
 ## Profile-scoped dishwasher starts (API 1.14)

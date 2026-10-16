@@ -24,8 +24,14 @@ String propertyValue(dynamic value, Json property) {
       : ' $unit'}';
 }
 
-String? actionUnavailable(Json capability, Json action) {
-  if (action['risk'] != 'low') return 'Trusted approval is unavailable.';
+String? actionUnavailable(
+  Json capability,
+  Json action, {
+  bool trustedApproval = false,
+}) {
+  if (action['risk'] != 'low' &&
+      !(action['risk'] == 'elevated' && trustedApproval))
+    return 'Trusted approval is unavailable.';
   final parameters = action['parameters'] as Json;
   final properties = parameters['properties'] as Json? ?? {};
   if (parameters['type'] != 'object') return 'This form is not supported.';
@@ -85,9 +91,18 @@ List<dynamic> describedControls(
         for (final entry in actions.entries)
           [
             controlLabel(entry.key),
-            actionUnavailable(capability, entry.value as Json) ??
+            actionUnavailable(
+                  capability,
+                  entry.value as Json,
+                  trustedApproval: c.supportsTrustedApproval,
+                ) ??
                 'Choose values  ›',
-            actionUnavailable(capability, entry.value as Json) == null
+            actionUnavailable(
+                      capability,
+                      entry.value as Json,
+                      trustedApproval: c.supportsTrustedApproval,
+                    ) ==
+                    null
                 ? 'control:$i:${Uri.encodeComponent(entry.key)}'
                 : null,
           ],
@@ -105,12 +120,14 @@ class CapabilityActionForm extends StatefulWidget {
     required this.onSubmit,
     required this.onCancel,
     required this.error,
+    this.onPrepare,
     super.key,
   });
   final Json capability;
   final String action;
   final Json? Function(String) observation;
   final Future<bool> Function(Json) onSubmit;
+  final Future<bool> Function(Json, String)? onPrepare;
   final VoidCallback onCancel;
   final Object? Function() error;
   @override
@@ -122,6 +139,7 @@ class _CapabilityActionFormState extends State<CapabilityActionForm> {
   final selected = <String, dynamic>{};
   String? message;
   bool saving = false;
+  String? route;
   Json get descriptor => widget.capability['actions'][widget.action] as Json;
   Json get parameters => descriptor['parameters'] as Json;
   Json get properties => parameters['properties'] as Json? ?? {};
@@ -143,7 +161,13 @@ class _CapabilityActionFormState extends State<CapabilityActionForm> {
           ? num.tryParse(entry.value.text)
           : entry.value.text;
     }
-    String? error = actionUnavailable(widget.capability, descriptor);
+    String? error = actionUnavailable(
+      widget.capability,
+      descriptor,
+      trustedApproval: widget.onPrepare != null,
+    );
+    if (descriptor['risk'] == 'elevated' && route == null)
+      error ??= 'Choose one explicit connection.';
     for (final name in parameters['required'] as List? ?? []) {
       if (!args.containsKey(name)) {
         error ??= 'Choose ${controlLabel(name)}.';
@@ -164,7 +188,9 @@ class _CapabilityActionFormState extends State<CapabilityActionForm> {
       saving = true;
       message = null;
     });
-    final success = await widget.onSubmit(args);
+    final success = descriptor['risk'] == 'elevated' && widget.onPrepare != null
+        ? await widget.onPrepare!(args, route!)
+        : await widget.onSubmit(args);
     if (!mounted) return;
     setState(() {
       saving = false;
@@ -196,7 +222,28 @@ class _CapabilityActionFormState extends State<CapabilityActionForm> {
             child: Copy(message!, color: const Color(0xff9e3421)),
           ),
         ),
-      ActionButton('Apply', onPressed: saving ? null : submit),
+      if (descriptor['risk'] == 'elevated' && widget.onPrepare != null) ...[
+        const Copy('Connection · Required', bold: true),
+        Wrap(
+          spacing: 8,
+          children: [
+            for (final transport in descriptor['transports'] as List)
+              ChoiceChip(
+                label: Text(controlLabel(transport as String)),
+                selected: route == transport,
+                onSelected: saving
+                    ? null
+                    : (selected) =>
+                          setState(() => route = selected ? transport : null),
+              ),
+          ],
+        ),
+        const SizedBox(height: 16),
+      ],
+      ActionButton(
+        descriptor['risk'] == 'elevated' ? 'Review Command' : 'Apply',
+        onPressed: saving ? null : submit,
+      ),
       ActionButton('Cancel', style: 'secondary', onPressed: widget.onCancel),
     ],
   );

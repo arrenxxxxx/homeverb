@@ -60,6 +60,40 @@ abstract interface class AccountClient {
   });
 }
 
+abstract interface class ApprovalClient {
+  bool get supportsTrustedApproval;
+  Future<ApprovalPreview> prepareApproval(Json command);
+  Future<Json> executeApproved(ApprovalPreview preview);
+  Future<void> discardApproval(ApprovalPreview preview);
+}
+
+/// Native scope is immutable and is never reconstructed from editable form state.
+class ApprovalPreview {
+  ApprovalPreview._(Json data, this._clock)
+    : _id = data['approval_id'] as int,
+      command = _freeze(data['command']) as Json,
+      descriptor = _freeze(data['descriptor']) as Json,
+      action = _freeze(data['action']) as Json,
+      connection = _freeze(data['connection']) as Json,
+      expiresAt = DateTime.parse(data['expires_at'] as String);
+  final int _id;
+  final Stopwatch _clock;
+  final Json command, descriptor, action, connection;
+  final DateTime expiresAt;
+  Duration get remaining {
+    final duration = const Duration(seconds: 60) - _clock.elapsed;
+    return duration.isNegative ? Duration.zero : duration;
+  }
+
+  static dynamic _freeze(dynamic value) => value is Map
+      ? Map<String, dynamic>.unmodifiable(
+          value.map((key, item) => MapEntry(key as String, _freeze(item))),
+        )
+      : value is List
+      ? List<dynamic>.unmodifiable(value.map(_freeze))
+      : value;
+}
+
 class NativeBindings {
   NativeBindings(String path)
     : library = path == 'process'
@@ -123,6 +157,36 @@ class NativeBindings {
     }
   }
 
+  late final prepareApproval = library
+      .lookupFunction<
+        Pointer<Utf8> Function(Uint64, Pointer<Utf8>),
+        Pointer<Utf8> Function(int, Pointer<Utf8>)
+      >('homeverb_prepare_approval');
+  late final executeApproved = library
+      .lookupFunction<
+        Pointer<Utf8> Function(Uint64, Pointer<Utf8>),
+        Pointer<Utf8> Function(int, Pointer<Utf8>)
+      >('homeverb_execute_approved');
+  late final discardApproval = library
+      .lookupFunction<Bool Function(Uint64, Uint64), bool Function(int, int)>(
+        'homeverb_discard_approval',
+      );
+
+  Json approvalRequest(int handle, Json data, {required bool execute}) {
+    final input = jsonEncode(data).toNativeUtf8();
+    Pointer<Utf8>? output;
+    try {
+      output = execute
+          ? executeApproved(handle, input)
+          : prepareApproval(handle, input);
+      if (output == nullptr) throw NativeFailure('NATIVE_ERROR', 'No response');
+      return jsonDecode(output.toDartString()) as Json;
+    } finally {
+      calloc.free(input);
+      if (output != null && output != nullptr) free(output);
+    }
+  }
+
   late final free = library
       .lookupFunction<
         Void Function(Pointer<Utf8>),
@@ -156,7 +220,7 @@ class NativeBindings {
   }
 }
 
-class NativeClient implements CoreClient, AccountClient {
+class NativeClient implements CoreClient, AccountClient, ApprovalClient {
   NativeClient._(this.path, this.handle, this.adapter)
     : bindings = NativeBindings(path);
   final String path;
@@ -175,6 +239,10 @@ class NativeClient implements CoreClient, AccountClient {
   @override
   bool get supportsPendingReauthorization =>
       supportsAccountConnection && apiAtLeast(8);
+  @override
+  bool get supportsTrustedApproval => apiAtLeast(13);
+  final Set<ApprovalPreview> _approvals = {};
+  int _approvalGeneration = 0;
   final NativeBindings bindings;
   final Set<String> active = {};
   Set<String> methods = {};
@@ -257,6 +325,87 @@ class NativeClient implements CoreClient, AccountClient {
     } finally {
       endOperation(id);
     }
+  }
+
+  @override
+  Future<ApprovalPreview> prepareApproval(Json command) async {
+    if (!supportsTrustedApproval) {
+      throw NativeFailure(
+        'API_UPGRADE_REQUIRED',
+        'Trusted approval requires API 1.13 or later.',
+      );
+    }
+    final operation = beginOperation(), generation = _approvalGeneration;
+    final clock = Stopwatch()..start();
+    final libraryPath = path, nativeHandle = handle;
+    final request = {
+      'schema_version': '1.0',
+      'operation_id': operation,
+      'command': command,
+    };
+    try {
+      final data =
+          decodeResponse(
+                await Isolate.run(
+                  () => NativeBindings(
+                    libraryPath,
+                  ).approvalRequest(nativeHandle, request, execute: false),
+                ),
+              )
+              as Json;
+      final preview = ApprovalPreview._(data, clock);
+      if (generation != _approvalGeneration || _closed || !_foreground) {
+        final approvalId = preview._id;
+        await Isolate.run(
+          () => NativeBindings(
+            libraryPath,
+          ).discardApproval(nativeHandle, approvalId),
+        );
+        throw NativeFailure('CANCELLED', 'The confirmation was cancelled.');
+      }
+      _approvals.add(preview);
+      return preview;
+    } finally {
+      endOperation(operation);
+    }
+  }
+
+  @override
+  Future<Json> executeApproved(ApprovalPreview preview) async {
+    if (!supportsTrustedApproval || !_approvals.contains(preview)) {
+      throw NativeFailure('APPROVAL_INVALID', 'Review a new confirmation.');
+    }
+    final operation = beginOperation(),
+        libraryPath = path,
+        nativeHandle = handle;
+    _approvals.remove(preview);
+    final request = {
+      'schema_version': '1.0',
+      'operation_id': operation,
+      'approval_id': preview._id,
+    };
+    try {
+      return decodeResponse(
+            await Isolate.run(
+              () => NativeBindings(
+                libraryPath,
+              ).approvalRequest(nativeHandle, request, execute: true),
+            ),
+          )
+          as Json;
+    } finally {
+      endOperation(operation);
+    }
+  }
+
+  @override
+  Future<void> discardApproval(ApprovalPreview preview) async {
+    if (!_approvals.remove(preview) || _closed) return;
+    final libraryPath = path, nativeHandle = handle, approvalId = preview._id;
+    await Isolate.run(
+      () =>
+          NativeBindings(libraryPath).discardApproval(nativeHandle, approvalId),
+    );
   }
 
   String beginOperation() {
@@ -358,6 +507,8 @@ class NativeClient implements CoreClient, AccountClient {
     _foreground = value;
     if (_closed) return;
     if (!value) {
+      _approvalGeneration++;
+      _approvals.clear();
       _suspended = true;
       bindings.foreground(handle, false);
     } else if (active.isEmpty) {
@@ -368,10 +519,17 @@ class NativeClient implements CoreClient, AccountClient {
 
   @override
   void cancelAll() {
+    _approvalGeneration++;
+    final hadApprovals = _approvals.isNotEmpty;
+    _approvals.clear();
     // Hold the native gate closed until even not-yet-started isolates drain.
-    if (active.isNotEmpty && !_closed) {
+    if ((active.isNotEmpty || hadApprovals) && !_closed) {
       _suspended = true;
       bindings.foreground(handle, false);
+    }
+    if (active.isEmpty && _foreground && !_closed && _suspended) {
+      _suspended = false;
+      bindings.foreground(handle, true);
     }
     for (final id in active.toList()) {
       final input = id.toNativeUtf8();

@@ -8,6 +8,7 @@ import 'package:file_selector/file_selector.dart';
 import 'blocks.dart';
 import 'appliance_controls.dart';
 import 'account_views.dart';
+import 'approval_review.dart';
 import 'compartment_controls.dart';
 import 'controller.dart';
 import 'diagnostics_export.dart';
@@ -1039,7 +1040,8 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         ui['overlay'] = 'sheet';
         ui['header'] = actionName == null
             ? 'Action unavailable'
-            : '${controlLabel(actionCapability!['id'])} · ${controlLabel(actionName!)}';
+            : widget.catalog.labels['${actionCapability!['id']}.$actionName'] ??
+                  '${controlLabel(actionCapability!['id'])} · ${controlLabel(actionName!)}';
         b = [
           ['note', 'Choose a supported action from the device page.'],
         ];
@@ -1382,10 +1384,58 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     }
     if (id == 'C10' && actionCapability != null && actionName != null) {
       final epoch = navigation;
+      if (c.approvalNeedsReceipt) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Copy(
+              'The confirmation reply was interrupted. Look up the original receipt before considering another command.',
+            ),
+            Copy('Request: ${c.approvalRequestId}'),
+            ActionButton(
+              'Look Up Receipt',
+              onPressed: c.busy
+                  ? null
+                  : () async {
+                      if (await c.loadReceipt(c.approvalRequestId!) &&
+                          mounted &&
+                          epoch == navigation) {
+                        c.approvalNeedsReceipt = false;
+                        await go('S06');
+                      }
+                    },
+            ),
+            ActionButton(
+              'Cancel',
+              style: 'secondary',
+              onPressed: () => action('Cancel'),
+            ),
+          ],
+        );
+      }
+      if (c.approvalPreview case final preview?) {
+        return ApprovalReview(
+          preview: preview,
+          labels: widget.catalog.labels,
+          onCancel: () => action('Cancel'),
+          onConfirm: () async {
+            if (await c.confirmApproval() && mounted && epoch == navigation)
+              await go('S06');
+          },
+        );
+      }
       return CapabilityActionForm(
         key: ValueKey('$epoch:${actionCapability!['id']}:$actionName'),
         capability: actionCapability!,
         action: actionName!,
+        onPrepare: c.supportsTrustedApproval
+            ? (arguments, route) => c.prepareApproval(
+                actionCapability!['id'],
+                actionName!,
+                arguments,
+                route,
+              )
+            : null,
         observation: (property) =>
             c.snapshot?['observations']?[property] as Json?,
         error: () => c.error,

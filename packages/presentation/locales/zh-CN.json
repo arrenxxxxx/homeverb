@@ -156,5 +156,8 @@
   "vendor.midea.dishwasher.additional.9": "额外漂洗一次",
   "vendor.midea.dishwasher.additional.10": "额外漂洗两次",
   "vendor.midea.dishwasher.additional.13": "少量餐具并额外漂洗一次",
-  "vendor.midea.dishwasher.additional.14": "少量餐具并额外漂洗两次"
+  "vendor.midea.dishwasher.additional.14": "少量餐具并额外漂洗两次",
+  "vendor.example.cycle.start": "启动模拟运行",
+  "vendor.example.cycle.start.confirm": "在 {device} 上启动一次模拟的{program}运行？此开发功能不会操作真实家电。",
+  "vendor.example.cycle.program.normal": "标准"
 }
