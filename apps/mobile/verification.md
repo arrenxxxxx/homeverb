@@ -1563,3 +1563,21 @@ assumption that backgrounded credential fields stay mounted; the updated asserti
 checks both retained controllers are empty and fields are absent until rechecking.
 No Core/Rust change or real provider write occurred in this correction phase.
 Actual APK installation/channel and real-login results are recorded separately.
+
+
+### Protected sign-in prerequisite on the emulator
+
+The correction APK passed signature, both complete ABIs, 17 Core exports per ABI,
+backup exclusions and 16 KiB ZIP/ELF alignment. `adb install -r` succeeded with
+preferences preserved. The actual Chinese Meiju sign-in page exposed two empty
+credential fields and the submit action, proving that the release APK's local
+Android channel reported installed backend plus secure/unlocked state. This does
+not establish a Keystore round trip or successful provider login. The owner was
+asked to enter credentials directly in the app; none were read or entered by tooling.
+
+Artifact: `output/flutter-verification/android/homeverb-0.2.0-meiju-credential-ready.apk`.
+Source: `67fa391bb9232f0c8bb47ce578824f8fe7e3c615`; bytes: 68062104.
+SHA-256: `a45aedd66f6d3745484f92c4c03491bda52b7fab08f6fa306d460d1581f6cde5`.
+The adjacent report and `credential-readiness-runtime.json` record packaging and
+prerequisite evidence. Earlier bilingual artifacts remain historical builds.
+No real AC write, external upload or new remote push occurred in this phase.
