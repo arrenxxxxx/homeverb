@@ -1946,30 +1946,49 @@
         },
         {
           "id": "P08",
-          "title": "Connecting platform",
-          "description": "Combined foreground connection and device retrieval. No staged completion or progress percentage is available. This is an isolated fictional preview.",
+          "title": "Account retrieval result",
+          "description": "Completed combined account connection and automatic device retrieval, with two fictional returned cards. No second discovery or selection step is required. Retrieval does not establish physical state or grant controls. Retry is explicit; empty, partial, failed and interrupted results retain their separate native contract behavior.",
           "image": "screens/P08.png",
           "board": "10-authentication",
           "ui": {
-            "header": "Connect platform",
+            "header": "Account result",
             "blocks": [
               [
                 "status",
-                "Connecting and retrieving",
-                "Account connection and device retrieval are still in progress.",
+                "Device retrieval complete",
+                "Sign-in succeeded. Saved authorization \u00b7 not checked.",
                 "neutral"
               ],
               [
                 "note",
-                "Keep HomeVerb open until the operation finishes."
+                "2 devices retrieved. Unsupported models remain visible. An empty result does not delete older saved cards."
               ],
               [
                 "note",
-                "No LAN scan or second Find Devices step is required. Preview only."
+                "Existing cards are reloaded from local storage. Retrieval does not establish physical state or grant appliance controls."
               ],
               [
                 "button",
-                "Cancel",
+                "Retrieve Devices"
+              ],
+              [
+                "button",
+                "Reauthorize",
+                "secondary"
+              ],
+              [
+                "button",
+                "Remove From This Device",
+                "secondary"
+              ],
+              [
+                "button",
+                "View Devices",
+                "secondary"
+              ],
+              [
+                "button",
+                "Back to Accounts",
                 "secondary"
               ]
             ],
@@ -4747,16 +4766,6 @@
       "target": "P01"
     },
     {
-      "source": "P08",
-      "action": "Device retrieval completes",
-      "target": "A06"
-    },
-    {
-      "source": "P08",
-      "action": "Done",
-      "target": "P01"
-    },
-    {
       "source": "P09",
       "action": "Expired check result",
       "target": "P10"
@@ -5210,6 +5219,31 @@
       "source": "D12",
       "action": "Standard text layout",
       "target": "D01"
+    },
+    {
+      "source": "P08",
+      "action": "Retrieve Devices",
+      "target": "P08"
+    },
+    {
+      "source": "P08",
+      "action": "Reauthorize",
+      "target": "P03"
+    },
+    {
+      "source": "P08",
+      "action": "Remove From This Device",
+      "target": "P11"
+    },
+    {
+      "source": "P08",
+      "action": "View Devices",
+      "target": "D01"
+    },
+    {
+      "source": "P08",
+      "action": "Back to Accounts",
+      "target": "P01"
     }
   ],
   "version": "2.0-window-light",

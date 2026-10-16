@@ -29,7 +29,7 @@ class AccountFixture implements CoreClient, AccountClient {
   @override
   String get adapter => 'midea.meiju';
   @override
-  bool get supportsAccountConnection => true;
+  bool supportsAccountConnection = true;
   @override
   bool supportsPendingReauthorization = true;
   final requests = <Json>[];
@@ -473,6 +473,67 @@ void main() {
     },
   );
 
+  testWidgets('unavailable connection uses a native platform heading', (
+    tester,
+  ) async {
+    final core = AccountFixture()..supportsAccountConnection = false;
+    final controller = HomeController(core, AccountPreferences());
+    final key = GlobalKey<NativeAppState>();
+    final catalog = (await tester.runAsync(ScreenCatalog.load))!;
+    await tester.pumpWidget(
+      NativeApp(key: key, catalog: catalog, controller: controller),
+    );
+    await tester.pumpAndSettle();
+    await key.currentState!.go('P02');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Meiju'));
+    await tester.pumpAndSettle();
+    expect(key.currentState!.id, 'P13');
+    expect(find.text('Platform connection'), findsOneWidget);
+    expect(find.text('Flow unavailable'), findsOneWidget);
+    expect(find.text('Example Climate'), findsNothing);
+    expect(core.connectionTargets, isEmpty);
+    await tester.tap(find.text('Back to Accounts'));
+    await tester.pumpAndSettle();
+    expect(key.currentState!.id, 'P01');
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('completed account result matches the P08 reference content', (
+    tester,
+  ) async {
+    final core = AccountFixture();
+    core.links[firstAccount] = [firstDevice, secondDevice];
+    final controller = HomeController(core, AccountPreferences());
+    final key = GlobalKey<NativeAppState>();
+    final catalog = (await tester.runAsync(ScreenCatalog.load))!;
+    await tester.pumpWidget(
+      NativeApp(key: key, catalog: catalog, controller: controller),
+    );
+    await tester.pumpAndSettle();
+    await controller.selectAccount(firstAccount);
+    await controller.connectAccount(
+      Uint8List.fromList('fixture@example.invalid'.codeUnits),
+      Uint8List.fromList('fictional-pass'.codeUnits),
+      'Home account',
+    );
+    await key.currentState!.go('P08');
+    await tester.pumpAndSettle();
+    expect(key.currentState!.screenFor('P08'), catalog.ui('P08'));
+    expect(core.connectionTargets, [firstAccount]);
+    expect(
+      core.requests.where((r) => r['method'] == 'refresh_account'),
+      isEmpty,
+    );
+    expect(find.text('Find Devices'), findsNothing);
+    await tester.ensureVisible(find.text('View Devices'));
+    await tester.tap(find.text('View Devices'));
+    await tester.pumpAndSettle();
+    expect(key.currentState!.id, 'D01');
+    expect(controller.visibleCards, hasLength(2));
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets(
     'new account catalog connects once and empty inventory preserves saved cards',
     (tester) async {
@@ -498,6 +559,8 @@ void main() {
       await tap('Add Platform');
       await tap('Meiju');
       expect(key.currentState!.id, 'P03');
+      expect(find.text('Connect Meiju'), findsOneWidget);
+      expect(find.textContaining('Example Home'), findsNothing);
       await tap('Continue to Sign In');
       await tester.enterText(
         find.byKey(const ValueKey('credential:Meiju account')),

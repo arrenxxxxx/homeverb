@@ -2,7 +2,7 @@
 
 Owner-selected visual system: **01 / Window Light**, October 15, 2026. This is the current full prototype, superseding the earlier atlas for visual implementation. Historical image-generation studies remain unchanged.
 
-Open [index.html](index.html) to browse **21 boards, 82 screen states, 14 review journeys and 198 action branches**. Search by screen ID or term; open a screen to follow its action branches. Arrow keys move between screens and Escape closes the preview. These controls navigate design images, not appliances. The atlas uses bundled assets and requires no account or external service.
+Open [index.html](index.html) to browse **21 boards, 82 screen states, 14 review journeys and 201 action branches**. Search by screen ID or term; open a screen to follow its action branches. Arrow keys move between screens and Escape closes the preview. These controls navigate design images, not appliances. The atlas uses bundled assets and requires no account or external service.
 
 ## Review artifacts
 
@@ -26,6 +26,16 @@ Wrapped content is centered as a group. Titles and body paragraphs keep their
 normal flow. The shared renderer measures text bounds; all 82 screens, 21 boards
 and overview images were rebuilt. See the [alignment rule](../../../docs/ui-window-light.md#control-alignment-revision--october-16-2026)
 and [Flutter checks](../../../apps/mobile/verification.md).
+
+## P08 account-contract revision
+
+The owner-selected native contract combines sign-in and automatic retrieval.
+P08 now depicts its completed result for two fictional cards and five explicit
+actions. It no longer asks the user to start a second discovery step. This
+independent raster update matches the production result content and brings the
+atlas to 201 branches. Busy, empty, partial and interrupted variants still need
+separate visual acceptance; see the [P08 inventory](../../../docs/ui-screen-inventory.md)
+and [executed Flutter checks](../../../apps/mobile/verification.md).
 
 ## Rendering and provenance
 

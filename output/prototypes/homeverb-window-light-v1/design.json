@@ -1946,31 +1946,50 @@
         },
         {
           "id": "P08",
-          "title": "Platform connected",
-          "description": "Back Platform Connected. Terracotta check, Example Home / Home account / Europe. Text Authorization saved securely. Primary Find Devices, secondary Done. No invented devices until discovery; no raw token display.",
+          "title": "Account retrieval result",
+          "description": "Completed combined account connection and automatic device retrieval, with two fictional returned cards. No second discovery or selection step is required. Retrieval does not establish physical state or grant controls. Retry is explicit; empty, partial, failed and interrupted results retain their separate native contract behavior.",
           "image": "screens/P08.png",
           "board": "10-authentication",
           "ui": {
-            "header": "Platform connected",
+            "header": "Account result",
             "blocks": [
               [
                 "status",
-                "Authorization saved securely",
-                "Example Home \u00b7 Home account \u00b7 Europe",
-                "success"
-              ],
-              [
-                "button",
-                "Find Devices"
-              ],
-              [
-                "button",
-                "Done",
-                "secondary"
+                "Device retrieval complete",
+                "Sign-in succeeded. Saved authorization \u00b7 not checked.",
+                "neutral"
               ],
               [
                 "note",
-                "Devices are listed after explicit discovery."
+                "2 devices retrieved. Unsupported models remain visible. An empty result does not delete older saved cards."
+              ],
+              [
+                "note",
+                "Existing cards are reloaded from local storage. Retrieval does not establish physical state or grant appliance controls."
+              ],
+              [
+                "button",
+                "Retrieve Devices"
+              ],
+              [
+                "button",
+                "Reauthorize",
+                "secondary"
+              ],
+              [
+                "button",
+                "Remove From This Device",
+                "secondary"
+              ],
+              [
+                "button",
+                "View Devices",
+                "secondary"
+              ],
+              [
+                "button",
+                "Back to Accounts",
+                "secondary"
               ]
             ],
             "root": null,
@@ -4747,16 +4766,6 @@
       "target": "P01"
     },
     {
-      "source": "P08",
-      "action": "Find Devices",
-      "target": "A04"
-    },
-    {
-      "source": "P08",
-      "action": "Done",
-      "target": "P01"
-    },
-    {
       "source": "P09",
       "action": "Expired check result",
       "target": "P10"
@@ -5210,6 +5219,31 @@
       "source": "D12",
       "action": "Standard text layout",
       "target": "D01"
+    },
+    {
+      "source": "P08",
+      "action": "Retrieve Devices",
+      "target": "P08"
+    },
+    {
+      "source": "P08",
+      "action": "Reauthorize",
+      "target": "P03"
+    },
+    {
+      "source": "P08",
+      "action": "Remove From This Device",
+      "target": "P11"
+    },
+    {
+      "source": "P08",
+      "action": "View Devices",
+      "target": "D01"
+    },
+    {
+      "source": "P08",
+      "action": "Back to Accounts",
+      "target": "P01"
     }
   ],
   "version": "2.0-window-light",

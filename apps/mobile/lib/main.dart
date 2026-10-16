@@ -739,6 +739,8 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     List<dynamic>? b;
     if (id.startsWith('P')) {
       b = accountBlocks(c, id);
+      if (id == 'P03') ui['header'] = 'Connect Meiju';
+      if (id == 'P13') ui['header'] = 'Platform connection';
       if (id == 'P03' && editingAccountName) {
         ui['header'] = 'Account name';
         b = [

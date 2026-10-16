@@ -8,7 +8,7 @@ The application pins Flutter 3.47.7 through FVM 4.3.1. It loads the native libra
 
 The native Mock path provides first launch, three roots, local search, room filters, room create/rename/reorder/delete, atomic assignment, alias/pin/order, explicit discovery and reads, component-described climate controls, explicit selected-device power batches, exact receipts/history, local route/name/skin preferences and allowlisted diagnostics preview/export. Loading and failed local reads do not display fictional preview cards. Modal backgrounds use the selected native device state.
 
-All 82 atlas states have native-widget implementations in an isolated, visibly labelled preview. The 198 event buttons in that preview simulate atlas branches. They are **not 198 successful native operations**. Flutter account metadata, protected input, automatic-retrieval results, pending-session recovery/reauthorization and scoped removal are implemented. Their successful provider flows are tested with isolated contract fixtures, not real credentials. Nearby sharing, identity merge and full-profile deletion remain unavailable. Native cache/history cleanup is implemented with separate scope confirmations. Non-climate native forms consume described scalar properties/actions. A selected component with one light, fan, media, sensor or cycle family now uses a dedicated Window Light layout; mixed families retain the descriptor list. These isolated fixtures are not registered native adapters or physical-device support. The multi-compartment overview now groups exact component readings and target controls. Strict layout equality remains pending.
+All 82 atlas states have native-widget implementations in an isolated, visibly labelled preview. The 201 event buttons in that preview simulate atlas branches. They are **not 201 successful native operations**. Flutter account metadata, protected input, automatic-retrieval results, pending-session recovery/reauthorization and scoped removal are implemented. Their successful provider flows are tested with isolated contract fixtures, not real credentials. Nearby sharing, identity merge and full-profile deletion remain unavailable. Native cache/history cleanup is implemented with separate scope confirmations. Non-climate native forms consume described scalar properties/actions. A selected component with one light, fan, media, sensor or cycle family now uses a dedicated Window Light layout; mixed families retain the descriptor list. These isolated fixtures are not registered native adapters or physical-device support. The multi-compartment overview now groups exact component readings and target controls. Strict layout equality remains pending.
 
 ## Executed verification
 
@@ -65,7 +65,7 @@ Controller/FFI tests additionally cover persisted reopen, accepted/verified/fail
 
 The screenshot test captures every ID at the reference size: 780 x 1688, or 2048 x 1536 for W01/W02. It loads the licensed Inter fonts and approved product/background assets. All text, controls and semantics are widgets; complete screen images are never used as the app interface. Test status/navigation chrome is deterministic artwork, not a captured phone OS.
 
-The latest complete comparison has **0 of 82 exact matches**, with mean absolute channel error **1.6529 / 255**, down from 6.1482 before rendering refinements. Native switches now use the prototype's accent/gray tracks and light thumbs. A lower average alone does not establish correct states or layouts. These metrics measure differences, not an acceptance tolerance. Text rasterization, icons, surfaces, controls and layout still differ. P08 intentionally follows the amended automatic-retrieval contract; the approved atlas still depicts the superseded manual step.
+The latest complete comparison has **0 of 82 exact matches**, with mean absolute channel error **1.3958 / 255**, down from 6.1482 before rendering refinements. Native switches now use the prototype's accent/gray tracks and light thumbs. A lower average alone does not establish correct states or layouts. These metrics measure differences, not an acceptance tolerance. Text rasterization, icons, surfaces, controls and layout still differ. P08's base result now follows the combined account/retrieval contract in both the independently rendered atlas and the Flutter catalog; its remaining pixel differences are still failures.
 
 The latest shared-widget refinement aligns the non-root header, raises button labels to the reference position, and measures actual label/value font widths before wrapping rows. Fan and refrigerator preview steppers now expose separate increase/decrease controls with explicit preview-only feedback. The added interaction check clicks all six controls without changing page or claiming a native write. All 29 Flutter tests, static analysis and the Linux release build passed after this refinement.
 
@@ -83,7 +83,7 @@ The command verifies the complete 82-file set, writes `output/flutter-verificati
 
 | Requirement | Current status and remaining evidence |
 |---|---|
-| UI-01 | 82 states and 198 simulated branches covered; native available routes clicked. System-owned authorization/permission transitions unavailable. |
+| UI-01 | 82 states and 201 simulated branches covered; native available routes clicked. System-owned authorization/permission transitions unavailable. |
 | UI-02 | Native first launch, three roots, search/clear, separate card/quick-control clicks, long press and room filters tested with actual fonts and strict pointer hits. Root keyboard navigation, modal focus containment and labelled tap targets tested. Full keyboard/screen-reader audit pending. |
 | UI-03 | Native room/card CRUD, room drag/menu sorting, exact-room assignment and preservation tested. Empty device selection and blank, overlong, control-character and duplicate room names are click-tested with retained input. Isolated multi-device fixtures additionally verify drag/menu sorting, unchanged hidden positions and metadata, invalid/stale permutations, and reload without automatic retry. Real native missing-device and deleted-room assignment conflicts preserve metadata atomically; duplicate-name selection, failed-choice retention and explicit retry are fixture-tested. |
 | UI-04 | Exact-component selection, capability references, cache isolation, climate bounds/enums and unknown/read-only values implemented. Isolated fridge/freezer fixture clicks verify distinct ranges and steps; Scalar non-climate action forms, stale/read-only properties, denied plans and cancellation are fixture-tested. Dedicated single-family layouts, numeric/enum fan controls, one-shot-action exclusion, unknown-value semantics and coupled-action fallback are fixture-tested. The combined overview, exact targets, partial-read recovery and compound target forms are fixture-tested. Pixel parity and physical multi-component acceptance remain pending. |
@@ -97,7 +97,7 @@ The command verifies the complete 82-file set, writes `output/flutter-verificati
 | UI-12 | Exact diagnostics preview/export and retained receipt navigation tested. Confirmed native cache/history cleanup, cancel, busy-journal refusal, local reload and request retirement are click/native-tested. Android system-document cancel/save and exact-byte read-back passed on the isolated emulator. Full-profile deletion, physical phones and other OS save choosers remain pending. |
 | UI-13 | Reference phone/wide captures, 320-width/200% text, all-state landscape/150% text and all-form simulated keyboard checks passed. Field/control semantics, all-state tap labels and reduced-motion busy indicators tested. System high contrast passes the 82 initial-viewport text-contrast checks and all-state 320-width/200% layouts. Full zh-CN wiring, offscreen contrast, remaining animation behavior, screen-reader and physical-keyboard acceptance pending. |
 | UI-14 | Linux process/bundle and Android debug/development-release APKs verified. Android 15 x86_64 journeys, cold launch, real IME and Home/resume checks passed. Physical phones, iOS, profiling and pixel equality remain unverified. |
-| UI-15 | Meiju Core and explicit read-only Flutter startup/account integration are present; real account and off-LAN acceptance remain pending. P08 preview copy follows automatic retrieval; replacement authoritative artwork and real off-LAN acceptance pending. |
+| UI-15 | Meiju Core and explicit read-only Flutter startup/account integration are present; real account and off-LAN acceptance remain pending. P08 base artwork now matches the combined retrieval result; separate runtime-variant artwork and real off-LAN acceptance remain pending. |
 
 ## Compatibility and environment
 
@@ -786,3 +786,53 @@ shown. The selected row capture is
 `output/flutter-verification/android/geometry-release-connections.png`.
 Both packaged Core libraries are byte-identical to the previously validated
 centering APK, retaining its exact exports and ELF alignment evidence.
+
+## P08 combined-result alignment — October 16, 2026
+
+The owner selected implementation under the current native contract. P08 now
+shows the completed combined account connection/retrieval result, replacing the
+obsolete manual Find Devices step. The raster reference is independently composed
+by the existing Python renderer; no Flutter capture was used as a baseline.
+The Flutter catalog and full atlas data are identical and the validator checks
+that equality. Five result actions replace the two obsolete branches, increasing
+the atlas from 198 to 201 simulated branches. Production connection still waits
+for the single native report; its behavior and Core ABI are unchanged. Android
+clicks also exposed fictional titles in the native connection path: P03 now
+shows Connect Meiju and P13 uses Platform connection. The isolated fictional
+prototype retains its own example platform names.
+
+The new regression test connects an isolated fictional account once, compares
+production P08 content with the reference definition, and clicks View Devices.
+It confirms there is no follow-up refresh or discovery request after connecting.
+Existing account checks retain complete-empty, partial, AUTH_REQUIRED, pending
+recovery, cancellation, late-result and exact local removal scope coverage.
+These are fixture checks, not real provider acceptance. Separate authoritative
+artwork for the busy/error/interrupted variants is still required.
+
+Executed verification:
+
+- All **74 Flutter tests** passed, including 82 regenerated captures, all **201**
+  simulated branch clicks, native Mock interactions and account fixture checks.
+  After correcting the native titles, all seven account checks and static
+  analysis passed again, including the added unavailable-connection click case.
+- FVM static analysis, documentation/contracts/repository validation and
+  `git diff --check` passed.
+- The prototype validator passed: 138 images, 547 links, 21 boards, 82 states,
+  14 journeys, 201 branches and zero content overflow. Existing P10/P11/S04
+  inventory amendments were preserved when rebuilding the generated atlas.
+- Strict screenshot comparison still fails: **0/82 exact**, mean channel error
+  **1.3958/255**. P08 improves from 10.6171 to 3.0031 after removing its semantic
+  mismatch; text rasterization and fractional layout differences remain. The
+  obsolete P08 intentional-mismatch annotation was removed from the report.
+- The dual-ABI development release APK rebuilt with FVM and passed 16 KiB ZIP
+  alignment, emulator installation and cold launch. Both Core libraries are
+  byte-identical to the preceding validated APK; bundled prototype bytes match
+  source. The ordinary Android Mock app opens Platforms and Add Platform with
+  the account-connection limitation visible. Choosing Meiju opens the unavailable
+  state with Platform connection as its heading; Back to Accounts returns to
+  the platform root. Screenshot: `output/flutter-verification/android/p08-release-account-gate.png`.
+
+Logs: `/tmp/homeverb-p08-tests.log`, `/tmp/homeverb-p08-analyze.log`,
+`/tmp/homeverb-p08-pixels.log` and `/tmp/homeverb-p08-release.log`.
+No real account, appliance, physical phone or iOS test was performed. This phase
+does not complete strict visual acceptance or the full original goal.

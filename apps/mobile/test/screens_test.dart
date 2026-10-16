@@ -63,8 +63,10 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull, reason: id);
       if (id == 'P08') {
-        expect(find.text('Connect platform'), findsOneWidget);
-        expect(find.text('Connecting and retrieving'), findsOneWidget);
+        expect(find.text('Account result'), findsOneWidget);
+        expect(find.text('Device retrieval complete'), findsOneWidget);
+        expect(find.text('Find Devices'), findsNothing);
+        expect(find.text('View Devices'), findsOneWidget);
         expect(find.textContaining('Authorization finished'), findsNothing);
         expect(find.byType(LinearProgressIndicator), findsNothing);
       }
@@ -272,7 +274,7 @@ void main() {
     tester.view.resetPhysicalSize();
     tester.view.resetDevicePixelRatio();
   });
-  testWidgets('click all 198 explicitly simulated atlas branches', (
+  testWidgets('click all 201 explicitly simulated atlas branches', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(780, 1688);
@@ -280,7 +282,7 @@ void main() {
     final key = GlobalKey<PreviewAppState>();
     await tester.pumpWidget(PreviewApp(key: key, catalog: catalog));
     await tester.pumpAndSettle();
-    expect(catalog.branches.length, 198);
+    expect(catalog.branches.length, 201);
     for (final branch in catalog.branches) {
       key.currentState!.go(branch['source']);
       await tester.pumpAndSettle();

@@ -2,9 +2,9 @@
 
 Status: owner-approved design scope, October 15, 2026. The Window Light prototype is a visual specification with fictional data, not an implemented mobile application or evidence of real-platform support.
 
-Use the [complete atlas](../output/prototypes/homeverb-window-light-v1/index.html), [82-state inventory](ui-screen-inventory.md), [requirement coverage](../output/prototypes/homeverb-window-light-v1/coverage.md), and [Window Light implementation guide](ui-window-light.md) together. The atlas contains 21 boards, 82 states, 14 review journeys, and 198 action branches. A journey is a review sequence; its adjacent screens are not necessarily a direct application transition. Branch buttons simulate navigation between images, not device actions.
+Use the [complete atlas](../output/prototypes/homeverb-window-light-v1/index.html), [82-state inventory](ui-screen-inventory.md), [requirement coverage](../output/prototypes/homeverb-window-light-v1/coverage.md), and [Window Light implementation guide](ui-window-light.md) together. The atlas contains 21 boards, 82 states, 14 review journeys, and 201 action branches. A journey is a review sequence; its adjacent screens are not necessarily a direct application transition. Branch buttons simulate navigation between images, not device actions.
 
-Account-flow amendment, October 15, 2026: Midea Meiju authorization must automatically retrieve existing bound devices and support subsequent cloud control away from home. The requirements and P08 inventory amendment below supersede the atlas's manual Find Devices step for that journey. The atlas images and interactive transitions have not been regenerated for this amendment; their visual acceptance remains pending.
+Account-flow amendment, October 15, 2026: Midea Meiju authorization must automatically retrieve existing bound devices and support subsequent cloud control away from home. The October 16 P08 result image and its five action branches supersede the manual Find Devices step. The base result uses the native combined-call contract; connecting, empty, partial, failed and interrupted runtime variants still require separate visual acceptance.
 
 This document expands [mobile requirements](mobile-app.md). The [embedded Core boundary](sdk.md), schemas, and ADRs remain authoritative for execution semantics. Preserve existing Core work; do not infer a new network service from this handoff. Native request details below are an integration snapshot of separate local implementation work, not code delivered by this UI documentation commit.
 
@@ -78,7 +78,7 @@ The 82-state atlas does not exhaust every transport error combination. Native er
 
 Each item requires implementation evidence; unchecked items are not completed by these images.
 
-- [ ] **UI-01** Implement all three roots, nested routes and 82 specified states; check all 198 branch destinations and system-owned transitions, plus caller-aware Back/Cancel.
+- [ ] **UI-01** Implement all three roots, nested routes and 82 specified states; check all 201 branch destinations and system-owned transitions, plus caller-aware Back/Cancel.
 - [ ] **UI-02** Verify first launch, no HomeVerb login, empty rooms, search, card/open versus quick action, and accessible alternatives to long-press/drag.
 - [ ] **UI-03** Exercise blank/duplicate/long/control-character room names, duplicate aliases, stale reorder permutations, atomic multi-device assignment and deletion without loss of identity or authority.
 - [ ] **UI-04** Drive forms from exact component metadata; test fridge/freezer different ranges, read-only/unknown values, invalid steps, missing capabilities, and permission-denied controls.

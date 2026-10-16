@@ -96,7 +96,7 @@ Later reviewed skins extend the registry and asset bundle, reuse the same compon
 
 ## Validation gates
 
-1. **Prototype completeness:** all 82 IDs rendered in Window Light; all 198 branches resolve; all 14 review journeys remain available. Appearance contains exactly one registered option.
+1. **Prototype completeness:** all 82 IDs rendered in Window Light; all 201 branches resolve; all 14 review journeys remain available. Appearance contains exactly one registered option.
 2. **Flutter compile and interaction:** use FVM, run dependency resolution and analysis, then build the preview and production UI. Linux and isolated web-preview checks are recorded in the application verification report. Phone builds, system dialogs and complete keyboard/accessibility acceptance remain pending.
 3. **Visual parity:** compare screenshots on narrow/regular phones and wide layouts against the approved home and representative control/platform/settings/share pages. Tune image fit and material tokens together.
 4. **Accessibility:** verify 100%, 150%, 200% text scaling, screen readers, long names, zh-CN/en-US, focus order, 48-pixel targets and contrast over the final composite background. Use an opaque readable surface when enhanced contrast requires it.

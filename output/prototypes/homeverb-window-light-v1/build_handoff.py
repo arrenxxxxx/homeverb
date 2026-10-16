@@ -11,7 +11,7 @@ REPO = ROOT.parents[2]
 data = json.loads((ROOT/'design.json').read_text())
 screens = [s for b in data['boards'] for s in b['screens']]
 assert len(screens) == 82
-assert len(data['interactions']) == 198
+assert len(data['interactions']) == 201
 assert data['skin']['available'] == [{'id':'window_light','name':'Window Light'}]
 
 template = (ROOT/'atlas-template.html').read_text()

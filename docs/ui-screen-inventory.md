@@ -559,24 +559,23 @@ Visible content: Authorization expired / Start again to request a new authorizat
 | Start Again | [P03](../output/prototypes/homeverb-window-light-v1/screens/P03.png) |
 | Cancel | [P01](../output/prototypes/homeverb-window-light-v1/screens/P01.png) |
 
-### P08 — Platform connected
+### P08 — Account retrieval result
 
 [Rendered state](../output/prototypes/homeverb-window-light-v1/screens/P08.png) · Nested screen
 
-The rendered image is the earlier generic example: Authorization saved securely, Find Devices, and Done. For the required Meiju journey, authorization instead continues automatically into bounded account-device retrieval. Show Loading Devices with Cancel; then the actual supported/unsupported counts and Open Devices. Do not require Find Devices or individual device selection. Preserve an authorization-success message when retrieval fails, offer Retry Retrieval, and distinguish empty from partial results. New supported cards start Unassigned; reauthorization preserves existing organization. No raw token display or invented fresh device state.
+The base image shows the completed combined connection/retrieval result for two fictional cards, matching native API 1.14.1. Login automatically retrieves devices; there is no second Find Devices or selection step. The result distinguishes successful sign-in from current authorization and physical-state evidence. Unsupported models remain visible, and empty results do not delete older cards.
 
-Required content, pending visual update: Authorization saved securely; Loading Devices; Cancel; retrieved device counts and unsupported reasons; Open Devices; optional room assignment. Error/partial variants offer Retry Retrieval and View Available Devices; a confirmed empty account explains that no devices were returned.
+Visible content: Account result; Device retrieval complete; Sign-in succeeded; Saved authorization · not checked; 2 devices retrieved; explicit Retrieve Devices; Reauthorize; Remove From This Device; View Devices; Back to Accounts.
 
 | Action or outcome | Review destination |
 |---|---|
-| Authorization saved | P08 retrieval variant, started automatically within the foreground connection flow |
-| Retrieval completed / Open Devices | [D01](../output/prototypes/homeverb-window-light-v1/screens/D01.png), using actual retrieved cards; empty variant when no devices are returned |
-| Retrieval failed or partial / Retry Retrieval | P08 retrieval variant; explicit bounded retry using the saved session when valid |
-| Partial result / View Available Devices | [D01](../output/prototypes/homeverb-window-light-v1/screens/D01.png), with incomplete retrieval disclosed |
-| Ambiguous identity | [A05](../output/prototypes/homeverb-window-light-v1/screens/A05.png), returning to the initiating account flow |
-| Assign local rooms | [R03](../output/prototypes/homeverb-window-light-v1/screens/R03.png), without gating retrieval or changing permissions |
-| Cancel retrieval | [P09](../output/prototypes/homeverb-window-light-v1/screens/P09.png), preserving securely saved authorization and known results without automatic resumption |
-| Done | [P01](../output/prototypes/homeverb-window-light-v1/screens/P01.png) |
+| Retrieve Devices | P08 after an explicit bounded refresh using the saved session |
+| Reauthorize | [P03](../output/prototypes/homeverb-window-light-v1/screens/P03.png), scoped to the selected account |
+| Remove From This Device | [P11](../output/prototypes/homeverb-window-light-v1/screens/P11.png), with exact local scope confirmation |
+| View Devices | [D01](../output/prototypes/homeverb-window-light-v1/screens/D01.png), using locally reloaded cards |
+| Back to Accounts | [P01](../output/prototypes/homeverb-window-light-v1/screens/P01.png) |
+
+Required runtime variants: P04 retains one Connecting and retrieving devices state until the combined call returns; no staged success or percentage is available. Cancel invalidates the pending UI result and requires local account summaries to be reloaded before retrying; it never automatically retries. P08 distinguishes complete-empty, partial and failed retrieval; partial does not supply a usable partial device list, so reload saved cards. AUTH_REQUIRED offers explicit reauthorization; pending credentials offer recovery or same-account sign-in. Do not send an identity conflict to a fictional merge control: native API 1.14.1 exposes no identity-linking method. Separate authoritative screenshots for these variants remain required; the base image alone does not establish their visual acceptance.
 
 ## Manage access deliberately
 

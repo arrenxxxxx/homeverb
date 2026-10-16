@@ -205,7 +205,7 @@
       1365,
       870
     ],
-    "sha256": "4badbacc30f31e4d2b14f60179dc466fb98c337d889d7c100f0d3c478de535ff"
+    "sha256": "5d773cf8f5de36b73a67b30d0f823db0ed9736d52c0744593e4b9b1cf1291736"
   },
   {
     "file": "boards/10-authentication.png",
@@ -213,7 +213,7 @@
       1820,
       1160
     ],
-    "sha256": "a9d59777d7c14e2a3a288250d653afef8cfcd5b60c55ba363db8b68b957eaa06"
+    "sha256": "1f5f833a4c089b7177585dbdb0c918b0e5958779efb632925daf9b14c3845a02"
   },
   {
     "file": "boards/11-platform-details-thumb.jpg",
@@ -445,7 +445,7 @@
       1208,
       3891
     ],
-    "sha256": "8a36e86dffdc8e2a03962aa4b3ac7a0ed495e3874f25a6ac1424aa502996bb4f"
+    "sha256": "b481733b5f36f9394955baf1776ca8a99fe389fb2e4104fb7bbc582aa9294f1d"
   },
   {
     "file": "screens/A01.png",
@@ -909,7 +909,7 @@
       780,
       1688
     ],
-    "sha256": "58036b8226e495ad9c8c63e4ebaf3be339d7e73f434f199b1dd4d309ab2ab846"
+    "sha256": "3e3cf2315bc8a24ee2715df49f51287c77a06e1b0fb56e94398e000336f698c6"
   },
   {
     "file": "screens/P09.png",

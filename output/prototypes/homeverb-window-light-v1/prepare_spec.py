@@ -54,7 +54,7 @@ UI={
 'P05':page('Verify Example Home',('note','Enter the code from your platform. Sent to ***42.'),('code','4  8  2  1  _  _'),('note','Resend in 00:28'),('button','Continue','disabled'),('button','Cancel','secondary')),
 'P06':page('Pair living room TV',('hero','tv','482 196','Confirm this fictional code on your TV.'),('status','Waiting for approval','01:20 remaining','neutral'),('button','Cancel','secondary')),
 'P07':page('Connect Example Home',('status','Authorization expired','Start again to request a new authorization.','warning'),('button','Start Again'),('button','Cancel','secondary')),
-'P08':page('Platform connected',('status','Authorization saved securely','Example Home · Home account · Europe','success'),('button','Find Devices'),('button','Done','secondary'),('note','Devices are listed after explicit discovery.')),
+'P08':page('Account result',('status', 'Device retrieval complete', 'Sign-in succeeded. Saved authorization · not checked.', 'neutral'),('note', '2 devices retrieved. Unsupported models remain visible. An empty result does not delete older saved cards.'),('note', 'Existing cards are reloaded from local storage. Retrieval does not establish physical state or grant appliance controls.'),('button', 'Retrieve Devices'),('button', 'Reauthorize', 'secondary'),('button', 'Remove From This Device', 'secondary'),('button', 'View Devices', 'secondary'),('button', 'Back to Accounts', 'secondary')),
 'P09':page('Example Home',('note','Home account · h***@example.invalid'),('rows',[['Region','Europe'],['Devices','6'],['Permissions','Read and control'],['Last checked','Today 09:40']]),('button','Check Connection'),('button','Reauthorize','secondary'),('link','Remove From This Device'),('link','Revoke Access · if supported')),
 'P10':page('Example Home',('status','Sign-in needed','Your platform authorization has expired.','warning'),('rows',[['Devices','6 · Last known']]),('button','Reauthorize'),('button','View Devices','secondary'),('link','Remove From This Device')),
 'P11':page('Remove from this device?',('note','Local authorization and associated cached data will be removed. Access on other devices is not revoked.'),('button','Remove Locally','danger'),('button','Cancel','secondary'),base='P09',overlay='dialog'),
@@ -98,6 +98,9 @@ for board in old['boards']:
  for screen in board['screens']:
   screen.pop('crop_box',None);screen['ui']=UI[screen['id']]
   screen['description']=screen['description'].replace('teal','terracotta').replace('Teal','Terracotta')
+  if screen['id']=='P08':
+   screen['title']='Account retrieval result'
+   screen['description']='Completed combined account connection and automatic device retrieval, with two fictional returned cards. No second discovery or selection step is required. Retrieval does not establish physical state or grant controls. Retry is explicit; empty, partial, failed and interrupted results retain their separate native contract behavior.'
   if screen['id']=='S07':
    screen['description']='Diagnostics preview uses the current allowlisted Core report: version, generation time, local profile counts, route counts, retention limits and receipt summaries. The pictured summary is abbreviated; production exposes every exported field before saving exactly the previewed report. No raw account or device identifiers, automatic upload or credential payloads.'
   if screen['id']=='D10':
@@ -111,6 +114,7 @@ for board in old['boards']:
 for action in old['interactions']:
  if action['source']=='S02' and action['target']=='S11':action['action']='Preview Window Light'
  if action['source']=='S11' and action['target']=='D01':action.update(action='Back to Appearance',target='S02')
+old['interactions']=[e for e in old['interactions'] if e['source']!='P08']+[{'source': 'P08', 'action': 'Retrieve Devices', 'target': 'P08'}, {'source': 'P08', 'action': 'Reauthorize', 'target': 'P03'}, {'source': 'P08', 'action': 'Remove From This Device', 'target': 'P11'}, {'source': 'P08', 'action': 'View Devices', 'target': 'D01'}, {'source': 'P08', 'action': 'Back to Accounts', 'target': 'P01'}]
 old.update(version='2.0-window-light',status='Complete visual prototype; fictional behavior only',method='Local deterministic composition',skin={'default':'window_light','available':[{'id':'window_light','name':'Window Light'}]},actual_resolution_note='Locally rendered at 2x logical size. No Flutter build or physical-device verification is implied.')
 for key in ['model','size','quality']:old.pop(key,None)
 (ROOT/'design.json').write_text(json.dumps(old,indent=2)+'\n')
