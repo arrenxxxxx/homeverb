@@ -998,7 +998,7 @@ class Climate extends StatelessWidget {
                   ),
                 ),
                 Positioned(
-                  top: 49.5,
+                  top: 52,
                   left: 0,
                   right: 0,
                   child: InkWell(

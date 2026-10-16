@@ -1,4 +1,4 @@
-"""Record independent font ink bounds for native centered text."""
+"""Record independent font ink bounds for native text alignment."""
 import hashlib
 import json
 from pathlib import Path
@@ -22,8 +22,8 @@ def collect(value):
 collect(json.loads((ASSETS / 'prototype.json').read_text()))
 variants = []
 for weight, sizes, filename in [
-    (400, [10, 12, 13], 'Inter-Regular.otf'),
-    (600, [12, 13, 14, 17, 32], 'Inter-SemiBold.otf'),
+    (400, [10, 11, 12, 13, 14, 16, 68], 'Inter-Regular.otf'),
+    (600, [10, 11, 12, 13, 14, 15, 16, 17, 19, 22, 23, 24, 25, 26, 27, 28, 30, 32], 'Inter-SemiBold.otf'),
 ]:
     path = ASSETS / 'fonts' / filename
     for size in sizes:

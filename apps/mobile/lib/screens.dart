@@ -301,10 +301,13 @@ class ScreenView extends StatelessWidget {
                                         context,
                                       ).scale(11) /
                                       11,
-                                  child: const Copy(
-                                    'HomeVerb',
-                                    size: 11,
-                                    color: muted,
+                                  child: const Padding(
+                                    padding: EdgeInsets.only(top: 3),
+                                    child: Copy(
+                                      'HomeVerb',
+                                      size: 11,
+                                      color: muted,
+                                    ),
                                   ),
                                 ),
                               ],

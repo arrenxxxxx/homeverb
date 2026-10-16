@@ -133,7 +133,7 @@ class Copy extends StatelessWidget {
           : FontWeight.w400,
     );
     if (control) {
-      return _InkCenteredText(
+      return _InkAlignedText(
         text,
         textAlign: center ? TextAlign.center : TextAlign.start,
         maxLines: maxLines,
@@ -173,16 +173,14 @@ class Copy extends StatelessWidget {
         measure.dispose();
         return Padding(
           padding: EdgeInsets.only(bottom: leading),
-          child: Transform.translate(
-            offset: Offset(0, -size * .20),
-            child: Text(
-              text,
-              textAlign: center ? TextAlign.center : TextAlign.start,
-              maxLines: maxLines,
-              overflow: maxLines == null ? null : TextOverflow.ellipsis,
-              textHeightBehavior: heightBehavior,
-              style: style,
-            ),
+          child: _InkAlignedText(
+            text,
+            textAlign: center ? TextAlign.center : TextAlign.start,
+            maxLines: maxLines,
+            textHeightBehavior: heightBehavior,
+            topAligned: true,
+            fallbackOffset: Offset(0, -size * .20),
+            style: style,
           ),
         );
       },
@@ -402,7 +400,7 @@ class ActionButton extends StatelessWidget {
             ),
           ),
           onPressed: onPressed,
-          child: _InkCenteredText(
+          child: _InkAlignedText(
             label,
             textAlign: TextAlign.center,
             style: const TextStyle(
@@ -418,13 +416,19 @@ class ActionButton extends StatelessWidget {
   }
 }
 
-class _InkCenteredText extends StatelessWidget {
-  const _InkCenteredText(
+class _InkAlignedText extends StatelessWidget {
+  const _InkAlignedText(
     this.label, {
     required this.style,
     required this.textAlign,
     this.maxLines,
+    this.textHeightBehavior,
+    this.topAligned = false,
+    this.fallbackOffset = Offset.zero,
   });
+  final TextHeightBehavior? textHeightBehavior;
+  final bool topAligned;
+  final Offset fallbackOffset;
   final String label;
   final TextStyle style;
   final TextAlign textAlign;
@@ -437,6 +441,7 @@ class _InkCenteredText extends StatelessWidget {
       textAlign: textAlign,
       maxLines: maxLines,
       overflow: maxLines == null ? null : TextOverflow.ellipsis,
+      textHeightBehavior: textHeightBehavior,
       style: style,
     );
     final metrics = _textInkBounds[(style.fontWeight!.value, style.fontSize!)];
@@ -445,12 +450,12 @@ class _InkCenteredText extends StatelessWidget {
         MediaQuery.maybeLineHeightScaleFactorOverrideOf(context) != null ||
         MediaQuery.maybeLetterSpacingOverrideOf(context) != null ||
         MediaQuery.maybeWordSpacingOverrideOf(context) != null) {
-      return text;
+      return Transform.translate(offset: fallbackOffset, child: text);
     }
     final defaults = DefaultTextStyle.of(context);
     final scaler = MediaQuery.textScalerOf(context);
     final ratio = MediaQuery.devicePixelRatioOf(context);
-    return _CenteredInk(
+    return _AlignedInk(
       painter: TextPainter(
         text: TextSpan(text: label, style: defaults.style.merge(style)),
         textAlign: textAlign,
@@ -463,63 +468,100 @@ class _InkCenteredText extends StatelessWidget {
         locale: Localizations.maybeLocaleOf(context),
         textWidthBasis: defaults.textWidthBasis,
         textHeightBehavior:
+            textHeightBehavior ??
             defaults.textHeightBehavior ??
             DefaultTextHeightBehavior.maybeOf(context),
       ),
       metrics: metrics,
       scale: scaler.scale(style.fontSize!) * ratio / (style.fontSize! * 2),
       pixelRatio: ratio,
+      topAligned: topAligned,
+      lineAdvance: scaler.scale(style.fontSize!) * 1.4,
+      fallbackOffset: fallbackOffset,
       child: text,
     );
   }
 }
 
 // Preserve native intrinsic/dry layout for Chip and other baseline consumers.
-class _CenteredInk extends SingleChildRenderObjectWidget {
-  const _CenteredInk({
+class _AlignedInk extends SingleChildRenderObjectWidget {
+  const _AlignedInk({
     required this.painter,
     required this.metrics,
     required this.scale,
     required this.pixelRatio,
+    required this.topAligned,
+    required this.lineAdvance,
+    required this.fallbackOffset,
     required super.child,
   });
   final TextPainter painter;
   final Map<int, (double, double)> metrics;
-  final double scale, pixelRatio;
+  final double scale, pixelRatio, lineAdvance;
+  final bool topAligned;
+  final Offset fallbackOffset;
   @override
-  RenderObject createRenderObject(BuildContext context) =>
-      _RenderCenteredInk(painter, metrics, scale, pixelRatio);
+  RenderObject createRenderObject(BuildContext context) => _RenderAlignedInk(
+    painter,
+    metrics,
+    scale,
+    pixelRatio,
+    topAligned,
+    lineAdvance,
+    fallbackOffset,
+  );
   @override
   void updateRenderObject(
     BuildContext context,
-    _RenderCenteredInk renderObject,
-  ) => renderObject.configure(painter, metrics, scale, pixelRatio);
+    _RenderAlignedInk renderObject,
+  ) => renderObject.configure(
+    painter,
+    metrics,
+    scale,
+    pixelRatio,
+    topAligned,
+    lineAdvance,
+    fallbackOffset,
+  );
 }
 
-class _RenderCenteredInk extends RenderProxyBox {
-  _RenderCenteredInk(
+class _RenderAlignedInk extends RenderProxyBox {
+  _RenderAlignedInk(
     this._painter,
     this._metrics,
     this._scale,
     this._pixelRatio,
+    this._topAligned,
+    this._lineAdvance,
+    this._fallbackOffset,
   );
   TextPainter _painter;
   Map<int, (double, double)> _metrics;
   double _scale, _pixelRatio;
   double _top = 0, _height = 0;
   bool _centerInk = false;
+  bool _topAligned;
+  Offset _fallbackOffset;
+  double _lineAdvance;
+  final _lineInk = <(double, double)>[];
 
   void configure(
     TextPainter painter,
     Map<int, (double, double)> metrics,
     double scale,
     double pixelRatio,
+    bool topAligned,
+    double lineAdvance,
+    Offset fallbackOffset,
   ) {
     _painter.dispose();
     _painter = painter;
     _metrics = metrics;
     _scale = scale;
     _pixelRatio = pixelRatio;
+    _topAligned = topAligned;
+    _lineAdvance = lineAdvance;
+    _fallbackOffset = fallbackOffset;
     markNeedsLayout();
     markNeedsSemanticsUpdate();
   }
@@ -540,6 +582,7 @@ class _RenderCenteredInk extends RenderProxyBox {
   void performLayout() {
     super.performLayout();
     _centerInk = false;
+    _lineInk.clear();
     _painter.layout(maxWidth: size.width);
     if (_painter.didExceedMaxLines) return;
     final label = _painter.text!.toPlainText();
@@ -564,6 +607,26 @@ class _RenderCenteredInk extends RenderProxyBox {
         last.$2 * _scale;
     _top = top / _pixelRatio;
     _height = (bottom - top) / _pixelRatio;
+    if (_topAligned && lines.length > 1) {
+      for (final line in lines) {
+        final range = _painter.getLineBoundary(
+          _painter.getPositionForOffset(
+            Offset(line.left + line.width / 2, line.baseline - line.ascent / 2),
+          ),
+        );
+        final ink = bounds(label.substring(range.start, range.end).trimRight());
+        if (ink == null) {
+          _lineInk.clear();
+          return;
+        }
+        final nativeBaseline = (baseline + line.baseline - lines.first.baseline)
+            .roundToDouble();
+        _lineInk.add((
+          nativeBaseline + ink.$1 * _scale / _pixelRatio,
+          nativeBaseline + ink.$2 * _scale / _pixelRatio,
+        ));
+      }
+    }
     _centerInk = true;
   }
 
@@ -576,18 +639,45 @@ class _RenderCenteredInk extends RenderProxyBox {
   }
 
   Offset get _offset {
-    if (!_centerInk) return Offset.zero;
+    if (!_centerInk) return _fallbackOffset;
     // Fractional paragraph and sheet origins must be rounded in screen space.
     final origin = localToGlobal(Offset.zero).dy;
     final target =
-        roundPixel((origin + (size.height - _height) / 2) * _pixelRatio) /
+        roundPixel(
+          (origin + (_topAligned ? 0 : (size.height - _height) / 2)) *
+              _pixelRatio,
+        ) /
         _pixelRatio;
     return Offset(0, target - origin - _top);
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null) context.paintChild(child!, offset + _offset);
+    if (child == null) return;
+    if (_lineInk.isEmpty) {
+      context.paintChild(child!, offset + _offset);
+      return;
+    }
+    // Keep one native paragraph and its semantics. Translate each painted line
+    // to the artwork's independent ink top, clipping only between ink bands.
+    final origin = localToGlobal(Offset.zero).dy;
+    for (var i = 0; i < _lineInk.length; i++) {
+      final top = i == 0
+          ? math.min(0.0, _lineInk[i].$1) - _lineAdvance
+          : (_lineInk[i - 1].$2 + _lineInk[i].$1) / 2;
+      final bottom = i == _lineInk.length - 1
+          ? math.max(size.height, _lineInk[i].$2) + _lineAdvance
+          : (_lineInk[i].$2 + _lineInk[i + 1].$1) / 2;
+      final target =
+          roundPixel((origin + i * _lineAdvance) * _pixelRatio) / _pixelRatio;
+      final shift = Offset(0, target - origin - _lineInk[i].$1);
+      context.pushClipRect(
+        needsCompositing,
+        offset + shift,
+        Rect.fromLTRB(-_lineAdvance, top, size.width + _lineAdvance, bottom),
+        (context, offset) => context.paintChild(child!, offset),
+      );
+    }
   }
 
   @override

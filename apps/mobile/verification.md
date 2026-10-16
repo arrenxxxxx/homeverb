@@ -1070,3 +1070,53 @@ Logs: `/tmp/homeverb-safe-area-before.log`, `/tmp/homeverb-safe-area-after.log`,
 `/tmp/homeverb-safe-area-release.log`. The full Android native journey described
 above ran before this padding-only correction; the final APK's system-inset
 behavior was verified by the direct native pointer sequence recorded here.
+
+## Native body and heading ink alignment — October 16, 2026
+
+Body copy and headings now use the bundled font's visible glyph bounds instead
+of an estimated upward offset proportional to font size. The shared native-text
+wrapper supports both centered controls and top-aligned copy. Each wrapped line
+is translated to its own rounded ink-top coordinate at the specified 1.4 line
+advance. Painting clips between native ink bands while retaining one native
+Text paragraph, its full label and intrinsic layout. Unsupported glyphs,
+truncation and system spacing overrides retain the previous native fallback.
+The generated metrics cover the 25 Regular/SemiBold styles used by Copy.
+
+The climate target now uses the prototype's y=52 coordinate; the previous y=49.5
+compensated for the old font offset. Header branding retains its y=62 ink origin.
+No reference artwork, comparison threshold, Core contract or operation semantics
+changed. Controls remain native widgets; no text is replaced with raster assets.
+
+All **83 Flutter tests** and static analysis pass. The added raster check verifies
+eight single-line styles and a wrapped paragraph at four fractional origins,
+including the independently rounded second-line top. The complete regression
+also captures all 82 states, clicks all 201 explicitly simulated branches, and
+checks native Mock/fixture interactions, high contrast, enlarged text, keyboard
+avoidance and safe-area behavior.
+
+Strict comparison still fails: **0/82 exact**, mean channel error **0.7289/255**,
+compared with 0.9358 before this phase. All 82 states improve; none regress. C03
+improves from 1.3023 to 0.7404. Remaining rasterization, horizontal placement,
+primitive and layout differences still prevent exact-screen acceptance.
+
+Evidence: `output/flutter-verification/body-ink-comparison.json`, the live
+`index.html` report and `body-ink-{C03,C04,A01,S10,D01,W02}.png` review panels.
+Logs: `/tmp/homeverb-body-tests.log`, `/tmp/homeverb-body-analyze.log` and
+`/tmp/homeverb-body-labels.log`.
+
+The complete Android native Mock journey passed on API 35 x86_64 in 2m28s
+after restarting the existing isolated emulator without wiping its data. Input,
+file-picker and lifecycle steps in that journey are injected. Its log is
+`/tmp/homeverb-body-android.log`; no complete native capture archive was retained.
+No real provider, appliance, physical phone or iOS acceptance is claimed.
+
+The ordinary dual-ABI development-release APK rebuilt and passed 16 KiB ZIP
+alignment. Both Core libraries are byte-identical to `c6231cc`; packaged font
+metrics, atlas data and decorative faces match source. Native pointer clicks
+opened Settings and Connections, saved Auto, discovered the fictional Mock
+appliance, opened its card and refreshed target 26/cool/power off. The mode
+sheet's Cancel remains above Android navigation and dismisses without changing
+mode. The Connections paragraph, climate value and sheet screenshots were
+inspected. Evidence: `android/body-ink-release-{settings,connections,device,mode}.png`
+and `android/body-ink-release-clicks.json` under `output/flutter-verification/`.
+Build log: `/tmp/homeverb-body-release.log`.
