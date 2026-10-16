@@ -1486,3 +1486,21 @@ subsequent delivery entry. The user's current emulator login attempt returned
 `SECRET_STORE_UNAVAILABLE`; provider credentials and actual AC operation are not
 validated by these presentation checks. No real-device writes, remote push or
 artifact upload occurred in this phase.
+
+
+### Android localization corrections
+
+The first bilingual APK passed archive checks and installed after the owner
+explicitly authorized removing the differently signed old app and its local data.
+Actual Android Settings clicks selected Simplified Chinese. Force-stop removed
+process 3093; new process 3313 restored the Chinese preference. Inspection found
+two uppercase section labels missing from the catalog: HOME and PREFERENCES.
+They are now included, bringing the catalogs to 1,122 messages; the five focused
+localization tests pass with explicit assertions for both Chinese section labels.
+All seven shared presentation tests also pass after regeneration.
+
+An isolated XDG configuration had generated a different temporary development
+key. Builds now set ANDROID_USER_HOME to the existing persistent Android directory;
+the build guide records this requirement. The rebuilt APK certificate was checked
+against that persistent local development key. No key is copied into this repo.
+The final rebuilt artifact and updated runtime inspection follow below.

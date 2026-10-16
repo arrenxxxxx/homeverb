@@ -1153,4 +1153,6 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get mobileRetained => '\uff08\u5df2\u4fdd\u7559\uff09';
 	@override String get mobileLan => '\u5c40\u57df\u7f51';
 	@override String mobileValueStaleEdf502({required Object value, required Object stale}) => '${value}${stale}';
+	@override String get mobileSectionHome => '\u5bb6\u5ead';
+	@override String get mobileSectionPreferences => '\u504f\u597d\u8bbe\u7f6e';
 }

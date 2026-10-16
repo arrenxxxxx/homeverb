@@ -1118,5 +1118,7 @@
   "mobile.phaseTransportSuffix": "{phase} · {transport}{suffix}",
   "mobile.retained": "（已保留）",
   "mobile.lan": "局域网",
-  "mobile.valueStale_edf502": "{value}{stale}"
+  "mobile.valueStale_edf502": "{value}{stale}",
+  "mobile.sectionHome": "家庭",
+  "mobile.sectionPreferences": "偏好设置"
 }

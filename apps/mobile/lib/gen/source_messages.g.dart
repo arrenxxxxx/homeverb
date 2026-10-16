@@ -1555,6 +1555,8 @@ String? translateSource(
     stale: args["stale"] ?? "{stale}",
     value: args["value"] ?? "{value}",
   ),
+  "HOME" => t.mobileSectionHome,
+  "PREFERENCES" => t.mobileSectionPreferences,
   _ => null,
 };
 
@@ -3016,5 +3018,7 @@ String? sourceForKey(String key) => switch (key) {
   "mobile.retained" => " (retained)",
   "mobile.lan" => "LAN",
   "mobile.valueStale_edf502" => "{value}{stale}",
+  "mobile.sectionHome" => "HOME",
+  "mobile.sectionPreferences" => "PREFERENCES",
   _ => null,
 };

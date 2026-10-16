@@ -66,7 +66,12 @@ For an isolated SDK override on Linux/macOS without legacy `~/.flutter_settings`
 create a temporary directory containing a `settings` JSON file with `android-sdk`
 and `jdk-dir` paths, then set `XDG_CONFIG_HOME` to that directory only for the build
 command. Set `ANDROID_HOME` and `ANDROID_SDK_ROOT` to the same SDK. This avoids
-changing global Flutter settings. Verify the generated `android/local.properties`
+changing global Flutter settings. Also set `ANDROID_USER_HOME` to your existing,
+persistent Android user directory (normally `$HOME/.android`). Otherwise Android
+Gradle may create a new development signing key under the temporary XDG directory;
+a later APK cannot update the installed app if that key is lost. Keep signing keys
+outside the repository and do not delete the persistent Android directory. Verify
+the generated `android/local.properties`
 contains that SDK. Do not accept unrelated SDK licenses to work around a wrong
 location. Remove only the temporary configuration created for this build.
 

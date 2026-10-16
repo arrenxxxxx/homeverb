@@ -3395,4 +3395,10 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: '{value}{stale}'
 	String mobileValueStaleEdf502({required Object value, required Object stale}) => '${value}${stale}';
+
+	/// en-US: 'HOME'
+	String get mobileSectionHome => 'HOME';
+
+	/// en-US: 'PREFERENCES'
+	String get mobileSectionPreferences => 'PREFERENCES';
 }

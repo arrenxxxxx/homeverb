@@ -84,6 +84,18 @@ void main() {
       final material = tester.widget<MaterialApp>(find.byType(MaterialApp));
       expect(material.locale, const Locale('zh', 'CN'));
       expect(core.requests.length, before);
+      await key.currentState!.go('S01');
+      await tester.pumpAndSettle();
+      expect(find.text('HOME'), findsNothing);
+      expect(find.text('PREFERENCES'), findsNothing);
+      expect(
+        find.text(AppLocale.zhCn.translations.mobileSectionHome),
+        findsOneWidget,
+      );
+      expect(
+        find.text(AppLocale.zhCn.translations.mobileSectionPreferences),
+        findsOneWidget,
+      );
       await key.currentState!.go('D01');
       await tester.pumpAndSettle();
       expect(
