@@ -36,6 +36,30 @@ local state after interruption. No appliance request, retry or execution receipt
 is generated. Mock/Meiju do not opt in; only synthetic tests exercise linking.
 No JSON, C/JNI, CLI or MCP linking method is exposed in this phase.
 
+## Trusted foreground LAN candidate scan
+
+[ADR-0054](adr/0054-trusted-meiju-lan-candidate-scan.md) composes discovery and
+protected reconciliation for one saved Meiju device through typed Rust Session
+methods. The host selects an assigned interface and handles platform permission.
+Preparation validates exact device/connection IDs and protected mainland account
+membership without networking. Its immutable, non-cloneable preview exposes the
+device/network, belongs to one Session/lifecycle generation and expires after
+60 monotonic seconds. Actual trusted consent is required before consuming it.
+
+Confirmation rechecks metadata, holds the account lease through one collector
+invocation, and revalidates protected identity/membership and current metadata
+before returning. The inherited budget is capped by preview expiry; the production
+collector retains its five-second window and two fixed probes. Cancellation,
+background, close and dropped futures release operation resources; background and
+close also invalidate outstanding previews. There is no automatic rescan.
+
+`LanScanOutcome` returns only the selected candidate or `NotObserved`, `Incomplete`
+or `Ambiguous`. Native redacted/nonserializable hints establish no authenticated
+endpoint, model, credential or route authority. This flow performs no cloud
+request, token lookup, TCP/state query, connection mutation or write. Ordinary
+JSON, C/JNI, CLI and MCP do not expose it. Mobile permission and consent integration
+remain pending; no physical acceptance follows from fictional integration tests.
+
 ## State machine
 
 ```mermaid

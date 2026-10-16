@@ -115,7 +115,7 @@ fn unconfirmed() -> Error {
     )
 }
 
-fn identity_conflict() -> Error {
+pub(crate) fn identity_conflict() -> Error {
     Error::new(
         "DEVICE_IDENTITY_CONFLICT",
         "The account inventory conflicts with an established appliance binding.",

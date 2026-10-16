@@ -3,7 +3,7 @@
 
 mod discovery;
 pub use crate::auth::LanUdpIdMethod;
-pub use discovery::{DiscoveryNetwork, DiscoveryReport, discover};
+pub use discovery::{DiscoveryNetwork, DiscoveryReport, LanDiscovery, UdpLanDiscovery, discover};
 mod v3;
 pub use v3::{V3Handshake, V3Response, V3Session, v3_frame_len};
 mod transport;

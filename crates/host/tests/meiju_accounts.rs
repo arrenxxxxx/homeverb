@@ -25,6 +25,9 @@ mod mode;
 #[path = "meiju_accounts/inventory.rs"]
 mod inventory;
 
+#[path = "meiju_accounts/lan_scan.rs"]
+mod lan_scan;
+
 fn operation() -> Operation {
     Operation::new(1000, CancellationToken::new()).unwrap()
 }

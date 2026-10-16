@@ -74,6 +74,8 @@
   "error.CONNECTION_LINK_UNSUPPORTED": "This connection cannot be linked with the current adapter or storage.",
   "error.CONNECTION_LINK_INVALID": "The device or connection preview changed. Review it again before confirming.",
   "error.CONNECTION_LINK_EXPIRED": "The connection preview expired. Review it again before confirming.",
+  "error.LAN_SCAN_INVALID": "The device or network scan preview changed. Review it again before confirming.",
+  "error.LAN_SCAN_EXPIRED": "The network scan preview expired. Review it again before confirming.",
   "error.REQUEST_NOT_FOUND": "No receipt was found in this profile. This does not establish whether the device acted; do not automatically resend.",
   "error.AUTH_REQUIRED": "Reconnect this platform account to continue.",
   "error.ACCOUNT_NOT_FOUND": "This local account is no longer available. Reload the account list.",

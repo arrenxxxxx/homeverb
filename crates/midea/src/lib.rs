@@ -21,7 +21,7 @@ pub use account::{
     MeijuAccount, connect,
 };
 mod adapter;
-pub use adapter::{AccountDiscovery, AccountInventory, MeijuAdapter};
+pub use adapter::{AccountDiscovery, AccountInventory, LanScanOutcome, MeijuAdapter};
 mod state;
 pub use state::{CloudState, StateQuery, read_cloud_state};
 

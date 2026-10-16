@@ -11,6 +11,9 @@ use std::{
 };
 use tokio_util::sync::CancellationToken;
 
+mod lan_scan;
+pub use lan_scan::PendingMeijuLanScan;
+
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct HostRequest {
@@ -118,7 +121,7 @@ struct State {
 pub struct Session {
     core: Core,
     accounts: Option<Arc<homeverb_midea::MeijuAdapter>>,
-    state: Mutex<State>,
+    state: Arc<Mutex<State>>,
 }
 
 struct Registration<'a> {
@@ -138,13 +141,13 @@ impl Session {
         Self {
             core,
             accounts: None,
-            state: Mutex::new(State {
+            state: Arc::new(Mutex::new(State {
                 foreground: true,
                 closed: false,
                 operations: HashMap::new(),
                 approvals: HashMap::new(),
                 approval_generation: 0,
-            }),
+            })),
         }
     }
 

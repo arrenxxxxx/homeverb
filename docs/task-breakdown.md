@@ -39,6 +39,13 @@ trusted mobile consent flow are still required before publishing a LAN route.
 The source's default AC decoder and the six cloud models do not establish a LAN
 model allowlist. These gaps do not require reimplementing the completed codecs.
 
+The [trusted foreground scan](adr/0054-trusted-meiju-lan-candidate-scan.md) now
+composes selected-device discovery/reconciliation through typed Rust Session
+preview and consuming confirmation. Synthetic tests cover lifecycle, identity,
+lease and deadline boundaries. It does not fetch keys, read state or publish a
+route. Mobile interface/permission selection, consent UI, a versioned bridge and
+the remaining model/endpoint/linking gates are still unfinished.
+
 The selected refrigerator's [write evidence review](development/05-midea.md#refrigerator-write-evidence)
 establishes model-specific manual bounds but leaves encoder preservation and
 temperature step unproven. Keep its existing reads available while researching

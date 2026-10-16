@@ -1,13 +1,16 @@
 //! Reconcile protected identities and resolve credentials without contacting a LAN peer.
 
-use super::{DeviceBinding, MeijuAccount, ProductProfile, family_code, identity_conflict};
+use super::{
+    DeviceBinding, MeijuAccount, PROVIDER, Payload, ProductProfile, StoredBinding, family_code,
+    identity_conflict,
+};
 use crate::{
     ApplianceFamily, CloudId, CloudTransport, ReadEndpoint, ReadTransport,
     lan::{DiscoveryCandidate, DiscoveryNetwork, DiscoveryReport, LanUdpIdMethod, V3Handshake},
     parse_appliances, parse_homes,
 };
 use homeverb_core::Operation;
-use homeverb_domain::{Error, Result};
+use homeverb_domain::{Connection, Device, Error, Result, Transport};
 
 /// Saved identity reconciliation only, never permission or endpoint authentication.
 /// ```compile_fail
@@ -24,6 +27,82 @@ pub enum LanCandidateMatch<'a> {
 }
 
 impl MeijuAccount {
+    fn require_lan_region(&self) -> Result<()> {
+        if self.record().region != "CN" {
+            return Err(Error::new(
+                "AUTH_FLOW_UNSUPPORTED",
+                "Only mainland Meiju is admitted.",
+            ));
+        }
+        Ok(())
+    }
+
+    fn checked_lan_binding<'a>(
+        &self,
+        payload: &'a Payload,
+        selected: DeviceBinding,
+    ) -> Result<&'a StoredBinding> {
+        let binding = payload
+            .bindings
+            .iter()
+            .find(|binding| binding.local == selected)
+            .ok_or_else(identity_conflict)?;
+        binding.require_listed()?;
+        if !matches!(binding.family, 0xac | 0xe1 | 0xca)
+            || !binding
+                .appliance_id
+                .parse::<u64>()
+                .is_ok_and(|id| (1..=0xffff_ffff_ffff).contains(&id))
+        {
+            return Err(Error::new(
+                "CAPABILITY_UNSUPPORTED",
+                "The appliance is outside the reviewed LAN reconciliation scope.",
+            ));
+        }
+        Ok(binding)
+    }
+
+    /// Validate a saved public selection against protected evidence before any LAN scan.
+    pub(crate) async fn validate_lan_scan(
+        &self,
+        device: &Device,
+        connection: &Connection,
+        operation: &Operation,
+    ) -> Result<DeviceBinding> {
+        operation
+            .run(async {
+                self.require_lan_region()?;
+                let selected = DeviceBinding {
+                    device_id: device.id.parse().map_err(|_| identity_conflict())?,
+                    connection_id: connection.id.parse().map_err(|_| identity_conflict())?,
+                    identity_ref: connection
+                        .identity_ref
+                        .parse()
+                        .map_err(|_| identity_conflict())?,
+                };
+                let payload = self.load(operation).await?;
+                let binding = self.checked_lan_binding(&payload, selected)?;
+                let expected = Connection {
+                    id: binding.local.connection_id.to_string(),
+                    adapter: PROVIDER.into(),
+                    transport: Transport::Cloud,
+                    account_id: Some(self.record().id.to_string()),
+                    identity_ref: binding.local.identity_ref.to_string(),
+                };
+                if *connection != expected
+                    || device.id != binding.local.device_id.to_string()
+                    || !device.connections.contains(connection)
+                    || binding
+                        .model
+                        .as_ref()
+                        .is_some_and(|model| *model != device.model)
+                {
+                    return Err(identity_conflict());
+                }
+                Ok(selected)
+            })
+            .await
+    }
     /// Compare one protected binding with bounded, unauthenticated LAN hints.
     /// Performs no network or persistence work and does not admit any route/model.
     pub async fn reconcile_lan_candidate<'a>(
@@ -35,30 +114,9 @@ impl MeijuAccount {
     ) -> Result<LanCandidateMatch<'a>> {
         operation
             .run(async {
-                if self.record().region != "CN" {
-                    return Err(Error::new(
-                        "AUTH_FLOW_UNSUPPORTED",
-                        "Only mainland Meiju is admitted.",
-                    ));
-                }
+                self.require_lan_region()?;
                 let payload = self.load(operation).await?;
-                let binding = payload
-                    .bindings
-                    .iter()
-                    .find(|binding| binding.local == selected)
-                    .ok_or_else(identity_conflict)?;
-                binding.require_listed()?;
-                if !matches!(binding.family, 0xac | 0xe1 | 0xca)
-                    || !binding
-                        .appliance_id
-                        .parse::<u64>()
-                        .is_ok_and(|id| (1..=0xffff_ffff_ffff).contains(&id))
-                {
-                    return Err(Error::new(
-                        "CAPABILITY_UNSUPPORTED",
-                        "The appliance is outside the reviewed LAN reconciliation scope.",
-                    ));
-                }
+                let binding = self.checked_lan_binding(&payload, selected)?;
                 report.validate(network)?;
                 if report.limit_reached {
                     return Ok(LanCandidateMatch::Incomplete);

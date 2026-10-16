@@ -256,6 +256,7 @@ The sequence below describes integration dependencies, not an enabled App flow.
 | Step | Callable implementation | Evidence and boundary |
 |---|---|---|
 | Collect hints | `lan::discover(network, operation)` and `decode_discovery` | [ADR-0045](../adr/0045-bounded-lan-discovery-decoding.md): explicit private/link-local subnet, five-second total window, 64 candidates/256 datagrams, cancellation and socket closure. V2/V3 hints are unauthenticated; V1 XML is unsupported |
+| Confirm a selected-device scan | `Session::prepare_meiju_lan_scan` / `scan_meiju_lan_candidate` | [ADR-0054](../adr/0054-trusted-meiju-lan-candidate-scan.md): protected local preflight, immutable 60-second device/network preview, consuming trusted consent and one collector invocation under the account lease. Rechecks metadata/membership and returns only the selected candidate or a non-unique outcome; no cloud, credential lookup, TCP or linking |
 | Match the saved device | `MeijuAccount::reconcile_lan_candidate(selected, network, report, operation)` | [ADR-0050](../adr/0050-protected-lan-candidate-reconciliation.md): exact protected binding and listed membership; `NotObserved`, `Incomplete`, `Ambiguous` or a borrowed `UniqueCandidate`. No keys, networking, identity merge or route publication |
 | Resolve V3 credentials | `MeijuAccount::lan_v3_handshake(transport, selected, method, operation)` | [ADR-0047](../adr/0047-account-bound-lan-credentials.md): fresh complete cloud home listing, one consistent target and one v2 token lookup. Explicit big/little-endian UDP-ID method; no default key, v1 fallback, alternate method, persistence or peer connection |
 | Process V3 frames | `V3Handshake`, `V3Session`, `v3_frame_len` | [ADR-0046](../adr/0046-bounded-v3-lan-codec.md): protected buffers, bounded frames, direction/digest checks and nonwrapping request counters. No identity, freshness or acknowledgement inference |
@@ -299,9 +300,12 @@ Do not call the sequence above automatically after a unique discovery result.
 Public IDs/checksums and saved membership do not authorize credential transmission.
 Before enabling a product route, complete these separate gates:
 
-1. Implement trusted host selection of an assigned network and foreground network
-   consent, with mobile permission/lifecycle acceptance. Do not ask ordinary JSON
-   callers to supply private addresses, keys or a confirmation boolean.
+1. Integrate trusted host selection of an assigned network and foreground network
+   consent, with mobile permission/lifecycle acceptance. The typed Rust preview
+   and consuming scan are implemented under ADR-0054; platform interface selection,
+   permissions, consent UI and the mobile bridge are still pending. Private address
+   syntax is not proof of interface ownership. Do not ask ordinary JSON callers to
+   supply private addresses, keys or a confirmation boolean.
 2. Establish endpoint/account identity evidence and exact model/profile selection.
    The [six cloud model mappings](../compatibility.md#observed-cloud-read-models)
    are not evidence of LAN compatibility. Do not infer a protocol from a brand,

@@ -1128,3 +1128,32 @@ API 1.14.1 and storage formats remain unchanged. Exact-model admission, network
 consent, linked-route integration and physical/off-LAN acceptance remain pending.
 No real account, appliance, separate Flutter worktree, new emulator or phone was
 accessed. Remote CI is inspected independently after the phase push.
+
+## Trusted foreground Meiju LAN candidate scan
+
+[ADR-0054](adr/0054-trusted-meiju-lan-candidate-scan.md) composes protected local
+preflight, an immutable 60-second Session-owned device/network preview and one
+consuming confirmed collection. The account lease spans discovery and protected
+reconciliation. Only the selected native candidate or a non-unique outcome can
+return, after identity, membership, descriptor and lifecycle revalidation. The
+production collector keeps its bounded two-probe behavior; no cloud, token lookup,
+TCP/state query, route publication, write or automatic retry is introduced.
+
+Eight integration groups exercise the actual Session, adapter, vault and SQLite
+using fictional accounts and scripted discovery, including AC/E1/CA, invalid and
+conflicting reports, changed identity/metadata, retained leases, foreign/expired
+previews, cancellation/background/close/deadline/drop and unchanged secrets/cards.
+Three new compile-fail checks enforce nonserializable results and non-cloneable
+previews. Ordinary JSON has no scan method; existing UDP loopback tests remain
+the collector evidence. Mobile interface selection, permission/consent, the
+bridge, endpoint/model admission, linked routes and physical acceptance remain
+pending. Private address validation is not interface ownership evidence.
+
+On October 16, 2026, formatting, workspace Clippy, workspace/example builds and
+documentation/contracts/repository/commit validators passed. Rust: 421 passed,
+two explicitly ignored; runtime: 35; native: 31 methods/51 fictional examples
+plus trusted approval checks; Python tooling: 33; presentation: six. All three
+Android AAR variants passed eleven-export and 16 KiB alignment checks. Native
+JSON API 1.14.1, C/JNI exports and storage formats remain unchanged. No owner
+account, appliance, separate Flutter worktree, emulator or phone was accessed.
+Remote CI is checked independently after the phase commit and push.

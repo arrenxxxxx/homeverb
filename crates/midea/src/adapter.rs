@@ -22,6 +22,9 @@ use uuid::Uuid;
 
 const PROVIDER: &str = "midea.meiju";
 
+mod lan;
+pub use lan::LanScanOutcome;
+
 // Exact model strings from the read-only cloud probe; not physical support certification.
 const READ_MODELS: &[(&str, ApplianceFamily)] = &[
     ("KFR-35G/N8HE1\u{2161}Pro", ApplianceFamily::AirConditioner),
@@ -220,6 +223,7 @@ pub struct MeijuAdapter {
     vault: Arc<AccountVault>,
     transport: Arc<dyn CloudTransport>,
     clock: Arc<dyn Clock>,
+    lan_discovery: Arc<dyn crate::lan::LanDiscovery>,
     ac_power: bool,
     ac_fan: bool,
     ac_mode: bool,
@@ -237,6 +241,7 @@ impl MeijuAdapter {
             vault,
             transport,
             clock,
+            lan_discovery: Arc::new(crate::lan::UdpLanDiscovery),
             ac_power: false,
             ac_fan: false,
             ac_mode: false,

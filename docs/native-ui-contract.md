@@ -10,6 +10,15 @@ method; Meiju does not opt in. Do not wire a confirmation button to discovery,
 invent a `confirmed` request field or add a duplicate LAN card. Native route
 admission and a separately versioned mobile bridge remain prerequisites.
 
+[ADR-0054](adr/0054-trusted-meiju-lan-candidate-scan.md) adds typed Rust Session
+`prepare_meiju_lan_scan` / `scan_meiju_lan_candidate`. Display the immutable saved
+device and selected native network, then consume the 60-second preview only after
+actual user consent. Preparation performs local protected preflight; confirmation
+collects bounded hints for that device. There is no JSON/C/JNI scan method in
+1.14.1. Flutter permission/interface selection and a versioned bridge remain
+pending. A unique candidate neither adds a LAN card/route nor authorizes credentials,
+state queries or controls. Scan consent and connection-link consent are separate.
+
 Branch from a commit containing both the Mock MVP and this contract. Put the Flutter application in `apps/mobile/`; do not copy Rust code into the app. The UI worktree owns Flutter views, routing, accessibility, local UI preferences, Dart FFI wrappers, and mobile build configuration. Core work owns native methods, schemas, capability semantics, storage, adapters, and their fixtures. Agree on schema changes before depending on them. Each verified phase is a separate English Conventional Commit; a local commit does not imply a push.
 
 Read the [UI integration guide](development/03-ui-integration.md) for existing behavior and the [functional handoff](ui-functional-spec.md) for screens. Use [api.json](../packages/native-contract/api.json) as the callable-method catalog and [examples.json](../packages/native-contract/examples.json) as fictional request/response examples. The examples were obtained from the built native library. They contain temporary fictional IDs and observations, not defaults for a production device.

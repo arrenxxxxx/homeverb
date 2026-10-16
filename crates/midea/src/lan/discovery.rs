@@ -44,8 +44,13 @@ impl DiscoveryNetwork {
         Ipv4Addr::from(u32::from(self.address) | !self.mask)
     }
 
-    pub(crate) fn local_address(&self) -> Ipv4Addr {
+    /// Selected native address for trusted preview display; not ownership or consent evidence.
+    pub fn local_address(&self) -> Ipv4Addr {
         self.address
+    }
+
+    pub fn prefix_length(&self) -> u8 {
+        self.mask.count_ones() as u8
     }
 
     #[cfg(test)]
@@ -75,6 +80,29 @@ pub struct DiscoveryReport {
     pub candidates: Vec<DiscoveryCandidate>,
     pub received_datagrams: usize,
     pub limit_reached: bool,
+}
+
+/// Trusted compiled transport boundary. Reports remain untrusted native hints.
+#[async_trait::async_trait]
+pub trait LanDiscovery: Send + Sync {
+    async fn discover(
+        &self,
+        network: &DiscoveryNetwork,
+        operation: &Operation,
+    ) -> Result<DiscoveryReport>;
+}
+
+pub struct UdpLanDiscovery;
+
+#[async_trait::async_trait]
+impl LanDiscovery for UdpLanDiscovery {
+    async fn discover(
+        &self,
+        network: &DiscoveryNetwork,
+        operation: &Operation,
+    ) -> Result<DiscoveryReport> {
+        discover(network, operation).await
+    }
 }
 
 impl DiscoveryReport {
