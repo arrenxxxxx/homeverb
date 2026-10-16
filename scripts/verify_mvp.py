@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import ctypes
+import sys
 import copy
 import fcntl
 from contextlib import closing
@@ -28,7 +29,7 @@ from native_contract import validator
 
 ROOT = Path(__file__).resolve().parents[1]
 BINARY = ROOT / 'target/debug/homeverb'
-LIBRARY = ROOT / 'target/debug/libhomeverb_ffi.so'
+LIBRARY = ROOT / ('target/debug/libhomeverb_ffi.dylib' if sys.platform == 'darwin' else 'target/debug/libhomeverb_ffi.so')
 
 
 class RuntimeAcceptance(unittest.TestCase):
@@ -89,6 +90,7 @@ class RuntimeAcceptance(unittest.TestCase):
         validator('native-response', definition).validate(response)
         return response
 
+    @unittest.skipUnless(sys.platform == 'linux', 'CLI grant-file admission is Linux-only.')
     def test_meiju_grants_require_secure_explicit_files_and_request_ids_before_startup(self):
         path = Path(self.directory.name) / 'grants.json'
         value = json.loads((ROOT / 'examples/cli-meiju-grants.json').read_text())
@@ -146,6 +148,7 @@ class RuntimeAcceptance(unittest.TestCase):
                                    (device_id, json.dumps({'device':device, 'capabilities':[power, fan]})))
         return path, grants, target, other, database
 
+    @unittest.skipUnless(sys.platform == 'linux', 'CLI grant-file admission is Linux-only.')
     def test_meiju_grants_bound_real_cli_plans_execution_refusals_and_receipt_replay(self):
         path, grants, target, other, database = self.seed_meiju_controls()
         options = ['--meiju-grants', str(path)]
@@ -280,7 +283,8 @@ class RuntimeAcceptance(unittest.TestCase):
                                     env={**os.environ, 'DBUS_SESSION_BUS_ADDRESS':
                                          f'unix:path={self.directory.name}/absent-bus'})
             self.assertEqual(result.returncode, 3, result.stdout)
-            self.assertEqual(json.loads(result.stdout)['error']['code'], 'SECRET_STORE_UNAVAILABLE')
+            self.assertEqual(json.loads(result.stdout)['error']['code'],
+                             'SECRET_STORE_UNAVAILABLE' if sys.platform == 'linux' else 'INPUT_UNAVAILABLE')
             self.assertEqual(termios.tcgetattr(slave), before)
             os.set_blocking(master, False)
             with self.assertRaises(BlockingIOError):
@@ -1094,6 +1098,7 @@ class RuntimeAcceptance(unittest.TestCase):
         process.stdout.close()
         process.stderr.close()
 
+    @unittest.skipUnless(sys.platform == 'linux', 'CLI grant-file admission is Linux-only.')
     def test_meiju_mcp_scopes_live_reads_controls_and_receipts_without_credentials(self):
         path, grants, target, other, database = self.seed_meiju_controls()
         snapshot = json.loads((ROOT / 'examples/state.json').read_text())
@@ -1193,6 +1198,7 @@ class RuntimeAcceptance(unittest.TestCase):
                 self.assertEqual(process.stderr.read(), '')
         self.assertFalse((database.parent / 'mock-appliance.sqlite3').exists())
 
+    @unittest.skipUnless(sys.platform == 'linux', 'CLI grant-file admission is Linux-only.')
     def test_mode_only_cli_and_mcp_grants_plan_activation_and_refuse_unconfirmed_send(self):
         path, _, target, other, database = self.seed_meiju_controls()
         capability = json.loads((ROOT / 'examples/capability.meiju-mode.json').read_text())
@@ -1239,6 +1245,7 @@ class RuntimeAcceptance(unittest.TestCase):
         self.assertEqual(process.returncode,0)
         self.assertEqual(process.stderr.read(),'')
 
+    @unittest.skipUnless(sys.platform == 'linux', 'CLI grant-file admission is Linux-only.')
     def test_temperature_only_cli_and_mcp_grants_keep_exact_setpoints_and_pre_send_guards(self):
         path, _, target, other, database = self.seed_meiju_controls()
         capability = json.loads((ROOT / 'examples/capability.meiju-temperature.json').read_text())
@@ -1283,6 +1290,7 @@ class RuntimeAcceptance(unittest.TestCase):
         self.assertEqual(process.returncode,0)
         self.assertEqual(process.stderr.read(),'')
 
+    @unittest.skipUnless(sys.platform == 'linux', 'CLI grant-file admission is Linux-only.')
     def test_four_ac_temperature_grants_fit_cli_and_mcp_without_widening_authority(self):
         path, _, target, other, database = self.seed_meiju_controls()
         device_ids = [target, other, '30000000-0000-4000-8000-000000000003',
@@ -1460,6 +1468,7 @@ class RuntimeAcceptance(unittest.TestCase):
         library.homeverb_close(handle)
         self.assertEqual(call('list-4', {'method': 'list_devices'})['error']['code'], 'HOST_CLOSED')
 
+    @unittest.skipUnless(hasattr(fcntl, 'F_SETPIPE_SZ'), 'Requires Linux pipe-capacity control.')
     def test_mcp_closed_or_stalled_output_exits_without_waiting_for_host_input(self):
         for stalled in [False, True]:
             with self.subTest(stalled=stalled):
@@ -1496,5 +1505,5 @@ class RuntimeAcceptance(unittest.TestCase):
 
 if __name__ == '__main__':
     if not BINARY.is_file() or not LIBRARY.is_file():
-        raise SystemExit('Run cargo build --workspace before runtime acceptance (Linux native library required).')
+        raise SystemExit('Run cargo build --workspace before runtime acceptance (host native library required).')
     unittest.main(verbosity=2)

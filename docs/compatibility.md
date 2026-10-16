@@ -1733,3 +1733,19 @@ rebuilt, passed alignment, installed and cold-started. The English catalog is
 bundled locally and checked against its shared source, correcting an Android
 asset-path failure found during integration. Strict prototype equality still
 fails at 0/82. See the [verification report](../apps/mobile/verification.md).
+
+
+## Integrated Flutter host (October 16, 2026)
+
+The former UI branch is merged into main against native API 1.22.0. The app's
+existing account, local organization, cleanup, Mock control and trusted-confirmation
+flows call Core directly. Explicit saved-conflict, control-option and session-grant
+inspection and historical inventory time are now available in the UI without
+networking, new grants, route admission or identity merges. See the
+[app verification record](../apps/mobile/verification.md) for current macOS,
+Android packaging and emulator results and explicit failures/skips. Historical
+Linux/Android records above retain their original source and evidence scope.
+
+Meiju Flutter startup remains explicitly selected and read-only; real account,
+physical-phone and appliance-control acceptance are separate. Native ABI signatures,
+storage formats and reviewed model support are unchanged by the UI merge.

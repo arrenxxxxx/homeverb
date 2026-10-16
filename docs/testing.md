@@ -20,7 +20,7 @@ python3 scripts/validate_commits.py --all
 python3 -m unittest discover -s tests -v
 ```
 
-After dependencies are cached, add `--offline` to Cargo commands. Use a Python virtual environment when system package installation is restricted. `requirements-dev.txt` explicitly includes RFC 3339 validation; contract and runtime checks fail if `date-time` checking is unavailable rather than silently ignoring timestamp formats. The runtime acceptance script currently targets Linux (`libhomeverb_ffi.so`) and uses temporary fictional profiles. Its SIGINT case requires ordinary OS signal delivery. A sandboxed failure must be distinguished from an actual run outside the sandbox; never silently skip that case.
+After dependencies are cached, add `--offline` to Cargo commands. Use a Python virtual environment when system package installation is restricted. `requirements-dev.txt` explicitly includes RFC 3339 validation; contract and runtime checks fail if `date-time` checking is unavailable rather than silently ignoring timestamp formats. The runtime acceptance script loads Linux (`libhomeverb_ffi.so`) or macOS (`libhomeverb_ffi.dylib`) and uses temporary fictional profiles. Its SIGINT case requires ordinary OS signal delivery. A sandboxed failure must be distinguished from an actual run outside the sandbox; never silently skip that case.
 
 The synthetic `homeverb-host --test meiju_accounts` suite uses paused Tokio time.
 Its one-second operation budgets must model the tested deadline, not the runner's
@@ -343,3 +343,19 @@ adapter refusal with fictional local descriptors. It is included by
 `verify_native_contract.py`; neither path obtains credentials or opens appliance
 connections. Successful links are tested at the injected Session boundary.
 Android AAR inspection requires these symbols but does not prove phone behavior.
+
+
+## Merged Flutter verification on macOS
+
+Build the workspace library, then follow [the app guide](../apps/mobile/README.md)
+for `fvm flutter analyze` and `fvm flutter test --reporter expanded`. Native tests
+select the host library suffix. Pixel assertions retain the original Linux
+reference geometry; macOS rasterization differences are recorded as failures,
+not silently accepted. See [current evidence](../apps/mobile/verification.md).
+
+The CLI runtime harness explicitly skips Linux grant-file admission and pipe-size
+checks on macOS. Protected terminal input remains unavailable there. Native C ABI
+checks run on either host and never require real credentials. Fourteen LAN Rust
+fixtures require assigned loopback aliases `127.0.0.2` and `127.0.1.1` on macOS;
+without administrator setup they are blocked, not passing tests. Do not weaken
+production subnet/endpoint checks to accommodate an unconfigured test host.

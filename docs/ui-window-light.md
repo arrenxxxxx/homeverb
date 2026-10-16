@@ -69,7 +69,7 @@ comparison remains a separate gate in the [verification report](../apps/mobile/v
 
 The table records the original rendering strategy. The Flutter app now has
 Linux and Android emulator evidence; its current surface-mask experiment and
-physical-phone performance remain unaccepted. See the [checkpoint](../apps/mobile/RESUME.md).
+physical-phone performance remain unaccepted. See the [checkpoint](../apps/mobile/README.md).
 
 | Visual effect | Flutter implementation | Acceptance concern |
 |---|---|---|

@@ -22,6 +22,6 @@ docs/development/          # Progressive contributor guides
 docs/adr/                  # Architecture decisions
 ```
 
-Rust package names use the `homeverb-` prefix. The executable is `homeverb`. `Cargo.lock` records resolved dependency versions and belongs in implementation commits; the supported minimum compiler is Rust 1.96. The local stable toolchain was verified at 1.96.0. The Flutter implementation and Android host are in `apps/mobile`; the generated iOS scaffold is not completed native integration. See the [app guide](../apps/mobile/README.md) and [checkpoint](../apps/mobile/RESUME.md) before building or resuming.
+Rust package names use the `homeverb-` prefix. The executable is `homeverb`. `Cargo.lock` records resolved dependency versions and belongs in implementation commits; the supported minimum compiler is Rust 1.96. The local stable toolchain was verified at 1.96.0. The Flutter implementation and Android host are in `apps/mobile`; the generated iOS scaffold is not completed native integration. See the [app guide](../apps/mobile/README.md) before building or resuming.
 
 Runtime data belongs outside the repository. Preserve unrelated local changes and never stage IDE files or device data. Prefer small commits with English [Conventional Commit](commit-conventions.md) subjects. Publishing requires explicit owner authorization and remote read-back; see [publishing](publishing.md).

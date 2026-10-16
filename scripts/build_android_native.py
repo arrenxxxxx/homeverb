@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Build and inspect an arm64 and/or x86_64 Android Core AAR from a Linux host."""
+"""Build and inspect an arm64 and/or x86_64 Android Core AAR on Linux or macOS."""
 
 import argparse
 import os
+import platform
 from pathlib import Path
 import subprocess
 import tempfile
@@ -20,6 +21,14 @@ SYMBOLS = ['homeverb_open', 'homeverb_call', 'homeverb_connect_account',
            'homeverb_discard_lan_scan', 'homeverb_prepare_connection_link',
            'homeverb_confirm_connection_link', 'homeverb_discard_connection_link',
            'Java_org_homeverb_NativeCredentials_nativeInstall']
+
+
+def ndk_tools(ndk):
+    # The macOS NDK retains this directory name on Apple Silicon as well.
+    host = {'Linux': 'linux-x86_64', 'Darwin': 'darwin-x86_64'}.get(platform.system())
+    if host is None:
+        raise ValueError('Android packaging requires a Linux or macOS host.')
+    return ndk / 'toolchains/llvm/prebuilt' / host / 'bin'
 
 
 def inspect_library(readelf, library, abi):
@@ -90,7 +99,7 @@ def main():
     abis = args.abi or ['arm64-v8a']
     if len(set(abis)) != len(abis):
         parser.error('Select each ABI only once.')
-    tools = args.ndk / 'toolchains/llvm/prebuilt/linux-x86_64/bin'
+    tools = ndk_tools(args.ndk)
     dependencies = [tools / f'{ABIS[abi][0]}28-clang' for abi in abis]
     dependencies += [tools / 'llvm-readelf', tools / 'llvm-ar', args.android_jar,
                      args.java_home / 'bin/javac', args.java_home / 'bin/jar']

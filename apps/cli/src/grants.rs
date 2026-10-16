@@ -3,16 +3,21 @@
 use homeverb_domain::{Error, Result};
 use homeverb_host::{
     MeijuControlGrants, MeijuFanGrant, MeijuModeGrant, MeijuPowerGrant, MeijuTemperatureGrant,
+};
+#[cfg(target_os = "linux")]
+use homeverb_host::{
     meiju_fan_policy, meiju_mode_policy, meiju_power_policy, meiju_temperature_policy,
 };
 use serde::Deserialize;
 use std::path::Path;
 
+#[cfg(target_os = "linux")]
 const MAX_BYTES: u64 = 32 * 1024;
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Grants {
+    #[cfg_attr(not(target_os = "linux"), allow(dead_code))]
     schema_version: String,
     #[serde(default)]
     pub meiju_power_grants: Vec<MeijuPowerGrant>,

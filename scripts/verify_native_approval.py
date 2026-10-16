@@ -2,6 +2,7 @@
 """Verify trusted approval exports with fictional appliances and temporary profiles."""
 
 import ctypes
+import sys
 import json
 import sqlite3
 import tempfile
@@ -13,7 +14,7 @@ from native_contract import ROOT, load, validator
 
 
 def verify_approvals():
-    library = ctypes.CDLL(str(ROOT / 'target/debug/libhomeverb_ffi.so'))
+    library = ctypes.CDLL(str(ROOT / ('target/debug/libhomeverb_ffi.dylib' if sys.platform == 'darwin' else 'target/debug/libhomeverb_ffi.so')))
     for name in ['homeverb_call', 'homeverb_prepare_approval', 'homeverb_execute_approved']:
         function = getattr(library, name)
         function.argtypes = [ctypes.c_uint64, ctypes.c_char_p]

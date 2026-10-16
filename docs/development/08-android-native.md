@@ -1,12 +1,12 @@
 # 8. Embed the Android Core and native credential store
 
 This stage supplies native storage and arm64/x86_64 Android library build paths for the
-separate Flutter worktree. It does not change Flutter pages or enable physical
+integrated Flutter app. It does not change Flutter pages or enable physical
 controls. Read the [native contract](../native-ui-contract.md),
 [account recovery rules](../storage.md#native-credential-storage) and
 [ADR-0032](../adr/0032-android-native-credential-storage.md) first.
 
-## Build and verify on Linux
+## Build and verify on Linux or macOS
 
 Requirements: the project Rust toolchain and the selected Android targets, a JDK
 with `--release` support, official Android API 28+ stubs, and Android NDK r28c.

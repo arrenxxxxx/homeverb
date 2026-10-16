@@ -4,7 +4,7 @@ An isolated widget reference for the approved material system: bundled ambient/w
 
 ## Historical reference only
 
-This early sample is superseded for development by the [FVM-managed application](../../../../apps/mobile/README.md). Use its [checkpoint](../../../../apps/mobile/RESUME.md) to continue work; do not treat this separate sample as the current app. It remains as design provenance and a generator asset target.
+This early sample is superseded for development by the [FVM-managed application](../../../../apps/mobile/README.md). Use its [checkpoint](../../../../apps/mobile/README.md) to continue work; do not treat this separate sample as the current app. It remains as design provenance and a generator asset target.
 
 Flutter SDK was unavailable in the original authoring environment. This source has **not** been compiled, analyzed, run on a phone, or performance-tested. The supplied images were locally rendered by Python, not captured from Flutter. Official painting/theme documentation supports the implementation approach; actual widget and native integration acceptance remains required.
 

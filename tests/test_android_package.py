@@ -8,11 +8,20 @@ from unittest.mock import patch
 import zipfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-from build_android_native import ABIS, SYMBOLS, inspect_library, package_aar
+from build_android_native import ABIS, SYMBOLS, inspect_library, package_aar, ndk_tools
 from build_android_acceptance import validate_acceptance_permissions
 
 
 class AndroidPackageTests(unittest.TestCase):
+    def test_ndk_host_selection_and_unsupported_host_refusal(self):
+        for host, directory in [('Linux', 'linux-x86_64'), ('Darwin', 'darwin-x86_64')]:
+            with patch('build_android_native.platform.system', return_value=host):
+                self.assertEqual(ndk_tools(Path('/ndk')),
+                                 Path('/ndk/toolchains/llvm/prebuilt') / directory / 'bin')
+        with patch('build_android_native.platform.system', return_value='Windows'):
+            with self.assertRaises(ValueError):
+                ndk_tools(Path('/ndk'))
+
     def test_acceptance_permissions_remain_metadata_only(self):
         allowed = "uses-permission: name='android.permission.ACCESS_NETWORK_STATE'\n"
         validate_acceptance_permissions("package: fictional\n" + allowed)

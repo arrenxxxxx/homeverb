@@ -75,7 +75,9 @@ void main({bool deviceRun = false}) {
           dataDir: directory.path,
           libraryPath: deviceRun
               ? null
-              : File('../../target/debug/libhomeverb_ffi.so').absolute.path,
+              : File(
+                  '../../target/debug/${NativeClient.defaultLibrary()}',
+                ).absolute.path,
           allowMockWrites: true,
         );
         controller = HomeController(

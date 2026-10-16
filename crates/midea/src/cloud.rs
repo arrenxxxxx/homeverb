@@ -345,6 +345,9 @@ mod tests {
                     seen.lock().unwrap().push(bytes);
                     if !response.is_empty() {
                         let _ = stream.write_all(&response).await;
+                        // Flush the final TLS record before dropping the fixture socket.
+                        // Otherwise a short write can look like a truncated response.
+                        let _ = stream.flush().await;
                     }
                     if stall {
                         let mut byte = [0];

@@ -238,6 +238,17 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       await finish(c.loadAccounts(), 'P01');
       return;
     }
+    if (label.startsWith('conflicts:')) {
+      await c.inspectDeviceConflicts(label.substring('conflicts:'.length));
+      return;
+    }
+    if (label.startsWith('grants:') || label.startsWith('options:')) {
+      await c.inspectRoute(
+        label.substring(label.indexOf(':') + 1),
+        options: label.startsWith('options:'),
+      );
+      return;
+    }
     if (label == 'Inspect Saved Inventory') {
       await c.inspectAccountInventory();
       return;
@@ -832,6 +843,54 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           [
             'note',
             'Supported: ${c.capabilities.map((v) => v['id']).join(' · ')}',
+          ],
+          for (final connection in device?['connections'] as List? ?? [])
+            [
+              'card',
+              '${connection['transport']} connection',
+              [
+                if (c.supports('inspect_session_grants'))
+                  [
+                    'Allowed controls for this session',
+                    'Inspect local permission',
+                    'grants:${connection['id']}',
+                  ],
+                if (!c.isMock && c.supports('inspect_control_options'))
+                  [
+                    'Review control options',
+                    'Does not enable controls',
+                    'options:${connection['id']}',
+                  ],
+              ],
+            ],
+          if (c.routeInspection != null) ...[
+            [
+              'note',
+              c.routeInspection!['source'] == 'session_policy'
+                  ? 'Current local session permissions. Provider authorization and device availability are not checked. Core checks every command.'
+                  : 'Reviewed saved model options. Permission is not checked and no controls are enabled.',
+            ],
+            ['note', 'Connection: ${c.routeInspection!['connection_id']}'],
+            if (((c.routeInspection!['grants'] ?? c.routeInspection!['options'])
+                    as List)
+                .isEmpty)
+              ['note', 'No controls are listed for this connection.'],
+            for (final rule
+                in (c.routeInspection!['grants'] ??
+                        c.routeInspection!['options'])
+                    as List)
+              [
+                'card',
+                '${rule['capability']}.${rule['action']}',
+                [
+                  ['Component', rule['component_id'], null],
+                  [
+                    'Exact constraints',
+                    jsonEncode(rule['argument_schema'] ?? rule['definition']),
+                    null,
+                  ],
+                ],
+              ],
           ],
           ['button', 'Recent Operations', 'secondary'],
         ];

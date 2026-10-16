@@ -3,6 +3,7 @@
 
 import copy
 import ctypes
+import sys
 import json
 import sqlite3
 import tempfile
@@ -12,7 +13,7 @@ from native_contract import ROOT, load, validator
 
 
 def verify_connection_link():
-    library = ctypes.CDLL(str(ROOT / 'target/debug/libhomeverb_ffi.so'))
+    library = ctypes.CDLL(str(ROOT / ('target/debug/libhomeverb_ffi.dylib' if sys.platform == 'darwin' else 'target/debug/libhomeverb_ffi.so')))
     library.homeverb_open.argtypes = [ctypes.c_char_p]
     library.homeverb_open.restype = ctypes.c_void_p
     for name in ['homeverb_call', 'homeverb_prepare_connection_link', 'homeverb_confirm_connection_link']:

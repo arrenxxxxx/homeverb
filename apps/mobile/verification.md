@@ -12,9 +12,53 @@ subsequent integration/build checks must use the merged Core. Earlier entries
 are historical evidence from the separate UI branch.
 
 
+### Phase 2: current Core integration on macOS
+
+Flutter negotiates API 1.22 and exposes explicit saved-conflict, control-option
+and session-grant queries using exact local account/device/connection IDs. Account
+details show nullable historical complete-inventory time. Cancellation, navigation
+and foreground changes clear inspection output and discard late replies. The
+new fixture/native tests cover unpublished bindings, query failure versus empty
+success, scope refusal, lifecycle races and retained read-only authority.
+
+The native package builder now selects the installed Linux/macOS NDK toolchain;
+Flutter and Python FFI tests load the host-specific library suffix. CLI Linux
+policy is unchanged; macOS-only lint warnings are scoped without enabling grants.
+The local TLS fixture now flushes its final record before closing. Obsolete paused
+handoff instructions were removed; the app README and task status are the entry
+points. API signatures, SQLite schema 5 and protected payload 3 are unchanged.
+
+Executed checks on this Mac:
+
+- Flutter 3.47.7 analysis passed. Full `fvm flutter test --reporter expanded`:
+  84 passed, four existing strict glyph-pixel assertions failed by one pixel on
+  macOS (`button_labels_test`, two `control_labels_test` cases and
+  `field_alignment_test`). Skin/reference files and tolerances were not changed.
+  This is functional/native integration evidence, not pixel-equality acceptance.
+- `cargo build --workspace --locked` passed with Rust 1.99.1. The full Rust suite
+  initially failed 14 LAN loopback fixtures because macOS does not assign
+  `127.0.0.2` and `127.0.1.1` by default. Temporary alias setup was blocked by
+  the administrator-password requirement; no interface was changed. With only
+  those 14 cases explicitly filtered, 466 tests passed and one environment probe
+  remained ignored. A separate TLS fixture truncation exposed during this run
+  was repaired by flushing, then passed in the final portable suite.
+- `scripts/verify_native_contract.py` passed all 34 methods, 55 fictional examples
+  and trusted approval/scan/link checks on the actual macOS library.
+- Python tooling: 63 tests passed. Shared presentation: seven tests passed.
+- The arm64-v8a/x86_64 AAR build passed all 17 native exports per ABI and 16 KiB
+  ELF alignment checks using NDK 28.2.13676358, API 35 stubs and JDK 21.
+
+`cargo +1.96.0 clippy --workspace --all-targets --locked --target-dir target/lint-rust-1.96 -- -D warnings` passed. Rust 1.99 reports newly introduced chunk-iteration
+lints in unchanged protocol code. The portable CLI/MCP suite passed 28 tests with
+seven explicit Linux-only skips; its initial unadapted run failed those platform
+assumptions and the macOS terminal-input expectation. APK build
+and emulator results belong to the following delivery phase. No provider account,
+physical appliance, physical phone, diagnostic upload or remote push was used.
+
+
 Date: October 16, 2026. Baseline: native UI contract 1.14.1 (pinned Core `7db8e9b`) and the approved Window Light atlas. This is an implementation checkpoint, not completion of the owner's pixel-identical acceptance requirement.
 
-## Current checkpoint
+## Historical UI branch checkpoint
 
 Source checkpoint: `2d4209c` on `codex/flutter-ui`, October 16, 2026. Native API
 1.14.1 and SQLite schema 4 remain pinned; this is not main's newer Core baseline.
@@ -29,7 +73,7 @@ Pixel work remains paused. Real Flutter accounts/Keystore, physical phones, iOS
 app integration, complete localization/accessibility and performance remain
 unaccepted; sharing, identity merge and full-profile deletion remain unavailable.
 
-Use [RESUME.md](RESUME.md) for portable recovery and remaining work, and the final
+Use [README.md](README.md) for portable recovery and remaining work, and the final
 [source-only checkpoint entry](#source-only-paused-checkpoint--october-16-2026)
 for its exact commands. Earlier counts, API versions and APK hashes below are
 historical phase evidence, not the latest build state. Logs, captures, reports
@@ -1284,7 +1328,7 @@ At the owner's request, the existing unfinished surface experiment is committed
 on `codex/flutter-ui` so another computer can recover it directly from Git.
 This checkpoint adds the current `skin.dart`, its generator and 24 decorative
 corner/border masks (11,946 bytes total), plus portable instructions in
-[RESUME.md](RESUME.md). No further pixel correction was implemented. APKs, AARs,
+[README.md](README.md). No further pixel correction was implemented. APKs, AARs,
 build caches, screenshots, reports, logs, IDE settings and the historical local
 archive are excluded; historical evidence paths remain workstation-local.
 
@@ -1304,7 +1348,7 @@ Checks repeated for this exact source checkpoint:
 
 Local logs: `/tmp/homeverb-portable-{native-build,analyze,tests}.log`.
 The earlier comparison remains 0/82 exact, mean channel error 0.5268/255, with
-the known S11 regression and endpoint-rounding issue described in RESUME.md.
+the known S11 regression and endpoint-rounding issue described in README.md.
 The image comparison was not rerun for this source-only checkpoint. Android/iOS
 builds, GPU rendering, native pointer checks, physical devices and remote CI were
 not repeated. Passing the Flutter suite does not complete visual or mobile

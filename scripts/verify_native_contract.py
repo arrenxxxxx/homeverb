@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import copy
 import ctypes
+import sys
 import json
 import sqlite3
 from pathlib import Path
@@ -34,7 +35,7 @@ def main():
     responses['get_api_info'].validate(info_example)
     info_example['data']['api_version'] = '2.0.0'
     assert not responses['get_api_info'].is_valid(info_example)
-    library = ctypes.CDLL(str(ROOT / 'target/debug/libhomeverb_ffi.so'))
+    library = ctypes.CDLL(str(ROOT / ('target/debug/libhomeverb_ffi.dylib' if sys.platform == 'darwin' else 'target/debug/libhomeverb_ffi.so')))
     library.homeverb_open.argtypes = [ctypes.c_char_p]
     library.homeverb_open.restype = ctypes.c_void_p
     library.homeverb_call.argtypes = [ctypes.c_uint64, ctypes.c_char_p]
@@ -903,7 +904,7 @@ def main():
     from verify_native_connection_link import verify_connection_link
     verify_connection_link()
     print(f"PASS: {len(api['methods'])} native methods; {len(examples)} live examples; closed-field, error, outcome, and lifecycle checks.")
-    print('Mock, empty Meiju startup, independent AC and trusted dishwasher grant admission and protected account-buffer guards verified on Linux; no live accounts, Flutter/mobile or physical-device verification in this suite.')
+    print('Mock, empty Meiju startup, independent AC and trusted dishwasher grant admission and protected account-buffer guards verified on this host; no live accounts, Flutter/mobile or physical-device verification in this suite.')
 
 
 if __name__ == '__main__':

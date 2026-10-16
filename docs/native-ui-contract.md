@@ -201,7 +201,7 @@ The automated suite separately checks empty-account startup/discovery, invalid
 mode/grant/scenario combinations, lifecycle gating and closed handles without
 vendor calls. The [Android native package](development/08-android-native.md) supplies
 Keystore integration, a library build path and isolated AOSP Android 15 acceptance.
-Flutter APK/physical-phone journeys remain pending. The isolated iOS 26.2 native
+Merged Flutter build/runtime evidence is recorded in [app verification](../apps/mobile/verification.md); physical-phone journeys remain pending. The isolated iOS 26.2 native
 app passed Mock/Core and fictional Keychain restart checks; physical iOS policy
 and Flutter integration still require acceptance.
 

@@ -49,7 +49,7 @@ Use short transactions, account-refresh locks, and per-device write coordination
 
 ## Implementation technology
 
-Rust is implemented for Domain/Core/Adapter/CLI. The C ABI embeds the same Core in a native host; Linux loading, cancellation, and foreground gating are tested. Flutter is the owner-selected mobile framework. Android Keystore and iOS Keychain backends are implemented with separate evidence scopes. Isolated Android/iOS native apps have runtime evidence; distribution signing, permissions, physical secure-store policy and phone lifecycle tests are still required. See the [UI integration guide](development/03-ui-integration.md).
+Rust is implemented for Domain/Core/Adapter/CLI. The C ABI embeds the same Core in a native host; Linux loading, cancellation, and foreground gating are tested. Flutter is the owner-selected mobile framework; `apps/mobile` calls the current Core C ABI in process. Android Keystore and iOS Keychain backends are implemented with separate evidence scopes. Isolated Android/iOS native apps have runtime evidence; distribution signing, permissions, physical secure-store policy and phone lifecycle tests are still required. See the [UI integration guide](development/03-ui-integration.md).
 
 The implementation uses reviewed compile-time registration and a fictional adapter. It does not depend on a Python device service. The stack and composite-receipt decision are recorded in [ADR-0007](adr/0007-mock-mvp.md).
 

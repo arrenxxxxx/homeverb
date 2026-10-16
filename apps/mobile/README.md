@@ -1,6 +1,17 @@
 # HomeVerb Flutter application
 
-The native application embeds Core using native UI contract 1.14.1. The separate visual preview contains fictional Window Light fixtures and never opens Core. The default build opens an isolated Mock profile. Explicit Meiju builds provide protected account connection, local metadata, retrieval/recovery and scoped local removal; Android startup wiring and Mock process journeys are emulator-tested; actual Keystore and physical acceptance remain pending. Cache and history clearing are connected with separate confirmations. Nearby sharing and full-profile deletion remain unavailable. Their preview states are not live features.
+The native application embeds Core using native UI contract 1.22.0. The separate visual preview contains fictional Window Light fixtures and never opens Core. The default build opens an isolated Mock profile. Explicit Meiju builds provide protected account connection, local metadata, retrieval/recovery and scoped local removal; Android startup wiring and Mock process journeys are emulator-tested; actual Keystore and physical acceptance remain pending. Cache and history clearing are connected with separate confirmations. Nearby sharing and full-profile deletion remain unavailable. Their preview states are not live features.
+
+## Current Core inspection
+
+Device Information provides explicit connection-scoped control-option and session
+permission inspection. Options never enable controls, and current local grants do
+not establish provider authorization. Account details show nullable historical
+complete-inventory time. Inspect Saved Inventory exposes per-binding duplicate
+record inspection, including unpublished bindings; it neither merges devices nor
+transfers authority. Query errors remain errors, and navigation/cancellation or
+backgrounding clears results and fences late responses. These operations do not
+refresh cloud accounts or open appliance connections.
 
 ## Account integration
 
@@ -45,13 +56,13 @@ Real account/secure-store and physical-device acceptance of these Flutter flows
 remains pending; the account tests use isolated fixtures and empty native profiles.
 Nearby sharing, provider revocation and full-profile deletion are unavailable.
 
-Paused work and restart instructions, including source-only recovery on another
-computer: [RESUME.md](RESUME.md). The branch includes an unfinished surface
-experiment; pixel equality and its Android rendering acceptance remain pending.
+The UI is merged into `main`. See [verification.md](verification.md) for current
+and historical evidence. The preserved surface experiment still has no whole-screen
+pixel-equality acceptance; prototype references are unchanged.
 
 ## Development
 
-Use FVM 4.3.1 and Flutter 3.47.7, pinned in `.fvmrc`. On a Linux host,
+Use FVM and Flutter 3.47.7, pinned in `.fvmrc`. On a Linux or macOS host,
 build the native library from the repository root before running the Flutter
 tests. Omit `--offline` on the first build so Cargo can obtain dependencies.
 

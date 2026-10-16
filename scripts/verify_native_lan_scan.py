@@ -2,6 +2,7 @@
 """Check trusted scan C metadata and refusal paths without accounts or network traffic."""
 
 import ctypes
+import sys
 import json
 import tempfile
 
@@ -9,7 +10,7 @@ from native_contract import ROOT, load, validator
 
 
 def verify_lan_scan():
-    library = ctypes.CDLL(str(ROOT / 'target/debug/libhomeverb_ffi.so'))
+    library = ctypes.CDLL(str(ROOT / ('target/debug/libhomeverb_ffi.dylib' if sys.platform == 'darwin' else 'target/debug/libhomeverb_ffi.so')))
     library.homeverb_open.argtypes = [ctypes.c_char_p]
     library.homeverb_open.restype = ctypes.c_void_p
     for name in ['homeverb_call', 'homeverb_confirm_lan_scan']:

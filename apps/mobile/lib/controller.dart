@@ -11,6 +11,7 @@ class HomeController extends ChangeNotifier {
   final LocalPreferences preferences;
   List<Json> rooms = [], cards = [], history = [];
   Json? description, snapshot, receipt, diagnostics, batchResult;
+  Json? accountConflicts, routeInspection;
   final Map<String, Json> snapshots = {};
   final Map<(String, String), Json> _componentSnapshots = {};
   final Map<(String, String), Object> _componentReadErrors = {};
@@ -22,6 +23,8 @@ class HomeController extends ChangeNotifier {
     discardApproval();
     _readEpoch++;
     accountInventory = null;
+    accountConflicts = null;
+    routeInspection = null;
     core.cancelAll();
   }
 
@@ -30,6 +33,8 @@ class HomeController extends ChangeNotifier {
       discardApproval();
       _readEpoch++;
       accountInventory = null;
+      accountConflicts = null;
+      routeInspection = null;
     }
     core.foreground(foreground);
     if (!foreground) notifyListeners();
@@ -136,6 +141,7 @@ class HomeController extends ChangeNotifier {
       1;
   Future<bool> selectDevice(String id) => perform(() async {
     selectedDevice = id;
+    routeInspection = null;
     description = null;
     snapshot = null;
     description = await core.call('describe_device', {'device': id}) as Json;
@@ -483,6 +489,8 @@ class HomeController extends ChangeNotifier {
 
   Future<void> reloadAccountViews() async {
     accountInventory = null;
+    accountConflicts = null;
+    routeInspection = null;
     accounts = (await core.call('list_accounts') as List).cast<Json>();
     await loadLocal();
     if (selectedAccount != null) {
@@ -513,6 +521,8 @@ class HomeController extends ChangeNotifier {
   Future<bool> selectAccount(String id) => perform(() async {
     selectedAccount = id;
     accountInventory = null;
+    accountConflicts = null;
+    routeInspection = null;
     accountDetails = null;
     accountReport = null;
     accountRemoval = null;
@@ -523,6 +533,8 @@ class HomeController extends ChangeNotifier {
 
   Future<bool> inspectAccountInventory() => perform(() async {
     accountInventory = null;
+    accountConflicts = null;
+    routeInspection = null;
     final id = selectedAccount;
     if (id == null ||
         account?['credential_state'] != 'stored' ||
@@ -545,6 +557,67 @@ class HomeController extends ChangeNotifier {
     }
   });
 
+  Future<bool> inspectDeviceConflicts(String deviceId) => perform(() async {
+    accountConflicts = null;
+    final id = selectedAccount;
+    final bindings = accountInventory?['devices'] as List? ?? [];
+    if (id == null ||
+        !supports('inspect_device_conflicts') ||
+        !bindings.any((binding) => binding['device_id'] == deviceId)) {
+      throw NativeFailure(
+        'INVALID_ARGUMENT',
+        'Select a saved inventory binding.',
+      );
+    }
+    final epoch = _readEpoch;
+    try {
+      final result =
+          await core.call('inspect_device_conflicts', {
+                'account_id': id,
+                'device_id': deviceId,
+              })
+              as Json;
+      if (epoch == _readEpoch && selectedAccount == id)
+        accountConflicts = result;
+    } catch (_) {
+      if (epoch != _readEpoch || selectedAccount != id) return;
+      rethrow;
+    }
+  });
+
+  Future<bool> inspectRoute(
+    String connectionId, {
+    required bool options,
+  }) => perform(() async {
+    routeInspection = null;
+    final id = selectedDevice;
+    final method = options
+        ? 'inspect_control_options'
+        : 'inspect_session_grants';
+    final connections = description?['device']?['connections'] as List? ?? [];
+    if (id == null ||
+        !supports(method) ||
+        !connections.any((connection) => connection['id'] == connectionId)) {
+      throw NativeFailure(
+        'INVALID_ARGUMENT',
+        'Select a saved device connection.',
+      );
+    }
+    final epoch = _readEpoch;
+    try {
+      final result =
+          await core.call(method, {
+                'device_id': id,
+                'connection_id': connectionId,
+              })
+              as Json;
+      if (epoch == _readEpoch && selectedDevice == id) routeInspection = result;
+    } catch (_) {
+      if (epoch != _readEpoch || selectedDevice != id) return;
+      rethrow;
+    }
+  });
+
   Future<bool> renameAccount(String label) => perform(() async {
     accountNeedsReload = true;
     await core.call('rename_account', {
@@ -556,6 +629,8 @@ class HomeController extends ChangeNotifier {
 
   Future<bool> retrieveAccount({bool recover = false}) => perform(() async {
     accountInventory = null;
+    accountConflicts = null;
+    routeInspection = null;
     accountNeedsReload = true;
     accountReport = null;
     accountReport =

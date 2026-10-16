@@ -22,8 +22,8 @@ fictional Mock tests. Meiju startup grant UI and physical acceptance remain pend
 
 API 1.15 adds independent [dishwasher pause/resume/cancel permissions](../native-ui-contract.md#profile-scoped-dishwasher-cycle-operations-api-115)
 with the same trusted confirmation flow and no new C exports. Render only
-descriptor-declared actions; all take empty arguments and require individual
-authority. Optional raw operator observations retain cloud staleness. Do not
+descriptor-declared actions; each requires individual authority. API 1.21 additionally requires an explicit
+additional-option argument for protected product 760Y0026. Optional raw operator observations retain cloud staleness. Do not
 present a submitted pause/cancel as a verified cycle or safe-door state.
 
 API 1.16 adds [read-only control-option inspection](../native-ui-contract.md#inspect-control-options-before-permission-api-116)

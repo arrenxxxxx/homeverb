@@ -138,7 +138,7 @@ void main() {
       final core = await NativeClient.open(
         dataDir: directory.path,
         libraryPath: File(
-          '../../target/debug/libhomeverb_ffi.so',
+          '../../target/debug/${NativeClient.defaultLibrary()}',
         ).absolute.path,
         allowMockWrites: true,
         scenario: 'lost-ack',

@@ -42,7 +42,7 @@ List<dynamic> savedInventoryBlocks(HomeController c) {
   return [
     [
       'note',
-      'Saved inventory only. This does not check current access, online state, model support or control permission. No retrieval timestamp is available.',
+      'Saved inventory only. This does not check current access, online state, model support or control permission. Historical inventory time is shown separately when recorded.',
     ],
     if (devices.isEmpty)
       [
@@ -76,6 +76,12 @@ List<dynamic> savedInventoryBlocks(HomeController c) {
           ],
           ['Device ID', binding['device_id'], null],
           ['Connection ID', binding['connection_id'], null],
+          if (c.supports('inspect_device_conflicts'))
+            [
+              'Inspect duplicate device records',
+              'Saved records only',
+              'conflicts:${binding['device_id']}',
+            ],
           if (binding['membership'] != 'listed')
             [
               'Next step',
@@ -278,6 +284,35 @@ List<dynamic> accountBlocks(HomeController c, String id) {
             '${c.accountRemoval!['error']?['code']}: ${c.accountRemoval!['error']?['message']}',
             'warning',
           ],
+        [
+          'note',
+          account['last_complete_inventory_at'] == null
+              ? 'No complete device-list time recorded.'
+              : 'Last complete device list: ${account['last_complete_inventory_at']}. Recorded using this device’s clock; not current authorization or appliance status.',
+        ],
+        if (c.accountConflicts != null) ...[
+          [
+            'note',
+            'Saved records may refer to the same appliance. Physical identity is unverified. No devices are merged and no permission is transferred.',
+          ],
+          [
+            'note',
+            'Selected device: ${c.accountConflicts!['selected']['device_id']}',
+          ],
+          if ((c.accountConflicts!['matches'] as List).isEmpty)
+            ['note', 'No equal saved device identifiers were found.'],
+          for (final match in c.accountConflicts!['matches'] as List)
+            [
+              'card',
+              'Possible duplicate',
+              [
+                ['Account ID', match['account_id'], null],
+                ['Device ID', match['device_id'], null],
+                ['Connection ID', match['connection_id'], null],
+                ['Saved membership', match['membership'], null],
+              ],
+            ],
+        ],
         ...actions,
         ['button', 'Revoke Access · if supported', 'secondary'],
       ];

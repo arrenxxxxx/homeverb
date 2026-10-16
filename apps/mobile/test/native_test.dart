@@ -5,7 +5,9 @@ import 'package:homeverb_mobile/controller.dart';
 import 'package:homeverb_mobile/preferences.dart';
 
 void main() {
-  final library = File('../../target/debug/libhomeverb_ffi.so').absolute.path;
+  final library = File(
+    '../../target/debug/${NativeClient.defaultLibrary()}',
+  ).absolute.path;
   test(
     'native organization, validation, observations, receipt and reopen',
     () async {

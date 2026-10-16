@@ -1,97 +1,29 @@
 # Implementation status and next tasks
 
-The Mock MVP and Flutter frontend are runnable. This branch remains on native API
-1.14.1 and SQLite schema 4; it does not include main's newer Core integration.
-See the [source checkpoint](../apps/mobile/RESUME.md) and
-[verification record](../apps/mobile/verification.md) for current Flutter evidence.
-Pixel work is paused. Status below is evidence-scoped; no row implies physical-device support.
+## Integrated main: October 16, 2026
 
-## Paused handoff: October 16, 2026
+The owner resumed development and requested the Flutter UI merge, Core integration
+and local Android APK delivery. The former UI branch is now part of `main`.
+Native API **1.22.0** provides 34 ordinary methods, 16 C functions plus the
+Android-only initializer, SQLite schema 5 and protected payload 3.
 
-The owner requested a development pause and a complete repository handoff to
-another computer. Resume only after a new owner instruction. The overall usable
-MVP remains incomplete; this checkpoint is not a release or physical-support claim.
+The app lives in [apps/mobile](../apps/mobile/README.md). Its protected account
+input, local organization, capability-driven controls, trusted command confirmation,
+receipt recovery and cleanup call Core in process. Current local build evidence
+is recorded in [verification.md](../apps/mobile/verification.md). Historical
+Linux/Android UI evidence remains distinct from this merged revision's checks.
 
-Current interface: native API **1.22.0**, 34 ordinary methods, 16 C functions
-plus the Android-only JNI initializer, SQLite schema 5 and protected payload 3.
-Start with [the native contract](native-ui-contract.md), the status table below,
-and [the Meiju guide](development/05-midea.md).
+Remaining product acceptance includes real account reauthorization, physical
+Android/iOS secure-store policy and phone lifecycle, separately authorized
+model-specific controls, off-LAN journeys, full localization/accessibility and
+pixel equality. LAN route admission, cross-account reconciliation and nearby
+sharing remain unavailable. No real appliance operations are authorized by this
+integration task. Do not inspect local pilot credentials by default.
 
-Completed foundations include embedded Core, CLI/local stdio MCP, room/card
-organization, secure account storage, cloud login/inventory/reads, reviewed
-experimental AC and dishwasher controls, mobile native bridges and synthetic
-LAN building blocks. One real mainland account previously returned four ACs,
-one dishwasher and one refrigerator. All six have experimental cloud reads;
-**zero of six have physical control acceptance**. Android emulator and iOS
-Simulator evidence does not establish physical-phone or Flutter acceptance.
-
-The final development phase adds saved cross-account conflict inspection to
-Session, the native JSON interface and CLI. It reports local candidate IDs only.
-It does not select an account, merge devices, transfer grants or change routing.
-Local evidence: 485 Rust tests passed, two environment-dependent tests ignored;
-35 CLI/MCP runtime tests; 34 native methods and 55 fictional examples; 62 Python
-tooling tests; seven presentation tests; build, Clippy, formatting and repository,
-documentation and contract validation. See the Meiju guide for the phase record.
-
-Remaining work, in dependency order:
-
-1. Implement an explicit, reviewed account-choice/reconciliation flow using the
-   saved conflict candidates. Preserve stable device IDs, rooms and history;
-   revalidate protected identity/model evidence and never transfer authority
-   implicitly. Design recovery before adding cross-store writes.
-2. Resolve exact-model control gaps. The selected refrigerator remains read-only:
-   temperature step and encoder preservation are unproven. Reuse the recorded
-   source research rather than repeating the same searches. Complete outstanding
-   dishwasher mappings only when exact product evidence supports them.
-3. Integrate the existing native contract with the separately developed Flutter
-   app: protected account input, foreground lifecycle, trusted confirmation,
-   outcome display and account recovery. This checkout does not establish that
-   separate worktree's implementation status.
-4. With separate owner authorization, verify real reauthorization, physical
-   phone credential storage, model-specific controls and the away-from-home
-   Internet journey. The owner has deferred appliance operations; do not perform
-   them or read the local pilot credential directory during resumption by default.
-5. Finish protected LAN endpoint/model admission, route publication and full-set
-   rediscovery before claiming LAN support. Bluetooth, authorization sharing,
-   another protocol family and release/license gates remain separate unfinished
-   scope; they are not prerequisites for implementing the cloud UI.
-
-Remote CI last fully passed at `406b212`. Runs for `f6f6e28` failed before executing
-steps because GitHub reported failed account payments or an insufficient spending
-limit (MVP run `38884135175`, docs run `38884135233`). This is an external admission
-failure, not test evidence. Do not change billing or repeatedly rerun unchanged
-jobs. Inspect CI for the pushed handoff revision before claiming remote success.
-
-### Continue on another computer
-
-Clone the repository, or pull `main` with `git pull --ff-only` after checking local
-changes. Read `AGENTS.md` and the progressive [development index](index.md), then
-use [the test guide](testing.md). The commands below are for a Linux checkout;
-dependencies need network access on the first machine setup.
-
-```bash
-git clone https://github.com/arrenxxxxx/homeverb.git
-cd homeverb
-python3 -m venv .venv
-.venv/bin/python -m pip install -r requirements-dev.txt
-cargo build --workspace --locked
-cargo test --workspace --locked
-.venv/bin/python scripts/verify_mvp.py
-.venv/bin/python scripts/verify_native_contract.py
-node packages/presentation/test/i18n.test.mjs
-```
-
-Install Rust with rustfmt/Clippy, Python 3 and Node.js first; Cargo uses the checked-in
-toolchain and lockfile. Add `--offline` only after dependencies are cached.
-Mobile SDK setup is documented in the Android and iOS progressive guides.
-Build outputs and Python environments are regenerated, not transferred through Git.
-Secrets and local account databases are not in the repository: use an explicitly
-authorized secure sign-in on the new computer, never a plaintext export. The
-separate Flutter worktree is outside this handoff; its uncommitted work is not
-included or inspected. UI design sources under `output/imagegen/` and the approved
-prototype under `output/prototypes/` are repository artifacts, not working Flutter
-screens. No credentials or physical device operations are needed for the fictional
-local checks above.
+Rebuild dependencies on each workstation; SDKs, app databases, secrets and generated
+artifacts are not source handoffs. Follow [testing](testing.md) and the
+[Android guide](development/08-android-native.md). Remote CI is not implied by
+local success; earlier runs were blocked by the repository's billing limit.
 
 ## Task status
 
@@ -101,14 +33,14 @@ local checks above.
 | T01 | Toolchain and workspace | Implemented: Rust 1.96, Cargo workspace | Additional target builds |
 | T02 | Domain DTOs and validation | Shared/component-scoped capability definitions, per-adapter descriptor admission, transactional rediscovery identity guards, and stored-metadata operational validation implemented | Expand tests with new capabilities and actual model constraints |
 | T03 | Mock and controlled failures | Implemented | Add protocol-specific faults with adapters |
-| T04 | Execution and routing | State-match and bounded correlated-completion verification, explicit independent-field decomposition, explicit device batches with whole-list preflight/shared deadlines, scoped authorization, and full-snapshot observation validation with per-property freshness limits and typed single-command elevated user approval and separate trusted native confirmation functions implemented | Flutter consent UI, reviewed consequential-action mappings, model-specific freshness/correlation evidence and real protocol guarantees |
+| T04 | Execution and routing | State-match and bounded correlated-completion verification, explicit independent-field decomposition, explicit device batches with whole-list preflight/shared deadlines, scoped authorization, and full-snapshot observation validation with per-property freshness limits and typed single-command elevated user approval and separate trusted native confirmation functions implemented | Real-platform Flutter consent acceptance, reviewed consequential-action mappings, model-specific freshness/correlation evidence and real protocol guarantees |
 | T05 | Storage and credentials | SQLite journal/cache, schema-1/2/3/4 backup/upgrade to schema 5, bounded detailed receipts, explicit cache/history clearing, retired-ID protection, and native account vault with persisted references, account leases, explicit Meiju pending-session recovery and same-account reauthorization, recoverable local removal without credential decryption, Linux Secret Service composition, and an Android Keystore/JNI backend with synthetic JVM and isolated AOSP Android 15 runtime verification implemented; iOS Keychain backend has portable/target checks and isolated iOS 26.2 Simulator round-trip/restart evidence | Real provider identity/session acceptance, Android Keystore/phone acceptance, physical iOS Keychain/entitlement policy and provider revocation |
 | T06 | CLI | Mock queries/writes and explicit batches; experimental Meiju protected terminal connection, account list/details/rename/removal/refresh/recovery/inventory, local organization, Core reads, exact receipt lookup/history, redacted diagnostics and explicit owner-controlled power, fan, mode activation and profile-scoped temperature grant files implemented | Live CLI login/read/control acceptance and adapter-specific diagnostics evidence |
-| T07 | Android embedding probe | Linux native ABI and foreground lifecycle tested; versioned [34-method UI contract 1.22.0](native-ui-contract.md), schemas and native examples implemented; API 28 arm64/x86_64 and combined AAR builds, exports and 16 KiB ELF alignment verified; isolated Android 15 test APK passes native Core/Keystore/lock/restart, grant revocation, trusted approval and uncertain-write/forced-stop recovery checks | Flutter startup wiring/APK integration, actual physical Android Keystore and phone; see the [Android guide](development/08-android-native.md) |
+| T07 | Android embedding probe | Linux native ABI and foreground lifecycle tested; versioned [34-method UI contract 1.22.0](native-ui-contract.md), schemas and native examples implemented; API 28 arm64/x86_64 and combined AAR builds, exports and 16 KiB ELF alignment verified; isolated Android 15 test APK passes native Core/Keystore/lock/restart, grant revocation, trusted approval and uncertain-write/forced-stop recovery checks | Merged APK/runtime evidence in the app verification record; physical Android Keystore and phone acceptance; see the [Android guide](development/08-android-native.md) |
 | T08 | Local MCP | Mock/Meiju reads and exact receipt lookup; explicit Meiju startup grants admit command planning/execution with unchanged Core policy; protocol, outcome and shutdown harnesses implemented | Target AI host validation and real Meiju read/control acceptance |
 | T09 | First native authentication | Scoped community flow admitted under [ADR-0022](adr/0022-meiju-community-cloud-admission.md); native codec, restricted HTTPS and protected connection tested; one real mainland account login and independent saved-session refresh returned six appliances | Native account connection/list/details/rename/removal/refresh/recovery, protected saved-inventory inspection and read-only control-option inspection before grants and local session-grant inspection are callable; connection uses separate secret buffers and can reauthorize an explicitly selected pending account without resetting intact bindings. Verify real reauthorization identity, Flutter input/mobile storage and off-LAN behavior |
 | T10 | First real adapter | Default read-only Meiju adapter admits six exact models and checks protected complete-inventory membership before live access and retains private product mapping evidence for reviewed profile-specific temperature contracts; real Core/native reads passed for six cards/seven components; protected product 760Y0026 additionally has synthetic-tested optional read-only additional-option observations. Explicit experimental AC power, vendor fan, power-on/mode and profile-scoped temperature controls, scoped power probe, independent native AC grants, and profile-scoped dishwasher starts and independently granted pause/resume/cancel operations (including explicit additional options for product 760Y0026) through trusted confirmation are synthetic-tested with conservative cloud outcomes; bounded LAN discovery/collection, V3/ordinary packet codecs, standard AC/E1/CA read candidates, one-operation TCP exchanges, account-bound v2 credential lookup, protected candidate reconciliation and composed family reads with message-version negotiation have fictional evidence only | Flutter account input/mobile integration, reauthorization identity, explicit cross-account reconciliation (saved candidate inspection is implemented), physical AC power acceptance deferred by the owner; Flutter consent UI, physical AC temperature/preservation and dishwasher start acceptance, remaining unreviewed dishwasher mappings and refrigerator controls, then LAN and model-specific physical/off-LAN acceptance |
-| T11 | Flutter room/card UI, platform management, and dynamic device controls | UI bridge, Core room/card metadata, and locale resources implemented; complete Window Light visual specification available | Implement the [functional acceptance checklist](ui-functional-spec.md), [82-state inventory](ui-screen-inventory.md), and [one-skin extension contract](ui-window-light.md); actual Flutter/phone integration remains unverified. No HomeVerb login; rooms preserve device identity |
+| T11 | Flutter room/card UI, platform management, and dynamic device controls | Flutter app merged against Core 1.22 with room/card metadata, protected account input, confirmed cleanup and local inspection; Window Light visual specification retained | Continue the [functional acceptance checklist](ui-functional-spec.md), [82-state inventory](ui-screen-inventory.md), and [one-skin extension contract](ui-window-light.md); physical-phone and visual acceptance remain unverified. No HomeVerb login; rooms preserve device identity |
 | T12 | Second protocol family | Planned after T10 | Equivalent capability calls on heterogeneous hardware |
 | T13 | Security review | Mock component, argument, route, composite-policy, uncertainty, and diagnostic allowlist/marker tests implemented | Real credential, dependency, live-adapter log and diagnostic review |
 | T14 | Release | Planned | License decision, packages, actual remote CI and device evidence |
@@ -154,7 +86,7 @@ that gate; Flutter can implement the read-only compartment view now.
 
 Each completion record names the task, changed interfaces, commands actually run, results, skipped checks, compatibility effects, and external actions. All such records are English.
 
-The owner requires one commit and remote push per completed, verified phase. The existing Mock MVP is committed as the reusable baseline. Independent Flutter work starts from the [native UI contract](native-ui-contract.md); frontend development must not wait for real-device acceptance to implement the available room/card/control flows. Subsequent account/cloud work adds reviewed contracts and implementation in separate verified phases.
+The owner requires one local commit per completed, verified phase. Pushing or publishing requires separate authorization. The existing Mock MVP is committed as the reusable baseline. Independent Flutter work starts from the [native UI contract](native-ui-contract.md); frontend development must not wait for real-device acceptance to implement the available room/card/control flows. Subsequent account/cloud work adds reviewed contracts and implementation in separate verified phases.
 
 The [iOS package builder](development/09-ios-native.md#2-build-and-check-the-native-code)
 passed actual macOS CI on `d4525b1`, including separate device/Simulator slices,

@@ -77,7 +77,9 @@ void main({bool deviceRun = false}) {
   });
   final library = deviceRun
       ? NativeClient.defaultLibrary()
-      : File('../../target/debug/libhomeverb_ffi.so').absolute.path;
+      : File(
+          '../../target/debug/${NativeClient.defaultLibrary()}',
+        ).absolute.path;
   Future<NativeClient> open(Directory dir, {bool writes = true}) =>
       NativeClient.open(
         dataDir: dir.path,

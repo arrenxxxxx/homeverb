@@ -7,7 +7,9 @@ import 'package:homeverb_mobile/account_views.dart';
 import 'package:homeverb_mobile/preferences.dart';
 
 void main() {
-  final library = File('../../target/debug/libhomeverb_ffi.so').absolute.path;
+  final library = File(
+    '../../target/debug/${NativeClient.defaultLibrary()}',
+  ).absolute.path;
   test(
     'protected FFI clears owned buffers on native rejection and wrapper refusals',
     () async {
