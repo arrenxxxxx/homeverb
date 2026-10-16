@@ -45,7 +45,9 @@ Real account/secure-store and physical-device acceptance of these Flutter flows
 remains pending; the account tests use isolated fixtures and empty native profiles.
 Nearby sharing, provider revocation and full-profile deletion are unavailable.
 
-Paused work and restart instructions: [RESUME.md](RESUME.md).
+Paused work and restart instructions, including source-only recovery on another
+computer: [RESUME.md](RESUME.md). The branch includes an unfinished surface
+experiment; pixel equality and its Android rendering acceptance remain pending.
 
 ## Development
 

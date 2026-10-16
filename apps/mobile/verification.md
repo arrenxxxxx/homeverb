@@ -1240,3 +1240,37 @@ Build log: `/tmp/homeverb-glyph-release.log`. APK SHA-256:
 The full Android integration journey was not repeated for this decorative phase;
 the prior journey's scope and limitations remain recorded above. No real account,
 appliance, physical phone, iOS or new Keystore acceptance is claimed.
+
+
+## Source-only paused checkpoint — October 16, 2026
+
+At the owner's request, the existing unfinished surface experiment is committed
+on `codex/flutter-ui` so another computer can recover it directly from Git.
+This checkpoint adds the current `skin.dart`, its generator and 24 decorative
+corner/border masks (11,946 bytes total), plus portable instructions in
+[RESUME.md](RESUME.md). No further pixel correction was implemented. APKs, AARs,
+build caches, screenshots, reports, logs, IDE settings and the historical local
+archive are excluded; historical evidence paths remain workstation-local.
+
+Checks repeated for this exact source checkpoint:
+
+- `cargo build -p homeverb-ffi --offline --locked`: passed.
+- `fvm flutter analyze --no-pub`: passed with no issues.
+- `fvm flutter test --no-pub --reporter expanded`: all 84 tests passed, including
+  the 82-state widget capture and existing synthetic/native Mock regressions.
+- The surface generator ran in an isolated temporary directory; all 24 output
+  PNGs match the committed assets byte for byte.
+- Documentation, contract, repository and existing commit-history validation
+  passed. The contract check used the existing development virtual environment;
+  the system Python first refused validation because its date-time checker was
+  missing. On another computer, install `requirements-dev.txt` before validation.
+- `git diff --check`: passed.
+
+Local logs: `/tmp/homeverb-portable-{native-build,analyze,tests}.log`.
+The earlier comparison remains 0/82 exact, mean channel error 0.5268/255, with
+the known S11 regression and endpoint-rounding issue described in RESUME.md.
+The image comparison was not rerun for this source-only checkpoint. Android/iOS
+builds, GPU rendering, native pointer checks, physical devices and remote CI were
+not repeated. Passing the Flutter suite does not complete visual or mobile
+acceptance. Native API 1.14.1, storage formats and Core semantics are unchanged;
+main's newer Core integration remains separate work.

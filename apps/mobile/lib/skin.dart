@@ -28,6 +28,7 @@ Future<void>? _skinAssetsLoad;
 final _buttonFaces = <String, ui.Image>{};
 ui.Image? _glyphAtlas;
 final _glyphRegions = <(String, double), Rect>{};
+final _surfaceFaces = <double, List<ui.Image>>{};
 final _textInkBounds = <(int, double), Map<int, (double, double)>>{};
 final _editableInkBounds = <int, (double, double)>{};
 Future<void> loadWindowSkin() => _skinAssetsLoad ??= () async {
@@ -76,6 +77,16 @@ Future<void> loadWindowSkin() => _skinAssetsLoad ??= () async {
   );
   _glyphAtlas = (await glyphCodec.getNextFrame()).image;
   glyphCodec.dispose();
+  for (final radius in [12, 14, 16, 18, 20, 22, 25, 28]) {
+    final faces = <ui.Image>[];
+    for (final kind in ['mask', 'border-1', 'border-2']) {
+      final bytes = await rootBundle.load('assets/surface-$radius-$kind.png');
+      final codec = await ui.instantiateImageCodec(bytes.buffer.asUint8List());
+      faces.add((await codec.getNextFrame()).image);
+      codec.dispose();
+    }
+    _surfaceFaces[radius.toDouble()] = faces;
+  }
   for (final style in ['primary', 'secondary', 'danger', 'disabled']) {
     final bytes = await rootBundle.load('assets/button-$style.png');
     final codec = await ui.instantiateImageCodec(bytes.buffer.asUint8List());
@@ -309,45 +320,173 @@ class Surface extends StatelessWidget {
   final double bottomBleed;
   final EdgeInsetsGeometry padding;
   @override
-  Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(
-      color: MediaQuery.highContrastOf(context)
-          ? (dark ? Colors.black : Colors.white)
-          : null,
-      gradient: MediaQuery.highContrastOf(context)
-          ? null
-          : WindowSurfaceGradient(
-              pixelRatio: MediaQuery.devicePixelRatioOf(context),
-              bottomBleed: bottomBleed,
-              colors: dark
-                  ? const [Color(0xff42413e), Color(0xff2b2e2f)]
-                  : const [Color(0xfffdfaf3), Color(0xffeeefeb)],
-            ),
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(radius),
-        bottom: Radius.circular(bottomBleed > 0 ? 0 : radius),
-      ),
-      border: Border.all(
+  Widget build(BuildContext context) {
+    final highContrast = MediaQuery.highContrastOf(context);
+    final faces = highContrast ? null : _surfaceFaces[radius];
+    return DecoratedBox(
+      decoration: BoxDecoration(
         color: MediaQuery.highContrastOf(context)
-            ? (dark ? Colors.white : Colors.black)
-            : border ?? (dark ? const Color(0xff5e605c) : Colors.white),
-        width: MediaQuery.highContrastOf(context)
-            ? math.max(borderWidth, 1.5)
-            : borderWidth,
-      ),
-      boxShadow: MediaQuery.highContrastOf(context)
-          ? null
-          : const [
-              BoxShadow(
-                color: Color(0x1a2b2c2e),
-                // The artwork uses sigma 10 at 2x scale (5 logical pixels).
-                blurRadius: (5 - .5) / .57735,
-                offset: Offset(0, 3),
+            ? (dark ? Colors.black : Colors.white)
+            : null,
+        gradient: highContrast || faces != null
+            ? null
+            : WindowSurfaceGradient(
+                pixelRatio: MediaQuery.devicePixelRatioOf(context),
+                bottomBleed: bottomBleed,
+                colors: dark
+                    ? const [Color(0xff42413e), Color(0xff2b2e2f)]
+                    : const [Color(0xfffdfaf3), Color(0xffeeefeb)],
               ),
-            ],
-    ),
-    child: Padding(padding: padding, child: child),
-  );
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(radius),
+          bottom: Radius.circular(bottomBleed > 0 ? 0 : radius),
+        ),
+        border: faces != null
+            ? null
+            : Border.all(
+                color: MediaQuery.highContrastOf(context)
+                    ? (dark ? Colors.white : Colors.black)
+                    : border ?? (dark ? const Color(0xff5e605c) : Colors.white),
+                width: MediaQuery.highContrastOf(context)
+                    ? math.max(borderWidth, 1.5)
+                    : borderWidth,
+              ),
+        boxShadow: MediaQuery.highContrastOf(context)
+            ? null
+            : const [
+                BoxShadow(
+                  color: Color(0x1a2b2c2e),
+                  // The artwork uses sigma 10 at 2x scale (5 logical pixels).
+                  blurRadius: (5 - .5) / .57735,
+                  offset: Offset(0, 3),
+                ),
+              ],
+      ),
+      child: CustomPaint(
+        painter: faces == null
+            ? null
+            : _SurfaceFace(
+                faces: faces,
+                radius: radius,
+                dark: dark,
+                border:
+                    border ?? (dark ? const Color(0xff5e605c) : Colors.white),
+                borderWidth: borderWidth,
+                bottomBleed: bottomBleed,
+                pixelRatio: MediaQuery.devicePixelRatioOf(context),
+              ),
+        child: Padding(padding: padding, child: child),
+      ),
+    );
+  }
+}
+
+class _SurfaceFace extends CustomPainter {
+  const _SurfaceFace({
+    required this.faces,
+    required this.radius,
+    required this.dark,
+    required this.border,
+    required this.borderWidth,
+    required this.bottomBleed,
+    required this.pixelRatio,
+  });
+  final List<ui.Image> faces;
+  final double radius, borderWidth, bottomBleed, pixelRatio;
+  final bool dark;
+  final Color border;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.isEmpty) return;
+    double pixel(double value) {
+      final scaled = value * pixelRatio;
+      final lower = scaled.floor();
+      return (scaled - lower == .5
+              ? (lower.isEven ? lower : lower + 1).toDouble()
+              : scaled.roundToDouble()) /
+          pixelRatio;
+    }
+
+    final transform = canvas.getTransform();
+    canvas.save();
+    if (transform[0] == 1 &&
+        transform[5] == 1 &&
+        transform[1] == 0 &&
+        transform[4] == 0) {
+      canvas.translate(
+        pixel(transform[12]) - transform[12],
+        pixel(transform[13]) - transform[13],
+      );
+    }
+    final rect = Rect.fromLTWH(
+      0,
+      0,
+      pixel(size.width),
+      pixel(size.height + bottomBleed),
+    );
+    final center = Rect.fromLTWH(radius * 2, radius * 2, 1, 1);
+    void drawFace(ui.Image image, Rect target, Paint paint) {
+      canvas.save();
+      canvas.scale(.5);
+      canvas.drawImageNine(
+        image,
+        center,
+        Rect.fromLTWH(
+          target.left * 2,
+          target.top * 2,
+          target.width * 2,
+          target.height * 2,
+        ),
+        paint,
+      );
+      canvas.restore();
+    }
+
+    canvas.saveLayer(rect, Paint());
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..shader = WindowSurfaceGradient(
+          pixelRatio: pixelRatio,
+          colors: dark
+              ? const [Color(0xff42413e), Color(0xff2b2e2f)]
+              : const [Color(0xfffdfaf3), Color(0xffeeefeb)],
+        ).createShader(rect),
+    );
+    drawFace(
+      faces[0],
+      rect,
+      Paint()
+        ..blendMode = BlendMode.dstIn
+        ..filterQuality = FilterQuality.low,
+    );
+    canvas.restore();
+    final outline = Rect.fromLTWH(
+      0,
+      0,
+      rect.width + 1 / pixelRatio,
+      rect.height + 1 / pixelRatio,
+    );
+    drawFace(
+      faces[(borderWidth * 2).round().clamp(1, 2)],
+      outline,
+      Paint()
+        ..filterQuality = FilterQuality.low
+        ..colorFilter = ColorFilter.mode(border, BlendMode.srcIn),
+    );
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(_SurfaceFace old) =>
+      faces != old.faces ||
+      radius != old.radius ||
+      dark != old.dark ||
+      border != old.border ||
+      borderWidth != old.borderWidth ||
+      bottomBleed != old.bottomBleed ||
+      pixelRatio != old.pixelRatio;
 }
 
 class WindowSurfaceGradient extends Gradient {
