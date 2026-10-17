@@ -1,8 +1,9 @@
 # Third-party notices
 
-This index records known bundled and ported material. It does not select a license
-for HomeVerb or replace the referenced license texts. The owner deferred the
-project license decision on October 17, 2026; see [LICENSE-DECISION.md](LICENSE-DECISION.md).
+HomeVerb uses [Apache-2.0](LICENSE), selected by the owner on October 17, 2026;
+see [LICENSE-DECISION.md](LICENSE-DECISION.md). This index records known bundled
+and ported material with its own terms. It does not replace those license texts
+or relicense third-party material under the project license.
 
 ## Ported protocol implementations
 
@@ -15,7 +16,7 @@ Retain the upstream copyright statements, license texts and applicable notices
 when redistributing derived portions, including in binary distribution notices.
 The per-source records identify upstream files and HomeVerb modifications. They
 remain authoritative when this summary is shorter than the implementation scope.
-A future HomeVerb license does not replace these upstream obligations.
+The HomeVerb license does not replace these upstream obligations.
 
 The public Meiju app-compatibility material is admitted for the personal MVP only
 under [ADR-0022](docs/adr/0022-meiju-community-cloud-admission.md). Its presence in
@@ -28,7 +29,7 @@ scope still needs a separate owner decision and review.
 - Bundled Inter Regular and SemiBold fonts are copyright the Inter Project
   Authors and use SIL Open Font License 1.1. Preserve the
   [font license](apps/mobile/assets/fonts/LICENSE.txt) with the font files.
-  Do not relicense the fonts under the eventual project license.
+  Do not relicense the fonts under the project license.
 - The app's refrigerator and dishwasher illustrations have a local
   [generation and refinement record](apps/mobile/artwork.md). Generated artwork
   is decorative and does not establish exact model support or trademark rights.

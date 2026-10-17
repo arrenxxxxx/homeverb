@@ -14,7 +14,7 @@ Upstream files: `custom_components/midea_auto_cloud/core/cloud.py` and
 
 License: Apache License 2.0; the complete upstream license is in [LICENSE.txt](LICENSE.txt).
 The inspected revision contains no NOTICE file. Retain this attribution and the
-license when distributing the derived portions; HomeVerb's release license remains undecided.
+license when distributing the derived portions; HomeVerb uses [Apache-2.0](../../LICENSE); these upstream terms remain applicable.
 
 HomeVerb modifications: a minimal Rust port of the Meiju password transforms,
 request signing, session-key decoding, login/read request shapes, protected product

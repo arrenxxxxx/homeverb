@@ -28,8 +28,8 @@ local success; earlier runs were blocked by the repository's billing limit.
 
 ## Open-source preparation: October 17, 2026
 
-The owner requested preparation and obsolete design-study removal, while deferring
-the project license. [Release readiness](open-source-readiness.md) records source
+The owner requested preparation and obsolete design-study removal, then selected
+[Apache-2.0](../LICENSE) after the initial license deferral. [Release readiness](open-source-readiness.md) records source
 publication gates, retained third-party notices, the unverified private reporting
 channel and the separate Meiju publication decision. The remote repository was
 verified private; no push or visibility change is part of this preparation.

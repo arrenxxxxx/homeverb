@@ -375,7 +375,7 @@ python3 apps/mobile/tool/native_gallery.py
 
 The generated `output/flutter-verification/native-gallery.html` labels clicks, drag gestures and direct test navigation separately. Its reference column uses different sample data; this gallery does not replace strict pixel comparison or physical-phone acceptance.
 
-Android APK packaging and x86_64 emulator Mock journeys are verified separately from actual Keystore, physical-phone lifecycle, iOS packaging, accessibility and performance. The default build uses Mock; Meiju requires an explicit opt-in. Project release licensing remains undecided. Bundled Inter fonts use the adjacent SIL Open Font License.
+Android APK packaging and x86_64 emulator Mock journeys are verified separately from actual Keystore, physical-phone lifecycle, iOS packaging, accessibility and performance. The default build uses Mock; Meiju requires an explicit opt-in. HomeVerb uses [Apache-2.0](../../LICENSE); third-party material retains its own terms. Bundled Inter fonts use the adjacent SIL Open Font License.
 
 
 ## Trusted single-command confirmation

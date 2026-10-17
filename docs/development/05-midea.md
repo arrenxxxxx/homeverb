@@ -26,7 +26,7 @@ accounts or replaces descriptors; execution and physical acceptance remain separ
 
 ## Reuse the community protocol work
 
-The Home Assistant integration [Midea Auto Cloud][cloud-integration] demonstrates account-device enumeration and daily cloud control, and lists the `AC`, `E1`, and `CA` families. Its root license is Apache-2.0. The integration [Midea AC LAN][ha] lists Midea and Wahin/Hualing among its brands and includes all three requested families. [midea-local][library] is the Python LAN protocol library extracted from that project; both LAN repositories carry the MIT license. Preserve applicable license notices and attribution when adapting code, including Apache-2.0 modification/NOTICE requirements where applicable. HomeVerb's own release license decision remains separate.
+The Home Assistant integration [Midea Auto Cloud][cloud-integration] demonstrates account-device enumeration and daily cloud control, and lists the `AC`, `E1`, and `CA` families. Its root license is Apache-2.0. The integration [Midea AC LAN][ha] lists Midea and Wahin/Hualing among its brands and includes all three requested families. [midea-local][library] is the Python LAN protocol library extracted from that project; both LAN repositories carry the MIT license. Preserve applicable license notices and attribution when adapting code, including Apache-2.0 modification/NOTICE requirements where applicable. HomeVerb uses [Apache-2.0](../../LICENSE); the separate source and service publication review remains required.
 
 Pinned sources inspected:
 

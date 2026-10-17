@@ -2,6 +2,7 @@
   "name": "homeverb-presentation",
   "version": "0.2.0",
   "private": true,
+  "license": "Apache-2.0",
   "type": "module",
   "exports": "./src/index.mjs",
   "scripts": {"test": "node --test test/*.test.mjs"},

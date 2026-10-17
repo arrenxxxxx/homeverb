@@ -8,7 +8,9 @@
   assets and the self-contained 82-state prototype used by visual checks.
 - Add support, third-party attribution and source-publication requirements; update
   security reporting and the existing-repository publishing procedure.
-- Keep the main license undecided at the owner's request. Meiju publication scope,
+- Adopt Apache-2.0 following the owner's subsequent decision, with a root license,
+  Rust/JavaScript package metadata and explicit contribution terms. Third-party
+  material retains its original licenses and notices. Meiju publication scope,
   full-history review and private vulnerability intake remain release prerequisites.
 - Preserve runtime behavior, public APIs, schemas and device compatibility. This
   preparation does not publish a repository, package or application release.

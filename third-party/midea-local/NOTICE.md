@@ -14,7 +14,7 @@ Standard E1/CA queries and selected general-response fields use
 device query selection in `__init__.py`.
 
 License: MIT; retain the complete upstream [LICENSE.txt](LICENSE.txt) when
-distributing the derived portions. HomeVerb's release license remains undecided.
+distributing the derived portions. HomeVerb uses [Apache-2.0](../../LICENSE); these upstream terms remain applicable.
 
 HomeVerb modifications: a bounded Rust decoder for V2 and V3-wrapped discovery
 packets, with strict inner framing/checksum/padding validation, native-only

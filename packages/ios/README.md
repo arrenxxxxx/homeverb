@@ -29,7 +29,8 @@ The device deployment target is iOS 13.0. Simulator builds require iOS 14.0,
 consistent with the Rust arm64 Simulator target's minimum. These are compilation
 targets, not physical-device support claims. Flutter loading, physical Keychain
 policy, phone lifecycle and appliance operations need their own acceptance evidence.
-The project license and release decision remain pending.
+HomeVerb uses [Apache-2.0](../../LICENSE), with [third-party notices](../../THIRD_PARTY_NOTICES.md).
+The release decision remains separate.
 
 `acceptance/main.m` is a separate test-only Simulator app, built and run by
 `scripts/verify_ios_acceptance.py`. It embeds this production framework and links

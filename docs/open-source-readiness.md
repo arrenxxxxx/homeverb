@@ -1,9 +1,10 @@
 # Open-source release preparation
 
 Status: preparation in progress, October 17, 2026. The owner requested open-source
-preparation and removal of unused design studies, and explicitly deferred the
-main license decision. This record does not authorize changing repository visibility,
-pushing, publishing packages or performing appliance writes.
+preparation and removal of unused design studies, then selected Apache-2.0
+after initially deferring the main license decision. This record does not authorize
+changing repository visibility, pushing, publishing packages or performing appliance
+writes.
 
 ## Verified preparation
 
@@ -26,9 +27,9 @@ pushing, publishing packages or performing appliance writes.
 
 | Gate | Current status | Completion evidence |
 |---|---|---|
-| Project license and rights holders | Blocked: owner deferred selection | Owner-approved license, accurate rights-holder information, root license text and consistent README/package/contribution metadata |
+| Project license | Complete: owner selected Apache-2.0 | Root LICENSE, license decision, README, Rust/JavaScript metadata and contribution terms agree; existing rights-holder notices remain intact |
 | Meiju publication scope | Blocked: ADR-0022 admits personal use only | Separate owner decision recording exact publicly distributable protocol material and review of provider/third-party restrictions; amend the ADR scope explicitly before publication |
-| Third-party and asset obligations | Partial: known port/font notices retained | Review resolved dependencies for intended targets, remaining asset provenance, license compatibility and source/binary notice packaging |
+| Third-party and asset obligations | Partial: known port/font notices retained | Review rights-holder attribution, resolved dependencies for intended targets, remaining asset provenance, license compatibility and source/binary notice packaging |
 | Private vulnerability reporting | Blocked: no verified public reporter intake | Enable GitHub private reporting or a verified private alternative, confirm access and update SECURITY.md; the October 17 API read returned 404 |
 | History and sensitive data | Pending full scan and manual review | Scan every ref intended for publication plus commit metadata; manually inspect images, fixtures and unusual findings; record scanner version, scope, redacted findings and resolution |
 | Repository settings and CI | Pending release-commit verification | Owner-approved branch rules, required checks and available security scanning; exact commit's actual remote check results |
@@ -58,7 +59,8 @@ by this documentation phase.
 
 ## Git and GitHub sequence
 
-1. Finish the local license, attribution, reporting and publication-scope decisions.
+1. Keep the selected Apache-2.0 license and finish attribution, reporting and
+   publication-scope decisions.
    Commit each verified phase using English Conventional Commits.
 2. Before a final audit, fetch authorized remote refs and inspect local/remote
    differences. Scan all branches and tags that would be public, including content
@@ -83,9 +85,10 @@ Source can be published as experimental after the source gates are met. Signed
 Android/iOS distribution, physical-phone storage/lifecycle acceptance, off-LAN
 account journeys and model-specific controls have their own remaining gates in
 [task status](task-breakdown.md) and [compatibility](compatibility.md). Do not turn
-those pending tests into a claim that source licensing or repository publication
-has already been completed. `publish = false` and `publish_to: none` may remain:
-public source does not require publishing packages to a registry.
+those pending tests into a claim that repository publication or application
+acceptance has already been completed. The Apache-2.0 license is selected.
+`publish = false` and `publish_to: none` may remain: public source does not require
+publishing packages to a registry.
 
 ## Preparation validation
 
@@ -109,3 +112,12 @@ physical-device tests, full-history secret scanning, dependency-license auditing
 and remote CI were not executed for this documentation/asset-cleanup phase.
 Repository metadata reads were the only remote actions; no settings were changed,
 source pushed, history rewritten or release published.
+
+The subsequent Apache-2.0 selection was checked with
+`cargo metadata --offline --locked --no-deps --format-version 1`: all nine Rust
+packages inherit `Apache-2.0` and remain non-publishable. The JavaScript manifest
+uses the same identifier and retains `private: true`. The root license matches
+the complete standard Apache-2.0 text already retained with the upstream port.
+Documentation, repository hygiene and contract validation passed again. This
+license/metadata change does not alter runtime behavior, APIs or device support;
+no application build, physical test or remote publication was performed.

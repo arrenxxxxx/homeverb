@@ -40,5 +40,5 @@ storage and lock-screen failures have no plaintext or key-regeneration fallback.
 There is no public credential JSON method. Core's account leases and pending-state
 recovery remain required; this backend alone does not establish provider identity.
 
-The project license remains undecided. Local build artifacts are for development;
+HomeVerb uses [Apache-2.0](../../LICENSE), with [third-party notices](../../THIRD_PARTY_NOTICES.md). Local build artifacts are for development;
 this work does not publish a package or establish release readiness.

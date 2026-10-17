@@ -47,11 +47,12 @@ copyright notices and modifications of copied or adapted code and assets in the
 appropriate source notice and [third-party index](THIRD_PARTY_NOTICES.md).
 Do not submit employer-owned or third-party material without permission.
 
-The owner has deferred the project license decision; resolve
-[LICENSE-DECISION.md](LICENSE-DECISION.md) and the inbound contribution terms before
-accepting external contributions for public distribution. Do not assume that a
-PR transfers copyright or grants an unspecified project license. No CLA or DCO
-requirement is introduced by this preparation phase.
+HomeVerb uses [Apache-2.0](LICENSE). Unless you explicitly state otherwise,
+contributions intentionally submitted for inclusion are licensed under Apache-2.0,
+as provided in section 5 of that license. Existing separately licensed material
+retains its notices and terms; flag any proposed exception for review before merge.
+You retain copyright in your contribution. No additional CLA, DCO requirement or
+copyright assignment is introduced. See the [license decision](LICENSE-DECISION.md).
 
 ## Review conduct
 
