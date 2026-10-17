@@ -35,6 +35,9 @@ channel and the separate Meiju publication decision. The remote repository was
 verified private; no push or visibility change is part of this preparation.
 Application assets and the 82-state prototype remain; obsolete image-generation
 studies were removed from the current tree without rewriting Git history.
+The subsequent [source audit](open-source-audit.md) inventories dependencies,
+classifies scanner findings, adds the missing Flutter scaffold notice and records
+one historical promotional-image rights issue plus a commit-email privacy choice.
 No runtime contract, authority or physical compatibility changed.
 
 ## Task status

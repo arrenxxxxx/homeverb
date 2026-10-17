@@ -29,18 +29,20 @@ writes.
 |---|---|---|
 | Project license | Complete: owner selected Apache-2.0 | Root LICENSE, license decision, README, Rust/JavaScript metadata and contribution terms agree; existing rights-holder notices remain intact |
 | Meiju publication scope | Blocked: ADR-0022 admits personal use only | Separate owner decision recording exact publicly distributable protocol material and review of provider/third-party restrictions; amend the ADR scope explicitly before publication |
-| Third-party and asset obligations | Partial: known port/font notices retained | Review rights-holder attribution, resolved dependencies for intended targets, remaining asset provenance, license compatibility and source/binary notice packaging |
+| Third-party and asset obligations | Source inventory reviewed; historical marketing-image rights unresolved | See the [audit](open-source-audit.md): 320 Rust and 74 Dart/SDK entries, added Flutter notice, one historical promotional screenshot without redistribution evidence; binary notices remain separate |
 | Private vulnerability reporting | Blocked: no verified public reporter intake | Enable GitHub private reporting or a verified private alternative, confirm access and update SECURITY.md; the October 17 API read returned 404 |
-| History and sensitive data | Pending full scan and manual review | Scan every ref intended for publication plus commit metadata; manually inspect images, fixtures and unusual findings; record scanner version, scope, redacted findings and resolution |
+| History and sensitive data | Scans and candidate review complete through 84db14d; email/history disposition pending | Gitleaks 8.30.1 findings classified as fictional/prose; owner review of one non-noreply commit address and historical screenshot remains. Re-scan final public refs. |
 | Repository settings and CI | Pending release-commit verification | Owner-approved branch rules, required checks and available security scanning; exact commit's actual remote check results |
 | Public-facing status | Preparation complete, final release review pending | README/support/compatibility/changelog describe the chosen release scope without claiming untested models or signed phone acceptance |
 
-Existing basic hygiene checks are not comprehensive secret or license scanners.
-`gitleaks` and `trufflehog` were not installed on the preparation workstation; no
-full-history secret-scan success is claimed. Treat known public protocol constants
-separately from private credentials: a reviewed public constant may be an expected
-scanner finding, but it still requires the publication decision above. Do not
-blanket-ignore a source directory or print secret values into a report.
+The subsequent [source audit](open-source-audit.md) used a checksum-verified
+Gitleaks 8.30.1 binary in private temporary storage. History and tracked-source
+scans returned five reviewed fictional/prose findings, not a zero-finding result.
+Commit metadata and 522 historical image blobs received separate review. The
+report records limits and specific remaining decisions; it does not establish
+absence of every secret or grant third-party rights. Public Meiju material was
+traced to the pinned upstream source but still requires the publication decision.
+Do not blanket-ignore a source directory or print secret values into a report.
 
 ## Proposed publication scope for the owner to review
 
@@ -90,7 +92,7 @@ acceptance has already been completed. The Apache-2.0 license is selected.
 `publish = false` and `publish_to: none` may remain: public source does not require
 publishing packages to a registry.
 
-## Preparation validation
+## Initial preparation validation
 
 Executed locally on October 17, 2026:
 

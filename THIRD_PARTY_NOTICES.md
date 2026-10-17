@@ -24,6 +24,13 @@ an open-source implementation does not establish provider approval, permission
 to use the service, or authorization to publish this integration. That release
 scope still needs a separate owner decision and review.
 
+## Flutter application scaffolding
+
+The mobile platform scaffolds derive from Flutter templates under BSD-3-Clause.
+Retain the [Flutter notice](third-party/flutter/NOTICE.md) and
+[license](third-party/flutter/LICENSE.txt), including for modified template code.
+Flutter runtime/engine and transitive package notices remain separate obligations.
+
 ## Fonts and visual assets
 
 - Bundled Inter Regular and SemiBold fonts are copyright the Inter Project
@@ -54,5 +61,7 @@ For each release, record the dependency name, resolved version, source, license
 expression, required notices, target and local modifications. Check compatibility
 with the chosen project license and distinguish build-only dependencies from
 redistributed components. A generated SBOM or license inventory helps document
-this work but does not establish permission on its own. The complete dependency
-license audit remains pending; this file inventories known vendored/ported sources.
+this work but does not establish permission on its own. The [source audit](docs/open-source-audit.md) inventories 320 Rust and 74 Dart/SDK
+packages and records combined licenses, missing upstream notice files and the
+historical marketing screenshot. Actual target binary notice packaging remains
+separate work; this index does not claim a completed binary-license audit.

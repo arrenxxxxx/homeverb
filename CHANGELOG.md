@@ -4,6 +4,12 @@
 
 ### Open-source preparation
 
+- Audit reachable history, tracked source, metadata and image provenance; classify
+  fictional/prose scanner findings and document the remaining historical-image
+  rights and commit-email privacy decisions without exposing private values.
+- Inventory 320 Rust and 74 Dart/Flutter SDK dependencies and preserve the missing
+  Flutter scaffold BSD-3-Clause notice. Binary notice packaging remains separate.
+
 - Remove superseded visual studies and their galleries while retaining application
   assets and the self-contained 82-state prototype used by visual checks.
 - Add support, third-party attribution and source-publication requirements; update
