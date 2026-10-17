@@ -5,9 +5,10 @@
 The October 17 documentation and obsolete-design cleanup changes no runtime
 behavior, API, schema, storage, grant or device-support claim. Production artwork
 and the maintained prototype remain. Source publication, dependency/asset rights
-and the personal-MVP Meiju exception are tracked separately in
-[release readiness](open-source-readiness.md); no public distribution or provider
-permission is established by this preparation.
+and the experimental Meiju integration are tracked separately in
+[release readiness](open-source-readiness.md). The owner-authorized public source
+publication is recorded in [delivery status](publication-status.md); it does not
+establish provider endorsement or additional physical-device acceptance.
 
 The isolated H5 preview reuses current Flutter climate controls with fictional
 fixed-position, swing-only or absent airflow descriptors. It has memory-only

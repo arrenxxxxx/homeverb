@@ -1,6 +1,7 @@
 # Open-source release preparation
 
-Status: preparation in progress, October 17, 2026. The owner requested open-source
+Status: source publicly available, October 17, 2026; private reporting enabled.
+The owner requested open-source
 preparation and removal of unused design studies, then selected Apache-2.0
 after initially deferring the main license decision. The owner subsequently authorized obsolete-history cleanup, remote synchronization
 and CI/security-reporting setup; see [delivery status](publication-status.md).
@@ -8,32 +9,33 @@ Package publication and appliance writes remain outside this source-delivery sco
 
 ## Verified preparation
 
-- GitHub metadata for `arrenxxxxx/homeverb` reported `PRIVATE`, with default branch
-  `main`, on October 17, 2026. No remote setting was changed during preparation.
+- The owner authorized public conversion of `arrenxxxxx/homeverb` on October 17,
+  2026. Authenticated metadata and anonymous API reads confirm `PUBLIC`, default
+  branch `main` and Apache-2.0. GitHub private vulnerability reporting is enabled.
 - The repository has contribution guidance, issue/PR templates, a changelog,
   compatibility records and documentation/Mock/native CI definitions. Workflow
   files are not evidence that the release commit passed remote CI.
 - Superseded `output/imagegen/` studies were removed: 314 tracked files, approximately
   144 MiB in the working tree, including images and supporting study files.
   Application assets and the self-contained 82-state prototype remain in use.
-  Their integrity validator checks 138 images and 555 local links. Deletion in a
-  new commit does not remove images from Git history or reduce a full clone by
-  the same amount.
+  Their integrity validator checks 138 images and 555 local links. The later
+  authorized history cleanup also removed the obsolete directory from the public
+  branch; an independent remote clone verified the resulting reachable history.
 - [Third-party notices](../THIRD_PARTY_NOTICES.md), [support](../SUPPORT.md),
   [security policy](../SECURITY.md) and the [publishing procedure](publishing.md)
   separate current evidence from release prerequisites.
 
-## Required before public source publication
+## Source publication checks
 
 | Gate | Current status | Completion evidence |
 |---|---|---|
 | Project license | Complete: owner selected Apache-2.0 | Root LICENSE, license decision, README, Rust/JavaScript metadata and contribution terms agree; existing rights-holder notices remain intact |
 | Meiju source scope | Included in owner-requested project-wide preparation | Existing reviewed integration and upstream notices are included; no duplicate owner approval. Unofficial service access is not vendor endorsement. |
-| Third-party and asset obligations | Source inventory reviewed; identified historical screenshot removed from candidate refs | See the [audit](open-source-audit.md): 320 Rust and 74 Dart/SDK entries, added Flutter notice, the identified historical promotional screenshot is excluded by the [history cleanup](publication-status.md); binary notices remain separate |
-| Private vulnerability reporting | Pending public conversion: GitHub reporting is public-repository only | Enable and verify reporting at public conversion, then update SECURITY.md; private-repository read/enable calls returned 404 |
-| History and sensitive data | Filtered history re-scanned; same five classified findings | Gitleaks 8.30.1 findings classified as fictional/prose; author identity is preserved; the historical screenshot is absent from the candidate refs. Verify final pushed refs. |
-| Repository settings and CI | Pending exact-commit run; prior private runs blocked by billing | See [delivery status](publication-status.md); verify exact commit results and required checks without claiming an unstarted job passed |
-| Public-facing status | Preparation complete, final release review pending | README/support/compatibility/changelog describe the chosen release scope without claiming untested models or signed phone acceptance |
+| Third-party and asset obligations | Source inventory reviewed; identified historical screenshot removed from public refs | See the [audit](open-source-audit.md): 320 Rust and 74 Dart/SDK entries, added Flutter notice, the identified historical promotional screenshot is excluded by the [history cleanup](publication-status.md); binary notices remain separate |
+| Private vulnerability reporting | Enabled and verified after public conversion | API returned `enabled: true`; [SECURITY.md](../SECURITY.md) links the private report form |
+| History and sensitive data | Filtered history re-scanned; same five classified findings | Gitleaks 8.30.1 findings classified as fictional/prose; author identity is preserved; the historical screenshot is absent from pushed refs, verified with an independent remote clone. |
+| Repository settings and CI | Public visibility verified; public CI now executes | Documentation checks passed on `3185e0e`; see [delivery status](publication-status.md) for run links and verify the latest commit on Actions. Earlier private runs were blocked by billing. |
+| Public-facing status | Updated for public source | README/support/compatibility/changelog describe the chosen release scope without claiming untested models or signed phone acceptance |
 
 The subsequent [source audit](open-source-audit.md) used a checksum-verified
 Gitleaks 8.30.1 binary in private temporary storage. History and tracked-source

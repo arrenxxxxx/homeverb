@@ -16,7 +16,7 @@ HomeVerb is the owner-approved project name; `homeverb` is the executable and re
 | Check a real appliance | [Compatibility record](docs/compatibility.md) | Exact model and capability evidence; no brand-wide guarantee |
 | Contribute or report a bug | [Contributing](CONTRIBUTING.md), [support](SUPPORT.md) | English issues and documentation; redact private data |
 
-This repository is preparing for open-source publication under
+This repository is publicly available under
 [Apache-2.0](LICENSE); see the [license decision](LICENSE-DECISION.md),
 [third-party notices](THIRD_PARTY_NOTICES.md) and the
 [release checklist](docs/open-source-readiness.md). Experimental Meiju support
@@ -83,4 +83,4 @@ Each host owns its Core instance. No HA, NAS, project backend, daemon, relay, ba
 
 [Documentation index](docs/index.md) | [Current task status](docs/task-breakdown.md) | [Compatibility](docs/compatibility.md) | [Testing](docs/testing.md) | [AI contributor rules](AGENTS.md)
 
-Repository documentation, code, diagnostics, and commit messages are English. Chinese is permitted only in the requested `zh-CN` translation catalog. Use English [Conventional Commits](docs/commit-conventions.md). HomeVerb is licensed under [Apache-2.0](LICENSE), except for separately licensed [third-party material](THIRD_PARTY_NOTICES.md). License selection does not publish the repository or a release.
+Repository documentation, code, diagnostics, and commit messages are English. Chinese is permitted only in the requested `zh-CN` translation catalog. Use English [Conventional Commits](docs/commit-conventions.md). HomeVerb is licensed under [Apache-2.0](LICENSE), except for separately licensed [third-party material](THIRD_PARTY_NOTICES.md). Public source availability does not imply a signed application or package release.

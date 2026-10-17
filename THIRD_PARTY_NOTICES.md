@@ -45,7 +45,8 @@ Flutter runtime/engine and transitive package notices remain separate obligation
   records its deterministic composition, bundled fictional reference artwork and
   font requirements. It is a test/design reference, not a product screenshot.
   Superseded image-generation experiments have been removed from the current
-  tree; their historical commits still require publication review.
+  tree and public branch history after review; see the
+  [source publication record](docs/publication-status.md).
 - Review the provenance and distribution rights of every remaining shipped
   image, icon and externally referenced asset before a public release. This
   index is not a completed asset-rights audit or a blanket license grant.

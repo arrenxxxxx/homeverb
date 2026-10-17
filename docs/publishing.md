@@ -3,16 +3,18 @@
 ## Current repository
 
 The existing target is `arrenxxxxx/homeverb`, with `main` as the default branch.
-On October 17, 2026 a GitHub metadata read verified private visibility. Do not run
+On October 17, 2026 the owner authorized public conversion. GitHub metadata and
+an unauthenticated API read verified public visibility; private vulnerability
+reporting is enabled. See [delivery evidence](publication-status.md). Do not run
 a repository-creation command for this existing checkout. The earlier private
 bootstrap helper remains available for its original purpose; it is not a public
 release tool.
 
 Open-source preparation is tracked in the [release checklist](open-source-readiness.md).
 The owner selected [Apache-2.0](../LICENSE); preparation includes the existing
-Meiju integration. Full-history review, dependency rights, private security
-reporting and release-commit checks
-remain prerequisites. Preparing files or a local commit does not change visibility.
+Meiju integration. The source audit, cleaned-history push and private security
+reporting setup are complete; exact-commit CI evidence is tracked in the delivery
+record. Preparing files or a local commit alone does not change visibility.
 
 Do not paste access tokens into chat, files or command arguments. Authenticate
 with the GitHub CLI's trusted browser flow when needed; see the
@@ -59,6 +61,9 @@ integration shortcut. Branch protection and required checks must name the
 checks actually present in this repository.
 
 ## Public source publication
+
+The first public conversion below was authorized and completed on October 17,
+2026. These instructions also describe the checks for future publication work.
 
 Finish all source gates in [open-source readiness](open-source-readiness.md) first.
 Then present the exact commit, license, Meiju scope, history-review results and

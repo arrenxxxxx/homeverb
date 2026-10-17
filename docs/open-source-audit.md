@@ -6,14 +6,16 @@ This record contains no secret values, personal email addresses or raw scanner
 reports. Review artifacts stayed in a private temporary directory outside Git.
 
 The later owner-authorized [history cleanup](publication-status.md) removes the
-identified historical image from the candidate branch. The observations below
-refer to the original audit scope and private backup; they are retained as evidence.
+identified historical image from the pushed public branch. Public conversion and
+enabled private vulnerability reporting are verified in that delivery record.
+The observations below refer to the original audit scope and private backup; they
+are retained as historical evidence, with subsequent dispositions recorded there.
 
 ## Result and remaining decisions
 
 No real credential was identified in the scans and reviewed candidates below.
 Known source license declarations have been inventoried, and a missing Flutter
-scaffold notice has been added. Publication still requires these concrete decisions:
+scaffold notice has been added. The original audit identified these dispositions:
 
 | Finding | Evidence | Required disposition |
 |---|---|---|
@@ -22,7 +24,7 @@ scaffold notice has been added. Publication still requires these concrete decisi
 | Meiju public compatibility material | All four constants in `crates/midea/src/material.rs` match the pinned public upstream `cloud.py`; two are encoded as integer-to-hex byte conversions upstream | Included in the owner-requested project-wide source preparation; no duplicate Meiju approval is required. Provenance does not establish provider endorsement. |
 | Private vulnerability reporting | No verified reporter intake in SECURITY.md | Configure and verify the reporting route before source publication. |
 
-No branch was rewritten, commit removed, source pushed or repository made public.
+During this audit phase, no branch was rewritten, commit removed, source pushed or repository made public.
 A future history rewrite must operate on a separate reviewed copy first, preserve
 a private backup and re-scan the resulting public refs. Removing all obsolete
 `output/imagegen/` history would also remove the identified marketing screenshot;

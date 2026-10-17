@@ -4,6 +4,10 @@
 
 ### Open-source preparation
 
+- Publish the reviewed source under Apache-2.0 after owner authorization; verify
+  public access and enable GitHub private vulnerability reporting. Update support
+  and publication records to reflect the public repository.
+
 - Remove obsolete image-generation content from the candidate Git history after
   verifying a private backup; preserve the current source tree and author identity.
 - Record GitHub's public-only vulnerability-reporting availability and actual
@@ -21,11 +25,12 @@
   security reporting and the existing-repository publishing procedure.
 - Adopt Apache-2.0 following the owner's subsequent decision, with a root license,
   Rust/JavaScript package metadata and explicit contribution terms. Third-party
-  material retains its original licenses and notices. Full-history review and private vulnerability intake remain release prerequisites.
+  material retains its original licenses and notices. History review and private
+  vulnerability intake are recorded in the publication delivery evidence.
   Existing Meiju source is included in the owner-requested project scope without
   a duplicate integration-specific approval.
 - Preserve runtime behavior, public APIs, schemas and device compatibility. This
-  preparation does not publish a repository, package or application release.
+  source publication does not publish a package or signed application release.
 
 The earlier entries below describe individual development milestones and their
 limits at that time. Use the [task status](docs/task-breakdown.md) and

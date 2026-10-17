@@ -27,33 +27,53 @@ hygiene, contract checks and all 181 retained commit messages passed. The origin
 checkout's local Codex references and the private backup are not publication refs;
 never use `git push --mirror` for this release.
 
-When updating the existing remote branch, use an exact expected-old-SHA lease,
-not an unrestricted force push. The inspected remote `main` was
-`82fd26a7e2904fd367fcfaef89977f6e827bc8e1`. A concurrent remote change must stop
-publication for inspection. Update other checkouts from the cleaned branch;
-merging an old branch can restore removed history. GitHub cached old commit views,
-unreachable server objects and third-party clones are outside this ref-rewrite
-verification; the screenshot is a rights-review item, not an exposed credential.
+## Verified push and public conversion
 
-## GitHub infrastructure findings
+Only `main` was pushed, using the exact old-SHA lease
+`82fd26a7e2904fd367fcfaef89977f6e827bc8e1`. GitHub and an independent bare clone
+both confirmed `3185e0e8f68e193c1ed0b06d63467cbb4478544d`. The independent clone
+contained no reachable `output/imagegen/` path or identified marketing-image blob.
+Local Codex refs and the private backup were not pushed.
 
-The repository was still private when checked. Both the read and enable calls
-for private vulnerability reporting returned HTTP 404. GitHub documents that
-[private vulnerability reporting is available for public repositories](https://docs.github.com/en/code-security/security-advisories/working-with-repository-security-advisories/configuring-private-vulnerability-reporting-for-a-repository).
-Enable and read back that setting immediately when converting to public; do not
-invent a working reporting address while the repository is private.
+The owner then explicitly authorized changing `arrenxxxxx/homeverb` to public.
+GitHub returned `visibility: public` and `private: false`; an unauthenticated API
+request independently confirmed this state, default branch `main` and the
+Apache-2.0 license. Private vulnerability reporting was enabled and read back as
+`enabled: true`. [SECURITY.md](../SECURITY.md) now links to the private report form.
+The anonymous report-form request redirects to GitHub sign-in, as expected.
+No sensitive test report was submitted to exercise the intake. The issue chooser
+also links to private reporting.
 
-Existing CI runs `39033802547` and `39033802515` for the previous remote tip failed
-before any job steps ran. The check annotations say recent account payments failed
-or a spending limit needs to be increased. This is an account/runner-start block,
-not an executed test failure. No billing or payment setting was changed. Do not
-mark remote CI as passed until the exact intended commit's jobs actually finish.
+The public metadata inventory contains only `main`, with no tags, issues/pull
+requests, releases or Actions artifacts. `main` has no branch protection rule;
+CI execution does not imply merge enforcement.
 
-## Remaining delivery checks
+Update other checkouts from the cleaned branch; merging an old branch can restore
+removed history. GitHub cached old commit views, unreachable server objects and
+third-party clones are outside this ref-rewrite verification; the screenshot is
+a rights-review item, not an exposed credential.
 
-Verify the pushed SHA, final repository visibility, private reporting setting and
-exact commit's CI conclusions. Review the final public source from an unauthenticated
-request after conversion. Branch rules should require the actual workflow checks,
-without deleting failing checks or weakening tests to make a release appear green.
-No real appliance operation, package-registry publication or signed application
-release is part of this source-delivery work.
+## CI evidence
+
+The earlier private runs `39033802547` and `39033802515`, and the first attempts
+of `39038575679` and `39038575653`, failed before any job steps ran. Their check
+annotations cited account payments/spending limits. No billing setting was changed.
+Private vulnerability-reporting calls had returned 404; GitHub documents that
+[the feature requires a public repository](https://docs.github.com/en/code-security/security-advisories/working-with-repository-security-advisories/configuring-private-vulnerability-reporting-for-a-repository).
+These initial infrastructure findings are superseded by verified public conversion.
+
+Both workflows for `3185e0e` were rerun after public conversion and started actual
+job steps. [Documentation checks](https://github.com/arrenxxxxx/homeverb/actions/runs/39038575653)
+passed. The [Mock/native run](https://github.com/arrenxxxxx/homeverb/actions/runs/39038575679)
+records Linux runtime, Android packaging and iOS Simulator results separately.
+For subsequent revisions, consult the [latest main workflows](https://github.com/arrenxxxxx/homeverb/actions?query=branch%3Amain)
+and match their head SHA to the intended commit. This record does not substitute
+an earlier run for the latest revision's results.
+
+## Scope
+
+This delivery changes source availability and documentation, not runtime behavior,
+APIs, schemas, storage, authority or physical-device support. No real appliance
+operation, package-registry publication or signed application release is part of
+this source-delivery work. Source availability does not close the separate
+[application and physical acceptance tasks](task-breakdown.md).

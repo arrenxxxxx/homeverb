@@ -30,12 +30,13 @@ local success; earlier runs were blocked by the repository's billing limit.
 
 The owner requested preparation and obsolete design-study removal, then selected
 [Apache-2.0](../LICENSE) after the initial license deferral. [Release readiness](open-source-readiness.md) records source
-publication gates, retained third-party notices, the unverified private reporting
-channel. The existing Meiju integration is included in the owner-requested source
-scope without duplicate approval. The remote repository was
-verified private; no push or visibility change is part of this preparation.
+publication evidence and retained third-party notices. The existing Meiju
+integration is included in the owner-requested source scope without duplicate
+approval. The owner subsequently authorized cleaned-history synchronization and
+public conversion; public visibility and enabled private vulnerability reporting
+are verified in the [delivery record](publication-status.md).
 Application assets and the 82-state prototype remain; obsolete image-generation
-studies were removed from the current tree without rewriting Git history.
+studies were removed from the public branch history after a private backup.
 The subsequent [source audit](open-source-audit.md) inventories dependencies,
 classifies scanner findings, adds the missing Flutter scaffold notice and records
 one historical promotional-image rights issue plus a commit-email privacy choice.

@@ -8,8 +8,7 @@ support; a successful Mock run is not physical-device acceptance.
 ## Bugs and feature requests
 
 Use the repository's [issue templates](https://github.com/arrenxxxxx/homeverb/issues/new/choose)
-when you have access. The repository is currently private; this link is not a
-public support channel until publication. Search existing issues first and keep
+for bugs and feature requests. The repository is public. Search existing issues first and keep
 one reproducible problem or feature request per issue. Requests are triaged on a
 best-effort basis; there is no response-time or implementation guarantee.
 
@@ -27,7 +26,7 @@ redacted evidence needed; diagnostic uploads require explicit owner authorizatio
 
 Report suspected permission bypass, credential exposure or unsafe duplicate
 execution through the procedure in [SECURITY.md](SECURITY.md), not a public issue.
-The private reporting channel is still a publication prerequisite.
+GitHub private vulnerability reporting is enabled; the security policy links to the form.
 
 Use the adapter-request template for a new exact model or provider. State region,
 public protocol references, requested capabilities and available test hardware.

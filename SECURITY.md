@@ -10,15 +10,14 @@ release. See [compatibility](docs/compatibility.md) and
 
 Do not post vulnerabilities, credentials, live device identifiers, packet captures
 or sensitive exploit details in public issues, discussions or pull requests.
-Use an existing verified private channel to the repository owner if one is
-already available to you. No maintainer email is published by this project.
-
-A public reporter intake is **not ready**. On October 17, 2026 the repository was
-verified private; the GitHub private-vulnerability-reporting API returned HTTP 404.
-That response does not establish whether reporting is enabled or accessible.
-Before publication, the owner must enable and verify GitHub private vulnerability
-reporting, or publish a verified private alternative here. Do not send sensitive
-reports to an assumed address or substitute a public issue for a private channel.
+Use GitHub's [private vulnerability report form](https://github.com/arrenxxxxx/homeverb/security/advisories/new)
+while signed in, or open the repository's Security tab and choose **Report a
+vulnerability**. The repository was made public on October 17, 2026; private
+vulnerability reporting was enabled and its API setting read back as `enabled: true`.
+Reports submitted through this form are private, not public issues.
+No maintainer email is published as a reporting address by this project.
+If the form is unavailable, do not substitute a public issue or an assumed email
+address for a private channel.
 
 ## Useful report contents
 
