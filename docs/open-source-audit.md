@@ -5,6 +5,10 @@ The owner requested history-sensitive-data and dependency/asset license review.
 This record contains no secret values, personal email addresses or raw scanner
 reports. Review artifacts stayed in a private temporary directory outside Git.
 
+The later owner-authorized [history cleanup](publication-status.md) removes the
+identified historical image from the candidate branch. The observations below
+refer to the original audit scope and private backup; they are retained as evidence.
+
 ## Result and remaining decisions
 
 No real credential was identified in the scans and reviewed candidates below.

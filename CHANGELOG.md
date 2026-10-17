@@ -4,6 +4,11 @@
 
 ### Open-source preparation
 
+- Remove obsolete image-generation content from the candidate Git history after
+  verifying a private backup; preserve the current source tree and author identity.
+- Record GitHub's public-only vulnerability-reporting availability and actual
+  account-billing blocks that prevented earlier private CI jobs from starting.
+
 - Audit reachable history, tracked source, metadata and image provenance; classify
   fictional/prose scanner findings and document the remaining historical-image
   rights and commit-email privacy decisions without exposing private values.

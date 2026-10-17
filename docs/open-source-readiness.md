@@ -2,9 +2,9 @@
 
 Status: preparation in progress, October 17, 2026. The owner requested open-source
 preparation and removal of unused design studies, then selected Apache-2.0
-after initially deferring the main license decision. This record does not authorize
-changing repository visibility, pushing, publishing packages or performing appliance
-writes.
+after initially deferring the main license decision. The owner subsequently authorized obsolete-history cleanup, remote synchronization
+and CI/security-reporting setup; see [delivery status](publication-status.md).
+Package publication and appliance writes remain outside this source-delivery scope.
 
 ## Verified preparation
 
@@ -29,10 +29,10 @@ writes.
 |---|---|---|
 | Project license | Complete: owner selected Apache-2.0 | Root LICENSE, license decision, README, Rust/JavaScript metadata and contribution terms agree; existing rights-holder notices remain intact |
 | Meiju source scope | Included in owner-requested project-wide preparation | Existing reviewed integration and upstream notices are included; no duplicate owner approval. Unofficial service access is not vendor endorsement. |
-| Third-party and asset obligations | Source inventory reviewed; historical marketing-image rights unresolved | See the [audit](open-source-audit.md): 320 Rust and 74 Dart/SDK entries, added Flutter notice, one historical promotional screenshot without redistribution evidence; binary notices remain separate |
-| Private vulnerability reporting | Blocked: no verified public reporter intake | Enable GitHub private reporting or a verified private alternative, confirm access and update SECURITY.md; the October 17 API read returned 404 |
-| History and sensitive data | Scans and candidate review complete through 84db14d; historical-image disposition pending | Gitleaks 8.30.1 findings classified as fictional/prose; the owner identified the commit address as their own; historical screenshot rights remain unresolved. Re-scan final public refs. |
-| Repository settings and CI | Pending release-commit verification | Owner-approved branch rules, required checks and available security scanning; exact commit's actual remote check results |
+| Third-party and asset obligations | Source inventory reviewed; identified historical screenshot removed from candidate refs | See the [audit](open-source-audit.md): 320 Rust and 74 Dart/SDK entries, added Flutter notice, the identified historical promotional screenshot is excluded by the [history cleanup](publication-status.md); binary notices remain separate |
+| Private vulnerability reporting | Pending public conversion: GitHub reporting is public-repository only | Enable and verify reporting at public conversion, then update SECURITY.md; private-repository read/enable calls returned 404 |
+| History and sensitive data | Filtered history re-scanned; same five classified findings | Gitleaks 8.30.1 findings classified as fictional/prose; author identity is preserved; the historical screenshot is absent from the candidate refs. Verify final pushed refs. |
+| Repository settings and CI | Pending exact-commit run; prior private runs blocked by billing | See [delivery status](publication-status.md); verify exact commit results and required checks without claiming an unstarted job passed |
 | Public-facing status | Preparation complete, final release review pending | README/support/compatibility/changelog describe the chosen release scope without claiming untested models or signed phone acceptance |
 
 The subsequent [source audit](open-source-audit.md) used a checksum-verified
