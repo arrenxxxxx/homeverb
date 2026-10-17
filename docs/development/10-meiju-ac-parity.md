@@ -13,10 +13,10 @@ functions. The earlier HomeVerb composition used original vector artwork; the
 current row layout uses native widgets without the appliance illustration. It neither
 embeds that screenshot nor invents outdoor temperature or humidity readings.
 
-The October 17 owner-approved [Window Light proposal](../../output/imagegen/homeverb-ac-detail-window-light-v2/README.md)
+The October 17 owner-approved [Window Light composition](../ui-window-light.md#owner-directed-ac-composition-revisions)
 supersedes the blue/white presentation: the live Flutter view now uses expanded,
 capability-dependent rows and the shared application materials. It does not turn
-the illustrative controls in that board into model support.
+the illustrative controls in the original study into model support.
 
 This reference is not the selected device's live Meiju page. Its exact current
 screens, expanded function drawer, selector options and app version are still

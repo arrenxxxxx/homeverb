@@ -18,8 +18,9 @@ decorative; power remained a separately labelled observation. That temporarily
 superseded the charcoal climate card. The October 17 revision below supersedes this
 blue/white exception; no second selectable skin is introduced.
 
-On October 17 the owner approved the [expanded row proposal](../output/imagegen/homeverb-ac-detail-window-light-v2/README.md)
-and required actual capability-dependent controls. The live Flutter page again
+On October 17 the owner approved the expanded row composition described below
+and required actual capability-dependent controls. The superseded raster proposal
+was removed during repository cleanup; this specification preserves the decision. The live Flutter page again
 uses the shared Window Light background, porcelain surfaces, charcoal temperature
 summary and terracotta controls. Mode, fan, horizontal airflow and vertical airflow
 appear in that order; independent additional settings follow. Unsupported rows

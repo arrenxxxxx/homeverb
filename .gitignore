@@ -24,3 +24,6 @@ node_modules/
 output/flutter-verification/
 .DS_Store
 Thumbs.db
+
+# Disposable visual experiments; production assets and test references stay tracked.
+output/imagegen/
