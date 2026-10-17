@@ -18,11 +18,19 @@ control bridge or service has been added to work around these boundaries.
 
 ## October 17 Flutter control presentation
 
+The owner-approved [foreground refresh policy](adr/0067-foreground-state-refresh.md)
+adds silent three-second state reads on native device views. Home/search/room
+filters and selected-device components bound the targets; other views and the
+background suspend reads. Cycles do not overlap, user operations take priority,
+and failures retain old snapshots without reminders. This is an App-owned
+read schedule, not account inventory polling, automatic control or a service.
+Native/CLI/MCP APIs, support levels and receipt semantics are unchanged.
+
 Home cards now share observed power colors and local activity feedback and select
 distinct refrigerator/dishwasher artwork from component/capability metadata. Local
 control-option/session-grant inspection filters whole-device shortcuts; a readable
 power property or refrigerator compartment does not establish control support.
-Cached startup reads do not refresh provider accounts or add polling. Commands
+Initial cached reads do not refresh provider accounts. Commands
 still prepare/recheck exact authority and use the existing Core path. The
 [artwork record](../apps/mobile/artwork.md) documents generated assets, not new
 adapter or model support. Native API 1.22, SQLite 5 and protected payload 3 are

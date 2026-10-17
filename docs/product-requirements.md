@@ -21,6 +21,12 @@ Multiple platforms and accounts; viable native authentication; LAN/cloud discove
 
 The owner-selected Flutter app uses custom local rooms and device cards, with Devices, Platforms, and Settings as its primary destinations. Platform management uses consumer-facing appliance-platform terminology. Explicit nearby authorization sharing belongs in Settings and follows [ADR-0008](adr/0008-foreground-authorization-sharing.md), with no app account, background receiver, or sender relay. See the [screen inventory](mobile-app.md) for the planned functions; sharing eligibility requires separate provider evidence.
 
+The owner additionally requires silent automatic device-state reads every three
+seconds on foreground App device views. Failures preserve the previous reading
+without a notification. [ADR-0067](adr/0067-foreground-state-refresh.md) defines
+view scope, non-overlap, user-operation priority and immediate background stop;
+it does not authorize background collection or automatic writes.
+
 The first real integration targets Midea/Hualing air conditioners, dishwashers, and refrigerators already bound in Meiju. Successful provider authorization starts bounded foreground account-device retrieval and automatically adds supported cards; unsupported returned devices remain visible with their limitation. Reauthorization preserves local organization and identity. Daily cloud reads and controls are required, while LAN is an additional route on the same Device. No LAN discovery or home gateway is required for the cloud journey. Exact controls depend on model, region, account permissions, and tested protocol evidence; this is not a promise of complete official-app feature parity. See the [integration plan](development/05-midea.md).
 
 ## Out of scope

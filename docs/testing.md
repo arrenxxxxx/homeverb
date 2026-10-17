@@ -183,6 +183,15 @@ The probe passed locally on Linux with GNOME Secret Service. Locked collections,
 
 ## Meiju native protocol and HTTPS tests
 
+The Flutter foreground read scheduler is tested independently with virtual time:
+`cd apps/mobile` then `fvm flutter test test/state_refresh_test.dart`. Its fictional
+fixtures cover three-second cadence, filtered/component targets, silent partial
+failure, non-overlap, cancelled late replies, user-command priority, lifecycle
+resume and absence of automatic activity UI. These tests do not contact providers
+or establish physical timing/rate support. See
+[ADR-0067](adr/0067-foreground-state-refresh.md) and the
+[App verification record](../apps/mobile/verification.md).
+
 `cargo test -p homeverb-midea --offline --locked` also starts generated local TLS
 fixtures. A sandbox that prohibits loopback listeners cannot run those cases;
 record the restriction and run with ordinary local socket access, rather than

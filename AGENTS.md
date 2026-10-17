@@ -8,10 +8,10 @@ Read `README.md`, `docs/product-requirements.md`, `docs/architecture.md`, `docs/
 
 ## Non-negotiable product constraints
 
-1. Do not require HA, a NAS, a project backend, a daemon, a startup service, background keep-alive, or periodic polling.
+1. Do not require HA, a NAS, a project backend, a daemon, a startup service, background keep-alive, or periodic polling outside the owner-approved foreground App state-read exception in ADR-0067.
 2. Core is an embeddable library. CLI, App, and MCP call Core directly. Do not make App or MCP shell out to the CLI and parse its output as the production architecture.
 3. CLI commands release resources and exit. MCP supports only a host-managed local stdio process, ending with its host session. An idle session must not scan appliances or refresh every account.
-4. The app performs foreground, on-demand work only. Leaving the foreground cancels networking and closes subscriptions. Unconfirmed writes are recorded as `unknown`. Do not promise a callback after a forced termination.
+4. The app performs foreground work only. ADR-0067 permits silent three-second state reads on visible device views; other work remains on demand. Leaving the foreground cancels networking and closes subscriptions. Unconfirmed writes are recorded as `unknown`. Do not promise a callback after a forced termination.
 5. Do not implement remote HTTP MCP, public control APIs, device relays, cloud sync, or background automation. Changing this boundary requires an explicit owner decision and a new ADR. Do not reintroduce these features under an "optional" label.
 6. Local SQLite and system secret stores do not require a self-hosted service. Temporary loopback authentication callbacks and short-lived protocol UDP sockets are allowed only within a bounded operation.
 7. A platform requiring a confidential shared client secret, private server callback, or persistent relay is incompatible unless it has a viable native-client alternative. Never embed a backend secret in an app to claim support. The owner-approved ADR-0022 exception permits only the pinned public Meiju community app-compatibility material for the personal MVP; it does not permit confidential developer secrets, publication, or real-device writes.

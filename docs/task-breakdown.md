@@ -28,6 +28,16 @@ local success; earlier runs were blocked by the repository's billing limit.
 
 ## Task status
 
+The owner requested silent three-second automatic state refresh while the App is
+foregrounded. [ADR-0067](adr/0067-foreground-state-refresh.md) records this narrow
+exception to the previous polling prohibition. Native device views now schedule
+bounded reads without overlapping cycles or user operations; failures keep prior
+evidence without notifications. Non-device navigation/background/disposal stop
+the schedule, and it never refreshes inventory, prepares controls or replays a
+write. Exact checks and emulator evidence are in the
+[verification record](../apps/mobile/verification.md); provider rate limits and
+physical-phone timing remain separate acceptance work.
+
 The home-card revision extends observed on/off colors and per-button pending
 feedback, hides unsupported whole-device shortcuts and adds distinct generated
 refrigerator/dishwasher artwork. Card loading inspects only local reviewed

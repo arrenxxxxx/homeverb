@@ -62,7 +62,7 @@ Future<void> main() async {
             await openSession(const []),
             prefs,
             reopen: adapter == 'midea.meiju' ? openSession : null,
-          ),
+          )..startAutomaticRefresh(),
         ),
       ),
     );
@@ -142,8 +142,16 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     c.addListener(changed);
     id = c.preferences.root;
+    c.setAutomaticRefreshView(refreshView(id));
     c.initialize();
   }
+
+  StateRefreshView refreshView(String screen) =>
+      ['D01', 'D03', 'D11', 'D12'].contains(screen)
+      ? StateRefreshView.cards
+      : ['C01', 'C08'].contains(screen)
+      ? StateRefreshView.device
+      : StateRefreshView.none;
 
   void changed() {
     if (!_disposed && mounted) setState(() {});
@@ -160,6 +168,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     _disposed = true;
     WidgetsBinding.instance.removeObserver(this);
     c.removeListener(changed);
+    c.stopAutomaticRefresh();
     c.cancelPending();
     c.core.close();
     for (final field in fields.values) {
@@ -194,6 +203,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       clearFields();
       if (target != 'D03') c.search = '';
     });
+    c.setAutomaticRefreshView(refreshView(target));
     if (['D01', 'P01', 'S01'].contains(target))
       await c.savePreferences({'root': target});
     if (target == 'P01' && c.supports('list_accounts')) await c.loadAccounts();

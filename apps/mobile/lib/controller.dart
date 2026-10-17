@@ -6,6 +6,8 @@ import 'session_permissions.dart';
 
 enum LocalCleanup { cachedState, executionHistory }
 
+enum StateRefreshView { none, cards, device }
+
 // The compiled native hosts currently expose exact const grants or an object
 // grant for Mock. Unknown schema constraints hide quick controls conservatively;
 // they never become a broader permission or bypass Core's JSON Schema validator.
@@ -33,6 +35,116 @@ class HomeController extends ChangeNotifier {
   bool get isForeground => _foreground;
   int get controlEpoch => _readEpoch;
   List<Json>? _controlPolicies;
+  Timer? _automaticRefreshTimer;
+  Future<void>? _automaticRefreshWork;
+  StateRefreshView _automaticRefreshView = StateRefreshView.none;
+  bool _automaticRefreshEnabled = false;
+  int _automaticRefreshGeneration = 0;
+
+  /// The production App host enables this schedule; Core/CLI/MCP never own it.
+  void startAutomaticRefresh() {
+    _automaticRefreshEnabled = true;
+    _scheduleAutomaticRefresh();
+  }
+
+  void stopAutomaticRefresh() {
+    _automaticRefreshEnabled = false;
+    _pauseAutomaticRefresh();
+  }
+
+  void setAutomaticRefreshView(StateRefreshView view) {
+    if (view != _automaticRefreshView) _pauseAutomaticRefresh();
+    _automaticRefreshView = view;
+    _scheduleAutomaticRefresh();
+  }
+
+  void _pauseAutomaticRefresh({bool cancelRead = true}) {
+    _automaticRefreshTimer?.cancel();
+    _automaticRefreshTimer = null;
+    _automaticRefreshGeneration++;
+    if (cancelRead && _automaticRefreshWork != null) core.cancelAll();
+  }
+
+  void _scheduleAutomaticRefresh() {
+    if (!_automaticRefreshEnabled ||
+        !_foreground ||
+        busy ||
+        _automaticRefreshView == StateRefreshView.none ||
+        _automaticRefreshTimer != null)
+      return;
+    _automaticRefreshTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+      if (busy ||
+          _automaticRefreshWork != null ||
+          _coreNeedsReopen ||
+          approvalPreview != null)
+        return;
+      final work = _refreshAutomatically(_automaticRefreshGeneration);
+      _automaticRefreshWork = work;
+      unawaited(work.whenComplete(() => _automaticRefreshWork = null));
+    });
+  }
+
+  Future<void> _refreshAutomatically(int generation) async {
+    final epoch = _readEpoch, client = core;
+    bool current() =>
+        _automaticRefreshEnabled &&
+        _foreground &&
+        !busy &&
+        _automaticRefreshView != StateRefreshView.none &&
+        generation == _automaticRefreshGeneration &&
+        epoch == _readEpoch &&
+        client == core;
+    if (!current()) return;
+    try {
+      final devices = _automaticRefreshView == StateRefreshView.cards
+          ? visibleCards.map((card) => card['device'] as Json).toList()
+          : [if (description?['device'] case final Json device) device];
+      for (final device in devices) {
+        final parts = device['components'] as List? ?? [];
+        if (device['support_status'] == 'unsupported' || parts.isEmpty)
+          continue;
+        final deviceId = device['id'] as String;
+        final route = preferences.route(deviceId);
+        for (final part in parts) {
+          if (!current()) return;
+          if ((part['capabilities'] as List? ?? []).isEmpty) continue;
+          final componentId = part['id'] as String;
+          try {
+            final next =
+                await client.call('read_state', {
+                      'device': deviceId,
+                      'component': componentId,
+                      'connection': route,
+                      'cached': false,
+                    })
+                    as Json;
+            if (!current()) return;
+            if (next['device_id'] != deviceId ||
+                next['component_id'] != componentId)
+              continue;
+            _componentSnapshots[(deviceId, componentId)] = next;
+            _componentReadErrors.remove((deviceId, componentId));
+            if (componentId == parts.first['id']) snapshots[deviceId] = next;
+            if (selectedDevice == deviceId && component == componentId)
+              snapshot = next;
+            notifyListeners();
+          } catch (_) {
+            // Keep previous evidence and manual errors; never notify on a failed read.
+            if (!current()) return;
+          }
+        }
+      }
+    } catch (_) {
+      // Optional automatic reads never surface an error or retry within a cycle.
+    }
+  }
+
+  @override
+  void dispose() {
+    stopAutomaticRefresh();
+    super.dispose();
+  }
+
   final Map<(String, String), Set<bool>> _cardPowerChoices = {};
 
   /// Local display choices, not authorization. Selection rechecks the session.
@@ -409,6 +521,7 @@ class HomeController extends ChangeNotifier {
   final Set<String> selection = {};
   int _readEpoch = 0;
   void cancelPending() {
+    _pauseAutomaticRefresh(cancelRead: false);
     discardApproval();
     _readEpoch++;
     accountInventory = null;
@@ -420,6 +533,7 @@ class HomeController extends ChangeNotifier {
   void setForeground(bool foreground) {
     _foreground = foreground;
     if (!foreground) {
+      _pauseAutomaticRefresh(cancelRead: false);
       discardApproval();
       _readEpoch++;
       accountInventory = null;
@@ -427,6 +541,7 @@ class HomeController extends ChangeNotifier {
       routeInspection = null;
     }
     core.foreground(foreground);
+    if (foreground) _scheduleAutomaticRefresh();
     if (!foreground) notifyListeners();
   }
 
@@ -437,8 +552,21 @@ class HomeController extends ChangeNotifier {
     if (busy) return false;
     busy = true;
     error = null;
+    final epoch = _readEpoch;
+    final automaticRead = _automaticRefreshWork;
+    _pauseAutomaticRefresh();
     notifyListeners();
     try {
+      // Native cancellation keeps admission closed until its active call drains.
+      if (automaticRead != null) {
+        await automaticRead;
+        if (!_foreground || epoch != _readEpoch) {
+          throw NativeFailure(
+            'CANCELLED',
+            'Operation was cancelled before starting.',
+          );
+        }
+      }
       if (_coreNeedsReopen) await _replaceControlSession(const []);
       await work();
       return true;
@@ -447,6 +575,7 @@ class HomeController extends ChangeNotifier {
       return false;
     } finally {
       busy = false;
+      _scheduleAutomaticRefresh();
       notifyListeners();
     }
   }

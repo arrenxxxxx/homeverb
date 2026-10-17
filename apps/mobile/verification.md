@@ -1,5 +1,76 @@
 # Flutter implementation verification
 
+## Silent foreground state refresh: October 17, 2026
+
+The owner explicitly requested automatic three-second device-state reads while
+the App is open and no reminder on failure. [ADR-0067](../../docs/adr/0067-foreground-state-refresh.md)
+records this foreground-only exception to the former polling prohibition; the
+repository instructions and lifecycle/architecture/product documents now agree.
+
+The production native entry point enables an App-owned timer. Home/search/room
+views read supported components in the current filter; controls read the selected
+device's components. Initial metadata/cache loading precedes the first three-second
+interval. Other views, backgrounding and disposal stop the schedule. Read cycles
+never overlap or queue missed ticks, and user operations cancel/drain automatic
+reads before using the native session. Lifecycle changes during that drain prevent
+a delayed command from starting after resume.
+
+Success updates the normal card/component caches while preserving timestamps,
+source and stale markers. Failures preserve earlier observations without loading
+UI, banners, snackbars or modal reminders. They do not overwrite manual errors or
+execution receipts. The loop never discovers devices, refreshes account inventory,
+prepares grants, reauthorizes accounts or replays a write. Every request retains
+the existing bounded Core read and route policy.
+
+Executed using pinned Flutter 3.47.7 from `apps/mobile`:
+
+- `fvm flutter analyze`: passed with no issues.
+- `fvm dart format --output=none --set-exit-if-changed lib test`: 61 files,
+  unchanged.
+- `fvm flutter test test/state_refresh_test.dart test/device_cards_test.dart
+  test/climate_controls_test.dart test/climate_rows_test.dart
+  test/session_permissions_test.dart test/accessibility_test.dart
+  test/localization_test.dart test/receipts_test.dart test/account_inventory_test.dart
+  test/current_contract_test.dart test/cleanup_test.dart
+  test/compartment_overview_test.dart test/organization_test.dart
+  test/native_test.dart --reporter expanded`: 80 passed in 21 seconds. Eight new
+  virtual-time/controller/widget tests cover cadence, filtered component targets,
+  independent silent failures, old snapshot/receipt retention, slow cycles,
+  background/resume, late replies, cancellation/drain before a fictional user
+  command, cancellation while waiting, non-device navigation and quiet UI. Existing
+  native Mock/control/account/cleanup/accessibility regressions also passed.
+- `fvm flutter build apk --release --target-platform android-arm64,android-x64
+  --dart-define=HOMEVERB_ADAPTER=midea.meiju`: passed in 34.5 seconds, after the
+  Flutter tests completed.
+
+The verified artifact is
+`output/flutter-verification/android/homeverb-0.2.0-meiju-auto-refresh.apk`,
+70,573,038 bytes, SHA-256
+`2cb9a4207ede5f8fe9ba1db44b5ed647998cae4f5a436cdd8e424584a0f57267`.
+Its adjacent report records base source `b7b87c3` plus these uncommitted changes
+(`source_dirty: true`), unchanged AAR
+`d43145c239cb13c993198dc31dbc28bedc75f884bc6270f06e682138f3c2fd6b`,
+two complete ABIs, 17 exports per ABI, backup exclusion, development signature,
+no integration-test plugin and 16 KiB ZIP/Core ELF alignment. Archive checks passed.
+
+`adb -s emulator-5586 install -r` succeeded on the existing host-GPU Android 15
+arm64 AVD, preserving the real account, six cards and Chinese preference. Cold
+start returned `Status: ok` in 1367 ms. Without pressing Refresh, a local scrolled
+screenshot showed the refrigerator card change from Not read/dash to a saved
+-18 Celsius observation. The AC cards retained their observations and the
+dishwasher still showed Not read at that checkpoint. No automatic loading/error
+UI appeared. This proves an unattended native read updated a card, not success
+for every appliance, exact provider timing or physical freshness. No control
+command, inventory-refresh button, uninstall, data reset or test APK was used.
+The H5 server remains stopped.
+
+Documentation (141 Markdown files), contract validation (20 schemas,
+45 positive/250 negative fixtures), repository/commit checks and seven shared
+presentation tests passed. The full Flutter visual suite, Rust workspace, native
+Android smoke, physical-phone timing and provider-rate acceptance were not rerun.
+Native API 1.22.0, SQLite 5, protected payload 3, control authority, adapter support
+and execution outcomes are unchanged. No push, upload or publication occurred.
+
 ## Home power feedback and appliance artwork: October 17, 2026
 
 Native home/search/room cards now use observed power colors and separate icons:

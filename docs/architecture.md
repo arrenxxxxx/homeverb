@@ -41,6 +41,12 @@ Start -> open local configuration -> resolve account and device -> validate capa
 
 Discovery and control have deadlines and cancellation tokens. Adapters cannot bypass Core by creating periodic workers. Subscriptions belong to explicit, bounded foreground tasks and must not outlive the host.
 
+The foreground App may schedule bounded state reads every three seconds under
+[ADR-0067](adr/0067-foreground-state-refresh.md). The timer belongs to the App;
+Core and adapters retain per-operation ownership and no periodic worker. Automatic
+reads yield to user operations and stop on backgrounding, disposal or non-device
+navigation. They neither prepare grants nor replay writes or refresh inventory.
+
 ## Local persistence
 
 SQLite stores configuration, device references, capability caches, timestamped observations, and bounded redacted execution records. Credentials live in the system secret store. Desktop CLI and MCP may share a store only for the same OS user and explicitly selected profile. Phone installations have independent storage and do not automatically synchronize. There is no central database.

@@ -5,7 +5,7 @@
 | Entry point | Starts when | Stops when | Idle behavior |
 |---|---|---|---|
 | CLI | The user runs a command | Completion, deadline, or cancellation | No background main loop |
-| App | The user opens and operates it in the foreground | Release networking after each task; cancel on backgrounding | UI/cache may remain; no periodic control |
+| App | The user opens and operates it in the foreground | Release networking after each task; cancel on backgrounding | Visible device views may read state every three seconds under ADR-0067; no periodic writes or background reads |
 | MCP stdio | A local host starts its child process | EOF, host shutdown, or termination | May await tools; must not scan devices proactively |
 | Auth callback | The user explicitly starts login | One callback or authorization timeout | No retained listener |
 | Authorization sharing | The user starts Send Authorization or Receive Authorization | Completion, cancellation, deadline, or backgrounding | No idle discovery, advertising, or receiver |
@@ -35,7 +35,20 @@ The [foreground sharing decision](adr/0008-foreground-authorization-sharing.md) 
 
 ## Mobile foreground and background
 
+The owner-approved [ADR-0067](adr/0067-foreground-state-refresh.md) permits a
+three-second App-owned state-read schedule on visible device views. Startup first
+loads local metadata/cache. Home/search/room filters and selected-device components
+bound the targets; non-device views suspend reads. Cycles do not overlap or queue
+missed ticks. User operations cancel and drain an automatic read before proceeding.
+Failures keep old evidence and remain silent; successes do not rewrite execution
+receipts or establish physical freshness. This does not schedule discovery,
+account inventory refresh, grant preparation, writes, CLI or MCP work.
+
 When backgrounded, reject new work and request cancellation of in-flight work. Unsent operations can end safely. A write already sent without an acknowledgement becomes `unknown`; tell the user to refresh when foregrounded again. A known accepted acknowledgement remains `accepted`. Do not rely on guaranteed background execution time, keep-alive tricks, or exact mobile scheduling.
+
+Backgrounding and disposal also cancel the App read timer and fence late results.
+Resuming starts a fresh interval without replay or catch-up requests. No timer
+survives in an OS service or separate process.
 
 ## Appliance work is not client work
 

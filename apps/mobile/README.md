@@ -8,8 +8,9 @@ Open a supported device after sign-in or retrieval to use its available controls
 There is no session-permission form, extra checkbox, review or revocation menu.
 The trusted app prepares all reviewed low-risk control values for the opened
 device using its exact saved model and cloud connection. It refreshes only that
-account to publish the available actions. Startup lists local metadata only;
-there is no periodic refresh, background setup or automatic appliance command.
+account to publish the available actions. Startup loads local metadata/cache first;
+automatic state reads then follow the foreground policy below. Account inventory
+refresh, background setup and appliance commands are never scheduled.
 See [ADR-0065](../../docs/adr/0065-default-app-device-controls.md).
 
 The climate-and-power panel keeps power, mode, fan and temperature operations on
@@ -40,7 +41,7 @@ on and neutral gray when off, with distinct icons and an opposite-action tooltip
 Pending commands do not change observed state. A small three-stroke pulse appears
 inside the power button, temperature heading or affected setting row until the
 command and its existing single follow-up read finish. Other operations use the
-same pulse beside a short activity label, including inside sheets and dialogs;
+same pulse beside a short activity label for user-initiated work, including inside sheets and dialogs;
 there is no page-edge loading bar. Reduced motion keeps the marker static, and
 background or inactive subtrees stop its animation. Duplicate controls remain
 disabled while the operation is pending.
@@ -49,6 +50,7 @@ Home card power buttons share these observed colors and icons, with a pulse insi
 the affected button during preparation, execution and the follow-up read. Local
 startup inspection uses reviewed control options or current session grants and
 cached observations only; it does not refresh every account or contact appliances.
+Subsequent foreground state reads use the automatic schedule below.
 Unknown power is neutral and disabled. Devices without a supported whole-device
 power action have no shortcut, including the current refrigerator compartments
 and dishwasher. A tap still prepares and rechecks the exact session before Core
@@ -67,6 +69,23 @@ transitions prevent late reads. The outcome is shown inline with an optional Vie
 Details action; quick card power stays on the home page and reports uncertain or
 failed outcomes without a routine acceptance message.
 
+## Automatic state refresh
+
+The native App refreshes device state every three seconds while a device view is
+foregrounded, following [ADR-0067](../../docs/adr/0067-foreground-state-refresh.md).
+Home/search/room views read supported devices in the current filter, including
+their separate components; controls read the selected device's components. Other
+views pause the schedule. The first cycle follows initial local loading by three
+seconds. Slow cycles skip ticks without overlapping or queuing missed work.
+
+These reads are silent: no loading animation, snackbar, modal or error banner.
+A failed read preserves the previous observation while other devices may update.
+Success retains source timestamps/stale markers and does not change an execution
+receipt. User operations cancel and drain automatic reads before using Core.
+Navigation/background/disposal invalidate late replies and stop the timer;
+resuming starts a new interval. There is no account inventory refresh, grant
+preparation, discovery, write replay, service or background scheduling in this loop.
+
 Account details show nullable historical complete-inventory time. Inspect Saved
 Inventory exposes per-binding duplicate record inspection, including unpublished
 bindings; it neither merges devices nor transfers authority. Query errors remain
@@ -82,8 +101,9 @@ fvm flutter run -d linux --dart-define=HOMEVERB_ADAPTER=midea.meiju
 ```
 
 This uses a separate app-private `native-meiju` directory, never the default Mock
-`native` profile or an existing CLI profile. Opening the app lists local metadata
-only. Platforms > Add Platform > Meiju previews the mainland account flow before
+`native` profile or an existing CLI profile. Opening the app first lists local
+metadata/cache; device views then use the foreground state schedule above.
+Platforms > Add Platform > Meiju previews the mainland account flow before
 protected sign-in. The native connection automatically retrieves devices once;
 partial/failed retrieval remains distinct from authentication and storage success.
 Explicit Retrieve Devices uses the saved session without another login. Pending

@@ -6,6 +6,14 @@
 
 Read/discovery operations may race safe routes within one shared budget. **Never race a write over LAN and cloud.** After an uncertain write on the primary route, do not duplicate it on a backup route.
 
+The App-owned [foreground state timer](adr/0067-foreground-state-refresh.md) issues
+new bounded reads using this same route policy. Its three-second ticks do not
+overlap or enqueue retries. User operations cancel and drain automatic reads
+before planning; backgrounding and navigation fence delayed replies. A silent
+read failure preserves prior observations, while successful reads retain source
+freshness evidence and never rewrite accepted/unknown receipts or replay a write.
+Core/adapter execution semantics and request/response schemas are unchanged.
+
 Write routes must also satisfy the trusted grant for the complete command, including component and argument bounds. Explicitly requesting an ungranted route returns `POLICY_DENIED`. `auto` cannot use an ungranted route, even after a proven-unsent failure. Each non-atomic step must independently satisfy a complete grant and use only transports allowed for both parent and step. Dry-run performs this same preflight and returns per-step candidate transports. See [trusted policy](development/02-core.md) and [ADR-0010](adr/0010-scoped-write-grants.md).
 
 Native `inspect_session_grants` projects current local device/transport rules

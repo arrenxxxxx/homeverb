@@ -2,6 +2,9 @@
 
 Status: accepted by the owner on October 16, 2026.
 
+The later [ADR-0067](0067-foreground-state-refresh.md) supersedes App state-read
+timing only. The on-demand grant-preparation decision below remains unchanged.
+
 ## Decision
 
 Remove the Flutter session-control selection, review, explicit capability-refresh
