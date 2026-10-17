@@ -25,3 +25,12 @@ docs/adr/                  # Architecture decisions
 Rust package names use the `homeverb-` prefix. The executable is `homeverb`. `Cargo.lock` records resolved dependency versions and belongs in implementation commits; the supported minimum compiler is Rust 1.96. The local stable toolchain was verified at 1.96.0. The Flutter implementation and Android host are in `apps/mobile`; the generated iOS scaffold is not completed native integration. See the [app guide](../apps/mobile/README.md) before building or resuming.
 
 Runtime data belongs outside the repository. Preserve unrelated local changes and never stage IDE files or device data. Prefer small commits with English [Conventional Commit](commit-conventions.md) subjects. Publishing requires explicit owner authorization and remote read-back; see [publishing](publishing.md).
+
+## Design artifacts
+
+Production images live with the application. The self-contained Window Light
+prototype under `output/prototypes/` remains a maintained visual/test reference.
+Disposable image-generation studies under `output/imagegen/` were removed and
+are now ignored. Do not restore obsolete galleries as build dependencies.
+The removal changes the current checkout only; historical blobs remain in Git.
+See [open-source readiness](open-source-readiness.md) before public distribution.

@@ -1,5 +1,14 @@
 # Platform and device compatibility matrix
 
+## Open-source preparation scope
+
+The October 17 documentation and obsolete-design cleanup changes no runtime
+behavior, API, schema, storage, grant or device-support claim. Production artwork
+and the maintained prototype remain. Source publication, dependency/asset rights
+and the personal-MVP Meiju exception are tracked separately in
+[release readiness](open-source-readiness.md); no public distribution or provider
+permission is established by this preparation.
+
 The isolated H5 preview reuses current Flutter climate controls with fictional
 fixed-position, swing-only or absent airflow descriptors. It has memory-only
 edits and no native Core session or provider access. The portable Dart client

@@ -6,6 +6,22 @@ HomeVerb is the owner-approved project name; `homeverb` is the executable and re
 
 > **Status: 0.2.0 Mock MVP.** The Rust Core, persistent fictional appliance, CLI, local MCP with default read-only policy, and native UI bridge are implemented. An experimental Meiju adapter has read six actual appliances through Core and the native bridge; one owner-authorized Flutter power test has an owner-observed shutdown, while broader physical/model acceptance remains pending. Android and iOS native packages have isolated test-app evidence; The Flutter app is merged into main and calls Core directly; see its [build guide](apps/mobile/README.md) and [verification record](apps/mobile/verification.md). Physical-phone acceptance remains separate work.
 
+## Start here
+
+| Goal | Entry point | Current scope |
+|---|---|---|
+| Try the shared Core and CLI | [Mock walkthrough](docs/development/01-run-mock.md) | Fictional appliance; no account or hardware required |
+| Build the mobile app | [Flutter build guide](apps/mobile/README.md) | Development builds; platform and phone evidence are tracked separately |
+| Connect an AI host | [Local MCP guide](docs/mcp.md) | Host-managed stdio; read-only by default |
+| Check a real appliance | [Compatibility record](docs/compatibility.md) | Exact model and capability evidence; no brand-wide guarantee |
+| Contribute or report a bug | [Contributing](CONTRIBUTING.md), [support](SUPPORT.md) | English issues and documentation; redact private data |
+
+This repository is preparing for open-source publication. The main license is
+not yet selected; see [license status](LICENSE-DECISION.md),
+[third-party notices](THIRD_PARTY_NOTICES.md) and the
+[release checklist](docs/open-source-readiness.md). Experimental Meiju support
+uses a community protocol and does not claim official vendor endorsement.
+
 ## Run the MVP
 
 Requirements: Rust 1.96 or later. The first build downloads dependencies; `Cargo.lock` records resolved versions. Commands use a private local profile and never contact an appliance.

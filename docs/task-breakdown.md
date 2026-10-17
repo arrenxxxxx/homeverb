@@ -26,6 +26,17 @@ artifacts are not source handoffs. Follow [testing](testing.md) and the
 [Android guide](development/08-android-native.md). Remote CI is not implied by
 local success; earlier runs were blocked by the repository's billing limit.
 
+## Open-source preparation: October 17, 2026
+
+The owner requested preparation and obsolete design-study removal, while deferring
+the project license. [Release readiness](open-source-readiness.md) records source
+publication gates, retained third-party notices, the unverified private reporting
+channel and the separate Meiju publication decision. The remote repository was
+verified private; no push or visibility change is part of this preparation.
+Application assets and the 82-state prototype remain; obsolete image-generation
+studies were removed from the current tree without rewriting Git history.
+No runtime contract, authority or physical compatibility changed.
+
 ## Task status
 
 [ADR-0069](adr/0069-profile-scoped-ac-features.md) integrates reviewed optional AC

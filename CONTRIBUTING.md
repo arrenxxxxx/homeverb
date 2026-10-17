@@ -2,6 +2,9 @@
 
 Contribute documentation, protocol research, adapters, and tests toward independent control without a persistent service. Start with [AGENTS.md](AGENTS.md), the [task breakdown](docs/task-breakdown.md), and the [compatibility matrix](docs/compatibility.md).
 
+For build questions and ordinary bugs, see [SUPPORT.md](SUPPORT.md). Report
+suspected vulnerabilities through [SECURITY.md](SECURITY.md), not a public PR.
+
 ## Workflow
 
 Select a task with acceptance criteria. Write a contract or regression test, implement the change, and update documentation, examples, and compatibility evidence. Adding a rebranded product using the same protocol does not prove heterogeneous-platform support. Changes to architectural boundaries require an ADR first.
@@ -39,4 +42,21 @@ Explain the task, design changes, tests, no-daemon impact, authentication/policy
 
 ## Licensing
 
-Before copying third-party code, record its source, license, and modifications. The project license remains undecided; resolve [LICENSE-DECISION.md](LICENSE-DECISION.md) before any public release.
+Contribute only material you have the right to submit. Record the origin, license,
+copyright notices and modifications of copied or adapted code and assets in the
+appropriate source notice and [third-party index](THIRD_PARTY_NOTICES.md).
+Do not submit employer-owned or third-party material without permission.
+
+The owner has deferred the project license decision; resolve
+[LICENSE-DECISION.md](LICENSE-DECISION.md) and the inbound contribution terms before
+accepting external contributions for public distribution. Do not assume that a
+PR transfers copyright or grants an unspecified project license. No CLA or DCO
+requirement is introduced by this preparation phase.
+
+## Review conduct
+
+Keep discussion respectful and focused on reproducible behavior and design
+tradeoffs. Do not post harassment, personal information or private account/device
+data. Maintainers may close off-topic or abusive contributions. A dedicated
+community code and private conduct-reporting channel can be added when their
+maintenance responsibilities and contact route are established.

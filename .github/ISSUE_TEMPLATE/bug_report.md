@@ -4,6 +4,8 @@ about: Report a reproducible problem without exposing credentials
 labels: fix
 ---
 
+For suspected security vulnerabilities, follow SECURITY.md instead of filing a public issue.
+
 ## Version and environment
 
 Operating system, entry point, version/commit:

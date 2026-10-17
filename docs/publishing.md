@@ -1,66 +1,97 @@
-# Publish a private GitHub repository
+# Repository and release publishing
 
-## Delivery status and target
+## Current repository
 
-Target: `arrenxxxxx/homeverb`, with private visibility and `main` as the default branch. This is a requested target, not a claim that the remote repository exists. The package contains local English commits; no remote creation or push was completed in the preparation environment because only read actions were available and there were no Git push credentials.
+The existing target is `arrenxxxxx/homeverb`, with `main` as the default branch.
+On October 17, 2026 a GitHub metadata read verified private visibility. Do not run
+a repository-creation command for this existing checkout. The earlier private
+bootstrap helper remains available for its original purpose; it is not a public
+release tool.
 
-Do not paste an access token into a chat, source file, issue, or command argument. Authenticate locally using GitHub CLI's trusted browser flow.
+Open-source preparation is tracked in the [release checklist](open-source-readiness.md).
+The owner deferred the main license decision. Meiju publication scope, full-history
+review, dependency rights, private security reporting and release-commit checks
+remain prerequisites. Preparing files or a local commit does not change visibility.
 
-## Requirements
+Do not paste access tokens into chat, files or command arguments. Authenticate
+with the GitHub CLI's trusted browser flow when needed; see the
+[official CLI documentation](https://cli.github.com/manual/gh_auth_login).
 
-Git, Python 3.10 or newer, and an authenticated GitHub CLI (`gh`) installation. The local account must be `arrenxxxxx` for the default target. Authentication must permit private-repository creation, content pushes including workflows, and issue-label management. Check the [official CLI installation and login documentation](https://cli.github.com/manual/).
+## Inspect before pushing
 
-## Publish from the ZIP with Git history
-
-The distribution ZIP includes the `homeverb/` working tree and its clean `.git` history. Extract the whole archive, including hidden files, then run:
-
-```bash
-cd homeverb
-gh auth login --hostname github.com --web --git-protocol https --scopes repo,workflow
-python3 scripts/publish_github.py
-```
-
-Already authenticated users can skip login if the current account and permissions are correct. The helper uses the local `gh` credential helper for Git without writing secrets or changing global Git configuration.
-
-The helper checks local status and commit syntax, checks the authenticated owner, creates a **private** repository, verifies visibility, pushes `main` without force, verifies the remote commit, applies English labels, and verifies private visibility again. It never creates a public repository, changes an existing repository's visibility, overwrites an unrelated remote, or force-pushes history.
-
-## Restore from a Git bundle instead
-
-A bundle is an optional portable backup of the same commits. It contains no login credentials or configured GitHub remote.
+These commands inspect the current checkout and remote configuration. Fetch
+updates remote-tracking refs but does not upload local commits:
 
 ```bash
-git clone homeverb-en.bundle homeverb
-cd homeverb
-git remote remove origin
-python3 scripts/publish_github.py
+git status --short
+git branch -vv
+git remote -v
+git fetch origin
+git log --oneline origin/main..main
+git log --oneline main..origin/main
+git diff --stat origin/main...main
+gh repo view arrenxxxxx/homeverb --json visibility,defaultBranchRef,url
 ```
 
-Authenticate with `gh` first if needed. The local bundle origin must be removed because it is not a GitHub destination. A source-only archive without `.git` is not interchangeable with the history-preserving ZIP or bundle.
+Review every intended commit and resolve divergence without discarding unrelated
+work. Audit all refs intended for public visibility, not just the branch tip.
+Removing a file or adding it to `.gitignore` leaves its historical contents intact.
+Keep secrets and private scanner reports outside the repository. See the
+[history-review requirements](open-source-readiness.md).
 
-## Safe retries and conflicts
+## Authorized push and verification
 
-Without `origin`, the helper attempts to create a new repository. If that name is already taken or creation fails, it stops rather than adopting an unrelated existing repository. After successful creation, a rerun can use the exact configured target origin only after checking private visibility. Pushes are normal fast-forward pushes; history conflicts stop rather than overwrite.
+After the applicable [checks](testing.md) pass and the owner authorizes the push,
+use a normal fast-forward update:
 
-If repository creation succeeds but a later push or label request fails, the helper reports failure and leaves the partial remote state intact. It does not delete a repository as compensation. Inspect the error, correct permissions, and rerun from the same checkout. GitHub labels are applied only after the uploaded `main` SHA has been verified.
+```bash
+git push origin main
+git rev-parse HEAD
+gh api repos/arrenxxxxx/homeverb/commits/main --jq .sha
+gh run list --repo arrenxxxxx/homeverb --branch main --limit 10
+```
 
-## Offline preview
+Require the remote SHA to equal the intended local commit. Inspect the runs for
+that exact SHA and their job conclusions; an older successful run or a local
+check is insufficient. Do not bypass failed checks or use force push as an
+integration shortcut. Branch protection and required checks must name the
+checks actually present in this repository.
+
+## Public source publication
+
+Finish all source gates in [open-source readiness](open-source-readiness.md) first.
+Then present the exact commit, license, Meiju scope, history-review results and
+repository settings for the owner's explicit publication decision. Changing
+visibility exposes reachable history and repository metadata, not only the latest
+source tree. Review issues, pull requests, releases and Actions artifacts/logs too.
+
+Change visibility through the repository settings only after that decision, then
+read back visibility and verify unauthenticated access to the intended source and
+license. Enable a working private security-reporting channel and update
+[SECURITY.md](../SECURITY.md) with the verified procedure. An API error is not
+evidence that a setting is enabled. Check the reporting path again after changing
+visibility because private and public repository behavior can differ.
+
+Public source is separate from creating tags, GitHub Releases, publishing crates,
+shipping APKs/IPA files or uploading diagnostics. Each requires its own authorized
+scope. Include third-party notices in distributed archives/binaries and record
+actual installation, signing and model acceptance separately from Mock tests.
+
+## Existing private bootstrap helper
+
+`scripts/publish_github.py` supports a clean checkout with no origin, or its exact
+already-configured private target. It checks the authenticated owner, repository
+visibility, commit syntax and clean status; it creates a private repository only
+when no origin exists, pushes without force, verifies the remote SHA, applies
+labels and verifies private visibility again. If a step fails it leaves partial
+remote state for inspection instead of deleting a repository as compensation.
+
+The offline preview does not authenticate, contact GitHub or change anything:
 
 ```bash
 python3 scripts/publish_github.py --dry-run
 ```
 
-This prints the intended target and actions without authenticating, creating a repository, pushing, or contacting GitHub. An offline preview or mocked test is not evidence of a successful publication.
-
-## Manual equivalent
-
-For a clean local Git repository with no origin:
-
-```bash
-gh repo create arrenxxxxx/homeverb --private --source . --remote origin \
-  --description "Cross-brand appliance control with an embedded core, CLI, mobile app, and local MCP. No persistent service."
-gh repo view arrenxxxxx/homeverb --json visibility,url
-# Continue only after checking that visibility is PRIVATE.
-git -c credential.helper= -c 'credential.helper=!gh auth git-credential' push -u origin main
-```
-
-The helper adds checks and label setup around this workflow. See the [official creation command](https://cli.github.com/manual/gh_repo_create). Remote CI, security reporting, branch protection, license choice, and any later public release still require separate verified actions.
+Do not use this helper after public conversion: it intentionally refuses a public
+repository. Do not loosen that guard to implement public releases. A future
+release helper needs its own reviewed workflow and explicit owner authorization.

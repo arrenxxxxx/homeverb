@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+### Open-source preparation
+
+- Remove superseded visual studies and their galleries while retaining application
+  assets and the self-contained 82-state prototype used by visual checks.
+- Add support, third-party attribution and source-publication requirements; update
+  security reporting and the existing-repository publishing procedure.
+- Keep the main license undecided at the owner's request. Meiju publication scope,
+  full-history review and private vulnerability intake remain release prerequisites.
+- Preserve runtime behavior, public APIs, schemas and device compatibility. This
+  preparation does not publish a repository, package or application release.
+
+The earlier entries below describe individual development milestones and their
+limits at that time. Use the [task status](docs/task-breakdown.md) and
+[compatibility record](docs/compatibility.md) for the current integrated scope.
+
 ### Meiju account-bound Core reads
 
 - Verify the protected local device and cloud connection before a default state request, retaining known model evidence and component identity.
