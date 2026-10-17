@@ -9,8 +9,9 @@ bootstrap helper remains available for its original purpose; it is not a public
 release tool.
 
 Open-source preparation is tracked in the [release checklist](open-source-readiness.md).
-The owner selected [Apache-2.0](../LICENSE). Meiju publication scope, full-history
-review, dependency rights, private security reporting and release-commit checks
+The owner selected [Apache-2.0](../LICENSE); preparation includes the existing
+Meiju integration. Full-history review, dependency rights, private security
+reporting and release-commit checks
 remain prerequisites. Preparing files or a local commit does not change visibility.
 
 Do not paste access tokens into chat, files or command arguments. Authenticate

@@ -21,7 +21,8 @@ inclusion are under Apache-2.0, as described in section 5 of the license. See
 assignment is introduced by this decision.
 
 License selection does not change repository visibility, publish a package,
-authorize appliance writes, or amend the personal-MVP Meiju admission in
-[ADR-0022](docs/adr/0022-meiju-community-cloud-admission.md). Provider permissions,
-third-party rights review, private vulnerability reporting and history review
+authorize appliance writes, or grant provider endorsement. The existing Meiju
+integration is included in the owner's project-wide preparation, as clarified in
+[ADR-0022](docs/adr/0022-meiju-community-cloud-admission.md). Third-party rights
+review, private vulnerability reporting and history review
 remain separate requirements in the [release checklist](docs/open-source-readiness.md).

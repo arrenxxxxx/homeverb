@@ -18,11 +18,12 @@ The per-source records identify upstream files and HomeVerb modifications. They
 remain authoritative when this summary is shorter than the implementation scope.
 The HomeVerb license does not replace these upstream obligations.
 
-The public Meiju app-compatibility material is admitted for the personal MVP only
-under [ADR-0022](docs/adr/0022-meiju-community-cloud-admission.md). Its presence in
-an open-source implementation does not establish provider approval, permission
-to use the service, or authorization to publish this integration. That release
-scope still needs a separate owner decision and review.
+The existing Meiju integration and pinned public app-compatibility material are
+included in the owner's project-wide open-source preparation; see the clarification
+in [ADR-0022](docs/adr/0022-meiju-community-cloud-admission.md). No duplicate
+integration-specific owner approval is required. The integration is unofficial;
+upstream source licensing does not establish provider endorsement or guaranteed
+service access. Preserve the applicable source licenses and notices.
 
 ## Flutter application scaffolding
 

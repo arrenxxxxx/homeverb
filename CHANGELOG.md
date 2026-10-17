@@ -16,8 +16,9 @@
   security reporting and the existing-repository publishing procedure.
 - Adopt Apache-2.0 following the owner's subsequent decision, with a root license,
   Rust/JavaScript package metadata and explicit contribution terms. Third-party
-  material retains its original licenses and notices. Meiju publication scope,
-  full-history review and private vulnerability intake remain release prerequisites.
+  material retains its original licenses and notices. Full-history review and private vulnerability intake remain release prerequisites.
+  Existing Meiju source is included in the owner-requested project scope without
+  a duplicate integration-specific approval.
 - Preserve runtime behavior, public APIs, schemas and device compatibility. This
   preparation does not publish a repository, package or application release.
 

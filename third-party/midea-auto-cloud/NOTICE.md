@@ -26,5 +26,6 @@ grants and trusted approval, with optional raw operator observations and bounded
 operations, restricted HTTPS endpoints, conservative write outcomes, redacted native data and synthetic tests.
 No default appliance keys, SmartHome routing, executable Lua downloads, automatic
 reauthentication, retries, or background work are copied. The public compatibility
-constants are admitted only for the personal MVP under ADR-0022. They do not
+constants are included in the owner-requested open-source preparation under
+ADR-0022's October 17 clarification. They do not
 protect user credentials and do not establish provider approval or model support.

@@ -28,10 +28,10 @@ writes.
 | Gate | Current status | Completion evidence |
 |---|---|---|
 | Project license | Complete: owner selected Apache-2.0 | Root LICENSE, license decision, README, Rust/JavaScript metadata and contribution terms agree; existing rights-holder notices remain intact |
-| Meiju publication scope | Blocked: ADR-0022 admits personal use only | Separate owner decision recording exact publicly distributable protocol material and review of provider/third-party restrictions; amend the ADR scope explicitly before publication |
+| Meiju source scope | Included in owner-requested project-wide preparation | Existing reviewed integration and upstream notices are included; no duplicate owner approval. Unofficial service access is not vendor endorsement. |
 | Third-party and asset obligations | Source inventory reviewed; historical marketing-image rights unresolved | See the [audit](open-source-audit.md): 320 Rust and 74 Dart/SDK entries, added Flutter notice, one historical promotional screenshot without redistribution evidence; binary notices remain separate |
 | Private vulnerability reporting | Blocked: no verified public reporter intake | Enable GitHub private reporting or a verified private alternative, confirm access and update SECURITY.md; the October 17 API read returned 404 |
-| History and sensitive data | Scans and candidate review complete through 84db14d; email/history disposition pending | Gitleaks 8.30.1 findings classified as fictional/prose; owner review of one non-noreply commit address and historical screenshot remains. Re-scan final public refs. |
+| History and sensitive data | Scans and candidate review complete through 84db14d; historical-image disposition pending | Gitleaks 8.30.1 findings classified as fictional/prose; the owner identified the commit address as their own; historical screenshot rights remain unresolved. Re-scan final public refs. |
 | Repository settings and CI | Pending release-commit verification | Owner-approved branch rules, required checks and available security scanning; exact commit's actual remote check results |
 | Public-facing status | Preparation complete, final release review pending | README/support/compatibility/changelog describe the chosen release scope without claiming untested models or signed phone acceptance |
 
@@ -41,23 +41,22 @@ scans returned five reviewed fictional/prose findings, not a zero-finding result
 Commit metadata and 522 historical image blobs received separate review. The
 report records limits and specific remaining decisions; it does not establish
 absence of every secret or grant third-party rights. Public Meiju material was
-traced to the pinned upstream source but still requires the publication decision.
+traced to the pinned upstream source and is included in the requested project scope.
 Do not blanket-ignore a source directory or print secret values into a report.
 
-## Proposed publication scope for the owner to review
+## Source publication scope
 
 Publish source and development instructions first, with Mock as the reproducible
 starting point and explicit experimental status for exact Meiju mappings. Do not
 claim official vendor endorsement, general brand compatibility, signed mobile
 release support or complete official-App parity.
 
-The current tree includes Meiju code and public app-compatibility constants. A
-Mock default, runtime switch or unused code path does not exclude that material
-from a public source archive or its history. The owner must decide whether to
-publish the reviewed integration or prepare a separately reviewed source scope.
-The latter requires reviewing history as well as build dependencies; merely
-removing a current file is insufficient. No integration was removed or reauthorized
-by this documentation phase.
+The owner-requested source scope includes the existing Meiju code and pinned
+public app-compatibility constants. Keep their provenance and license notices.
+Do not turn the earlier personal-MVP wording into a new approval requirement.
+A Mock default does not remove this code from an archive or change its unofficial
+status. No new integration, credential use or physical write is authorized by
+this source-preparation scope.
 
 ## Git and GitHub sequence
 
