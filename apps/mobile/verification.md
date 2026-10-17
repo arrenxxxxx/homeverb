@@ -1,5 +1,86 @@
 # Flutter implementation verification
 
+## Home power feedback and appliance artwork: October 17, 2026
+
+Native home/search/room cards now use observed power colors and separate icons:
+orange on, gray off, and neutral disabled unknown state. The affected shortcut
+shows the existing three-stroke pulse throughout device preparation, execution and
+the one foreground follow-up read. Duplicate submissions are blocked, observations
+remain unchanged until a read, and routine accepted/verified home snackbars are
+removed. Uncertain/failed outcome messages and original history remain available.
+
+Card loading locally inspects reviewed control options or exact native-session
+grants, respects the selected transport and reads cached observations only. It
+does not prepare authority, refresh accounts, contact appliances or fall through
+to live reads. The actual tap prepares/rechecks the selected session before the
+existing Core plan/execute path. Read-only/missing/ambiguous whole-device power
+actions have no shortcut; refrigerator compartment power is not an appliance
+switch. Foreign replies and lifecycle changes cannot install late choices.
+
+The owner-invoked imagegen workflow generated separate transparent refrigerator
+and dishwasher product images, each followed by an extraction refinement. Both
+selected RGBA PNGs are 1254-square, preserved under `assets/` and decoded at bounded
+card dimensions. Decorative selection uses component/capability metadata, never
+aliases or brands; unknown types have a generic icon. The [artwork record](artwork.md)
+contains the built-in generation mode, exact generation prompts and refinement
+scope. Fictional rendered cards and the actual emulator home were inspected at
+their display sizes; full-source matte-edge remnants are documented there.
+
+Executed from `apps/mobile` using pinned Flutter 3.47.7:
+
+- `fvm flutter analyze`: passed with no issues.
+- `fvm dart format --output=none --set-exit-if-changed lib test`: 60 files,
+  unchanged.
+- `fvm flutter test test/device_cards_test.dart test/climate_controls_test.dart
+  test/climate_rows_test.dart test/session_permissions_test.dart
+  test/accessibility_test.dart test/localization_test.dart test/receipts_test.dart
+  test/account_inventory_test.dart test/current_contract_test.dart
+  test/cleanup_test.dart test/compartment_overview_test.dart
+  test/organization_test.dart --reporter expanded`: 60 passed. This run included
+  eight initial card tests plus existing control, lifecycle, local account,
+  uncertainty, cleanup, compartment and accessibility regressions.
+- `fvm flutter test test/device_cards_test.dart test/native_test.dart
+  --reporter expanded`: 20 passed after adding the late/foreign inspection case
+  and a real native Mock quick-power grant assertion. Nine card tests and eleven
+  native tests use fictional material and isolated profiles, without providers.
+- A card-test run with
+  `--dart-define=HOMEVERB_CARD_CAPTURE=/private/tmp/homeverb-device-cards.png`
+  produced a locally inspected image after actual font loading and image decoding.
+  The card tests cover 390-wide normal text and 320-wide 2x text/high contrast,
+  absent unsupported shortcuts, unchanged pending state and one command/read.
+- `fvm flutter build apk --release --target-platform android-arm64,android-x64
+  --dart-define=HOMEVERB_ADAPTER=midea.meiju`: passed in 18.9 seconds. An initial
+  overlapping test/build used test-generated plugin registration and failed;
+  the successful build ran after tests completed. Archive inspection excludes
+  the integration-test plugin from the delivery APK.
+
+Artifact:
+`output/flutter-verification/android/homeverb-0.2.0-meiju-home-cards.apk`,
+70,573,038 bytes, SHA-256
+`a251cd5e11cf5abc4896ad81fccf241f1718b3bfaf200e1f731a71f7e0ae515f`.
+Its adjacent verifier report records base source `fd42ec3` plus these uncommitted
+changes (`source_dirty: true`), unchanged native AAR
+`d43145c239cb13c993198dc31dbc28bedc75f884bc6270f06e682138f3c2fd6b`,
+two complete ABIs, 17 native exports per ABI, backup exclusion, development
+signature and 16 KiB ZIP/Core ELF alignment. All archive checks passed.
+
+`adb -s emulator-5586 install -r` succeeded on the existing host-GPU Android 15
+arm64 AVD. Cold start returned `Status: ok` in 1236 ms. Six saved cards and Chinese
+locale survived. Local screenshots show four AC shortcuts in their cached off
+state, distinct refrigerator/dishwasher images and no power shortcut on those two
+appliances. The home screen was scrolled only; no appliance command, provider
+refresh, uninstall, data reset or integration-test APK was used. Cached state is
+not a fresh or physical-state verification. The H5 server remains stopped.
+
+Seven shared presentation tests, docs (140 Markdown files), contracts (20 schemas,
+45 positive/250 negative fixtures), repository and existing commit checks passed;
+the contract check used the temporary environment with declared dependencies.
+The full Flutter visual suite, Rust workspace, native Android smoke and physical
+phone/appliance acceptance were not rerun for this Dart/assets-only phase.
+Native API 1.22.0, SQLite 5, protected payload 3, authority, routing, adapter
+support and outcome semantics are unchanged. No push, upload or publication
+occurred.
+
 ## Power state and activity feedback: October 17, 2026
 
 The climate power control now distinguishes observed on/off state using orange

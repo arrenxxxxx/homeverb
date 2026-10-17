@@ -33,6 +33,177 @@ class HomeController extends ChangeNotifier {
   bool get isForeground => _foreground;
   int get controlEpoch => _readEpoch;
   List<Json>? _controlPolicies;
+  final Map<(String, String), Set<bool>> _cardPowerChoices = {};
+
+  /// Local display choices, not authorization. Selection rechecks the session.
+  Set<bool> cardPowerChoices(String device) {
+    if (!_foreground) return {};
+    final route = preferences.route(device);
+    return {
+      for (final entry in _cardPowerChoices.entries)
+        if (entry.key.$1 == device &&
+            (route == 'auto' || route == entry.key.$2))
+          ...entry.value,
+    };
+  }
+
+  Future<void> _loadCardPower() async {
+    _cardPowerChoices.clear();
+    final epoch = _readEpoch, client = core;
+    void requireCurrent() {
+      if (!_foreground || epoch != _readEpoch || client != core) {
+        throw NativeFailure('CANCELLED', 'Card inspection was cancelled.');
+      }
+    }
+
+    for (final card in cards) {
+      requireCurrent();
+      final device = card['device'] as Json;
+      final parts = device['components'] as List? ?? [];
+      // A component power property is not necessarily a whole-appliance switch.
+      if (device['support_status'] == 'unsupported' ||
+          parts.length != 1 ||
+          !(parts.single['capabilities'] as List? ?? []).contains('power'))
+        continue;
+      final id = device['id'] as String;
+      final componentId = parts.single['id'] as String;
+      final choices = <String, Set<bool>>{};
+      try {
+        final connections = device['connections'] as List? ?? [];
+        if (_canPrepareControls && supports('inspect_control_options')) {
+          final cloud = connections.where((c) => c['transport'] == 'cloud');
+          if (cloud.length != 1) continue;
+          final connection = cloud.single;
+          final inspected =
+              await client.call('inspect_control_options', {
+                    'device_id': id,
+                    'connection_id': connection['id'],
+                  })
+                  as Json;
+          requireCurrent();
+          if (inspected['device_id'] != id ||
+              inspected['connection_id'] != connection['id'])
+            continue;
+          choices['cloud'] = {
+            for (final choice in SessionPermission.choices(inspected))
+              if (choice.component == componentId &&
+                  choice.capability == 'power' &&
+                  choice.action == 'set' &&
+                  choice.parameter == 'state' &&
+                  choice.value is bool)
+                choice.value as bool,
+          };
+        } else {
+          final descriptor =
+              await client.call('describe_device', {'device': id}) as Json;
+          requireCurrent();
+          if (descriptor['device']?['id'] != id) continue;
+          final power = (descriptor['capabilities'] as List? ?? [])
+              .where(
+                (cap) =>
+                    cap['id'] == 'power' &&
+                    (cap['component_id'] == null ||
+                        cap['component_id'] == componentId),
+              )
+              .singleOrNull;
+          final action = power?['actions']?['set'] as Json?;
+          final parameters = action?['parameters'] as Map?;
+          final state = parameters?['properties']?['state'] as Map?;
+          if (action?['risk'] != 'low' ||
+              action?['idempotency'] != 'set_value' ||
+              power?['properties']?['state']?['writable'] == false ||
+              parameters?['type'] != 'object' ||
+              parameters?['additionalProperties'] != false ||
+              !listEquals(parameters?['required'] as List?, ['state']) ||
+              (parameters?['properties'] as Map?)?.length != 1 ||
+              parameters!.keys.any(
+                (key) => !{
+                  'type',
+                  'properties',
+                  'required',
+                  'additionalProperties',
+                  'minProperties',
+                  'maxProperties',
+                  'description',
+                  'title',
+                }.contains(key),
+              ) ||
+              (parameters['minProperties'] as num? ?? 0) > 1 ||
+              (parameters['maxProperties'] as num? ?? 1) < 1 ||
+              state?['type'] != 'boolean' ||
+              state!.keys.any(
+                (key) =>
+                    !{'type', 'enum', 'description', 'title'}.contains(key),
+              ))
+            continue;
+          for (final connection in connections) {
+            final transport = connection['transport'] as String;
+            if (!(action!['transports'] as List).contains(transport)) continue;
+            List grants = [
+              {'argument_schema': true},
+            ];
+            if (client is NativeSessionClient) {
+              if (!supports('inspect_session_grants')) continue;
+              final policy =
+                  await client.call('inspect_session_grants', {
+                        'device_id': id,
+                        'connection_id': connection['id'],
+                      })
+                      as Json;
+              requireCurrent();
+              if (policy['device_id'] != id ||
+                  policy['connection_id'] != connection['id'] ||
+                  policy['transport'] != transport ||
+                  policy['source'] != 'session_policy' ||
+                  policy['provider_authorization'] != 'not_checked')
+                continue;
+              grants = (policy['grants'] as List)
+                  .where(
+                    (grant) =>
+                        grant['component_id'] == componentId &&
+                        grant['capability'] == 'power' &&
+                        grant['action'] == 'set',
+                  )
+                  .toList();
+            }
+            choices.putIfAbsent(transport, () => {}).addAll({
+              for (final value in [false, true])
+                if ((state['enum'] == null ||
+                        (state['enum'] as List).contains(value)) &&
+                    grants.any(
+                      (grant) => _matchesDisplayGrant(
+                        grant['argument_schema'],
+                        {'state': value},
+                      ),
+                    ))
+                  value,
+            });
+          }
+        }
+        requireCurrent();
+        for (final entry in choices.entries) {
+          _cardPowerChoices[(id, entry.key)] = entry.value;
+        }
+        final cached =
+            await client.call('read_state', {
+                  'device': id,
+                  'component': componentId,
+                  'connection': preferences.route(id),
+                  'cached': true,
+                })
+                as Json;
+        requireCurrent();
+        if (cached['device_id'] == id &&
+            cached['component_id'] == componentId) {
+          snapshots[id] = cached;
+          _componentSnapshots[(id, componentId)] = cached;
+        }
+      } catch (_) {
+        // Optional local inspection/cache failures never trigger live fallback.
+        requireCurrent();
+      }
+    }
+  }
 
   /// Presentation-only intersection. Core still plans and validates every write.
   bool canControlValue(
@@ -287,6 +458,7 @@ class HomeController extends ChangeNotifier {
     ]);
     rooms = (results[0] as List).cast<Json>();
     cards = (results[1] as List).cast<Json>();
+    await _loadCardPower();
   }
 
   Future<bool> initialize() => perform(() async {

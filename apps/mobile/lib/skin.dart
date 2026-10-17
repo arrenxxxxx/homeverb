@@ -141,6 +141,16 @@ Color readableInk(BuildContext context, Color color) =>
     ? (color.computeLuminance() >= .5 ? Colors.white : Colors.black)
     : color;
 
+Color powerBackground(BuildContext context, bool? state) =>
+    MediaQuery.highContrastOf(context)
+    ? (state == true ? Colors.white : Colors.black)
+    : (state == true ? accent : const Color(0xff595d5a));
+
+Color powerForeground(BuildContext context, bool? state) =>
+    MediaQuery.highContrastOf(context) && state == true
+    ? Colors.black
+    : const Color(0xfffffaf1);
+
 const windowFieldTextStyle = TextStyle(
   fontFamily: 'Inter',
   fontSize: 15,

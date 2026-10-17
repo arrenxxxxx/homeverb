@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'skin.dart';
 import 'localization.dart';
+import 'device_presentation.dart';
 
 typedef ActionHandler = void Function(String label);
 
@@ -708,14 +709,24 @@ Widget product(String key, {double size = 80}) {
     'lamp': Size(87, 137),
     'tv': Size(172, 111),
     'sensor': Size(84, 98),
+    'refrigerator': Size(1254, 1254),
+    'dishwasher': Size(1254, 1254),
   };
   final source = dimensions[key];
-  if (source == null) return Center(child: Glyph(key, size: 52, color: accent));
+  if (source == null)
+    return Center(
+      child: key == 'appliance'
+          ? const Icon(Icons.devices_other_outlined, size: 52, color: accent)
+          : Glyph(key, size: 52, color: accent),
+    );
+  final asset = {'refrigerator', 'dishwasher'}.contains(key)
+      ? 'assets/$key-v1.png'
+      : 'assets/$key.png';
   return LayoutBuilder(
     builder: (context, constraints) {
       if (!constraints.hasBoundedWidth || !constraints.hasBoundedHeight) {
         return Image.asset(
-          'assets/$key.png',
+          asset,
           fit: BoxFit.contain,
           filterQuality: FilterQuality.high,
         );
@@ -743,7 +754,10 @@ Widget product(String key, {double size = 80}) {
             width: width,
             height: height,
             child: Image.asset(
-              'assets/$key.png',
+              asset,
+              cacheWidth: source.width > 1000
+                  ? (width * ratio).ceil().clamp(1, source.width.toInt())
+                  : null,
               fit: BoxFit.fill,
               filterQuality: FilterQuality.high,
             ),
@@ -1172,10 +1186,12 @@ class DeviceGrid extends StatelessWidget {
     this.cached = false,
     this.large = false,
     this.data,
+    this.presentations = const {},
     super.key,
   });
   final List<String> keys;
   final List<List<Object>>? data;
+  final Map<String, DevicePresentation> presentations;
   final ActionHandler onAction;
   final bool cached, large;
   @override
@@ -1199,6 +1215,7 @@ class DeviceGrid extends StatelessWidget {
               child: DeviceTile(
                 keys[i],
                 data: data?[i],
+                presentation: presentations[keys[i]],
                 cached: cached,
                 onAction: onAction,
                 large: columns == 1,
@@ -1219,30 +1236,74 @@ class DeviceTile extends StatelessWidget {
     this.large = false,
     this.compactHeight = 233,
     this.data,
+    this.presentation,
     super.key,
   });
   final String deviceKey;
   final double compactHeight;
   final List<Object>? data;
+  final DevicePresentation? presentation;
   final ActionHandler onAction;
   final bool cached, large;
   @override
   Widget build(BuildContext context) {
-    final kind = sampleNames.containsKey(deviceKey) ? deviceKey : 'ac',
-        d = data ?? sampleNames[kind]!;
-    final dark = kind == 'ac',
+    final kind =
+            presentation?.artwork ??
+            (sampleNames.containsKey(deviceKey) ? deviceKey : 'ac'),
+        d = data ?? sampleNames[kind] ?? sampleNames['ac']!;
+    final dark = {
+          'ac',
+          'refrigerator',
+          'dishwasher',
+          'appliance',
+        }.contains(kind),
         color = dark ? const Color(0xfffffaf1) : ink,
         secondary = dark ? const Color(0xffd3d1ca) : muted;
     final scale = MediaQuery.textScalerOf(context).scale(13) / 13;
     final largeText = scale > 1.3;
     final active = kind != 'tv' && !cached;
+    final state = presentation?.power;
+    final updating = presentation?.updating ?? false;
+    final powerEnabled = (presentation?.powerEnabled ?? true) && !updating;
+    final powerAction = state == null
+        ? 'Power unknown'
+        : state
+        ? 'Turn Off'
+        : 'Turn On';
+    final powerColor = presentation == null
+        ? (active ? accent : const Color(0xffe0ddd5))
+        : powerBackground(context, state);
+    final powerInk = presentation == null
+        ? (active ? Colors.white : ink)
+        : powerForeground(context, state);
     Widget power() => Semantics(
       label: localize(context, UiMessage('Power {name}', {'name': d[0]})),
       button: true,
+      enabled: powerEnabled,
+      toggled: state,
+      liveRegion: updating,
+      value: presentation == null
+          ? null
+          : localize(
+              context,
+              updating
+                  ? 'Updating device…'
+                  : state == null
+                  ? 'Power unknown'
+                  : state
+                  ? 'Powered on'
+                  : 'Powered off',
+            ),
       child: Tooltip(
-        message: localize(context, UiMessage('Power {name}', {'name': d[0]})),
+        message: localize(
+          context,
+          presentation == null
+              ? UiMessage('Power {name}', {'name': d[0]})
+              : powerAction,
+        ),
         child: InkWell(
-          onTap: () => onAction('power:$deviceKey'),
+          key: ValueKey('card-power:$deviceKey'),
+          onTap: powerEnabled ? () => onAction('power:$deviceKey') : null,
           borderRadius: BorderRadius.circular(24),
           child: SizedBox.square(
             dimension: 48,
@@ -1252,14 +1313,24 @@ class DeviceTile extends StatelessWidget {
                 height: large ? 48 : 42,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: active ? accent : const Color(0xffe0ddd5),
+                  color: powerColor,
+                  border:
+                      presentation != null && MediaQuery.highContrastOf(context)
+                      ? Border.all(color: Colors.white)
+                      : null,
                 ),
                 child: Center(
-                  child: Glyph(
-                    'power',
-                    size: large ? 24 : 22,
-                    color: active ? Colors.white : ink,
-                  ),
+                  child: updating
+                      ? OperationPulse(color: powerInk, size: large ? 24 : 22)
+                      : presentation != null && state != true
+                      ? Icon(
+                          state == false
+                              ? Icons.power_off_outlined
+                              : Icons.power_settings_new,
+                          size: large ? 24 : 22,
+                          color: powerInk,
+                        )
+                      : Glyph('power', size: large ? 24 : 22, color: powerInk),
                 ),
               ),
             ),
@@ -1412,7 +1483,7 @@ class DeviceTile extends StatelessWidget {
                     ),
             ),
           ),
-          if (kind != 'sensor')
+          if (presentation?.showPower ?? (kind != 'sensor'))
             Positioned(
               right: large ? 14 : 8,
               bottom: large ? 15 : 19,

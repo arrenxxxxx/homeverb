@@ -45,10 +45,27 @@ there is no page-edge loading bar. Reduced motion keeps the marker static, and
 background or inactive subtrees stop its animation. Duplicate controls remain
 disabled while the operation is pending.
 
+Home card power buttons share these observed colors and icons, with a pulse inside
+the affected button during preparation, execution and the follow-up read. Local
+startup inspection uses reviewed control options or current session grants and
+cached observations only; it does not refresh every account or contact appliances.
+Unknown power is neutral and disabled. Devices without a supported whole-device
+power action have no shortcut, including the current refrigerator compartments
+and dishwasher. A tap still prepares and rechecks the exact session before Core
+plans and executes the command. Routine accepted/verified home snackbars are removed;
+uncertain/failed outcomes and history remain available.
+
+Device artwork follows component/capability metadata rather than aliases or brands.
+Refrigerators and dishwashers use distinct transparent product renderings; unknown
+types use a generic device symbol. The [artwork record](artwork.md) contains the
+built-in image-generation prompts, refinement scope and actual source dimensions.
+Large source images decode at the card's bounded physical pixel size.
+
 After a command, one bounded foreground read updates observations without rewriting
 its receipt or retrying the write. Navigation, device/component changes and background
 transitions prevent late reads. The outcome is shown inline with an optional View
-Details action; quick card power stays on the home page with a local status message.
+Details action; quick card power stays on the home page and reports uncertain or
+failed outcomes without a routine acceptance message.
 
 Account details show nullable historical complete-inventory time. Inspect Saved
 Inventory exposes per-binding duplicate record inspection, including unpublished

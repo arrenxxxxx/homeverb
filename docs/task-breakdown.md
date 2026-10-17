@@ -28,6 +28,16 @@ local success; earlier runs were blocked by the repository's billing limit.
 
 ## Task status
 
+The home-card revision extends observed on/off colors and per-button pending
+feedback, hides unsupported whole-device shortcuts and adds distinct generated
+refrigerator/dishwasher artwork. Card loading inspects only local reviewed
+options/session grants and cached state; execution still prepares/rechecks the
+current session. The current refrigerator and dishwasher gain no new control
+admission. Prompt provenance and exact checks/artifact delivery are recorded in
+the [artwork](../apps/mobile/artwork.md) and
+[verification](../apps/mobile/verification.md) records. Physical-phone and new
+appliance-control acceptance remain open.
+
 The owner unlocked the existing Android emulator, and the ordinary Meiju app
 launched successfully. The H5 preview server is stopped. The native app initially
 showed no connected accounts and was left at Meiju connection for owner sign-in;

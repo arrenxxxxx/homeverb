@@ -16,6 +16,7 @@ import 'compartment_controls.dart';
 import 'controller.dart';
 import 'diagnostics_export.dart';
 import 'diagnostics_view.dart';
+import 'device_presentation.dart';
 import 'controls.dart';
 import 'native_client.dart';
 import 'preferences.dart';
@@ -130,6 +131,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   LocalCleanup? cleanupScope;
   bool editingAccountName = false;
   bool exporting = false;
+  String? quickPowerDevice;
   String connectionLabel = 'Meiju account';
   bool _disposed = false;
   int navigation = 0;
@@ -228,7 +230,8 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           epoch == navigation &&
           id == 'D01' &&
           c.isForeground &&
-          foreground == activityEpoch) {
+          foreground == activityEpoch &&
+          !['accepted', 'verified'].contains(c.receipt?['status'])) {
         final context = navigator.currentContext;
         if (context != null)
           ScaffoldMessenger.of(context).showSnackBar(
@@ -451,11 +454,35 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     if (label.startsWith('open:') ||
         label.startsWith('power:') ||
         label.startsWith('menu:')) {
+      if (c.busy || quickPowerDevice != null) return;
       final epoch = navigation,
-          device = label.substring(label.indexOf(':') + 1);
-      if (!await c.selectDevice(device)) return;
-      if (!mounted || epoch != navigation) return;
-      if (label.startsWith('power:')) {
+          foreground = activityEpoch,
+          device = label.substring(label.indexOf(':') + 1),
+          power = label.startsWith('power:');
+      if (power) {
+        final state =
+            c.snapshots[device]?['observations']?['power.state']?['value'];
+        if (state is! bool || !c.cardPowerChoices(device).contains(!state))
+          return;
+        setState(() => quickPowerDevice = device);
+      }
+      try {
+        if (!await c.selectDevice(device)) return;
+        if (!mounted ||
+            epoch != navigation ||
+            foreground != activityEpoch ||
+            !c.isForeground)
+          return;
+        if (!power) {
+          await go(
+            label.startsWith('menu:')
+                ? 'D05'
+                : c.hasCompartmentOverview
+                ? 'C08'
+                : 'C01',
+          );
+          return;
+        }
         final state = c.observed('power.state');
         if (state is! bool) {
           c.error = NativeFailure(
@@ -465,15 +492,10 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           changed();
           return;
         }
+        if (!c.canControlValue('power', 'set', 'state', !state)) return;
         await executeOnDevice('power', 'set', {'state': !state});
-      } else {
-        await go(
-          label.startsWith('menu:')
-              ? 'D05'
-              : c.hasCompartmentOverview
-              ? 'C08'
-              : 'C01',
-        );
+      } finally {
+        if (power && mounted) setState(() => quickPowerDevice = null);
       }
       return;
     }
@@ -1482,8 +1504,33 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             : 'Saved observation',
       ];
     }).toList(),
+    presentations: {
+      for (final card in c.visibleCards)
+        card['device']['id'] as String: cardPresentation(
+          card['device'] as Json,
+        ),
+    },
     onAction: action,
   );
+  DevicePresentation cardPresentation(Json device) {
+    final deviceId = device['id'] as String;
+    final observed =
+        c.snapshots[deviceId]?['observations']?['power.state']?['value'];
+    final state = observed is bool ? observed : null;
+    final choices = c.cardPowerChoices(deviceId);
+    return DevicePresentation(
+      artwork: deviceArtwork(device),
+      power: state,
+      showPower: choices.isNotEmpty,
+      powerEnabled:
+          !c.busy &&
+          quickPowerDevice == null &&
+          state != null &&
+          choices.contains(!state),
+      updating: quickPowerDevice == deviceId,
+    );
+  }
+
   Widget? special() => specialFor(id);
   Object roomDeviceCount(String? room) {
     final count = c.cards
@@ -2041,7 +2088,8 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             values: values,
             onChanged: changed,
             busy: c.busy,
-            showOperationProgress: content is! ClimateControls,
+            showOperationProgress:
+                content is! ClimateControls && quickPowerDevice == null,
             error: id == 'C10' && actionCapability != null ? null : c.error,
           ),
         ),

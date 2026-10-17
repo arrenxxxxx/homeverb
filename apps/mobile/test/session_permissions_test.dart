@@ -181,11 +181,7 @@ void main() {
       expect(await c.initialize(), true);
       expect(
         old.requests.any(
-          (v) => [
-            'refresh_account',
-            'inspect_control_options',
-            'discover',
-          ].contains(v['method']),
+          (v) => ['refresh_account', 'discover'].contains(v['method']),
         ),
         false,
       );

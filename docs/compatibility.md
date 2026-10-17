@@ -18,6 +18,16 @@ control bridge or service has been added to work around these boundaries.
 
 ## October 17 Flutter control presentation
 
+Home cards now share observed power colors and local activity feedback and select
+distinct refrigerator/dishwasher artwork from component/capability metadata. Local
+control-option/session-grant inspection filters whole-device shortcuts; a readable
+power property or refrigerator compartment does not establish control support.
+Cached startup reads do not refresh provider accounts or add polling. Commands
+still prepare/recheck exact authority and use the existing Core path. The
+[artwork record](../apps/mobile/artwork.md) documents generated assets, not new
+adapter or model support. Native API 1.22, SQLite 5 and protected payload 3 are
+unchanged; current refrigerator/dishwasher cards gain no new write operation.
+
 The subsequent presentation revision distinguishes observed power-on/off colors,
 removes routine accepted/verified bottom cards and replaces indeterminate page-edge
 bars with local three-stroke activity feedback. Failed/unknown/partial explanations

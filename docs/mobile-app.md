@@ -73,6 +73,18 @@ Each device belongs to at most one room in the local installation. Users can cre
 
 Use a two-column card grid on phones where space allows, adapting to narrow widths and larger text. Each card contains the device icon, local name, key observed state, freshness information, and a supported common action. Tapping the card opens Device Controls; a separate quick-control target sends the specific action. Long-press exposes room assignment, ordering, favorite/pin, and rename options; provide the same options through an accessible menu.
 
+Implemented native cards select decorative artwork from component/capability
+metadata, including distinct refrigerator and dishwasher product images. Names,
+brands and artwork do not select commands. A quick power shortcut requires a
+single-component whole-device action and exact reviewed options or native session
+grants for the chosen route. Refrigerator compartment power readings do not create
+an appliance switch. Local startup inspection and cached reads do not contact the
+provider or refresh accounts; actual execution rechecks the current session.
+Observed on/off states use orange/gray and separate icons, unknown state disables
+the shortcut, and pending preparation/command/read uses a local pulse without
+optimistic color changes. Accepted/verified shortcuts have no routine bottom
+message; failed/uncertain outcomes and history retain their meaning.
+
 Favorites can be pinned within the current filter without changing room membership. An empty room offers Add Device and Move Existing Devices. A stale snapshot, unknown state, and a failed connection check remain distinguishable; an old snapshot alone does not prove that a device is offline.
 
 Use bottom sheets or dialogs for quick controls, room assignment, action confirmation, sharing-scope confirmation, permissions, and short result messages. Keep the main control prominent and reveal secondary capabilities as needed. Color supplements text and icons rather than being the only status cue.

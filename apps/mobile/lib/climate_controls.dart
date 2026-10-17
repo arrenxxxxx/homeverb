@@ -376,16 +376,16 @@ class _ClimateControlsState extends State<ClimateControls>
                       key: const ValueKey('climate-power'),
                       style: FilledButton.styleFrom(
                         minimumSize: const Size(124, 40),
-                        backgroundColor: powerColor(context, power),
-                        foregroundColor:
-                            MediaQuery.highContrastOf(context) && power
-                            ? Colors.black
-                            : white,
-                        disabledBackgroundColor: powerColor(context, power),
-                        disabledForegroundColor:
-                            MediaQuery.highContrastOf(context) && power
-                            ? Colors.black
-                            : white,
+                        backgroundColor: powerBackground(context, power),
+                        foregroundColor: powerForeground(context, power),
+                        disabledBackgroundColor: powerBackground(
+                          context,
+                          power,
+                        ),
+                        disabledForegroundColor: powerForeground(
+                          context,
+                          power,
+                        ),
                         side: MediaQuery.highContrastOf(context)
                             ? const BorderSide(color: Colors.white)
                             : BorderSide.none,
@@ -395,9 +395,7 @@ class _ClimateControlsState extends State<ClimateControls>
                           : null,
                       icon: updating(powerChoice)
                           ? OperationPulse(
-                              color: MediaQuery.highContrastOf(context) && power
-                                  ? Colors.black
-                                  : white,
+                              color: powerForeground(context, power),
                             )
                           : Icon(
                               power
@@ -498,11 +496,6 @@ class _ClimateControlsState extends State<ClimateControls>
       ),
     );
   }
-
-  Color powerColor(BuildContext context, bool power) =>
-      MediaQuery.highContrastOf(context)
-      ? (power ? Colors.white : Colors.black)
-      : (power ? accent : const Color(0xff595d5a));
 
   @override
   Widget build(BuildContext context) {

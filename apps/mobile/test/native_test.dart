@@ -27,6 +27,7 @@ void main() {
         expect(await state.saveRoom('Study'), true);
         expect(await state.saveRoom('Study'), false);
         final id = state.cards.single['device']['id'] as String;
+        expect(state.cardPowerChoices(id), {false, true});
         await state.selectDevice(id);
         expect(await state.refresh(), true);
         final before = state.observed('climate.target_temperature');
