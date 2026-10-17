@@ -31,7 +31,19 @@ read-only observations remain distinct from actionable controls.
 
 The climate page omits the reading-time footer and the trailing Refresh State,
 Device information and Recent Operations buttons. Settings retains operation
-history; command results still appear inline when available.
+history. Accepted/verified receipts no longer add a bottom card; failed, unknown
+and partial outcomes retain their inline explanation and details. All receipts
+remain available in history with their original meaning.
+
+The power button shows observed Powered on/Powered off labels, warm orange when
+on and neutral gray when off, with distinct icons and an opposite-action tooltip.
+Pending commands do not change observed state. A small three-stroke pulse appears
+inside the power button, temperature heading or affected setting row until the
+command and its existing single follow-up read finish. Other operations use the
+same pulse beside a short activity label, including inside sheets and dialogs;
+there is no page-edge loading bar. Reduced motion keeps the marker static, and
+background or inactive subtrees stop its animation. Duplicate controls remain
+disabled while the operation is pending.
 
 After a command, one bounded foreground read updates observations without rewriting
 its receipt or retrying the write. Navigation, device/component changes and background

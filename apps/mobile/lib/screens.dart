@@ -50,6 +50,7 @@ class ScreenView extends StatelessWidget {
     this.testChrome = false,
     this.preview = false,
     this.busy = false,
+    this.showOperationProgress = true,
     this.error,
     super.key,
   });
@@ -64,7 +65,7 @@ class ScreenView extends StatelessWidget {
   final Widget? home;
   final Json Function(String id)? resolveScreen;
   final Widget? Function(String id)? resolveHome;
-  final bool testChrome, preview, busy;
+  final bool testChrome, preview, busy, showOperationProgress;
   final Object? error;
   Widget blocks(List b) => Blocks(
     b,
@@ -214,6 +215,11 @@ class ScreenView extends StatelessWidget {
                                 ),
                               ),
                               SizedBox(height: dialog ? 17 : 21),
+                              if (busy && showOperationProgress)
+                                const Padding(
+                                  padding: EdgeInsets.only(bottom: 12),
+                                  child: OperationProgress(),
+                                ),
                               content,
                               if (error != null)
                                 Semantics(
@@ -230,13 +236,6 @@ class ScreenView extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (busy)
-                  const Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    child: OperationProgress(),
-                  ),
               ],
             );
           }
@@ -405,7 +404,7 @@ class ScreenView extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 9),
                                   ],
-                                  if (busy)
+                                  if (busy && showOperationProgress)
                                     const Padding(
                                       padding: EdgeInsets.only(bottom: 12),
                                       child: OperationProgress(),

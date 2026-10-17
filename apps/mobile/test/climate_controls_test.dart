@@ -9,6 +9,7 @@ import 'package:homeverb_mobile/main.dart';
 import 'package:homeverb_mobile/native_client.dart';
 import 'package:homeverb_mobile/preferences.dart';
 import 'package:homeverb_mobile/screens.dart' hide Json;
+import 'package:homeverb_mobile/skin.dart';
 import 'controls_test.dart' show ControlsFixture, capability, setter, example;
 
 class ClimateFixture extends ControlsFixture {
@@ -53,8 +54,10 @@ class ClimateFixture extends ControlsFixture {
   }
   String outcome = 'accepted';
   bool failRead = false;
+  Completer<void>? readGate;
   @override
   Future<dynamic> call(String method, [Json fields = const {}]) async {
+    if (method == 'read_state') await readGate?.future;
     if (method == 'read_state' && failRead) {
       calls.add({'method': method, ...fields});
       throw NativeFailure('STATE_UNAVAILABLE', 'Fixture read failure.');
@@ -106,6 +109,96 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   }
+
+  testWidgets(
+    'power feedback stays local and observed until the post-command read',
+    (tester) async {
+      final (core, c, _) = await open(tester);
+      final power = find.byKey(const ValueKey('climate-power'));
+      Color? background() => tester
+          .widget<FilledButton>(power)
+          .style!
+          .backgroundColor!
+          .resolve({});
+      expect(find.text('Powered on'), findsOneWidget);
+      final onColor = background();
+      core.executionGate = Completer<void>();
+      core.readGate = Completer<void>();
+      core.calls.clear();
+      await tester.tap(power);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(c.observed('power.state'), true);
+      expect(find.text('Turning off…'), findsOneWidget);
+      expect(
+        find.descendant(of: power, matching: find.byType(OperationPulse)),
+        findsOneWidget,
+      );
+      expect(find.byType(OperationProgress), findsNothing);
+      expect(find.byType(LinearProgressIndicator), findsNothing);
+      expect(tester.widget<FilledButton>(power).onPressed, isNull);
+      expect(
+        tester
+            .widget<ChoiceChip>(
+              find.byKey(const ValueKey('climate-option:mode:dry')),
+            )
+            .onSelected,
+        isNull,
+      );
+      core.executionGate!.complete();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(c.observed('power.state'), true);
+      expect(find.text('Turning off…'), findsOneWidget);
+      core.readGate!.complete();
+      await tester.pumpAndSettle();
+      expect(find.byType(OperationPulse), findsNothing);
+      expect(find.text('Powered off'), findsOneWidget);
+      expect(background(), isNot(onColor));
+      expect(c.receipt!['status'], 'accepted');
+      expect(find.text('Accepted'), findsNothing);
+      expect(find.text('View Details'), findsNothing);
+      expect(core.calls.where((v) => v['method'] == 'execute').length, 1);
+      expect(core.calls.where((v) => v['method'] == 'read_state').length, 1);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
+  testWidgets('mode activity marks only its row without changing selection', (
+    tester,
+  ) async {
+    final (core, c, _) = await open(tester);
+    core.executionGate = Completer<void>();
+    await tester.tap(find.byKey(const ValueKey('climate-option:mode:dry')));
+    await tester.pump();
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('climate-row:Mode')),
+        matching: find.byType(OperationPulse),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('climate-row:Fan speed')),
+        matching: find.byType(OperationPulse),
+      ),
+      findsNothing,
+    );
+    expect(c.observed('vendor.midea.ac.mode'), 'cool');
+    expect(
+      tester
+          .widget<ChoiceChip>(
+            find.byKey(const ValueKey('climate-option:mode:cool')),
+          )
+          .selected,
+      true,
+    );
+    core.executionGate!.complete();
+    await tester.pumpAndSettle();
+    expect(find.byType(OperationPulse), findsNothing);
+    await tester.pumpWidget(const SizedBox());
+  });
 
   testWidgets(
     'power stays on device, refreshes once and retains unknown receipt',

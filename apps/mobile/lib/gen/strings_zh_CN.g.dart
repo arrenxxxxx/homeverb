@@ -303,6 +303,10 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get mobileRetrieveControlCapabilities => '\u83b7\u53d6\u53ef\u7528\u63a7\u5236\u80fd\u529b';
 	@override String get mobilePowerOn => '\u5f00\u673a';
 	@override String get mobilePowerOff => '\u5173\u673a';
+	@override String get mobilePoweredOn => '\u5df2\u5f00\u542f';
+	@override String get mobilePoweredOff => '\u5df2\u5173\u95ed';
+	@override String get mobileTurningOn => '\u5f00\u542f\u4e2d\u2026';
+	@override String get mobileTurningOff => '\u5173\u95ed\u4e2d\u2026';
 	@override String get mobilePower => '\u7535\u6e90';
 	@override String get mobileCooling => '\u5236\u51b7';
 	@override String get mobileHeating => '\u5236\u70ed';

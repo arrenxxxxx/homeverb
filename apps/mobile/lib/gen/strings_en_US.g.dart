@@ -846,6 +846,18 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	/// en-US: 'Power off'
 	String get mobilePowerOff => 'Power off';
 
+	/// en-US: 'Powered on'
+	String get mobilePoweredOn => 'Powered on';
+
+	/// en-US: 'Powered off'
+	String get mobilePoweredOff => 'Powered off';
+
+	/// en-US: 'Turning on\u2026'
+	String get mobileTurningOn => 'Turning on\u2026';
+
+	/// en-US: 'Turning off\u2026'
+	String get mobileTurningOff => 'Turning off\u2026';
+
 	/// en-US: 'Power'
 	String get mobilePower => 'Power';
 

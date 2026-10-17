@@ -135,6 +135,8 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(tester.binding.hasScheduledFrame, false);
+        expect(find.byType(LinearProgressIndicator), findsNothing);
+        expect(find.byType(OperationPulse), findsOneWidget);
         final busy = tester.getSemantics(find.byType(OperationProgress));
         expect(busy.label, 'Operation in progress');
         expect(busy.value, isEmpty);
@@ -142,6 +144,26 @@ void main() {
       } finally {
         semantics.dispose();
       }
+    },
+  );
+
+  testWidgets(
+    'activity animation stops in background and resumes in foreground',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(home: Scaffold(body: const OperationProgress())),
+      );
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(tester.binding.hasScheduledFrame, true);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      await tester.pumpAndSettle();
+      expect(tester.binding.hasScheduledFrame, false);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(tester.binding.hasScheduledFrame, true);
+      await tester.pumpWidget(const SizedBox());
+      await tester.pumpAndSettle();
+      expect(tester.binding.hasScheduledFrame, false);
     },
   );
 

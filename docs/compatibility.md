@@ -18,6 +18,13 @@ control bridge or service has been added to work around these boundaries.
 
 ## October 17 Flutter control presentation
 
+The subsequent presentation revision distinguishes observed power-on/off colors,
+removes routine accepted/verified bottom cards and replaces indeterminate page-edge
+bars with local three-stroke activity feedback. Failed/unknown/partial explanations
+and all retained receipts remain available. Pending command and follow-up read
+disable duplicate submission without optimistic observations or write retries.
+These Dart-only changes do not admit new actions or alter native outcomes.
+
 The live climate-and-power view now uses expanded Window Light rows and local
 native-session grant inspection. Unsupported/ungranted operations have no quick
 control. Each axis can expose swing, exact positions, both or neither. Boolean,
@@ -31,8 +38,9 @@ Android 15 arm64 process tests pass direct mode and stepped-temperature Native
 Mock writes with verified receipts, unsupported-row hiding and Chinese detail
 rendering. These Mock results do not establish additional Meiju control
 acceptance. The later profiling-tool uninstall removed the emulator's local
-account/device data; the ordinary APK now requires a fresh connection, as
-recorded in the app verification report.
+account/device data; the owner subsequently reconnected and the feedback APK's
+in-place update retained those cards and Chinese locale, as recorded in the app
+verification report.
 
 Native API 1.22.0, SQLite schema 5, protected payload 3, startup grant formats,
 adapter admission, routing and outcome semantics are unchanged. No new appliance

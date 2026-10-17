@@ -28,11 +28,20 @@ local success; earlier runs were blocked by the repository's billing limit.
 
 ## Task status
 
+The owner unlocked the existing Android emulator, and the ordinary Meiju app
+launched successfully. The H5 preview server is stopped. The native app initially
+showed no connected accounts and was left at Meiju connection for owner sign-in;
+the owner subsequently supplied a real-device control-page screenshot. The next
+presentation revision adds observed on/off colors and local pulse feedback and
+removes routine accepted/verified bottom cards. Exact executed checks and APK
+delivery are recorded in the [app verification record](../apps/mobile/verification.md).
+
 The owner subsequently requested actual operation rather than preview data.
 The climate fixture's language button is removed. A current ordinary Meiju APK
 has passed build/archive checks and installed in place on the host-GPU Android
-emulator. Startup is blocked by Android's locked user storage pending owner
-unlock. Real H5 account/device integration remains unimplemented; no temporary
+emulator. At that earlier handoff, startup was blocked by locked user storage;
+the owner has since unlocked it as recorded above. Real H5 account/device
+integration remains unimplemented; no temporary
 HTTP control bridge was introduced. See the [runtime handoff evidence](../apps/mobile/verification.md#native-runtime-handoff-and-language-button-removal-october-17-2026).
 
 The owner-requested H5 development preview now opens the current shared climate

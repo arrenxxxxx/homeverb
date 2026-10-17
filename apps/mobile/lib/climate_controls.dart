@@ -31,6 +31,10 @@ class _ClimateControlsState extends State<ClimateControls>
   int selectionEpoch = 0;
   double? draftTarget;
   int? targetGestureEpoch;
+  (String, Object)? pending;
+  bool get enabled => pending == null && !c.busy && c.isForeground;
+  bool updating(ClimateChoice? choice) =>
+      choice != null && pending?.$1 == choice.signature;
   @override
   void initState() {
     super.initState();
@@ -73,7 +77,7 @@ class _ClimateControlsState extends State<ClimateControls>
     int lifecycle,
   ) async {
     if (!mounted ||
-        c.busy ||
+        !enabled ||
         !c.isForeground ||
         epoch != c.controlEpoch ||
         lifecycle != selectionEpoch)
@@ -87,9 +91,14 @@ class _ClimateControlsState extends State<ClimateControls>
         current.signature != choice.signature ||
         !current.permits(c, value))
       return;
-    await widget.onExecute(choice.capability['id'], choice.action, {
-      choice.parameter: value,
-    });
+    setState(() => pending = (choice.signature, value));
+    try {
+      await widget.onExecute(choice.capability['id'], choice.action, {
+        choice.parameter: value,
+      });
+    } finally {
+      if (mounted) setState(() => pending = null);
+    }
   }
 
   static const features = <(String, Set<String>, IconData)>[
@@ -125,7 +134,6 @@ class _ClimateControlsState extends State<ClimateControls>
           ]
         : available;
     final observed = c.observed(choice.property);
-    final enabled = !c.busy && c.isForeground;
     if (options.length == 2 &&
         options.contains(true) &&
         options.contains(false) &&
@@ -227,6 +235,7 @@ class _ClimateControlsState extends State<ClimateControls>
     title: title,
     icon: icon,
     value: choiceValue(choice),
+    updating: updating(choice),
     trailing: isSwitch(choice) ? scalar(choice) : null,
     child: isSwitch(choice)
         ? null
@@ -258,6 +267,7 @@ class _ClimateControlsState extends State<ClimateControls>
       title: title,
       icon: icon,
       value: choiceValue(swing),
+      updating: updating(swing) || updating(direction),
       trailing: isSwitch(swing) ? scalar(swing) : null,
       child: isSwitch(swing) && direction == null
           ? null
@@ -305,11 +315,7 @@ class _ClimateControlsState extends State<ClimateControls>
         backgroundColor: const Color(0xff545653),
         foregroundColor: white,
       ),
-      onPressed:
-          !c.busy &&
-              c.isForeground &&
-              bounded &&
-              options.contains(target - step!)
+      onPressed: enabled && bounded && options.contains(target - step!)
           ? () => send(targetChoice, target - step, epoch, lifecycle)
           : null,
       icon: const Icon(Icons.remove),
@@ -317,11 +323,7 @@ class _ClimateControlsState extends State<ClimateControls>
     Widget plus() => IconButton.filled(
       key: const ValueKey('climate-increase'),
       tooltip: localize(context, 'Increase target'),
-      onPressed:
-          !c.busy &&
-              c.isForeground &&
-              bounded &&
-              options.contains(target + step!)
+      onPressed: enabled && bounded && options.contains(target + step!)
           ? () => send(targetChoice, target + step, epoch, lifecycle)
           : null,
       icon: const Icon(Icons.add),
@@ -348,18 +350,72 @@ class _ClimateControlsState extends State<ClimateControls>
             spacing: 12,
             runSpacing: 8,
             children: [
-              Copy('Target temperature', color: soft, size: 13),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Copy('Target temperature', color: soft, size: 13),
+                  if (updating(targetChoice)) ...[
+                    const SizedBox(width: 8),
+                    Semantics(
+                      label: localize(context, 'Updating device…'),
+                      liveRegion: true,
+                      child: OperationPulse(color: white),
+                    ),
+                  ],
+                ],
+              ),
               if (power is bool &&
                   powerChoice != null &&
                   powerChoice.permits(c, !power))
-                FilledButton.icon(
-                  key: const ValueKey('climate-power'),
-                  onPressed: c.busy || !c.isForeground
-                      ? null
-                      : () => send(powerChoice, !power, epoch, lifecycle),
-                  icon: const Icon(Icons.power_settings_new, size: 20),
-                  label: Text(
-                    localize(context, power ? 'Turn off' : 'Turn on'),
+                Tooltip(
+                  message: localize(context, power ? 'Turn off' : 'Turn on'),
+                  child: Semantics(
+                    toggled: power,
+                    liveRegion: updating(powerChoice),
+                    child: FilledButton.icon(
+                      key: const ValueKey('climate-power'),
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(124, 40),
+                        backgroundColor: powerColor(context, power),
+                        foregroundColor:
+                            MediaQuery.highContrastOf(context) && power
+                            ? Colors.black
+                            : white,
+                        disabledBackgroundColor: powerColor(context, power),
+                        disabledForegroundColor:
+                            MediaQuery.highContrastOf(context) && power
+                            ? Colors.black
+                            : white,
+                        side: MediaQuery.highContrastOf(context)
+                            ? const BorderSide(color: Colors.white)
+                            : BorderSide.none,
+                      ),
+                      onPressed: enabled
+                          ? () => send(powerChoice, !power, epoch, lifecycle)
+                          : null,
+                      icon: updating(powerChoice)
+                          ? OperationPulse(
+                              color: MediaQuery.highContrastOf(context) && power
+                                  ? Colors.black
+                                  : white,
+                            )
+                          : Icon(
+                              power
+                                  ? Icons.power_settings_new
+                                  : Icons.power_off_outlined,
+                              size: 20,
+                            ),
+                      label: Text(
+                        localize(
+                          context,
+                          updating(powerChoice)
+                              ? (pending!.$2 == true
+                                    ? 'Turning on…'
+                                    : 'Turning off…')
+                              : (power ? 'Powered on' : 'Powered off'),
+                        ),
+                      ),
+                    ),
                   ),
                 )
               else
@@ -398,17 +454,17 @@ class _ClimateControlsState extends State<ClimateControls>
                   .round(),
               label: (draftTarget ?? target).toString() + '°C',
               semanticFormatterCallback: (v) => '$v' + '°C',
-              onChangeStart: c.busy || !c.isForeground
+              onChangeStart: !enabled
                   ? null
                   : (_) => targetGestureEpoch = epoch,
-              onChanged: c.busy || !c.isForeground
+              onChanged: !enabled
                   ? null
                   : (v) {
                       if (epoch == c.controlEpoch &&
                           lifecycle == selectionEpoch)
                         setState(() => draftTarget = v);
                     },
-              onChangeEnd: c.busy || !c.isForeground
+              onChangeEnd: !enabled
                   ? null
                   : (value) {
                       if (targetGestureEpoch != epoch ||
@@ -442,6 +498,11 @@ class _ClimateControlsState extends State<ClimateControls>
       ),
     );
   }
+
+  Color powerColor(BuildContext context, bool power) =>
+      MediaQuery.highContrastOf(context)
+      ? (power ? Colors.white : Colors.black)
+      : (power ? accent : const Color(0xff595d5a));
 
   @override
   Widget build(BuildContext context) {
@@ -540,11 +601,16 @@ class _ClimateControlsState extends State<ClimateControls>
                 ChoiceChip(
                   label: Text(part['id']),
                   selected: c.component == part['id'],
-                  onSelected: c.busy || !c.isForeground
+                  onSelected: !enabled
                       ? null
                       : (_) => widget.onAction('component:' + part['id']),
                 ),
             ],
+          ),
+        if (c.busy && pending == null)
+          const Padding(
+            padding: EdgeInsets.only(bottom: 12),
+            child: OperationProgress(label: 'Updating device…'),
           ),
         temperature(target, power),
         if (rows.isNotEmpty) ...[
@@ -559,19 +625,9 @@ class _ClimateControlsState extends State<ClimateControls>
             children: [for (final f in extras) row(f.$1, f.$2, f.$3)],
           ),
         ],
-        if (c.busy)
-          Padding(
-            padding: EdgeInsets.only(top: 12),
-            child: Semantics(
-              liveRegion: true,
-              child: const Copy(
-                'Updating device…',
-                color: accent,
-                center: true,
-              ),
-            ),
-          ),
-        if (receipt != null && receipt['device_id'] == c.selectedDevice) ...[
+        if (receipt != null &&
+            receipt['device_id'] == c.selectedDevice &&
+            !{'accepted', 'verified'}.contains(receipt['status'])) ...[
           const SizedBox(height: 16),
           Semantics(
             liveRegion: true,

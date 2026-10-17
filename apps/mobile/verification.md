@@ -1,5 +1,69 @@
 # Flutter implementation verification
 
+## Power state and activity feedback: October 17, 2026
+
+The climate power control now distinguishes observed on/off state using orange
+and gray, separate icons and Powered on/Powered off labels. Its tooltip names the
+opposite action. Commands retain their prior observation until the existing
+follow-up read returns. Accepted/verified receipts no longer create a bottom
+card; failed, unknown, partial and unrecognized results keep their explanation
+and details, and Settings history retains the original receipts.
+
+Indeterminate operations use a small three-stroke pulse instead of a page-edge
+bar. Climate commands place it in the power button, temperature heading or
+affected row and disable duplicate submission across the command and follow-up
+read. Other pages, sheets and dialogs use the same pulse beside an activity
+caption within the content. Its isolated painter does not rebuild the page per
+frame. Reduced motion is static; backgrounding and inactive subtrees stop the
+animation. No percentage, optimistic state or completion claim is inferred.
+
+Executed from `apps/mobile` with pinned Flutter 3.47.7:
+
+- `fvm flutter analyze`: passed with no issues after using the pinned ticker API.
+- `fvm dart format --output=none --set-exit-if-changed lib test`: 58 files,
+  unchanged.
+- `fvm flutter test test/climate_controls_test.dart test/climate_rows_test.dart
+  test/preview_climate_test.dart test/accessibility_test.dart
+  test/localization_test.dart test/receipts_test.dart --reporter expanded`:
+  30 tests passed. Gated command/read fixtures verify local activity, unchanged
+  observations and selections, duplicate prevention, colors after read-back and
+  accepted-card removal; existing uncertainty, capability, lifecycle and history
+  regressions also pass.
+- `fvm flutter test test/accessibility_test.dart --reporter expanded`: six passed
+  after adding actual background/resume/disposal animation checks. Reduced-motion
+  semantics retain an activity label and no percentage.
+- `fvm flutter build apk --release --target-platform android-arm64,android-x64
+  --dart-define=HOMEVERB_ADAPTER=midea.meiju`: passed in 33.5 seconds.
+
+The current artifact is
+`output/flutter-verification/android/homeverb-0.2.0-meiju-feedback.apk`,
+68,267,876 bytes, SHA-256
+`94ce91019d43672d8562f6459d9ed94d55da758f472d7a10f623d594401780f8`.
+Its adjacent verifier report records base source `be6a864` with these uncommitted
+Dart/catalog/docs changes (`source_dirty: true`) and unchanged native AAR
+`d43145c239cb13c993198dc31dbc28bedc75f884bc6270f06e682138f3c2fd6b`.
+Signature, exactly two complete ABIs, 17 exports per ABI, backup exclusion and
+16 KiB ZIP/Core ELF alignment passed. Signing remains local development only.
+
+`adb -s emulator-5586 install -r` succeeded on the existing host-GPU Android 15
+arm64 AVD. Cold start returned `Status: ok` in 1512 ms. The reconnected account's
+cards and Chinese locale survived the upgrade. Reopening the same wall AC showed
+its saved 27 Celsius target and gray Powered off control, with supported mode/fan
+rows and no routine result card. The existing device-opening flow prepares exact
+controls through its bounded account refresh and reads cached observations;
+this is not a fresh appliance-state or actuation verification. No appliance
+command, uninstall, data reset or profiling/integration-test APK was used.
+The H5 server remains stopped.
+
+Seven shared presentation tests and documentation, contract (20 schemas,
+45 positive/250 negative fixtures), repository and commit checks passed. The
+contract check used the declared requirements in a temporary Python environment.
+The full Flutter visual suite, Rust workspace, native Android smoke, physical
+phone and new real-control journeys were not rerun for this Dart-only phase.
+Native API 1.22.0, SQLite 5, protected payload 3, authority, routing, adapter
+support and outcome semantics are unchanged. No push, upload or publication
+occurred.
+
 ## Native runtime handoff and language-button removal: October 17, 2026
 
 The owner requested removal of the climate fixture's language button and actual
@@ -22,13 +86,15 @@ passed; they are not runtime or physical-device acceptance.
 The existing Android 15 arm64 AVD started with its same data partition and
 `-gpu host -no-snapshot -no-boot-anim`; SurfaceFlinger confirmed the Apple M1 Pro
 host renderer. `adb install -r` succeeded without uninstalling or clearing data.
-Android user 0 remains `RUNNING_LOCKED` after reboot. Activity startup was refused
+At this handoff Android user 0 was `RUNNING_LOCKED` after reboot. Activity startup was refused
 while credential-encrypted user storage was locked; actual native startup and
 account/device acceptance remain blocked until the owner unlocks the emulator.
 The screen was woken for the owner, without supplying or changing a lock secret.
 No provider credential was accessed or provider read/appliance command sent,
-and no upload, push or publication occurred. The H5 fixture must not be described
-as real operation, and the installed APK must not be described as launched.
+and no upload, push or publication occurred. The owner subsequently unlocked the
+emulator; the App launched successfully and initially had no connected accounts.
+The later reconnection and in-place update are recorded in the power-state phase
+above. The H5 fixture does not provide real account/device operation.
 
 ## Climate footer removal: October 17, 2026
 

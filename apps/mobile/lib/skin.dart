@@ -953,18 +953,126 @@ class _ButtonFace extends CustomPainter {
 }
 
 class OperationProgress extends StatelessWidget {
-  const OperationProgress({super.key});
+  const OperationProgress({this.label = 'Operation in progress', super.key});
+  final String label;
   @override
   Widget build(BuildContext context) => Semantics(
-    label: localize(context, 'Operation in progress'),
+    label: localize(context, label),
     liveRegion: true,
     child: ExcludeSemantics(
-      child: LinearProgressIndicator(
-        // A static activity marker avoids an indefinite animation when requested.
-        value: MediaQuery.disableAnimationsOf(context) ? .35 : null,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            const OperationPulse(),
+            const SizedBox(width: 10),
+            Expanded(child: Copy(label, size: 12, color: muted)),
+          ],
+        ),
       ),
     ),
   );
+}
+
+/// Paint-only activity feedback; it never represents completion or a percentage.
+class OperationPulse extends StatefulWidget {
+  const OperationPulse({this.color = accent, this.size = 20, super.key});
+  final Color color;
+  final double size;
+  @override
+  State<OperationPulse> createState() => _OperationPulseState();
+}
+
+class _OperationPulseState extends State<OperationPulse>
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+  late final animation = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1200),
+  );
+  AppLifecycleState? lifecycle;
+
+  @override
+  void initState() {
+    super.initState();
+    lifecycle = WidgetsBinding.instance.lifecycleState;
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    updateAnimation();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    lifecycle = state;
+    updateAnimation();
+  }
+
+  void updateAnimation() {
+    final active =
+        (lifecycle == null || lifecycle == AppLifecycleState.resumed) &&
+        TickerMode.valuesOf(context).enabled &&
+        !MediaQuery.disableAnimationsOf(context);
+    if (active) {
+      if (!animation.isAnimating) animation.repeat();
+    } else {
+      animation.stop();
+      animation.value = .5;
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    animation.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => RepaintBoundary(
+    child: SizedBox.square(
+      dimension: widget.size,
+      child: CustomPaint(
+        painter: _OperationPulsePainter(
+          animation,
+          readableInk(context, widget.color),
+        ),
+      ),
+    ),
+  );
+}
+
+class _OperationPulsePainter extends CustomPainter {
+  _OperationPulsePainter(this.animation, this.color)
+    : super(repaint: animation);
+  final Animation<double> animation;
+  final Color color;
+  @override
+  void paint(Canvas canvas, Size size) {
+    final width = size.width * .16;
+    for (var i = 0; i < 3; i++) {
+      final wave =
+          .5 + .5 * math.cos((animation.value - i * .18) * math.pi * 2);
+      final height = size.height * (.3 + .55 * wave);
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromCenter(
+            center: Offset(size.width * (.2 + i * .3), size.height / 2),
+            width: width,
+            height: height,
+          ),
+          Radius.circular(width / 2),
+        ),
+        Paint()..color = color.withValues(alpha: .45 + .55 * wave),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_OperationPulsePainter old) =>
+      color != old.color || animation != old.animation;
 }
 
 class InlineStepper extends StatelessWidget {

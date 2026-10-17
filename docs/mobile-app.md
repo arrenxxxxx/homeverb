@@ -32,7 +32,12 @@ Authorization sharing belongs inside Settings, with no primary navigation destin
 
 The owner-approved climate-page revision omits the reading-time footer and the
 trailing Refresh State, Device information and Recent Operations buttons. The
-controls retain their supported setting rows and inline command results. Device
+controls retain their supported setting rows and inline failed/uncertain results.
+Routine accepted/verified results have no bottom card; Settings history preserves
+all receipts. Power colors, labels and icons reflect observed on/off state.
+Commands show a small pulse in the affected control or row, while other operations
+use a pulse and activity caption within the content. Reduced motion is static;
+backgrounding stops animation. These markers do not imply completion. Device
 information remains available from the card menu and history from Settings;
 the general screen inventory below also covers other device-control layouts.
 

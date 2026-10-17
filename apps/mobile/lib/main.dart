@@ -2011,37 +2011,41 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   }
 
   @override
-  Widget build(BuildContext context) => MaterialApp(
-    navigatorKey: navigator,
-    locale: translationsOf(context).$meta.locale.flutterLocale,
-    supportedLocales: AppLocaleUtils.supportedLocales,
-    localizationsDelegates: GlobalMaterialLocalizations.delegates,
-    debugShowCheckedModeBanner: false,
-    theme: windowTheme(),
-    highContrastTheme: windowTheme(highContrast: true),
-    home: PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (popped, _) {
-        if (!popped) action('Back');
-      },
-      child: Scaffold(
-        body: ScreenView(
-          key: id == 'S06' ? ObjectKey(c.receipt) : null,
-          id: id,
-          catalog: widget.catalog,
-          screenOverride: screen,
-          home: special(),
-          resolveScreen: screenFor,
-          resolveHome: specialFor,
-          onAction: action,
-          fields: fields,
-          choices: choices,
-          values: values,
-          onChanged: changed,
-          busy: c.busy,
-          error: id == 'C10' && actionCapability != null ? null : c.error,
+  Widget build(BuildContext context) {
+    final content = special();
+    return MaterialApp(
+      navigatorKey: navigator,
+      locale: translationsOf(context).$meta.locale.flutterLocale,
+      supportedLocales: AppLocaleUtils.supportedLocales,
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      debugShowCheckedModeBanner: false,
+      theme: windowTheme(),
+      highContrastTheme: windowTheme(highContrast: true),
+      home: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (popped, _) {
+          if (!popped) action('Back');
+        },
+        child: Scaffold(
+          body: ScreenView(
+            key: id == 'S06' ? ObjectKey(c.receipt) : null,
+            id: id,
+            catalog: widget.catalog,
+            screenOverride: screen,
+            home: content,
+            resolveScreen: screenFor,
+            resolveHome: specialFor,
+            onAction: action,
+            fields: fields,
+            choices: choices,
+            values: values,
+            onChanged: changed,
+            busy: c.busy,
+            showOperationProgress: content is! ClimateControls,
+            error: id == 'C10' && actionCapability != null ? null : c.error,
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }

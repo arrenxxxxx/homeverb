@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'localization.dart';
 import 'skin.dart';
 
 /// Shared Window Light material, also used by the other application pages.
@@ -18,12 +19,14 @@ class ClimateRow extends StatelessWidget {
     required this.value,
     this.child,
     this.trailing,
+    this.updating = false,
     super.key,
   });
   final String title;
   final IconData icon;
   final Object value;
   final Widget? child, trailing;
+  final bool updating;
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 14),
@@ -38,7 +41,14 @@ class ClimateRow extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Icon(icon, color: ink, size: 22),
+                      if (updating)
+                        Semantics(
+                          liveRegion: true,
+                          label: localize(context, 'Updating device…'),
+                          child: const OperationPulse(size: 22),
+                        )
+                      else
+                        Icon(icon, color: ink, size: 22),
                       const SizedBox(width: 10),
                       Expanded(child: Copy(title, bold: true)),
                     ],
