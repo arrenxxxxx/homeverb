@@ -288,14 +288,16 @@ class LightBackground extends StatelessWidget {
     fit: StackFit.expand,
     children: [
       Positioned.fill(
-        child: ExcludeSemantics(
-          child: MediaQuery.highContrastOf(context)
-              ? const ColoredBox(color: Colors.white)
-              : Image.asset(
-                  'assets/window-light-background.png',
-                  fit: BoxFit.fill,
-                  filterQuality: FilterQuality.high,
-                ),
+        child: RepaintBoundary(
+          child: ExcludeSemantics(
+            child: MediaQuery.highContrastOf(context)
+                ? const ColoredBox(color: Colors.white)
+                : Image.asset(
+                    'assets/window-light-background.png',
+                    fit: BoxFit.fill,
+                    filterQuality: FilterQuality.high,
+                  ),
+          ),
         ),
       ),
       child,

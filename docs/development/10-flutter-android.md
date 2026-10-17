@@ -128,6 +128,44 @@ after integration tests; never distribute the test APK as the app artifact.
 Actual commands, outcomes, known pixel failures, host-specific test limitations
 and delivery hashes are recorded in [app verification](../../apps/mobile/verification.md).
 
+## Diagnose scrolling performance
+
+Check the emulator's renderer before interpreting app frame times:
+
+```sh
+adb -s EMULATOR_SERIAL shell dumpsys SurfaceFlinger | rg '^GLES:'
+```
+
+SwiftShader and Lavapipe are software renderers. They are useful for isolated
+compatibility checks but can make the same scrolling workload much slower than
+host GPU rendering. For interactive review, close the selected emulator and
+restart its existing AVD with `emulator -avd AVD_NAME -gpu host -no-snapshot
+-no-boot-anim`. Do not use `-wipe-data`. Confirm the actual renderer after startup;
+the host flag alone does not establish that acceleration succeeded. Preserve any
+existing Android SDK/AVD directory selection and application signing key.
+
+The opt-in scrolling benchmark uses the production screen, background and device
+grid with twelve fictional AC cards, decoded images, one warm-up sweep and four
+measured flings. It does not open Core or an account. From `apps/mobile`, run:
+
+```sh
+HOMEVERB_PERFORMANCE_REPORT=/absolute/scroll-profile.json \
+  fvm flutter drive --profile --no-dds -d EMULATOR_SERIAL \
+  --driver=test_driver/performance_driver.dart \
+  --target=integration_test/scroll_performance_test.dart \
+  --dart-define=HOMEVERB_PERFORMANCE=true
+```
+
+The pinned Flutter version uses `flutter drive` for profile-mode integration
+tests; `flutter test` has no `--profile` option. `--no-dds` permits the timing
+collector's device-local VM connection. The host driver saves UI/raster frame
+timings and sample counts to the explicit report path. The test is skipped unless
+opted in and refuses debug timing. Run comparisons with the same renderer,
+viewport, workload and idle host, without screenshots or competing builds during
+measurement. Report rendering and emulator changes separately; average raster
+duration is not a displayed-FPS guarantee. Representative physical-phone profile
+measurements remain necessary. Restore the ordinary APK after profiling.
+
 
 ## Select the app language
 

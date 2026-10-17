@@ -228,6 +228,13 @@ vendor. Passing these checks does not establish Android Keystore round trips or
 physical-device support. Release signing still uses the development debug key;
 these builds are development artifacts, not distributable store releases.
 
+For scrolling investigations, the opt-in profile benchmark records UI/raster
+timings from twelve fictional cards without opening Core. See the
+[Android performance procedure](../../docs/development/10-flutter-android.md#diagnose-scrolling-performance)
+for its command, renderer checks and measurement limits. The shared background
+and device tiles have separate paint boundaries; native masks, gradients,
+shadows, text, interactions and control authority are retained.
+
 ## Verification boundary
 
 See [verification.md](verification.md) for executed checks and remaining acceptance gates. All 82 native-widget preview states render and all 201 simulated atlas event branches are clicked separately from the real Core tests. The actual Linux Flutter process also discovers, reads and writes the fictional Mock appliance through FFI. Screenshot equality has **not passed**; do not describe the application as a pixel-identical or phone-verified delivery.

@@ -1,5 +1,50 @@
 # Flutter implementation verification
 
+## Scrolling investigation: October 17, 2026
+
+The owner reported severe scrolling stutter on the current emulator. The selected
+Android 15 / API 35 arm64 AVD was launched with `-gpu swiftshader`. SurfaceFlinger
+confirmed ANGLE/SwiftShader, and Flutter used Impeller OpenGLES. These are actual
+runtime observations, not an inference from debug-build speed. General Android
+`gfxinfo` exposed only one wrapper-view frame and was not used as Flutter FPS.
+
+The new opt-in `scroll_performance_test.dart` exercises the production screen,
+background and device grid with twelve fictional AC cards. It opens no Core or
+account and verifies that scrolling invokes no device action. After decoding and
+warming the images, four alternating 600-logical-pixel flings at 1800 logical
+pixels/second are measured with Flutter's frame-timing collector. The host driver
+saves reports. Executed commands used `fvm flutter drive --profile --no-dds`,
+`test_driver/performance_driver.dart`, this test target and
+`HOMEVERB_PERFORMANCE=true`; the viewport remained 1080 by 2400 at 420 dpi.
+
+| Configuration | Frames sampled | Mean UI / p90 (ms) | Mean raster / p90 (ms) | Raster p99 (ms) |
+|---|---:|---:|---:|---:|
+| Original painting, forced SwiftShader | 72 | 3.506 / 6.877 | 166.484 / 216.977 | 265.086 |
+| Separate background/tile paint boundaries, SwiftShader | 72 | 1.284 / 3.508 | 155.291 / 195.323 | 248.276 |
+| Same paint boundaries, host GPU | 162 | 0.633 / 1.206 | 13.966 / 17.829 | 27.001 |
+
+All three recorded profile runs passed. Separating painting alone did not resolve
+the software raster bottleneck. Restarting the same data partition with `-gpu
+host -no-snapshot -no-boot-anim` selected the Apple M1 Pro host renderer; the AVD's
+local GPU-enabled/mode settings now also select host graphics. No wipe, app-data
+clear or snapshot restore was used. The renderer change accounts for most of the
+improvement and must not be attributed solely to the Dart change. The remaining
+tail exceeds a 60-Hz frame budget; no locked-60-FPS or physical-phone claim follows
+from average raster time. No layer/picture raster-cache hits were reported.
+
+Production changes only isolate the fixed decorative background and each device
+tile with `RepaintBoundary`. Masks, gradient shaders, shadows, layout and native
+semantics are retained. There is no new polling, network work, control grant or
+execution behavior. Native API 1.22.0, SQLite 5 and protected payload 3 are unchanged.
+The profile command and GPU selection are documented in the Android app guide.
+Local reports are `output/flutter-verification/android/scroll-before.json`,
+`scroll-boundaries.json` and `scroll-host-gpu.json`. These are ignored artifacts.
+`fvm flutter analyze`, the pinned Dart format check, documentation/repository
+validators and `git diff --check` passed. The complete `fvm flutter test --reporter
+expanded` passed 115 tests and failed the same four known macOS glyph-pixel cases:
+button labels, editable-field alignment and two control-label checks. References
+and tolerances are unchanged; this is not an entirely passing visual suite.
+
 ## Expanded capability-dependent climate rows: October 17, 2026
 
 The owner approved the Window Light row proposal and required every control to

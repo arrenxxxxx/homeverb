@@ -1195,12 +1195,14 @@ class DeviceGrid extends StatelessWidget {
           keys.length,
           (i) => SizedBox(
             width: width,
-            child: DeviceTile(
-              keys[i],
-              data: data?[i],
-              cached: cached,
-              onAction: onAction,
-              large: columns == 1,
+            child: RepaintBoundary(
+              child: DeviceTile(
+                keys[i],
+                data: data?[i],
+                cached: cached,
+                onAction: onAction,
+                large: columns == 1,
+              ),
             ),
           ),
         ),
