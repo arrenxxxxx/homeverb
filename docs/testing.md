@@ -162,9 +162,10 @@ creates a new compatible Simulator, verifies embedded Simulator entitlements and
 the plain ad-hoc seal, and requires
 fresh successful write/read reports with different launch PIDs. Mock Core, SQLite
 cache/receipt persistence, explicit lifecycle calls and fictional system Keychain
-round trips are exercised; no provider account or appliance is accessed. Twelve
+round trips are exercised; no provider account or appliance is accessed. Thirteen
 portable runner tests refuse stale/failed/incomplete reports, wrong process/scope,
-missing runtime evidence and unsafe simulator selection/cleanup. They do not prove
+missing runtime evidence and unsafe simulator selection/cleanup, including cold
+setup timeouts that must fail without installation or app retries. They do not prove
 actual Apple runtime behavior. The exact CI job must pass before claiming it.
 Simulator results do not establish physical passcode/lock or signed-device policy.
 On `d02b10a`, macOS job `116902983930` passed eighteen object/orchestration tests,

@@ -105,7 +105,7 @@ class IosAcceptanceTests(unittest.TestCase):
                 ios.validate_simulator_entitlements(actual_xml, actual_der, expected_der, b'')
 
     def test_failure_cleans_only_the_new_simulator_and_never_retries_launch(self):
-        for fail_at in ['boot', 'bootstatus', 'install', 'launch', 'report', None]:
+        for fail_at in ['boot', 'bootstatus', 'install', 'get_app_container', 'launch', 'report', None]:
             with self.subTest(fail_at=fail_at), tempfile.TemporaryDirectory() as directory:
                 calls = []
 
@@ -137,6 +137,33 @@ class IosAcceptanceTests(unittest.TestCase):
                 self.assertEqual([call[2] for call in calls[-2:]], ['shutdown', 'delete'])
                 launches = [call for call in calls if call[2] == 'launch']
                 self.assertEqual(len(launches), 2 if fail_at is None else int(fail_at in ['launch', 'report']))
+
+    def test_cold_setup_timeout_fails_without_retry_or_app_execution(self):
+        for fail_at in ['install', 'get_app_container']:
+            with self.subTest(fail_at=fail_at):
+                calls = []
+
+                def command(*args, **kwargs):
+                    calls.append(args)
+                    if args[2] == 'create':
+                        return DEVICE
+                    self.assertEqual(args[3], DEVICE)
+                    if args[2] in ['bootstatus', 'install', 'get_app_container']:
+                        self.assertGreater(kwargs['timeout'], 60)
+                        self.assertLessEqual(kwargs['timeout'], 240)
+                    if args[2] == fail_at:
+                        raise subprocess.TimeoutExpired(args, kwargs['timeout'])
+                    return ''
+
+                with patch.object(ios, 'command', side_effect=command), \
+                        patch.object(ios, 'wait_report') as wait, \
+                        self.assertRaises(subprocess.TimeoutExpired):
+                    ios.exercise(Path('/fictional/app'), 'runtime', 'type')
+                actions = [call[2] for call in calls]
+                self.assertEqual(actions.count(fail_at), 1)
+                self.assertNotIn('launch', actions)
+                self.assertEqual(actions[-2:], ['shutdown', 'delete'])
+                wait.assert_not_called()
 
     def test_invalid_create_output_never_targets_existing_devices(self):
         for output in ['booted', 'all', '', 'existing-device']:

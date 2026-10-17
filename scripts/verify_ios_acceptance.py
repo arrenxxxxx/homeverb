@@ -21,6 +21,7 @@ ROOT = package.ROOT
 BUNDLE = 'org.homeverb.test'
 GROUP = 'SYNTHETIC.' + BUNDLE
 STORE_CHECKS = {'write': 10, 'read': 4}
+SIMULATOR_SETUP_TIMEOUT = 240
 
 
 def command(*args, timeout=60, **kwargs):
@@ -166,15 +167,22 @@ def exercise(app, runtime, device_type):
     if not re.fullmatch(r'[0-9A-Fa-f]{8}(?:-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}', device):
         raise ValueError('Simulator creation did not return a UUID; refuse all device operations.')
     try:
+        print('Simulator setup: boot and wait for readiness.', flush=True)
         command('xcrun', 'simctl', 'boot', device)
-        command('xcrun', 'simctl', 'bootstatus', device, '-b', timeout=240)
-        command('xcrun', 'simctl', 'install', device, app)
-        container = Path(command('xcrun', 'simctl', 'get_app_container', device, BUNDLE, 'data'))
+        command('xcrun', 'simctl', 'bootstatus', device, '-b', timeout=SIMULATOR_SETUP_TIMEOUT)
+        # Cold hosted simulators can finish booting before app services are responsive.
+        # Allow bounded setup latency without retrying installation or app execution.
+        print('Simulator setup: install the isolated app.', flush=True)
+        command('xcrun', 'simctl', 'install', device, app, timeout=SIMULATOR_SETUP_TIMEOUT)
+        print('Simulator setup: locate the isolated app data container.', flush=True)
+        container = Path(command('xcrun', 'simctl', 'get_app_container', device, BUNDLE, 'data',
+                                 timeout=SIMULATOR_SETUP_TIMEOUT))
         if not container.is_absolute() or not container.is_dir():
             raise ValueError('Simulator returned an invalid app data container.')
         writer_pid = None
         reports = []
         for phase in ['write', 'read']:
+            print(f'Simulator acceptance: launch {phase} once and require its report.', flush=True)
             path = container / 'Documents' / (phase + '.json')
             if path.exists():
                 raise ValueError('Refuse a pre-existing acceptance report.')

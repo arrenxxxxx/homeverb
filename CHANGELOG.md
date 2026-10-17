@@ -4,6 +4,8 @@
 
 ### Open-source preparation
 
+- Allow bounded cold iOS Simulator installation/container lookup time in CI and
+  log setup phases; retain acceptance deadlines, assertions and no-retry behavior.
 - Publish the reviewed source under Apache-2.0 after owner authorization; verify
   public access and enable GitHub private vulnerability reporting. Update support
   and publication records to reflect the public repository.

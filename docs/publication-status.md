@@ -70,6 +70,16 @@ For subsequent revisions, consult the [latest main workflows](https://github.com
 and match their head SHA to the intended commit. This record does not substitute
 an earlier run for the latest revision's results.
 
+The initial public runs on `3185e0e` and `7c91bec` passed documentation, Linux
+runtime and Android checks, plus iOS object tests and XCFramework packaging.
+Their isolated iOS acceptance steps failed before app launch: `simctl` container
+lookup and installation respectively exceeded the former 60-second setup limit.
+The runner now allows a bounded 240 seconds for each of those cold-setup calls,
+matching boot readiness, and prints stage progress. It performs no retry and
+retains the app/report deadlines, assertions, exact-device cleanup and production
+Keychain policy. Those earlier failures remain recorded, not retroactively passed;
+the latest exact-commit run supplies the result for the adjusted runner.
+
 ## Scope
 
 This delivery changes source availability and documentation, not runtime behavior,

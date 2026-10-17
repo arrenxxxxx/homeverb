@@ -147,6 +147,15 @@ bounded. The new Simulator is shut down and deleted even after a returned failur
 an externally killed runner may require manual cleanup of its named test device.
 There is no app/write retry after missing or failed evidence.
 
+Cold hosted Simulator setup allows up to 240 seconds each for boot readiness,
+installation and app-container lookup. Stage messages distinguish setup stalls
+from app acceptance failures. Installation and lookup are attempted once; a
+timeout fails the run and still cleans up only the newly created Simulator.
+App launch and report deadlines remain 60 seconds, with no replay or relaxed
+report assertions. October 17 public CI exposed the former 60-second installation
+and container-lookup limits before either app process could start; see the
+[publication record](../publication-status.md).
+
 The test app embeds the inspected production framework and calls the public C ABI
 from a worker. It verifies Mock discovery, power execution and reading, persisted
 cards/cache/receipt after a separate process launch, explicit Core foreground
