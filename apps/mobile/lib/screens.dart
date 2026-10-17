@@ -877,22 +877,21 @@ class DeviceHome extends StatelessWidget {
                     color: muted,
                   ),
                 ),
-                Positioned(
-                  right: 24,
-                  top: 0,
-                  child: InkWell(
-                    onTap: () => onAction('Inspect cached state'),
-                    child: Copy(
-                      cards != null
-                          ? 'Saved locally'
-                          : mode == 'cached'
-                          ? 'Cached · 2h ago'
-                          : 'Updated just now',
-                      size: 11,
-                      color: muted,
+                if (cards == null)
+                  Positioned(
+                    right: 24,
+                    top: 0,
+                    child: InkWell(
+                      onTap: () => onAction('Inspect cached state'),
+                      child: Copy(
+                        mode == 'cached'
+                            ? 'Cached · 2h ago'
+                            : 'Updated just now',
+                        size: 11,
+                        color: muted,
+                      ),
                     ),
                   ),
-                ),
                 Positioned(
                   right: -15,
                   top: -17,
@@ -1003,20 +1002,17 @@ class DeviceHome extends StatelessWidget {
               color: muted,
             ),
             const Spacer(),
-            Flexible(
-              child: InkWell(
-                onTap: () => onAction('Inspect cached state'),
-                child: Copy(
-                  cards != null
-                      ? 'Saved locally'
-                      : mode == 'cached'
-                      ? 'Cached · 2h ago'
-                      : 'Updated just now',
-                  size: 11,
-                  color: muted,
+            if (cards == null)
+              Flexible(
+                child: InkWell(
+                  onTap: () => onAction('Inspect cached state'),
+                  child: Copy(
+                    mode == 'cached' ? 'Cached · 2h ago' : 'Updated just now',
+                    size: 11,
+                    color: muted,
+                  ),
                 ),
               ),
-            ),
             SizedBox(
               width: 26,
               height: 26,

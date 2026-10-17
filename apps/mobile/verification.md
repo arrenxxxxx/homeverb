@@ -1,5 +1,40 @@
 # Flutter implementation verification
 
+## Concise native home captions: October 17, 2026
+
+Native home/search/room cards omit Saved observation and Not read captions; the
+home header omits Saved locally. Empty captions create no text or extra caption
+spacing across compact, single-column and enlarged-text layouts. Missing values
+remain a dash, while unsupported-model explanations and supported controls remain.
+Core retains source timestamps and cache metadata; this presentation change does
+not make a fresh-state claim or alter refresh, authority or execution outcomes.
+
+Executed with pinned Flutter 3.47.7 from `apps/mobile`:
+
+- `fvm flutter test test/device_cards_test.dart test/accessibility_test.dart
+  test/contrast_test.dart test/climate_rows_test.dart --reporter expanded`:
+  24 existing tests passed. The card rendering fixture now uses empty captions.
+- `fvm flutter analyze`: no issues.
+- `fvm dart format --output=none --set-exit-if-changed lib test`: 61 files,
+  unchanged.
+- `fvm flutter build apk --release --target-platform android-arm64,android-x64
+  --dart-define=HOMEVERB_ADAPTER=midea.meiju`: passed in 35.5 seconds after tests.
+
+Artifact: `output/flutter-verification/android/homeverb-0.2.0-meiju-concise-cards.apk`,
+70,573,038 bytes, SHA-256
+`9b215d37bcb38a5e63b1b71dac05af94972d169a6b0c734c20ac3b31172830a8`.
+The adjacent verifier report records base source `a7c532d` plus this phase's
+uncommitted changes. Signature, complete arm64/x86_64 ABIs, native exports and
+16 KiB ZIP/Core ELF alignment passed; the native AAR is unchanged.
+
+In-place installation and cold launch on `emulator-5586` succeeded (1779 ms).
+The local screenshot confirms the home header and supported cards have no routine
+storage/read captions, with the real account, six cards and Chinese locale retained.
+No appliance command, uninstall, data reset or test APK was used. H5 remains stopped.
+Docs, contract and repository checks passed. Full Flutter/Rust suites and physical
+phone/appliance acceptance were not rerun. Native API 1.22, SQLite 5, protected
+payload 3 and adapter compatibility are unchanged. No push or publication occurred.
+
 ## Light device cards: October 17, 2026
 
 Device cards use white surfaces for observed power on and slightly gray-white

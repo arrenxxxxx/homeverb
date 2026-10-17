@@ -1507,11 +1507,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         s?['observations']?['climate.target_temperature']?['value'] == null
             ? '—'
             : '${s!['observations']['climate.target_temperature']['value']}°C',
-        d['support_status'] == 'unsupported'
-            ? 'Unsupported model'
-            : s == null
-            ? 'Not read'
-            : 'Saved observation',
+        d['support_status'] == 'unsupported' ? 'Unsupported model' : '',
       ];
     }).toList(),
     presentations: {

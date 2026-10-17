@@ -390,7 +390,7 @@ void main() {
                         presentations: presentations,
                         data: [
                           for (final kind in presentations.keys)
-                            [kind, 'Unassigned', '—', 'Saved observation'],
+                            [kind, 'Unassigned', '—', ''],
                         ],
                         onAction: (_) {},
                       ),

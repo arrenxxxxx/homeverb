@@ -29,6 +29,9 @@ Native/CLI/MCP APIs, support levels and receipt semantics are unchanged.
 Home card surfaces use white for observed power on and slightly gray-white for
 off/unknown, with dark text. High contrast retains white surfaces and black outlines.
 This presentation change preserves observed-only state and all control semantics.
+Native home cards also omit routine saved-observation/not-read captions and the
+Saved locally header. Missing values stay unknown; Core retains timestamps and
+cache evidence. Unsupported-model reasons remain.
 Home cards now share observed power colors and local activity feedback and select
 distinct refrigerator/dishwasher artwork from component/capability metadata. Local
 control-option/session-grant inspection filters whole-device shortcuts; a readable

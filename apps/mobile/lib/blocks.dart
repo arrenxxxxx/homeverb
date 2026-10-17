@@ -1251,6 +1251,7 @@ class DeviceTile extends StatelessWidget {
             presentation?.artwork ??
             (sampleNames.containsKey(deviceKey) ? deviceKey : 'ac'),
         d = data ?? sampleNames[kind] ?? sampleNames['ac']!;
+    final hasCaption = d[3].toString().isNotEmpty;
     const color = ink, secondary = muted;
     final scale = MediaQuery.textScalerOf(context).scale(13) / 13;
     final largeText = scale > 1.3;
@@ -1368,8 +1369,10 @@ class DeviceTile extends StatelessWidget {
                           Copy(d[1], size: 14, color: secondary),
                           const SizedBox(height: 12),
                           Copy(d[2], size: 26, bold: true, color: color),
-                          const SizedBox(height: 8),
-                          Copy(d[3], size: 14, color: secondary),
+                          if (hasCaption) ...[
+                            const SizedBox(height: 8),
+                            Copy(d[3], size: 14, color: secondary),
+                          ],
                           const SizedBox(height: 48),
                         ],
                       ),
@@ -1422,17 +1425,18 @@ class DeviceTile extends StatelessWidget {
                                 color: color,
                               ),
                             ),
-                            Positioned(
-                              left: 138,
-                              right: 14,
-                              top: 154,
-                              child: Copy(
-                                d[3],
-                                size: 14,
-                                color: secondary,
-                                maxLines: 1,
+                            if (hasCaption)
+                              Positioned(
+                                left: 138,
+                                right: 14,
+                                top: 154,
+                                child: Copy(
+                                  d[3],
+                                  size: 14,
+                                  color: secondary,
+                                  maxLines: 1,
+                                ),
                               ),
-                            ),
                           ] else ...[
                             textAt(
                               117,
@@ -1464,15 +1468,16 @@ class DeviceTile extends StatelessWidget {
                               ),
                               right: 50,
                             ),
-                            textAt(
-                              compactHeight - 26,
-                              Copy(
-                                cached ? 'Cached · 2h ago' : d[3],
-                                maxLines: 1,
-                                size: 10,
-                                color: secondary,
+                            if (hasCaption)
+                              textAt(
+                                compactHeight - 26,
+                                Copy(
+                                  cached ? 'Cached · 2h ago' : d[3],
+                                  maxLines: 1,
+                                  size: 10,
+                                  color: secondary,
+                                ),
                               ),
-                            ),
                           ],
                         ],
                       ),
