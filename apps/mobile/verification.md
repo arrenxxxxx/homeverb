@@ -96,6 +96,50 @@ Local captures are
 The APK, report and captures are local ignored artifacts; no upload, push or
 publication occurred. Native API, schemas and adapter admission are unchanged.
 
+### Emulator recheck and isolated Native Mock acceptance
+
+The owner requested installation and emulator verification again. In-place
+installation of the same verified APK succeeded on the Android 15 / API 35 arm64
+emulator. Opening a saved AC card still returned `AUTH_REQUIRED`; the review did
+not enter credentials, reauthorize an account or select a physical-device control.
+
+Two separate process tests then ran with temporary Native Mock profiles and
+`--no-uninstall`, preserving the real profile and presentation preferences:
+
+- `fvm flutter test integration_test/native_journeys_test.dart -d EMULATOR_SERIAL
+  --no-uninstall --reporter expanded`: one test passed in 3 minutes 18 seconds.
+  It exercised direct Heat selection and its verified native receipt, temperature
+  forms, quick power, local organization/preferences, scoped cleanup and lifecycle
+  refusal through the embedded Core. Text input, file picker and lifecycle events
+  remain simulated as documented above; no provider or appliance was used.
+- `fvm flutter test integration_test/native_smoke_test.dart -d EMULATOR_SERIAL
+  --no-uninstall --reporter expanded`, with a device-local
+  `HOMEVERB_CLIMATE_CAPTURE` Dart define: one test passed in 19 seconds. The smoke
+  test now uses inline Heat selection instead of the removed mode dialog. It
+  checks observed Heat and a verified receipt, increases the described target
+  from 26 to 26.5 degrees Celsius through the new plus button, checks the observed
+  target and its verified receipt, and confirms unsupported fan, airflow and
+  display/sound rows are absent. It then renders the same page in Simplified
+  Chinese before restoring English and checking scoped cache/history cleanup.
+
+The Android Chinese climate capture was visually inspected: labels and mode
+choices render with platform CJK fallback, without the host widget renderer's
+missing glyphs. This establishes native Mock rendering and execution, not a Meiju
+read, extra adapter mapping, physical-appliance acceptance or pixel equality.
+`fvm flutter analyze` and the pinned Dart format check passed after the smoke-test
+update. No production Dart, Rust, ABI, schema or startup-grant code changed.
+
+Local evidence under `output/flutter-verification/android/`:
+`climate-rows-native-mode-en-US.png`, `climate-rows-native-zh-CN.png`,
+`climate-rows-native-journeys.log`, `climate-rows-native-smoke.log`,
+`climate-rows-recheck-auth-required-zh-CN.png` and
+`climate-rows-restored-home-zh-CN.png`. These are ignored local artifacts.
+After both tests, the ordinary verified Meiju APK was reinstalled successfully
+and launched with its original saved cards and Chinese preference intact. The
+emulator is left on that ordinary build's home screen. Real Meiju detail/control
+acceptance remains **blocked** by the account's authentication requirement.
+No physical-device write, upload, push or publication occurred.
+
 ## Main integration: October 16, 2026
 
 Phase 1 merges `origin/codex/flutter-ui` at `834739b` into main at `cb76cbb`.

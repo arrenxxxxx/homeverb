@@ -11,6 +11,10 @@ same plan/execute path. Swing, positions, display, sound and comfort controls ha
 fictional widget evidence only and remain unavailable on current Meiju descriptors.
 See the [parity record](development/10-meiju-ac-parity.md) and
 [verification record](../apps/mobile/verification.md).
+Android 15 arm64 process tests pass direct mode and stepped-temperature Native
+Mock writes with verified receipts, unsupported-row hiding and Chinese detail
+rendering. The current emulator's Meiju account requires authentication; these
+Mock results do not establish additional Meiju control acceptance.
 
 Native API 1.22.0, SQLite schema 5, protected payload 3, startup grant formats,
 adapter admission, routing and outcome semantics are unchanged. No new appliance

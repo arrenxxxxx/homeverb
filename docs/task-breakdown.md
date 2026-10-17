@@ -36,6 +36,11 @@ native session-grant inspection separating saved metadata from current authority
 The generic swing/display/sound/comfort paths have fictional widget evidence only;
 current Meiju adapters still do not admit those actions. Exact-model mappings and
 physical acceptance remain open; see the [app evidence](../apps/mobile/verification.md).
+Android 15 arm64 process checks now pass the Native Mock click journey and
+expanded-control smoke test, including direct mode/temperature receipts, hidden
+unsupported rows and Chinese detail rendering. The ordinary Meiju APK is restored
+with saved cards/preferences intact; its current account returns `AUTH_REQUIRED`,
+so new Meiju detail/control acceptance remains blocked.
 
 The owner subsequently requested complete parity with the selected AC's Meiju
 control page. The [AC parity review](development/10-meiju-ac-parity.md) tracks this

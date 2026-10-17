@@ -206,8 +206,8 @@ Run the process tests on a connected Android device or emulator:
 
 ```sh
 fvm flutter test integration_test/native_journeys_test.dart -d DEVICE_ID --no-uninstall
-fvm flutter test integration_test/native_smoke_test.dart -d DEVICE_ID
-fvm flutter test integration_test/account_smoke_test.dart -d DEVICE_ID
+fvm flutter test integration_test/native_smoke_test.dart -d DEVICE_ID --no-uninstall
+fvm flutter test integration_test/account_smoke_test.dart -d DEVICE_ID --no-uninstall
 ```
 
 These tests create temporary isolated profiles. The full journey captures its
@@ -215,6 +215,13 @@ Flutter surfaces under Dart's temporary directory (`code_cache` on the tested
 Android emulator) at `homeverb-native-captures`, using
 the device dimensions. It simulates text input and the file picker and injects
 lifecycle transitions; it does not verify the OS keyboard, picker or task switcher.
+The native smoke test selects an inline climate mode, increases the temperature,
+checks verified Mock receipts and hides unsupported fan, airflow and settings rows.
+It also renders the detail page in Simplified Chinese; the optional
+`HOMEVERB_CLIMATE_CAPTURE` Dart define saves that Flutter surface to an explicit
+device-local path. This is native Mock execution and platform-font evidence,
+not a provider login or physical-appliance acceptance test. Reinstall the ordinary
+APK after process tests; `--no-uninstall` preserves the existing application data.
 The account test uses empty local
 metadata and fictional input without submitting valid credentials or calling a
 vendor. Passing these checks does not establish Android Keystore round trips or
