@@ -10,6 +10,12 @@ The subsequent climate-footer removal affects presentation only: the reading tim
 and three trailing navigation/refresh buttons are absent in both native and H5
 views. Capability filtering, grants and execution semantics are unchanged.
 
+Real H5 account/device operation is not implemented. The Android Meiju build uses
+the production native entry point and protected system storage; the browser
+fixture cannot load the native FFI library or reuse Android credentials. macOS
+also lacks a production credential-store backend in this checkout. No HTTP
+control bridge or service has been added to work around these boundaries.
+
 ## October 17 Flutter control presentation
 
 The live climate-and-power view now uses expanded Window Light rows and local

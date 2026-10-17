@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'client_contract.dart';
 import 'climate_controls.dart';
 import 'controller.dart';
-import 'localization.dart';
 import 'preferences.dart';
 import 'skin.dart';
 
@@ -208,19 +207,6 @@ class _PreviewClimateState extends State<PreviewClimate> {
                 configure();
               });
             },
-          ),
-          TextButton(
-            onPressed: () => LocaleSettings.setLocale(
-              translationsOf(context).$meta.locale == AppLocale.zhCn
-                  ? AppLocale.enUs
-                  : AppLocale.zhCn,
-            ),
-            child: Copy(
-              translationsOf(context).$meta.locale == AppLocale.zhCn
-                  ? 'English (United States)'
-                  : 'Simplified Chinese',
-              size: 12,
-            ),
           ),
         ],
       ),

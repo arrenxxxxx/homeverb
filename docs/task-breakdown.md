@@ -28,6 +28,13 @@ local success; earlier runs were blocked by the repository's billing limit.
 
 ## Task status
 
+The owner subsequently requested actual operation rather than preview data.
+The climate fixture's language button is removed. A current ordinary Meiju APK
+has passed build/archive checks and installed in place on the host-GPU Android
+emulator. Startup is blocked by Android's locked user storage pending owner
+unlock. Real H5 account/device integration remains unimplemented; no temporary
+HTTP control bridge was introduced. See the [runtime handoff evidence](../apps/mobile/verification.md#native-runtime-handoff-and-language-button-removal-october-17-2026).
+
 The owner-requested H5 development preview now opens the current shared climate
 controls with fictional, memory-only data and three airflow-capability scenarios.
 It compiles independently of native FFI and cannot control appliances. The

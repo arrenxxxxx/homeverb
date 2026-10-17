@@ -167,7 +167,20 @@ airflow, swing-only airflow and no airflow controls. Temperature, mode, fan and
 other settings edit only that fixture; no Core, credentials, provider requests or
 execution receipts are involved. These scenarios do not add adapter support.
 The preview defaults to Simplified Chinese; `--dart-define=PREVIEW_LOCALE=en-US`
-selects English, and the climate fixture also offers a language switch.
+selects English. Language selection belongs in the native app's Settings page,
+not in the climate controls.
+
+The Web entry point has no real account/device integration. For actual Meiju
+sign-in, retrieval and supported controls, run the native Android entry point:
+
+```sh
+fvm flutter run -d ANDROID_DEVICE_ID --dart-define=HOMEVERB_ADAPTER=midea.meiju
+```
+
+Native Core, system credential storage and the existing protected account flow
+remain required. Do not expose Core through a temporary HTTP control bridge or
+describe the browser fixture as a live-device application. Changing that boundary
+requires an explicit owner decision and a new ADR.
 
 `--dart-define=PREVIEW_SCREEN=H04` selects another catalog fixture. The preview is
 labelled on screen. Screenshot tests use deterministic status-area fixtures;

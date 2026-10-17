@@ -1,5 +1,35 @@
 # Flutter implementation verification
 
+## Native runtime handoff and language-button removal: October 17, 2026
+
+The owner requested removal of the climate fixture's language button and actual
+account/device operation instead of fictional preview data. The extra button is
+removed; the native app retains language selection in Settings. Analysis, pinned
+format checking and both preview widget tests passed. The running H5 entry point
+still has no native Core or real account/device implementation. No HTTP control
+bridge, credential copy, browser secret store or new adapter path was added.
+
+The current ordinary Meiju release APK built successfully in 33.1 seconds with
+both Android ABIs and production plugin generation. The inspected artifact is
+`output/flutter-verification/android/homeverb-0.2.0-meiju-live.apk`, 68,202,196
+bytes, SHA-256
+`5870bfce29ce8c61b59bf9c0bfb43e14d0ead1a66d2dbb3e5be3c33763d3ebb3`.
+The adjacent verifier report records base source `d99ccc8` with the uncommitted
+preview-button/README changes (`source_dirty: true`), unchanged native AAR,
+17 exports per ABI, development signature and 16 KiB alignment. Archive checks
+passed; they are not runtime or physical-device acceptance.
+
+The existing Android 15 arm64 AVD started with its same data partition and
+`-gpu host -no-snapshot -no-boot-anim`; SurfaceFlinger confirmed the Apple M1 Pro
+host renderer. `adb install -r` succeeded without uninstalling or clearing data.
+Android user 0 remains `RUNNING_LOCKED` after reboot. Activity startup was refused
+while credential-encrypted user storage was locked; actual native startup and
+account/device acceptance remain blocked until the owner unlocks the emulator.
+The screen was woken for the owner, without supplying or changing a lock secret.
+No provider credential was accessed or provider read/appliance command sent,
+and no upload, push or publication occurred. The H5 fixture must not be described
+as real operation, and the installed APK must not be described as launched.
+
 ## Climate footer removal: October 17, 2026
 
 Following the owner's browser annotation, the shared climate view removes the
