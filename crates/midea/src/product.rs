@@ -74,6 +74,17 @@ fn text(value: Option<&Value>) -> Result<Option<&str>> {
 }
 
 impl ProductProfile {
+    pub(crate) fn ac_features(
+        &self,
+        model: Option<&str>,
+    ) -> Option<&'static crate::ac_features::AcFeatureProfile> {
+        crate::ac_features::select(
+            self.0.subtype.as_deref(),
+            self.0.sn8.as_deref(),
+            self.0.category.as_deref(),
+            model,
+        )
+    }
     pub(crate) fn temperature(
         &self,
         model: Option<&str>,

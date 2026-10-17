@@ -89,11 +89,18 @@ List<dynamic> describedControls(
     final visibleProperties = properties.entries.where(
       (entry) =>
           entry.value['readable'] == true &&
+          (entry.value['control_requires_observation'] != true ||
+              c.observed('$id.${entry.key}') != null) &&
           !excludeProperties.contains('$id.${entry.key}'),
     );
     final visibleActions = actions.entries.where(
       (entry) =>
           !excludeActions.contains('$id.${entry.key}') &&
+          !((entry.value['parameters']?['properties'] as Map? ?? {}).keys.any(
+            (p) =>
+                properties[p]?['control_requires_observation'] == true &&
+                c.observed('$id.$p') == null,
+          )) &&
           (!hideUnavailable ||
               (c.hasControlAction(id, entry.key) &&
                   actionUnavailable(

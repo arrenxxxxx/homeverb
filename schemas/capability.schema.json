@@ -36,6 +36,11 @@
           "writable": {
             "type": "boolean"
           },
+          "control_requires_observation": {
+            "type": "boolean",
+            "default": false,
+            "description": "Optional controls require a reported property value before presentation. This is neither authority nor physical support certification; adapters independently recheck required live state before sending."
+          },
           "unit": {
             "type": "string",
             "minLength": 1

@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "device_id": "30000000-0000-4000-8000-000000000001",
+  "component_id": "main",
+  "from_cache": false,
+  "observations": {
+    "vendor.midea.ac.eco": {
+      "value": true,
+      "source": "cloud",
+      "observed_at": null,
+      "received_at": "2026-10-17T05:00:00Z",
+      "stale": true
+    },
+    "vendor.midea.ac.breezeless": {
+      "value": 2,
+      "source": "cloud",
+      "observed_at": null,
+      "received_at": "2026-10-17T05:00:00Z",
+      "stale": true
+    },
+    "vendor.midea.ac.horizontal_direction": {
+      "value": 25,
+      "source": "cloud",
+      "observed_at": null,
+      "received_at": "2026-10-17T05:00:00Z",
+      "stale": true
+    }
+  },
+  "warnings": [
+    "Cloud freshness is unproven."
+  ]
+}

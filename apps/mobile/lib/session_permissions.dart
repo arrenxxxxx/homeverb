@@ -19,7 +19,11 @@ class SessionPermission {
 
   Map<String, dynamic> get startupEntry => {
     'device_id': device,
-    parameter: value,
+    if (startupField == 'meiju_ac_feature_grants') ...{
+      'feature': parameter,
+      'value': value,
+    } else
+      parameter: value,
   };
 
   // Host configuration translation, not vendor wire encoding. The UI derives
@@ -38,7 +42,19 @@ class SessionPermission {
       return [];
     final result = <SessionPermission>[];
     for (final option in inspection['options'] as List? ?? []) {
-      final mapping = _startup[(option['capability'], option['action'])];
+      final propertiesForMapping =
+          option['definition']?['parameters']?['properties'];
+      final featureParameter =
+          propertiesForMapping is Map && propertiesForMapping.length == 1
+          ? propertiesForMapping.keys.single
+          : null;
+      final mapping =
+          _startup[(option['capability'], option['action'])] ??
+          (option['capability'] == 'vendor.midea.ac' &&
+                  featureParameter is String &&
+                  option['action'] == 'set_' + featureParameter
+              ? ('meiju_ac_feature_grants', featureParameter)
+              : null);
       final definition = option['definition'] as Map?;
       if (mapping == null ||
           option['component_id'] != 'main' ||
@@ -83,7 +99,8 @@ class SessionPermission {
           'boolean' => value is bool,
           'string' => value is String,
           'number' => value is num && value.isFinite,
-          'integer' => value is int,
+          'integer' =>
+            value is num && value.isFinite && value == value.roundToDouble(),
           _ => false,
         }))
           return false;
@@ -131,7 +148,11 @@ class SessionPermission {
           values.add(value);
         }
       }
-      if (values.length > (mapping.$1 == 'meiju_temperature_grants' ? 256 : 64))
+      if (values.length >
+          (mapping.$1 == 'meiju_temperature_grants' ||
+                  mapping.$1 == 'meiju_ac_feature_grants'
+              ? 256
+              : 64))
         continue;
       for (final value in values.where(valid)) {
         result.add(
@@ -164,6 +185,8 @@ class SessionPermission {
       entries.add(permission.startupEntry);
       final limit = permission.startupField == 'meiju_temperature_grants'
           ? 256
+          : permission.startupField == 'meiju_ac_feature_grants'
+          ? 1024
           : 64;
       if (entries.length > limit)
         throw StateError('Too many exact session permissions.');

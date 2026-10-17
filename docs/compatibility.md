@@ -16,6 +16,24 @@ fixture cannot load the native FFI library or reuse Android credentials. macOS
 also lacks a production credential-store backend in this checkout. No HTTP
 control bridge or service has been added to work around these boundaries.
 
+## October 17 optional AC integration
+
+API 1.23 adds exact native feature/value grants and revision-4 vendor AC
+properties/actions under [ADR-0069](adr/0069-profile-scoped-ac-features.md).
+The same four reviewed model gate remains; protected subtype/product/category
+select optional functions without inheriting excluded overrides. Reported values
+filter Flutter rows; field absence is not proof that the hardware lacks a function.
+ECO, breezeless, swing/directions, lights/sound and other mapped comfort/fresh-air
+settings have fictional execution evidence. Physical acceptance remains pending.
+The [parity guide](development/10-meiju-ac-parity.md) names the excluded controls.
+Older strict descriptor consumers must upgrade for `control_requires_observation`;
+old native libraries reject the new startup field. C/JNI counts, SQLite 5 and
+protected payload 3 are unchanged. CLI/MCP startup grant formats are unchanged.
+Native reads add bounded, missing-field supplemental queries only for the admitted
+device IDs, with no new timer or background worker. The existing foreground
+three-second cycle still avoids overlap and silently retains prior state on failure.
+No new real-device write or physical support certification is claimed.
+
 ## October 17 Flutter control presentation
 
 The native platform page adds explicit detail/remark buttons and optional remarks

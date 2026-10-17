@@ -80,6 +80,11 @@ ClimateChoice? climateChoice(
       for (final field in (parameters['properties'] as Json).entries) {
         final schema = field.value as Json;
         if (!names.contains(field.key) ||
+            (capability['properties']?[field
+                        .key]?['control_requires_observation'] ==
+                    true &&
+                controller.observed('${capability['id']}.${field.key}') ==
+                    null) ||
             (parameters['required'] as List? ?? []).any(
               (key) => key != field.key,
             ) ||

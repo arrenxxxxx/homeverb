@@ -101,6 +101,77 @@ class PermissionCore extends AccountFixture {
 
 void main() {
   test(
+    'optional AC startup permissions retain exact independent feature values',
+    () {
+      final inspected = inspection();
+      final cap = jsonDecode(
+        File(
+          '../../examples/capability.meiju-ac-features.json',
+        ).readAsStringSync(),
+      );
+      for (final action in [
+        'set_eco',
+        'set_breezeless',
+        'set_horizontal_direction',
+      ]) {
+        inspected['options'].add({
+          'component_id': 'main',
+          'capability': 'vendor.midea.ac',
+          'action': action,
+          'definition': cap['actions'][action],
+        });
+      }
+      final permissions = SessionPermission.choices(inspected);
+      final grants =
+          SessionPermission.startup(permissions)['meiju_ac_feature_grants']
+              as List;
+      expect(grants.length, 22);
+      expect(
+        grants
+            .where((g) => g['feature'] == 'eco')
+            .map((g) => g['value'])
+            .toList(),
+        [false, true],
+      );
+      expect(
+        grants
+            .where((g) => g['feature'] == 'breezeless')
+            .map((g) => g['value'])
+            .toList(),
+        [0, 1, 2, 3],
+      );
+      expect(
+        grants.every(
+          (g) =>
+              g.keys.toSet().containsAll(['device_id', 'feature', 'value']) &&
+              g.length == 3,
+        ),
+        isTrue,
+      );
+      expect(
+        SessionPermission.startup([
+          ...permissions,
+          ...permissions,
+        ])['meiju_ac_feature_grants'],
+        grants,
+      );
+      cap['actions']['set_eco']['risk'] = 'elevated';
+      inspected['options'].removeWhere(
+        (g) =>
+            g['action'] == 'set_breezeless' ||
+            g['action'] == 'set_horizontal_direction' ||
+            (g['action'] as String).startsWith('set_') &&
+                !{'set_eco', 'set_fan_speed'}.contains(g['action']),
+      );
+      expect(
+        SessionPermission.startup(
+          SessionPermission.choices(inspected),
+        ).containsKey('meiju_ac_feature_grants'),
+        isFalse,
+      );
+    },
+  );
+  test(
     'native Meiju startup accepts exact host grants without account or networking',
     () async {
       final dir = await Directory.systemTemp.createTemp(
@@ -130,15 +201,16 @@ void main() {
     () {
       final inspected = inspection();
       final choices = SessionPermission.choices(inspected);
-      expect(choices.length, 42);
+      expect(choices.length, 52);
       final grants = SessionPermission.startup(choices);
       expect((grants['meiju_power_grants'] as List).map((v) => v['state']), [
         false,
         true,
       ]);
       expect((grants['meiju_temperature_grants'] as List).length, 29);
-      final narrow = inspected['options']
-          .last['definition']['parameters']['properties']['target_temperature'];
+      final narrow = inspected['options'].firstWhere(
+        (option) => option['capability'] == 'climate',
+      )['definition']['parameters']['properties']['target_temperature'];
       narrow['minimum'] = 20;
       narrow['maximum'] = 22;
       narrow['multipleOf'] = 1;

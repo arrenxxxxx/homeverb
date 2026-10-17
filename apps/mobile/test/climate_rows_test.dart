@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -70,6 +71,83 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   }
+
+  testWidgets(
+    'reported optional ECO and breezeless stay separate and hide absent fields',
+    (tester) async {
+      final (core, c) = await open(tester);
+      field(core, 'eco', {'type': 'boolean'}, null);
+      field(core, 'breezeless', {
+        'type': 'integer',
+        'enum': [0, 1, 2, 3],
+      }, null);
+      for (final name in ['eco', 'breezeless']) {
+        core
+                .capabilities
+                .last['properties'][name]['control_requires_observation'] =
+            true;
+      }
+      await c.refresh();
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('climate-switch:eco')), findsNothing);
+      expect(
+        find.byKey(const ValueKey('climate-option:breezeless:2')),
+        findsNothing,
+      );
+      expect(find.text('Energy saving'), findsNothing);
+      core.observations['vendor.midea.ac.eco'] = false;
+      core.observations['vendor.midea.ac.breezeless'] = 0;
+      await c.refresh();
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('climate-switch:eco')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('climate-option:breezeless:2')),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Observed:'), findsNothing);
+      core.calls.clear();
+      await tap(tester, 'climate-switch:eco');
+      expect(
+        core.calls
+            .where((v) => v['method'] == 'execute')
+            .single['command']['arguments'],
+        {'eco': true},
+      );
+      expect(c.observed('vendor.midea.ac.eco'), false);
+      core.calls.clear();
+      await tap(tester, 'climate-option:breezeless:2');
+      expect(
+        core.calls
+            .where((v) => v['method'] == 'execute')
+            .single['command']['arguments'],
+        {'breezeless': 2},
+      );
+      expect(c.observed('vendor.midea.ac.breezeless'), 0);
+      LocaleSettings.setLocale(AppLocale.zhCn);
+      await tester.pumpAndSettle();
+      final label =
+          tester
+                  .widget<ChoiceChip>(
+                    find.byKey(const ValueKey('climate-option:breezeless:2')),
+                  )
+                  .label
+              as Text;
+      final chinese = jsonDecode(
+        File(
+          '../../packages/presentation/locales/zh-CN.json',
+        ).readAsStringSync(),
+      );
+      expect(label.data, chinese['vendor.midea.ac.breezeless.2']);
+      core.observations.remove('vendor.midea.ac.breezeless');
+      await c.refresh();
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('climate-option:breezeless:2')),
+        findsNothing,
+      );
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
 
   testWidgets(
     'airflow axes degrade independently to switches or exact positions',

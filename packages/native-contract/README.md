@@ -1,6 +1,6 @@
 # HomeVerb native contract
 
-Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.22.0 has 34 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions and three trusted connection-link functions; the JSON envelope schema is 1.0.
+Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.23.0 has 34 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions and three trusted connection-link functions; the JSON envelope schema is 1.0.
 
 API 1.19 adds nullable `last_complete_inventory_at` to account summaries. It is
 historical local retrieval metadata, not authorization or online status. SQLite
@@ -94,3 +94,11 @@ At most 64 mainland Meiju accounts participate; any inaccessible relevant map
 fails the complete query. C/JNI and storage formats remain unchanged. Account
 choice and reconciliation remain separate work; see the
 [conflict contract](../../docs/native-ui-contract.md#inspect-saved-device-conflicts-api-122).
+
+
+API 1.23 adds startup-only `meiju_ac_feature_grants` for reviewed optional AC
+scalar settings. Inspection can return up to 64 action options; revision-4 AC
+properties use `control_requires_observation` to hide unreported optional controls.
+Execution independently checks the protected profile and reads required state
+before one send. The 34 ordinary methods, C/JNI exports and storage formats are
+unchanged. See the [contract](../../docs/native-ui-contract.md#profile-scoped-optional-ac-startup-api-123).

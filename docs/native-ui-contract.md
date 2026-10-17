@@ -34,7 +34,7 @@ The 16 C functions in [homeverb.h](../crates/ffi/include/homeverb.h) form the na
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects saved-account cloud reads. `scenario` defaults to `normal`. Meiju requires `allow_mock_writes: false` and rejects any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms `homeverb.mock` or `midea.meiju`. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.22.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.23.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -1352,3 +1352,54 @@ an omitted subtype. The unchanged 1.22.0 request/response and startup schemas al
 represent these options and bounds. Hosts must inspect again and establish exact
 temperature grants before refreshing descriptors. A cached readable target is never
 permission to construct arbitrary bounds or grant an uninspected action.
+
+
+## Profile-scoped optional AC startup (API 1.23)
+
+[ADR-0069](adr/0069-profile-scoped-ac-features.md) adds the optional startup array
+`meiju_ac_feature_grants`, with at most 1024 unique entries shaped as
+`{"device_id":"30000000-0000-4000-8000-000000000001","feature":"eco","value":true}`.
+The ID is canonical local UUID-v4; feature/value pairs must satisfy the reviewed
+union in [native-open](../schemas/native-open.schema.json). Integral numeric
+representations normalize before duplicate/policy checks. Non-Meiju startup must
+omit the field or supply an empty array. Invalid startup fails before creating a
+profile. Ordinary method arguments cannot supply or change it. CLI/MCP grant-file
+formats are unchanged and do not expose these optional grants.
+
+Saved protected model/profile evidence supplies the optional action definitions
+through `inspect_control_options` (now at most 64 entries). Inspection remains
+local, non-authoritative and independent of provider field availability. Each
+`vendor.midea.ac.set_<feature>` action accepts exactly its one named scalar.
+The Flutter host admits the reviewed values for the selected device under its
+existing owner-approved foreground policy. An individual grant confers no power,
+mode, temperature, other-feature/value, other-device or LAN authority.
+
+Revision-4 AC properties can declare `control_requires_observation: true`.
+Flutter hides those controls and generic forms until an actual property value is
+available; this flag is presentation metadata, never authorization or freshness.
+Unsupported fixed directions degrade independently to each axis's swing control.
+Discrete angle and breezeless codes are localized choices, never percentages.
+Older strict descriptor consumers need an upgrade before reading these definitions;
+older native libraries reject the new startup field.
+
+Optional observations and supplemental reads run only for admitted device IDs;
+legacy basic descriptors retain basic reads until explicit control setup refreshes
+metadata. Supplemental queries skip already-covered fields,
+and share the single foreground operation/deadline. The default query must succeed.
+Optional errors leave the basic snapshot available with a fixed warning, except
+cancellation/deadline/authentication failures which stop the operation. Invalid
+optional fields are omitted without inventing values. A setting command reads
+its required state within its own operation and rechecks protected membership,
+identity and profile before one control send. Other supported swing-axis values
+must be reported. A valid reported buzzer preference is preserved; an absent
+preference is omitted and a malformed report refuses before send. No source
+defaults or saved Core snapshot fills gaps; sound controls still require a report.
+Concurrent changes in another vendor client can still race prerequisite reads.
+
+Examples: [descriptor](../examples/capability.meiju-ac-features.json),
+[startup](../examples/native-open.meiju-ac-features.json),
+[command](../examples/command.meiju-ac-features.json) and
+[state](../examples/state.meiju-ac-features.json).
+Native method/symbol counts, SQLite 5 and protected payload 3 are unchanged.
+Accepted/unknown/rejected outcomes and replay guards remain unchanged. Field
+availability is experimental mapping evidence, not physical certification.

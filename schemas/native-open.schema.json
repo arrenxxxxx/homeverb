@@ -257,6 +257,338 @@
         "additionalProperties": false
       },
       "description": "Trusted startup-only exact dishwasher cycle action and arguments over cloud. Omitted arguments mean exactly {}. Product 760Y0026 requires explicit additional; other admitted profiles forbid it. Requires reviewed protected product evidence and separate trusted confirmation. Grants no program start or other cycle action."
+    },
+    "meiju_ac_feature_grants": {
+      "type": "array",
+      "maxItems": 1024,
+      "uniqueItems": true,
+      "default": [],
+      "description": "Trusted startup-only exact local AC feature/value permission over cloud. The protected model/profile and prerequisite observations independently restrict execution. No wildcard or ordinary request authority.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "feature": {
+            "type": "string"
+          },
+          "value": {}
+        },
+        "required": [
+          "device_id",
+          "feature",
+          "value"
+        ],
+        "additionalProperties": false,
+        "oneOf": [
+          {
+            "properties": {
+              "feature": {
+                "const": "auto_comfort_fresh_air"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "properties": {
+              "feature": {
+                "const": "auto_fresh_off_co2"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "properties": {
+              "feature": {
+                "const": "auto_purifier_on_pm"
+              },
+              "value": {
+                "type": "integer",
+                "minimum": 75,
+                "maximum": 180,
+                "multipleOf": 1
+              }
+            }
+          },
+          {
+            "properties": {
+              "feature": {
+                "const": "auxiliary_heat"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "properties": {
+              "feature": {
+                "const": "avoid_direct_airflow"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "properties": {
+              "feature": {
+                "const": "boost"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "properties": {
+              "feature": {
+                "const": "breezeless"
+              },
+              "value": {
+                "type": "integer",
+                "enum": [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              }
+            }
+          },
+          {
+            "properties": {
+              "feature": {
+                "const": "button_sound"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "properties": {
+              "feature": {
+                "const": "comfort_energy_saving"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "properties": {
+              "feature": {
+                "const": "comfort_fresh_air"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "properties": {
+              "feature": {
+                "const": "display"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "properties": {
+              "feature": {
+                "const": "dry_after_shutdown"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "properties": {
+              "feature": {
+                "const": "eco"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "properties": {
+              "feature": {
+                "const": "elec_dust_remove"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "properties": {
+              "feature": {
+                "const": "fengguan_remove_odor"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "properties": {
+              "feature": {
+                "const": "follow_airflow"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "properties": {
+              "feature": {
+                "const": "fresh_air_fan_speed"
+              },
+              "value": {
+                "type": "integer",
+                "enum": [
+                  40,
+                  60,
+                  80,
+                  100
+                ]
+              }
+            }
+          },
+          {
+            "properties": {
+              "feature": {
+                "const": "fresh_air_remove_odor"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "properties": {
+              "feature": {
+                "const": "horizontal_direction"
+              },
+              "value": {
+                "type": "integer",
+                "enum": [
+                  0,
+                  1,
+                  25,
+                  50,
+                  75,
+                  100
+                ]
+              }
+            }
+          },
+          {
+            "properties": {
+              "feature": {
+                "const": "horizontal_swing"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "properties": {
+              "feature": {
+                "const": "lower_horizontal_swing"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "properties": {
+              "feature": {
+                "const": "manul_humi"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "properties": {
+              "feature": {
+                "const": "manul_humi_value"
+              },
+              "value": {
+                "type": "integer",
+                "minimum": 40,
+                "maximum": 70,
+                "multipleOf": 1
+              }
+            }
+          },
+          {
+            "properties": {
+              "feature": {
+                "const": "prevent_overcooling"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "properties": {
+              "feature": {
+                "const": "sleep"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "properties": {
+              "feature": {
+                "const": "vertical_direction"
+              },
+              "value": {
+                "type": "integer",
+                "enum": [
+                  0,
+                  1,
+                  25,
+                  50,
+                  75,
+                  100
+                ]
+              }
+            }
+          },
+          {
+            "properties": {
+              "feature": {
+                "const": "vertical_swing"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
+          }
+        ]
+      }
     }
   },
   "required": [
@@ -265,7 +597,7 @@
     "allow_mock_writes"
   ],
   "additionalProperties": false,
-  "description": "Trusted native startup. data_dir must be an absolute private OS path. adapter defaults to homeverb.mock; scenario defaults to normal. Meiju defaults to read-only; optional meiju_power_grants, meiju_fan_grants, meiju_mode_grants and meiju_temperature_grants separately admit exact-device power, fan, explicit power-on/mode activation and profile-scoped temperature targets over cloud. Meiju rejects Mock grants or fault scenarios. Opening never authenticates, discovers or controls. Optional meiju_dishwasher_grants admit reviewed elevated starts only through separate trusted confirmation. Optional meiju_dishwasher_cycle_grants independently admit reviewed pause, resume and cancel requests through trusted confirmation.",
+  "description": "Trusted native startup. data_dir must be an absolute private OS path. adapter defaults to homeverb.mock; scenario defaults to normal. Meiju defaults to read-only; optional meiju_power_grants, meiju_fan_grants, meiju_mode_grants and meiju_temperature_grants separately admit exact-device power, fan, explicit power-on/mode activation and profile-scoped temperature targets over cloud. Meiju rejects Mock grants or fault scenarios. Opening never authenticates, discovers or controls. Optional meiju_dishwasher_grants admit reviewed elevated starts only through separate trusted confirmation. Optional meiju_dishwasher_cycle_grants independently admit reviewed pause, resume and cancel requests through trusted confirmation. Optional meiju_ac_feature_grants independently admit reviewed profile-scoped scalar settings; missing reported prerequisites refuse before send.",
   "allOf": [
     {
       "if": {
@@ -306,6 +638,9 @@
             "maxItems": 0
           },
           "meiju_dishwasher_cycle_grants": {
+            "maxItems": 0
+          },
+          "meiju_ac_feature_grants": {
             "maxItems": 0
           }
         }

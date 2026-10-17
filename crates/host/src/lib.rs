@@ -17,7 +17,9 @@ mod accounts;
 pub use accounts::{AccountConnection, AccountSummary, ConnectRequest};
 mod power_grants;
 pub use power_grants::{MeijuPowerGrant, meiju_power_policy};
+mod ac_feature_grants;
 mod fan_grants;
+pub use ac_feature_grants::{MeijuAcFeatureGrant, meiju_ac_feature_policy};
 pub use fan_grants::{MeijuFanGrant, meiju_fan_policy};
 mod mode_grants;
 pub use mode_grants::{MeijuModeGrant, meiju_mode_policy};
@@ -32,6 +34,7 @@ pub use temperature_grants::{MeijuTemperatureGrant, meiju_temperature_policy};
 /// Trusted startup configuration only; ordinary requests cannot deserialize it.
 #[derive(Default)]
 pub struct MeijuControlGrants<'a> {
+    pub ac_features: &'a [MeijuAcFeatureGrant],
     pub power: &'a [MeijuPowerGrant],
     pub fan: &'a [MeijuFanGrant],
     pub mode: &'a [MeijuModeGrant],
@@ -143,6 +146,9 @@ fn meiju_parts(
 ) -> Result<(Core, Arc<homeverb_midea::MeijuAdapter>)> {
     let mut policy = meiju_power_policy(grants.power)?;
     policy.grants.extend(meiju_fan_policy(grants.fan)?.grants);
+    policy
+        .grants
+        .extend(meiju_ac_feature_policy(grants.ac_features)?.grants);
     policy.grants.extend(meiju_mode_policy(grants.mode)?.grants);
     policy
         .grants
@@ -172,6 +178,11 @@ fn meiju_parts(
     }
     if !grants.temperature.is_empty() {
         adapter = adapter.with_ac_temperature_control();
+    }
+    if !grants.ac_features.is_empty() {
+        adapter = adapter
+            .with_ac_feature_control()
+            .with_ac_feature_devices(grants.ac_features.iter().map(|g| g.device_id.clone()));
     }
     if !grants.dishwasher.is_empty() {
         adapter = adapter.with_dishwasher_control();

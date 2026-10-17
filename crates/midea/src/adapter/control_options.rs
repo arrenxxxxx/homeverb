@@ -6,17 +6,17 @@ use serde::Serialize;
 pub struct ControlOption {
     component_id: &'static str,
     capability: &'static str,
-    action: &'static str,
+    action: String,
     definition: Action,
 }
 
 fn options(appliance: &Appliance) -> Vec<ControlOption> {
     let mut options = Vec::new();
-    let mut add = |capability, action, definition| {
+    let mut add = |capability, action: &str, definition| {
         options.push(ControlOption {
             component_id: "main",
             capability,
-            action,
+            action: action.to_owned(),
             definition,
         });
     };
@@ -35,6 +35,20 @@ fn options(appliance: &Appliance) -> Vec<ControlOption> {
                 .temperature(appliance.model.as_deref())
             {
                 add("climate", "set", temperature_action(profile));
+            }
+            if let Some(profile) = appliance
+                .product_profile
+                .ac_features(appliance.model.as_deref())
+            {
+                for feature in &profile.features {
+                    // Owned names are retained in the result, never provider identifiers.
+                    options.push(ControlOption {
+                        component_id: "main",
+                        capability: "vendor.midea.ac",
+                        action: feature.action_name(),
+                        definition: feature.action(),
+                    });
+                }
             }
         }
         Some(ApplianceFamily::Dishwasher) => {

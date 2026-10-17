@@ -2149,7 +2149,7 @@
                 },
                 "options": {
                   "type": "array",
-                  "maxItems": 4,
+                  "maxItems": 64,
                   "uniqueItems": true,
                   "items": {
                     "type": "object",

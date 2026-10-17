@@ -22,6 +22,10 @@ def main() -> int:
     formats = checked_formats()
     pairs = [
         ("cli-meiju-grants", "cli-meiju-grants"),
+        ("native-open", "native-open.meiju-ac-features"),
+        ("capability", "capability.meiju-ac-features"),
+        ("command", "command.meiju-ac-features"),
+        ("state", "state.meiju-ac-features"),
         ("device", "device"), ("capability", "capability.climate"),
         ("room", "room"), ("device-preferences", "device-preferences"),
         ("room-assignment", "room-assignment"),
@@ -134,6 +138,24 @@ def main() -> int:
     approved_action = Draft202012Validator(load("examples/capability.approved-cycle.json")["actions"]["start"]["parameters"])
     approved_action.validate(load("examples/command.approved-cycle.json")["arguments"])
     negative = []
+    for feature, value in [("eco", "on"), ("eco", 1), ("breezeless", 4),
+                           ("horizontal_direction", 30), ("unknown", True), ("self_clean", True),
+                           ("breezeless", 1.5), ("display", None)]:
+        bad = load("examples/native-open.meiju-ac-features.json")
+        bad["meiju_ac_feature_grants"][0].update(feature=feature, value=value)
+        negative.append((f"invalid AC feature {feature}/{value}", validators["native-open"], bad))
+    for change in ["duplicate", "adapter", "scope", "authority", "capacity"]:
+        bad = load("examples/native-open.meiju-ac-features.json")
+        if change == "duplicate": bad["meiju_ac_feature_grants"] *= 2
+        elif change == "adapter": bad["adapter"] = "homeverb.mock"
+        elif change == "scope": bad["meiju_ac_feature_grants"][0]["device_id"] = "*"
+        elif change == "authority": bad["meiju_ac_feature_grants"][0]["confirmed"] = True
+        else: bad["meiju_ac_feature_grants"] = [dict(device_id=f"30000000-0000-4000-8000-{i:012d}", feature="eco", value=True) for i in range(1025)]
+        negative.append((f"invalid AC startup {change}", validators["native-open"], bad))
+    for value in [None, 1, "true", {}]:
+        bad = load("examples/capability.meiju-ac-features.json")
+        bad["properties"]["eco"]["control_requires_observation"] = value
+        negative.append((f"invalid observation gate {value}", validators["capability"], bad))
     for code in ["APPROVAL_INVALID", "APPROVAL_EXPIRED"]:
         bad = load("examples/command-result.approval-expired.json")
         bad["error"]["code"] = code

@@ -1,5 +1,5 @@
 {
-  "api_version": "1.22.0",
+  "api_version": "1.23.0",
   "provenance": "Fictional account DTO examples. Actual synthetic host responses are checked against the same schemas by crates/host/tests/meiju_accounts.rs. No live identities or credentials.",
   "connect_metadata": {
     "schema_version": "1.0",
@@ -642,6 +642,141 @@
                 "atomic": false,
                 "independent_fields": false,
                 "verification": "unavailable"
+              }
+            },
+            {
+              "component_id": "main",
+              "capability": "vendor.midea.ac",
+              "action": "set_sleep",
+              "definition": {
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "sleep": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "sleep"
+                  ],
+                  "additionalProperties": false
+                },
+                "transports": [
+                  "cloud"
+                ],
+                "idempotency": "set_value",
+                "risk": "low",
+                "verification": "unavailable",
+                "atomic": false,
+                "independent_fields": false
+              }
+            },
+            {
+              "component_id": "main",
+              "capability": "vendor.midea.ac",
+              "action": "set_fengguan_remove_odor",
+              "definition": {
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "fengguan_remove_odor": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "fengguan_remove_odor"
+                  ],
+                  "additionalProperties": false
+                },
+                "transports": [
+                  "cloud"
+                ],
+                "idempotency": "set_value",
+                "risk": "low",
+                "verification": "unavailable",
+                "atomic": false,
+                "independent_fields": false
+              }
+            },
+            {
+              "component_id": "main",
+              "capability": "vendor.midea.ac",
+              "action": "set_prevent_overcooling",
+              "definition": {
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "prevent_overcooling": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "prevent_overcooling"
+                  ],
+                  "additionalProperties": false
+                },
+                "transports": [
+                  "cloud"
+                ],
+                "idempotency": "set_value",
+                "risk": "low",
+                "verification": "unavailable",
+                "atomic": false,
+                "independent_fields": false
+              }
+            },
+            {
+              "component_id": "main",
+              "capability": "vendor.midea.ac",
+              "action": "set_auxiliary_heat",
+              "definition": {
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "auxiliary_heat": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "auxiliary_heat"
+                  ],
+                  "additionalProperties": false
+                },
+                "transports": [
+                  "cloud"
+                ],
+                "idempotency": "set_value",
+                "risk": "low",
+                "verification": "unavailable",
+                "atomic": false,
+                "independent_fields": false
+              }
+            },
+            {
+              "component_id": "main",
+              "capability": "vendor.midea.ac",
+              "action": "set_follow_airflow",
+              "definition": {
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "follow_airflow": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "follow_airflow"
+                  ],
+                  "additionalProperties": false
+                },
+                "transports": [
+                  "cloud"
+                ],
+                "idempotency": "set_value",
+                "risk": "low",
+                "verification": "unavailable",
+                "atomic": false,
+                "independent_fields": false
               }
             }
           ]

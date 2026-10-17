@@ -14,6 +14,7 @@ use std::{collections::BTreeMap, fmt};
 pub enum StateQuery {
     Default,
     IndoorTemperature,
+    AcOptional(&'static str),
 }
 
 impl StateQuery {
@@ -22,6 +23,7 @@ impl StateQuery {
         match self {
             Self::Default => json!({}),
             Self::IndoorTemperature => json!({"query_type": "indoor_temperature"}),
+            Self::AcOptional(query) => json!({"query_type":query}),
         }
     }
 }
@@ -37,6 +39,7 @@ pub struct CloudState {
     pub appliance_id: CloudId,
     received_at: DateTime<Utc>,
     components: BTreeMap<&'static str, BTreeMap<String, Value>>,
+    pub(crate) ac_fields: BTreeMap<String, Value>,
 }
 
 impl fmt::Debug for CloudState {
@@ -97,6 +100,7 @@ pub async fn read_cloud_state(
     operation
         .run(async {
             if matches!(appliance.family, ApplianceFamily::Other(_))
+                || matches!(query, StateQuery::AcOptional(name) if appliance.family != ApplianceFamily::AirConditioner || !crate::ac_features::query_allowed(name))
                 || (query == StateQuery::IndoorTemperature
                     && appliance.family != ApplianceFamily::AirConditioner)
             {
@@ -135,6 +139,11 @@ pub async fn read_cloud_state(
                 appliance_id: appliance.id.clone(),
                 received_at,
                 components: decode(&data, appliance)?,
+                ac_fields: appliance
+                    .product_profile
+                    .ac_features(appliance.model.as_deref())
+                    .map(|p| p.fields(&data))
+                    .unwrap_or_default(),
             })
         })
         .await?;
@@ -213,10 +222,21 @@ fn decode(
     data: &Value,
     appliance: &Appliance,
 ) -> Result<BTreeMap<&'static str, BTreeMap<String, Value>>> {
-    let mut output = BTreeMap::new();
+    let mut output: BTreeMap<&'static str, BTreeMap<String, Value>> = BTreeMap::new();
     match appliance.family {
         ApplianceFamily::AirConditioner => {
             let readings = output.entry("main").or_default();
+            if let Some(profile) = appliance
+                .product_profile
+                .ac_features(appliance.model.as_deref())
+            {
+                let raw = profile.fields(data);
+                for feature in &profile.features {
+                    if let Ok(Some(value)) = feature.observed(&raw) {
+                        readings.insert(format!("vendor.midea.ac.{}", feature.name), value);
+                    }
+                }
+            }
             field(readings, data, "power", "power.state", on_off)?;
             field(readings, data, "mode", "vendor.midea.ac.mode", vendor_token)?;
             field(

@@ -4,7 +4,7 @@
 
 The owner resumed development and requested the Flutter UI merge, Core integration
 and local Android APK delivery. The former UI branch is now part of `main`.
-Native API **1.22.0** provides 34 ordinary methods, 16 C functions plus the
+Native API **1.23.0** provides 34 ordinary methods, 16 C functions plus the
 Android-only initializer, SQLite schema 5 and protected payload 3.
 
 The app lives in [apps/mobile](../apps/mobile/README.md). Its protected account
@@ -27,6 +27,15 @@ artifacts are not source handoffs. Follow [testing](testing.md) and the
 local success; earlier runs were blocked by the repository's billing limit.
 
 ## Task status
+
+[ADR-0069](adr/0069-profile-scoped-ac-features.md) integrates reviewed optional AC
+scalar mappings, exact feature/value startup grants, prerequisite reads and Flutter
+reported-state rows. ECO, breezeless, both swing axes, exact directions, display,
+sound and profile-specific comfort/fresh-air settings are experimental. Mapping
+facts and the remaining unsupported conditional/self-clean/timer functions are
+listed in the [parity guide](development/10-meiju-ac-parity.md). Physical optional
+feature acceptance and the selected official-App inventory remain open. No new
+physical appliance write is authorized by this source integration.
 
 The native platform page now uses explicit detail/remark actions and a compact
 reload control. Remarks are optional; a successful foreground sign-in can supply

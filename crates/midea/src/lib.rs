@@ -1,9 +1,11 @@
 //! Native Meiju accounts and model-scoped reads, with reviewed experimental AC/dishwasher controls.
 
+mod ac_features;
 mod auth;
 mod cloud;
 mod codec;
 mod control;
+pub use ac_features::validate_ac_feature_value;
 pub use control::{AC_FAN_SPEEDS, AC_MODES, AcMode};
 mod dishwasher;
 pub mod lan;

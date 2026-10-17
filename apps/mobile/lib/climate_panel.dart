@@ -16,7 +16,7 @@ class ClimateRow extends StatelessWidget {
   const ClimateRow({
     required this.title,
     required this.icon,
-    required this.value,
+    this.value,
     this.child,
     this.trailing,
     this.updating = false,
@@ -24,7 +24,7 @@ class ClimateRow extends StatelessWidget {
   });
   final String title;
   final IconData icon;
-  final Object value;
+  final Object? value;
   final Widget? child, trailing;
   final bool updating;
   @override
@@ -53,8 +53,10 @@ class ClimateRow extends StatelessWidget {
                       Expanded(child: Copy(title, bold: true)),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  Copy(value, size: 12, color: muted),
+                  if (value case final value?) ...[
+                    const SizedBox(height: 8),
+                    Copy(value, size: 12, color: muted),
+                  ],
                 ],
               ),
             ),

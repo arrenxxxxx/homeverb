@@ -1,0 +1,2859 @@
+[
+  {
+    "selector": "portable",
+    "codes": [],
+    "queries": [
+      "run_status",
+      "indoor_temperature",
+      "group_data_four"
+    ],
+    "preserve": [],
+    "features": [
+      {
+        "name": "eco",
+        "wire": "eco",
+        "read_field": "eco",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "eco": "off",
+              "cool_power_saving": 0
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "eco": "on",
+              "cool_power_saving": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "comfort_energy_saving",
+        "wire": "comfort_power_save",
+        "read_field": "comfort_power_save",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "comfort_power_save": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "comfort_power_save": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "boost",
+        "wire": "strong_wind",
+        "read_field": "strong_wind",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "strong_wind": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "strong_wind": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "vertical_swing",
+        "wire": "wind_swing_ud",
+        "read_field": "wind_swing_ud",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "wind_swing_ud": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "wind_swing_ud": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "dry_after_shutdown",
+        "wire": "dry",
+        "read_field": "dry",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "dry": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "dry": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "auxiliary_heat",
+        "wire": "aux_heat",
+        "read_field": "aux_heat",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "aux_heat": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "aux_heat": "on"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "selector": "wall",
+    "codes": [],
+    "queries": [
+      "no_wind_sense",
+      "prevent_straight_wind",
+      "prevent_super_cool",
+      "wind_swing_lr_angle",
+      "wind_swing_ud_angle",
+      "group_data_four"
+    ],
+    "preserve": [
+      "buzzer"
+    ],
+    "features": [
+      {
+        "name": "eco",
+        "wire": "eco",
+        "read_field": "eco",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "eco": "off",
+              "cool_power_saving": 0
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "eco": "on",
+              "cool_power_saving": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "comfort_energy_saving",
+        "wire": "comfort_power_save",
+        "read_field": "comfort_power_save",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "comfort_power_save": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "comfort_power_save": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "boost",
+        "wire": "strong_wind",
+        "read_field": "strong_wind",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "strong_wind": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "strong_wind": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "horizontal_swing",
+        "wire": "wind_swing_lr",
+        "read_field": "wind_swing_lr",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "wind_swing_lr": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "wind_swing_lr": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "vertical_swing",
+        "wire": "wind_swing_ud",
+        "read_field": "wind_swing_ud",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "wind_swing_ud": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "wind_swing_ud": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "fresh_air_remove_odor",
+        "wire": "fresh_air_remove_odor",
+        "read_field": "fresh_air_remove_odor",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "fresh_air_remove_odor": 0
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "fresh_air_remove_odor": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "button_sound",
+        "wire": "buzzer",
+        "read_field": "buzzer",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "buzzer": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "buzzer": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "display",
+        "wire": "screen_display",
+        "read_field": "screen_display_now",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "screen_display": 0
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "screen_display": 100
+            }
+          }
+        ]
+      },
+      {
+        "name": "avoid_direct_airflow",
+        "wire": "prevent_straight_wind",
+        "read_field": "prevent_straight_wind",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "prevent_straight_wind": 1
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "prevent_straight_wind": 2
+            }
+          }
+        ]
+      },
+      {
+        "name": "prevent_overcooling",
+        "wire": "prevent_super_cool",
+        "read_field": "prevent_super_cool",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "prevent_super_cool": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "prevent_super_cool": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "dry_after_shutdown",
+        "wire": "dry",
+        "read_field": "dry",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "dry": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "dry": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "auxiliary_heat",
+        "wire": "ptc",
+        "read_field": "ptc",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "ptc": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "ptc": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "follow_airflow",
+        "wire": "follow_body_sense",
+        "read_field": "follow_body_sense",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "follow_body_sense_enable": 1,
+              "follow_body_sense": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "follow_body_sense_enable": 1,
+              "follow_body_sense": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "vertical_direction",
+        "wire": "wind_swing_ud_angle",
+        "read_field": "wind_swing_ud_angle",
+        "parameter": {
+          "type": "integer",
+          "enum": [
+            0,
+            1,
+            25,
+            50,
+            75,
+            100
+          ]
+        },
+        "options": [
+          {
+            "value": 0,
+            "control": {
+              "wind_swing_ud_angle": 0
+            }
+          },
+          {
+            "value": 1,
+            "control": {
+              "wind_swing_ud_angle": 1
+            }
+          },
+          {
+            "value": 25,
+            "control": {
+              "wind_swing_ud_angle": 25
+            }
+          },
+          {
+            "value": 50,
+            "control": {
+              "wind_swing_ud_angle": 50
+            }
+          },
+          {
+            "value": 75,
+            "control": {
+              "wind_swing_ud_angle": 75
+            }
+          },
+          {
+            "value": 100,
+            "control": {
+              "wind_swing_ud_angle": 100
+            }
+          }
+        ]
+      },
+      {
+        "name": "horizontal_direction",
+        "wire": "wind_swing_lr_angle",
+        "read_field": "wind_swing_lr_angle",
+        "parameter": {
+          "type": "integer",
+          "enum": [
+            0,
+            1,
+            25,
+            50,
+            75,
+            100
+          ]
+        },
+        "options": [
+          {
+            "value": 0,
+            "control": {
+              "wind_swing_lr_angle": 0
+            }
+          },
+          {
+            "value": 1,
+            "control": {
+              "wind_swing_lr_angle": 1
+            }
+          },
+          {
+            "value": 25,
+            "control": {
+              "wind_swing_lr_angle": 25
+            }
+          },
+          {
+            "value": 50,
+            "control": {
+              "wind_swing_lr_angle": 50
+            }
+          },
+          {
+            "value": 75,
+            "control": {
+              "wind_swing_lr_angle": 75
+            }
+          },
+          {
+            "value": 100,
+            "control": {
+              "wind_swing_lr_angle": 100
+            }
+          }
+        ]
+      },
+      {
+        "name": "breezeless",
+        "wire": "no_wind_sense",
+        "read_field": "no_wind_sense",
+        "parameter": {
+          "type": "integer",
+          "enum": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        "options": [
+          {
+            "value": 0,
+            "control": {
+              "no_wind_sense": 0
+            }
+          },
+          {
+            "value": 1,
+            "control": {
+              "no_wind_sense": 1
+            }
+          },
+          {
+            "value": 2,
+            "control": {
+              "no_wind_sense": 2
+            }
+          },
+          {
+            "value": 3,
+            "control": {
+              "no_wind_sense": 3
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "selector": "product",
+    "codes": [
+      "22040055",
+      "22040023",
+      "22040053"
+    ],
+    "queries": [
+      "prevent_straight_wind",
+      "prevent_super_cool",
+      "wind_swing_lr_angle",
+      "wind_swing_ud_angle"
+    ],
+    "preserve": [
+      "buzzer"
+    ],
+    "features": [
+      {
+        "name": "eco",
+        "wire": "eco",
+        "read_field": "eco",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "eco": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "eco": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "comfort_energy_saving",
+        "wire": "comfort_power_save",
+        "read_field": "comfort_power_save",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "comfort_power_save": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "comfort_power_save": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "horizontal_swing",
+        "wire": "wind_swing_lr",
+        "read_field": "wind_swing_lr",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "wind_swing_lr": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "wind_swing_lr": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "vertical_swing",
+        "wire": "wind_swing_ud",
+        "read_field": "wind_swing_ud",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "wind_swing_ud": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "wind_swing_ud": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "button_sound",
+        "wire": "buzzer",
+        "read_field": "buzzer",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "buzzer": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "buzzer": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "display",
+        "wire": "screen_display",
+        "read_field": "screen_display_now",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "screen_display": 0
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "screen_display": 100
+            }
+          }
+        ]
+      },
+      {
+        "name": "avoid_direct_airflow",
+        "wire": "prevent_straight_wind",
+        "read_field": "prevent_straight_wind",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "prevent_straight_wind": 1
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "prevent_straight_wind": 2
+            }
+          }
+        ]
+      },
+      {
+        "name": "prevent_overcooling",
+        "wire": "prevent_super_cool",
+        "read_field": "prevent_super_cool",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "prevent_super_cool": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "prevent_super_cool": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "dry_after_shutdown",
+        "wire": "dry",
+        "read_field": "dry",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "dry": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "dry": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "auxiliary_heat",
+        "wire": "ptc",
+        "read_field": "ptc",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "ptc": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "ptc": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "vertical_direction",
+        "wire": "wind_swing_ud_angle",
+        "read_field": "wind_swing_ud_angle",
+        "parameter": {
+          "type": "integer",
+          "enum": [
+            0,
+            1,
+            25,
+            50,
+            75,
+            100
+          ]
+        },
+        "options": [
+          {
+            "value": 0,
+            "control": {
+              "wind_swing_ud_angle": 0
+            }
+          },
+          {
+            "value": 1,
+            "control": {
+              "wind_swing_ud_angle": 1
+            }
+          },
+          {
+            "value": 25,
+            "control": {
+              "wind_swing_ud_angle": 25
+            }
+          },
+          {
+            "value": 50,
+            "control": {
+              "wind_swing_ud_angle": 50
+            }
+          },
+          {
+            "value": 75,
+            "control": {
+              "wind_swing_ud_angle": 75
+            }
+          },
+          {
+            "value": 100,
+            "control": {
+              "wind_swing_ud_angle": 100
+            }
+          }
+        ]
+      },
+      {
+        "name": "horizontal_direction",
+        "wire": "wind_swing_lr_angle",
+        "read_field": "wind_swing_lr_angle",
+        "parameter": {
+          "type": "integer",
+          "enum": [
+            0,
+            1,
+            25,
+            50,
+            75,
+            100
+          ]
+        },
+        "options": [
+          {
+            "value": 0,
+            "control": {
+              "wind_swing_lr_angle": 0
+            }
+          },
+          {
+            "value": 1,
+            "control": {
+              "wind_swing_lr_angle": 1
+            }
+          },
+          {
+            "value": 25,
+            "control": {
+              "wind_swing_lr_angle": 25
+            }
+          },
+          {
+            "value": 50,
+            "control": {
+              "wind_swing_lr_angle": 50
+            }
+          },
+          {
+            "value": 75,
+            "control": {
+              "wind_swing_lr_angle": 75
+            }
+          },
+          {
+            "value": 100,
+            "control": {
+              "wind_swing_lr_angle": 100
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "selector": "product",
+    "codes": [
+      "22396505",
+      "22396517",
+      "22396521",
+      "22396525",
+      "22396533"
+    ],
+    "queries": [
+      "indoor_temperature",
+      "indoor_humidity",
+      "prevent_super_cool",
+      "run_status"
+    ],
+    "preserve": [],
+    "features": [
+      {
+        "name": "boost",
+        "wire": "strong_wind",
+        "read_field": "strong_wind",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "strong_wind": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "strong_wind": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "prevent_overcooling",
+        "wire": "prevent_super_cool",
+        "read_field": "prevent_super_cool",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "prevent_super_cool": 0
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "prevent_super_cool": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "dry_after_shutdown",
+        "wire": "dry",
+        "read_field": "dry",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "dry": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "dry": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "follow_airflow",
+        "wire": "follow_body_sense",
+        "read_field": "follow_body_sense",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "follow_body_sense_enable": 1,
+              "follow_body_sense": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "follow_body_sense_enable": 1,
+              "follow_body_sense": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "auxiliary_heat",
+        "wire": "ptc",
+        "read_field": "ptc",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "ptc": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "ptc": "on"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "selector": "product",
+    "codes": [
+      "23096245"
+    ],
+    "queries": [
+      "indoor_temperature"
+    ],
+    "preserve": [],
+    "features": [
+      {
+        "name": "auxiliary_heat",
+        "wire": "ptc",
+        "read_field": "ptc",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "ptc": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "ptc": "on"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "selector": "product",
+    "codes": [
+      "22259015"
+    ],
+    "queries": [
+      "run_status",
+      "module_30",
+      "module_31",
+      "module_32"
+    ],
+    "preserve": [],
+    "features": [
+      {
+        "name": "eco",
+        "wire": "eco",
+        "read_field": "eco",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "eco": "off",
+              "cool_power_saving": 0
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "eco": "on",
+              "cool_power_saving": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "comfort_energy_saving",
+        "wire": "comfort_power_save",
+        "read_field": "comfort_power_save",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "comfort_power_save": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "comfort_power_save": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "boost",
+        "wire": "strong_wind",
+        "read_field": "strong_wind",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "strong_wind": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "strong_wind": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "horizontal_swing",
+        "wire": "wind_swing_lr",
+        "read_field": "wind_swing_lr",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "wind_swing_lr": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "wind_swing_lr": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "vertical_swing",
+        "wire": "wind_swing_ud",
+        "read_field": "wind_swing_ud",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "wind_swing_ud": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "wind_swing_ud": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "dry_after_shutdown",
+        "wire": "dry",
+        "read_field": "dry",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "dry": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "dry": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "avoid_direct_airflow",
+        "wire": "prevent_straight_wind",
+        "read_field": "prevent_straight_wind",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "prevent_straight_wind": 0
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "prevent_straight_wind": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "auxiliary_heat",
+        "wire": "aux_heat",
+        "read_field": "aux_heat",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "aux_heat": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "aux_heat": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "elec_dust_remove",
+        "wire": "elec_dust_remove",
+        "read_field": "elec_dust_remove",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "elec_dust_remove": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "elec_dust_remove": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "auto_comfort_fresh_air",
+        "wire": "auto_comfort_fresh_air",
+        "read_field": "auto_comfort_fresh_air",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "auto_comfort_fresh_air": 0
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "auto_comfort_fresh_air": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "auto_fresh_off_co2",
+        "wire": "auto_fresh_off_co2",
+        "read_field": "auto_fresh_off_co2",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "auto_fresh_off_co2": 0
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "auto_fresh_off_co2": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "comfort_fresh_air",
+        "wire": "comfort_fresh_air",
+        "read_field": "comfort_fresh_air",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "comfort_fresh_air": 0
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "comfort_fresh_air": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "manul_humi",
+        "wire": "manul_humi",
+        "read_field": "manul_humi",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "manul_humi": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "manul_humi": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "fresh_air_fan_speed",
+        "wire": "fresh_air_fan_speed",
+        "read_field": "fresh_air_fan_speed",
+        "parameter": {
+          "type": "integer",
+          "enum": [
+            40,
+            60,
+            80,
+            100
+          ]
+        },
+        "options": [
+          {
+            "value": 40,
+            "control": {
+              "fresh_air_fan_speed": 40
+            }
+          },
+          {
+            "value": 60,
+            "control": {
+              "fresh_air_fan_speed": 60
+            }
+          },
+          {
+            "value": 80,
+            "control": {
+              "fresh_air_fan_speed": 80
+            }
+          },
+          {
+            "value": 100,
+            "control": {
+              "fresh_air_fan_speed": 100
+            }
+          }
+        ]
+      },
+      {
+        "name": "manul_humi_value",
+        "wire": "manul_humi_value",
+        "read_field": "manul_humi_value",
+        "parameter": {
+          "type": "integer",
+          "minimum": 40,
+          "maximum": 70,
+          "multipleOf": 1
+        },
+        "options": []
+      },
+      {
+        "name": "auto_purifier_on_pm",
+        "wire": "auto_purifier_on_pm",
+        "read_field": "auto_purifier_on_pm",
+        "parameter": {
+          "type": "integer",
+          "minimum": 75,
+          "maximum": 180,
+          "multipleOf": 1
+        },
+        "options": []
+      }
+    ]
+  },
+  {
+    "selector": "product",
+    "codes": [
+      "22019031",
+      "22019035",
+      "22019045"
+    ],
+    "queries": [
+      "fresh_air",
+      "indoor_humidity",
+      "indoor_temperature",
+      "outdoor_temperature"
+    ],
+    "preserve": [],
+    "features": [
+      {
+        "name": "eco",
+        "wire": "eco",
+        "read_field": "eco",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "eco": "off",
+              "cool_power_saving": 0
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "eco": "on",
+              "cool_power_saving": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "comfort_energy_saving",
+        "wire": "comfort_power_save",
+        "read_field": "comfort_power_save",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "comfort_power_save": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "comfort_power_save": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "boost",
+        "wire": "strong_wind",
+        "read_field": "strong_wind",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "strong_wind": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "strong_wind": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "horizontal_swing",
+        "wire": "wind_swing_lr",
+        "read_field": "wind_swing_lr",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "wind_swing_lr": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "wind_swing_lr": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "vertical_swing",
+        "wire": "wind_swing_ud",
+        "read_field": "wind_swing_ud",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "wind_swing_ud": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "wind_swing_ud": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "fresh_air_remove_odor",
+        "wire": "fresh_air_remove_odor",
+        "read_field": "fresh_air_remove_odor",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "fresh_air_remove_odor": 0
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "fresh_air_remove_odor": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "dry_after_shutdown",
+        "wire": "dry",
+        "read_field": "dry",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "dry": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "dry": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "avoid_direct_airflow",
+        "wire": "prevent_straight_wind",
+        "read_field": "prevent_straight_wind",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "prevent_straight_wind": 0
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "prevent_straight_wind": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "auxiliary_heat",
+        "wire": "aux_heat",
+        "read_field": "aux_heat",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "aux_heat": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "aux_heat": "on"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "selector": "product",
+    "codes": [
+      "22396961",
+      "22396963",
+      "22396965",
+      "22396969",
+      "22396973",
+      "22397057",
+      "22397059",
+      "22397061",
+      "22397063",
+      "22397065",
+      "22397067"
+    ],
+    "queries": [
+      "run_status"
+    ],
+    "preserve": [],
+    "features": [
+      {
+        "name": "sleep",
+        "wire": "energy_save",
+        "read_field": "energy_save",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "energy_save": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "energy_save": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "follow_airflow",
+        "wire": "follow_body_sense",
+        "read_field": "follow_body_sense",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "follow_body_sense_enable": 1,
+              "follow_body_sense": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "follow_body_sense_enable": 1,
+              "follow_body_sense": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "auxiliary_heat",
+        "wire": "ptc",
+        "read_field": "ptc",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "ptc": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "ptc": "on"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "selector": "product",
+    "codes": [
+      "22397091"
+    ],
+    "queries": [
+      "indoor_temperature",
+      "indoor_humidity",
+      "run_status"
+    ],
+    "preserve": [],
+    "features": [
+      {
+        "name": "sleep",
+        "wire": "energy_save",
+        "read_field": "energy_save",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "energy_save": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "energy_save": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "fengguan_remove_odor",
+        "wire": "fengguan_remove_odor",
+        "read_field": "fengguan_remove_odor",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "fengguan_remove_odor": "on"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "fengguan_remove_odor": "off"
+            }
+          }
+        ]
+      },
+      {
+        "name": "prevent_overcooling",
+        "wire": "prevent_super_cool",
+        "read_field": "prevent_super_cool",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "prevent_super_cool": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "prevent_super_cool": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "auxiliary_heat",
+        "wire": "ptc",
+        "read_field": "ptc",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "ptc": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "ptc": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "follow_airflow",
+        "wire": "follow_body_sense",
+        "read_field": "follow_body_sense",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "follow_body_sense_enable": 1,
+              "follow_body_sense": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "follow_body_sense_enable": 1,
+              "follow_body_sense": "on"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "selector": "product",
+    "codes": [
+      "23096653"
+    ],
+    "queries": [
+      "run_status",
+      "indoor_humidity",
+      "indoor_temperature"
+    ],
+    "preserve": [],
+    "features": [
+      {
+        "name": "eco",
+        "wire": "eco",
+        "read_field": "eco",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "eco": "off",
+              "cool_power_saving": 0
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "eco": "on",
+              "cool_power_saving": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "boost",
+        "wire": "strong_wind",
+        "read_field": "strong_wind",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "strong_wind": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "strong_wind": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "fengguan_remove_odor",
+        "wire": "fengguan_remove_odor",
+        "read_field": "fengguan_remove_odor",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "fengguan_remove_odor": "on"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "fengguan_remove_odor": "off"
+            }
+          }
+        ]
+      },
+      {
+        "name": "auxiliary_heat",
+        "wire": "ptc",
+        "read_field": "ptc",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "ptc": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "ptc": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "follow_airflow",
+        "wire": "follow_body_sense",
+        "read_field": "follow_body_sense",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "follow_body_sense_enable": 1,
+              "follow_body_sense": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "follow_body_sense_enable": 1,
+              "follow_body_sense": "on"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "selector": "product",
+    "codes": [
+      "23096633"
+    ],
+    "queries": [
+      "run_status",
+      "indoor_humidity",
+      "indoor_temperature"
+    ],
+    "preserve": [],
+    "features": [
+      {
+        "name": "eco",
+        "wire": "eco",
+        "read_field": "eco",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "eco": "off",
+              "cool_power_saving": 0
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "eco": "on",
+              "cool_power_saving": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "boost",
+        "wire": "strong_wind",
+        "read_field": "strong_wind",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "strong_wind": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "strong_wind": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "auxiliary_heat",
+        "wire": "ptc",
+        "read_field": "ptc",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "ptc": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "ptc": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "follow_airflow",
+        "wire": "follow_body_sense",
+        "read_field": "follow_body_sense",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "follow_body_sense_enable": 1,
+              "follow_body_sense": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "follow_body_sense_enable": 1,
+              "follow_body_sense": "on"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "selector": "product",
+    "codes": [
+      "22012369",
+      "22040023",
+      "22270043"
+    ],
+    "queries": [
+      "prevent_straight_wind",
+      "prevent_super_cool",
+      "wind_swing_ud_angle",
+      "wind_swing_lr_angle"
+    ],
+    "preserve": [
+      "buzzer"
+    ],
+    "features": [
+      {
+        "name": "eco",
+        "wire": "eco",
+        "read_field": "eco",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "eco": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "eco": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "comfort_energy_saving",
+        "wire": "comfort_power_save",
+        "read_field": "comfort_power_save",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "comfort_power_save": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "comfort_power_save": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "horizontal_swing",
+        "wire": "wind_swing_lr",
+        "read_field": "wind_swing_lr",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "wind_swing_lr": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "wind_swing_lr": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "vertical_swing",
+        "wire": "wind_swing_ud",
+        "read_field": "wind_swing_ud",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "wind_swing_ud": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "wind_swing_ud": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "button_sound",
+        "wire": "buzzer",
+        "read_field": "buzzer",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "buzzer": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "buzzer": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "display",
+        "wire": "screen_display",
+        "read_field": "screen_display_now",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "screen_display": 0
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "screen_display": 100
+            }
+          }
+        ]
+      },
+      {
+        "name": "avoid_direct_airflow",
+        "wire": "prevent_straight_wind",
+        "read_field": "prevent_straight_wind",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "prevent_straight_wind": 1
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "prevent_straight_wind": 2
+            }
+          }
+        ]
+      },
+      {
+        "name": "prevent_overcooling",
+        "wire": "prevent_super_cool",
+        "read_field": "prevent_super_cool",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "prevent_super_cool": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "prevent_super_cool": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "dry_after_shutdown",
+        "wire": "dry",
+        "read_field": "dry",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "dry": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "dry": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "auxiliary_heat",
+        "wire": "ptc",
+        "read_field": "ptc",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "ptc": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "ptc": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "vertical_direction",
+        "wire": "wind_swing_ud_angle",
+        "read_field": "wind_swing_ud_angle",
+        "parameter": {
+          "type": "integer",
+          "enum": [
+            0,
+            1,
+            25,
+            50,
+            75,
+            100
+          ]
+        },
+        "options": [
+          {
+            "value": 0,
+            "control": {
+              "wind_swing_ud_angle": 0
+            }
+          },
+          {
+            "value": 1,
+            "control": {
+              "wind_swing_ud_angle": 1
+            }
+          },
+          {
+            "value": 25,
+            "control": {
+              "wind_swing_ud_angle": 25
+            }
+          },
+          {
+            "value": 50,
+            "control": {
+              "wind_swing_ud_angle": 50
+            }
+          },
+          {
+            "value": 75,
+            "control": {
+              "wind_swing_ud_angle": 75
+            }
+          },
+          {
+            "value": 100,
+            "control": {
+              "wind_swing_ud_angle": 100
+            }
+          }
+        ]
+      },
+      {
+        "name": "horizontal_direction",
+        "wire": "wind_swing_lr_angle",
+        "read_field": "wind_swing_lr_angle",
+        "parameter": {
+          "type": "integer",
+          "enum": [
+            0,
+            1,
+            25,
+            50,
+            75,
+            100
+          ]
+        },
+        "options": [
+          {
+            "value": 0,
+            "control": {
+              "wind_swing_lr_angle": 0
+            }
+          },
+          {
+            "value": 1,
+            "control": {
+              "wind_swing_lr_angle": 1
+            }
+          },
+          {
+            "value": 25,
+            "control": {
+              "wind_swing_lr_angle": 25
+            }
+          },
+          {
+            "value": 50,
+            "control": {
+              "wind_swing_lr_angle": 50
+            }
+          },
+          {
+            "value": 75,
+            "control": {
+              "wind_swing_lr_angle": 75
+            }
+          },
+          {
+            "value": 100,
+            "control": {
+              "wind_swing_lr_angle": 100
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "selector": "product",
+    "codes": [
+      "22251077"
+    ],
+    "queries": [
+      "no_wind_sense",
+      "prevent_super_cool",
+      "wind_swing_ud_angle",
+      "wind_swing_lr_angle"
+    ],
+    "preserve": [
+      "buzzer"
+    ],
+    "features": [
+      {
+        "name": "eco",
+        "wire": "eco",
+        "read_field": "eco",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "eco": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "eco": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "horizontal_swing",
+        "wire": "wind_swing_lr",
+        "read_field": "wind_swing_lr",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "wind_swing_lr": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "wind_swing_lr": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "vertical_swing",
+        "wire": "wind_swing_ud",
+        "read_field": "wind_swing_ud",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "wind_swing_ud": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "wind_swing_ud": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "lower_horizontal_swing",
+        "wire": "wind_swing_lr_under",
+        "read_field": "wind_swing_lr_under",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "wind_swing_lr_under": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "wind_swing_lr_under": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "button_sound",
+        "wire": "buzzer",
+        "read_field": "buzzer",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "buzzer": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "buzzer": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "display",
+        "wire": "screen_display",
+        "read_field": "screen_display_now",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "screen_display": 0
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "screen_display": 100
+            }
+          }
+        ]
+      },
+      {
+        "name": "prevent_overcooling",
+        "wire": "prevent_super_cool",
+        "read_field": "prevent_super_cool",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "prevent_super_cool": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "prevent_super_cool": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "dry_after_shutdown",
+        "wire": "dry",
+        "read_field": "dry",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "dry": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "dry": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "auxiliary_heat",
+        "wire": "ptc",
+        "read_field": "ptc",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "ptc": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "ptc": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "vertical_direction",
+        "wire": "wind_swing_ud_angle",
+        "read_field": "wind_swing_ud_angle",
+        "parameter": {
+          "type": "integer",
+          "enum": [
+            0,
+            1,
+            25,
+            50,
+            75,
+            100
+          ]
+        },
+        "options": [
+          {
+            "value": 0,
+            "control": {
+              "wind_swing_ud_angle": 0
+            }
+          },
+          {
+            "value": 1,
+            "control": {
+              "wind_swing_ud_angle": 1
+            }
+          },
+          {
+            "value": 25,
+            "control": {
+              "wind_swing_ud_angle": 25
+            }
+          },
+          {
+            "value": 50,
+            "control": {
+              "wind_swing_ud_angle": 50
+            }
+          },
+          {
+            "value": 75,
+            "control": {
+              "wind_swing_ud_angle": 75
+            }
+          },
+          {
+            "value": 100,
+            "control": {
+              "wind_swing_ud_angle": 100
+            }
+          }
+        ]
+      },
+      {
+        "name": "horizontal_direction",
+        "wire": "wind_swing_lr_angle",
+        "read_field": "wind_swing_lr_angle",
+        "parameter": {
+          "type": "integer",
+          "enum": [
+            0,
+            1,
+            25,
+            50,
+            75,
+            100
+          ]
+        },
+        "options": [
+          {
+            "value": 0,
+            "control": {
+              "wind_swing_lr_angle": 0
+            }
+          },
+          {
+            "value": 1,
+            "control": {
+              "wind_swing_lr_angle": 1
+            }
+          },
+          {
+            "value": 25,
+            "control": {
+              "wind_swing_lr_angle": 25
+            }
+          },
+          {
+            "value": 50,
+            "control": {
+              "wind_swing_lr_angle": 50
+            }
+          },
+          {
+            "value": 75,
+            "control": {
+              "wind_swing_lr_angle": 75
+            }
+          },
+          {
+            "value": 100,
+            "control": {
+              "wind_swing_lr_angle": 100
+            }
+          }
+        ]
+      },
+      {
+        "name": "breezeless",
+        "wire": "no_wind_sense",
+        "read_field": "no_wind_sense",
+        "parameter": {
+          "type": "integer",
+          "enum": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        "options": [
+          {
+            "value": 0,
+            "control": {
+              "no_wind_sense": 0
+            }
+          },
+          {
+            "value": 1,
+            "control": {
+              "no_wind_sense": 1
+            }
+          },
+          {
+            "value": 2,
+            "control": {
+              "no_wind_sense": 2
+            }
+          },
+          {
+            "value": 3,
+            "control": {
+              "no_wind_sense": 3
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

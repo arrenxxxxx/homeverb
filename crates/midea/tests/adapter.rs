@@ -15,6 +15,9 @@ use std::{
 use tokio_util::sync::CancellationToken;
 use uuid::Uuid;
 
+#[path = "adapter/ac_features.rs"]
+mod ac_features;
+
 #[path = "adapter/fan.rs"]
 mod fan;
 
@@ -106,6 +109,9 @@ impl SecretStore for Secrets {
 struct Wire {
     inventories: Mutex<HashMap<String, Vec<Value>>>,
     state: Mutex<Option<Value>>,
+    query_states: Mutex<HashMap<String, Value>>,
+    queries: Mutex<Vec<Value>>,
+    query_fault: Mutex<Option<String>>,
     calls: AtomicUsize,
     partial: AtomicBool,
     delay: AtomicBool,
@@ -180,8 +186,15 @@ impl CloudTransport for Wire {
             }
             CloudEndpoint::ApplianceState => {
                 let body: Value = serde_json::from_slice(request.body()).unwrap();
-                assert_eq!(body["command"], json!({"query":{}}));
-                if let Some(state) = self.state.lock().unwrap().as_ref() {
+                let query = &body["command"]["query"];
+                self.queries.lock().unwrap().push(query.clone());
+                let query_type = query["query_type"].as_str().unwrap_or("default");
+                if self.query_fault.lock().unwrap().as_deref() == Some(query_type) {
+                    return Ok(bytes(json!({"code":999})));
+                }
+                if let Some(state) = self.query_states.lock().unwrap().get(query_type) {
+                    state.clone()
+                } else if let Some(state) = self.state.lock().unwrap().as_ref() {
                     state.clone()
                 } else {
                     match body["applianceCode"].as_str().unwrap() {

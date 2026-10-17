@@ -3542,4 +3542,193 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Use at most 80 characters without control characters.'
 	String get mobileOptionalAccountRemarkValidation => 'Use at most 80 characters without control characters.';
+
+	/// en-US: 'Energy saving'
+	String get vendorMideaAcEco => 'Energy saving';
+
+	/// en-US: 'Comfort energy saving'
+	String get vendorMideaAcComfortEnergySaving => 'Comfort energy saving';
+
+	/// en-US: 'Comfort energy saving'
+	String get mobileAcFeatureComfortEnergySaving => 'Comfort energy saving';
+
+	/// en-US: 'Breezeless'
+	String get vendorMideaAcBreezeless => 'Breezeless';
+
+	/// en-US: 'Breezeless'
+	String get mobileAcFeatureBreezeless => 'Breezeless';
+
+	/// en-US: 'Horizontal swing'
+	String get vendorMideaAcHorizontalSwing => 'Horizontal swing';
+
+	/// en-US: 'Vertical swing'
+	String get vendorMideaAcVerticalSwing => 'Vertical swing';
+
+	/// en-US: 'Lower horizontal swing'
+	String get vendorMideaAcLowerHorizontalSwing => 'Lower horizontal swing';
+
+	/// en-US: 'Lower horizontal swing'
+	String get mobileAcFeatureLowerHorizontalSwing => 'Lower horizontal swing';
+
+	/// en-US: 'Horizontal direction'
+	String get vendorMideaAcHorizontalDirection => 'Horizontal direction';
+
+	/// en-US: 'Vertical direction'
+	String get vendorMideaAcVerticalDirection => 'Vertical direction';
+
+	/// en-US: 'Display light'
+	String get vendorMideaAcDisplay => 'Display light';
+
+	/// en-US: 'Button sound'
+	String get vendorMideaAcButtonSound => 'Button sound';
+
+	/// en-US: 'Sleep'
+	String get vendorMideaAcSleep => 'Sleep';
+
+	/// en-US: 'Boost'
+	String get vendorMideaAcBoost => 'Boost';
+
+	/// en-US: 'Avoid direct airflow'
+	String get vendorMideaAcAvoidDirectAirflow => 'Avoid direct airflow';
+
+	/// en-US: 'Prevent overcooling'
+	String get vendorMideaAcPreventOvercooling => 'Prevent overcooling';
+
+	/// en-US: 'Prevent overcooling'
+	String get mobileAcFeaturePreventOvercooling => 'Prevent overcooling';
+
+	/// en-US: 'Dry after shutdown'
+	String get vendorMideaAcDryAfterShutdown => 'Dry after shutdown';
+
+	/// en-US: 'Dry after shutdown'
+	String get mobileAcFeatureDryAfterShutdown => 'Dry after shutdown';
+
+	/// en-US: 'Auxiliary heat'
+	String get vendorMideaAcAuxiliaryHeat => 'Auxiliary heat';
+
+	/// en-US: 'Follow airflow'
+	String get vendorMideaAcFollowAirflow => 'Follow airflow';
+
+	/// en-US: 'Follow airflow'
+	String get mobileAcFeatureFollowAirflow => 'Follow airflow';
+
+	/// en-US: 'Odor removal'
+	String get vendorMideaAcFreshAirRemoveOdor => 'Odor removal';
+
+	/// en-US: 'Odor removal'
+	String get mobileAcFeatureFreshAirRemoveOdor => 'Odor removal';
+
+	/// en-US: 'Odor removal'
+	String get vendorMideaAcFengguanRemoveOdor => 'Odor removal';
+
+	/// en-US: 'Odor removal'
+	String get mobileAcFeatureFengguanRemoveOdor => 'Odor removal';
+
+	/// en-US: 'Electrostatic dust removal'
+	String get vendorMideaAcElecDustRemove => 'Electrostatic dust removal';
+
+	/// en-US: 'Electrostatic dust removal'
+	String get mobileAcFeatureElecDustRemove => 'Electrostatic dust removal';
+
+	/// en-US: 'Automatic fresh air'
+	String get vendorMideaAcAutoComfortFreshAir => 'Automatic fresh air';
+
+	/// en-US: 'Automatic fresh air'
+	String get mobileAcFeatureAutoComfortFreshAir => 'Automatic fresh air';
+
+	/// en-US: 'Fresh air CO2 control'
+	String get vendorMideaAcAutoFreshOffCo2 => 'Fresh air CO2 control';
+
+	/// en-US: 'Fresh air CO2 control'
+	String get mobileAcFeatureAutoFreshOffCo2 => 'Fresh air CO2 control';
+
+	/// en-US: 'Fresh air'
+	String get vendorMideaAcComfortFreshAir => 'Fresh air';
+
+	/// en-US: 'Fresh air'
+	String get mobileAcFeatureComfortFreshAir => 'Fresh air';
+
+	/// en-US: 'Fresh air fan speed'
+	String get vendorMideaAcFreshAirFanSpeed => 'Fresh air fan speed';
+
+	/// en-US: 'Fresh air fan speed'
+	String get mobileAcFeatureFreshAirFanSpeed => 'Fresh air fan speed';
+
+	/// en-US: 'Manual humidity'
+	String get vendorMideaAcManulHumi => 'Manual humidity';
+
+	/// en-US: 'Manual humidity'
+	String get mobileAcFeatureManulHumi => 'Manual humidity';
+
+	/// en-US: 'Target humidity'
+	String get vendorMideaAcManulHumiValue => 'Target humidity';
+
+	/// en-US: 'Target humidity'
+	String get mobileAcFeatureManulHumiValue => 'Target humidity';
+
+	/// en-US: 'Purifier PM threshold'
+	String get vendorMideaAcAutoPurifierOnPm => 'Purifier PM threshold';
+
+	/// en-US: 'Purifier PM threshold'
+	String get mobileAcFeatureAutoPurifierOnPm => 'Purifier PM threshold';
+
+	/// en-US: 'Off'
+	String get vendorMideaAcBreezeless0 => 'Off';
+
+	/// en-US: 'Upper and lower breezeless'
+	String get vendorMideaAcBreezeless1 => 'Upper and lower breezeless';
+
+	/// en-US: 'Upper breezeless'
+	String get vendorMideaAcBreezeless2 => 'Upper breezeless';
+
+	/// en-US: 'Lower breezeless'
+	String get vendorMideaAcBreezeless3 => 'Lower breezeless';
+
+	/// en-US: 'Fixed direction off'
+	String get vendorMideaAcHorizontalDirection0 => 'Fixed direction off';
+
+	/// en-US: 'Far left'
+	String get vendorMideaAcHorizontalDirection1 => 'Far left';
+
+	/// en-US: 'Left'
+	String get vendorMideaAcHorizontalDirection25 => 'Left';
+
+	/// en-US: 'Middle'
+	String get vendorMideaAcHorizontalDirection50 => 'Middle';
+
+	/// en-US: 'Right'
+	String get vendorMideaAcHorizontalDirection75 => 'Right';
+
+	/// en-US: 'Far right'
+	String get vendorMideaAcHorizontalDirection100 => 'Far right';
+
+	/// en-US: 'Fixed direction off'
+	String get vendorMideaAcVerticalDirection0 => 'Fixed direction off';
+
+	/// en-US: 'Top'
+	String get vendorMideaAcVerticalDirection1 => 'Top';
+
+	/// en-US: 'Upper'
+	String get vendorMideaAcVerticalDirection25 => 'Upper';
+
+	/// en-US: 'Middle'
+	String get vendorMideaAcVerticalDirection50 => 'Middle';
+
+	/// en-US: 'Lower'
+	String get vendorMideaAcVerticalDirection75 => 'Lower';
+
+	/// en-US: 'Bottom'
+	String get vendorMideaAcVerticalDirection100 => 'Bottom';
+
+	/// en-US: 'Low'
+	String get vendorMideaAcFreshAirFanSpeed40 => 'Low';
+
+	/// en-US: 'Medium'
+	String get vendorMideaAcFreshAirFanSpeed60 => 'Medium';
+
+	/// en-US: 'High'
+	String get vendorMideaAcFreshAirFanSpeed80 => 'High';
+
+	/// en-US: 'Full'
+	String get vendorMideaAcFreshAirFanSpeed100 => 'Full';
 }

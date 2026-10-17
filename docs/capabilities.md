@@ -78,3 +78,14 @@ and localized vendor labels; it must not reinterpret code 102 as a percentage or
 expose the presets on another model. Readable codes outside the action enum remain
 observable without becoming writable. Mode-dependent effects and physical support
 still require acceptance. See [ADR-0034](adr/0034-scoped-meiju-ac-fan-control.md).
+
+
+## Optional controls requiring an observation
+
+`control_requires_observation` is an optional boolean property descriptor field
+(default false). When true, the App omits the corresponding setter and generic
+form until the property has an actual observation. It does not grant permission,
+make stale evidence fresh or replace adapter prerequisite checks. Properties keep
+their readable domains independently of action write domains; unknown enum codes
+can remain visible without becoming commands. See
+[ADR-0069](adr/0069-profile-scoped-ac-features.md) for experimental AC examples.

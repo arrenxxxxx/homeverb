@@ -56,18 +56,17 @@ class _ClimateControlsState extends State<ClimateControls>
     if (mounted) setState(() => draftTarget = null);
   }
 
-  Object choiceValue(ClimateChoice choice) {
+  Object? choiceValue(ClimateChoice choice) {
     final observed = c.observed(choice.property);
+    if (observed != null && choice.values.contains(observed)) return null;
     final value = propertyValue(
       observed,
       choice.capability['properties']?[choice.parameter] as Json? ?? {},
       propertyId: choice.property,
     );
-    return UiMessage('Observed: {value}', {
-      'value': observed != null && !choice.values.contains(observed)
-          ? UiMessage('Unrecognized ({value})', {'value': value})
-          : UiMessage(value),
-    });
+    return observed == null
+        ? UiMessage(value)
+        : UiMessage('Unrecognized ({value})', {'value': value});
   }
 
   Future<void> send(
@@ -110,9 +109,44 @@ class _ClimateControlsState extends State<ClimateControls>
     ),
     ('Sleep', {'sleep'}, Icons.bedtime_outlined),
     ('Energy saving', {'energy_saving', 'eco'}, Icons.eco_outlined),
+    (
+      'Comfort energy saving',
+      {'comfort_energy_saving'},
+      Icons.energy_savings_leaf_outlined,
+    ),
+    ('Breezeless', {'breezeless'}, Icons.air),
     ('Boost', {'boost'}, Icons.bolt_outlined),
     ('Avoid direct airflow', {'avoid_direct_airflow'}, Icons.air),
+    ('Prevent overcooling', {'prevent_overcooling'}, Icons.ac_unit),
+    ('Follow airflow', {'follow_airflow'}, Icons.person_outline),
+    ('Dry after shutdown', {'dry_after_shutdown'}, Icons.dry_outlined),
     ('Auxiliary heat', {'auxiliary_heat'}, Icons.waves),
+    ('Lower horizontal swing', {'lower_horizontal_swing'}, Icons.swap_horiz),
+    (
+      'Odor removal',
+      {'fresh_air_remove_odor', 'fengguan_remove_odor'},
+      Icons.air,
+    ),
+    (
+      'Electrostatic dust removal',
+      {'elec_dust_remove'},
+      Icons.filter_alt_outlined,
+    ),
+    (
+      'Automatic fresh air',
+      {'auto_comfort_fresh_air'},
+      Icons.auto_awesome_outlined,
+    ),
+    ('Fresh air CO2 control', {'auto_fresh_off_co2'}, Icons.co2),
+    ('Fresh air', {'comfort_fresh_air'}, Icons.air),
+    ('Fresh air fan speed', {'fresh_air_fan_speed'}, Icons.speed),
+    ('Manual humidity', {'manul_humi'}, Icons.water_drop_outlined),
+    ('Target humidity', {'manul_humi_value'}, Icons.water_drop_outlined),
+    (
+      'Purifier PM threshold',
+      {'auto_purifier_on_pm'},
+      Icons.filter_alt_outlined,
+    ),
   ];
 
   bool isSwitch(ClimateChoice choice) {
@@ -284,8 +318,10 @@ class _ClimateControlsState extends State<ClimateControls>
                     bold: true,
                   ),
                   const SizedBox(height: 8),
-                  Copy(choiceValue(direction), size: 12, color: muted),
-                  const SizedBox(height: 8),
+                  if (choiceValue(direction) case final value?) ...[
+                    Copy(value, size: 12, color: muted),
+                    const SizedBox(height: 8),
+                  ],
                   scalar(direction),
                 ],
               ],

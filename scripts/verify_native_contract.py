@@ -804,6 +804,53 @@ def main():
             assert decode(library.homeverb_open(json.dumps(config).encode()))['error']['code'] == 'INVALID_ARGUMENT'
             assert not private.exists()
 
+    feature_grant = {'device_id':grant_id, 'feature':'eco', 'value':True}
+    for grants in [[], [feature_grant], [{**feature_grant, 'feature':'breezeless', 'value':2.0}]]:
+        with tempfile.TemporaryDirectory(prefix='homeverb-ui-ac-features-') as directory:
+            config = {'schema_version':'1.0', 'data_dir':directory, 'adapter':'midea.meiju',
+                      'allow_mock_writes':False, 'meiju_ac_feature_grants':grants}
+            open_schema.validate(config)
+            result = decode(library.homeverb_open(json.dumps(config).encode()))
+            assert result['error'] is None, result
+            handle = result['data']['handle']
+            try:
+                device = load('examples/device.json')
+                device.update(id=grant_id, model='KFR-35G/WF2', support_status='experimental',
+                              components=[{'id':'main','capabilities':['vendor.midea.ac']}],
+                              connections=[{'id':'fictional-feature-cloud','adapter':'midea.meiju','transport':'cloud',
+                                            'account_id':'40000000-0000-4000-8000-000000000001','identity_ref':'fictional-feature-binding'}])
+                cap = load('examples/capability.meiju-ac-features.json')
+                with sqlite3.connect(Path(directory) / 'homeverb.sqlite3') as database:
+                    database.execute('INSERT INTO devices VALUES (?, ?)',
+                                     (grant_id, json.dumps({'device':device, 'capabilities':[cap]})))
+                for feature, value in [('eco',False),('eco',True),('breezeless',2),('horizontal_direction',25)]:
+                    request = command('ac-feature-plan', device_id=grant_id, capability='vendor.midea.ac',
+                                      action='set_'+feature, arguments={feature:value}, connection='cloud')
+                    plan = raw(handle,envelope('plan',command=request))
+                    responses['plan'].validate(plan)
+                    assert (plan['error'] is None) == any(g['feature']==feature and g['value']==value for g in grants), plan
+                forged = envelope('list_devices')
+                forged['request']['meiju_ac_feature_grants'] = [feature_grant]
+                assert not request_schema.is_valid(forged)
+                assert raw(handle,forged)['error']['code'] == 'INVALID_ARGUMENT'
+                library.homeverb_set_foreground(handle,False)
+                assert raw(handle,envelope('list_devices'))['error']['code'] == 'HOST_BACKGROUND'
+            finally:
+                library.homeverb_close(handle)
+    bad_features = [None, True, {}, [feature_grant]*2,
+                    [{**feature_grant,'device_id':'*'}], [{**feature_grant,'confirmed':True}],
+                    [{'device_id':grant_id,'feature':'breezeless','value':2}, {'device_id':grant_id,'feature':'breezeless','value':2.0}]]
+    bad_features.extend([{**feature_grant, 'feature':feature, 'value':value}]
+                        for feature,value in [('eco',1),('eco','on'),('breezeless',4),('horizontal_direction',30),('self_clean',True)])
+    for grants,adapter in [(g,'midea.meiju') for g in bad_features]+[([feature_grant],None),([feature_grant],'homeverb.mock')]:
+        with tempfile.TemporaryDirectory(prefix='homeverb-ui-bad-features-') as directory:
+            private = Path(directory) / 'must-not-create'
+            config = {'schema_version':'1.0','data_dir':str(private),'allow_mock_writes':False,'meiju_ac_feature_grants':grants}
+            if adapter: config['adapter'] = adapter
+            assert not open_schema.is_valid(config),config
+            assert decode(library.homeverb_open(json.dumps(config).encode()))['error']['code'] == 'INVALID_ARGUMENT'
+            assert not private.exists()
+
     example_path = ROOT / 'packages/native-contract/examples.json'
     if args.write_examples:
         example_path.write_text(json.dumps({'api_version': api['api_version'], 'cases': examples}, indent=2) + '\n')

@@ -2513,3 +2513,100 @@ emulator is left on the restored 28 Celsius AC page. No physical-phone, full
 Meiju feature parity, remote push or artifact publication is claimed. The preceding
 source-phase test limitations remain applicable; this delivery record does not
 turn the filtered Rust run or Flutter visual suite into an unfiltered pass.
+
+## Profile-scoped optional AC controls (October 17, 2026)
+
+Source phase based on `9ed77ea`. The owner requested integration of the selected
+ACs' available functions. [ADR-0069](../../docs/adr/0069-profile-scoped-ac-features.md)
+and the [parity review](../../docs/development/10-meiju-ac-parity.md) define the
+implemented scope and remaining evidence. API 1.23 adds exact native
+`meiju_ac_feature_grants`; ordinary method/C export counts, SQLite 5 and protected
+payload 3 are unchanged. CLI/MCP optional-feature grant formats are not added.
+
+The private catalog selects reviewed scalar mappings from protected subtype,
+product and explicit category while retaining the four exact AC model gate.
+ECO, comfort saving, breezeless, swing/positions, light/sound, shutdown drying,
+overcooling protection, auxiliary heat, body-following airflow and selected
+fresh-air/humidity/purification settings have independent actions. Only reported
+optional properties expose Flutter rows; each axis degrades independently.
+Direction/no-wind codes retain their exact domains and contextual translations.
+A feature write rechecks the private contract and reads prerequisites before one
+send, preserving reported buzzer preferences and required other swing axes without
+copying Core cache. An absent client buzzer preference is omitted rather than
+invented from an upstream default; its own sound row remains hidden until reported.
+No new physical appliance command was sent in this phase.
+
+Executed source validation:
+
+- `cargo fmt --all -- --check` and `cargo build --workspace --offline --locked`:
+  passed.
+- `cargo test --workspace --exclude homeverb-midea --offline --locked`: 292 passed.
+- Meiju regression with exactly the 14 pre-existing macOS loopback-alias cases
+  excluded: 193 passed, including 46 adapter tests and 16 compile-fail doctests.
+  The unfiltered Meiju library run passed 48 and failed 14 with
+  `AddrNotAvailable` for unassigned loopback aliases. The initial sandbox run also
+  refused synthetic sockets; the unsandboxed result is the recorded host limit.
+- Strict workspace Clippy encountered four existing Rust 1.99
+  `chunks_exact_to_as_chunks` warnings in unchanged crypto/LAN files. The same
+  command with only `-A clippy::chunks_exact_to_as_chunks` passed; production code
+  and lint attributes were not weakened.
+- `scripts/verify_native_contract.py` against the actual host library: 34 methods,
+  55 live fictional examples, trusted C boundaries and the new exact-feature
+  startup/plan/duplicate/lifecycle guards passed. No account/provider traffic.
+- `scripts/verify_mvp.py`: 35 cases, 28 passed and seven explicit Linux-only skips.
+  `python -m unittest discover -s tests -v`: 66 passed.
+- `fvm flutter analyze`: passed. Focused climate rows, climate controls, generic
+  controls, session permissions and localization: 32 passed. A final seven-case
+  climate-row run also passed after adding the contextual Chinese breezeless-label
+  assertion. These include missing optional observations, independent exact
+  arguments and retained observed state after accepted commands.
+- The broader Flutter run passed 141 and failed eight: four known macOS glyph
+  pixel assertions plus four legacy card/footer click cases referencing controls
+  removed by earlier owner UI revisions. Those flows were not changed or declared
+  passing by this feature phase; full visual/interaction acceptance remains open.
+- Seven shared presentation tests, documentation/repository validation and
+  contract validation passed (20 schemas, 49 positive and 267 negative fixtures).
+
+The dual-ABI Android native build passed for arm64-v8a and x86_64, with seventeen
+exports per ABI and 16 KiB ELF alignment. AAR SHA-256:
+`260aeb27839d07bf5db2e3e5cdb59d64a2878344c163a1e712c0da507608df9a`.
+The sequential release build used Flutter 3.47.7, JDK 21, API 35/NDK r28c and
+`HOMEVERB_ADAPTER=midea.meiju`. `scripts/verify_flutter_apk.py` passed both ABIs,
+source assets/native libraries, exports, alignment and signature. APK SHA-256:
+`bea51562e8deef4dd35d70be91d6ce9f83b8acbf4f705beec4fa809555de2ebe`.
+
+`adb -s emulator-5586 install -r` returned `Success`, preserving the existing
+account/application data. Both the earlier candidate and final artifact exceeded
+`am start -W`'s wait window; subsequent captures confirmed the rendered native
+page. This is not successful first-frame timing or performance acceptance. The
+final artifact includes the buzzer correction and caption removal. Emulator UI
+checks below are separate from build/installation and physical control acceptance.
+Physical phone behavior, firmware-specific optional-feature effects, the official
+selected-device function inventory, complete Meiju parity and provider rate-limit
+acceptance remain open. No remote push, package publication or diagnostic upload.
+
+
+The rendered release home screen retained six existing cards. Read-only navigation
+to the bedroom AC showed the real 28 Celsius target, separate indoor temperature,
+mode/fan controls and newly reported horizontal swing/fixed positions. This is
+actual native rendering after selected-device control setup, not the H5 fixture.
+The first screenshot was Android's splash; a subsequent capture confirmed the
+live Flutter page. Local captures remain outside source under `/private/tmp`.
+No power, temperature, mode or optional-setting button was activated.
+
+Read-only scrolling also exposed real reported ECO, comfort saving, breezeless,
+boost, anti-draft, overcooling protection and shutdown drying. Sound was not
+reported, so its row remained absent. This inspection led to a correction:
+missing client buzzer preferences must not block other valid feature commands or
+be filled from the upstream client's default. Focused synthetic adapter evidence
+checks that an ECO packet omits that missing field and that a malformed reported
+preference refuses before any additional send. Normal Flutter setting rows
+now use only their switch/selected option for state, removing repetitive observation
+captions while retaining unknown-value indications.
+
+The final installed artifact was checked again by opening the saved bedroom card
+and scrolling through each swing axis and the settings group. The switches and
+exact-position chips retained their real reported state, and the repeated captions
+were absent. Final local captures: `/private/tmp/homeverb-ac-final-home.png`,
+`/private/tmp/homeverb-ac-final-detail.png` and
+`/private/tmp/homeverb-ac-final-settings.png`. The process was left on the AC page.

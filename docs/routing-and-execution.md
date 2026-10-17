@@ -445,3 +445,24 @@ Existing product overrides and exclusions still determine the temperature encodi
 and bounds. Execution rechecks the same protected evidence as option inspection
 and discovery. No inferred subtype is stored; grants, schemas, one-send behavior,
 accepted/unknown outcomes and the separation of later observations are unchanged.
+
+
+## Optional AC prerequisite reads
+
+[ADR-0069](adr/0069-profile-scoped-ac-features.md) adds independent profile-scoped
+scalar setters. Core validates exact permissions and routing first; the adapter
+rechecks protected membership/model/profile and its immutable argument schema,
+then reads prerequisites within that same operation/deadline before its one
+control send. Missing or unrecognized required state refuses before transmission.
+Other supported swing axes must come from that operation, never Core cache.
+A valid reported buzzer preference is preserved, an absent preference is omitted,
+and a malformed report refuses before send. No upstream client default is copied.
+These reads do not verify the later command or update Core's observation cache.
+There is no atomic transaction with another vendor client; concurrent changes can
+race the reads. Source-specific paired ECO fields stay in one request.
+
+No retries or route fallback are added. A control request marked sent retains
+possibly-sent/accepted evidence through timeout, cancellation and malformed reply;
+only reviewed explicit rejections prove rejection. Reusing its request ID returns
+the stored receipt without more prerequisite reads or sends. Separate foreground
+state refresh remains observation evidence, never physical-causality proof.

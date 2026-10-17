@@ -451,3 +451,22 @@ device missing from the selected protected binding map returns
 accounts and unavailable/corrupt protected entries retain their existing fixed
 errors. No error triggers refresh, recovery, merge, credentials changes or an
 empty-success fallback. Cancellation and deadlines release all acquired leases.
+
+
+## Optional AC feature admission
+
+API 1.23 rejects unknown feature/value pairs, duplicate normalized triples,
+noncanonical device IDs, more than 1024 grants, extra fields and non-Meiju grant
+startup with `INVALID_ARGUMENT` before creating a profile. A missing exact feature
+permission remains `POLICY_DENIED`. Protected profile mismatch, absent required
+state, missing other supported swing axes or an excluded feature refuses before
+control send; malformed required wire values retain `MIDEA_RESPONSE_INVALID`.
+An absent client buzzer preference is omitted; a malformed reported preference
+refuses before send. Its own sound control still requires an actual report.
+
+Default state-query failures preserve the previous Core cache. Invalid optional
+values are omitted from an otherwise valid basic snapshot. Supplemental query
+failures keep the basic result and a fixed warning; cancellation, deadline and
+authentication errors stop the operation. The App's foreground refresh failure
+policy remains silent. No failure supplies a default switch state. Sent command
+outcomes and request replay retain the existing accepted/unknown/rejected rules.

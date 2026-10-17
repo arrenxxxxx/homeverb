@@ -44,6 +44,7 @@ impl Default for Grants {
 impl Grants {
     pub fn controls(&self) -> MeijuControlGrants<'_> {
         MeijuControlGrants {
+            ac_features: &[],
             power: &self.meiju_power_grants,
             fan: &self.meiju_fan_grants,
             mode: &self.meiju_mode_grants,

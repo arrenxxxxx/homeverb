@@ -56,7 +56,7 @@ async fn read_only_options_enable_permission_selection_without_mutation_or_autho
         result["data"]["connection_id"],
         descriptor.device.connections[0].id
     );
-    assert_eq!(result["data"]["options"].as_array().unwrap().len(), 4);
+    assert_eq!(result["data"]["options"].as_array().unwrap().len(), 9);
     let examples: Value = serde_json::from_str(include_str!(
         "../../../../packages/native-contract/account-examples.json"
     ))
@@ -119,22 +119,22 @@ async fn protected_profiles_determine_options_and_match_enabled_descriptors() {
     let cases = [
         (
             json!({"modelNumber":524,"sn8":"21293193"}),
-            4,
+            10,
             Some((16, 1.0)),
         ),
         (
             json!({"modelNumber":1,"sn8":"23096245"}),
-            4,
+            5,
             Some((17, 1.0)),
         ),
         (
             json!({"modelNumber":1,"sn8":"22397091"}),
-            4,
+            9,
             Some((16, 0.5)),
         ),
         (
             json!({"modelNumber":1,"sn8":"22040055"}),
-            4,
+            16,
             Some((17, 0.5)),
         ),
         (
@@ -145,17 +145,17 @@ async fn protected_profiles_determine_options_and_match_enabled_descriptors() {
         (json!({"sn8":"22397091"}), 3, None),
         (
             json!({"sn8":"22397091","category":"wall-air-conditioner"}),
-            4,
+            9,
             Some((16, 0.5)),
         ),
         (
             json!({"sn8":"23096245","category":"wall_air_conditioner"}),
-            4,
+            5,
             Some((17, 1.0)),
         ),
         (
             json!({"sn8":"TEST1234","category":"wall-air-conditioner"}),
-            4,
+            20,
             Some((17, 0.5)),
         ),
         (
@@ -209,6 +209,7 @@ async fn protected_profiles_determine_options_and_match_enabled_descriptors() {
             .with_ac_fan_control()
             .with_ac_mode_control()
             .with_ac_temperature_control()
+            .with_ac_feature_control()
             .with_dishwasher_control()
             .with_dishwasher_cycle_control();
         let enabled = adapter

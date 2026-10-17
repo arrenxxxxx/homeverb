@@ -4,9 +4,9 @@ use homeverb_core::SecretBytes;
 use homeverb_domain::{Error, Query};
 use homeverb_host::{
     ConfirmConnectionLinkRequest, ConfirmLanScanRequest, ConnectRequest, ExecuteApprovalRequest,
-    HostRequest, MeijuControlGrants, MeijuDishwasherCycleGrant, MeijuDishwasherGrant,
-    MeijuFanGrant, MeijuModeGrant, MeijuPowerGrant, MeijuTemperatureGrant, PrepareApprovalRequest,
-    PrepareConnectionLinkRequest, PrepareLanScanRequest, Session,
+    HostRequest, MeijuAcFeatureGrant, MeijuControlGrants, MeijuDishwasherCycleGrant,
+    MeijuDishwasherGrant, MeijuFanGrant, MeijuModeGrant, MeijuPowerGrant, MeijuTemperatureGrant,
+    PrepareApprovalRequest, PrepareConnectionLinkRequest, PrepareLanScanRequest, Session,
 };
 use homeverb_mock::Scenario;
 use serde::Deserialize;
@@ -51,6 +51,8 @@ struct Config {
     meiju_mode_grants: Vec<MeijuModeGrant>,
     #[serde(default)]
     meiju_temperature_grants: Vec<MeijuTemperatureGrant>,
+    #[serde(default)]
+    meiju_ac_feature_grants: Vec<MeijuAcFeatureGrant>,
     #[serde(default)]
     meiju_dishwasher_grants: Vec<MeijuDishwasherGrant>,
     #[serde(default)]
@@ -130,6 +132,7 @@ pub unsafe extern "C" fn homeverb_open(config: *const c_char) -> *mut c_char {
                 || !config.meiju_fan_grants.is_empty()
                 || !config.meiju_mode_grants.is_empty()
                 || !config.meiju_temperature_grants.is_empty()
+                || !config.meiju_ac_feature_grants.is_empty()
                 || !config.meiju_dishwasher_grants.is_empty()
                 || !config.meiju_dishwasher_cycle_grants.is_empty())
         {
@@ -153,6 +156,7 @@ pub unsafe extern "C" fn homeverb_open(config: *const c_char) -> *mut c_char {
                 homeverb_host::open_meiju_session_with_grants(
                     &config.data_dir,
                     MeijuControlGrants {
+                        ac_features: &config.meiju_ac_feature_grants,
                         power: &config.meiju_power_grants,
                         fan: &config.meiju_fan_grants,
                         mode: &config.meiju_mode_grants,

@@ -1,0 +1,491 @@
+{
+  "schema_version": "1.0",
+  "id": "vendor.midea.ac",
+  "component_id": "main",
+  "revision": 4,
+  "properties": {
+    "mode": {
+      "type": "string",
+      "readable": true,
+      "writable": false
+    },
+    "wind_speed": {
+      "type": "integer",
+      "readable": true,
+      "writable": false
+    },
+    "eco": {
+      "type": "boolean",
+      "readable": true,
+      "writable": true,
+      "control_requires_observation": true
+    },
+    "comfort_energy_saving": {
+      "type": "boolean",
+      "readable": true,
+      "writable": true,
+      "control_requires_observation": true
+    },
+    "boost": {
+      "type": "boolean",
+      "readable": true,
+      "writable": true,
+      "control_requires_observation": true
+    },
+    "horizontal_swing": {
+      "type": "boolean",
+      "readable": true,
+      "writable": true,
+      "control_requires_observation": true
+    },
+    "vertical_swing": {
+      "type": "boolean",
+      "readable": true,
+      "writable": true,
+      "control_requires_observation": true
+    },
+    "fresh_air_remove_odor": {
+      "type": "boolean",
+      "readable": true,
+      "writable": true,
+      "control_requires_observation": true
+    },
+    "button_sound": {
+      "type": "boolean",
+      "readable": true,
+      "writable": true,
+      "control_requires_observation": true
+    },
+    "display": {
+      "type": "boolean",
+      "readable": true,
+      "writable": true,
+      "control_requires_observation": true
+    },
+    "avoid_direct_airflow": {
+      "type": "boolean",
+      "readable": true,
+      "writable": true,
+      "control_requires_observation": true
+    },
+    "prevent_overcooling": {
+      "type": "boolean",
+      "readable": true,
+      "writable": true,
+      "control_requires_observation": true
+    },
+    "dry_after_shutdown": {
+      "type": "boolean",
+      "readable": true,
+      "writable": true,
+      "control_requires_observation": true
+    },
+    "auxiliary_heat": {
+      "type": "boolean",
+      "readable": true,
+      "writable": true,
+      "control_requires_observation": true
+    },
+    "follow_airflow": {
+      "type": "boolean",
+      "readable": true,
+      "writable": true,
+      "control_requires_observation": true
+    },
+    "vertical_direction": {
+      "type": "integer",
+      "readable": true,
+      "writable": true,
+      "control_requires_observation": true
+    },
+    "horizontal_direction": {
+      "type": "integer",
+      "readable": true,
+      "writable": true,
+      "control_requires_observation": true
+    },
+    "breezeless": {
+      "type": "integer",
+      "readable": true,
+      "writable": true,
+      "control_requires_observation": true
+    }
+  },
+  "actions": {
+    "set_eco": {
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "eco": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "eco"
+        ],
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "set_value",
+      "risk": "low",
+      "verification": "unavailable",
+      "atomic": false,
+      "independent_fields": false
+    },
+    "set_comfort_energy_saving": {
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "comfort_energy_saving": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "comfort_energy_saving"
+        ],
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "set_value",
+      "risk": "low",
+      "verification": "unavailable",
+      "atomic": false,
+      "independent_fields": false
+    },
+    "set_boost": {
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "boost": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "boost"
+        ],
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "set_value",
+      "risk": "low",
+      "verification": "unavailable",
+      "atomic": false,
+      "independent_fields": false
+    },
+    "set_horizontal_swing": {
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "horizontal_swing": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "horizontal_swing"
+        ],
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "set_value",
+      "risk": "low",
+      "verification": "unavailable",
+      "atomic": false,
+      "independent_fields": false
+    },
+    "set_vertical_swing": {
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "vertical_swing": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "vertical_swing"
+        ],
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "set_value",
+      "risk": "low",
+      "verification": "unavailable",
+      "atomic": false,
+      "independent_fields": false
+    },
+    "set_fresh_air_remove_odor": {
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "fresh_air_remove_odor": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "fresh_air_remove_odor"
+        ],
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "set_value",
+      "risk": "low",
+      "verification": "unavailable",
+      "atomic": false,
+      "independent_fields": false
+    },
+    "set_button_sound": {
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "button_sound": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "button_sound"
+        ],
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "set_value",
+      "risk": "low",
+      "verification": "unavailable",
+      "atomic": false,
+      "independent_fields": false
+    },
+    "set_display": {
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "display": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "display"
+        ],
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "set_value",
+      "risk": "low",
+      "verification": "unavailable",
+      "atomic": false,
+      "independent_fields": false
+    },
+    "set_avoid_direct_airflow": {
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "avoid_direct_airflow": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "avoid_direct_airflow"
+        ],
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "set_value",
+      "risk": "low",
+      "verification": "unavailable",
+      "atomic": false,
+      "independent_fields": false
+    },
+    "set_prevent_overcooling": {
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "prevent_overcooling": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "prevent_overcooling"
+        ],
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "set_value",
+      "risk": "low",
+      "verification": "unavailable",
+      "atomic": false,
+      "independent_fields": false
+    },
+    "set_dry_after_shutdown": {
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "dry_after_shutdown": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "dry_after_shutdown"
+        ],
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "set_value",
+      "risk": "low",
+      "verification": "unavailable",
+      "atomic": false,
+      "independent_fields": false
+    },
+    "set_auxiliary_heat": {
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "auxiliary_heat": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "auxiliary_heat"
+        ],
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "set_value",
+      "risk": "low",
+      "verification": "unavailable",
+      "atomic": false,
+      "independent_fields": false
+    },
+    "set_follow_airflow": {
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "follow_airflow": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "follow_airflow"
+        ],
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "set_value",
+      "risk": "low",
+      "verification": "unavailable",
+      "atomic": false,
+      "independent_fields": false
+    },
+    "set_vertical_direction": {
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "vertical_direction": {
+            "type": "integer",
+            "enum": [
+              0,
+              1,
+              25,
+              50,
+              75,
+              100
+            ]
+          }
+        },
+        "required": [
+          "vertical_direction"
+        ],
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "set_value",
+      "risk": "low",
+      "verification": "unavailable",
+      "atomic": false,
+      "independent_fields": false
+    },
+    "set_horizontal_direction": {
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "horizontal_direction": {
+            "type": "integer",
+            "enum": [
+              0,
+              1,
+              25,
+              50,
+              75,
+              100
+            ]
+          }
+        },
+        "required": [
+          "horizontal_direction"
+        ],
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "set_value",
+      "risk": "low",
+      "verification": "unavailable",
+      "atomic": false,
+      "independent_fields": false
+    },
+    "set_breezeless": {
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "breezeless": {
+            "type": "integer",
+            "enum": [
+              0,
+              1,
+              2,
+              3
+            ]
+          }
+        },
+        "required": [
+          "breezeless"
+        ],
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "set_value",
+      "risk": "low",
+      "verification": "unavailable",
+      "atomic": false,
+      "independent_fields": false
+    }
+  },
+  "events": {}
+}

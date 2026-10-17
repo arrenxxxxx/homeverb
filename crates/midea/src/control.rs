@@ -30,6 +30,7 @@ pub const AC_MODES: [AcMode; 5] = [
 #[derive(Serialize)]
 #[serde(untagged)]
 pub(crate) enum CloudControl {
+    AcFeature(std::collections::BTreeMap<String, serde_json::Value>),
     Power {
         power: &'static str,
     },

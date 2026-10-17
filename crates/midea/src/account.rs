@@ -660,6 +660,23 @@ impl MeijuAccount {
         clock: &dyn Clock,
         operation: &Operation,
     ) -> Result<Snapshot> {
+        self.read_bound_state_with_features(
+            transport, device, component, connection, clock, operation, false,
+        )
+        .await
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub(crate) async fn read_bound_state_with_features(
+        &self,
+        transport: &dyn ReadTransport,
+        device: &Device,
+        component: &str,
+        connection: &Connection,
+        clock: &dyn Clock,
+        operation: &Operation,
+        include_features: bool,
+    ) -> Result<Snapshot> {
         let payload = self.load(operation).await?;
         let appliance = operation
             .run(async {
@@ -716,9 +733,69 @@ impl MeijuAccount {
             operation,
         )
         .await?;
-        operation
-            .run(async { state.snapshot(&device.id, component) })
-            .await
+        let mut snapshot = state.snapshot(&device.id, component)?;
+        if include_features
+            && let Some(profile) = appliance
+                .product_profile
+                .ac_features(appliance.model.as_deref())
+        {
+            let mut raw = state.ac_fields;
+            for query in profile.queries() {
+                if !profile.needs_query(query, &raw) {
+                    continue;
+                }
+                match read_cloud_state(
+                    transport,
+                    self.record().credential_ref,
+                    &appliance,
+                    query,
+                    clock,
+                    operation,
+                )
+                .await
+                {
+                    Ok(state) => {
+                        snapshot
+                            .observations
+                            .extend(state.snapshot(&device.id, component)?.observations);
+                        raw.extend(state.ac_fields);
+                    }
+                    Err(error)
+                        if matches!(
+                            error.code.as_str(),
+                            "CANCELLED" | "DEADLINE_EXCEEDED" | "AUTH_REQUIRED"
+                        ) =>
+                    {
+                        return Err(error);
+                    }
+                    Err(_) => {
+                        if !snapshot
+                            .warnings
+                            .iter()
+                            .any(|w| w == "An optional AC state query is unavailable.")
+                        {
+                            snapshot
+                                .warnings
+                                .push("An optional AC state query is unavailable.".into());
+                        }
+                    }
+                }
+            }
+        }
+        if !include_features
+            && let Some(profile) = appliance
+                .product_profile
+                .ac_features(appliance.model.as_deref())
+        {
+            // Legacy saved descriptors can still contain only the basic AC properties.
+            // Optional observations are admitted with the host's selected-device opt-in.
+            for feature in &profile.features {
+                snapshot
+                    .observations
+                    .remove(&format!("vendor.midea.ac.{}", feature.name));
+            }
+        }
+        operation.run(async { Ok(snapshot) }).await
     }
 
     async fn load(&self, operation: &Operation) -> Result<Payload> {

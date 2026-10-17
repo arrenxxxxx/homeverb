@@ -133,6 +133,16 @@ fn descriptors(
                 fan.properties.get_mut("mode").unwrap()["writable"] = json!(true);
                 fan.actions.insert("activate_mode".into(), mode_action());
             }
+            if let Some(profile) = profile.and_then(|p| p.ac_features(appliance.model.as_deref())) {
+                fan.revision = 4;
+                for feature in &profile.features {
+                    fan.properties
+                        .insert(feature.name.clone(), feature.property(adapter.ac_features));
+                    if adapter.ac_features {
+                        fan.actions.insert(feature.action_name(), feature.action());
+                    }
+                }
+            }
             capabilities.push(fan);
         }
         Some(ApplianceFamily::Refrigerator) => {
@@ -254,6 +264,8 @@ pub struct MeijuAdapter {
     ac_fan: bool,
     ac_mode: bool,
     ac_temperature: bool,
+    ac_features: bool,
+    ac_feature_devices: Option<HashSet<String>>,
     dishwasher: bool,
     dishwasher_cycle: bool,
 }
@@ -273,6 +285,8 @@ impl MeijuAdapter {
             ac_fan: false,
             ac_mode: false,
             ac_temperature: false,
+            ac_features: false,
+            ac_feature_devices: None,
             dishwasher: false,
             dishwasher_cycle: false,
         }
@@ -299,6 +313,18 @@ impl MeijuAdapter {
     /// Admit only temperature mappings selected from retained protected product evidence.
     pub fn with_ac_temperature_control(mut self) -> Self {
         self.ac_temperature = true;
+        self
+    }
+
+    /// Admit reported optional settings from protected profiles; grants remain exact.
+    pub fn with_ac_feature_control(mut self) -> Self {
+        self.ac_features = true;
+        self
+    }
+
+    /// Limit supplemental foreground reads to exact devices admitted by the host.
+    pub fn with_ac_feature_devices(mut self, devices: impl IntoIterator<Item = String>) -> Self {
+        self.ac_feature_devices = Some(devices.into_iter().collect());
         self
     }
 
@@ -543,12 +569,12 @@ impl MeijuAdapter {
                 let profiles = if self.ac_temperature
                     || self.dishwasher
                     || self.dishwasher_cycle
-                    || bound
-                        .inventory
-                        .appliances
-                        .iter()
-                        .any(|appliance| appliance.family == ApplianceFamily::Dishwasher)
-                {
+                    || bound.inventory.appliances.iter().any(|appliance| {
+                        matches!(
+                            appliance.family,
+                            ApplianceFamily::AirConditioner | ApplianceFamily::Dishwasher
+                        )
+                    }) {
                     account.product_profiles(operation).await?
                 } else {
                     Default::default()
@@ -610,13 +636,18 @@ impl Adapter for MeijuAdapter {
         let session = account.cloud_session(operation).await?;
         let reads = session.reads(self.transport.as_ref(), account.record().credential_ref);
         account
-            .read_bound_state(
+            .read_bound_state_with_features(
                 &reads,
                 device,
                 component,
                 connection,
                 self.clock.as_ref(),
                 operation,
+                self.ac_features
+                    && self
+                        .ac_feature_devices
+                        .as_ref()
+                        .is_none_or(|ids| ids.contains(&device.id)),
             )
             .await
     }
@@ -635,6 +666,10 @@ impl Adapter for MeijuAdapter {
         let cycle_action = crate::DishwasherCycleAction::parse(&command.action);
         let dishwasher = command.capability == "vendor.midea.dishwasher"
             && (command.action == "start_cycle" || cycle_action.is_some());
+        let ac_feature = self.ac_features
+            && command.capability == "vendor.midea.ac"
+            && command.action.starts_with("set_")
+            && command.action != "set_fan_speed";
         if dishwasher && !validated.has_user_approval() {
             return Err(Error::new(
                 "POLICY_DENIED",
@@ -668,6 +703,7 @@ impl Adapter for MeijuAdapter {
                 })
             }
             ("climate", "set") if self.ac_temperature => None,
+            ("vendor.midea.ac", _) if ac_feature => None,
             ("vendor.midea.dishwasher", "start_cycle") if self.dishwasher => None,
             ("vendor.midea.dishwasher", _) if self.dishwasher_cycle && cycle_action.is_some() => {
                 None
@@ -698,8 +734,49 @@ impl Adapter for MeijuAdapter {
         {
             return Err(crate::control::unsupported());
         }
+        let session = account.cloud_session(operation).await?;
         let control = match control {
             Some(control) => control,
+            None if ac_feature => {
+                let profile = appliance
+                    .product_profile
+                    .ac_features(appliance.model.as_deref())
+                    .ok_or_else(crate::control::unsupported)?;
+                let name = command
+                    .action
+                    .strip_prefix("set_")
+                    .ok_or_else(crate::control::unsupported)?;
+                let feature = profile
+                    .feature(name)
+                    .ok_or_else(crate::control::unsupported)?;
+                feature.action().validate_arguments(&command.arguments)?;
+                let reads = session.reads(self.transport.as_ref(), account.record().credential_ref);
+                let mut state = crate::read_cloud_state(
+                    &reads,
+                    account.record().credential_ref,
+                    &appliance,
+                    crate::StateQuery::Default,
+                    self.clock.as_ref(),
+                    operation,
+                )
+                .await?;
+                for query in profile.queries_for(feature) {
+                    if feature.observed(&state.ac_fields)?.is_some() {
+                        break;
+                    }
+                    let supplemental = crate::read_cloud_state(
+                        &reads,
+                        account.record().credential_ref,
+                        &appliance,
+                        query,
+                        self.clock.as_ref(),
+                        operation,
+                    )
+                    .await?;
+                    state.ac_fields.extend(supplemental.ac_fields);
+                }
+                profile.control(feature, &command.arguments, &state.ac_fields)?
+            }
             None if dishwasher => {
                 let profile = appliance
                     .product_profile
@@ -719,7 +796,6 @@ impl Adapter for MeijuAdapter {
                 profile.control(&command.arguments["target_temperature"])?
             }
         };
-        let session = account.cloud_session(operation).await?;
         crate::control::execute(
             &session,
             self.transport.as_ref(),
