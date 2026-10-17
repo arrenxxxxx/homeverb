@@ -63,6 +63,39 @@ their widgets have fictional fixture evidence only. This source phase accessed n
 real account or appliance and sent no physical-device write. No push, publication
 or diagnostic upload was performed.
 
+### Android delivery and authentication block
+
+The release-mode Meiju APK was built from clean application source at
+`b03d113f6d748873f6a206f3c5ca8c6dbc86a6f7` with the pinned Flutter SDK and the
+existing Android SDK/NDK and JDK 21. A temporary Flutter configuration selected
+these tools without changing global settings. The build targeted android-arm64
+and android-x64 with `HOMEVERB_ADAPTER=midea.meiju`; no test entry point was used.
+
+- Artifact: `output/flutter-verification/android/homeverb-0.2.0-meiju-climate-rows.apk`.
+- Bytes: 68,202,196.
+- SHA-256: `f719e5ca69d9bf2a286241c7b68bf6bf223e7eb3309c4fd116981038c7067220`.
+- `scripts/verify_flutter_apk.py` passed both complete ABIs, 17 Core exports per
+  ABI, signature, backup exclusion and 16 KiB ZIP/Core ELF alignment. This is a
+  local development signature, not store-distribution acceptance. The adjacent
+  `homeverb-0.2.0-meiju-climate-rows.json` records the source and native hashes.
+- `adb install -r` succeeded on the existing Android 15 / API 35 arm64 emulator.
+  The app launched with its saved cards and Chinese preference intact; visible
+  Chinese navigation and status glyphs rendered correctly.
+
+Runtime detail acceptance is **blocked**: opening an existing AC card returned
+`AUTH_REQUIRED` and requested account reconnection before entering its detail
+page. No credentials were entered, no reauthorization was attempted, and no
+appliance control was selected or sent. This does not establish runtime detail
+layout, current session grants, a successful provider read or physical control.
+Chinese detail glyphs and exact-model controls still require a valid session.
+The source/widget and native Mock evidence above remains separate from this block.
+
+Local captures are
+`output/flutter-verification/android/climate-rows-home-zh-CN.png` and
+`output/flutter-verification/android/climate-rows-auth-required-zh-CN.png`.
+The APK, report and captures are local ignored artifacts; no upload, push or
+publication occurred. Native API, schemas and adapter admission are unchanged.
+
 ## Main integration: October 16, 2026
 
 Phase 1 merges `origin/codex/flutter-ui` at `834739b` into main at `cb76cbb`.
