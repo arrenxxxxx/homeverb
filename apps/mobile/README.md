@@ -13,11 +13,21 @@ there is no periodic refresh, background setup or automatic appliance command.
 See [ADR-0065](../../docs/adr/0065-default-app-device-controls.md).
 
 The climate-and-power panel keeps power, mode, fan and temperature operations on
-the device page. Mode, air direction and fan speed have separate prominent buttons;
-only independently settable descriptor choices are enabled. An unsupported direction
-button stays explicitly unavailable. Mode activation discloses its power-on effect.
-A bottom sheet requires an explicit selection and Apply; cancellation/backgrounding
-sends nothing. Other descriptor controls remain available below the primary buttons.
+the device page. The shared Window Light materials surround a compact charcoal
+temperature/power summary and expanded rows: mode, fan speed, horizontal airflow,
+vertical airflow, then other settings. Only actual independently settable actions
+with locally permitted values on the selected route appear. Session-grant inspection
+on device opening is local; saved action metadata alone cannot expose a button.
+Mode activation discloses its power-on effect before a direct selection.
+
+Each airflow axis adapts independently: a known boolean swing setting uses a switch,
+fixed positions use only the actual enum or numeric bounds, and unsupported choices
+are absent. Missing boolean observations require explicit On/Off choices. Numeric
+fan speed uses the described step; enum codes remain named presets without guessed
+ordering or percentages. Sparse exact grants use explicit choices. Display light,
+button sound and comfort settings follow the same descriptor and execution path.
+Empty groups disappear. Coupled/unfamiliar setters keep supported explicit forms;
+read-only observations remain distinct from actionable controls.
 
 After a command, one bounded foreground read updates observations without rewriting
 its receipt or retrying the write. Navigation, device/component changes and background
@@ -304,7 +314,9 @@ A failed or interrupted setup remains an error; opening the device again retries
 setup without replaying any appliance command. Accepted/unknown receipts retain
 their existing meanings and uncertainty protections.
 
-The live AC panel now uses the owner-requested light Meiju-style composition,
-direct descriptor-bounded temperature adjustment and a separate integration-status
-sheet. This is not complete Meiju feature parity. See the [function comparison](../../docs/development/10-meiju-ac-parity.md)
+The live AC panel uses the owner-approved expanded Window Light composition and
+direct descriptor-bounded actions. The current Meiju adapter admits power, mode,
+fan and eligible temperature actions; swing, fixed positions, display and sound
+remain hidden because their native mappings are not yet admitted. This is not
+complete Meiju feature parity. See the [function comparison](../../docs/development/10-meiju-ac-parity.md)
 for unfinished model-specific controls and evidence requirements.

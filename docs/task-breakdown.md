@@ -28,10 +28,19 @@ local success; earlier runs were blocked by the repository's billing limit.
 
 ## Task status
 
+The October 17 owner-directed Flutter revision restores Window Light materials
+and expands only actual locally permitted controls into rows. Swing-only and
+fixed-position layouts are independent per axis; unsupported rows are hidden.
+Existing power/mode/fan/eligible-temperature commands continue through Core, with
+native session-grant inspection separating saved metadata from current authority.
+The generic swing/display/sound/comfort paths have fictional widget evidence only;
+current Meiju adapters still do not admit those actions. Exact-model mappings and
+physical acceptance remain open; see the [app evidence](../apps/mobile/verification.md).
+
 The owner subsequently requested complete parity with the selected AC's Meiju
 control page. The [AC parity review](development/10-meiju-ac-parity.md) tracks this
-unfinished task separately from the completed inline-power/UI revision. The light
-Flutter panel and generic additional-function tiles do not establish new Meiju
+unfinished task separately from the completed inline-power/UI revision. The
+Flutter panel and generic additional-function controls do not establish new Meiju
 controls. Exact-model screen references and protected protocol mappings remain
 required for the rest of the feature inventory.
 

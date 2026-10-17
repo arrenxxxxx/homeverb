@@ -1065,7 +1065,6 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             ? roomPresentation(c, prefs?['room_id'])
             : '';
         if (c.capability('climate') != null && c.capability('power') != null) {
-          ui['appearance'] = 'climate';
           ui['subtitle'] = '';
         }
         final temperature = c.observed('climate.target_temperature');

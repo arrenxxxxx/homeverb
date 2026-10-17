@@ -1607,6 +1607,11 @@ String? translateSource(
   "Auxiliary heat" => t.mobileClimateAuxiliaryHeat,
   "Timer" => t.mobileClimateTimer,
   "Available controls" => t.mobileClimateAvailableControls,
+  "Other settings" => t.mobileClimateOtherSettings,
+  "Horizontal direction" => t.mobileClimateHorizontalDirection,
+  "Vertical direction" => t.mobileClimateVerticalDirection,
+  "Display light" => t.mobileClimateDisplayLight,
+  "Button sound" => t.mobileClimateButtonSound,
   _ => null,
 };
 
@@ -3118,5 +3123,10 @@ String? sourceForKey(String key) => switch (key) {
   "mobile.climateTimer" => "Timer",
   "mobile.climateSelfClean" => "Self-clean",
   "mobile.climateAvailableControls" => "Available controls",
+  "mobile.climateOtherSettings" => "Other settings",
+  "mobile.climateHorizontalDirection" => "Horizontal direction",
+  "mobile.climateVerticalDirection" => "Vertical direction",
+  "mobile.climateDisplayLight" => "Display light",
+  "mobile.climateButtonSound" => "Button sound",
   _ => null,
 };

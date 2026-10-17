@@ -1190,4 +1190,9 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get mobileClimateTimer => '\u5b9a\u65f6';
 	@override String get mobileClimateSelfClean => '\u81ea\u6e05\u6d01';
 	@override String get mobileClimateAvailableControls => '\u5df2\u63a5\u5165';
+	@override String get mobileClimateOtherSettings => '\u5176\u4ed6\u8bbe\u7f6e';
+	@override String get mobileClimateHorizontalDirection => '\u5de6\u53f3\u5b9a\u5411';
+	@override String get mobileClimateVerticalDirection => '\u4e0a\u4e0b\u5b9a\u5411';
+	@override String get mobileClimateDisplayLight => '\u706f\u6548';
+	@override String get mobileClimateButtonSound => '\u6309\u952e\u58f0\u97f3';
 }

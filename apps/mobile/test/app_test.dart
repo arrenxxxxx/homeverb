@@ -230,10 +230,8 @@ void main({bool deviceRun = false}) {
         await capture('Long press device card');
         await tap('Close');
         await tap('mock-ac');
-        await tap('Mode');
         expect(find.text('Bedroom AC'), findsNothing);
         await tap('Heat');
-        await tap('Apply');
         expect(app.currentState!.id, 'C01');
         expect(controller.receipt!['status'], 'verified');
         await route('C14');

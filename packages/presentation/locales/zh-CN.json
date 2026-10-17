@@ -1155,5 +1155,10 @@
   "mobile.climateAuxiliaryHeat": "电辅热",
   "mobile.climateTimer": "定时",
   "mobile.climateSelfClean": "自清洁",
-  "mobile.climateAvailableControls": "已接入"
+  "mobile.climateAvailableControls": "已接入",
+  "mobile.climateOtherSettings": "其他设置",
+  "mobile.climateHorizontalDirection": "左右定向",
+  "mobile.climateVerticalDirection": "上下定向",
+  "mobile.climateDisplayLight": "灯效",
+  "mobile.climateButtonSound": "按键声音"
 }

@@ -1,5 +1,68 @@
 # Flutter implementation verification
 
+## Expanded capability-dependent climate rows: October 17, 2026
+
+The owner approved the Window Light row proposal and required every control to
+adapt to the selected device's actual operations. The live page restores the
+shared background, porcelain groups, charcoal summary and terracotta selection.
+Mode, fan, horizontal airflow, vertical airflow and other settings expand in that
+order. Empty groups and unsupported controls disappear. A swing-only axis uses a
+switch; fixed-position options require an independent action and its exact values.
+Numeric fan settings use the described step; enum fan codes remain presets.
+Known booleans use compact switches; missing observations use explicit choices.
+
+Production NativeClient sessions inspect current local grants on device opening.
+Quick controls intersect complete grants, exact component/action values and the
+selected route. Saved descriptors from a prior writable session do not expose
+buttons after read-only reopening. Sparse grants never widen into a numeric range.
+Unknown grant-schema constraints hide quick controls conservatively; Core remains
+the complete planning/execution authority. No permission is read from preferences
+or ordinary request arguments. Coupled supported actions retain explicit forms.
+
+Every selection uses the existing in-process plan/execute path. Power, mode, fan
+and eligible temperature actions remain on the page and retain their receipt.
+One bounded foreground read remains separate from that outcome. There is no
+optimistic observation, automatic replay, implicit retry or background work. Old
+callbacks and slider releases are invalidated by navigation, component selection
+and background/resume. Mode activation discloses its existing power-on effect.
+
+Executed source checks:
+
+- `cargo build -p homeverb-ffi --offline --locked`: passed on this macOS host.
+- `python3 scripts/generate_flutter_i18n.py --generate` and `fvm flutter analyze`:
+  passed with the pinned Flutter 3.47.7 SDK; English/Chinese catalogs are synchronized.
+- Focused climate/row/outcome/session-permission tests: 24 passed before final
+  composition refinements. The final complete `fvm flutter test --reporter expanded`
+  passed 115 tests and failed only the four existing macOS glyph-pixel tests:
+  button-label ink, two control-label cases and editable-field alignment. No
+  reference image or tolerance changed. This is not a fully passing visual suite.
+- Six new row tests cover axis-specific fallbacks and exact command fields,
+  numeric/enum fan differences, missing booleans, plan denial without execution,
+  read-only/coupled/ambiguous/conditional refusal, real native read-only reopening,
+  row ordering, narrow 200% Chinese text and high contrast. Existing native Mock
+  click journeys cover actual FFI writes, receipts, one follow-up read and no replay.
+- Seven shared presentation tests passed. Documentation, contract (20 schemas,
+  45 positive and 250 negative fixtures), repository and existing commit checks
+  passed. `git diff --check` passed.
+- The Android AAR was rebuilt from this checkout for arm64-v8a and x86_64; archive
+  inspection passed 17 exports per ABI and 16 KiB ELF alignment.
+
+Generated widget captures are under `apps/mobile/build/verification/climate-rows/`:
+`main-controls.png`, `settings.png`, `zh-large-text.png` and `high-contrast.png`.
+English captures were visually inspected with the actual bundled Inter and
+Material Icons fonts. Host Chinese captures assert translated strings and layout,
+but the test renderer lacks the platform CJK fallback; they are not packaged
+Chinese glyph acceptance. Android runtime acceptance is recorded separately.
+
+Compatibility: native API 1.22.0, SQLite 5, protected payload 3, existing startup
+grant formats, adapter admission and Core execution semantics are unchanged. The
+current Meiju adapter still admits only power, mode, fan and eligible temperature
+controls. Swing, positions, display, sound and comfort operations remain blocked
+for Meiju by missing reviewed native mappings, grants and exact-model acceptance;
+their widgets have fictional fixture evidence only. This source phase accessed no
+real account or appliance and sent no physical-device write. No push, publication
+or diagnostic upload was performed.
+
 ## Main integration: October 16, 2026
 
 Phase 1 merges `origin/codex/flutter-ui` at `834739b` into main at `cb76cbb`.

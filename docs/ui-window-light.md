@@ -8,15 +8,38 @@ Use the approved [01 / Window Light study](../output/prototypes/homeverb-window-
 
 Apply the same background and material tokens to Devices, Platforms, Settings, device controls, forms, empty/error states, sharing flows, sheets and dialogs. System/browser/permission/secure-storage/export surfaces remain owned by their providers or operating system. The atlas's illustrative provider consent page does not promise that HomeVerb can reskin a third-party website.
 
-### Owner-directed AC composition revision
+### Owner-directed AC composition revisions
 
 On October 16 the owner requested a Meiju-style AC panel and eventual feature
-parity for the selected appliance. The live climate-and-power page now uses a
+parity for the selected appliance. That revision used a
 pale blue-to-white background, white rounded control cards and a blue interaction
-accent within the existing skin. Its original vector appliance illustration is
-decorative; power remains a separately labelled observation. This supersedes the
-charcoal climate card for the live panel, not the historical prototype or other
-screens. No second selectable skin is introduced.
+accent within the existing skin. Its original vector appliance illustration was
+decorative; power remained a separately labelled observation. That temporarily
+superseded the charcoal climate card. The October 17 revision below supersedes this
+blue/white exception; no second selectable skin is introduced.
+
+On October 17 the owner approved the [expanded row proposal](../output/imagegen/homeverb-ac-detail-window-light-v2/README.md)
+and required actual capability-dependent controls. The live Flutter page again
+uses the shared Window Light background, porcelain surfaces, charcoal temperature
+summary and terracotta controls. Mode, fan, horizontal airflow and vertical airflow
+appear in that order; independent additional settings follow. Unsupported rows
+are omitted, including their section headings when empty. Observations may remain
+read-only without suggesting an available operation.
+
+The renderer intersects the exact component action schema with current local
+session grants and the selected route. Boolean setters use a compact switch when
+the observed value is known; an unknown value requires explicit On/Off selection.
+Enumerations use only the admitted presets. Bounded numeric setters use the
+described step; sparse exact grants become individual choices instead of implying
+permission over a larger range. Each airflow axis independently renders swing,
+fixed positions, both or neither. No brand, universal angle range or fan-code
+percentage inference determines these controls. Fixed positions never substitute
+for an absent direction action. Controls wrap at large text sizes.
+
+Selections call the existing in-process plan/execute path directly. Mode activation
+discloses its power-on effect before selection; requested values do not replace
+observations. Current Meiju mappings still admit only power, mode, fan and eligible
+temperature controls. Generic swing/light/sound widgets do not add those mappings.
 
 The [official public reference](https://www.smartmidea.net/projects/downloads-app/image/change/a66.png)
 informs the temperature, environmental reading and grouped control hierarchy.

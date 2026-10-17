@@ -125,24 +125,34 @@ Do not add cloud sync, automation, background listeners, skin downloads, executa
 ## Owner-directed climate interaction revision
 
 For a device exposing climate and power capabilities, keep the user on its control
-page after a power, mode, fan or target-temperature operation. Put Mode, Air direction
-and Fan speed in separate prominent buttons with observed values. Open supported
-choices in a bottom sheet; unsupported controls are labelled unavailable. Never
+page after a power, mode, fan or target-temperature operation. As revised by the
+owner on October 17, expand supported controls into rows: mode, fan speed,
+horizontal airflow, vertical airflow, then additional settings. Omit unavailable
+controls instead of rendering placeholders. Never
 silently replace a mode-only operation with a power-on command: disclose the existing
 activation effect when that is the action exposed by the adapter.
 
 Show pending work and the retained outcome inline, with optional operation details.
 A single bounded foreground read may follow the command; it is not polling or proof
 that the command caused the observed state. Preserve unknown outcomes and prevent
-replay. Dismiss parameter selection on backgrounding. Device switching, navigation
-and background transitions invalidate follow-up work. Large text reflows the button
-row vertically. Quick card power leaves the user on the home page.
+replay. Device switching, navigation and background transitions invalidate old
+callbacks, drafts and follow-up work. Large text wraps options and row contents.
+Quick card power leaves the user on the home page.
 
-The subsequent owner-requested Meiju-style revision replaces the large dark
-card with a light panel, an observed indoor-temperature strip and a two-column
-control grid. Temperature adjustment remains in place: use only descriptor bounds
+The October 17 revision restores the shared Window Light materials and compact
+charcoal temperature/power summary. Temperature adjustment remains in place: use only descriptor bounds
 and steps, send once on slider release and discard a drag across background/resume.
 Never optimistically replace observations. Additional independent low-risk
-descriptor setters appear as separate tiles; generic tile support does not add
-Meiju adapter functions. The [parity record](development/10-meiju-ac-parity.md)
+descriptor setters appear as rows. Inspect current native-session grants locally
+when opening the device; saved descriptors alone do not establish control access.
+Only permitted exact values on the selected route appear. Keep each grant's full
+argument combination intact; do not combine grants to imply extra values. Numeric
+fan controls use descriptor steps, while enum fan codes remain presets. Swing-only
+devices use switches; fixed-position choices require their own actual action and
+values, independently for each axis. A missing observation is not false. Display,
+sound and other independent low-risk settings use the same schema and plan/execute
+path. Coupled or unfamiliar schemas retain supported explicit forms; high-risk,
+read-only and ungranted operations do not become quick controls.
+
+Generic widget support does not add Meiju adapter functions. The [parity record](development/10-meiju-ac-parity.md)
 tracks the remaining full-function request and exact-model reference gate.

@@ -773,6 +773,15 @@ schemas are omitted, as they add no authority during execution. Valid boolean
 schemas are retained. Preserve complete rules and their argument combinations;
 do not combine separate grants into a wider range or a new multi-field grant.
 
+The October 17 Flutter climate renderer inspects these rules locally on device
+opening and intersects them with action values and the selected route. Its quick
+control projection recognizes the compiled hosts' exact object-constant grants,
+unconstrained object grants and boolean schemas; unfamiliar constraints hide quick
+controls conservatively. Sparse exact values remain separate choices rather than
+an inferred range. This display filter neither grants authority nor replaces
+Core's complete JSON Schema planning and execution checks. See the
+[live layout rules](ui-functional-spec.md#owner-directed-climate-interaction-revision).
+
 Use three distinct sources in the control/permission UI:
 
 | Source | Meaning | Access |

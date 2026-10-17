@@ -6,6 +6,24 @@ import 'session_permissions.dart';
 
 enum LocalCleanup { cachedState, executionHistory }
 
+// The compiled native hosts currently expose exact const grants or an object
+// grant for Mock. Unknown schema constraints hide quick controls conservatively;
+// they never become a broader permission or bypass Core's JSON Schema validator.
+bool _matchesDisplayGrant(dynamic schema, Json arguments) {
+  if (schema is bool) return schema;
+  if (schema is! Map ||
+      schema.keys.any(
+        (key) => !{'const', 'type', 'title', 'description'}.contains(key),
+      ))
+    return false;
+  if (schema['type'] != null && schema['type'] != 'object') return false;
+  if (schema.containsKey('const')) {
+    return schema['const'] is Map &&
+        mapEquals(schema['const'] as Map, arguments);
+  }
+  return true;
+}
+
 class HomeController extends ChangeNotifier {
   HomeController(this.core, this.preferences, {this.reopen});
   CoreClient core;
@@ -13,6 +31,102 @@ class HomeController extends ChangeNotifier {
   List<SessionPermission> _controlPermissions = const [];
   bool _foreground = true;
   bool get isForeground => _foreground;
+  int get controlEpoch => _readEpoch;
+  List<Json>? _controlPolicies;
+
+  /// Presentation-only intersection. Core still plans and validates every write.
+  bool canControlValue(
+    String capability,
+    String action,
+    String parameter,
+    Object value,
+  ) => _controlRules(capability, action).any(
+    (rule) => _matchesDisplayGrant(rule['argument_schema'], {parameter: value}),
+  );
+
+  bool hasControlAction(String capability, String action) =>
+      _controlRules(capability, action).any((rule) {
+        final schema = rule['argument_schema'];
+        if (schema is bool) return schema;
+        if (schema is! Map) return false;
+        if (schema['const'] case final Map args) {
+          return _matchesDisplayGrant(schema, args.cast<String, dynamic>());
+        }
+        return _matchesDisplayGrant(schema, {});
+      });
+
+  Iterable<Json> _controlRules(String capability, String action) sync* {
+    final definition =
+        componentCapability(component, capability)?['actions']?[action]
+            as Json?;
+    if (definition == null) return;
+    final route = preferences.route(selectedDevice);
+    final transports = definition['transports'] as List? ?? [];
+    if (core is NativeClient) {
+      for (final policy in _controlPolicies ?? <Json>[]) {
+        if ((route != 'auto' && route != policy['transport']) ||
+            !transports.contains(policy['transport']))
+          continue;
+        for (final grant in policy['grants'] as List) {
+          if (grant['component_id'] == component &&
+              grant['capability'] == capability &&
+              grant['action'] == action)
+            yield grant as Json;
+        }
+      }
+    } else if (_canPrepareControls) {
+      if ((route != 'auto' && route != 'cloud') ||
+          !transports.contains('cloud'))
+        return;
+      for (final p in _controlPermissions) {
+        if (p.device == selectedDevice &&
+            p.component == component &&
+            p.capability == capability &&
+            p.action == action) {
+          yield {
+            'argument_schema': {
+              'const': {p.parameter: p.value},
+            },
+          };
+        }
+      }
+    } else {
+      // Injected CoreClient fixtures supply planning policy. Production clients
+      // always require current native-session inspection, never saved metadata.
+      if (route == 'auto' || transports.contains(route))
+        yield {'argument_schema': true};
+    }
+  }
+
+  Future<void> _inspectControlPolicies() async {
+    _controlPolicies = null;
+    if (core is! NativeClient || !supports('inspect_session_grants')) return;
+    final device = selectedDevice!, epoch = _readEpoch;
+    final policies = <Json>[];
+    for (final connection in description!['device']['connections'] as List) {
+      final policy =
+          await core.call('inspect_session_grants', {
+                'device_id': device,
+                'connection_id': connection['id'],
+              })
+              as Json;
+      _requireCurrentDevice(device, epoch);
+      if (policy['device_id'] != device ||
+          policy['connection_id'] != connection['id'] ||
+          policy['transport'] != connection['transport'] ||
+          policy['source'] != 'session_policy' ||
+          policy['provider_authorization'] != 'not_checked' ||
+          policy['grants'] is! List) {
+        throw NativeFailure(
+          'POLICY_DENIED',
+          'Control policy does not match this connection.',
+        );
+      }
+      policies.add(policy);
+    }
+    _controlPolicies = policies;
+  }
+
   bool _coreNeedsReopen = false;
   bool get _canPrepareControls =>
       reopen != null &&
@@ -95,6 +209,7 @@ class HomeController extends ChangeNotifier {
     final epoch = _readEpoch;
     _coreNeedsReopen = true;
     _controlPermissions = const [];
+    _controlPolicies = null;
     await core.close();
     if (!_foreground || epoch != _readEpoch) {
       throw NativeFailure('CANCELLED', 'Device setup was cancelled.');
@@ -246,6 +361,7 @@ class HomeController extends ChangeNotifier {
     selectedDevice = id;
     routeInspection = null;
     description = null;
+    _controlPolicies = null;
     snapshot = null;
     final epoch = _readEpoch;
     description = await core.call('describe_device', {'device': id}) as Json;
@@ -253,6 +369,7 @@ class HomeController extends ChangeNotifier {
     await _prepareDeviceControls(id);
     component = components.first['id'] as String;
     if (description!['device']['support_status'] == 'unsupported') return;
+    await _inspectControlPolicies();
     await _loadComponentCache();
     if (hasCompartmentOverview) {
       for (final part in components.where((part) => part['id'] != component)) {

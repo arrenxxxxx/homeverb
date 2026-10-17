@@ -3506,4 +3506,19 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Available controls'
 	String get mobileClimateAvailableControls => 'Available controls';
+
+	/// en-US: 'Other settings'
+	String get mobileClimateOtherSettings => 'Other settings';
+
+	/// en-US: 'Horizontal direction'
+	String get mobileClimateHorizontalDirection => 'Horizontal direction';
+
+	/// en-US: 'Vertical direction'
+	String get mobileClimateVerticalDirection => 'Vertical direction';
+
+	/// en-US: 'Display light'
+	String get mobileClimateDisplayLight => 'Display light';
+
+	/// en-US: 'Button sound'
+	String get mobileClimateButtonSound => 'Button sound';
 }

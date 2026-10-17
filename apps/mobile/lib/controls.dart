@@ -70,6 +70,8 @@ List<dynamic> describedControls(
   Set<String> exclude = const {},
   Set<String> excludeActions = const {},
   Set<String> excludeProperties = const {},
+  bool hideUnavailable = false,
+  bool includeClimate = false,
 }) {
   final result = <dynamic>[];
   for (var i = 0; i < c.capabilities.length; i++) {
@@ -83,14 +85,23 @@ List<dynamic> describedControls(
         (actions.keys.any((a) => a != 'set') ||
             ((actions['set']?['parameters']?['properties'] as Map?) ?? {}).keys
                 .any((p) => !['target_temperature', 'mode'].contains(p)));
-    if (id == 'climate' && !extraClimate) continue;
+    if (id == 'climate' && !extraClimate && !includeClimate) continue;
     final visibleProperties = properties.entries.where(
       (entry) =>
           entry.value['readable'] == true &&
           !excludeProperties.contains('$id.${entry.key}'),
     );
     final visibleActions = actions.entries.where(
-      (entry) => !excludeActions.contains('$id.${entry.key}'),
+      (entry) =>
+          !excludeActions.contains('$id.${entry.key}') &&
+          (!hideUnavailable ||
+              (c.hasControlAction(id, entry.key) &&
+                  actionUnavailable(
+                        capability,
+                        entry.value as Json,
+                        trustedApproval: c.supportsTrustedApproval,
+                      ) ==
+                      null)),
     );
     if (visibleProperties.isEmpty && visibleActions.isEmpty) continue;
     result.add([

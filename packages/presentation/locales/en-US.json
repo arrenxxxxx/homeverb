@@ -1155,5 +1155,10 @@
   "mobile.climateAuxiliaryHeat": "Auxiliary heat",
   "mobile.climateTimer": "Timer",
   "mobile.climateSelfClean": "Self-clean",
-  "mobile.climateAvailableControls": "Available controls"
+  "mobile.climateAvailableControls": "Available controls",
+  "mobile.climateOtherSettings": "Other settings",
+  "mobile.climateHorizontalDirection": "Horizontal direction",
+  "mobile.climateVerticalDirection": "Vertical direction",
+  "mobile.climateDisplayLight": "Display light",
+  "mobile.climateButtonSound": "Button sound"
 }

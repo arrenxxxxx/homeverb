@@ -9,8 +9,14 @@ the presentation phase; it does not complete that request.
 The [official public AC example](https://www.smartmidea.net/projects/downloads-app/image/change/a66.png)
 was viewed in a browser on October 16, 2026. It groups an appliance illustration,
 environmental readings, target adjustment, primary selectors and additional
-functions. HomeVerb uses original vector artwork and native widgets. It neither
+functions. The earlier HomeVerb composition used original vector artwork; the
+current row layout uses native widgets without the appliance illustration. It neither
 embeds that screenshot nor invents outdoor temperature or humidity readings.
+
+The October 17 owner-approved [Window Light proposal](../../output/imagegen/homeverb-ac-detail-window-light-v2/README.md)
+supersedes the blue/white presentation: the live Flutter view now uses expanded,
+capability-dependent rows and the shared application materials. It does not turn
+the illustrative controls in that board into model support.
 
 This reference is not the selected device's live Meiju page. Its exact current
 screens, expanded function drawer, selector options and app version are still
@@ -29,18 +35,18 @@ every mapping. Preserve the profile-selection rules in ADR-0040 and ADR-0041.
 | Function | HomeVerb implementation | Selected AC evidence / remaining work |
 |---|---|---|
 | Power | Direct card, in-place receipt and one bounded follow-up read | Earlier owner-observed shutdown; this redesign sends no new physical write |
-| Mode | Independent card and localized selector with explicit power-on effect | Existing exact-model actions; individual modes not physically verified |
-| Fan | Independent card, reviewed values only, preserves unknown observed codes | Earlier code 101 has no reviewed label; later temperature acceptance read the reviewed automatic value. Do not relabel unknown codes |
+| Mode | Expanded localized choices with explicit power-on effect and exact local grant checks | Existing exact-model actions; individual modes not physically verified |
+| Fan | Expanded reviewed presets or descriptor-bounded numeric stepper; preserves unknown observed codes | Current Meiju codes are presets, not a percentage or an inferred ordered scale. Earlier code 101 has no reviewed label; later temperature acceptance read the reviewed automatic value. Do not relabel unknown codes |
 | Temperature | Descriptor-bounded plus/minus and slider; one command on gesture release | ADR-0066 resolves the optional-subtype admission defect. Selected AC accepted 28 to 27.5 to 28 Celsius with separate matching cloud observations; physical temperature behavior remains unverified |
-| Swing | Dedicated direction card and optional independent vertical/horizontal controls | Current Meiju adapter has no swing action or corresponding startup grants |
-| Anti-draft, sleep, energy saving, boost, display, auxiliary heat | Independent descriptor-driven tiles when actual low-risk setters exist; covered by fictional widget fixtures only | Meiju action encoding, model admission, exact grants and physical behavior remain unimplemented |
+| Swing / fixed positions | Each axis independently shows actual swing, exact positions, both or neither; unsupported rows are omitted | Current Meiju adapter has no swing/position action or corresponding startup grants. UI fallback and exact commands have fictional widget evidence only |
+| Anti-draft, sleep, energy saving, boost, display, button sound, auxiliary heat | Independent descriptor-driven rows when actual low-risk setters and permission exist; known booleans use compact switches, unknown values use explicit choices | Meiju action encoding, model admission, exact grants and physical behavior remain unimplemented; these controls stay hidden for current Meiju devices |
 | Timer / self-clean | No operational controls | Need selected-model app and protocol evidence, risk classification and native device execution contract; no project background scheduler |
 | Indoor temperature | Real observation shown separately from target | Existing stale cloud observation semantics retained |
 | Outdoor temperature / humidity / energy | No invented readings | Require protected model mappings, bounded reads and evidence |
 
-The Function support sheet distinguishes an unfinished HomeVerb integration from
-missing appliance hardware. It neither grants authority nor contacts the vendor.
-Unconnected functions cannot send commands. Generic descriptor presentation is
+The earlier Function support sheet and disabled direction placeholder are removed
+from the live page. Missing integration is not a claim that appliance hardware
+lacks the feature. Unconnected functions cannot send commands. Generic descriptor presentation is
 not Meiju support; future adapter work must update the table and compatibility
 record with actual tests before enabling the corresponding controls.
 
@@ -50,11 +56,15 @@ Temperature bounds and steps come exclusively from the action descriptor. Couple
 required fields, missing bounds and unsupported risk/idempotency omit the slider.
 Dragging changes only a local draft; release sends one validated target. Leaving
 the foreground invalidates the draft and late release, including after resume.
-Replies do not turn the requested value into an observation. Mode and additional
-selectors cancel without sending; operations remain on the appliance page.
+Replies do not turn the requested value into an observation. Inline mode/preset
+selection and setting switches send one exact command through Core planning and
+execution; operations remain on the appliance page. Old callbacks across navigation,
+component changes or background/resume send nothing. Native session grants are
+inspected locally on opening; no new polling, account login or control grant is
+introduced by that inspection. Read-only reopenings hide stale saved actions.
 
 The English/Simplified Chinese catalogs share the existing slang generation path.
-Large text stacks control cards. Native controls retain focus and semantics;
+Large text wraps row controls. Native controls retain focus and semantics;
 high contrast retains outlined surfaces. The historical 82-state prototype is
 unchanged and no longer a pixel-parity target for the owner-revised live AC panel.
 

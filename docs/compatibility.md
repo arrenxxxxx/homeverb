@@ -1,5 +1,21 @@
 # Platform and device compatibility matrix
 
+## October 17 Flutter control presentation
+
+The live climate-and-power view now uses expanded Window Light rows and local
+native-session grant inspection. Unsupported/ungranted operations have no quick
+control. Each axis can expose swing, exact positions, both or neither. Boolean,
+enum and numeric setters retain their own schemas; enum fan codes are not ordered
+percentages. Existing Meiju power/mode/fan/eligible-temperature actions use the
+same plan/execute path. Swing, positions, display, sound and comfort controls have
+fictional widget evidence only and remain unavailable on current Meiju descriptors.
+See the [parity record](development/10-meiju-ac-parity.md) and
+[verification record](../apps/mobile/verification.md).
+
+Native API 1.22.0, SQLite schema 5, protected payload 3, startup grant formats,
+adapter admission, routing and outcome semantics are unchanged. No new appliance
+protocol support or physical-device acceptance is established by this UI revision.
+
 > The fictional `homeverb.mock` adapter is implemented and Mock-tested on Linux. The six listed Meiju models have experimental cloud reads; real-platform rows do not claim verified physical support. One owner-observed wall-AC shutdown is recorded below; this does not establish protocol-level verification or broad model support.
 
 | Candidate | Potential route | Evidence still required | Project status |

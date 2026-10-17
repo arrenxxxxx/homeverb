@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:homeverb_mobile/climate_controls.dart';
-import 'package:homeverb_mobile/climate_panel.dart';
 import 'package:homeverb_mobile/controller.dart';
 import 'package:homeverb_mobile/localization.dart';
 import 'package:homeverb_mobile/main.dart';
@@ -133,28 +132,25 @@ void main() {
   );
 
   testWidgets(
-    'control cards expose bounded mode and fan choices without extra navigation',
+    'expanded rows execute exact mode and fan choices without extra navigation',
     (tester) async {
       final (core, c, app) = await open(tester);
-      final direction = tester.widget<ClimateTile>(
-        find.byKey(const ValueKey('climate-button:Air direction')),
+      expect(
+        find.byKey(const ValueKey('climate-row:Air direction')),
+        findsNothing,
       );
-      expect(direction.onPressed, isNull);
-      expect(find.text('Not connected in HomeVerb'), findsOneWidget);
+      expect(find.text('Not connected in HomeVerb'), findsNothing);
       core.observations['vendor.midea.ac.wind_speed'] = 101;
       await c.refresh();
       await tester.pumpAndSettle();
-      expect(find.text('Unrecognized (101)'), findsOneWidget);
+      expect(find.textContaining('Unrecognized (101)'), findsOneWidget);
       core.observations['vendor.midea.ac.wind_speed'] = 40;
       core.calls.clear();
-      await tap(tester, find.byKey(const ValueKey('climate-button:Mode')));
       expect(
         find.text('Selecting a mode also turns this device on.'),
         findsOneWidget,
       );
       await tap(tester, find.byKey(const ValueKey('climate-option:mode:dry')));
-      expect(core.calls, isEmpty);
-      await tap(tester, find.text('Apply'));
       expect(app.currentState!.id, 'C01');
       expect(
         core.calls.firstWhere(
@@ -163,12 +159,10 @@ void main() {
         {'mode': 'dry'},
       );
       core.calls.clear();
-      await tap(tester, find.byKey(const ValueKey('climate-button:Fan speed')));
       await tap(
         tester,
         find.byKey(const ValueKey('climate-option:wind_speed:80')),
       );
-      await tap(tester, find.text('Apply'));
       expect(app.currentState!.id, 'C01');
       expect(
         core.calls.firstWhere(
@@ -185,23 +179,25 @@ void main() {
     },
   );
 
-  testWidgets(
-    'dismissal and background invalidate a selector without sending',
-    (tester) async {
-      final (core, _, app) = await open(tester);
-      core.calls.clear();
-      await tap(tester, find.byKey(const ValueKey('climate-button:Mode')));
-      await tap(tester, find.byKey(const ValueKey('climate-option:mode:heat')));
-      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-      await tester.pumpAndSettle();
-      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-      await tester.pumpAndSettle();
-      expect(find.text('Apply'), findsNothing);
-      expect(core.calls, isEmpty);
-      expect(app.currentState!.id, 'C01');
-      await tester.pumpWidget(const SizedBox());
-    },
-  );
+  testWidgets('background invalidates an old inline callback without sending', (
+    tester,
+  ) async {
+    final (core, _, app) = await open(tester);
+    core.calls.clear();
+    final option = tester.widget<ChoiceChip>(
+      find.byKey(const ValueKey('climate-option:mode:heat')),
+    );
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    await tester.pumpAndSettle();
+    option.onSelected!(true);
+    await tester.pumpAndSettle();
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+    expect(find.text('Apply'), findsNothing);
+    expect(core.calls, isEmpty);
+    expect(app.currentState!.id, 'C01');
+    await tester.pumpWidget(const SizedBox());
+  });
 
   testWidgets('temperature slider sends once on release within device bounds', (
     tester,
@@ -296,7 +292,7 @@ void main() {
     tester,
   ) async {
     final (core, c, app) = await open(tester);
-    expect(find.byKey(const ValueKey('climate-button:Sleep')), findsNothing);
+    expect(find.byKey(const ValueKey('climate-row:Sleep')), findsNothing);
     final vendor = core.capabilities.last;
     vendor['properties']['sleep'] = {
       'type': 'boolean',
@@ -313,10 +309,7 @@ void main() {
     await c.refresh();
     await tester.pumpAndSettle();
     core.calls.clear();
-    await tap(tester, find.byKey(const ValueKey('climate-button:Sleep')));
-    await tap(tester, find.byKey(const ValueKey('climate-option:sleep:true')));
-    expect(core.calls, isEmpty);
-    await tap(tester, find.text('Apply'));
+    await tap(tester, find.byKey(const ValueKey('climate-switch:sleep')));
     expect(
       core.calls
           .where((v) => v['method'] == 'execute')
@@ -324,8 +317,7 @@ void main() {
       {'sleep': true},
     );
     expect(app.currentState!.id, 'C01');
-    await tap(tester, find.text('Function support'));
-    expect(find.text('Not connected in HomeVerb'), findsWidgets);
+    expect(find.text('Function support'), findsNothing);
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox());
   });
@@ -383,7 +375,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         find.text(AppLocale.zhCn.translations.mobileAirDirection),
-        findsOneWidget,
+        findsNothing,
       );
       expect(tester.takeException(), isNull);
       core.capabilities.last['actions']['activate_mode']['risk'] = 'elevated';

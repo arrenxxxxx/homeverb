@@ -281,9 +281,8 @@ class Copy extends StatelessWidget {
 }
 
 class LightBackground extends StatelessWidget {
-  const LightBackground({required this.child, this.climate = false, super.key});
+  const LightBackground({required this.child, super.key});
   final Widget child;
-  final bool climate;
   @override
   Widget build(BuildContext context) => Stack(
     fit: StackFit.expand,
@@ -292,21 +291,6 @@ class LightBackground extends StatelessWidget {
         child: ExcludeSemantics(
           child: MediaQuery.highContrastOf(context)
               ? const ColoredBox(color: Colors.white)
-              : climate
-              ? const DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Color(0xffe3f3fb),
-                        Color(0xfff5f7fa),
-                        Color(0xfff5f7fa),
-                      ],
-                      stops: [0, .48, 1],
-                    ),
-                  ),
-                )
               : Image.asset(
                   'assets/window-light-background.png',
                   fit: BoxFit.fill,
