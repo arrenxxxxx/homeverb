@@ -148,12 +148,12 @@ an externally killed runner may require manual cleanup of its named test device.
 There is no app/write retry after missing or failed evidence.
 
 Cold hosted Simulator setup allows up to 240 seconds each for boot readiness,
-installation and app-container lookup. Stage messages distinguish setup stalls
+installation, app-container lookup and process launch. Stage messages distinguish setup stalls
 from app acceptance failures. Installation and lookup are attempted once; a
 timeout fails the run and still cleans up only the newly created Simulator.
-App launch and report deadlines remain 60 seconds, with no replay or relaxed
+The report deadline after a returned launch PID remains 60 seconds, with no replay or relaxed
 report assertions. October 17 public CI exposed the former 60-second installation
-and container-lookup limits before either app process could start; see the
+and container-lookup limits, followed by a launch timeout; see the
 [publication record](../publication-status.md).
 
 The test app embeds the inspected production framework and calls the public C ABI

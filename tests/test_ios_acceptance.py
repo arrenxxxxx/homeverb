@@ -188,11 +188,15 @@ class IosAcceptanceTests(unittest.TestCase):
                 self.assertEqual(args[3], DEVICE)
                 if action == 'get_app_container':
                     return directory
-                if action in ['launch', 'spawn']:
+                if action == 'launch':
+                    self.assertGreater(kwargs['timeout'], 60)
+                    self.assertLessEqual(kwargs['timeout'], 240)
+                    raise subprocess.TimeoutExpired(args, kwargs['timeout'])
+                if action == 'spawn':
                     raise subprocess.CalledProcessError(1, args)
                 return ''
 
-            with patch.object(ios, 'command', side_effect=command), self.assertRaises(subprocess.CalledProcessError):
+            with patch.object(ios, 'command', side_effect=command), self.assertRaises(subprocess.TimeoutExpired):
                 ios.exercise(Path(directory) / 'app', 'runtime', 'type')
             self.assertEqual([call[2] for call in calls].count('launch'), 1)
             diagnostics = [call for call in calls if call[2] == 'spawn']

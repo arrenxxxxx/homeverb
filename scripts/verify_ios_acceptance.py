@@ -187,7 +187,8 @@ def exercise(app, runtime, device_type):
             if path.exists():
                 raise ValueError('Refuse a pre-existing acceptance report.')
             try:
-                pid = launched_pid(command('xcrun', 'simctl', 'launch', device, BUNDLE, phase, run_id))
+                pid = launched_pid(command('xcrun', 'simctl', 'launch', device, BUNDLE, phase, run_id,
+                                           timeout=SIMULATOR_SETUP_TIMEOUT))
             except subprocess.SubprocessError:
                 # Only this fresh fictional Simulator is queried; never collect host/user logs.
                 predicate = f'eventMessage CONTAINS "{BUNDLE}" OR eventMessage CONTAINS "HomeVerbAcceptance"'
