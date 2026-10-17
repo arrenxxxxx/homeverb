@@ -202,6 +202,9 @@ void main() {
           ..addFont(rootBundle.load('assets/fonts/Inter-Regular.otf'))
           ..addFont(rootBundle.load('assets/fonts/Inter-SemiBold.otf')))
         .load();
+    await (FontLoader(
+      'MaterialIcons',
+    )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
   });
 
   testWidgets(
@@ -296,6 +299,7 @@ void main() {
       expect(find.text('Unsupported model'), findsOneWidget);
       expect(find.text('Refresh State'), findsNothing);
       await tap('Back');
+      await tap('Manage account');
       await tap('Account name');
       await tester.enterText(
         find.byKey(const ValueKey('field:Account name')),
@@ -313,15 +317,14 @@ void main() {
       core.retrieval = 'partial';
       core.retrievalError = 'MIDEA_INVENTORY_PARTIAL';
       await tap('Retrieve Devices');
-      expect(find.text('Device retrieval incomplete'), findsOneWidget);
+      expect(find.text('Some devices could not be updated'), findsOneWidget);
       expect(controller.cards, hasLength(2));
       expect(core.connectionTargets, isEmpty);
       core.retrieval = 'failed';
       core.retrievalError = 'AUTH_REQUIRED';
       await tap('Retrieve Devices');
-      expect(find.text('Device retrieval failed'), findsOneWidget);
+      expect(find.text('Could not update devices'), findsOneWidget);
       await tap('Reauthorize');
-      await tap('Continue to Sign In');
       final login = find.byKey(const ValueKey('credential:Meiju account'));
       final password = find.byKey(const ValueKey('credential:Password'));
       expect(tester.widget<TextField>(password).obscureText, true);
@@ -370,11 +373,15 @@ void main() {
       expect(core.connectionTargets, hasLength(1));
       expect(controller.account!['credential_state'], 'stored');
       await account(secondAccount);
-      await tap('Revoke Access · if supported');
-      expect(find.text('Provider revocation unavailable'), findsOneWidget);
-      await tap('Back');
+      expect(find.text('Revoke Access · if supported'), findsNothing);
+      if (find.text('Remove From This Device').evaluate().isEmpty) {
+        await tap('Manage account');
+      }
       await tap('Remove From This Device');
       await tap('Cancel');
+      if (find.text('Remove From This Device').evaluate().isEmpty) {
+        await tap('Manage account');
+      }
       expect(
         core.requests.where((r) => r['method'] == 'remove_account'),
         isEmpty,
@@ -517,43 +524,44 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
-  testWidgets('completed account result matches the P08 reference content', (
-    tester,
-  ) async {
-    final core = AccountFixture();
-    core.links[firstAccount] = [firstDevice, secondDevice];
-    final controller = HomeController(core, AccountPreferences());
-    final key = GlobalKey<NativeAppState>();
-    final catalog = (await tester.runAsync(ScreenCatalog.load))!;
-    await tester.pumpWidget(
-      NativeApp(key: key, catalog: catalog, controller: controller),
-    );
-    await tester.pumpAndSettle();
-    await controller.selectAccount(firstAccount);
-    await controller.connectAccount(
-      Uint8List.fromList('fixture@example.invalid'.codeUnits),
-      Uint8List.fromList('fictional-pass'.codeUnits),
-      'Home account',
-    );
-    await key.currentState!.go('P08');
-    await tester.pumpAndSettle();
-    expect(
-      jsonDecode(jsonEncode(key.currentState!.screenFor('P08'))),
-      catalog.ui('P08'),
-    );
-    expect(core.connectionTargets, [firstAccount]);
-    expect(
-      core.requests.where((r) => r['method'] == 'refresh_account'),
-      isEmpty,
-    );
-    expect(find.text('Find Devices'), findsNothing);
-    await tester.ensureVisible(find.text('View Devices'));
-    await tester.tap(find.text('View Devices'));
-    await tester.pumpAndSettle();
-    expect(key.currentState!.id, 'D01');
-    expect(controller.visibleCards, hasLength(2));
-    await tester.pumpWidget(const SizedBox());
-  });
+  testWidgets(
+    'completed account result shows only the device count and next steps',
+    (tester) async {
+      final core = AccountFixture();
+      core.links[firstAccount] = [firstDevice, secondDevice];
+      final controller = HomeController(core, AccountPreferences());
+      final key = GlobalKey<NativeAppState>();
+      final catalog = (await tester.runAsync(ScreenCatalog.load))!;
+      await tester.pumpWidget(
+        NativeApp(key: key, catalog: catalog, controller: controller),
+      );
+      await tester.pumpAndSettle();
+      await controller.selectAccount(firstAccount);
+      await controller.connectAccount(
+        Uint8List.fromList('fixture@example.invalid'.codeUnits),
+        Uint8List.fromList('fictional-pass'.codeUnits),
+        'Home account',
+      );
+      await key.currentState!.go('P08');
+      await tester.pumpAndSettle();
+      expect(find.text('Device list updated'), findsOneWidget);
+      expect(find.text('2 devices found.'), findsOneWidget);
+      expect(find.text('Retrieve Devices'), findsNothing);
+      expect(find.text('Reauthorize'), findsNothing);
+      expect(core.connectionTargets, [firstAccount]);
+      expect(
+        core.requests.where((r) => r['method'] == 'refresh_account'),
+        isEmpty,
+      );
+      expect(find.text('Find Devices'), findsNothing);
+      await tester.ensureVisible(find.text('View Devices'));
+      await tester.tap(find.text('View Devices'));
+      await tester.pumpAndSettle();
+      expect(key.currentState!.id, 'D01');
+      expect(controller.visibleCards, hasLength(2));
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
 
   testWidgets(
     'new account catalog connects once and empty inventory preserves saved cards',
@@ -579,10 +587,9 @@ void main() {
 
       await tap('Add Platform');
       await tap('Meiju');
-      expect(key.currentState!.id, 'P03');
-      expect(find.text('Connect Meiju'), findsOneWidget);
+      expect(key.currentState!.id, 'P04');
+      expect(find.text('Meiju sign-in'), findsOneWidget);
       expect(find.textContaining('Example Home'), findsNothing);
-      await tap('Continue to Sign In');
       await tester.enterText(
         find.byKey(const ValueKey('credential:Meiju account')),
         'fixture@example.invalid',
@@ -594,7 +601,7 @@ void main() {
       await tap('Sign In and Retrieve Devices');
       expect(key.currentState!.id, 'P08');
       expect(core.connectionTargets, [null]);
-      expect(find.textContaining('0 devices retrieved.'), findsOneWidget);
+      expect(find.text('0 devices found.'), findsOneWidget);
       expect(controller.cards, hasLength(2));
       expect(
         core.requests.any(
@@ -655,7 +662,6 @@ void main() {
       );
       expect(core.connectionTargets, isEmpty);
       await tap('Sign In to the Original Account');
-      await tap('Continue to Sign In');
       await tester.enterText(
         find.byKey(const ValueKey('credential:Meiju account')),
         'fixture@example.invalid',

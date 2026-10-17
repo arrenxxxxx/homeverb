@@ -36,12 +36,14 @@ No new real-device write or physical support certification is claimed.
 
 ## October 17 Flutter control presentation
 
-The native platform page adds explicit detail/remark buttons and optional remarks
-with a masked sign-in fallback under [ADR-0068](adr/0068-app-account-display-names.md).
-Current native metadata supplies no reviewed provider nickname; historical logins
-cannot be recovered by this UI update. Only a masked projection of a new successful
-foreground sign-in is retained as nonsecret display metadata. Native account
-identity, storage formats, API 1.22 and control permissions are unchanged.
+The native platform flow now goes directly from platform choice to protected
+sign-in. Account cards open compact device-first details, with remarks/sign-in/
+removal under Manage account and local inventory diagnosis under Troubleshooting.
+Only actionable exceptions appear by default; saved credentials are not labelled
+as live authorization. Unsupported provider revocation has no production entry.
+The masked sign-in fallback still follows [ADR-0068](adr/0068-app-account-display-names.md).
+Native identity, API 1.23, SQLite 5, protected payload 3, control permissions and
+model support are unchanged; no backend, background refresh or new write path.
 
 The owner-approved [foreground refresh policy](adr/0067-foreground-state-refresh.md)
 adds silent three-second state reads on native device views. Home/search/room

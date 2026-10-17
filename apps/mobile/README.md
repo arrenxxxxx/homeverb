@@ -101,10 +101,19 @@ errors, and navigation/cancellation or backgrounding fences late responses.
 
 ## Account integration
 
-The native platform page uses white account cards with explicit Account details
-and Rename Account buttons. Reload Accounts is a compact header action, and
-routine authorization/storage explanations are omitted. Pending recovery and
-local cleanup remain visible without inferring current provider access.
+The native platform page uses one tappable card per account, with its name,
+platform and any actionable recovery/cleanup state. Duplicate names retain a
+local identity suffix. Local reload is shown only when reconciliation is needed.
+Choose Meiju to open protected sign-in directly; remarks are optional maintenance,
+not an onboarding step. Success shows the retrieved count and next destinations;
+partial/failed retrieval preserves saved cards and offers explicit recovery.
+
+Account details prioritize devices and explicit device-list retrieval. Manage
+account contains the remark, sign-in and local-removal actions. Troubleshooting
+inside that disclosure contains historical inventory and exact-binding inspection;
+opening either disclosure performs no networking. Unsupported provider revocation
+has no production entry. Removal still confirms the exact linked-card scope,
+with separate interrupted-cleanup handling.
 
 Account names prefer a user remark and fall back to a masked sign-in label.
 Remarks are optional and clearing one restores the fallback. Current native
@@ -124,8 +133,7 @@ fvm flutter run -d linux --dart-define=HOMEVERB_ADAPTER=midea.meiju
 This uses a separate app-private `native-meiju` directory, never the default Mock
 `native` profile or an existing CLI profile. Opening the app first lists local
 metadata/cache; device views then use the foreground state schedule above.
-Platforms > Add Platform > Meiju previews the mainland account flow before
-protected sign-in. The native connection automatically retrieves devices once;
+Platforms > Add Platform > Meiju opens the mainland protected sign-in form. The native connection automatically retrieves devices once;
 partial/failed retrieval remains distinct from authentication and storage success.
 Explicit Retrieve Devices uses the saved session without another login. Pending
 accounts offer recovery or, with API 1.8+, sign-in to the original account.
@@ -147,8 +155,8 @@ prove that later storage will succeed. Core still validates every operation.
 A missing backend, malformed reply or three-second timeout fails closed; there
 is no insecure storage fallback. Other platforms retain their Core storage checks.
 
-Account details offer explicit Inspect Saved Inventory when Core advertises the
-method. It reads only the selected account's protected local bindings, distinguishes
+Account details > Manage account > Troubleshooting offers explicit Inspect Saved
+Inventory when Core advertises the method. It reads only the selected account's protected local bindings, distinguishes
 listed/not-listed/unconfirmed membership, and joins a card only when both device
 and connection IDs match. Historical and unpublished bindings remain visible;
 inspection neither creates cards nor grants control. Empty results are not proof

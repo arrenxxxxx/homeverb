@@ -33,7 +33,6 @@ class PlatformAccounts extends StatelessWidget {
     final highContrast = MediaQuery.highContrastOf(context);
     Widget accountCard(Json account) {
       final id = account['id'] as String;
-      final name = accountDisplayName(c, account);
       final duplicate =
           c.accounts
               .where(
@@ -43,148 +42,66 @@ class PlatformAccounts extends StatelessWidget {
               )
               .length >
           1;
-      final canOpen = !c.busy && c.supports('get_account');
-      final canRename =
-          canOpen &&
-          c.supports('rename_account') &&
-          account['credential_state'] != 'removing';
       return Padding(
-        padding: const EdgeInsets.only(bottom: 16),
-        child: Surface(
-          backgroundColor: Colors.white,
-          border: const Color(0xffe1e3de),
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+        padding: const EdgeInsets.only(bottom: 12),
+        child: OutlinedButton(
+          key: ValueKey('account:$id'),
+          onPressed: !c.busy && c.supports('get_account')
+              ? () => onAction('account:$id')
+              : null,
+          style: OutlinedButton.styleFrom(
+            foregroundColor: highContrast ? Colors.black : ink,
+            backgroundColor: Colors.white,
+            padding: const EdgeInsets.all(20),
+            side: BorderSide(
+              color: highContrast ? Colors.black : const Color(0xffe1e3de),
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(22),
+            ),
+          ),
+          child: Row(
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: highContrast
-                          ? Colors.white
-                          : const Color(0xfff7eee6),
-                      borderRadius: BorderRadius.circular(15),
-                      border: highContrast ? Border.all() : null,
-                    ),
-                    child: Icon(
-                      Icons.person_outline_rounded,
-                      color: highContrast ? Colors.black : accent,
-                      size: 28,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Copy(name, size: 20, bold: true),
-                        const SizedBox(height: 6),
-                        const Copy(
-                          'Meiju · Mainland China',
-                          size: 12,
-                          color: muted,
-                        ),
-                        if (duplicate) ...[
-                          const SizedBox(height: 4),
-                          Copy(
-                            LiteralText(id.split('-').last),
-                            size: 11,
-                            color: muted,
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              if (account['credential_state'] != 'stored') ...[
-                const SizedBox(height: 12),
-                Copy(
-                  credentialLabel(account['credential_state']),
-                  size: 12,
-                  color: highContrast ? Colors.black : accent,
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: highContrast ? Colors.white : const Color(0xfff7eee6),
+                  borderRadius: BorderRadius.circular(15),
                 ),
-              ],
-              const SizedBox(height: 18),
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final large = MediaQuery.textScalerOf(context).scale(14) > 20;
-                  Widget open() => OutlinedButton(
-                    key: ValueKey('account:$id'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: highContrast ? Colors.black : ink,
-                      backgroundColor: highContrast
-                          ? Colors.white
-                          : const Color(0xfff0f1ee),
-                      minimumSize: const Size(0, 48),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 12,
-                      ),
-                      side: BorderSide(
-                        color: highContrast
-                            ? Colors.black
-                            : const Color(0xffd7dbd4),
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(13),
-                      ),
-                    ),
-                    onPressed: canOpen ? () => onAction('account:$id') : null,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Flexible(
-                          child: Copy(
-                            'Account details',
-                            bold: true,
-                            control: true,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        const Icon(Icons.arrow_forward_rounded, size: 18),
-                      ],
-                    ),
-                  );
-                  Widget rename() => TextButton.icon(
-                    key: ValueKey('rename-account:$id'),
-                    style: TextButton.styleFrom(
-                      foregroundColor: highContrast ? Colors.black : accent,
-                      minimumSize: const Size(0, 48),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 12,
-                      ),
-                    ),
-                    onPressed: canRename
-                        ? () => onAction('rename-account:$id')
-                        : null,
-                    icon: const Icon(Icons.edit_outlined, size: 18),
-                    label: Copy(
-                      'Rename Account',
-                      color: highContrast ? Colors.black : accent,
-                      bold: true,
-                      control: true,
-                    ),
-                  );
-                  return large
-                      ? Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [open(), rename()],
-                        )
-                      : Row(
-                          children: [
-                            Expanded(child: open()),
-                            const SizedBox(width: 8),
-                            Expanded(child: rename()),
-                          ],
-                        );
-                },
+                child: Icon(
+                  Icons.person_outline_rounded,
+                  color: highContrast ? Colors.black : accent,
+                  size: 28,
+                ),
               ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Copy(accountDisplayName(c, account), size: 18, bold: true),
+                    const SizedBox(height: 6),
+                    const Copy('Meiju', size: 12, color: muted),
+                    if (duplicate)
+                      Copy(
+                        LiteralText(id.split('-').last),
+                        size: 11,
+                        color: muted,
+                      ),
+                    if (account['credential_state'] != 'stored') ...[
+                      const SizedBox(height: 6),
+                      Copy(
+                        credentialLabel(account['credential_state']),
+                        size: 12,
+                        color: highContrast ? Colors.black : accent,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Icon(Icons.chevron_right_rounded, size: 22),
             ],
           ),
         ),
@@ -197,7 +114,7 @@ class PlatformAccounts extends StatelessWidget {
         Row(
           children: [
             const Expanded(child: Copy('Accounts', size: 14, bold: true)),
-            if (c.supports('list_accounts'))
+            if (c.accountNeedsReload && c.supports('list_accounts'))
               IconButton(
                 tooltip: localize(context, 'Reload Accounts'),
                 onPressed: c.busy ? null : () => onAction('Reload Accounts'),
@@ -218,7 +135,7 @@ class PlatformAccounts extends StatelessWidget {
           const Padding(
             padding: EdgeInsets.only(bottom: 20),
             child: Copy(
-              'No platform account is saved on this installation.',
+              'Add a platform to bring your appliances here.',
               color: muted,
             ),
           ),
@@ -368,20 +285,15 @@ List<dynamic> accountBlocks(HomeController c, String id) {
       return [];
     case 'P02':
       return [
+        ['note', 'Choose the app you already use for your appliances.'],
         [
           'card',
-          'Appliance platforms',
+          'Available platforms',
           [
-            ['Meiju', 'Mainland China · experimental', 'Choose Meiju'],
+            ['Meiju', 'Mainland China', 'Choose Meiju'],
           ],
         ],
-        [
-          'note',
-          c.isMock
-              ? 'Account connection is unavailable in this Mock build.'
-              : 'Direct cloud connection. Open a supported device to use its available controls.',
-        ],
-        ['button', 'Compatibility Details', 'secondary'],
+        ['note', 'Supported devices vary by model.'],
       ];
     case 'P03':
       return [
@@ -404,48 +316,35 @@ List<dynamic> accountBlocks(HomeController c, String id) {
         ['button', 'Cancel', 'secondary'],
       ];
     case 'P08':
-      final report = c.accountReport;
-      final retrieval = report?['retrieval'] as Json?;
+      final retrieval = c.accountReport?['retrieval'] as Json?;
       final status = retrieval?['status'];
       return [
         [
           'status',
           status == 'complete'
-              ? 'Device retrieval complete'
+              ? 'Device list updated'
               : status == 'partial'
-              ? 'Device retrieval incomplete'
-              : 'Device retrieval failed',
-          report == null
-              ? 'No completed account report is available.'
-              : UiMessage('{authentication} {storage}.', {
-                  'authentication': UiMessage(
-                    report['authentication'] == 'succeeded'
-                        ? 'Sign-in succeeded.'
-                        : 'No new sign-in was attempted.',
-                  ),
-                  'storage': UiMessage(
-                    credentialLabel(report['account']['credential_state']),
-                  ),
-                }),
-          status == 'complete' ? 'neutral' : 'warning',
+              ? 'Some devices could not be updated'
+              : 'Could not update devices',
+          status == 'complete'
+              ? UiMessage('{count} devices found.', {
+                  'count': (retrieval!['device_ids'] as List).length,
+                })
+              : 'Your saved devices are still here. Try again or sign in again.',
+          status == 'complete' ? 'success' : 'warning',
         ],
-        if (status == 'complete')
+        if (status == 'complete' && (retrieval!['device_ids'] as List).isEmpty)
           [
             'note',
-            UiMessage(
-              '{count} devices retrieved. Unsupported models remain visible. An empty result does not delete older saved cards.',
-              {'count': (retrieval!['device_ids'] as List).length},
-            ),
+            'Check that your appliances are added to this account in Meiju.',
           ],
-        if (retrieval?['error'] != null)
-          ['note', UiError(retrieval!['error']['code'])],
-        [
-          'note',
-          'Existing cards are reloaded from local storage. Retrieval does not establish physical state or grant appliance controls.',
+        if (status != 'complete') ...[
+          if (retrieval?['error'] != null)
+            ['note', UiError(retrieval!['error']['code'])],
+          ...actions.where((action) => action[1] != 'Remove From This Device'),
         ],
-        ...actions,
-        ['button', 'View Devices', 'secondary'],
-        ['button', 'Back to Accounts', 'secondary'],
+        ['button', 'View Devices'],
+        ['button', 'Account details', 'secondary'],
       ];
     case 'P09':
     case 'P10':
@@ -455,89 +354,105 @@ List<dynamic> accountBlocks(HomeController c, String id) {
           ['button', 'Reload Accounts'],
         ];
       return [
-        [
-          'hero',
-          'platform',
-          accountDisplayName(c, account),
-          UiMessage('Meiju · {region}', {'region': account['region']}),
-        ],
-        [
-          'status',
-          credentialLabel(state),
-          'Current provider authorization has not been checked by this local view.',
-          state == 'stored' ? 'neutral' : 'warning',
-        ],
-        [
-          'rows',
+        ['summary', accountDisplayName(c, account), 'Meiju'],
+        if (state != 'stored')
           [
-            [
-              'Devices',
-              UiMessage('{count} saved cards', {
-                'count': c.accountDeviceIds.length,
-              }),
-              null,
-            ],
-            if (state != 'removing' && c.supports('rename_account'))
-              [
-                'Account name',
-                accountDisplayName(c, account),
-                'Rename Account',
-              ],
+            'status',
+            credentialLabel(state),
+            state == 'removing'
+                ? 'Finish removing this account from this device.'
+                : 'Restore access to update your devices.',
+            'warning',
           ],
-        ],
         if (c.accountDeviceIds.isNotEmpty)
           [
             'card',
-            'Saved devices',
+            'Devices',
             linkedCardRows(c, c.accountDeviceIds, open: true),
           ],
-        if (state == 'stored' && c.supports('inspect_account_inventory')) ...[
-          ['button', 'Inspect Saved Inventory', 'secondary'],
-          ...savedInventoryBlocks(c),
-        ],
+        if (c.accountDeviceIds.isEmpty && state == 'stored')
+          [
+            'note',
+            'No devices yet. Update the list after adding appliances in Meiju.',
+          ],
+        if (state == 'stored' && c.supports('refresh_account'))
+          ['button', 'Retrieve Devices', 'secondary'],
+        if (state != 'stored') ...actions,
         if (c.accountRemoval?['status'] == 'pending')
+          ['note', UiError(c.accountRemoval!['error']?['code'] ?? 'UNKNOWN')],
+        if (state == 'stored')
           [
-            'status',
-            'Local cleanup pending',
-            UiError(c.accountRemoval!['error']?['code'] ?? 'UNKNOWN'),
-            'warning',
-          ],
-        [
-          'note',
-          account['last_complete_inventory_at'] == null
-              ? 'No complete device-list time recorded.'
-              : UiMessage(
-                  'Last complete device list: {time}. Recorded using this device’s clock; not current authorization or appliance status.',
-                  {'time': account['last_complete_inventory_at']},
-                ),
-        ],
-        if (c.accountConflicts != null) ...[
-          [
-            'note',
-            'Saved records may refer to the same appliance. Physical identity is unverified. No devices are merged and no permission is transferred.',
-          ],
-          [
-            'note',
-            UiMessage('Selected device: {device}', {
-              'device': c.accountConflicts!['selected']['device_id'],
-            }),
-          ],
-          if ((c.accountConflicts!['matches'] as List).isEmpty)
-            ['note', 'No equal saved device identifiers were found.'],
-          for (final match in c.accountConflicts!['matches'] as List)
+            'disclosure',
+            'Manage account',
             [
-              'card',
-              'Possible duplicate',
               [
-                ['Account ID', match['account_id'], null],
-                ['Device ID', match['device_id'], null],
-                ['Connection ID', match['connection_id'], null],
-                ['Saved membership', match['membership'], null],
+                'rows',
+                [
+                  if (c.supports('rename_account'))
+                    [
+                      'Account name',
+                      accountDisplayName(c, account),
+                      'Rename Account',
+                    ],
+                  if (c.canSignIn) ['Reauthorize', '', 'Reauthorize'],
+                  if (c.supports('remove_account'))
+                    ['Remove From This Device', '', 'Remove From This Device'],
+                ],
               ],
+              if (c.supports('inspect_account_inventory'))
+                [
+                  'disclosure',
+                  'Troubleshooting',
+                  [
+                    ['button', 'Inspect Saved Inventory', 'secondary'],
+                    ...savedInventoryBlocks(c),
+                    [
+                      'note',
+                      account['last_complete_inventory_at'] == null
+                          ? 'No complete device-list time recorded.'
+                          : UiMessage(
+                              'Last complete device list: {time}. Recorded using this device’s clock; not current authorization or appliance status.',
+                              {'time': account['last_complete_inventory_at']},
+                            ),
+                    ],
+                    if (c.accountConflicts != null) ...[
+                      [
+                        'note',
+                        'Saved records may refer to the same appliance. Physical identity is unverified. No devices are merged and no permission is transferred.',
+                      ],
+                      [
+                        'note',
+                        UiMessage('Selected device: {device}', {
+                          'device':
+                              c.accountConflicts!['selected']['device_id'],
+                        }),
+                      ],
+                      if ((c.accountConflicts!['matches'] as List).isEmpty)
+                        [
+                          'note',
+                          'No equal saved device identifiers were found.',
+                        ],
+                      for (final match
+                          in c.accountConflicts!['matches'] as List)
+                        [
+                          'card',
+                          'Possible duplicate',
+                          [
+                            ['Account ID', match['account_id'], null],
+                            ['Device ID', match['device_id'], null],
+                            ['Connection ID', match['connection_id'], null],
+                            ['Saved membership', match['membership'], null],
+                          ],
+                        ],
+                    ],
+                  ],
+                  c.selectedAccount,
+                ],
             ],
-        ],
-        ...actions,
-        ['button', 'Revoke Access · if supported', 'secondary'],
+            c.selectedAccount,
+          ],
+        if (state == 'stored' && c.accountNeedsReload)
+          ['button', 'Reload Accounts', 'secondary'],
       ];
     case 'P11':
       return [
@@ -563,9 +478,8 @@ List<dynamic> accountBlocks(HomeController c, String id) {
           ],
         [
           'note',
-          'Rooms, operation receipts and replay protection remain. Other installations and provider authorization are unaffected. Reconnecting creates new local identities without restoring previous organization.',
+          'This only removes the account and its devices from HomeVerb on this device. Your Meiju account is unchanged. Reconnecting will not restore device names or room assignments.',
         ],
-        ['note', 'This does not securely erase backups or storage pages.'],
         if (c.removalScope != null && !c.accountNeedsReload)
           ['button', 'Remove Locally']
         else
@@ -602,12 +516,13 @@ class AccountSignIn extends StatefulWidget {
     required this.onReload,
     required this.needsReload,
     required this.busy,
+    this.reauthorizing = false,
     this.credentialAccess = const PlatformCredentialAccess(),
     super.key,
   });
   final Future<void> Function(Uint8List login, Uint8List password) onSubmit;
   final VoidCallback onCancel, onReload;
-  final bool needsReload, busy;
+  final bool needsReload, busy, reauthorizing;
   final CredentialAccess credentialAccess;
   @override
   State<AccountSignIn> createState() => _AccountSignInState();
@@ -766,10 +681,12 @@ class _AccountSignInState extends State<AccountSignIn>
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      const Copy('Sign in to Meiju', size: 23, bold: true),
-      const SizedBox(height: 12),
-      const Copy(
-        'Sign-in connects directly to the admitted mainland provider and automatically retrieves devices. Saved authorization uses the system secure store.',
+      const Copy('Meiju · Mainland China', size: 14, color: muted),
+      const SizedBox(height: 20),
+      Copy(
+        widget.reauthorizing
+            ? 'Sign in to the same Meiju account. Your device names and rooms will stay.'
+            : 'Sign in with your Meiju account to add your appliances.',
         color: muted,
       ),
       const SizedBox(height: 16),

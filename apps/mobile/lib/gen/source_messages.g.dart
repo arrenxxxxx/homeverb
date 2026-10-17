@@ -1649,6 +1649,34 @@ String? translateSource(
   "Upper" => t.vendorMideaAcVerticalDirection25,
   "Lower" => t.vendorMideaAcVerticalDirection75,
   "Bottom" => t.vendorMideaAcVerticalDirection100,
+  "Add a platform to bring your appliances here." => t.mobilePlatformEmpty,
+  "Choose the app you already use for your appliances." =>
+    t.mobilePlatformChoose,
+  "Available platforms" => t.mobilePlatformAvailable,
+  "Supported devices vary by model." => t.mobilePlatformModelSupport,
+  "Device list updated" => t.mobilePlatformUpdated,
+  "Some devices could not be updated" => t.mobilePlatformPartial,
+  "Could not update devices" => t.mobilePlatformFailed,
+  "{count} devices found." => t.mobilePlatformFound(
+    count: args["count"] ?? "{count}",
+  ),
+  "Your saved devices are still here. Try again or sign in again." =>
+    t.mobilePlatformRetry,
+  "Check that your appliances are added to this account in Meiju." =>
+    t.mobilePlatformCheckMeiju,
+  "Finish removing this account from this device." =>
+    t.mobilePlatformFinishRemoval,
+  "Restore access to update your devices." => t.mobilePlatformRestore,
+  "No devices yet. Update the list after adding appliances in Meiju." =>
+    t.mobilePlatformNoDevices,
+  "Manage account" => t.mobilePlatformManage,
+  "Troubleshooting" => t.mobilePlatformTroubleshooting,
+  "This only removes the account and its devices from HomeVerb on this device. Your Meiju account is unchanged. Reconnecting will not restore device names or room assignments." =>
+    t.mobilePlatformRemovalScope,
+  "Sign in to the same Meiju account. Your device names and rooms will stay." =>
+    t.mobilePlatformSignInAgain,
+  "Sign in with your Meiju account to add your appliances." =>
+    t.mobilePlatformSignIn,
   _ => null,
 };
 
@@ -3237,5 +3265,31 @@ String? sourceForKey(String key) => switch (key) {
   "vendor.midea.ac.fresh_air_fan_speed.60" => "Medium",
   "vendor.midea.ac.fresh_air_fan_speed.80" => "High",
   "vendor.midea.ac.fresh_air_fan_speed.100" => "Full",
+  "mobile.platformEmpty" => "Add a platform to bring your appliances here.",
+  "mobile.platformChoose" =>
+    "Choose the app you already use for your appliances.",
+  "mobile.platformAvailable" => "Available platforms",
+  "mobile.platformModelSupport" => "Supported devices vary by model.",
+  "mobile.platformUpdated" => "Device list updated",
+  "mobile.platformPartial" => "Some devices could not be updated",
+  "mobile.platformFailed" => "Could not update devices",
+  "mobile.platformFound" => "{count} devices found.",
+  "mobile.platformRetry" =>
+    "Your saved devices are still here. Try again or sign in again.",
+  "mobile.platformCheckMeiju" =>
+    "Check that your appliances are added to this account in Meiju.",
+  "mobile.platformFinishRemoval" =>
+    "Finish removing this account from this device.",
+  "mobile.platformRestore" => "Restore access to update your devices.",
+  "mobile.platformNoDevices" =>
+    "No devices yet. Update the list after adding appliances in Meiju.",
+  "mobile.platformManage" => "Manage account",
+  "mobile.platformTroubleshooting" => "Troubleshooting",
+  "mobile.platformRemovalScope" =>
+    "This only removes the account and its devices from HomeVerb on this device. Your Meiju account is unchanged. Reconnecting will not restore device names or room assignments.",
+  "mobile.platformSignInAgain" =>
+    "Sign in to the same Meiju account. Your device names and rooms will stay.",
+  "mobile.platformSignIn" =>
+    "Sign in with your Meiju account to add your appliances.",
   _ => null,
 };

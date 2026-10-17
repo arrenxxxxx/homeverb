@@ -1265,4 +1265,22 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get mobileAcFeatureManulHumi => '\u624b\u52a8\u6e7f\u5ea6\u63a7\u5236';
 	@override String get mobileAcFeatureFreshAirRemoveOdor => '\u9664\u5f02\u5473';
 	@override String get mobileAcFeatureAutoFreshOffCo2 => '\u4e8c\u6c27\u5316\u78b3\u65b0\u98ce\u63a7\u5236';
+	@override String get mobilePlatformEmpty => '\u6dfb\u52a0\u5e73\u53f0\uff0c\u5c06\u5bb6\u7535\u96c6\u4e2d\u5230\u8fd9\u91cc\u3002';
+	@override String get mobilePlatformChoose => '\u9009\u62e9\u4f60\u6b63\u5728\u4f7f\u7528\u7684\u5bb6\u7535\u5e73\u53f0\u3002';
+	@override String get mobilePlatformAvailable => '\u53ef\u6dfb\u52a0\u7684\u5e73\u53f0';
+	@override String get mobilePlatformModelSupport => '\u652f\u6301\u7684\u529f\u80fd\u56e0\u8bbe\u5907\u578b\u53f7\u800c\u5f02\u3002';
+	@override String get mobilePlatformUpdated => '\u8bbe\u5907\u5217\u8868\u5df2\u66f4\u65b0';
+	@override String get mobilePlatformPartial => '\u90e8\u5206\u8bbe\u5907\u672a\u80fd\u66f4\u65b0';
+	@override String get mobilePlatformFailed => '\u6682\u65f6\u65e0\u6cd5\u66f4\u65b0\u8bbe\u5907';
+	@override String mobilePlatformFound({required Object count}) => '\u5df2\u627e\u5230 ${count} \u53f0\u8bbe\u5907\u3002';
+	@override String get mobilePlatformRetry => '\u5df2\u6dfb\u52a0\u7684\u8bbe\u5907\u4ecd\u7136\u4fdd\u7559\uff0c\u53ef\u91cd\u8bd5\u6216\u91cd\u65b0\u767b\u5f55\u3002';
+	@override String get mobilePlatformCheckMeiju => '\u8bf7\u786e\u8ba4\u5df2\u5728\u7f8e\u5c45\u4e2d\u5c06\u5bb6\u7535\u6dfb\u52a0\u5230\u6b64\u8d26\u53f7\u3002';
+	@override String get mobilePlatformFinishRemoval => '\u8bf7\u7ee7\u7eed\u5b8c\u6210\u6b64\u8bbe\u5907\u4e0a\u7684\u8d26\u53f7\u79fb\u9664\u3002';
+	@override String get mobilePlatformRestore => '\u6062\u590d\u767b\u5f55\u540e\u5373\u53ef\u66f4\u65b0\u8bbe\u5907\u3002';
+	@override String get mobilePlatformNoDevices => '\u8fd8\u6ca1\u6709\u8bbe\u5907\u3002\u5728\u7f8e\u5c45\u4e2d\u6dfb\u52a0\u5bb6\u7535\u540e\uff0c\u66f4\u65b0\u5217\u8868\u5373\u53ef\u3002';
+	@override String get mobilePlatformManage => '\u8d26\u53f7\u7ba1\u7406';
+	@override String get mobilePlatformTroubleshooting => '\u95ee\u9898\u6392\u67e5';
+	@override String get mobilePlatformRemovalScope => '\u4ec5\u4ece\u672c\u673a HomeVerb \u79fb\u9664\u6b64\u8d26\u53f7\u53ca\u5176\u8bbe\u5907\uff0c\u4e0d\u5f71\u54cd\u7f8e\u5c45\u8d26\u53f7\u3002\u91cd\u65b0\u6dfb\u52a0\u540e\uff0c\u8bbe\u5907\u540d\u79f0\u548c\u623f\u95f4\u5206\u914d\u4e0d\u4f1a\u6062\u590d\u3002';
+	@override String get mobilePlatformSignInAgain => '\u8bf7\u767b\u5f55\u539f\u7f8e\u5c45\u8d26\u53f7\uff0c\u8bbe\u5907\u540d\u79f0\u548c\u623f\u95f4\u5206\u914d\u5c06\u4fdd\u7559\u3002';
+	@override String get mobilePlatformSignIn => '\u767b\u5f55\u7f8e\u5c45\u8d26\u53f7\uff0c\u81ea\u52a8\u6dfb\u52a0\u8d26\u53f7\u4e0b\u7684\u5bb6\u7535\u3002';
 }

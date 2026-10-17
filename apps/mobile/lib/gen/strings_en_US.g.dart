@@ -3731,4 +3731,58 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Full'
 	String get vendorMideaAcFreshAirFanSpeed100 => 'Full';
+
+	/// en-US: 'Add a platform to bring your appliances here.'
+	String get mobilePlatformEmpty => 'Add a platform to bring your appliances here.';
+
+	/// en-US: 'Choose the app you already use for your appliances.'
+	String get mobilePlatformChoose => 'Choose the app you already use for your appliances.';
+
+	/// en-US: 'Available platforms'
+	String get mobilePlatformAvailable => 'Available platforms';
+
+	/// en-US: 'Supported devices vary by model.'
+	String get mobilePlatformModelSupport => 'Supported devices vary by model.';
+
+	/// en-US: 'Device list updated'
+	String get mobilePlatformUpdated => 'Device list updated';
+
+	/// en-US: 'Some devices could not be updated'
+	String get mobilePlatformPartial => 'Some devices could not be updated';
+
+	/// en-US: 'Could not update devices'
+	String get mobilePlatformFailed => 'Could not update devices';
+
+	/// en-US: '{count} devices found.'
+	String mobilePlatformFound({required Object count}) => '${count} devices found.';
+
+	/// en-US: 'Your saved devices are still here. Try again or sign in again.'
+	String get mobilePlatformRetry => 'Your saved devices are still here. Try again or sign in again.';
+
+	/// en-US: 'Check that your appliances are added to this account in Meiju.'
+	String get mobilePlatformCheckMeiju => 'Check that your appliances are added to this account in Meiju.';
+
+	/// en-US: 'Finish removing this account from this device.'
+	String get mobilePlatformFinishRemoval => 'Finish removing this account from this device.';
+
+	/// en-US: 'Restore access to update your devices.'
+	String get mobilePlatformRestore => 'Restore access to update your devices.';
+
+	/// en-US: 'No devices yet. Update the list after adding appliances in Meiju.'
+	String get mobilePlatformNoDevices => 'No devices yet. Update the list after adding appliances in Meiju.';
+
+	/// en-US: 'Manage account'
+	String get mobilePlatformManage => 'Manage account';
+
+	/// en-US: 'Troubleshooting'
+	String get mobilePlatformTroubleshooting => 'Troubleshooting';
+
+	/// en-US: 'This only removes the account and its devices from HomeVerb on this device. Your Meiju account is unchanged. Reconnecting will not restore device names or room assignments.'
+	String get mobilePlatformRemovalScope => 'This only removes the account and its devices from HomeVerb on this device. Your Meiju account is unchanged. Reconnecting will not restore device names or room assignments.';
+
+	/// en-US: 'Sign in to the same Meiju account. Your device names and rooms will stay.'
+	String get mobilePlatformSignInAgain => 'Sign in to the same Meiju account. Your device names and rooms will stay.';
+
+	/// en-US: 'Sign in with your Meiju account to add your appliances.'
+	String get mobilePlatformSignIn => 'Sign in with your Meiju account to add your appliances.';
 }

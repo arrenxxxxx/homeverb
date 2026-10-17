@@ -2610,3 +2610,61 @@ exact-position chips retained their real reported state, and the repeated captio
 were absent. Final local captures: `/private/tmp/homeverb-ac-final-home.png`,
 `/private/tmp/homeverb-ac-final-detail.png` and
 `/private/tmp/homeverb-ac-final-settings.png`. The process was left on the AC page.
+
+## Platform onboarding and maintenance redesign — October 17, 2026
+
+The owner requested an essential-information-only platform journey. The native
+catalog now opens protected sign-in directly, without the old explanation/remark
+step. White account cards have one detail target; optional remarks move into
+Manage account. Details show a compact account summary, linked devices and explicit
+retrieval. Manage account groups remark, sign-in and confirmed local removal, with
+saved inventory/conflict evidence nested under Troubleshooting. Unsupported
+provider revocation has no production entry. Only ambiguous names retain the local
+identity suffix, and local reload appears when reconciliation is required.
+
+Successful retrieval shows its count and next destinations. Partial/failure,
+pending authorization and interrupted removal retain explicit recovery paths.
+Removal still binds the exact reviewed device scope and rejects changed scope.
+Protected input clearing, late-result cancellation, account identity and adapter
+admission are unchanged. No Core, native API, storage schema or control changes.
+
+Executed checks on this macOS workstation:
+
+- Pinned Flutter 3.47.7 / Dart 3.13.5 confirmed; `fvm flutter analyze` passed.
+- Account, platform, saved-inventory, credential-readiness and localization tests:
+  final 24 passed, including the two Chinese layout cases. This covers exact
+  account selection, optional remarks, direct sign-in, partial/empty results,
+  pending recovery, removal scope changes and credential cancellation.
+- Full `fvm flutter test --reporter expanded`: 143 passed, eight failed. The
+  failures match the preceding recorded baseline: four macOS glyph/pixel checks
+  and four old card/footer click tests (`app_test` and `outcome_click_test`). No
+  full-suite success is claimed.
+- Five platform tests passed with `HOMEVERB_CJK_FONT` pointing to the workstation's
+  STHeiti Medium font. Chinese screenshots cover catalog, sign-in, success,
+  details and removal at 390 logical pixels / 100% text and 320 / 200% text.
+  The capture fixture now taps the disclosure title, rather than the expanded
+  widget's center, and asserts that navigation remains on the intended page.
+  Captures are local under `build/verification/platform-redesign/`; account and
+  appliance data are fictional. This font override is test-only and is not an
+  app asset or Android font-equivalence claim.
+- Shared presentation tests: seven passed. Documentation, contract, repository
+  and existing commit validation passed; contract coverage remains 20 schemas,
+  49 positive and 267 negative fixtures. `git diff --check` passed.
+
+The first APK attempt used Flutter's auto-detected platform-tools directory and
+failed because it was not the installed full SDK. No SDK license was accepted or
+component installed. The subsequent build uses the existing SDK already used by
+the local emulator and JDK 21. The dual-ABI release APK build passed using
+`fvm flutter build apk --release --target-platform android-arm64,android-x64
+--dart-define=HOMEVERB_ADAPTER=midea.meiju`. The APK verification script passed
+both complete ABIs, native exports, v2 signature and alignment. It reuses the
+unchanged native AAR from the preceding Core phase; Rust tests were not rerun for
+this presentation-only change.
+
+Local artifact: `output/flutter-verification/android/homeverb-0.2.0-platform-redesign.apk`.
+SHA-256: `37cd3a442b0162e99aeaff9900fcf3e828a624810546ca5918bf0c07af4ede69`.
+The adjacent JSON records artifact checks. No installation was performed.
+
+Physical-phone layout, live sign-in/reauthorization and removal acceptance remain
+unverified for this revision. No provider request, appliance command, installation,
+remote push, publication or diagnostic upload is part of this phase.

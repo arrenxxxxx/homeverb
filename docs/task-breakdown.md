@@ -37,12 +37,14 @@ listed in the [parity guide](development/10-meiju-ac-parity.md). Physical option
 feature acceptance and the selected official-App inventory remain open. No new
 physical appliance write is authorized by this source integration.
 
-The native platform page now uses explicit detail/remark actions and a compact
-reload control. Remarks are optional; a successful foreground sign-in can supply
-a masked fallback, while current native metadata has no reviewed provider nickname.
-Historical unnamed accounts need a remark or explicit sign-in; this is not a
-user-profile retrieval implementation. See [ADR-0068](adr/0068-app-account-display-names.md)
-and the [App verification record](../apps/mobile/verification.md).
+The owner-requested platform redesign now opens protected sign-in directly from
+the catalog. Tappable account cards lead to device-first details; remarks,
+reauthorization and removal are grouped under Manage account. Technical inventory
+inspection is nested under Troubleshooting, and unsupported revocation has no
+production entry. Success shows a count and next steps; partial retrieval,
+pending authorization and interrupted cleanup keep explicit recovery paths.
+Masked name fallback remains governed by [ADR-0068](adr/0068-app-account-display-names.md).
+See the [App verification record](../apps/mobile/verification.md) for executed checks.
 
 The owner requested silent three-second automatic state refresh while the App is
 foregrounded. [ADR-0067](adr/0067-foreground-state-refresh.md) records this narrow

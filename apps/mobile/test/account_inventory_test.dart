@@ -115,6 +115,13 @@ void main() {
         expect(tester.takeException(), isNull);
       }
 
+      expect(find.text('Inspect Saved Inventory'), findsNothing);
+      await tester.ensureVisible(find.text('Manage account'));
+      await tester.tap(find.text('Manage account'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Troubleshooting'));
+      await tester.tap(find.text('Troubleshooting'));
+      await tester.pumpAndSettle();
       await inspect();
       expect(core.requests.last, {
         'method': 'inspect_account_inventory',

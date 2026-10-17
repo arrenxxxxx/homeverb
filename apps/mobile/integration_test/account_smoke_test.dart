@@ -61,7 +61,6 @@ void main() {
         expect(controller.accounts, isEmpty);
         await tap('Add Platform');
         await tap('Meiju');
-        await tap('Continue to Sign In');
         expect(app.currentState!.id, 'P04');
         await tap('Sign In and Retrieve Devices');
         expect(controller.accountReport, isNull);
@@ -116,7 +115,7 @@ void main() {
           image.dispose();
         }
         await tap('Cancel');
-        expect(app.currentState!.id, 'P03');
+        expect(app.currentState!.id, 'P02');
         expect(tester.takeException(), isNull);
       } finally {
         await tester.pumpWidget(const SizedBox());

@@ -325,7 +325,8 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         c.accountReport = null;
         c.accountRemoval = null;
       }
-      await go(c.canSignIn ? 'P03' : 'P13');
+      connectionLabel = '';
+      await go(c.canSignIn ? 'P04' : 'P13');
       return;
     }
     if (label == 'Continue to Sign In' || label == 'Save Account Name') {
@@ -388,6 +389,10 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     }
     if (label == 'Back to Accounts') {
       await go('P01');
+      return;
+    }
+    if (label == 'Account details') {
+      await go('P09');
       return;
     }
     if (label == 'View Devices') {
@@ -1596,6 +1601,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       final epoch = navigation;
       return AccountSignIn(
         key: ValueKey('signin:$epoch'),
+        reauthorizing: c.selectedAccount != null,
         needsReload: c.accountNeedsReload,
         busy: c.busy,
         onSubmit: (login, password) async {

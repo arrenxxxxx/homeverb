@@ -65,6 +65,59 @@ class Blocks extends StatelessWidget {
             child: Copy(b[1], color: accent, bold: true, control: true),
           ),
         );
+      case 'summary':
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Surface(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.person_outline_rounded,
+                  size: 30,
+                  color: MediaQuery.highContrastOf(context)
+                      ? Colors.black
+                      : accent,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Copy(b[1], size: 20, bold: true),
+                      const SizedBox(height: 4),
+                      Copy(b[2], size: 12, color: muted),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      case 'disclosure':
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Surface(
+            padding: EdgeInsets.zero,
+            child: ExpansionTile(
+              key: PageStorageKey('${b[1]}:${b.length > 3 ? b[3] : ''}'),
+              shape: const Border(),
+              collapsedShape: const Border(),
+              title: Copy(b[1], bold: true),
+              childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              children: [
+                Blocks(
+                  b[2] as List,
+                  onAction: onAction,
+                  fields: fields,
+                  choices: choices,
+                  values: values,
+                  onChanged: onChanged,
+                ),
+              ],
+            ),
+          ),
+        );
       case 'rows':
         return Rows(b[1] as List, onAction: onAction);
       case 'card':
