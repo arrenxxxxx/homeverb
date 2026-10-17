@@ -38,6 +38,9 @@ write. Exact checks and emulator evidence are in the
 [verification record](../apps/mobile/verification.md); provider rate limits and
 physical-phone timing remain separate acceptance work.
 
+The latest home-card surfaces use white for observed power on and slightly
+gray-white for off/unknown, with dark text and outlined high-contrast controls.
+Pending commands retain the previous observed color.
 The home-card revision extends observed on/off colors and per-button pending
 feedback, hides unsupported whole-device shortcuts and adds distinct generated
 refrigerator/dishwasher artwork. Card loading inspects only local reviewed

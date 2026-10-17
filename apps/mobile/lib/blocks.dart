@@ -1251,14 +1251,7 @@ class DeviceTile extends StatelessWidget {
             presentation?.artwork ??
             (sampleNames.containsKey(deviceKey) ? deviceKey : 'ac'),
         d = data ?? sampleNames[kind] ?? sampleNames['ac']!;
-    final dark = {
-          'ac',
-          'refrigerator',
-          'dishwasher',
-          'appliance',
-        }.contains(kind),
-        color = dark ? const Color(0xfffffaf1) : ink,
-        secondary = dark ? const Color(0xffd3d1ca) : muted;
+    const color = ink, secondary = muted;
     final scale = MediaQuery.textScalerOf(context).scale(13) / 13;
     final largeText = scale > 1.3;
     final active = kind != 'tv' && !cached;
@@ -1316,7 +1309,7 @@ class DeviceTile extends StatelessWidget {
                   color: powerColor,
                   border:
                       presentation != null && MediaQuery.highContrastOf(context)
-                      ? Border.all(color: Colors.white)
+                      ? Border.all(color: Colors.black)
                       : null,
                 ),
                 child: Center(
@@ -1341,7 +1334,10 @@ class DeviceTile extends StatelessWidget {
     Widget textAt(double top, Widget child, {double right = 14}) =>
         Positioned(left: 14, right: right, top: top, child: child);
     return Surface(
-      dark: dark,
+      backgroundColor: (presentation == null ? active : state == true)
+          ? Colors.white
+          : const Color(0xfff0f1ee),
+      border: const Color(0xffe1e3de),
       child: Stack(
         children: [
           Semantics(

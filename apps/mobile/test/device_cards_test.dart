@@ -264,7 +264,16 @@ void main() {
       final button = find.byKey(ValueKey('card-power:${core.device['id']}'));
       DevicePresentation presentation() =>
           tester.widget<DeviceTile>(find.byType(DeviceTile)).presentation!;
+      Color? cardColor() => tester
+          .widget<Surface>(
+            find.descendant(
+              of: find.byType(DeviceTile),
+              matching: find.byType(Surface),
+            ),
+          )
+          .backgroundColor;
       expect(presentation().power, true);
+      expect(cardColor(), Colors.white);
       core.executionGate = Completer<void>();
       core.postReadGate = Completer<void>();
       core.calls.clear();
@@ -277,6 +286,7 @@ void main() {
       );
       expect(find.byType(OperationProgress), findsNothing);
       expect(presentation().power, true);
+      expect(cardColor(), Colors.white);
       expect(tester.widget<InkWell>(button).onTap, isNull);
       await app.currentState!.action('power:${core.device['id']}');
       expect(core.calls.where((v) => v['method'] == 'execute'), hasLength(1));
@@ -285,9 +295,11 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
       expect(presentation().updating, true);
       expect(presentation().power, true);
+      expect(cardColor(), Colors.white);
       core.postReadGate!.complete();
       await tester.pumpAndSettle();
       expect(presentation().power, false);
+      expect(cardColor(), const Color(0xfff0f1ee));
       expect(presentation().updating, false);
       expect(app.currentState!.id, 'D01');
       expect(c.receipt!['status'], 'accepted');
@@ -311,6 +323,17 @@ void main() {
       await tester.pump();
       final button = find.byKey(ValueKey('card-power:${core.device['id']}'));
       expect(tester.widget<InkWell>(button).onTap, isNull);
+      expect(
+        tester
+            .widget<Surface>(
+              find.descendant(
+                of: find.byType(DeviceTile),
+                matching: find.byType(Surface),
+              ),
+            )
+            .backgroundColor,
+        const Color(0xfff0f1ee),
+      );
       core.calls.clear();
       await app.currentState!.action('power:${core.device['id']}');
       expect(core.calls, isEmpty);
@@ -388,6 +411,40 @@ void main() {
         });
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
+        for (final tile in find.byType(DeviceTile).evaluate()) {
+          final surface = find.descendant(
+            of: find.byWidget(tile.widget),
+            matching: find.byType(Surface),
+          );
+          final decoration =
+              tester
+                      .widget<DecoratedBox>(
+                        find
+                            .descendant(
+                              of: surface,
+                              matching: find.byType(DecoratedBox),
+                            )
+                            .first,
+                      )
+                      .decoration
+                  as BoxDecoration;
+          final isOn = (tile.widget as DeviceTile).presentation!.power == true;
+          expect(
+            decoration.color,
+            contrast || isOn ? Colors.white : const Color(0xfff0f1ee),
+          );
+          expect(decoration.gradient, isNull);
+          for (final text in tester.widgetList<Text>(
+            find.descendant(of: surface, matching: find.byType(Text)),
+          )) {
+            final foreground = text.style!.color!;
+            expect(
+              (decoration.color!.computeLuminance() + .05) /
+                  (foreground.computeLuminance() + .05),
+              greaterThanOrEqualTo(4.5),
+            );
+          }
+        }
         expect(
           find.byKey(const ValueKey('card-power:refrigerator')),
           findsNothing,

@@ -17,9 +17,11 @@ The generation prompts requested 2048-square output; the tool delivered the
 not a photograph or claim about the exact connected model. Device component and
 capability metadata select the artwork; artwork never selects a command or grants
 authority. Flutter keeps the source detail and bounds decoding to the card's
-physical pixel size. Visual acceptance is at the actual card size on charcoal,
-including narrow and enlarged-text layouts. Small source-edge matte remnants may
-remain visible at full asset resolution.
+physical pixel size. Initial visual acceptance used charcoal cards. The owner
+subsequently requested white on-state and slightly gray-white off/unknown-state
+cards; the same assets are used on those light surfaces. The original generation
+prompts below remain unchanged. Small source-edge matte remnants may remain visible
+at full asset resolution.
 
 ## Refrigerator generation prompt
 
@@ -56,4 +58,3 @@ complete appliance silhouette, material detail, viewing angle, pose and genuine
 transparency. The selected edited versions are the versioned workspace assets
 linked above. No live account material or device identifiers were supplied to the
 image tool.
-

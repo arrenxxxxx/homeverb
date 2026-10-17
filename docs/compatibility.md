@@ -26,6 +26,9 @@ and failures retain old snapshots without reminders. This is an App-owned
 read schedule, not account inventory polling, automatic control or a service.
 Native/CLI/MCP APIs, support levels and receipt semantics are unchanged.
 
+Home card surfaces use white for observed power on and slightly gray-white for
+off/unknown, with dark text. High contrast retains white surfaces and black outlines.
+This presentation change preserves observed-only state and all control semantics.
 Home cards now share observed power colors and local activity feedback and select
 distinct refrigerator/dishwasher artwork from component/capability metadata. Local
 control-option/session-grant inspection filters whole-device shortcuts; a readable

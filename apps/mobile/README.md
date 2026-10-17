@@ -46,6 +46,10 @@ there is no page-edge loading bar. Reduced motion keeps the marker static, and
 background or inactive subtrees stop its animation. Duplicate controls remain
 disabled while the operation is pending.
 
+Device cards use white surfaces for observed power on and slightly gray-white
+surfaces for off or unknown power, with dark text and a subtle border. Pending
+operations retain the observed surface color. High contrast keeps white surfaces
+with black outlines and distinct power icons.
 Home card power buttons share these observed colors and icons, with a pulse inside
 the affected button during preparation, execution and the follow-up read. Local
 startup inspection uses reviewed control options or current session grants and

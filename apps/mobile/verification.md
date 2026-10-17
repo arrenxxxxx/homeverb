@@ -1,5 +1,52 @@
 # Flutter implementation verification
 
+## Light device cards: October 17, 2026
+
+Device cards use white surfaces for observed power on and slightly gray-white
+(`#f0f1ee`) for off or unknown power. Text is dark, with a subtle outline; high
+contrast keeps white surfaces and black outlines. The shared Surface accepts an
+explicit fill without its baked face or gradient overriding it. Other surfaces,
+including the climate summary, retain their existing materials. Pending operations
+retain the previous observed surface color until a read supplies new evidence.
+
+Executed from `apps/mobile` using pinned Flutter 3.47.7:
+
+- `fvm flutter analyze`: passed with no issues.
+- `fvm dart format --output=none --set-exit-if-changed lib test`: 61 files,
+  unchanged.
+- `fvm flutter test test/device_cards_test.dart test/accessibility_test.dart
+  test/contrast_test.dart test/climate_rows_test.dart
+  --dart-define=HOMEVERB_CARD_CAPTURE=/private/tmp/homeverb-light-device-cards.png
+  --reporter expanded`: 24 passed. Existing card assertions now check actual fills,
+  readable text contrast, unknown state and unchanged color throughout a pending
+  command/read. Narrow/enlarged-text and full-atlas high-contrast checks passed.
+  The fictional on/off capture was inspected with decoded appliance artwork at
+  its display size; refrigerator and dishwasher silhouettes remain distinct on
+  light surfaces. This does not establish a physical-device state transition.
+- `fvm flutter build apk --release --target-platform android-arm64,android-x64
+  --dart-define=HOMEVERB_ADAPTER=midea.meiju`: passed in 34.1 seconds after tests.
+
+Artifact: `output/flutter-verification/android/homeverb-0.2.0-meiju-light-cards.apk`,
+70,573,038 bytes, SHA-256
+`1f98d9cec89816b81fed67a88e6226d9ace4ffe612a8a06245e85ba84d2befb3`.
+The adjacent verifier report records base source `8bc1901` with this phase's
+uncommitted changes, unchanged AAR, two complete ABIs, 17 exports per ABI,
+development signature and 16 KiB ZIP/Core ELF alignment. Archive checks passed.
+
+In-place `adb -s emulator-5586 install -r` and cold launch succeeded (1694 ms)
+on the existing Android 15 arm64 AVD. Local screenshots show white observed-on
+cards, gray-white off cards, dark readable text and distinct refrigerator/dishwasher
+artwork. The real account, six cards and Chinese preference survived. Inspection
+only scrolled the home screen; no control command, uninstall, data reset or test
+APK was used. Existing automatic foreground reads remain enabled. The H5 server
+remains stopped.
+
+Documentation, contracts (20 schemas, 45 positive/250 negative fixtures), repository
+checks and seven shared presentation tests passed. The full Flutter suite, Rust
+workspace, physical-phone rendering and physical appliance transitions were not
+rerun. Native API 1.22, SQLite 5, protected payload 3, authority, model support and
+execution outcomes are unchanged. No push, publication or diagnostic upload occurred.
+
 ## Silent foreground state refresh: October 17, 2026
 
 The owner explicitly requested automatic three-second device-state reads while

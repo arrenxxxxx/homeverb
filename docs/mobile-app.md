@@ -80,7 +80,9 @@ single-component whole-device action and exact reviewed options or native sessio
 grants for the chosen route. Refrigerator compartment power readings do not create
 an appliance switch. Local startup inspection and cached reads do not contact the
 provider or refresh accounts; actual execution rechecks the current session.
-Observed on/off states use orange/gray and separate icons, unknown state disables
+Card surfaces are white for observed power on and slightly gray-white for off or
+unknown, with dark text; high contrast retains white surfaces and black outlines.
+Power buttons use orange/gray and separate icons, unknown state disables
 the shortcut, and pending preparation/command/read uses a local pulse without
 optimistic color changes. Accepted/verified shortcuts have no routine bottom
 message; failed/uncertain outcomes and history retain their meaning.

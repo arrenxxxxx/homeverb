@@ -319,6 +319,7 @@ class Surface extends StatelessWidget {
   const Surface({
     required this.child,
     this.dark = false,
+    this.backgroundColor,
     this.radius = 22,
     this.border,
     this.borderWidth = .6,
@@ -328,6 +329,7 @@ class Surface extends StatelessWidget {
   });
   final Widget child;
   final bool dark;
+  final Color? backgroundColor;
   final double radius;
   final Color? border;
   final double borderWidth;
@@ -336,13 +338,15 @@ class Surface extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final highContrast = MediaQuery.highContrastOf(context);
-    final faces = highContrast ? null : _surfaceFaces[radius];
+    final faces = highContrast || backgroundColor != null
+        ? null
+        : _surfaceFaces[radius];
     return DecoratedBox(
       decoration: BoxDecoration(
         color: MediaQuery.highContrastOf(context)
             ? (dark ? Colors.black : Colors.white)
-            : null,
-        gradient: highContrast || faces != null
+            : backgroundColor,
+        gradient: highContrast || faces != null || backgroundColor != null
             ? null
             : WindowSurfaceGradient(
                 pixelRatio: MediaQuery.devicePixelRatioOf(context),
