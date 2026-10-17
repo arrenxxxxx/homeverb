@@ -528,12 +528,6 @@ class _ClimateControlsState extends State<ClimateControls>
         airflow('Vertical swing', Icons.swap_vert, vertical, verticalDirection),
       if (direction != null) row('Air direction', Icons.air, direction),
     ];
-    final observations = (c.snapshot?['observations'] as Json? ?? {}).values
-        .whereType<Map>();
-    final times =
-        observations.map((v) => v['received_at']).whereType<String>().toList()
-          ..sort();
-    final stale = observations.any((v) => v['stale'] == true);
     final receipt = c.receipt;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -609,36 +603,6 @@ class _ClimateControlsState extends State<ClimateControls>
             values: {},
           ),
         ],
-        const SizedBox(height: 16),
-        if (c.snapshot == null)
-          const Copy('No reading', size: 12, color: muted)
-        else
-          Copy(
-            UiMessage('Read: {time}{stale}', {
-              'time': receiptTime(times.lastOrNull, compact: true),
-              'stale': UiMessage(stale ? ' · Stale' : ''),
-            }),
-            size: 12,
-            color: muted,
-          ),
-        const SizedBox(height: 10),
-        ActionButton(
-          'Refresh State',
-          style: 'secondary',
-          onPressed: c.busy || !c.isForeground
-              ? null
-              : () => widget.onAction('Refresh State'),
-        ),
-        ActionButton(
-          'Device information',
-          style: 'secondary',
-          onPressed: () => widget.onAction('Device information'),
-        ),
-        ActionButton(
-          'Recent Operations',
-          style: 'secondary',
-          onPressed: () => widget.onAction('Recent Operations'),
-        ),
       ],
     );
   }

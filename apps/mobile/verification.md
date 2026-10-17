@@ -1,5 +1,23 @@
 # Flutter implementation verification
 
+## Climate footer removal: October 17, 2026
+
+Following the owner's browser annotation, the shared climate view removes the
+reading-time/no-reading footer and its trailing Refresh State, Device information
+and Recent Operations buttons. This applies to the native widget and H5 fixture.
+Capability rows, additional settings and command-result handling are unchanged.
+The native smoke test now seeds its first read through the controller because
+the removed refresh button is no longer part of this screen's journey.
+
+`fvm flutter analyze`, the pinned format check and sixteen focused climate/preview
+tests passed. The H5 development server reloaded the shared widget; Chrome's
+scrolled view visually confirmed that the three buttons and reading time are gone.
+The revised
+native smoke test was analyzed but not rerun on Android; no APK was rebuilt or
+installed in this phase. Native API, grants, storage and adapter support are
+unchanged. No provider request, real-device command or external publication was
+performed.
+
 ## H5 development preview: October 17, 2026
 
 The owner requested a browser view for interactive UI iteration. The pinned

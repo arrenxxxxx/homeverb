@@ -6,6 +6,10 @@ edits and no native Core session or provider access. The portable Dart client
 interface does not change native API 1.22.0, storage formats, control permissions
 or model support. See the [browser verification scope](../apps/mobile/verification.md#h5-development-preview-october-17-2026).
 
+The subsequent climate-footer removal affects presentation only: the reading time
+and three trailing navigation/refresh buttons are absent in both native and H5
+views. Capability filtering, grants and execution semantics are unchanged.
+
 ## October 17 Flutter control presentation
 
 The live climate-and-power view now uses expanded Window Light rows and local

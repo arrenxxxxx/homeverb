@@ -29,6 +29,10 @@ button sound and comfort settings follow the same descriptor and execution path.
 Empty groups disappear. Coupled/unfamiliar setters keep supported explicit forms;
 read-only observations remain distinct from actionable controls.
 
+The climate page omits the reading-time footer and the trailing Refresh State,
+Device information and Recent Operations buttons. Settings retains operation
+history; command results still appear inline when available.
+
 After a command, one bounded foreground read updates observations without rewriting
 its receipt or retrying the write. Navigation, device/component changes and background
 transitions prevent late reads. The outcome is shown inline with an optional View
@@ -142,7 +146,7 @@ build/linux/x64/release/bundle/homeverb_mobile
 
 The Linux CMake install step packages `target/debug/libhomeverb_ffi.so` in the bundle's `lib` directory. Set CMake `HOMEVERB_NATIVE_LIBRARY` to use another build. Keep the whole bundle together. A development override is available through `--dart-define=HOMEVERB_LIBRARY=/absolute/path/to/libhomeverb_ffi.so`. Linux builds require Flutter's standard CMake, Ninja, Clang and GTK development dependencies.
 
-The explicit Mock host permits fictional writes only. Native metadata and presentation preferences live in the OS application support directory. Opening a page does not discover or refresh devices. Local Data offers cache/history cleanup after reviewing each scope. History clearing also removes uncertain receipt details while retaining request-ID replay protection. Interrupted cleanup requires local reloading before an explicit retry; the UI never deletes database files. Use Add Device to discover the Mock appliance and Refresh State to read it. Device menu > Select Devices offers explicit batch power actions; results remain per item. Unsupported or ambiguous capabilities fail admission before execution.
+The explicit Mock host permits fictional writes only. Native metadata and presentation preferences live in the OS application support directory. Opening a page does not discover or refresh devices. Local Data offers cache/history cleanup after reviewing each scope. History clearing also removes uncertain receipt details while retaining request-ID replay protection. Interrupted cleanup requires local reloading before an explicit retry; the UI never deletes database files. Use Add Device to discover the Mock appliance. Other control layouts retain Refresh State where available; the climate page omits that footer. Device menu > Select Devices offers explicit batch power actions; results remain per item. Unsupported or ambiguous capabilities fail admission before execution.
 
 The isolated visual preview runs independently:
 

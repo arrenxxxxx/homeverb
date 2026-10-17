@@ -87,7 +87,8 @@ void main() {
         await tap('Discover Mock device');
         expect(controller.cards.length, 1);
         await tap('mock-ac');
-        await tap('Refresh State');
+        expect(await controller.refresh(), true);
+        await settle();
         expect(controller.snapshot, isNotNull);
         await tap('Heat');
         expect(app.currentState!.id, 'C01');

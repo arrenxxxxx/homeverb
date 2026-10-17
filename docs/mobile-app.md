@@ -30,6 +30,12 @@ The three primary destinations are **Devices**, **Platforms**, and **Settings**.
 
 Authorization sharing belongs inside Settings, with no primary navigation destination or separate sharing home. Recent Operations is also reached from Settings, with a device-specific entry from Device Controls.
 
+The owner-approved climate-page revision omits the reading-time footer and the
+trailing Refresh State, Device information and Recent Operations buttons. The
+controls retain their supported setting rows and inline command results. Device
+information remains available from the card menu and history from Settings;
+the general screen inventory below also covers other device-control layouts.
+
 ## Screen inventory
 
 | Screen | Entry | Functions |
