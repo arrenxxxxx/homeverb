@@ -1,5 +1,76 @@
 # Flutter implementation verification
 
+## Platform accounts and display names: October 17, 2026
+
+The native platform page uses white account cards with explicit Account details
+and Rename Account buttons, a compact reload icon and Add Platform. Routine saved
+authorization explanations are absent. Pending recovery/cleanup remain visible;
+stored credentials are not labelled as proof of current access. Duplicate names
+retain separate local suffixes and exact action targets.
+
+Optional remarks use the existing local rename method. Clearing one restores a
+captured masked sign-in label or the historical default. Successful foreground
+sign-in retains only a display projection in private App preferences; original
+login/password buffers remain protected and cleared. Failed/late authentication
+cannot install the fallback. Local account listing prunes labels for removed
+accounts. Existing custom names survive. API 1.22 has no reviewed provider nickname,
+and old unnamed accounts have no retained login to backfill automatically; explicit
+sign-in or a remark is required. See [ADR-0068](../../docs/adr/0068-app-account-display-names.md).
+
+Executed from `apps/mobile` with pinned Flutter 3.47.7:
+
+- `fvm flutter analyze`: no issues.
+- `fvm dart format --output=none --set-exit-if-changed lib test`: 64 files,
+  unchanged after formatting.
+- `fvm flutter test test/account_identity_test.dart test/platform_accounts_test.dart
+  test/accounts_test.dart test/credential_access_test.dart test/localization_test.dart
+  test/state_refresh_test.dart test/device_cards_test.dart test/cleanup_test.dart
+  test/current_contract_test.dart test/native_test.dart
+  --dart-define=HOMEVERB_PLATFORM_CAPTURE=/private/tmp/homeverb-platform-accounts.png
+  --reporter expanded`: 58 passed. Six new tests cover masked identifiers,
+  persistence without original credentials, remark precedence/clearing/removal,
+  failed/late login, exact account actions and 390-wide/320-wide 2x text layouts.
+- After moving the pure mask projection into the credential-clearing `try/finally`
+  and selecting English for the normal-size capture, the two new test files passed
+  again (six tests). The large-text case remains Chinese/high contrast. The capture
+  was inspected; the earlier Chinese fixture had no CJK test font, so actual Chinese
+  glyph appearance requires the separate Android runtime check below.
+- An initial optional screenshot capture ran before the button ripple repainted
+  and failed its paint assertion; waiting for the frame fixed the capture. This
+  was not a native-account or provider test failure.
+- The final reauthorization view leaves remark editing to the dedicated action
+  instead of exposing a field that native reconnect would ignore. Account and
+  platform-page tests passed again (10 tests) after that adjustment.
+- Emulator inspection caught the shared field's search placeholder in the empty
+  remark editor. The field now uses the account label as its hint and the Chinese
+  save button says Save remark. Platform-page/localization tests passed again
+  (eight tests), followed by static analysis with no issues. Translation generation
+  initially lacked SDK-cache write permission; the authorized retry succeeded.
+- Final `fvm flutter build apk --release --target-platform android-arm64,android-x64
+  --dart-define=HOMEVERB_ADAPTER=midea.meiju`: passed in 31.3 seconds after tests.
+
+Artifact: `output/flutter-verification/android/homeverb-0.2.0-meiju-platform-accounts.apk`,
+70,639,162 bytes, SHA-256
+`86c49a0362251eee2465685b49f89b2058803f48d0138327f5203975c7e58631`.
+The adjacent verifier report records base source `fa65ce7` plus this phase's
+uncommitted changes. Signature, two complete ABIs, native exports and 16 KiB
+ZIP/Core ELF alignment passed; the native AAR remains unchanged.
+
+In-place installation and cold launch of the final APK on `emulator-5586` succeeded
+(1282 ms). Local Chinese screenshots confirm the white account card, distinct
+detail/remark buttons, compact reload action and corrected remark editor. Opening
+details retained the existing account and six saved device cards; the editor was
+cancelled without saving. No real account rename, reauthorization, removal, cleanup
+or appliance command was used. No uninstall, data reset or test APK was used.
+H5 remains stopped. The old generic account correctly retains a localized placeholder
+because no historical sign-in label exists; no user details were recovered.
+
+Shared presentation tests (seven), documentation, contract (20 schemas,
+45 positive/250 negative fixtures), repository and commit checks passed. Full
+Flutter/Rust suites, real reauthorization and physical phone/appliance acceptance
+were not rerun. Native API 1.22, SQLite 5, protected payload 3 and adapter/control
+compatibility are unchanged. No push, publication or diagnostic upload occurred.
+
 ## Concise native home captions: October 17, 2026
 
 Native home/search/room cards omit Saved observation and Not read captions; the

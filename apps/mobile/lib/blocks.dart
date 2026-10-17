@@ -79,6 +79,7 @@ class Blocks extends StatelessWidget {
         );
       case 'field':
         final label = b[1] as String;
+        final hint = label == 'Account name' ? label : 'Search by name';
         final field = fields.putIfAbsent(
           label,
           () => TextEditingController(text: b[2]),
@@ -116,10 +117,10 @@ class Blocks extends StatelessWidget {
                       decoration: InputDecoration(
                         contentPadding: fieldTextPadding(
                           context,
-                          value.text.isEmpty ? 'Search by name' : value.text,
+                          value.text.isEmpty ? hint : value.text,
                         ),
                         border: InputBorder.none,
-                        hintText: localize(context, 'Search by name'),
+                        hintText: localize(context, hint),
                         suffixIcon: label.startsWith('Search')
                             ? IconButton(
                                 tooltip: localize(context, 'Clear search'),

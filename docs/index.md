@@ -31,6 +31,7 @@ Start with the progressive development path. Reference documents define invarian
 - Cleanup recovery: [remove unreadable local credentials](adr/0033-delete-unreadable-account-credentials.md) through the existing confirmed account-removal flow.
 - Inventory inspection: [foreground saved account evidence](adr/0036-local-account-inventory-inspection.md) for the native UI.
 - Inventory timing: [historical complete-retrieval metadata](adr/0060-account-inventory-timestamp.md), nullable after upgrade and never an authorization or online signal.
+- App account names: [optional remarks and masked sign-in labels](adr/0068-app-account-display-names.md), without provider-profile retrieval or exposing original login inputs.
 - Connection linking: [trusted native preview/confirm/discard](adr/0061-native-connection-link-bridge.md), with independent adapter admission and no ordinary JSON method.
 - Inventory admission: [retain identity while gating live Meiju requests](adr/0035-meiju-inventory-membership.md).
 - LAN foundation: [bounded discovery decoding and collection](adr/0045-bounded-lan-discovery-decoding.md), with unauthenticated native candidates, fictional loopback evidence and no route registration.

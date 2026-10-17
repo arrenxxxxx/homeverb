@@ -13,6 +13,225 @@ String credentialLabel(dynamic state) => switch (state) {
   _ => 'Unsupported account state',
 };
 
+Object accountDisplayName(HomeController c, Json account) {
+  final name = c.accountDisplayName(account);
+  return name == null ? const UiMessage('Meiju account') : LiteralText(name);
+}
+
+class PlatformAccounts extends StatelessWidget {
+  const PlatformAccounts({
+    required this.controller,
+    required this.onAction,
+    super.key,
+  });
+  final HomeController controller;
+  final void Function(String) onAction;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = controller;
+    final highContrast = MediaQuery.highContrastOf(context);
+    Widget accountCard(Json account) {
+      final id = account['id'] as String;
+      final name = accountDisplayName(c, account);
+      final duplicate =
+          c.accounts
+              .where(
+                (other) =>
+                    c.accountDisplayName(other) ==
+                    c.accountDisplayName(account),
+              )
+              .length >
+          1;
+      final canOpen = !c.busy && c.supports('get_account');
+      final canRename =
+          canOpen &&
+          c.supports('rename_account') &&
+          account['credential_state'] != 'removing';
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: Surface(
+          backgroundColor: Colors.white,
+          border: const Color(0xffe1e3de),
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: highContrast
+                          ? Colors.white
+                          : const Color(0xfff7eee6),
+                      borderRadius: BorderRadius.circular(15),
+                      border: highContrast ? Border.all() : null,
+                    ),
+                    child: Icon(
+                      Icons.person_outline_rounded,
+                      color: highContrast ? Colors.black : accent,
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Copy(name, size: 20, bold: true),
+                        const SizedBox(height: 6),
+                        const Copy(
+                          'Meiju · Mainland China',
+                          size: 12,
+                          color: muted,
+                        ),
+                        if (duplicate) ...[
+                          const SizedBox(height: 4),
+                          Copy(
+                            LiteralText(id.split('-').last),
+                            size: 11,
+                            color: muted,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              if (account['credential_state'] != 'stored') ...[
+                const SizedBox(height: 12),
+                Copy(
+                  credentialLabel(account['credential_state']),
+                  size: 12,
+                  color: highContrast ? Colors.black : accent,
+                ),
+              ],
+              const SizedBox(height: 18),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final large = MediaQuery.textScalerOf(context).scale(14) > 20;
+                  Widget open() => OutlinedButton(
+                    key: ValueKey('account:$id'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: highContrast ? Colors.black : ink,
+                      backgroundColor: highContrast
+                          ? Colors.white
+                          : const Color(0xfff0f1ee),
+                      minimumSize: const Size(0, 48),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
+                      side: BorderSide(
+                        color: highContrast
+                            ? Colors.black
+                            : const Color(0xffd7dbd4),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(13),
+                      ),
+                    ),
+                    onPressed: canOpen ? () => onAction('account:$id') : null,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Flexible(
+                          child: Copy(
+                            'Account details',
+                            bold: true,
+                            control: true,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.arrow_forward_rounded, size: 18),
+                      ],
+                    ),
+                  );
+                  Widget rename() => TextButton.icon(
+                    key: ValueKey('rename-account:$id'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: highContrast ? Colors.black : accent,
+                      minimumSize: const Size(0, 48),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 12,
+                      ),
+                    ),
+                    onPressed: canRename
+                        ? () => onAction('rename-account:$id')
+                        : null,
+                    icon: const Icon(Icons.edit_outlined, size: 18),
+                    label: Copy(
+                      'Rename Account',
+                      color: highContrast ? Colors.black : accent,
+                      bold: true,
+                      control: true,
+                    ),
+                  );
+                  return large
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [open(), rename()],
+                        )
+                      : Row(
+                          children: [
+                            Expanded(child: open()),
+                            const SizedBox(width: 8),
+                            Expanded(child: rename()),
+                          ],
+                        );
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            const Expanded(child: Copy('Accounts', size: 14, bold: true)),
+            if (c.supports('list_accounts'))
+              IconButton(
+                tooltip: localize(context, 'Reload Accounts'),
+                onPressed: c.busy ? null : () => onAction('Reload Accounts'),
+                icon: const Icon(Icons.refresh_rounded, color: muted),
+              ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (c.isMock)
+          const Padding(
+            padding: EdgeInsets.only(bottom: 16),
+            child: Copy(
+              'Account connection is unavailable in this Mock build.',
+              color: muted,
+            ),
+          ),
+        if (c.accounts.isEmpty && !c.isMock)
+          const Padding(
+            padding: EdgeInsets.only(bottom: 20),
+            child: Copy(
+              'No platform account is saved on this installation.',
+              color: muted,
+            ),
+          ),
+        for (final account in c.accounts) accountCard(account),
+        ActionButton(
+          'Add Platform',
+          onPressed: c.busy ? null : () => onAction('Add Platform'),
+        ),
+      ],
+    );
+  }
+}
+
 Object roomPresentation(HomeController c, String? id) {
   final room = c.rooms.where((r) => r['id'] == id).firstOrNull;
   return room == null
@@ -146,63 +365,7 @@ List<dynamic> accountBlocks(HomeController c, String id) {
   ];
   switch (id) {
     case 'P01':
-      return [
-        if (c.isMock)
-          [
-            'status',
-            'Mock profile',
-            'Platform authorization is unavailable in Mock. This profile contains fictional devices only.',
-            'neutral',
-          ],
-        if (c.accountRemoval?['status'] == 'removed')
-          [
-            'status',
-            'Removed from this device',
-            'Other installations and provider authorization are unchanged.',
-            'neutral',
-          ],
-        if (c.accounts.isEmpty)
-          [
-            'note',
-            c.busy
-                ? 'Loading local accounts…'
-                : 'No platform account is saved on this installation.',
-          ],
-        if (c.accounts.isNotEmpty)
-          [
-            'card',
-            'Meiju · Mainland China',
-            [
-              for (final a in c.accounts)
-                [
-                  LiteralText(a['label']),
-                  UiMessage('{state}{suffix}', {
-                    'state': UiMessage(credentialLabel(a['credential_state'])),
-                    'suffix':
-                        c.accounts
-                                .where((other) => other['label'] == a['label'])
-                                .length >
-                            1
-                        ? ' · ${a['id'].split('-').last}'
-                        : '',
-                  }),
-                  c.supports('get_account') ? 'account:${a['id']}' : null,
-                ],
-            ],
-          ],
-        ['button', 'Add Platform'],
-        if (c.supports('list_accounts'))
-          ['button', 'Reload Accounts', 'secondary']
-        else
-          [
-            'note',
-            'Local account management requires a native library update.',
-          ],
-        [
-          'note',
-          'Opening this page only reads local account metadata. Saved authorization does not prove current access.',
-        ],
-      ];
+      return [];
     case 'P02':
       return [
         [
@@ -223,7 +386,10 @@ List<dynamic> accountBlocks(HomeController c, String id) {
     case 'P03':
       return [
         ['hero', 'platform', 'Meiju', 'Mainland China'],
-        ['field', 'Account name', account?['label'] ?? 'Meiju account'],
+        if (c.selectedAccount == null) ...[
+          ['field', 'Account name', ''],
+          ['note', 'Optional. Uses your sign-in account when blank.'],
+        ],
         [
           'note',
           c.selectedAccount == null
@@ -292,7 +458,7 @@ List<dynamic> accountBlocks(HomeController c, String id) {
         [
           'hero',
           'platform',
-          LiteralText(account['label']),
+          accountDisplayName(c, account),
           UiMessage('Meiju · {region}', {'region': account['region']}),
         ],
         [
@@ -312,7 +478,11 @@ List<dynamic> accountBlocks(HomeController c, String id) {
               null,
             ],
             if (state != 'removing' && c.supports('rename_account'))
-              ['Account name', LiteralText(account['label']), 'Rename Account'],
+              [
+                'Account name',
+                accountDisplayName(c, account),
+                'Rename Account',
+              ],
           ],
         ],
         if (c.accountDeviceIds.isNotEmpty)
@@ -377,8 +547,9 @@ List<dynamic> accountBlocks(HomeController c, String id) {
           UiMessage(
             'Remove {account}, its local credentials and {count} linked cards, preferences and saved readings.',
             {
-              'account':
-                  account?['label'] ?? const UiMessage('the selected account'),
+              'account': account == null
+                  ? const UiMessage('the selected account')
+                  : accountDisplayName(c, account),
               'count': c.removalScope?.length ?? c.accountDeviceIds.length,
             },
           ),

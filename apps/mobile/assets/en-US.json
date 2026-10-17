@@ -1164,5 +1164,8 @@
   "mobile.climateHorizontalDirection": "Horizontal direction",
   "mobile.climateVerticalDirection": "Vertical direction",
   "mobile.climateDisplayLight": "Display light",
-  "mobile.climateButtonSound": "Button sound"
+  "mobile.climateButtonSound": "Button sound",
+  "mobile.platformAccounts": "Accounts",
+  "mobile.optionalAccountRemark": "Optional. Uses your sign-in account when blank.",
+  "mobile.optionalAccountRemarkValidation": "Use at most 80 characters without control characters."
 }

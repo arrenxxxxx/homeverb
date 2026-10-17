@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'client_contract.dart';
 import 'preferences.dart';
 import 'session_permissions.dart';
+import 'account_identity.dart';
 
 enum LocalCleanup { cachedState, executionHistory }
 
@@ -1001,6 +1002,21 @@ class HomeController extends ChangeNotifier {
       core is AccountClient ? core as AccountClient : null;
   bool get isMock => accountClient?.adapter != 'midea.meiju';
   Json? get account => accountDetails?['account'] as Json?;
+  String accountRemark(Json account) {
+    final label = account['label'] as String? ?? '';
+    return label == 'Meiju account' ||
+            label == preferences.accountLoginLabel(account['id'])
+        ? ''
+        : label;
+  }
+
+  String? accountDisplayName(Json account) {
+    final remark = accountRemark(account);
+    return remark.isNotEmpty
+        ? remark
+        : preferences.accountLoginLabel(account['id']);
+  }
+
   bool get canSignIn =>
       !isMock &&
       accountClient!.supportsAccountConnection &&
@@ -1018,6 +1034,9 @@ class HomeController extends ChangeNotifier {
     accountConflicts = null;
     routeInspection = null;
     accounts = (await core.call('list_accounts') as List).cast<Json>();
+    await preferences.retainAccountLoginLabels(
+      accounts.map((account) => account['id'] as String).toSet(),
+    );
     await loadLocal();
     if (selectedAccount != null) {
       if (accounts.any((a) => a['id'] == selectedAccount)) {
@@ -1148,7 +1167,9 @@ class HomeController extends ChangeNotifier {
     accountNeedsReload = true;
     await core.call('rename_account', {
       'account_id': selectedAccount,
-      'label': label.trim(),
+      'label': label.trim().isNotEmpty
+          ? label.trim()
+          : preferences.accountLoginLabel(selectedAccount!) ?? 'Meiju account',
     });
     await reloadAccountViews();
   });
@@ -1174,6 +1195,7 @@ class HomeController extends ChangeNotifier {
     String label,
   ) async {
     try {
+      final loginLabel = maskedAccountLogin(login);
       return await perform(() async {
         if (!canSignIn)
           throw NativeFailure(
@@ -1182,14 +1204,23 @@ class HomeController extends ChangeNotifier {
           );
         accountNeedsReload = true;
         accountReport = null;
+        final epoch = _readEpoch;
         accountReport = await accountClient!.connectAccount(
           login: login,
           password: password,
-          label: label,
+          label: label.trim().isNotEmpty
+              ? label.trim()
+              : loginLabel ?? 'Meiju account',
           accountId: selectedAccount,
         );
         validateAccountReport(accountReport!);
         selectedAccount = accountReport!['account']['id'] as String;
+        if (_foreground &&
+            epoch == _readEpoch &&
+            loginLabel != null &&
+            accountReport!['authentication'] == 'succeeded') {
+          await preferences.saveAccountLoginLabel(selectedAccount!, loginLabel);
+        }
         await reloadAccountViews();
       });
     } finally {

@@ -59,6 +59,14 @@ the general screen inventory below also covers other device-control layouts.
 
 ## Existing account to device cards
 
+Platform account cards expose explicit Account details and Rename Account buttons
+and keep local reload compact. Prefer a user remark, then reviewed provider user
+information when available, then a masked sign-in label. Current native metadata
+has no reviewed provider nickname, so that source is skipped. A remark can be
+cleared to restore the captured fallback. Old unnamed accounts require explicit
+sign-in or a new remark; never guess a phone number from device or account IDs.
+See [ADR-0068](adr/0068-app-account-display-names.md).
+
 Before Connect Platform, explain account/region scope and automatic retrieval. Once Meiju authorization is saved securely, show finite retrieval progress, then the returned supported device cards without another Find Devices step or per-device selection. Unsupported returned devices remain visible with a reason and no enabled unsupported controls. Empty, failed, and partial retrieval are separate states; a successful login with failed retrieval offers explicit retry without repeating login.
 
 New devices start Unassigned; existing aliases, rooms, favorites, and IDs survive reauthorization and retrieval. Vendor room names do not overwrite local organization. Resolve ambiguous identities explicitly, and do not remove existing cards based on a partial response. Subsequent refresh is user-initiated. Cloud retrieval works away from the appliance network and does not request local-network permission.

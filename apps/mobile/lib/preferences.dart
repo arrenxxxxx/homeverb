@@ -12,6 +12,41 @@ class LocalPreferences {
   String? get locale => canonicalLocale(values['locale']);
   String get sharingName => values['sharing_name'] as String? ?? 'Home phone';
   String get root => values['root'] as String? ?? 'D01';
+  String? accountLoginLabel(String id) {
+    final labels = values['account_login_labels'];
+    final value = labels is Map ? labels[id] : null;
+    return value is String &&
+            value.length <= 80 &&
+            value.contains('***') &&
+            RegExp(r'^[\x21-\x7e]+$').hasMatch(value)
+        ? value
+        : null;
+  }
+
+  Future<void> saveAccountLoginLabel(String id, String label) => save({
+    'account_login_labels': {
+      for (final entry
+          in (values['account_login_labels'] is Map
+                  ? values['account_login_labels'] as Map
+                  : {})
+              .entries)
+        if (entry.key is String && accountLoginLabel(entry.key) != null)
+          entry.key as String: entry.value,
+      id: label,
+    },
+  });
+
+  Future<void> retainAccountLoginLabels(Set<String> ids) async {
+    final labels = values['account_login_labels'];
+    if (labels is! Map || labels.keys.every(ids.contains)) return;
+    await save({
+      'account_login_labels': {
+        for (final id in ids)
+          if (accountLoginLabel(id) case final String label) id: label,
+      },
+    });
+  }
+
   String route([String? device]) =>
       (values['device_routes'] as Map?)?[device] as String? ??
       values['route'] as String? ??

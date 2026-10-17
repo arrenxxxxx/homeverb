@@ -269,7 +269,7 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get mobileDeviceId => '\u8bbe\u5907\u5f15\u7528';
 	@override String get mobileAccountId => '\u8d26\u53f7\u5f15\u7528';
 	@override String get mobileAccount => '\u8d26\u53f7';
-	@override String get mobileAccountName => '\u8d26\u53f7\u540d\u79f0';
+	@override String get mobileAccountName => '\u8d26\u53f7\u5907\u6ce8';
 	@override String get mobileAccountDetails => '\u8d26\u53f7\u8be6\u60c5';
 	@override String get mobileAccountResult => '\u8d26\u53f7\u7ed3\u679c';
 	@override String get mobileAppliancePlatforms => '\u5bb6\u7535\u5e73\u53f0';
@@ -278,7 +278,7 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get mobileConnectMeiju => '\u8fde\u63a5\u7f8e\u5c45';
 	@override String get mobileChooseMeiju => '\u9009\u62e9\u7f8e\u5c45';
 	@override String get mobileContinueToSignIn => '\u7ee7\u7eed\u767b\u5f55';
-	@override String get mobileSaveAccountName => '\u4fdd\u5b58\u8d26\u53f7\u540d\u79f0';
+	@override String get mobileSaveAccountName => '\u4fdd\u5b58\u5907\u6ce8';
 	@override String get mobileReloadAccounts => '\u91cd\u65b0\u52a0\u8f7d\u8d26\u53f7';
 	@override String get mobileRetrieveDevices => '\u83b7\u53d6\u8bbe\u5907';
 	@override String get mobileRetrieveSavedAccounts => '\u83b7\u53d6\u5df2\u4fdd\u5b58\u8d26\u53f7\u7684\u8bbe\u5907';
@@ -722,7 +722,7 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get mobileRemoveLocalData6afed9 => '\u79fb\u9664\u672c\u5730\u6570\u636e\uff1f';
 	@override String get mobileRemoveSavedDeviceAndComponentReadingsFromThis => '\u4ece\u6b64\u5b89\u88c5\u79fb\u9664\u5df2\u4fdd\u5b58\u7684\u8bbe\u5907\u548c\u7ec4\u4ef6\u8bfb\u6570\uff0c\u7f3a\u5931\u7684\u8bfb\u6570\u5c06\u663e\u793a\u4e3a\u672a\u77e5\u3002\u4e0d\u4f1a\u542f\u52a8\u8bbe\u5907\u5237\u65b0\u3002';
 	@override String get mobileRemovedFromThisDevice => '\u5df2\u4ece\u6b64\u8bbe\u5907\u79fb\u9664';
-	@override String get mobileRenameAccount => '\u91cd\u547d\u540d\u8d26\u53f7';
+	@override String get mobileRenameAccount => '\u4fee\u6539\u5907\u6ce8';
 	@override String get mobileRenameDevice => '\u91cd\u547d\u540d\u8bbe\u5907';
 	@override String get mobileReopenTheApplication => '\u8bf7\u91cd\u65b0\u6253\u5f00\u5e94\u7528\u3002';
 	@override String get mobileReorderDevices0c0797 => '\u8c03\u6574\u8bbe\u5907\u987a\u5e8f';
@@ -1199,4 +1199,7 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get mobileClimateVerticalDirection => '\u4e0a\u4e0b\u5b9a\u5411';
 	@override String get mobileClimateDisplayLight => '\u706f\u6548';
 	@override String get mobileClimateButtonSound => '\u6309\u952e\u58f0\u97f3';
+	@override String get mobilePlatformAccounts => '\u8d26\u53f7';
+	@override String get mobileOptionalAccountRemark => '\u9009\u586b\uff0c\u7559\u7a7a\u5219\u4f7f\u7528\u767b\u5f55\u8d26\u53f7\u3002';
+	@override String get mobileOptionalAccountRemarkValidation => '\u6700\u591a 80 \u4e2a\u5b57\u7b26\uff0c\u4e0d\u542b\u63a7\u5236\u5b57\u7b26\u3002';
 }

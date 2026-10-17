@@ -1616,6 +1616,11 @@ String? translateSource(
   "Vertical direction" => t.mobileClimateVerticalDirection,
   "Display light" => t.mobileClimateDisplayLight,
   "Button sound" => t.mobileClimateButtonSound,
+  "Accounts" => t.mobilePlatformAccounts,
+  "Optional. Uses your sign-in account when blank." =>
+    t.mobileOptionalAccountRemark,
+  "Use at most 80 characters without control characters." =>
+    t.mobileOptionalAccountRemarkValidation,
   _ => null,
 };
 
@@ -3136,5 +3141,10 @@ String? sourceForKey(String key) => switch (key) {
   "mobile.climateVerticalDirection" => "Vertical direction",
   "mobile.climateDisplayLight" => "Display light",
   "mobile.climateButtonSound" => "Button sound",
+  "mobile.platformAccounts" => "Accounts",
+  "mobile.optionalAccountRemark" =>
+    "Optional. Uses your sign-in account when blank.",
+  "mobile.optionalAccountRemarkValidation" =>
+    "Use at most 80 characters without control characters.",
   _ => null,
 };

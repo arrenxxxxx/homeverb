@@ -132,7 +132,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   bool editingAccountName = false;
   bool exporting = false;
   String? quickPowerDevice;
-  String connectionLabel = 'Meiju account';
+  String connectionLabel = '';
   bool _disposed = false;
   int navigation = 0;
   int activityEpoch = 0;
@@ -301,6 +301,17 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       await finish(c.selectAccount(label.substring('account:'.length)), 'P09');
       return;
     }
+    if (label.startsWith('rename-account:')) {
+      final epoch = navigation;
+      if (await c.selectAccount(label.substring('rename-account:'.length)) &&
+          mounted &&
+          epoch == navigation &&
+          c.isForeground) {
+        editingAccountName = true;
+        await go('P03');
+      }
+      return;
+    }
     if ([
       'Choose Meiju',
       'Reauthorize',
@@ -320,11 +331,10 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     if (label == 'Continue to Sign In' || label == 'Save Account Name') {
       if (c.busy) return;
       final name = input('Account name').trim();
-      if (name.isEmpty ||
-          name.runes.length > 80 ||
-          RegExp(r'[\x00-\x1f\x7f]').hasMatch(name)) {
+      if (name.runes.length > 80 || RegExp(r'[\x00-\x1f\x7f]').hasMatch(name)) {
         setState(
-          () => formError = 'Use 1–80 characters without control characters.',
+          () => formError =
+              'Use at most 80 characters without control characters.',
         );
         return;
       }
@@ -873,11 +883,12 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       if (id == 'P03' && editingAccountName) {
         ui['header'] = 'Account name';
         b = [
-          ['field', 'Account name', c.account?['label'] ?? ''],
           [
-            'note',
-            'This changes only the local display name. Identity, credentials and permissions stay unchanged.',
+            'field',
+            'Account name',
+            c.account == null ? '' : c.accountRemark(c.account!),
           ],
+          ['note', 'Optional. Uses your sign-in account when blank.'],
           ['button', 'Save Account Name'],
           ['button', 'Cancel', 'secondary'],
         ];
@@ -1548,6 +1559,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   }
 
   Widget? specialFor(String id) {
+    if (id == 'P01') return PlatformAccounts(controller: c, onAction: action);
     if (id == 'L01') {
       final t = translationsOf(context);
       return Column(

@@ -101,6 +101,19 @@ errors, and navigation/cancellation or backgrounding fences late responses.
 
 ## Account integration
 
+The native platform page uses white account cards with explicit Account details
+and Rename Account buttons. Reload Accounts is a compact header action, and
+routine authorization/storage explanations are omitted. Pending recovery and
+local cleanup remain visible without inferring current provider access.
+
+Account names prefer a user remark and fall back to a masked sign-in label.
+Remarks are optional and clearing one restores the fallback. Current native
+metadata has no reviewed provider nickname, so that unavailable source is skipped.
+Only a masked display projection is saved after successful foreground sign-in;
+the original login and password remain protected inputs. Historical unnamed
+accounts need a remark or explicit new sign-in to become recognizable. See
+[ADR-0068](../../docs/adr/0068-app-account-display-names.md).
+
 The default adapter remains `homeverb.mock`. An explicit Linux development build
 can select the Meiju app host after reviewing the [native contract](../../docs/native-ui-contract.md):
 

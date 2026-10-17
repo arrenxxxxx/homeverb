@@ -3533,4 +3533,13 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Button sound'
 	String get mobileClimateButtonSound => 'Button sound';
+
+	/// en-US: 'Accounts'
+	String get mobilePlatformAccounts => 'Accounts';
+
+	/// en-US: 'Optional. Uses your sign-in account when blank.'
+	String get mobileOptionalAccountRemark => 'Optional. Uses your sign-in account when blank.';
+
+	/// en-US: 'Use at most 80 characters without control characters.'
+	String get mobileOptionalAccountRemarkValidation => 'Use at most 80 characters without control characters.';
 }

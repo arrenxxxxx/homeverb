@@ -391,6 +391,14 @@ No provider subject, credential reference, guessed masked login or permission sc
 is exposed. Display the local label as the account name. API 1.19 adds historical
 inventory timing below; it does not add a current authorization check.
 
+The App presentation policy in [ADR-0068](adr/0068-app-account-display-names.md)
+supports optional remarks and a masked display projection captured from its own
+successful foreground sign-in input. This is not a new field returned by Core.
+The original login never enters general metadata. Unnamed historical accounts
+cannot acquire a login label from listing or secret-store inspection. Clearing
+a remark uses `rename_account` with a nonempty fallback label; native validation
+and protected identity matching remain unchanged.
+
 ### Last complete inventory time (API 1.19)
 
 All account summaries include `last_complete_inventory_at`, a nullable RFC 3339

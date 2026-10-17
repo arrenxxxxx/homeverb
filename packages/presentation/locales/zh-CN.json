@@ -235,7 +235,7 @@
   "mobile.deviceId": "设备引用",
   "mobile.accountId": "账号引用",
   "mobile.account": "账号",
-  "mobile.accountName": "账号名称",
+  "mobile.accountName": "账号备注",
   "mobile.accountDetails": "账号详情",
   "mobile.accountResult": "账号结果",
   "mobile.appliancePlatforms": "家电平台",
@@ -244,7 +244,7 @@
   "mobile.connectMeiju": "连接美居",
   "mobile.chooseMeiju": "选择美居",
   "mobile.continueToSignIn": "继续登录",
-  "mobile.saveAccountName": "保存账号名称",
+  "mobile.saveAccountName": "保存备注",
   "mobile.reloadAccounts": "重新加载账号",
   "mobile.retrieveDevices": "获取设备",
   "mobile.retrieveSavedAccounts": "获取已保存账号的设备",
@@ -688,7 +688,7 @@
   "mobile.removeLocalData_6afed9": "移除本地数据？",
   "mobile.removeSavedDeviceAndComponentReadingsFromThis": "从此安装移除已保存的设备和组件读数，缺失的读数将显示为未知。不会启动设备刷新。",
   "mobile.removedFromThisDevice": "已从此设备移除",
-  "mobile.renameAccount": "重命名账号",
+  "mobile.renameAccount": "修改备注",
   "mobile.renameDevice": "重命名设备",
   "mobile.reopenTheApplication": "请重新打开应用。",
   "mobile.reorderDevices_0c0797": "调整设备顺序",
@@ -1164,5 +1164,8 @@
   "mobile.climateHorizontalDirection": "左右定向",
   "mobile.climateVerticalDirection": "上下定向",
   "mobile.climateDisplayLight": "灯效",
-  "mobile.climateButtonSound": "按键声音"
+  "mobile.climateButtonSound": "按键声音",
+  "mobile.platformAccounts": "账号",
+  "mobile.optionalAccountRemark": "选填，留空则使用登录账号。",
+  "mobile.optionalAccountRemarkValidation": "最多 80 个字符，不含控制字符。"
 }

@@ -18,6 +18,13 @@ control bridge or service has been added to work around these boundaries.
 
 ## October 17 Flutter control presentation
 
+The native platform page adds explicit detail/remark buttons and optional remarks
+with a masked sign-in fallback under [ADR-0068](adr/0068-app-account-display-names.md).
+Current native metadata supplies no reviewed provider nickname; historical logins
+cannot be recovered by this UI update. Only a masked projection of a new successful
+foreground sign-in is retained as nonsecret display metadata. Native account
+identity, storage formats, API 1.22 and control permissions are unchanged.
+
 The owner-approved [foreground refresh policy](adr/0067-foreground-state-refresh.md)
 adds silent three-second state reads on native device views. Home/search/room
 filters and selected-device components bound the targets; other views and the

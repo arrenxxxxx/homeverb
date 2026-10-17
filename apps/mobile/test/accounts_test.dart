@@ -34,6 +34,7 @@ class AccountFixture implements CoreClient, AccountClient {
   bool supportsPendingReauthorization = true;
   final requests = <Json>[];
   final connectionTargets = <String?>[];
+  final connectionLabels = <String>[];
   final records = <Json>[
     for (final id in [firstAccount, secondAccount])
       {
@@ -170,6 +171,7 @@ class AccountFixture implements CoreClient, AccountClient {
     String? accountId,
   }) async {
     connectionTargets.add(accountId);
+    connectionLabels.add(label);
     ownedLogin = login;
     ownedPassword = password;
     login.fillRange(0, login.length, 0);
@@ -297,7 +299,7 @@ void main() {
       await tap('Account name');
       await tester.enterText(
         find.byKey(const ValueKey('field:Account name')),
-        '',
+        'x' * 81,
       );
       await tap('Save Account Name');
       expect(key.currentState!.id, 'P03');
