@@ -36,6 +36,12 @@ No new real-device write or physical support certification is claimed.
 
 ## October 17 Flutter control presentation
 
+Account maintenance now stays on account details: Refresh Devices, remark edits,
+reauthorization and removal confirmation add no page navigation. New sign-in
+opens those details directly. Inline feedback preserves partial/failure meaning;
+cancellation/background invalidates forms and removal scope without rollback.
+Only successful local removal returns to the account list.
+
 The native platform flow now goes directly from platform choice to protected
 sign-in. Account cards open compact device-first details, with remarks/sign-in/
 removal under Manage account and local inventory diagnosis under Troubleshooting.

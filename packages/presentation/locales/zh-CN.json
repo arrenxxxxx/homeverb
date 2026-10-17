@@ -1248,5 +1248,6 @@
   "mobile.platformTroubleshooting": "问题排查",
   "mobile.platformRemovalScope": "仅从本机 HomeVerb 移除此账号及其设备，不影响美居账号。重新添加后，设备名称和房间分配不会恢复。",
   "mobile.platformSignInAgain": "请登录原美居账号，设备名称和房间分配将保留。",
-  "mobile.platformSignIn": "登录美居账号，自动添加账号下的家电。"
+  "mobile.platformSignIn": "登录美居账号，自动添加账号下的家电。",
+  "mobile.refreshAccountDevices": "刷新设备"
 }

@@ -1248,5 +1248,6 @@
   "mobile.platformTroubleshooting": "Troubleshooting",
   "mobile.platformRemovalScope": "This only removes the account and its devices from HomeVerb on this device. Your Meiju account is unchanged. Reconnecting will not restore device names or room assignments.",
   "mobile.platformSignInAgain": "Sign in to the same Meiju account. Your device names and rooms will stay.",
-  "mobile.platformSignIn": "Sign in with your Meiju account to add your appliances."
+  "mobile.platformSignIn": "Sign in with your Meiju account to add your appliances.",
+  "mobile.refreshAccountDevices": "Refresh Devices"
 }

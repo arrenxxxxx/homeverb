@@ -3785,4 +3785,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Sign in with your Meiju account to add your appliances.'
 	String get mobilePlatformSignIn => 'Sign in with your Meiju account to add your appliances.';
+
+	/// en-US: 'Refresh Devices'
+	String get mobileRefreshAccountDevices => 'Refresh Devices';
 }

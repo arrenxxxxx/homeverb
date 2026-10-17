@@ -248,12 +248,40 @@ List<dynamic> savedInventoryBlocks(HomeController c) {
   ];
 }
 
+List<dynamic> accountRefreshBlocks(HomeController c) {
+  final retrieval = c.accountReport!['retrieval'] as Json;
+  final status = retrieval['status'];
+  if (status == 'complete')
+    return [
+      ['note', 'Device list updated'],
+      if ((retrieval['device_ids'] as List).isEmpty)
+        [
+          'note',
+          'Check that your appliances are added to this account in Meiju.',
+        ],
+    ];
+  return [
+    [
+      'status',
+      status == 'partial'
+          ? 'Some devices could not be updated'
+          : 'Could not update devices',
+      'Your saved devices are still here. Try again or sign in again.',
+      'warning',
+    ],
+    if (retrieval['error'] != null)
+      ['note', UiError(retrieval['error']['code'])],
+    if (c.account?['credential_state'] == 'stored' && c.canSignIn)
+      ['button', 'Reauthorize', 'secondary'],
+  ];
+}
+
 List<dynamic> accountBlocks(HomeController c, String id) {
   final account = c.account;
   final state = account?['credential_state'];
   final actions = <dynamic>[
     if (state == 'stored' && c.supports('refresh_account'))
-      ['button', 'Retrieve Devices'],
+      ['button', 'Refresh Devices'],
     if (state == 'pending' && c.supports('recover_account')) ...[
       [
         'note',
@@ -364,6 +392,9 @@ List<dynamic> accountBlocks(HomeController c, String id) {
                 : 'Restore access to update your devices.',
             'warning',
           ],
+        if (c.accountReport?['account']['id'] == c.selectedAccount &&
+            c.accountReport != null)
+          ...accountRefreshBlocks(c),
         if (c.accountDeviceIds.isNotEmpty)
           [
             'card',
@@ -376,7 +407,7 @@ List<dynamic> accountBlocks(HomeController c, String id) {
             'No devices yet. Update the list after adding appliances in Meiju.',
           ],
         if (state == 'stored' && c.supports('refresh_account'))
-          ['button', 'Retrieve Devices', 'secondary'],
+          ['button', 'Refresh Devices', c.busy ? 'disabled' : 'secondary'],
         if (state != 'stored') ...actions,
         if (c.accountRemoval?['status'] == 'pending')
           ['note', UiError(c.accountRemoval!['error']?['code'] ?? 'UNKNOWN')],
@@ -394,7 +425,11 @@ List<dynamic> accountBlocks(HomeController c, String id) {
                       accountDisplayName(c, account),
                       'Rename Account',
                     ],
-                  if (c.canSignIn) ['Reauthorize', '', 'Reauthorize'],
+                  if (c.canSignIn &&
+                      (c.accountReport == null ||
+                          c.accountReport?['retrieval']['status'] ==
+                              'complete'))
+                    ['Reauthorize', '', 'Reauthorize'],
                   if (c.supports('remove_account'))
                     ['Remove From This Device', '', 'Remove From This Device'],
                 ],

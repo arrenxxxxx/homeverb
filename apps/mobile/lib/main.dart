@@ -130,6 +130,8 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   String? formError;
   LocalCleanup? cleanupScope;
   bool editingAccountName = false;
+  String? accountEditor;
+  bool get onAccountDetails => id == 'P09' || id == 'P10';
   bool exporting = false;
   String? quickPowerDevice;
   String connectionLabel = '';
@@ -161,6 +163,9 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed) activityEpoch++;
     c.setForeground(state == AppLifecycleState.resumed);
+    if (state != AppLifecycleState.resumed && accountEditor != null) {
+      setAccountEditor(null);
+    }
   }
 
   @override
@@ -187,6 +192,16 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     formError = null;
   }
 
+  void setAccountEditor(String? editor) {
+    c.cancelPending();
+    c.removalScope = null;
+    setState(() {
+      navigation++;
+      accountEditor = editor;
+      clearFields();
+    });
+  }
+
   Future<void> go(String target, {bool back = false}) async {
     if (!mounted) return;
     final navContext = navigator.currentContext;
@@ -200,6 +215,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       receiptParents.clear();
       if (!back) history.add(id);
       id = target;
+      accountEditor = null;
       clearFields();
       if (target != 'D03') c.search = '';
     });
@@ -289,6 +305,10 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         label == 'Cancel' ||
         label == 'Close' ||
         label == 'Not Now') {
+      if (onAccountDetails && accountEditor != null) {
+        setAccountEditor(null);
+        return;
+      }
       if (id == 'S06' && receiptParents.isNotEmpty) {
         c.receipt = receiptParents.removeLast();
         changed();
@@ -326,7 +346,11 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         c.accountRemoval = null;
       }
       connectionLabel = '';
-      await go(c.canSignIn ? 'P04' : 'P13');
+      if (onAccountDetails && c.canSignIn) {
+        setAccountEditor('signin');
+      } else {
+        await go(c.canSignIn ? 'P04' : 'P13');
+      }
       return;
     }
     if (label == 'Continue to Sign In' || label == 'Save Account Name') {
@@ -340,7 +364,17 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         return;
       }
       if (label == 'Save Account Name') {
-        await finish(c.renameAccount(name), 'P09');
+        if (onAccountDetails) {
+          final epoch = navigation;
+          if (await c.renameAccount(name) &&
+              mounted &&
+              epoch == navigation &&
+              c.isForeground) {
+            setAccountEditor(null);
+          }
+        } else {
+          await finish(c.renameAccount(name), 'P09');
+        }
       } else {
         connectionLabel = name;
         await go('P04');
@@ -349,12 +383,20 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     }
     if (label == 'Rename Account') {
       if (c.busy || c.account?['credential_state'] == 'removing') return;
-      editingAccountName = true;
-      await go('P03');
+      if (onAccountDetails) {
+        setAccountEditor('rename');
+      } else {
+        editingAccountName = true;
+        await go('P03');
+      }
       return;
     }
     if (label == 'Reload Accounts') {
-      await finish(c.loadAccounts(), 'P01');
+      if (onAccountDetails) {
+        await c.loadAccounts();
+      } else {
+        await finish(c.loadAccounts(), 'P01');
+      }
       return;
     }
     if (label.startsWith('conflicts:')) {
@@ -365,11 +407,19 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       await c.inspectAccountInventory();
       return;
     }
-    if (label == 'Retrieve Devices' || label == 'Recover Saved Authorization') {
-      await finish(
-        c.retrieveAccount(recover: label == 'Recover Saved Authorization'),
-        'P08',
-      );
+    if (label == 'Refresh Devices' ||
+        label == 'Retrieve Devices' ||
+        label == 'Recover Saved Authorization') {
+      if (onAccountDetails) {
+        await c.retrieveAccount(
+          recover: label == 'Recover Saved Authorization',
+        );
+      } else {
+        await finish(
+          c.retrieveAccount(recover: label == 'Recover Saved Authorization'),
+          'P09',
+        );
+      }
       return;
     }
     if ([
@@ -377,13 +427,30 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       'Retry local cleanup',
       'Review removal scope',
     ].contains(label)) {
-      await finish(c.reviewAccountRemoval(), 'P11');
+      if (onAccountDetails) {
+        if (c.busy) return;
+        final epoch = navigation;
+        if (await c.reviewAccountRemoval() &&
+            mounted &&
+            epoch == navigation &&
+            c.isForeground) {
+          setState(() => accountEditor = 'remove');
+        }
+      } else {
+        await finish(c.reviewAccountRemoval(), 'P11');
+      }
       return;
     }
     if (label == 'Remove Locally') {
       final epoch = navigation;
       if (await c.removeAccount() && mounted && navigation == epoch) {
-        await go(c.accountRemoval?['status'] == 'removed' ? 'P01' : 'P09');
+        if (c.accountRemoval?['status'] == 'removed') {
+          await go('P01');
+        } else if (onAccountDetails) {
+          setAccountEditor(null);
+        } else {
+          await go('P09');
+        }
       }
       return;
     }
@@ -901,6 +968,21 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       if (id == 'P04') ui['header'] = 'Meiju sign-in';
       if (id == 'P09' || id == 'P10') ui['header'] = 'Account details';
       if (id == 'P08') ui['header'] = 'Account result';
+      if ((id == 'P09' || id == 'P10') &&
+          accountEditor != null &&
+          c.account != null) {
+        final summary = ['summary', accountDisplayName(c, c.account!), 'Meiju'];
+        b = [
+          summary,
+          if (accountEditor == 'rename') ...[
+            ['field', 'Account name', c.accountRemark(c.account!)],
+            ['note', 'Optional. Uses your sign-in account when blank.'],
+            ['button', 'Save Account Name', c.busy ? 'disabled' : ''],
+            ['button', 'Cancel', 'secondary'],
+          ],
+          if (accountEditor == 'remove') ...accountBlocks(c, 'P11'),
+        ];
+      }
     }
     if (id.startsWith('H')) {
       b = [
@@ -1597,9 +1679,13 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         ],
       );
     }
-    if (id == 'P04') {
+    if (id == 'P04' ||
+        ((id == 'P09' || id == 'P10') &&
+            accountEditor == 'signin' &&
+            c.account != null)) {
       final epoch = navigation;
-      return AccountSignIn(
+      final inline = id != 'P04';
+      final signIn = AccountSignIn(
         key: ValueKey('signin:$epoch'),
         reauthorizing: c.selectedAccount != null,
         needsReload: c.accountNeedsReload,
@@ -1610,11 +1696,37 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             password,
             connectionLabel,
           );
-          if (success && mounted && epoch == navigation) await go('P08');
+          if (success && mounted && epoch == navigation && c.isForeground) {
+            if (inline) {
+              setAccountEditor(null);
+            } else {
+              history
+                ..clear()
+                ..add('P01');
+              await go('P09', back: true);
+            }
+          }
         },
         onCancel: () => action('Cancel'),
         onReload: () => action('Reload Accounts'),
       );
+      return inline
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Blocks(
+                  [
+                    ['summary', accountDisplayName(c, c.account!), 'Meiju'],
+                  ],
+                  onAction: action,
+                  fields: fields,
+                  choices: choices,
+                  values: values,
+                ),
+                signIn,
+              ],
+            )
+          : signIn;
     }
 
     if (['D01', 'D11', 'D12'].contains(id) && c.cards.isNotEmpty)

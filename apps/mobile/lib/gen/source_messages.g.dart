@@ -1677,6 +1677,7 @@ String? translateSource(
     t.mobilePlatformSignInAgain,
   "Sign in with your Meiju account to add your appliances." =>
     t.mobilePlatformSignIn,
+  "Refresh Devices" => t.mobileRefreshAccountDevices,
   _ => null,
 };
 
@@ -3291,5 +3292,6 @@ String? sourceForKey(String key) => switch (key) {
     "Sign in to the same Meiju account. Your device names and rooms will stay.",
   "mobile.platformSignIn" =>
     "Sign in with your Meiju account to add your appliances.",
+  "mobile.refreshAccountDevices" => "Refresh Devices",
   _ => null,
 };

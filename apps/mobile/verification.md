@@ -2668,3 +2668,57 @@ The adjacent JSON records artifact checks. No installation was performed.
 Physical-phone layout, live sign-in/reauthorization and removal acceptance remain
 unverified for this revision. No provider request, appliance command, installation,
 remote push, publication or diagnostic upload is part of this phase.
+
+## In-place account maintenance — October 17, 2026
+
+The owner requested that account details perform maintenance without additional
+page transitions. Refresh Devices now calls the existing saved-session retrieval
+and updates linked devices on P09/P10. Completion is a compact inline notice;
+partial/failure retains old cards and shows the existing recovery explanation.
+The refresh button is disabled while work is pending. No P08 result route is
+added, and successful first sign-in now enters details directly. Back then returns
+to Platforms rather than reopening the completed login form.
+
+Remarks, same-account sign-in and exact-scope local removal use inline forms on
+those details. Cancel/Back dismisses the form before leaving the account; editing
+and refreshing do not add history entries. Backgrounding dismisses the editor,
+clears protected input through its existing lifecycle, invalidates the reviewed
+removal scope and fences late completion. Successful removal returns to Platforms;
+pending cleanup remains on details. No Core, native API, grant, storage or
+appliance-execution semantics changed.
+
+Executed checks:
+
+- `fvm flutter analyze`: passed.
+- `fvm flutter test test/accounts_test.dart test/platform_accounts_test.dart
+  test/account_inventory_test.dart test/credential_access_test.dart
+  test/localization_test.dart` with the same local CJK capture override as above:
+  26 passed. New assertions cover unchanged route/history, preserved cards during
+  refresh, a disabled duplicate-submit target, inline edit cancellation, cancelled
+  late sign-in and background invalidation of removal confirmation.
+- `node packages/presentation/test/i18n.test.mjs`: seven passed.
+- Documentation, contract and repository validation passed; contracts remain
+  20 schemas, 49 positive and 267 negative fixtures. `git diff --check` passed.
+- The full Flutter/Rust suites were not repeated for this scoped presentation
+  revision. The preceding full Flutter record retains its eight known failures.
+
+All automated account operations above use fictional fixtures. Physical-phone
+lifecycle, real-account reauthorization/removal and appliance controls remain
+outside this revision's verification scope. APK and emulator delivery results
+are recorded below after completion.
+
+The release build passed with both `android-arm64` and `android-x64` and explicit
+`HOMEVERB_ADAPTER=midea.meiju`, using the existing SDK/JDK 21 and unchanged native
+AAR. `scripts/verify_flutter_apk.py` passed native exports, both complete ABIs,
+signature and alignment. Local artifact:
+`output/flutter-verification/android/homeverb-0.2.0-inline-accounts.apk`.
+SHA-256: `3d8d5805b5f78ca2c4bc6043e71bc3fa5111c4d3544cdd5c25412161fb7d3c9e`.
+
+Following the owner's emulator-installation request, `adb -s emulator-5586
+install -r` returned `Success`; the app was launched in place. A subsequent
+screen capture confirmed the retained Chinese locale and saved account. Opening
+its local details showed all six retained device cards, Refresh Devices and the
+collapsed management group. The emulator is left on account details. No live
+refresh, login, rename, removal or appliance command was performed during this
+visual check; those interactions have the synthetic evidence above. No remote
+push, publication or diagnostic upload occurred.

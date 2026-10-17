@@ -37,12 +37,18 @@ listed in the [parity guide](development/10-meiju-ac-parity.md). Physical option
 feature acceptance and the selected official-App inventory remain open. No new
 physical appliance write is authorized by this source integration.
 
+The subsequent owner-requested maintenance revision keeps device refresh, remark
+editing, reauthorization and removal confirmation on account details. Refresh
+Devices updates the list in place; new sign-in also opens details directly.
+Cancel/Back dismisses an inline form first, and backgrounding invalidates its
+confirmation scope. Only successful removal leaves for the account list.
+
 The owner-requested platform redesign now opens protected sign-in directly from
 the catalog. Tappable account cards lead to device-first details; remarks,
 reauthorization and removal are grouped under Manage account. Technical inventory
 inspection is nested under Troubleshooting, and unsupported revocation has no
-production entry. Success shows a count and next steps; partial retrieval,
-pending authorization and interrupted cleanup keep explicit recovery paths.
+production entry. Refresh feedback stays on details; partial retrieval, pending
+authorization and interrupted cleanup keep explicit recovery paths.
 Masked name fallback remains governed by [ADR-0068](adr/0068-app-account-display-names.md).
 See the [App verification record](../apps/mobile/verification.md) for executed checks.
 

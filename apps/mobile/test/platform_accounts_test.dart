@@ -155,7 +155,7 @@ void main() {
       }
 
       await editRemark();
-      expect(app.currentState!.id, 'P03');
+      expect(app.currentState!.id, 'P09');
       expect(c.selectedAccount, secondAccount);
       expect(
         tester

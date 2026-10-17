@@ -105,15 +105,19 @@ The native platform page uses one tappable card per account, with its name,
 platform and any actionable recovery/cleanup state. Duplicate names retain a
 local identity suffix. Local reload is shown only when reconciliation is needed.
 Choose Meiju to open protected sign-in directly; remarks are optional maintenance,
-not an onboarding step. Success shows the retrieved count and next destinations;
-partial/failed retrieval preserves saved cards and offers explicit recovery.
+not an onboarding step. New sign-in opens account details directly; subsequent
+refresh, rename, reauthorization and removal confirmation stay on those details.
+Refresh Devices updates the linked list in place, with inline completion or
+partial/failure feedback and no result-page navigation.
 
-Account details prioritize devices and explicit device-list retrieval. Manage
+Account details prioritize devices and explicit Refresh Devices. Manage
 account contains the remark, sign-in and local-removal actions. Troubleshooting
 inside that disclosure contains historical inventory and exact-binding inspection;
 opening either disclosure performs no networking. Unsupported provider revocation
 has no production entry. Removal still confirms the exact linked-card scope,
-with separate interrupted-cleanup handling.
+with separate interrupted-cleanup handling. Cancel/Back closes an inline editor
+before leaving details; backgrounding dismisses it and invalidates its removal
+scope. Only successful removal returns to the account list.
 
 Account names prefer a user remark and fall back to a masked sign-in label.
 Remarks are optional and clearing one restores the fallback. Current native
@@ -135,7 +139,7 @@ This uses a separate app-private `native-meiju` directory, never the default Moc
 metadata/cache; device views then use the foreground state schedule above.
 Platforms > Add Platform > Meiju opens the mainland protected sign-in form. The native connection automatically retrieves devices once;
 partial/failed retrieval remains distinct from authentication and storage success.
-Explicit Retrieve Devices uses the saved session without another login. Pending
+Explicit Refresh Devices uses the saved session without another login. Pending
 accounts offer recovery or, with API 1.8+, sign-in to the original account.
 
 Credential controllers clear on submission, backgrounding and disposal. Owned

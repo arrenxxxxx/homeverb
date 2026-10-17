@@ -74,7 +74,7 @@ class AccountFixture implements CoreClient, AccountClient {
   String? retrievalError, connectionError;
   bool pendingRemoval = false;
   int cancelled = 0;
-  Completer<void>? connectionGate;
+  Completer<void>? connectionGate, retrievalGate;
   Uint8List? ownedLogin, ownedPassword;
   Json record(String id) => records.singleWhere((a) => a['id'] == id);
   Json report(String id, String authentication) {
@@ -125,6 +125,7 @@ class AccountFixture implements CoreClient, AccountClient {
         return {...record(id)};
       case 'refresh_account':
       case 'recover_account':
+        if (retrievalGate != null) await retrievalGate!.future;
         return report(id!, 'not_attempted');
       case 'remove_account':
         final expected = (fields['expected_device_ids'] as List).toSet();
@@ -306,7 +307,7 @@ void main() {
         'x' * 81,
       );
       await tap('Save Account Name');
-      expect(key.currentState!.id, 'P03');
+      expect(key.currentState!.id, 'P09');
       await tester.enterText(
         find.byKey(const ValueKey('field:Account name')),
         'Studio',
@@ -316,13 +317,13 @@ void main() {
       expect(core.record(firstAccount)['label'], 'Home account');
       core.retrieval = 'partial';
       core.retrievalError = 'MIDEA_INVENTORY_PARTIAL';
-      await tap('Retrieve Devices');
+      await tap('Refresh Devices');
       expect(find.text('Some devices could not be updated'), findsOneWidget);
       expect(controller.cards, hasLength(2));
       expect(core.connectionTargets, isEmpty);
       core.retrieval = 'failed';
       core.retrievalError = 'AUTH_REQUIRED';
-      await tap('Retrieve Devices');
+      await tap('Refresh Devices');
       expect(find.text('Could not update devices'), findsOneWidget);
       await tap('Reauthorize');
       final login = find.byKey(const ValueKey('credential:Meiju account'));
@@ -354,7 +355,7 @@ void main() {
       expect(core.connectionTargets, [secondAccount]);
       expect(core.ownedLogin!.every((v) => v == 0), true);
       expect(core.ownedPassword!.every((v) => v == 0), true);
-      expect(key.currentState!.id, 'P08');
+      expect(key.currentState!.id, 'P09');
       expect(
         core.requests.where((r) => r['method'] == 'refresh_account'),
         hasLength(2),
@@ -436,6 +437,115 @@ void main() {
           'size': [780, 1688],
           'captures': captures,
         }),
+      );
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
+  testWidgets(
+    'refresh updates details without navigation or duplicate requests',
+    (tester) async {
+      final core = AccountFixture();
+      final controller = HomeController(core, AccountPreferences());
+      final key = GlobalKey<NativeAppState>();
+      final catalog = (await tester.runAsync(ScreenCatalog.load))!;
+      await tester.pumpWidget(
+        NativeApp(key: key, catalog: catalog, controller: controller),
+      );
+      await tester.pumpAndSettle();
+      await controller.selectAccount(firstAccount);
+      await key.currentState!.go('P09');
+      await tester.pumpAndSettle();
+      final history = List<String>.from(key.currentState!.history);
+      final cards = jsonEncode(controller.cards);
+      core.retrievalGate = Completer<void>();
+      final refresh = key.currentState!.action('Refresh Devices');
+      await tester.pump();
+      expect(key.currentState!.id, 'P09');
+      expect(find.text('Retrieve Devices'), findsNothing);
+      final button = find.ancestor(
+        of: find.text('Refresh Devices'),
+        matching: find.byType(FilledButton),
+      );
+      expect(tester.widget<FilledButton>(button).onPressed, isNull);
+      expect(jsonEncode(controller.cards), cards);
+      core.retrievalGate!.complete();
+      await refresh;
+      await tester.pumpAndSettle();
+      expect(find.text('Device list updated'), findsOneWidget);
+      expect(find.text('View Devices'), findsNothing);
+      expect(key.currentState!.id, 'P09');
+      expect(key.currentState!.history, history);
+      expect(
+        core.requests.where((r) => r['method'] == 'refresh_account'),
+        hasLength(1),
+      );
+      expect(core.connectionTargets, isEmpty);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
+  testWidgets(
+    'inline account editors cancel locally and invalidate consent on background',
+    (tester) async {
+      final core = AccountFixture();
+      final controller = HomeController(core, AccountPreferences());
+      final key = GlobalKey<NativeAppState>();
+      final catalog = (await tester.runAsync(ScreenCatalog.load))!;
+      await tester.pumpWidget(
+        NativeApp(key: key, catalog: catalog, controller: controller),
+      );
+      await tester.pumpAndSettle();
+      await controller.selectAccount(firstAccount);
+      await key.currentState!.go('P09');
+      await tester.pumpAndSettle();
+      final history = List<String>.from(key.currentState!.history);
+      await key.currentState!.action('Rename Account');
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const ValueKey('field:Account name')),
+        'Discarded',
+      );
+      await key.currentState!.action('Cancel');
+      await tester.pumpAndSettle();
+      expect(key.currentState!.id, 'P09');
+      expect(core.record(firstAccount)['label'], 'Home account');
+      await key.currentState!.action('Reauthorize');
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const ValueKey('credential:Meiju account')),
+        'fixture@example.invalid',
+      );
+      await tester.enterText(
+        find.byKey(const ValueKey('credential:Password')),
+        'fictional-pass',
+      );
+      core.connectionGate = Completer<void>();
+      await tester.ensureVisible(find.text('Sign In and Retrieve Devices'));
+      await tester.tap(find.text('Sign In and Retrieve Devices'));
+      await tester.pump();
+      await key.currentState!.action('Cancel');
+      core.connectionGate!.complete();
+      await tester.pumpAndSettle();
+      expect(key.currentState!.id, 'P09');
+      expect(key.currentState!.accountEditor, isNull);
+      expect(find.byKey(const ValueKey('credential:Password')), findsNothing);
+      expect(core.ownedPassword!.every((byte) => byte == 0), true);
+      await key.currentState!.action('Reload Accounts');
+      await key.currentState!.action('Remove From This Device');
+      await tester.pumpAndSettle();
+      expect(controller.removalScope, isNotNull);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      await tester.pump();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+      expect(key.currentState!.id, 'P09');
+      expect(key.currentState!.accountEditor, isNull);
+      expect(controller.removalScope, isNull);
+      expect(key.currentState!.history, history);
+      expect(
+        core.requests.where((r) => r['method'] == 'remove_account'),
+        isEmpty,
       );
       await tester.pumpWidget(const SizedBox());
     },
@@ -578,7 +688,9 @@ void main() {
       await key.currentState!.go('P01');
       await tester.pumpAndSettle();
       Future<void> tap(String label) async {
-        final finder = find.text(label).last;
+        final finder = find.text(label).evaluate().isNotEmpty
+            ? find.text(label).last
+            : find.byTooltip(label).last;
         await tester.ensureVisible(finder);
         await tester.tap(finder);
         await tester.pumpAndSettle();
@@ -599,9 +711,15 @@ void main() {
         'fictional-pass',
       );
       await tap('Sign In and Retrieve Devices');
-      expect(key.currentState!.id, 'P08');
+      expect(key.currentState!.id, 'P09');
       expect(core.connectionTargets, [null]);
-      expect(find.text('0 devices found.'), findsOneWidget);
+      expect(find.text('Device list updated'), findsOneWidget);
+      expect(
+        find.text(
+          'Check that your appliances are added to this account in Meiju.',
+        ),
+        findsOneWidget,
+      );
       expect(controller.cards, hasLength(2));
       expect(
         core.requests.any(
@@ -613,9 +731,11 @@ void main() {
         ),
         false,
       );
-      await tap('View Devices');
-      expect(key.currentState!.id, 'D01');
-      expect(controller.visibleCards, hasLength(2));
+      expect(find.text('View Devices'), findsNothing);
+      expect(controller.accountDeviceIds, isEmpty);
+      await tap('Back');
+      expect(key.currentState!.id, 'P01');
+      expect(find.byKey(const ValueKey('credential:Password')), findsNothing);
       await tester.pumpWidget(const SizedBox());
     },
   );
@@ -647,7 +767,9 @@ void main() {
       await key.currentState!.go('P10');
       await tester.pumpAndSettle();
       Future<void> tap(String label) async {
-        final finder = find.text(label).last;
+        final finder = find.text(label).evaluate().isNotEmpty
+            ? find.text(label).last
+            : find.byTooltip(label).last;
         await tester.ensureVisible(finder);
         await tester.tap(finder);
         await tester.pumpAndSettle();
