@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
-import 'native_client.dart';
+import 'client_contract.dart';
 import 'localization.dart';
 
 class LocalPreferences {
-  LocalPreferences(this.file);
-  final File file;
+  LocalPreferences(File file) : file = file;
+  LocalPreferences.memory() : file = null;
+  final File? file;
   Json values = {};
   String get skin => 'window_light';
   String? get locale => canonicalLocale(values['locale']);
@@ -16,6 +17,8 @@ class LocalPreferences {
       values['route'] as String? ??
       'auto';
   Future<void> load() async {
+    final file = this.file;
+    if (file == null) return;
     try {
       final data = jsonDecode(await file.readAsString());
       if (data is Map<String, dynamic> && data['schema_version'] == 1) {
@@ -46,10 +49,13 @@ class LocalPreferences {
 
   Future<void> save(Json changes) async {
     final next = {...values, ...changes, 'schema_version': 1, 'skin_id': skin};
-    await file.parent.create(recursive: true);
-    final pending = File('${file.path}.pending');
-    await pending.writeAsString(jsonEncode(next), flush: true);
-    await pending.rename(file.path);
+    final file = this.file;
+    if (file != null) {
+      await file.parent.create(recursive: true);
+      final pending = File('${file.path}.pending');
+      await pending.writeAsString(jsonEncode(next), flush: true);
+      await pending.rename(file.path);
+    }
     values = next;
   }
 }

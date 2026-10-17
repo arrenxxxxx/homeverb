@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'native_client.dart';
+import 'client_contract.dart';
 import 'preferences.dart';
 import 'session_permissions.dart';
 
@@ -62,7 +62,7 @@ class HomeController extends ChangeNotifier {
     if (definition == null) return;
     final route = preferences.route(selectedDevice);
     final transports = definition['transports'] as List? ?? [];
-    if (core is NativeClient) {
+    if (core is NativeSessionClient) {
       for (final policy in _controlPolicies ?? <Json>[]) {
         if ((route != 'auto' && route != policy['transport']) ||
             !transports.contains(policy['transport']))
@@ -100,7 +100,8 @@ class HomeController extends ChangeNotifier {
 
   Future<void> _inspectControlPolicies() async {
     _controlPolicies = null;
-    if (core is! NativeClient || !supports('inspect_session_grants')) return;
+    if (core is! NativeSessionClient || !supports('inspect_session_grants'))
+      return;
     final device = selectedDevice!, epoch = _readEpoch;
     final policies = <Json>[];
     for (final connection in description!['device']['connections'] as List) {
@@ -131,7 +132,8 @@ class HomeController extends ChangeNotifier {
   bool get _canPrepareControls =>
       reopen != null &&
       !isMock &&
-      (core is! NativeClient || (core as NativeClient).apiAtLeast(22));
+      (core is! NativeSessionClient ||
+          (core as NativeSessionClient).apiAtLeast(22));
 
   void _requireCurrentDevice(String device, int epoch) {
     if (!_foreground || epoch != _readEpoch || selectedDevice != device) {
@@ -953,7 +955,8 @@ class HomeController extends ChangeNotifier {
   });
 
   bool supports(String method) =>
-      core is! NativeClient || (core as NativeClient).methods.contains(method);
+      core is! NativeSessionClient ||
+      (core as NativeSessionClient).methods.contains(method);
   int? cleanupCount;
   LocalCleanup? cleanupResult;
   bool cleanupNeedsReload = false;

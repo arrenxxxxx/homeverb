@@ -1,7 +1,7 @@
 import 'localization.dart';
 import 'package:flutter/material.dart';
 import 'controller.dart';
-import 'native_client.dart';
+import 'client_contract.dart';
 import 'receipts.dart';
 import 'skin.dart';
 

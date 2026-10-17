@@ -1,6 +1,6 @@
 import 'localization.dart';
 import 'dart:convert';
-import 'native_client.dart';
+import 'client_contract.dart';
 
 String outcomeLabel(dynamic status) =>
     const {

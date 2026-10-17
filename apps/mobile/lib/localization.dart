@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'gen/strings.g.dart';
 import 'gen/source_messages.g.dart';
-import 'native_client.dart';
+import 'client_contract.dart';
 
 export 'gen/strings.g.dart';
 export 'gen/source_messages.g.dart' show sourceForKey;

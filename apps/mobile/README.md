@@ -147,11 +147,28 @@ The explicit Mock host permits fictional writes only. Native metadata and presen
 The isolated visual preview runs independently:
 
 ```sh
-fvm flutter run -d chrome -t lib/main_preview.dart
+fvm flutter run -d chrome -t lib/main_preview.dart --dart-define=PREVIEW_SCREEN=C01
 fvm flutter build web -t lib/main_preview.dart
 ```
 
-`--dart-define=PREVIEW_SCREEN=H04` selects a fixture. The preview is labelled on screen. Screenshot tests use deterministic status-area fixtures; those are not phone screenshots. Compare `build/verification/screens/` to the approved atlas before claiming visual equivalence.
+For a stable local URL, run `fvm flutter run -d web-server --web-hostname
+127.0.0.1 --web-port 5273 -t lib/main_preview.dart
+--dart-define=PREVIEW_SCREEN=C01` and open `http://127.0.0.1:5273` in a browser.
+Keep that development process running; `r` reloads source changes. A browser
+refresh also resets the fictional interaction state.
+
+`C01` now reuses the production `ClimateControls` widget with fictional descriptors
+and memory-only preferences. Its preview selector switches between fixed-position
+airflow, swing-only airflow and no airflow controls. Temperature, mode, fan and
+other settings edit only that fixture; no Core, credentials, provider requests or
+execution receipts are involved. These scenarios do not add adapter support.
+The preview defaults to Simplified Chinese; `--dart-define=PREVIEW_LOCALE=en-US`
+selects English, and the climate fixture also offers a language switch.
+
+`--dart-define=PREVIEW_SCREEN=H04` selects another catalog fixture. The preview is
+labelled on screen. Screenshot tests use deterministic status-area fixtures;
+those are not phone screenshots. Compare `build/verification/screens/` to the
+approved atlas before claiming visual equivalence.
 
 ## Native boundary
 

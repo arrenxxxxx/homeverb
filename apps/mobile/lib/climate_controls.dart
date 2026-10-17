@@ -5,7 +5,7 @@ import 'climate_panel.dart';
 import 'controller.dart';
 import 'controls.dart';
 import 'localization.dart';
-import 'native_client.dart';
+import 'client_contract.dart';
 import 'receipts.dart';
 import 'skin.dart';
 

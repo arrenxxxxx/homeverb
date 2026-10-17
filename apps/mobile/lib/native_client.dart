@@ -2,75 +2,15 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:isolate';
-import 'dart:math';
 import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
+import 'client_contract.dart';
 import 'session_permissions.dart';
-
-typedef Json = Map<String, dynamic>;
-
-String uniqueId() => List.generate(
-  24,
-  (_) => Random.secure().nextInt(256).toRadixString(16).padLeft(2, '0'),
-).join();
-
-class NativeFailure implements Exception {
-  NativeFailure(this.code, this.message);
-  final String code, message;
-  @override
-  String toString() => '$code: $message';
-}
-
-/// Retain execution payloads even when they contain an embedded error.
-dynamic decodeResponse(Json value) {
-  if (value['status'] != null) {
-    if (![
-      'accepted',
-      'verified',
-      'failed',
-      'unknown',
-      'partial',
-    ].contains(value['status'])) {
-      throw NativeFailure('UNSUPPORTED_OUTCOME', '${value['status']}');
-    }
-    return value;
-  }
-  if (value['error'] case final Map error) {
-    throw NativeFailure('${error['code']}', '${error['message']}');
-  }
-  return value['data'];
-}
-
-abstract interface class CoreClient {
-  Future<dynamic> call(String method, [Json fields = const {}]);
-  void foreground(bool value);
-  void cancelAll();
-  Future<void> close();
-}
-
-abstract interface class AccountClient {
-  String get adapter;
-  bool get supportsAccountConnection;
-  bool get supportsPendingReauthorization;
-  // Takes ownership of the byte arrays and clears them on every return path.
-  Future<Json> connectAccount({
-    required Uint8List login,
-    required Uint8List password,
-    required String label,
-    String? accountId,
-  });
-}
-
-abstract interface class ApprovalClient {
-  bool get supportsTrustedApproval;
-  Future<ApprovalPreview> prepareApproval(Json command);
-  Future<Json> executeApproved(ApprovalPreview preview);
-  Future<void> discardApproval(ApprovalPreview preview);
-}
+export 'client_contract.dart';
 
 /// Native scope is immutable and is never reconstructed from editable form state.
-class ApprovalPreview {
-  ApprovalPreview._(Json data, this._clock)
+class _NativeApprovalPreview implements ApprovalPreview {
+  _NativeApprovalPreview(Json data, this._clock)
     : _id = data['approval_id'] as int,
       command = _freeze(data['command']) as Json,
       descriptor = _freeze(data['descriptor']) as Json,
@@ -221,7 +161,8 @@ class NativeBindings {
   }
 }
 
-class NativeClient implements CoreClient, AccountClient, ApprovalClient {
+class NativeClient
+    implements NativeSessionClient, AccountClient, ApprovalClient {
   NativeClient._(this.path, this.handle, this.adapter)
     : bindings = NativeBindings(path);
   final String path;
@@ -242,7 +183,7 @@ class NativeClient implements CoreClient, AccountClient, ApprovalClient {
       supportsAccountConnection && apiAtLeast(8);
   @override
   bool get supportsTrustedApproval => apiAtLeast(13);
-  final Set<ApprovalPreview> _approvals = {};
+  final Set<_NativeApprovalPreview> _approvals = {};
   int _approvalGeneration = 0;
   final NativeBindings bindings;
   final Set<String> active = {};
@@ -363,7 +304,7 @@ class NativeClient implements CoreClient, AccountClient, ApprovalClient {
                 ),
               )
               as Json;
-      final preview = ApprovalPreview._(data, clock);
+      final preview = _NativeApprovalPreview(data, clock);
       if (generation != _approvalGeneration || _closed || !_foreground) {
         final approvalId = preview._id;
         await Isolate.run(
@@ -382,7 +323,9 @@ class NativeClient implements CoreClient, AccountClient, ApprovalClient {
 
   @override
   Future<Json> executeApproved(ApprovalPreview preview) async {
-    if (!supportsTrustedApproval || !_approvals.contains(preview)) {
+    if (preview is! _NativeApprovalPreview ||
+        !supportsTrustedApproval ||
+        !_approvals.contains(preview)) {
       throw NativeFailure('APPROVAL_INVALID', 'Review a new confirmation.');
     }
     final operation = beginOperation(),
@@ -410,7 +353,10 @@ class NativeClient implements CoreClient, AccountClient, ApprovalClient {
 
   @override
   Future<void> discardApproval(ApprovalPreview preview) async {
-    if (!_approvals.remove(preview) || _closed) return;
+    if (preview is! _NativeApprovalPreview ||
+        !_approvals.remove(preview) ||
+        _closed)
+      return;
     final libraryPath = path, nativeHandle = handle, approvalId = preview._id;
     await Isolate.run(
       () =>

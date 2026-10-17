@@ -1,5 +1,42 @@
 # Flutter implementation verification
 
+## H5 development preview: October 17, 2026
+
+The owner requested a browser view for interactive UI iteration. The pinned
+Flutter Web development server now runs the isolated `main_preview.dart` entry
+point at `http://127.0.0.1:5273`, initially showing `C01` in Simplified Chinese.
+The [preview procedure](README.md#development) documents the exact command.
+The climate fixture reuses production `ClimateControls`, including descriptor
+filtering and the shared Window Light surfaces. Its selector supplies fictional
+fixed-position, swing-only or absent airflow actions. Controls update memory-only
+fixture observations; no native session, account, secret store, provider request,
+appliance command or execution receipt is created. The HTTP listener only serves
+development UI resources and does not expose a device-control API.
+
+The initial Web compile exposed an unintended `dart:ffi` dependency through
+localization. Client interfaces/errors now live in portable `client_contract.dart`
+and remain re-exported by `native_client.dart`. Production session inspection uses
+the native-session interface, preserving grant/route filtering. Trusted native
+previews remain private, deeply immutable and bound to their original handle's
+one-use registry; external implementations are explicitly rejected. File-backed
+preferences retain their required File constructor and atomic save behavior;
+only the explicit preview constructor uses memory.
+
+Static analysis and a release Web build passed. The build command was
+`fvm flutter build web -t lib/main_preview.dart --dart-define=PREVIEW_SCREEN=C01
+--no-web-resources-cdn`; the SDK reported a missing Cupertino font-family warning.
+Forty focused Flutter tests passed across native calls, current contract, climate
+controls/rows, localization/preferences, approvals and the new preview tests.
+The four approval cases passed again after adding the external-preview rejection
+assertion. The preview tests exercise a fictional temperature/power edit and
+capability-dependent hiding of positions and axes. Chrome rendered the Chinese
+screen at 430 by 932; its keyboard temperature control changed the fixture from
+24 to 24.5 Celsius. A development hot restart reported a disposed-engine-view
+assertion; a full browser refresh recovered. This is not a full visual-suite,
+Android/iOS rebuild, performance or real-provider acceptance claim. Native API
+1.22.0, SQLite 5, protected payload 3 and reviewed model support are unchanged.
+No publication or diagnostics upload occurred.
+
 ## Scrolling investigation: October 17, 2026
 
 The owner reported severe scrolling stutter on the current emulator. The selected

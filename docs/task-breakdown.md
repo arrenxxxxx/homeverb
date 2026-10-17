@@ -28,6 +28,13 @@ local success; earlier runs were blocked by the repository's billing limit.
 
 ## Task status
 
+The owner-requested H5 development preview now opens the current shared climate
+controls with fictional, memory-only data and three airflow-capability scenarios.
+It compiles independently of native FFI and cannot control appliances. The
+[app verification record](../apps/mobile/verification.md#h5-development-preview-october-17-2026)
+records the executed browser and focused regression checks. This does not add a
+browser Core backend or change outstanding native/physical acceptance.
+
 The subsequent scrolling investigation identified forced SwiftShader rendering
 as the main emulator bottleneck. Paint isolation and host GPU selection reduced
 mean profile raster time from 166.484 to 13.966 ms on the same fictional grid;

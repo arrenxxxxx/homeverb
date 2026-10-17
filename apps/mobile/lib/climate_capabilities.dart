@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'controller.dart';
 import 'controls.dart';
-import 'native_client.dart';
+import 'client_contract.dart';
 
 bool _validChoiceValue(Object? value, Json schema) {
   if (schema['type'] != null &&

@@ -56,6 +56,12 @@ class LostApprovalReply implements CoreClient, ApprovalClient {
   Future<void> close() => native.close();
 }
 
+class UntrustedApprovalPreview implements ApprovalPreview {
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw UnsupportedError('An external preview has no native handle.');
+}
+
 void main({bool deviceRun = false}) {
   setUpAll(() async {
     if (!deviceRun) {
@@ -104,6 +110,17 @@ void main({bool deviceRun = false}) {
         final historyBefore = await core.call('recent_executions');
         final input = command();
         final preview = await core.prepareApproval(input);
+        await expectLater(
+          core.executeApproved(UntrustedApprovalPreview()),
+          throwsA(
+            isA<NativeFailure>().having(
+              (e) => e.code,
+              'code',
+              'APPROVAL_INVALID',
+            ),
+          ),
+        );
+        await core.discardApproval(UntrustedApprovalPreview());
         expect(await core.call('recent_executions'), historyBefore);
         input['arguments']['program'] = 'changed';
         expect(preview.command['arguments']['program'], 'normal');

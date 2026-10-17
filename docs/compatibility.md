@@ -1,5 +1,11 @@
 # Platform and device compatibility matrix
 
+The isolated H5 preview reuses current Flutter climate controls with fictional
+fixed-position, swing-only or absent airflow descriptors. It has memory-only
+edits and no native Core session or provider access. The portable Dart client
+interface does not change native API 1.22.0, storage formats, control permissions
+or model support. See the [browser verification scope](../apps/mobile/verification.md#h5-development-preview-october-17-2026).
+
 ## October 17 Flutter control presentation
 
 The live climate-and-power view now uses expanded Window Light rows and local

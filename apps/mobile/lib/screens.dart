@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'blocks.dart';
 import 'skin.dart';
 import 'localization.dart';
@@ -1111,11 +1112,13 @@ class PreviewApp extends StatefulWidget {
     required this.catalog,
     this.initial = 'D01',
     this.testChrome = false,
+    this.contentBuilder,
     super.key,
   });
   final ScreenCatalog catalog;
   final String initial;
   final bool testChrome;
+  final Widget? Function(String, ActionHandler)? contentBuilder;
   @override
   State<PreviewApp> createState() => PreviewAppState();
 }
@@ -1291,6 +1294,9 @@ class PreviewAppState extends State<PreviewApp> {
 
   @override
   Widget build(BuildContext context) => MaterialApp(
+    locale: translationsOf(context).$meta.locale.flutterLocale,
+    supportedLocales: AppLocaleUtils.supportedLocales,
+    localizationsDelegates: GlobalMaterialLocalizations.delegates,
     debugShowCheckedModeBanner: false,
     theme: windowTheme(),
     highContrastTheme: windowTheme(highContrast: true),
@@ -1316,6 +1322,7 @@ class PreviewAppState extends State<PreviewApp> {
             child: ScreenView(
               id: id,
               catalog: widget.catalog,
+              home: widget.contentBuilder?.call(id, action),
               onAction: action,
               fields: fields,
               choices: choices,
