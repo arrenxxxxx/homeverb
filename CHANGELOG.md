@@ -6,6 +6,8 @@
 
 - Allow bounded cold iOS Simulator installation/container lookup time in CI and
   log setup phases; retain acceptance deadlines, assertions and no-retry behavior.
+- Synchronize the isolated iOS app's API assertion with native contract 1.23.0 and
+  check that expectation against the versioned contract in portable tests.
 - Publish the reviewed source under Apache-2.0 after owner authorization; verify
   public access and enable GitHub private vulnerability reporting. Update support
   and publication records to reflect the public repository.

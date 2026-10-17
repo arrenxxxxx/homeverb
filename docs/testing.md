@@ -162,11 +162,13 @@ creates a new compatible Simulator, verifies embedded Simulator entitlements and
 the plain ad-hoc seal, and requires
 fresh successful write/read reports with different launch PIDs. Mock Core, SQLite
 cache/receipt persistence, explicit lifecycle calls and fictional system Keychain
-round trips are exercised; no provider account or appliance is accessed. Thirteen
+round trips are exercised; no provider account or appliance is accessed. Fourteen
 portable runner tests refuse stale/failed/incomplete reports, wrong process/scope,
 missing runtime evidence and unsafe simulator selection/cleanup, including cold
 setup timeouts that must fail without installation or app retries. They do not prove
 actual Apple runtime behavior. The exact CI job must pass before claiming it.
+The test app's exact API-version assertion is checked against the versioned native
+contract so a Core upgrade cannot silently leave a stale Simulator expectation.
 Simulator results do not establish physical passcode/lock or signed-device policy.
 On `d02b10a`, macOS job `116902983930` passed eighteen object/orchestration tests,
 all package/consumer checks and actual iOS 26.2 execution: 40 Core/10 Keychain

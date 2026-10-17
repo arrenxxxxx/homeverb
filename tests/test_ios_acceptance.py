@@ -23,6 +23,11 @@ def report(phase='write'):
 
 
 class IosAcceptanceTests(unittest.TestCase):
+    def test_app_requires_the_current_native_contract_version(self):
+        api = json.loads((ios.ROOT / 'packages/native-contract/api.json').read_text())
+        app = (ios.ROOT / 'packages/ios/acceptance/main.m').read_text()
+        self.assertIn('[@"api_version"] isEqual:@"' + api['api_version'] + '"', app)
+
     def test_only_available_compatible_iphone_runtime_is_selected(self):
         runtimes = [
             {'identifier': 'com.apple.CoreSimulator.SimRuntime.iOS-18-0', 'version': '18.0', 'isAvailable': True},

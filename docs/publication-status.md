@@ -80,6 +80,11 @@ retains the app/report deadlines, assertions, exact-device cleanup and productio
 Keychain policy. Those earlier failures remain recorded, not retroactively passed;
 the latest exact-commit run supplies the result for the adjusted runner.
 
+Inspection also found the isolated iOS app still expected native API 1.22.0 while
+the production contract is 1.23.0. Its exact assertion now matches that contract,
+with a portable cross-file check to catch future drift. No production API or
+acceptance assertion was removed.
+
 ## Scope
 
 This delivery changes source availability and documentation, not runtime behavior,
