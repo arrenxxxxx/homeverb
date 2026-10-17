@@ -468,11 +468,22 @@ void main() {
         matching: find.byType(FilledButton),
       );
       expect(tester.widget<FilledButton>(button).onPressed, isNull);
+      expect(
+        find.descendant(
+          of: button,
+          matching: find.byType(CircularProgressIndicator),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Operation in progress'), findsNothing);
+      expect(find.byType(LinearProgressIndicator), findsNothing);
       expect(jsonEncode(controller.cards), cards);
       core.retrievalGate!.complete();
       await refresh;
       await tester.pumpAndSettle();
       expect(find.text('Device list updated'), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(tester.widget<FilledButton>(button).onPressed, isNotNull);
       expect(find.text('View Devices'), findsNothing);
       expect(key.currentState!.id, 'P09');
       expect(key.currentState!.history, history);

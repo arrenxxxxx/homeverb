@@ -276,7 +276,11 @@ List<dynamic> accountRefreshBlocks(HomeController c) {
   ];
 }
 
-List<dynamic> accountBlocks(HomeController c, String id) {
+List<dynamic> accountBlocks(
+  HomeController c,
+  String id, {
+  bool refreshing = false,
+}) {
   final account = c.account;
   final state = account?['credential_state'];
   final actions = <dynamic>[
@@ -407,7 +411,12 @@ List<dynamic> accountBlocks(HomeController c, String id) {
             'No devices yet. Update the list after adding appliances in Meiju.',
           ],
         if (state == 'stored' && c.supports('refresh_account'))
-          ['button', 'Refresh Devices', c.busy ? 'disabled' : 'secondary'],
+          [
+            'button',
+            'Refresh Devices',
+            c.busy ? 'disabled' : 'secondary',
+            refreshing,
+          ],
         if (state != 'stored') ...actions,
         if (c.accountRemoval?['status'] == 'pending')
           ['note', UiError(c.accountRemoval!['error']?['code'] ?? 'UNKNOWN')],

@@ -107,7 +107,9 @@ local identity suffix. Local reload is shown only when reconciliation is needed.
 Choose Meiju to open protected sign-in directly; remarks are optional maintenance,
 not an onboarding step. New sign-in opens account details directly; subsequent
 refresh, rename, reauthorization and removal confirmation stay on those details.
-Refresh Devices updates the linked list in place, with inline completion or
+Refresh Devices shows one spinner inside its disabled button, suppressing the
+page-level activity indicator. Reduced-motion settings keep the indicator static.
+It updates the linked list in place, with inline completion or
 partial/failure feedback and no result-page navigation.
 
 Account details prioritize devices and explicit Refresh Devices. Manage

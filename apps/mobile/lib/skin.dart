@@ -579,9 +579,11 @@ class ActionButton extends StatelessWidget {
     this.label, {
     required this.onPressed,
     this.style = '',
+    this.loading = false,
     super.key,
   });
   final String label, style;
+  final bool loading;
   final VoidCallback? onPressed;
   @override
   Widget build(BuildContext context) {
@@ -592,6 +594,16 @@ class ActionButton extends StatelessWidget {
               : style == ''
               ? 'primary'
               : style];
+    final text = _InkAlignedText(
+      localize(context, label),
+      textAlign: TextAlign.center,
+      style: const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        height: 1.4,
+        letterSpacing: 0,
+      ),
+    );
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: CustomPaint(
@@ -636,16 +648,33 @@ class ActionButton extends StatelessWidget {
             ),
           ),
           onPressed: onPressed,
-          child: _InkAlignedText(
-            localize(context, label),
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              height: 1.4,
-              letterSpacing: 0,
-            ),
-          ),
+          child: loading
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: MediaQuery.highContrastOf(context)
+                            ? Colors.black
+                            : ink,
+                        value: MediaQuery.disableAnimationsOf(context)
+                            ? 0.75
+                            : null,
+                        semanticsLabel: localize(
+                          context,
+                          'Operation in progress',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Flexible(child: text),
+                  ],
+                )
+              : text,
         ),
       ),
     );

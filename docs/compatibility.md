@@ -40,7 +40,9 @@ Account maintenance now stays on account details: Refresh Devices, remark edits,
 reauthorization and removal confirmation add no page navigation. New sign-in
 opens those details directly. Inline feedback preserves partial/failure meaning;
 cancellation/background invalidates forms and removal scope without rollback.
-Only successful local removal returns to the account list.
+Only successful local removal returns to the account list. Device refresh now
+shows one in-button progress animation instead of page-level activity; this adds
+no network operation or timer and preserves reduced-motion behavior.
 
 The native platform flow now goes directly from platform choice to protected
 sign-in. Account cards open compact device-first details, with remarks/sign-in/

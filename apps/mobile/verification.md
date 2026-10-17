@@ -2722,3 +2722,32 @@ collapsed management group. The emulator is left on account details. No live
 refresh, login, rename, removal or appliance command was performed during this
 visual check; those interactions have the synthetic evidence above. No remote
 push, publication or diagnostic upload occurred.
+
+## Refresh-button loading feedback — October 17, 2026
+
+The owner's follow-up moves refresh activity into Refresh Devices itself. One
+18-pixel circular indicator appears beside the label while that exact foreground
+refresh is pending; the button remains disabled and the page-level progress
+indicator is suppressed. Completion or failure restores the normal button, with
+existing inline outcomes unchanged. Reduced motion uses a static indicator.
+Other account operations retain their own feedback. No Core, networking, API,
+storage, authority or outcome change is involved.
+
+`fvm flutter analyze` passed. The account, platform and localization test suites
+passed all 19 cases. The existing held-refresh regression now asserts exactly one
+spinner inside the disabled button, no page progress label/bar, and restoration
+of the enabled button without navigation. Documentation/repository validation and
+`git diff --check` are recorded with this phase. Broader Flutter/Rust suites were
+not repeated; earlier full-suite limitations still apply. Device operations in
+tests remain fictional, and physical-phone animation acceptance remains open.
+
+Implementation files: `lib/main.dart` scopes refresh feedback to the current
+navigation; `lib/account_views.dart` and `lib/blocks.dart` pass loading state;
+`lib/skin.dart` renders the button indicator. The unchanged-label text layout is
+shared with idle buttons. The dual-ABI Meiju release APK built successfully and
+passed the APK export/signature/alignment checks. Artifact:
+`output/flutter-verification/android/homeverb-0.2.0-refresh-spinner.apk`.
+SHA-256: `6357742c59e7d6c9e10ce4b4c54e8b728f3a1a0412625d6a1c240d7658bf190a`.
+The owner-requested emulator update used `adb -s emulator-5586 install -r`, which
+returned `Success`; launching MainActivity also succeeded. No uninstall, data
+clear, live refresh, appliance command, remote push or publication was performed.

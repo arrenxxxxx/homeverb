@@ -131,6 +131,12 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   LocalCleanup? cleanupScope;
   bool editingAccountName = false;
   String? accountEditor;
+  int? accountRefreshEpoch;
+  bool get accountRefreshing =>
+      onAccountDetails &&
+      accountRefreshEpoch == navigation &&
+      c.busy &&
+      c.isForeground;
   bool get onAccountDetails => id == 'P09' || id == 'P10';
   bool exporting = false;
   String? quickPowerDevice;
@@ -410,10 +416,21 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     if (label == 'Refresh Devices' ||
         label == 'Retrieve Devices' ||
         label == 'Recover Saved Authorization') {
+      if (c.busy) return;
       if (onAccountDetails) {
-        await c.retrieveAccount(
-          recover: label == 'Recover Saved Authorization',
-        );
+        final epoch = navigation;
+        if (label != 'Recover Saved Authorization') {
+          setState(() => accountRefreshEpoch = epoch);
+        }
+        try {
+          await c.retrieveAccount(
+            recover: label == 'Recover Saved Authorization',
+          );
+        } finally {
+          if (mounted && accountRefreshEpoch == epoch) {
+            setState(() => accountRefreshEpoch = null);
+          }
+        }
       } else {
         await finish(
           c.retrieveAccount(recover: label == 'Recover Saved Authorization'),
@@ -949,7 +966,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     final ui = Map<String, dynamic>.from(original);
     List<dynamic>? b;
     if (id.startsWith('P')) {
-      b = accountBlocks(c, id);
+      b = accountBlocks(c, id, refreshing: accountRefreshing);
       if (id == 'P03') ui['header'] = 'Connect Meiju';
       if (id == 'P13') ui['header'] = 'Platform connection';
       if (id == 'P03' && editingAccountName) {
@@ -2225,7 +2242,9 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             onChanged: changed,
             busy: c.busy,
             showOperationProgress:
-                content is! ClimateControls && quickPowerDevice == null,
+                content is! ClimateControls &&
+                quickPowerDevice == null &&
+                !accountRefreshing,
             error: id == 'C10' && actionCapability != null ? null : c.error,
           ),
         ),

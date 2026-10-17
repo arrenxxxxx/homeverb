@@ -39,7 +39,8 @@ physical appliance write is authorized by this source integration.
 
 The subsequent owner-requested maintenance revision keeps device refresh, remark
 editing, reauthorization and removal confirmation on account details. Refresh
-Devices updates the list in place; new sign-in also opens details directly.
+Devices updates the list in place, with one in-button loading indicator and no
+page-level activity during refresh; new sign-in also opens details directly.
 Cancel/Back dismisses an inline form first, and backgrounding invalidates its
 confirmation scope. Only successful removal leaves for the account list.
 

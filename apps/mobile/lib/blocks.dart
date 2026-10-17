@@ -126,6 +126,7 @@ class Blocks extends StatelessWidget {
         return ActionButton(
           b[1],
           style: b.length > 2 ? b[2] : '',
+          loading: b.length > 3 && b[3] == true,
           onPressed: b.length > 2 && b[2] == 'disabled'
               ? null
               : () => onAction(b[1]),
