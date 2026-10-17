@@ -13,8 +13,10 @@ See the [parity record](development/10-meiju-ac-parity.md) and
 [verification record](../apps/mobile/verification.md).
 Android 15 arm64 process tests pass direct mode and stepped-temperature Native
 Mock writes with verified receipts, unsupported-row hiding and Chinese detail
-rendering. The current emulator's Meiju account requires authentication; these
-Mock results do not establish additional Meiju control acceptance.
+rendering. These Mock results do not establish additional Meiju control
+acceptance. The later profiling-tool uninstall removed the emulator's local
+account/device data; the ordinary APK now requires a fresh connection, as
+recorded in the app verification report.
 
 Native API 1.22.0, SQLite schema 5, protected payload 3, startup grant formats,
 adapter admission, routing and outcome semantics are unchanged. No new appliance

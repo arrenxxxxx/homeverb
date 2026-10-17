@@ -234,6 +234,8 @@ timings from twelve fictional cards without opening Core. See the
 for its command, renderer checks and measurement limits. The shared background
 and device tiles have separate paint boundaries; native masks, gradients,
 shadows, text, interactions and control authority are retained.
+Use an empty AVD and keep `--keep-app-running` on the profiling command: Flutter
+drive otherwise uninstalls the package and deletes its local data after the test.
 
 ## Verification boundary
 

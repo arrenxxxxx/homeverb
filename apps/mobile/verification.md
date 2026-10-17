@@ -26,8 +26,9 @@ saves reports. Executed commands used `fvm flutter drive --profile --no-dds`,
 All three recorded profile runs passed. Separating painting alone did not resolve
 the software raster bottleneck. Restarting the same data partition with `-gpu
 host -no-snapshot -no-boot-anim` selected the Apple M1 Pro host renderer; the AVD's
-local GPU-enabled/mode settings now also select host graphics. No wipe, app-data
-clear or snapshot restore was used. The renderer change accounts for most of the
+local GPU-enabled/mode settings now also select host graphics. The restart used
+no `-wipe-data` or snapshot restore; the profiling-tool uninstall described below
+later removed the original package data. The renderer change accounts for most of the
 improvement and must not be attributed solely to the Dart change. The remaining
 tail exceeds a 60-Hz frame budget; no locked-60-FPS or physical-phone claim follows
 from average raster time. No layer/picture raster-cache hits were reported.
@@ -44,6 +45,43 @@ validators and `git diff --check` passed. The complete `fvm flutter test --repor
 expanded` passed 115 tests and failed the same four known macOS glyph-pixel cases:
 button labels, editable-field alignment and two control-label checks. References
 and tolerances are unchanged; this is not an entirely passing visual suite.
+
+**Data-loss incident:** the profiling commands above initially omitted
+`--keep-app-running`. Inspection of the pinned Flutter drive service confirmed
+that its default completion path stops and uninstalls the package, clearing the
+emulator's prior local account/device data. In-place installation and temporary
+test fixtures did not prevent that post-test uninstall. The final ordinary APK
+opens with empty account/device state; preservation must not be claimed. No
+credential was read, provider command sent or appliance changed during profiling.
+The owner was informed of the mistake and the need to reconnect the account.
+The Android procedure now requires `--keep-app-running` and recommends an empty
+AVD. The earlier successful preservation record for `flutter test --no-uninstall`
+does not cover `flutter drive`.
+
+### Ordinary APK delivery and retained-driver recheck
+
+The ordinary dual-ABI Meiju release APK was built from clean source
+`e2c9e7bdf92f66f0b187bb30661ae443c184e905` with production plugin regeneration:
+
+- Artifact: `output/flutter-verification/android/homeverb-0.2.0-meiju-scroll.apk`.
+- Bytes: 68,202,196.
+- SHA-256: `59902e69bd60ff7f6c41ac5769f59fe46268a02a6f1d549876687fa10684430c`.
+- The APK verifier passed signature, two complete ABIs, 17 Core exports per ABI,
+  backup exclusions and 16 KiB ZIP/Core ELF alignment. The adjacent JSON report
+  records unchanged native/AAR hashes and the clean source revision. Signing is
+  for local development, not store distribution.
+
+The corrected host-GPU profile command was rerun with `--keep-app-running`.
+It passed again, reported mean raster 12.884 ms, p90 17.397 ms and p99 20.329 ms,
+and explicitly left the application running. A subsequent package lookup
+confirmed it remained installed. The additional local report is
+`output/flutter-verification/android/scroll-host-gpu-retained.json`.
+The ordinary APK was then restored with `adb install -r` and launched. Android
+SurfaceFlinger confirms the Apple M1 Pro host renderer. The app opens in Chinese
+with empty account/device state after the incident above; account reconnection
+and an actual saved-device scrolling review remain blocked. The fictional-grid
+profile evidence does not replace those checks. No provider credentials or
+physical appliance were used. No push, publication or diagnostic upload occurred.
 
 ## Expanded capability-dependent climate rows: October 17, 2026
 

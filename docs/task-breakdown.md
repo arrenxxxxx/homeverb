@@ -28,6 +28,15 @@ local success; earlier runs were blocked by the repository's billing limit.
 
 ## Task status
 
+The subsequent scrolling investigation identified forced SwiftShader rendering
+as the main emulator bottleneck. Paint isolation and host GPU selection reduced
+mean profile raster time from 166.484 to 13.966 ms on the same fictional grid;
+physical-phone performance remains open. The initial `flutter drive` command
+omitted its retention flag and uninstalled the package after profiling, losing
+the emulator's prior local account/device data. The owner was informed; the
+ordinary APK is restored but requires account reconnection. The corrected
+procedure and incident are recorded in the app verification report.
+
 The October 17 owner-directed Flutter revision restores Window Light materials
 and expands only actual locally permitted controls into rows. Swing-only and
 fixed-position layouts are independent per axis; unsupported rows are hidden.
@@ -39,8 +48,9 @@ physical acceptance remain open; see the [app evidence](../apps/mobile/verificat
 Android 15 arm64 process checks now pass the Native Mock click journey and
 expanded-control smoke test, including direct mode/temperature receipts, hidden
 unsupported rows and Chinese detail rendering. The ordinary Meiju APK is restored
-with saved cards/preferences intact; its current account returns `AUTH_REQUIRED`,
-so new Meiju detail/control acceptance remains blocked.
+with saved cards/preferences intact at that earlier checkpoint; its then-current
+account returned `AUTH_REQUIRED`. The later profiling incident above supersedes
+that emulator-state record. New Meiju detail/control acceptance remains blocked.
 
 The owner subsequently requested complete parity with the selected AC's Meiju
 control page. The [AC parity review](development/10-meiju-ac-parity.md) tracks this

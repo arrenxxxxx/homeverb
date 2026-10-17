@@ -150,7 +150,7 @@ measured flings. It does not open Core or an account. From `apps/mobile`, run:
 
 ```sh
 HOMEVERB_PERFORMANCE_REPORT=/absolute/scroll-profile.json \
-  fvm flutter drive --profile --no-dds -d EMULATOR_SERIAL \
+  fvm flutter drive --profile --no-dds --keep-app-running -d EMULATOR_SERIAL \
   --driver=test_driver/performance_driver.dart \
   --target=integration_test/scroll_performance_test.dart \
   --dart-define=HOMEVERB_PERFORMANCE=true
@@ -164,7 +164,14 @@ opted in and refuses debug timing. Run comparisons with the same renderer,
 viewport, workload and idle host, without screenshots or competing builds during
 measurement. Report rendering and emulator changes separately; average raster
 duration is not a displayed-FPS guarantee. Representative physical-phone profile
-measurements remain necessary. Restore the ordinary APK after profiling.
+measurements remain necessary.
+
+Use an empty AVD for profiling. `--keep-app-running` is mandatory when retaining
+an installation: this Flutter version otherwise stops and uninstalls the package
+after `drive`, deleting its local account data and Android Keystore entries. A
+temporary fixture inside the test does not protect the ordinary installation
+from that tooling behavior. After profiling, stop the test app and install the
+ordinary APK with `adb install -r`; never uninstall it to switch entry points.
 
 
 ## Select the app language
