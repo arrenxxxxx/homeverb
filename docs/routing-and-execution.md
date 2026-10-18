@@ -7,6 +7,13 @@ They inherit the caller's cancellation/deadline, never retry, and never update
 inventory, cached observations, permissions, routes or execution receipts.
 This is not an alternate control route or uncertain-write recovery path.
 
+API 1.24 routes account operations by registered provider and saved account ID
+under [ADR-0073](adr/0073-mijia-native-account-routing.md). Combined sessions keep
+one Core policy with exact Meiju grants and read-only Mijia admission. Positive
+Mijia partial inventory publishes cards with explicit partial status. Ordinary
+requests cannot change provider registration or authority. Device execution and
+uncertain-write semantics are unchanged.
+
 ## Experimental Mijia Core reads
 
 [ADR-0072](adr/0072-mijia-protected-core-reads.md) adds a read-only cloud adapter

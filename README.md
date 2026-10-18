@@ -46,11 +46,12 @@ This exits with code 11. Refresh state to inspect the result; do not blindly res
 
 ## What is implemented
 
-- Experimental [Mijia Rust integration](docs/development/11-mijia.md): protected
+- Experimental [Mijia integration](docs/development/11-mijia.md): protected
   mainland account login/recovery, bounded account/home enumeration, stable named
   device cards including unsupported placeholders, and exact MIoT fan/doorbell/
-  lock/battery reads through Core. Synthetic evidence only; Mijia C/App entry
-  points, fan controls and owner-run real-device acceptance remain pending.
+  lock/battery reads through Core. Native API 1.24 supports Mijia-only and combined
+  account sessions. Synthetic evidence only; Flutter entry points, fan controls
+  and owner-run real-device acceptance remain pending.
   Door-lock writes are unavailable. No account or network work occurs at startup.
 
 - Capability-driven validation, device/component/argument/route-scoped low-risk grants, shared deadlines, cancellation, and timestamped verification.

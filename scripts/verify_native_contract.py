@@ -388,6 +388,39 @@ def main():
         finally:
             library.homeverb_close(handle)
 
+    # New platform modes are local at construction and share the protected buffer boundary.
+    for adapter in ['xiaomi.mijia', 'homeverb.platforms']:
+        with tempfile.TemporaryDirectory(prefix='homeverb-ui-mijia-') as directory:
+            handle = open_host(directory, allow=False, adapter=adapter)
+            try:
+                for method in ['list_accounts', 'list_devices', 'discover']:
+                    result = raw(handle, envelope(method))
+                    responses[method].validate(result)
+                    assert result['error'] is None and result['data'] == []
+                assert raw(handle, envelope('get_api_info'))['data'] == api
+                library.homeverb_set_foreground(handle, False)
+                for provider in ['xiaomi.mijia', 'midea.meiju', None]:
+                    selected = {**metadata, 'provider': provider}
+                    connect_schema.validate(selected)
+                    connect_check('HOST_BACKGROUND', request=selected, target=handle)
+                connect_check('INVALID_ARGUMENT', request={**metadata, 'provider':'other.provider'}, target=handle)
+                library.homeverb_set_foreground(handle, True)
+                if adapter == 'xiaomi.mijia':
+                    connect_check('AUTH_FLOW_UNSUPPORTED', request={**metadata, 'provider':'midea.meiju'}, target=handle)
+                for method in ['refresh_account', 'recover_account', 'get_account', 'inspect_account_inventory']:
+                    result = raw(handle, envelope(method, account_id='40000000-0000-4000-8000-000000000001'))
+                    responses[method].validate(result)
+                    assert result['error']['code'] == 'ACCOUNT_NOT_FOUND'
+            finally:
+                library.homeverb_close(handle)
+        for invalid in [{'allow_mock_writes':True}, {'scenario':'lost-ack'}] + ([{'meiju_power_grants':[{'device_id':'40000000-0000-4000-8000-000000000001','state':True}]}] if adapter == 'xiaomi.mijia' else []):
+            with tempfile.TemporaryDirectory(prefix='homeverb-ui-mijia-denied-') as directory:
+                private = Path(directory) / 'not-created'
+                config = {'schema_version':'1.0','data_dir':str(private),'adapter':adapter,'allow_mock_writes':False, **invalid}
+                assert not open_schema.is_valid(config)
+                assert decode(library.homeverb_open(json.dumps(config).encode()))['error']['code'] == 'INVALID_ARGUMENT'
+                assert not private.exists()
+
     # Local account metadata remains usable without creating any protected session.
     with tempfile.TemporaryDirectory(prefix='homeverb-ui-local-accounts-') as directory:
         account_id = '40000000-0000-4000-8000-000000000001'
@@ -864,6 +897,7 @@ def main():
     assert account_examples['api_version'] == api['api_version']
     connect_schema.validate(account_examples['connect_metadata'])
     connect_schema.validate(account_examples['reauthorize_metadata'])
+    connect_schema.validate(account_examples['mijia_connect_metadata'])
     assert account_examples['reauthorize_metadata']['account_id'] is not None
     summary_schema = validator('native-response', 'account_summary')
     summary = next(case['response']['data']['account'] for case in account_examples['cases']

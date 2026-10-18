@@ -10,6 +10,7 @@ char *homeverb_open(const char *config_json);
 char *homeverb_call(uint64_t handle, const char *request_json);
 /* Secret buffers are disjoint caller-owned writable memory; no concurrent access. */
 /* Native code clears valid 1..256-byte buffers before admission. Always clear/free them. */
+/* API 1.24+: optional provider selects a registered flow; credentials remain separate. */
 char *homeverb_connect_account(uint64_t handle, const char *metadata_json,
                               uint8_t *login, size_t login_length,
                               uint8_t *password, size_t password_length);

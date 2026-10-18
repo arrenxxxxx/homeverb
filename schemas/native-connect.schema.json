@@ -33,6 +33,14 @@
           "type": "null"
         }
       ]
+    },
+    "provider": {
+      "enum": [
+        "midea.meiju",
+        "xiaomi.mijia",
+        null
+      ],
+      "description": "Select a registered provider. Omission selects Mijia in Mijia-only hosts and Meiju otherwise. Does not grant permissions."
     }
   },
   "required": [

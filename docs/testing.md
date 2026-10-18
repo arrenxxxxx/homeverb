@@ -1,5 +1,13 @@
 # Test plan and quality gates
 
+Native Mijia tests in `crates/host/tests/mijia_accounts.rs` use temporary SQLite,
+fictional secure storage and an encrypted in-process cloud peer. They check
+protected connection, named unsupported cards, partial positive IDs, actual power
+independent of online hints, provider routing/isolation, local removal replay,
+background cancellation and no automatic login replay. The C ABI verifier checks
+new startup modes, closed configuration, account scope, buffer clearing and
+foreground refusal without vendor traffic.
+
 ## Mijia protocol checks
 
 `cargo test -p homeverb-mijia --offline --locked` uses fictional credentials and
