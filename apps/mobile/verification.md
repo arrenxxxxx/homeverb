@@ -3077,3 +3077,58 @@ matching, exports and 16 KiB alignment. Artifact:
 `adb -s emulator-5586 install -r` returned `Success`, retaining app data.
 The owner was asked to submit one login directly in the existing app. Live
 comparison results remain pending and no appliance control has been sent.
+
+## Same-account identity repair and trusted legacy restoration
+
+The next owner-operated diagnostic login emitted fixed stage markers only:
+`selected_account`, `protected_binding_validated`, `login_succeeded`,
+`subject_differs`, `client_identifier_matches`. It therefore reached successful
+provider login and failed the exact historical login-ID check. No raw identifiers
+or credentials were captured. Matching client identifiers does not itself prove
+provider identity. The protected saved account was not replaced by that attempt.
+
+[ADR-0073](../../docs/adr/0073-meiju-account-identity-recovery.md) implements the
+repair: canonical IoT-user subjects in protected inner session version 3 and a
+separate trusted legacy restoration preview/confirm/discard path. Exact matched
+legacy aliases migrate during ordinary login; changed aliases require full matching
+inventory and actual owner same-account confirmation. A different canonical UID,
+missing/partial/changed scope, modified protected bytes, duplicate local canonical
+account, expired preview or cancelled lifecycle cannot silently replace a binding.
+The confirming host seals before persistence; the App reopens read-only. Account,
+device and connection IDs, names, rooms and receipts remain local and unchanged.
+No appliance control is part of recovery.
+
+API 1.25 has 34 ordinary methods and 19 C functions plus Android initialization.
+SQLite 5 and outer payload 3 remain unchanged. Old binaries cannot read canonical
+inner version-3 sessions; never reset or downgrade a migrated account. The new
+Restore Saved Account action clears credential fields before dispatch and requires
+a separate explicit confirmation showing the matched device count.
+
+Executed verification before delivery:
+
+- All 88 host Meiju account tests passed, including seven new canonical/legacy
+  recovery cases. Subsequent shared duplicate-subject guarding was rechecked with
+  the focused recovery, account and authentication suites.
+- All 37 Midea account and nine authentication tests passed, including protected
+  canonical encoding and malformed-identity refusal.
+- The native contract verifier passed all 34 methods, 55 fictional live examples,
+  new recovery C buffer-erasure/admission tests and existing trusted approval,
+  LAN-scan and connection-link checks. No provider account was used by these tests.
+- Flutter analysis passed. The focused account/localization/native/controller
+  group passed 21 tests; all five recovery-specific tests then passed, including
+  the real widget action and confirm/decline/background/uncertainty cases.
+- Seven shared presentation tests and the documentation/contract/repository
+  validators passed. Formatting passed. Clippy passed for Midea/Host/FFI with
+  only the pre-existing `chunks_exact_to_as_chunks` lint explicitly allowed.
+- `cargo test --workspace --offline --locked` was executed outside the sandbox.
+  It stopped at 14 existing Midea LAN tests: macOS returned `AddrNotAvailable`
+  (`Can't assign requested address`) when binding their fixture addresses. The
+  Midea library run had 48 passes and 14 failures. This is not a full-workspace
+  pass; no system network aliases or LAN implementation were changed to hide it.
+
+The first native-contract invocation used system Python and failed because it
+lacked `jsonschema`; the project `.venv/bin/python` invocation passed. Android
+ABI builds passed with diagnostic logging disabled; final packaging and installed
+artifact evidence are recorded below. Live same-account restoration and the
+original refrigerator/dishwasher acceptance remain pending, not synthetic-test
+claims. No diagnostic upload, remote push or appliance write occurred.

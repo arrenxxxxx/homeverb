@@ -15,6 +15,8 @@ ABIS = {
     'x86_64': ('x86_64-linux-android', 'Advanced Micro Devices X86-64', 'x86_64'),
 }
 SYMBOLS = ['homeverb_open', 'homeverb_call', 'homeverb_connect_account',
+           'homeverb_prepare_identity_recovery', 'homeverb_confirm_identity_recovery',
+           'homeverb_discard_identity_recovery',
            'homeverb_cancel', 'homeverb_set_foreground', 'homeverb_close',
            'homeverb_string_free', 'homeverb_prepare_approval', 'homeverb_execute_approved',
            'homeverb_discard_approval', 'homeverb_prepare_lan_scan', 'homeverb_confirm_lan_scan',

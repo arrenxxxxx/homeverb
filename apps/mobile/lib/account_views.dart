@@ -561,10 +561,12 @@ class AccountSignIn extends StatefulWidget {
     required this.needsReload,
     required this.busy,
     this.reauthorizing = false,
+    this.onRecover,
     this.credentialAccess = const PlatformCredentialAccess(),
     super.key,
   });
   final Future<void> Function(Uint8List login, Uint8List password) onSubmit;
+  final Future<void> Function(Uint8List login, Uint8List password)? onRecover;
   final VoidCallback onCancel, onReload;
   final bool needsReload, busy, reauthorizing;
   final CredentialAccess credentialAccess;
@@ -624,7 +626,7 @@ class _AccountSignInState extends State<AccountSignIn>
     super.dispose();
   }
 
-  Future<void> submit() async {
+  Future<void> submit({bool recovery = false}) async {
     if (!foreground ||
         !canEnter ||
         submitting ||
@@ -653,7 +655,10 @@ class _AccountSignInState extends State<AccountSignIn>
       if (!mounted || !foreground || epoch != checkEpoch) return;
       setState(() => readiness = result);
       if (!canEnter) return;
-      await widget.onSubmit(loginBytes, passwordBytes);
+      await (recovery ? widget.onRecover! : widget.onSubmit)(
+        loginBytes,
+        passwordBytes,
+      );
     } finally {
       loginBytes.fillRange(0, loginBytes.length, 0);
       passwordBytes.fillRange(0, passwordBytes.length, 0);
@@ -772,6 +777,19 @@ class _AccountSignInState extends State<AccountSignIn>
           'Sign In and Retrieve Devices',
           onPressed: submitting ? null : submit,
         ),
+      if (canEnter && !widget.needsReload && widget.onRecover != null) ...[
+        const Copy(
+          'If the same account was refused because its identity changed, restore its saved binding after reviewing the matching devices.',
+          color: muted,
+        ),
+        ActionButton(
+          'Restore Saved Account',
+          style: 'secondary',
+          onPressed: submitting || widget.busy
+              ? null
+              : () => submit(recovery: true),
+        ),
+      ],
       ActionButton('Cancel', style: 'secondary', onPressed: widget.onCancel),
     ],
   );

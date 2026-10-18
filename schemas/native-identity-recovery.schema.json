@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:homeverb:schema:native-identity-recovery",
+  "title": "Trusted legacy account identity recovery",
+  "$defs": {
+    "prepare": {
+      "description": "Nonsecret metadata for homeverb_connect_account only. Account/password bytes use separate bounded native buffers.",
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "operation_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 180000
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "account_id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "schema_version",
+        "operation_id",
+        "timeout_ms",
+        "label",
+        "account_id"
+      ],
+      "additionalProperties": false
+    },
+    "confirm": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "operation_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 180000
+        },
+        "recovery_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 18446744073709551615
+        }
+      },
+      "required": [
+        "schema_version",
+        "operation_id",
+        "timeout_ms",
+        "recovery_id"
+      ],
+      "additionalProperties": false
+    },
+    "preview": {
+      "type": "object",
+      "properties": {
+        "recovery_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 18446744073709551615
+        },
+        "account": {
+          "$ref": "urn:homeverb:schema:native-response#/$defs/account_summary"
+        },
+        "device_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4096
+        },
+        "expires_in_ms": {
+          "const": 60000
+        },
+        "requires_same_account_confirmation": {
+          "const": true
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "recovery_id",
+        "account",
+        "device_count",
+        "expires_in_ms",
+        "requires_same_account_confirmation"
+      ]
+    },
+    "prepare_result": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "$ref": "#/$defs/preview"
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "urn:homeverb:schema:native-response#/$defs/query_error"
+        }
+      ]
+    },
+    "confirm_result": {
+      "$ref": "urn:homeverb:schema:native-response#/$defs/connect_account"
+    }
+  }
+}

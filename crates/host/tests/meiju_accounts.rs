@@ -182,6 +182,7 @@ impl SecretStore for Secrets {
 }
 
 struct Wire {
+    uid: Mutex<Option<String>>,
     subject: Mutex<String>,
     token: Mutex<String>,
     login_code: AtomicI32,
@@ -199,6 +200,7 @@ struct Wire {
 impl Default for Wire {
     fn default() -> Self {
         Self {
+            uid: Mutex::new(None),
             subject: Mutex::new("synthetic-login-001".into()),
             token: Mutex::new("SYNTHETIC-TOKEN".into()),
             login_code: AtomicI32::new(0),
@@ -266,6 +268,11 @@ impl CloudTransport for Wire {
             ),
             _ => panic!("Account connection must not request state or controls."),
         };
+        if request.endpoint() == CloudEndpoint::Login
+            && let Some(uid) = &*self.uid.lock().unwrap()
+        {
+            data["iotUserId"] = json!(uid);
+        }
         if request.endpoint() == CloudEndpoint::Login && code != 0 {
             data = json!({"challenge":"PRIVATE-CHALLENGE"});
         }
@@ -1036,3 +1043,6 @@ mod product;
 
 #[path = "meiju_accounts/temperature.rs"]
 mod temperature;
+
+#[path = "meiju_accounts/identity_recovery.rs"]
+mod identity_recovery;

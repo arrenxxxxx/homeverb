@@ -155,21 +155,21 @@ login-ID request and one password request under the same Operation. Rejection,
 additional challenges, cancellation or timeout never trigger automatic login or
 replay. Passwords and account spellings are not part of the stored session.
 
-`MeijuSession` holds the access token, decoded session key and an opaque subject
-`meiju.login-id.v1:<server-login-id>` in redacted native memory. The server login ID
-participates in the successful password proof. It is an exact-match reconnect
-guard, not a claim that all account aliases share an identity. Real-account tests
-must confirm its stability. Changed IDs require explicit identity reconciliation; saved-session recovery does not reconcile subjects. Never substitute
-a nickname, login spelling or guessed `userInfo` field. `encode`/`restore` are private
-credential-persistence operations, not public JSON DTOs. `reads` binds a session to
-one exact local credential reference for the existing inventory/state protocols.
+`MeijuSession` holds the access token, decoded session key and protected identity.
+API 1.25 uses `meiju.iot-user-id.v1:<iotUserId>` from a successful HTTPS login when
+available. Inner session version 3 also retains the returned login-ID alias for
+exact legacy-alias migration. Versions 1 and 2 remain readable; missing canonical
+identity retains legacy login-ID behavior. A saved canonical subject can never
+fall back to a changed or missing UID. Encoding is private credential persistence,
+not a public JSON DTO. SQLite and outer protected payload version 3 are unchanged.
 
-On October 18, the owner reported `ACCOUNT_IDENTITY_CONFLICT` when reauthorizing
-the same account in the existing Android emulator. The error is not evidence that
-the owner selected a different human account. The explicit selected-account path
-compares the protected saved subject against the fresh login subject before any
-replacement or inventory retrieval. No private values were captured, so the exact
-reason for the mismatch remains unverified. Saved account/device data is retained.
+On October 18, an owner-operated diagnostic login emitted only these fixed markers:
+`selected_account`, `protected_binding_validated`, `login_succeeded`,
+`subject_differs`, `client_identifier_matches`. This establishes successful fresh
+provider login followed by refusal of a changed login-ID subject, despite matching
+login-derived client identifiers. It does not prove why the provider ID changed or
+that client-identifier equality alone establishes identity. No credential or raw
+identifier values were captured. The old stored session and bindings were intact.
 
 Static inspection of the pinned official APK 11.7.10.6 distinguishes
 `LoginIdRspData.loginId` from `LoginRspData.iotUserId` and `userInfo`.
@@ -181,8 +181,12 @@ field/call names. They do not establish identifier stability or a link from an
 expired legacy login-ID binding to a fresh UID. Existing sessions did not retain
 those additional user identifiers. Changing the subject prefix, matching a login
 spelling/device list, or deleting/recreating the account would not supply the
-missing provider identity proof. Safe legacy reconciliation remains unresolved;
-the corrected error wording does not fix reauthorization.
+missing provider identity proof. [ADR-0073](../adr/0073-meiju-account-identity-recovery.md)
+therefore provides explicit user-confirmed legacy recovery with complete matching
+inventory, unchanged protected bytes, duplicate-subject refusal and a sealed old
+host. Matching inventory only constrains the restoration scope; the trusted owner
+must confirm it is the same account. Ordinary login never relaxes the identity
+check. Synthetic checks pass; live restoration remains pending.
 
 For an owner-directed Android investigation, building native Core with
 `HOMEVERB_AUTH_TRACE=1` enables the local `HomeVerbAuthTrace` Android log tag.

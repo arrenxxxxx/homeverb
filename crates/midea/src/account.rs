@@ -19,7 +19,9 @@ use uuid::Uuid;
 use zeroize::Zeroize;
 
 mod conflicts;
+pub(crate) mod identity_recovery;
 mod lan;
+pub use identity_recovery::PendingIdentityRecovery;
 pub use lan::LanCandidateMatch;
 
 const PROVIDER: &str = "midea.meiju";
@@ -472,7 +474,7 @@ impl MeijuAccount {
                 if crate::auth_trace::enabled() {
                     session.trace_reauthorization(&payload.cloud_session()?);
                 }
-                if payload.subject != session.subject().expose() {
+                if !session.matches_saved_subject(&payload.subject) {
                     return Err(Error::new(
                         "ACCOUNT_IDENTITY_CONFLICT",
                         "The authorized provider identity differs from this local account.",
@@ -490,6 +492,8 @@ impl MeijuAccount {
         }
         payload.session.zeroize();
         payload.session = session.encode()?.expose().to_vec();
+        payload.subject.zeroize();
+        payload.subject = session.subject().expose().to_vec();
         self.save(&payload, operation).await
     }
 
@@ -890,7 +894,7 @@ pub async fn connect(
     if selected.is_none() {
         let matches: Vec<_> = subjects
             .iter()
-            .filter(|(_, subject)| subject.expose() == session.subject().expose())
+            .filter(|(_, subject)| session.matches_saved_subject(subject.expose()))
             .map(|(id, _)| *id)
             .collect();
         if matches.len() > 1 {
@@ -907,6 +911,15 @@ pub async fn connect(
     }
     let mut account = match selected {
         Some((mut account, original)) => {
+            if session.is_canonical() {
+                identity_recovery::ensure_unique_subject(
+                    vault,
+                    account.record().id,
+                    &session,
+                    operation,
+                )
+                .await?;
+            }
             account.reauthorize(&original, &session, operation).await?;
             account
         }

@@ -68,6 +68,24 @@ abstract interface class ApprovalClient {
   Future<void> discardApproval(ApprovalPreview preview);
 }
 
+abstract interface class IdentityRecoveryPreview {
+  Json get account;
+  int get deviceCount;
+}
+
+/// Separate trusted UI surface. Never expose confirmation through ordinary JSON.
+abstract interface class IdentityRecoveryClient {
+  bool get supportsIdentityRecovery;
+  Future<IdentityRecoveryPreview> prepareIdentityRecovery({
+    required Uint8List login,
+    required Uint8List password,
+    required String accountId,
+    required String label,
+  });
+  Future<Json> confirmIdentityRecovery(IdentityRecoveryPreview preview);
+  Future<void> discardIdentityRecovery(IdentityRecoveryPreview preview);
+}
+
 /// Native implementations retain the private handle and immutable preview data.
 abstract interface class ApprovalPreview {
   Json get command;

@@ -385,6 +385,17 @@ def main() -> int:
     for field in ["descriptor", "anchor", "connection", "transport_grants", "expires_at"]:
         bad = copy.deepcopy(link["prepare_result"]); del bad["data"][field]
         negative.append((f"link preview requires {field}", native_validator("native-connection-link", "prepare_result"), bad))
+    recovery = load("packages/native-contract/identity-recovery-examples.json")
+    assert recovery["api_version"] == load("packages/native-contract/api.json")["api_version"]
+    for definition in ["prepare", "confirm", "prepare_result", "confirm_result"]:
+        shape = native_validator("native-identity-recovery", definition)
+        shape.validate(recovery[definition])
+        for field in ["confirmed", "principal", "token", "iotUserId", "login", "password"]:
+            bad = copy.deepcopy(recovery[definition]); bad[field] = "FORBIDDEN"
+            negative.append((f"identity recovery {definition} rejects {field}", shape, bad))
+    for value in [0, -1, 18446744073709551616, "1", True]:
+        bad = dict(recovery["confirm"]); bad["recovery_id"] = value
+        negative.append(("invalid recovery ID", native_validator("native-identity-recovery", "confirm"), bad))
     for name, validator, data in negative:
         if validator.is_valid(data):
             raise AssertionError(f"Counterexample was not rejected: {name}")

@@ -35,6 +35,19 @@ class _NativeApprovalPreview implements ApprovalPreview {
       : value;
 }
 
+class _IdentityRecoveryPreview implements IdentityRecoveryPreview {
+  _IdentityRecoveryPreview(Json data)
+    : id = data['recovery_id'] as int,
+      account = Map.unmodifiable(data['account'] as Json),
+      deviceCount = data['device_count'] as int;
+  final int id;
+  @override
+  final Json account;
+  @override
+  final int deviceCount;
+  final clock = Stopwatch()..start();
+}
+
 class NativeBindings {
   NativeBindings(String path)
     : library = path == 'process'
@@ -71,6 +84,49 @@ class NativeBindings {
         )
       >('homeverb_connect_account');
 
+  late final prepareIdentityRecovery = library
+      .lookupFunction<
+        Pointer<Utf8> Function(
+          Uint64,
+          Pointer<Utf8>,
+          Pointer<Uint8>,
+          Size,
+          Pointer<Uint8>,
+          Size,
+        ),
+        Pointer<Utf8> Function(
+          int,
+          Pointer<Utf8>,
+          Pointer<Uint8>,
+          int,
+          Pointer<Uint8>,
+          int,
+        )
+      >('homeverb_prepare_identity_recovery');
+
+  late final confirmIdentityRecovery = library
+      .lookupFunction<
+        Pointer<Utf8> Function(Uint64, Pointer<Utf8>),
+        Pointer<Utf8> Function(int, Pointer<Utf8>)
+      >('homeverb_confirm_identity_recovery');
+  late final discardIdentityRecovery = library
+      .lookupFunction<Bool Function(Uint64, Uint64), bool Function(int, int)>(
+        'homeverb_discard_identity_recovery',
+      );
+
+  Json confirmRecoveryRequest(int handle, Json metadata) {
+    final input = jsonEncode(metadata).toNativeUtf8();
+    Pointer<Utf8>? output;
+    try {
+      output = confirmIdentityRecovery(handle, input);
+      if (output == nullptr) throw NativeFailure('NATIVE_ERROR', 'No response');
+      return jsonDecode(output.toDartString()) as Json;
+    } finally {
+      calloc.free(input);
+      if (output != null && output != nullptr) free(output);
+    }
+  }
+
   Json connectRequest(
     int handle,
     Json metadata,
@@ -78,11 +134,12 @@ class NativeBindings {
     int loginLength,
     int passwordAddress,
     int passwordLength,
+    bool recovery,
   ) {
     final input = jsonEncode(metadata).toNativeUtf8();
     Pointer<Utf8>? output;
     try {
-      output = connect(
+      output = (recovery ? prepareIdentityRecovery : connect)(
         handle,
         input,
         Pointer<Uint8>.fromAddress(loginAddress),
@@ -162,7 +219,11 @@ class NativeBindings {
 }
 
 class NativeClient
-    implements NativeSessionClient, AccountClient, ApprovalClient {
+    implements
+        NativeSessionClient,
+        AccountClient,
+        ApprovalClient,
+        IdentityRecoveryClient {
   NativeClient._(this.path, this.handle, this.adapter)
     : bindings = NativeBindings(path);
   final String path;
@@ -390,6 +451,19 @@ class NativeClient
     required Uint8List password,
     required String label,
     String? accountId,
+  }) => _connectAccount(
+    login: login,
+    password: password,
+    label: label,
+    accountId: accountId,
+  );
+
+  Future<Json> _connectAccount({
+    required Uint8List login,
+    required Uint8List password,
+    required String label,
+    String? accountId,
+    bool recovery = false,
   }) async {
     Pointer<Uint8>? loginMemory, passwordMemory;
     String? id;
@@ -438,6 +512,7 @@ class NativeClient
               loginLength,
               passwordAddress,
               passwordLength,
+              recovery,
             ),
           )
           as Json;
@@ -458,11 +533,94 @@ class NativeClient
     }
   }
 
+  final Set<_IdentityRecoveryPreview> _identityRecoveries = {};
+  @override
+  bool get supportsIdentityRecovery =>
+      supportsAccountConnection && apiAtLeast(25);
+
+  @override
+  Future<IdentityRecoveryPreview> prepareIdentityRecovery({
+    required Uint8List login,
+    required Uint8List password,
+    required String accountId,
+    required String label,
+  }) async {
+    if (!supportsIdentityRecovery) {
+      login.fillRange(0, login.length, 0);
+      password.fillRange(0, password.length, 0);
+      throw NativeFailure(
+        'API_UPGRADE_REQUIRED',
+        'Account recovery requires native API 1.25.',
+      );
+    }
+    final data = await _connectAccount(
+      login: login,
+      password: password,
+      accountId: accountId,
+      label: label,
+      recovery: true,
+    );
+    final preview = _IdentityRecoveryPreview(data);
+    if (preview.account['id'] != accountId ||
+        preview.deviceCount < 1 ||
+        data['requires_same_account_confirmation'] != true) {
+      bindings.discardIdentityRecovery(handle, preview.id);
+      throw NativeFailure(
+        'ACCOUNT_IDENTITY_CONFLICT',
+        'Recovery scope changed.',
+      );
+    }
+    _identityRecoveries.add(preview);
+    return preview;
+  }
+
+  @override
+  Future<Json> confirmIdentityRecovery(IdentityRecoveryPreview preview) async {
+    if (preview is! _IdentityRecoveryPreview ||
+        !_identityRecoveries.remove(preview) ||
+        preview.clock.elapsed >= const Duration(seconds: 60)) {
+      throw NativeFailure(
+        'ACCOUNT_IDENTITY_CONFLICT',
+        'Review account recovery again.',
+      );
+    }
+    final id = beginOperation();
+    final metadata = <String, dynamic>{
+      'schema_version': '1.0',
+      'operation_id': id,
+      'timeout_ms': 30000,
+      'recovery_id': preview.id,
+    };
+    final libraryPath = path, nativeHandle = handle;
+    try {
+      return decodeResponse(
+            await Isolate.run(
+              () => NativeBindings(
+                libraryPath,
+              ).confirmRecoveryRequest(nativeHandle, metadata),
+            ),
+          )
+          as Json;
+    } finally {
+      _identityRecoveries.clear();
+      endOperation(id);
+    }
+  }
+
+  @override
+  Future<void> discardIdentityRecovery(IdentityRecoveryPreview preview) async {
+    if (preview is _IdentityRecoveryPreview &&
+        _identityRecoveries.remove(preview)) {
+      bindings.discardIdentityRecovery(handle, preview.id);
+    }
+  }
+
   @override
   void foreground(bool value) {
     _foreground = value;
     if (_closed) return;
     if (!value) {
+      _identityRecoveries.clear();
       _approvalGeneration++;
       _approvals.clear();
       _suspended = true;
@@ -475,11 +633,13 @@ class NativeClient
 
   @override
   void cancelAll() {
+    final hadRecoveries = _identityRecoveries.isNotEmpty;
+    _identityRecoveries.clear();
     _approvalGeneration++;
     final hadApprovals = _approvals.isNotEmpty;
     _approvals.clear();
     // Hold the native gate closed until even not-yet-started isolates drain.
-    if ((active.isNotEmpty || hadApprovals) && !_closed) {
+    if ((active.isNotEmpty || hadApprovals || hadRecoveries) && !_closed) {
       _suspended = true;
       bindings.foreground(handle, false);
     }
@@ -516,6 +676,7 @@ Future<Json> _connectOnWorker(
   int loginLength,
   int passwordAddress,
   int passwordLength,
+  bool recovery,
 ) => Isolate.run(
   () => NativeBindings(path).connectRequest(
     handle,
@@ -524,5 +685,6 @@ Future<Json> _connectOnWorker(
     loginLength,
     passwordAddress,
     passwordLength,
+    recovery,
   ),
 );

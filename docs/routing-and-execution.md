@@ -482,3 +482,14 @@ Power requests use one `work_status` control attempt with no wash-program field,
 implicit read, retry, fallback or compensation. Neither power assignment is
 assumed replay-safe. Provider acknowledgements remain accepted; possibly-sent
 failures remain unknown. Power-off is not physical isolation or rollback.
+
+## Account identity recovery and command authority
+
+The trusted API 1.25 legacy Meiju recovery in
+[ADR-0073](adr/0073-meiju-account-identity-recovery.md) sends login/inventory reads
+only. A recovery preview is not a command grant or appliance approval. Confirmation
+requires a quiescent foreground host, seals it before local persistence and
+invalidates existing approvals. Reopen read-only; do not copy command grants into
+the replacement session. Uncertain credential persistence stays pending and is
+never automatically replayed. Device/connection IDs and existing receipts remain
+unchanged; neither restoration nor cancellation proves any physical state.

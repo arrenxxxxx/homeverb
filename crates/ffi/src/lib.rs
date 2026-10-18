@@ -3,10 +3,11 @@
 use homeverb_core::SecretBytes;
 use homeverb_domain::{Error, Query};
 use homeverb_host::{
-    ConfirmConnectionLinkRequest, ConfirmLanScanRequest, ConnectRequest, ExecuteApprovalRequest,
-    HostRequest, MeijuAcFeatureGrant, MeijuControlGrants, MeijuDishwasherCycleGrant,
-    MeijuDishwasherGrant, MeijuFanGrant, MeijuModeGrant, MeijuPowerGrant, MeijuTemperatureGrant,
-    PrepareApprovalRequest, PrepareConnectionLinkRequest, PrepareLanScanRequest, Session,
+    ConfirmConnectionLinkRequest, ConfirmIdentityRecoveryRequest, ConfirmLanScanRequest,
+    ConnectRequest, ExecuteApprovalRequest, HostRequest, MeijuAcFeatureGrant, MeijuControlGrants,
+    MeijuDishwasherCycleGrant, MeijuDishwasherGrant, MeijuFanGrant, MeijuModeGrant,
+    MeijuPowerGrant, MeijuTemperatureGrant, PrepareApprovalRequest, PrepareConnectionLinkRequest,
+    PrepareLanScanRequest, Session,
 };
 use homeverb_mock::Scenario;
 use serde::Deserialize;
@@ -241,6 +242,73 @@ pub unsafe extern "C" fn homeverb_connect_account(
         host.runtime
             .block_on(host.session.connect_account(request, login, password))
     })
+}
+
+/// Prepare legacy identity recovery with protected credentials; preparation is not consent.
+/// Free the returned JSON with homeverb_string_free. The caller owns and clears/frees inputs.
+/// # Safety
+/// Metadata must be NULL or a valid NUL-terminated UTF-8 string. Each non-NULL secret pointer
+/// with length 1..=256 must be valid writable memory for that length. Buffers and metadata
+/// must not overlap.
+/// No other thread may access these buffers during the call. Valid 1..=256 byte buffers
+/// are copied and cleared even when metadata/host admission fails. Oversized inputs are
+/// not dereferenced; caller cleanup is mandatory on every path.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn homeverb_prepare_identity_recovery(
+    handle: u64,
+    metadata: *const c_char,
+    login: *mut u8,
+    login_length: usize,
+    password: *mut u8,
+    password_length: usize,
+) -> *mut c_char {
+    output(|| {
+        let login = unsafe { take_secret(login, login_length) };
+        let password = unsafe { take_secret(password, password_length) };
+        let (Some(login), Some(password)) = (login, password) else {
+            return error(
+                "MIDEA_LOGIN_INPUT_UNSUPPORTED",
+                "Provide bounded native account and password buffers.",
+            );
+        };
+        let Some(host) = host(handle) else {
+            return error("HOST_CLOSED", "The native host handle is closed.");
+        };
+        let Some(request) = (unsafe { input_json::<ConnectRequest>(metadata) }) else {
+            return error("INVALID_ARGUMENT", "Invalid account connection metadata.");
+        };
+        host.runtime.block_on(
+            host.session
+                .prepare_native_identity_recovery(request, login, password),
+        )
+    })
+}
+
+/// Confirm only after actual trusted UI consent to the retained account recovery preview.
+/// The host closes after confirmation starts; reopen read-only before further work.
+/// # Safety
+/// `request` must be NULL or a valid NUL-terminated UTF-8 string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn homeverb_confirm_identity_recovery(
+    handle: u64,
+    request: *const c_char,
+) -> *mut c_char {
+    output(|| {
+        let Some(host) = host(handle) else {
+            return error("HOST_CLOSED", "The native host handle is closed.");
+        };
+        let Some(request) = (unsafe { input_json::<ConfirmIdentityRecoveryRequest>(request) })
+        else {
+            return error("INVALID_ARGUMENT", "Invalid identity recovery metadata.");
+        };
+        host.runtime
+            .block_on(host.session.confirm_native_identity_recovery(request))
+    })
+}
+/// Dismiss the private preview without changing the saved account.
+#[unsafe(no_mangle)]
+pub extern "C" fn homeverb_discard_identity_recovery(handle: u64, recovery_id: u64) -> bool {
+    host(handle).is_some_and(|host| host.session.discard_native_identity_recovery(recovery_id))
 }
 
 /// Prepare an immutable elevated-action preview for trusted user review only.

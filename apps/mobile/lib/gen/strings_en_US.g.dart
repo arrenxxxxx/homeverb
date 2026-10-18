@@ -3830,4 +3830,19 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Remaining time'
 	String get vendorMideaDishwasherRemainingMinutes => 'Remaining time';
+
+	/// en-US: 'Restore Saved Account'
+	String get mobileIdentityRecoveryAction => 'Restore Saved Account';
+
+	/// en-US: 'If the same account was refused because its identity changed, restore its saved binding after reviewing the matching devices.'
+	String get mobileIdentityRecoveryHint => 'If the same account was refused because its identity changed, restore its saved binding after reviewing the matching devices.';
+
+	/// en-US: 'All {count} saved devices match this login.'
+	String mobileIdentityRecoveryCount({required Object count}) => 'All ${count} saved devices match this login.';
+
+	/// en-US: 'Confirm this is the same Meiju account. HomeVerb will update its identity binding and keep your devices, names and rooms. Existing control permissions will be cleared. Shared devices alone do not prove account identity.'
+	String get mobileIdentityRecoveryConsent => 'Confirm this is the same Meiju account. HomeVerb will update its identity binding and keep your devices, names and rooms. Existing control permissions will be cleared. Shared devices alone do not prove account identity.';
+
+	/// en-US: 'Confirm Same Account and Restore'
+	String get mobileIdentityRecoveryConfirm => 'Confirm Same Account and Restore';
 }

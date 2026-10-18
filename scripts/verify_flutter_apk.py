@@ -10,7 +10,7 @@ import subprocess
 import tempfile
 import zipfile
 
-from build_android_native import ABIS, ROOT, inspect_library, ndk_tools
+from build_android_native import ABIS, ROOT, SYMBOLS, inspect_library, ndk_tools
 
 
 def inspect_contents(archive):
@@ -91,7 +91,7 @@ def main():
         'native_matches_current_aar': matches,
         'signature': 'verified; local development signing, not distribution acceptance',
         'zip_and_core_elf_alignment': '16 KiB verified',
-        'core_exports_per_abi': 17,
+        'core_exports_per_abi': len(SYMBOLS),
         'runtime_acceptance': 'record separately; archive inspection is not an execution test',
     }
     args.report.parent.mkdir(parents=True, exist_ok=True)

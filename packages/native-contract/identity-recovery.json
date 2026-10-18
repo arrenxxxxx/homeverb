@@ -1,0 +1,29 @@
+{
+  "api_version": "1.25.0",
+  "functions": {
+    "homeverb_prepare_identity_recovery": {
+      "request": "native-identity-recovery#/$defs/prepare",
+      "protected_inputs": [
+        "login",
+        "password"
+      ],
+      "response": "native-identity-recovery#/$defs/prepare_result"
+    },
+    "homeverb_confirm_identity_recovery": {
+      "request": "native-identity-recovery#/$defs/confirm",
+      "response": "native-identity-recovery#/$defs/confirm_result"
+    },
+    "homeverb_discard_identity_recovery": {
+      "parameters": [
+        "uint64 handle",
+        "uint64 recovery_id"
+      ],
+      "response": "bool"
+    }
+  },
+  "limits": {
+    "max_pending_recoveries": 8,
+    "preview_ttl_ms": 60000
+  },
+  "confirmation": "Actual trusted UI same-account consent; closes the confirming host. Never a model tool."
+}

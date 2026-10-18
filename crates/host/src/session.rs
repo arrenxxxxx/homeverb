@@ -14,7 +14,9 @@ use tokio_util::sync::CancellationToken;
 mod lan_scan;
 pub use lan_scan::{ConfirmLanScanRequest, PendingMeijuLanScan, PrepareLanScanRequest};
 mod connection_link;
+mod identity_recovery;
 pub use connection_link::{ConfirmConnectionLinkRequest, PrepareConnectionLinkRequest};
+pub use identity_recovery::ConfirmIdentityRecoveryRequest;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -131,6 +133,7 @@ struct State {
     approvals: HashMap<u64, PendingApproval>,
     lan_scans: HashMap<u64, PendingMeijuLanScan>,
     connection_links: HashMap<u64, PendingConnectionLink>,
+    identity_recoveries: HashMap<u64, homeverb_midea::PendingIdentityRecovery>,
     approval_generation: u64,
 }
 
@@ -164,6 +167,7 @@ impl Session {
                 approvals: HashMap::new(),
                 lan_scans: HashMap::new(),
                 connection_links: HashMap::new(),
+                identity_recoveries: HashMap::new(),
                 approval_generation: 0,
             })),
         }
@@ -207,6 +211,7 @@ impl Session {
                 state.approvals.clear();
                 state.lan_scans.clear();
                 state.connection_links.clear();
+                state.identity_recoveries.clear();
                 state.approval_generation += 1;
                 for token in state.operations.values() {
                     token.cancel();
@@ -216,6 +221,10 @@ impl Session {
     }
 
     pub fn cancel(&self, operation_id: &str) -> bool {
+        if let Ok(mut state) = self.state.lock() {
+            state.identity_recoveries.clear();
+            state.approval_generation += 1;
+        }
         self.state
             .lock()
             .ok()
@@ -233,6 +242,7 @@ impl Session {
             state.approvals.clear();
             state.lan_scans.clear();
             state.connection_links.clear();
+            state.identity_recoveries.clear();
             state.approval_generation += 1;
             for token in state.operations.values() {
                 token.cancel();

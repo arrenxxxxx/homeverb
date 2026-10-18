@@ -1238,6 +1238,68 @@ class HomeController extends ChangeNotifier {
     }
   }
 
+  bool get canRecoverIdentity =>
+      reopen != null &&
+      selectedAccount != null &&
+      core is IdentityRecoveryClient &&
+      (core as IdentityRecoveryClient).supportsIdentityRecovery;
+
+  Future<bool> recoverIdentity(
+    Uint8List login,
+    Uint8List password,
+    String label,
+    Future<bool> Function(IdentityRecoveryPreview) confirm,
+  ) async {
+    try {
+      return await perform(() async {
+        if (!canRecoverIdentity)
+          throw NativeFailure(
+            'AUTH_FLOW_UNSUPPORTED',
+            'Account recovery is unavailable.',
+          );
+        final client = core as IdentityRecoveryClient;
+        final accountId = selectedAccount!;
+        final epoch = _readEpoch;
+        accountNeedsReload = true;
+        final preview = await client.prepareIdentityRecovery(
+          login: login,
+          password: password,
+          accountId: accountId,
+          label: label.trim().isEmpty ? 'Meiju account' : label.trim(),
+        );
+        try {
+          if (!_foreground ||
+              epoch != _readEpoch ||
+              selectedAccount != accountId ||
+              preview.account['id'] != accountId) {
+            throw NativeFailure('CANCELLED', 'Account recovery was cancelled.');
+          }
+          final approved = await confirm(preview);
+          if (!approved) return;
+          if (!_foreground ||
+              epoch != _readEpoch ||
+              selectedAccount != accountId) {
+            throw NativeFailure('CANCELLED', 'Account recovery was cancelled.');
+          }
+          try {
+            accountReport = await client.confirmIdentityRecovery(preview);
+            validateAccountReport(accountReport!);
+          } finally {
+            // A confirmed identity transition seals the old host, even on uncertainty.
+            // Never carry its command grants or previews into the replacement session.
+            await _replaceControlSession(const []);
+          }
+          await reloadAccountViews();
+        } finally {
+          await client.discardIdentityRecovery(preview);
+        }
+      });
+    } finally {
+      login.fillRange(0, login.length, 0);
+      password.fillRange(0, password.length, 0);
+    }
+  }
+
   void validateAccountReport(Json report) {
     final retrieval = report['retrieval'] as Json;
     if (!['complete', 'partial', 'failed'].contains(retrieval['status']) ||

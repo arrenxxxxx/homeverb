@@ -1,5 +1,5 @@
 {
-  "api_version": "1.24.0",
+  "api_version": "1.25.0",
   "prepare": {
     "schema_version": "1.0",
     "operation_id": "scan-preview",

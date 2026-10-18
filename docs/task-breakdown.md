@@ -53,6 +53,21 @@ classifies scanner findings, adds the missing Flutter scaffold notice and record
 one historical promotional-image rights issue plus a commit-email privacy choice.
 No runtime contract, authority or physical compatibility changed.
 
+## Same-account identity recovery: October 18, 2026
+
+Native API 1.25 implements canonical Meiju IoT-user subjects and a separate trusted
+legacy restoration preview/confirmation/discard path under
+[ADR-0073](adr/0073-meiju-account-identity-recovery.md). An owner-operated diagnostic
+confirmed login success followed by changed-login-ID refusal with matching client
+identifiers. Complete matching inventory plus explicit owner consent can migrate
+an intact legacy binding, preserving local IDs and settings. The old host closes;
+control grants and approvals do not survive the transition. Ordinary login still
+refuses identity conflicts. SQLite 5 and outer payload 3 are unchanged; canonical
+inner sessions use version 3 and cannot be read by older binaries.
+Synthetic evidence and pending live restoration are recorded in the
+[App verification record](../apps/mobile/verification.md). This is not additional
+physical-appliance compatibility or write authorization.
+
 ## Task status
 
 The October 18 existing-emulator check retained the saved account and six device

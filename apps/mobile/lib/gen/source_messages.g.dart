@@ -1700,6 +1700,14 @@ String? translateSource(
   "Water supply warning" => t.vendorMideaDishwasherWaterLack,
   "Salt warning" => t.vendorMideaDishwasherSoftwaterLack,
   "Rinse aid warning" => t.vendorMideaDishwasherBrightLack,
+  "Restore Saved Account" => t.mobileIdentityRecoveryAction,
+  "If the same account was refused because its identity changed, restore its saved binding after reviewing the matching devices." =>
+    t.mobileIdentityRecoveryHint,
+  "All {count} saved devices match this login." =>
+    t.mobileIdentityRecoveryCount(count: args["count"] ?? "{count}"),
+  "Confirm this is the same Meiju account. HomeVerb will update its identity binding and keep your devices, names and rooms. Existing control permissions will be cleared. Shared devices alone do not prove account identity." =>
+    t.mobileIdentityRecoveryConsent,
+  "Confirm Same Account and Restore" => t.mobileIdentityRecoveryConfirm,
   _ => null,
 };
 
@@ -3333,5 +3341,13 @@ String? sourceForKey(String key) => switch (key) {
   "vendor.midea.dishwasher.bright_lack" => "Rinse aid warning",
   "vendor.midea.dishwasher.temperature" => "Temperature",
   "vendor.midea.dishwasher.remaining_minutes" => "Remaining time",
+  "mobile.identityRecoveryAction" => "Restore Saved Account",
+  "mobile.identityRecoveryHint" =>
+    "If the same account was refused because its identity changed, restore its saved binding after reviewing the matching devices.",
+  "mobile.identityRecoveryCount" =>
+    "All {count} saved devices match this login.",
+  "mobile.identityRecoveryConsent" =>
+    "Confirm this is the same Meiju account. HomeVerb will update its identity binding and keep your devices, names and rooms. Existing control permissions will be cleared. Shared devices alone do not prove account identity.",
+  "mobile.identityRecoveryConfirm" => "Confirm Same Account and Restore",
   _ => null,
 };

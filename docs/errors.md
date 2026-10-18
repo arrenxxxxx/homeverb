@@ -485,3 +485,13 @@ Unknown actions, malformed/duplicate/oversized grants still fail with
 `CAPABILITY_UNSUPPORTED` before transmission. Accepted power requests are not
 verified state. Uncertain transmission remains `WRITE_OUTCOME_UNKNOWN` and may
 not be replayed or treated as a safe-door/drainage guarantee.
+
+API 1.25 legacy identity restoration uses `ACCOUNT_IDENTITY_CONFLICT` for an
+expired/unavailable preview, missing canonical identity or mismatched account/
+inventory scope. It does not imply incorrect credentials. The separate trusted
+recovery UI requires actual same-account consent; ordinary reauthorization keeps
+its exact identity guard. `ACCOUNT_SESSION_UNCONFIRMED` covers changed protected
+bytes. Existing credential-write uncertainty codes retain their pending semantics.
+Once confirmation seals the host, reopen read-only even if restoration fails;
+`HOST_CLOSED` is expected for further requests on that old handle. See
+[ADR-0073](adr/0073-meiju-account-identity-recovery.md).

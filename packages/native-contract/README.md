@@ -1,6 +1,6 @@
 # HomeVerb native contract
 
-Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.24.0 has 34 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions and three trusted connection-link functions; the JSON envelope schema is 1.0.
+Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.25.0 has 34 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions three trusted connection-link functions and three trusted account-identity recovery functions; the JSON envelope schema is 1.0.
 
 API 1.19 adds nullable `last_complete_inventory_at` to account summaries. It is
 historical local retrieval metadata, not authorization or online status. SQLite
@@ -102,3 +102,11 @@ properties use `control_requires_observation` to hide unreported optional contro
 Execution independently checks the protected profile and reads required state
 before one send. The 34 ordinary methods, C/JNI exports and storage formats are
 unchanged. See the [contract](../../docs/native-ui-contract.md#profile-scoped-optional-ac-startup-api-123).
+
+API 1.25 supplies [identity-recovery.json](identity-recovery.json),
+[fictional fixtures](identity-recovery-examples.json) and the
+[recovery schema](../../schemas/native-identity-recovery.schema.json). Actual
+trusted UI consent is required after full device matching. Confirmation seals
+the old host and preserves local identity/preferences; reopen read-only. Canonical
+inner Meiju session version 3 uses the provider IoT user ID; SQLite and outer
+payload formats remain unchanged.

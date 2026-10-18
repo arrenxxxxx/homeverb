@@ -404,3 +404,52 @@ async fn transport_errors_never_export_provider_details() {
     assert_eq!(error.code, "MIDEA_REQUEST_FAILED");
     assert!(!format!("{error:?}").contains("private"));
 }
+
+#[tokio::test]
+async fn canonical_identity_is_protected_and_malformed_identity_never_downgrades() {
+    let mut response = login_response();
+    response["data"]["iotUserId"] = json!("FICTIONAL-IOT-USER");
+    let script = Script::new(vec![id_response(), response]);
+    let session = login(&script, &credentials(), &operation()).await.unwrap();
+    assert_eq!(
+        session.subject().expose(),
+        b"meiju.iot-user-id.v1:FICTIONAL-IOT-USER"
+    );
+    let encoded = session.encode().unwrap();
+    let restored = MeijuSession::restore(&encoded).unwrap();
+    assert_eq!(restored.subject().expose(), session.subject().expose());
+    let stored: Value = serde_json::from_slice(encoded.expose()).unwrap();
+    assert_eq!(stored["version"], 3);
+    assert_eq!(
+        stored["legacy_subject"],
+        "meiju.login-id.v1:synthetic-login-001"
+    );
+    for bad in [
+        json!(""),
+        json!("private\nidentifier"),
+        json!("x".repeat(257)),
+        json!(123),
+        json!({}),
+    ] {
+        let mut response = login_response();
+        response["data"]["iotUserId"] = bad;
+        let script = Script::new(vec![id_response(), response]);
+        assert_eq!(
+            login(&script, &credentials(), &operation())
+                .await
+                .unwrap_err()
+                .code,
+            "MIDEA_RESPONSE_INVALID"
+        );
+    }
+    for field in ["legacy_subject", "client_device_id", "subject"] {
+        let mut invalid = stored.clone();
+        invalid.as_object_mut().unwrap().remove(field);
+        assert_eq!(
+            MeijuSession::restore(&SecretBytes::new(serde_json::to_vec(&invalid).unwrap()))
+                .unwrap_err()
+                .code,
+            "ACCOUNT_SESSION_UNCONFIRMED"
+        );
+    }
+}

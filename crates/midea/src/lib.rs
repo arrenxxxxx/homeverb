@@ -23,7 +23,7 @@ pub use product::ProductProfile;
 mod account;
 pub use account::{
     BoundInventory, ConnectReport, DeviceBinding, DeviceInventoryMembership, LanCandidateMatch,
-    MeijuAccount, connect,
+    MeijuAccount, PendingIdentityRecovery, connect,
 };
 mod adapter;
 pub use adapter::{

@@ -1298,4 +1298,9 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get vendorMideaDishwasherBrightLack => '\u6f02\u6d17\u5242\u63d0\u9192';
 	@override String get vendorMideaDishwasherTemperature => '\u6e29\u5ea6';
 	@override String get vendorMideaDishwasherRemainingMinutes => '\u5269\u4f59\u65f6\u95f4';
+	@override String get mobileIdentityRecoveryAction => '\u6062\u590d\u539f\u8d26\u53f7';
+	@override String get mobileIdentityRecoveryHint => '\u5982\u679c\u540c\u4e00\u8d26\u53f7\u56e0\u8eab\u4efd\u6807\u8bc6\u53d8\u5316\u800c\u88ab\u62d2\u7edd\uff0c\u8bf7\u6838\u5bf9\u8bbe\u5907\u540e\u6062\u590d\u539f\u8d26\u53f7\u7ed1\u5b9a\u3002';
+	@override String mobileIdentityRecoveryCount({required Object count}) => '\u6b64\u6b21\u767b\u5f55\u4e0e\u539f\u8d26\u53f7\u7684\u5168\u90e8 ${count} \u53f0\u8bbe\u5907\u5339\u914d\u3002';
+	@override String get mobileIdentityRecoveryConsent => '\u8bf7\u786e\u8ba4\u8fd9\u662f\u540c\u4e00\u4e2a\u7f8e\u5c45\u8d26\u53f7\u3002HomeVerb \u5c06\u66f4\u65b0\u8eab\u4efd\u7ed1\u5b9a\uff0c\u4fdd\u7559\u8bbe\u5907\u3001\u540d\u79f0\u548c\u623f\u95f4\uff0c\u5e76\u6e05\u9664\u539f\u63a7\u5236\u6743\u9650\u3002\u4ec5\u8bbe\u5907\u76f8\u540c\u4e0d\u80fd\u8bc1\u660e\u8d26\u53f7\u76f8\u540c\u3002';
+	@override String get mobileIdentityRecoveryConfirm => '\u786e\u8ba4\u662f\u540c\u4e00\u8d26\u53f7\u5e76\u6062\u590d';
 }

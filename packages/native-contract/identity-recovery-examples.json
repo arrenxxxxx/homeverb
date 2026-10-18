@@ -1,0 +1,60 @@
+{
+  "api_version": "1.25.0",
+  "prepare": {
+    "schema_version": "1.0",
+    "operation_id": "connect-example",
+    "timeout_ms": 180000,
+    "label": "Example account",
+    "account_id": "00000000-0000-4000-8000-000000000001"
+  },
+  "confirm": {
+    "schema_version": "1.0",
+    "operation_id": "confirm-example",
+    "timeout_ms": 30000,
+    "recovery_id": 1
+  },
+  "prepare_result": {
+    "schema_version": "1.0",
+    "data": {
+      "recovery_id": 1,
+      "account": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "provider": "midea.meiju",
+        "region": "CN",
+        "label": "Example account",
+        "credential_state": "stored",
+        "authorization": "not_checked",
+        "last_complete_inventory_at": null
+      },
+      "device_count": 1,
+      "expires_in_ms": 60000,
+      "requires_same_account_confirmation": true
+    },
+    "warnings": [],
+    "error": null
+  },
+  "confirm_result": {
+    "schema_version": "1.0",
+    "data": {
+      "account": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "provider": "midea.meiju",
+        "region": "CN",
+        "label": "Example account",
+        "credential_state": "stored",
+        "authorization": "not_checked",
+        "last_complete_inventory_at": null
+      },
+      "authentication": "succeeded",
+      "retrieval": {
+        "status": "complete",
+        "device_ids": [
+          "00000000-0000-4000-8000-000000000002"
+        ],
+        "error": null
+      }
+    },
+    "warnings": [],
+    "error": null
+  }
+}

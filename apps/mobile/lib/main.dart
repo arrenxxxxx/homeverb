@@ -1708,6 +1708,60 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         reauthorizing: c.selectedAccount != null,
         needsReload: c.accountNeedsReload,
         busy: c.busy,
+        onRecover: !c.canRecoverIdentity
+            ? null
+            : (login, password) async {
+                final success = await c.recoverIdentity(
+                  login,
+                  password,
+                  connectionLabel,
+                  (preview) async {
+                    if (!mounted || epoch != navigation || !c.isForeground)
+                      return false;
+                    return await showDialog<bool>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Copy('Restore Saved Account'),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Copy(LiteralText(preview.account['label'])),
+                                Copy(
+                                  UiMessage(
+                                    'All {count} saved devices match this login.',
+                                    {'count': preview.deviceCount},
+                                  ),
+                                ),
+                                const Copy(
+                                  'Confirm this is the same Meiju account. HomeVerb will update its identity binding and keep your devices, names and rooms. Existing control permissions will be cleared. Shared devices alone do not prove account identity.',
+                                ),
+                              ],
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, false),
+                                child: const Copy('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, true),
+                                child: const Copy(
+                                  'Confirm Same Account and Restore',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ) ??
+                        false;
+                  },
+                );
+                if (success &&
+                    mounted &&
+                    epoch == navigation &&
+                    c.isForeground) {
+                  setAccountEditor(null);
+                }
+              },
         onSubmit: (login, password) async {
           final success = await c.connectAccount(
             login,

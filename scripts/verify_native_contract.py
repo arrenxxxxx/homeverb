@@ -950,6 +950,8 @@ def main():
     verify_lan_scan()
     from verify_native_connection_link import verify_connection_link
     verify_connection_link()
+    from verify_native_identity_recovery import verify_identity_recovery
+    verify_identity_recovery()
     print(f"PASS: {len(api['methods'])} native methods; {len(examples)} live examples; closed-field, error, outcome, and lifecycle checks.")
     print('Mock, empty Meiju startup, independent AC and trusted dishwasher grant admission and protected account-buffer guards verified on this host; no live accounts, Flutter/mobile or physical-device verification in this suite.')
 

@@ -11,6 +11,49 @@ void main() {
     '../../target/debug/${NativeClient.defaultLibrary()}',
   ).absolute.path;
   test(
+    'identity recovery clears protected inputs on native and version refusals',
+    () async {
+      final directory = await Directory.systemTemp.createTemp(
+        'homeverb-recovery-ffi-',
+      );
+      final core = await NativeClient.open(
+        dataDir: directory.path,
+        libraryPath: library,
+      );
+      try {
+        expect(core.supportsIdentityRecovery, true);
+        for (final version in ['1.25.0', '1.24.0']) {
+          core.apiVersion = version;
+          final login = Uint8List.fromList('fixture@example.invalid'.codeUnits);
+          final password = Uint8List.fromList('Fictional password'.codeUnits);
+          await expectLater(
+            core.prepareIdentityRecovery(
+              login: login,
+              password: password,
+              accountId: '00000000-0000-4000-8000-000000000001',
+              label: 'Fictional',
+            ),
+            throwsA(
+              isA<NativeFailure>().having(
+                (e) => e.code,
+                'code',
+                version == '1.25.0'
+                    ? 'AUTH_FLOW_UNSUPPORTED'
+                    : 'API_UPGRADE_REQUIRED',
+              ),
+            ),
+          );
+          expect(login.every((b) => b == 0), true);
+          expect(password.every((b) => b == 0), true);
+        }
+      } finally {
+        await core.close();
+        await directory.delete(recursive: true);
+      }
+    },
+  );
+
+  test(
     'protected FFI clears owned buffers on native rejection and wrapper refusals',
     () async {
       final directory = await Directory.systemTemp.createTemp(

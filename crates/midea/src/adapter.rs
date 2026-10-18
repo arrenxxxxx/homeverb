@@ -439,6 +439,43 @@ impl MeijuAdapter {
         })
     }
 
+    pub async fn prepare_identity_recovery(
+        &self,
+        credentials: LoginCredentials,
+        account_id: Uuid,
+        operation: &Operation,
+    ) -> Result<crate::PendingIdentityRecovery> {
+        crate::account::identity_recovery::prepare(
+            &self.vault,
+            self.transport.as_ref(),
+            credentials,
+            account_id,
+            operation,
+        )
+        .await
+    }
+
+    /// Trusted user confirmation only; ordinary login cannot reconcile changed identities.
+    pub async fn confirm_identity_recovery(
+        &self,
+        preview: crate::PendingIdentityRecovery,
+        operation: &Operation,
+    ) -> Result<AccountDiscovery> {
+        let report =
+            crate::account::identity_recovery::confirm(&self.vault, preview, operation).await?;
+        let descriptors = match report.retrieval {
+            Ok(bound) => {
+                self.discover_inner(Some(report.account.id), Some(bound), operation)
+                    .await
+            }
+            Err(error) => Err(error),
+        };
+        Ok(AccountDiscovery {
+            account: report.account,
+            descriptors,
+        })
+    }
+
     pub async fn refresh_devices(
         &self,
         id: Uuid,

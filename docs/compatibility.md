@@ -15,6 +15,21 @@ remain unverified. See the [phase record](development/11-mijia.md).
 Existing native API 1.23, SQLite 5, Meiju protected payload 3 and entry points are
 unchanged. A new internal crate and six locked SHA-1 support packages are added.
 
+## Same-account identity recovery: October 18, 2026
+
+Native API 1.25 implements canonical Meiju IoT-user subjects and a separate trusted
+legacy restoration preview/confirmation/discard path under
+[ADR-0073](adr/0073-meiju-account-identity-recovery.md). An owner-operated diagnostic
+confirmed login success followed by changed-login-ID refusal with matching client
+identifiers. Complete matching inventory plus explicit owner consent can migrate
+an intact legacy binding, preserving local IDs and settings. The old host closes;
+control grants and approvals do not survive the transition. Ordinary login still
+refuses identity conflicts. SQLite 5 and outer payload 3 are unchanged; canonical
+inner sessions use version 3 and cannot be read by older binaries.
+Synthetic evidence and pending live restoration are recorded in the
+[App verification record](../apps/mobile/verification.md). This is not additional
+physical-appliance compatibility or write authorization.
+
 ## Appliance detail buttons: October 18, 2026
 
 The existing Android emulator retained six cards after the update, but live reads

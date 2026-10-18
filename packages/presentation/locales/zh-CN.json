@@ -1263,5 +1263,10 @@
   "vendor.midea.dishwasher.softwater_lack": "洗碗盐提醒",
   "vendor.midea.dishwasher.bright_lack": "漂洗剂提醒",
   "vendor.midea.dishwasher.temperature": "温度",
-  "vendor.midea.dishwasher.remaining_minutes": "剩余时间"
+  "vendor.midea.dishwasher.remaining_minutes": "剩余时间",
+  "mobile.identityRecoveryAction": "恢复原账号",
+  "mobile.identityRecoveryHint": "如果同一账号因身份标识变化而被拒绝，请核对设备后恢复原账号绑定。",
+  "mobile.identityRecoveryCount": "此次登录与原账号的全部 {count} 台设备匹配。",
+  "mobile.identityRecoveryConsent": "请确认这是同一个美居账号。HomeVerb 将更新身份绑定，保留设备、名称和房间，并清除原控制权限。仅设备相同不能证明账号相同。",
+  "mobile.identityRecoveryConfirm": "确认是同一账号并恢复"
 }

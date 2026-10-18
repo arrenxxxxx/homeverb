@@ -185,6 +185,8 @@ struct Token {
 struct LoginData {
     mdata: Token,
     key: PrivateString,
+    #[serde(default, rename = "iotUserId")]
+    iot_user_id: Option<PrivateString>,
 }
 
 #[derive(Serialize)]
@@ -274,10 +276,19 @@ pub async fn login(
         return Err(invalid());
     }
     let key = codec::session_key(&result.key.0)?;
-    // The server login ID participates in the successful password proof. Do not infer
-    // identity from nicknames, login spellings or an unreviewed userInfo field.
-    let mut subject = b"meiju.login-id.v1:".to_vec();
-    subject.extend_from_slice(id.id.0.as_bytes());
+    let mut legacy = b"meiju.login-id.v1:".to_vec();
+    legacy.extend_from_slice(id.id.0.as_bytes());
+    let (subject, legacy_subject) = match result.iot_user_id {
+        Some(uid) => {
+            if !ascii(uid.0.as_bytes(), 256, false) {
+                return Err(invalid());
+            }
+            let mut subject = b"meiju.iot-user-id.v1:".to_vec();
+            subject.extend_from_slice(uid.0.as_bytes());
+            (subject, Some(SecretBytes::new(legacy)))
+        }
+        None => (legacy, None),
+    };
     operation
         .run(async {
             Ok(MeijuSession {
@@ -285,6 +296,7 @@ pub async fn login(
                 token: SecretBytes::new(result.mdata.token.0.as_bytes().to_vec()),
                 key,
                 client_device_id: Some(SecretBytes::new(device_id.as_bytes().to_vec())),
+                legacy_subject,
             })
         })
         .await
@@ -299,6 +311,7 @@ pub struct MeijuSession {
     token: SecretBytes,
     key: SecretBytes,
     client_device_id: Option<SecretBytes>,
+    legacy_subject: Option<SecretBytes>,
 }
 
 impl fmt::Debug for MeijuSession {
@@ -315,6 +328,8 @@ struct StoredSession<'a> {
     key: &'a str,
     #[serde(skip_serializing_if = "Option::is_none")]
     client_device_id: Option<&'a str>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    legacy_subject: Option<&'a str>,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -325,9 +340,28 @@ struct RestoredSession {
     key: PrivateString,
     #[serde(default)]
     client_device_id: Option<PrivateString>,
+    #[serde(default)]
+    legacy_subject: Option<PrivateString>,
 }
 
 impl MeijuSession {
+    pub(crate) fn matches_saved_subject(&self, subject: &[u8]) -> bool {
+        self.subject.expose() == subject
+            || self
+                .legacy_subject
+                .as_ref()
+                .is_some_and(|id| id.expose() == subject)
+    }
+
+    pub(crate) fn is_canonical(&self) -> bool {
+        self.legacy_subject.is_some()
+    }
+
+    pub(crate) fn same_login_input(&self, previous: &Self) -> bool {
+        matches!((&self.client_device_id, &previous.client_device_id),
+            (Some(a), Some(b)) if a.expose() == b.expose())
+    }
+
     /// Diagnostic comparisons never participate in account admission or persistence.
     pub(crate) fn trace_reauthorization(&self, previous: &Self) {
         use crate::auth_trace::{Event, emit};
@@ -391,7 +425,9 @@ impl MeijuSession {
         }
         Ok(SecretBytes::new(
             serde_json::to_vec(&StoredSession {
-                version: if self.client_device_id.is_some() {
+                version: if self.is_canonical() {
+                    3
+                } else if self.client_device_id.is_some() {
                     2
                 } else {
                     1
@@ -400,6 +436,7 @@ impl MeijuSession {
                 token: text(&self.token)?,
                 key: text(&self.key)?,
                 client_device_id: self.client_device_id.as_ref().map(text).transpose()?,
+                legacy_subject: self.legacy_subject.as_ref().map(text).transpose()?,
             })
             .map_err(|_| invalid())?,
         ))
@@ -420,7 +457,7 @@ impl MeijuSession {
         let subject = stored.subject.0.as_bytes();
         let valid_version = match (stored.version, &stored.client_device_id) {
             (1, None) => true,
-            (2, Some(id)) => {
+            (2 | 3, Some(id)) => {
                 id.0.len() == 16
                     && id
                         .0
@@ -429,10 +466,24 @@ impl MeijuSession {
             }
             _ => false,
         };
-        if !valid_version
-            || subject
+        let valid_subject = match (stored.version, &stored.legacy_subject) {
+            (1 | 2, None) => subject
                 .strip_prefix(b"meiju.login-id.v1:")
-                .is_none_or(|id| !ascii(id, 256, false))
+                .is_some_and(|id| ascii(id, 256, false)),
+            (3, Some(legacy)) => {
+                subject
+                    .strip_prefix(b"meiju.iot-user-id.v1:")
+                    .is_some_and(|id| ascii(id, 256, false))
+                    && legacy
+                        .0
+                        .as_bytes()
+                        .strip_prefix(b"meiju.login-id.v1:")
+                        .is_some_and(|id| ascii(id, 256, false))
+            }
+            _ => false,
+        };
+        if !valid_version
+            || !valid_subject
             || !ascii(stored.token.0.as_bytes(), 8192, false)
             || !matches!(stored.key.0.len(), 16 | 24 | 32)
             || !ascii(stored.key.0.as_bytes(), 32, false)
@@ -445,6 +496,10 @@ impl MeijuSession {
             key: SecretBytes::new(stored.key.0.as_bytes().to_vec()),
             client_device_id: stored
                 .client_device_id
+                .as_ref()
+                .map(|id| SecretBytes::new(id.0.as_bytes().to_vec())),
+            legacy_subject: stored
+                .legacy_subject
                 .as_ref()
                 .map(|id| SecretBytes::new(id.0.as_bytes().to_vec())),
         })
