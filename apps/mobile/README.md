@@ -19,15 +19,17 @@ and dishwasher ADRs [0044](../../docs/adr/0044-profile-scoped-dishwasher-start.m
 [0055](../../docs/adr/0055-profile-scoped-dishwasher-cycle-controls.md) and
 [0063](../../docs/adr/0063-explicit-dishwasher-cycle-options.md), plus the current
 adapter descriptors and App startup policy. Meiju refrigerators remain read-only.
-The ordinary App does not automatically prepare elevated dishwasher grants, so
-its saved dishwasher cards can show observations and utility buttons without
-cycle controls. Fictional authorized fixtures exercise those buttons; this UI
-revision neither broadens startup authority nor establishes physical support.
+The foreground App now prepares exact reviewed dishwasher startup grants when
+opening a supported device, following [ADR-0071](../../docs/adr/0071-app-dishwasher-command-preparation.md).
+Every start, pause, resume or cancel still requires a separate immutable native
+preview and explicit confirmation. Unsupported product profiles remain read-only;
+preparation neither sends a command nor establishes physical support.
 
 Open a supported device after sign-in or retrieval to use its available controls.
 There is no session-permission form, extra checkbox, review or revocation menu.
-The trusted app prepares all reviewed low-risk control values for the opened
-device using its exact saved model and cloud connection. It refreshes only that
+The trusted app prepares reviewed low-risk control values and the four reviewed
+dishwasher cycle actions for the opened device using its exact saved model and
+cloud connection. It refreshes only that
 account to publish the available actions. Startup loads local metadata/cache first;
 automatic state reads then follow the foreground policy below. Account inventory
 refresh, background setup and appliance commands are never scheduled.

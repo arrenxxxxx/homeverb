@@ -1,5 +1,48 @@
 # Flutter implementation verification
 
+## Foreground dishwasher command preparation: October 18, 2026
+
+This follow-up implements [ADR-0071](../../docs/adr/0071-app-dishwasher-command-preparation.md)
+and supersedes the preceding UI-only phase's lack of automatic dishwasher grant
+preparation. Opening an admitted dishwasher now derives exact program/additional
+combinations from protected native inspection, reopens the trusted session and
+refreshes only the selected account. The existing buttons open argument entry and
+immutable command review; every send still requires separate trusted confirmation.
+The 760Y0026 fixture produces 60 start grants and 15 cycle grants. Unknown schemas,
+optional/foreign arguments, oversized combinations and hosts without trusted
+approval support do not create dishwasher authority.
+
+Changed implementation: `lib/session_permissions.dart`, `lib/controller.dart`,
+and `test/dishwasher_permissions_test.dart`. The adapter wire encoding and native
+ABI are unchanged. The [command evidence record](../../docs/development/12-appliance-command-evidence.md)
+traces the actual send endpoint and explains why refrigerator writes still need
+exact-model encoder evidence.
+
+Executed on macOS with the installed FVM SDK:
+
+- `cargo build -p homeverb-ffi --offline --locked`: passed.
+- `fvm dart format lib/session_permissions.dart lib/controller.dart test/dishwasher_permissions_test.dart`: passed.
+- `fvm flutter analyze`: passed, no issues.
+- `fvm flutter test test/dishwasher_permissions_test.dart test/session_permissions_test.dart test/device_detail_controls_test.dart test/approval_test.dart test/state_refresh_test.dart --reporter expanded`: 29 passed.
+- `cargo test -p homeverb-midea --offline --locked dishwasher`: 16 passed; other tests filtered out.
+- `cargo test -p homeverb-host --test dishwasher_grants --test dishwasher_cycle_grants --test user_approval --offline --locked`: 17 passed.
+- `scripts/verify_native_dishwasher.py` using `.venv/bin/python`: passed against the built native library, with fictional profiles and no provider traffic.
+- `scripts/verify_refrigerator_encoders.py` using temporary Python/Lupa 2.8 and the pinned public checkout: 13 packet vectors and seven expected missing-input errors matched.
+- Documentation, contract and repository validators: passed.
+
+The first new test run exposed a shallow Map matcher in the test, corrected with
+`contains(equals(...))`; an intermediate focused command also included a nonexistent
+test filename, removed in the final run. Neither failure is counted as a pass.
+The prior two macOS pixel-baseline failures are outside these focused suites;
+this phase does not claim a full Flutter-suite pass.
+
+No APK/package, phone installation, live account access, physical appliance write,
+remote CI or publication was performed. Real-profile button availability and
+physical start/pause/resume/cancel outcomes still require owner acceptance.
+Refrigerator controls remain blocked by exact-model encoder/step/preservation
+evidence. Native API 1.23, SQLite 5 and protected Meiju payload 3 are unchanged;
+only trusted foreground App preparation policy expands.
+
 ## Refrigerator and dishwasher detail buttons: October 18, 2026
 
 Capability exploration traced the current refrigerator write-evidence review,

@@ -179,6 +179,10 @@ malformed undecodable input does not. Missing/consumed/foreign/pruned IDs return
 Background/close clears the registry; a generation check prevents publishing a
 preview across a background/foreground race. No registry lock spans execution.
 Ordinary JSON/CLI/MCP remain unchanged. Flutter consent UI has fictional native integration evidence; real-platform consent and physical acceptance remain separate work.
+[ADR-0071](adr/0071-app-dishwasher-command-preparation.md) lets the foreground App
+prepare exact reviewed dishwasher grants on device opening. That preparation
+does not prepare or consume a command preview and cannot send an appliance command;
+the separate trusted confirmation and adapter admission rules below still apply.
 [ADR-0044](adr/0044-profile-scoped-dishwasher-start.md) uses this path for reviewed
 experimental dishwasher starts: elevated, non-idempotent, exact arguments, one
 cloud request, no replay/readback/optimistic cache. Explicit additional settings

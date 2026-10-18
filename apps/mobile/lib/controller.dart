@@ -376,9 +376,7 @@ class HomeController extends ChangeNotifier {
             p.capability == capability &&
             p.action == action) {
           yield {
-            'argument_schema': {
-              'const': {p.parameter: p.value},
-            },
+            'argument_schema': {'const': p.arguments},
           };
         }
       }
@@ -433,8 +431,8 @@ class HomeController extends ChangeNotifier {
     }
   }
 
-  /// Owner-approved default: admit every reviewed low-risk value for the device
-  /// being opened. This is foreground host policy, never a preference or command.
+  /// Prepare reviewed values for the opened device. Dishwasher actions still
+  /// require a separate trusted command preview and user confirmation (ADR-0071).
   Future<void> _prepareDeviceControls(String device) async {
     if (!_canPrepareControls) return;
     final epoch = _readEpoch;
@@ -460,7 +458,10 @@ class HomeController extends ChangeNotifier {
         'Control options do not match this device.',
       );
     }
-    final next = SessionPermission.choices(inspected);
+    final next = SessionPermission.choices(
+      inspected,
+      trustedApproval: supportsTrustedApproval,
+    );
     if (next.isEmpty) return;
     final previousIds = _controlPermissions.map((p) => p.identity).toSet();
     final nextIds = next.map((p) => p.identity).toSet();

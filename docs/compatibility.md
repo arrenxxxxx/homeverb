@@ -24,9 +24,13 @@ trusted review remain separate from read-only observations, including the explic
 additional option required by product 760Y0026. This fixes a Flutter presentation
 refusal without changing adapter admission or Core execution semantics.
 
-Native API, SQLite, protected account payloads and startup authority are unchanged.
-The ordinary App still does not prepare elevated dishwasher grants, and Meiju
-refrigerator writes remain blocked by the existing model/preservation evidence.
+Native API, SQLite and protected account payloads are unchanged. The subsequent
+[ADR-0071](adr/0071-app-dishwasher-command-preparation.md) implementation prepares
+exact reviewed dishwasher startup grants in the foreground App. Every invocation
+still requires separate trusted confirmation. Meiju refrigerator writes remain
+blocked by exact-model encoder/preservation evidence; the latest
+[command investigation](development/12-appliance-command-evidence.md) records the
+protocol lookup path and additional offline encoder results.
 No real appliance control was performed. Fictional UI and existing native approval
 regressions are recorded in the [App verification record](../apps/mobile/verification.md).
 

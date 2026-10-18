@@ -14,10 +14,17 @@ progress are synthetic-tested. Native API 1.9 also adds independent vendor fan c
 API 1.12 adds protected-profile AC temperature control; API 1.12.1 also uses that
 profile's selected temperature wire shape on explicit reads.
 API 1.14 adds reviewed profile-scoped dishwasher starts through exact native grants
-and trusted confirmation. Remaining dishwasher mappings, refrigerator writes,
-Flutter consent UI and physical acceptance remain pending. API 1.15 adds independent
+and trusted confirmation. Remaining dishwasher mappings, refrigerator writes
+and physical acceptance remain pending. API 1.15 adds independent
 reviewed dishwasher pause/resume/cancel grants and trusted confirmation; it does
 not expand unknown-product admission or enable refrigerator writes.
+
+The October 18 [App command-preparation phase](../adr/0071-app-dishwasher-command-preparation.md)
+connects these dishwasher actions to foreground device opening, explicit argument
+buttons and the separately confirmed native command path. Fictional Flutter/native
+tests cover this integration; physical acceptance remains pending. The subsequent
+[command research](12-appliance-command-evidence.md) records the exact cloud send
+and protocol lookup paths plus additional refrigerator encoder comparisons.
 
 API 1.16 adds [read-only control-option inspection](../native-ui-contract.md#inspect-control-options-before-permission-api-116)
 from saved protected model/profile evidence. Flutter can build the exact consent

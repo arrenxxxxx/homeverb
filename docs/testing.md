@@ -241,6 +241,19 @@ approval send uncertainty and cancellation; no sleep-based expiry test is needed
 
 ## Profile-scoped dishwasher controls
 
+The foreground App integration is covered by
+`fvm flutter test test/dishwasher_permissions_test.dart test/session_permissions_test.dart test/device_detail_controls_test.dart test/approval_test.dart test/state_refresh_test.dart`
+from `apps/mobile`, after building `homeverb-ffi`. It checks exact multi-argument
+startup grants, trusted-host gating, immutable arguments, malformed/oversized
+schemas, native startup and selected-device preparation without sending commands.
+Existing widget/native approval and foreground lifecycle regressions remain part
+of this focused suite. No provider credentials or household appliances are used.
+
+The optional [refrigerator encoder research](development/12-appliance-command-evidence.md)
+uses `scripts/verify_refrigerator_encoders.py` with a local pinned public checkout
+and temporary `lupa==2.8` environment. It asserts 13 encoded vectors and seven
+expected missing-input errors; these are source experiments, not model support.
+
 The native contract suite also runs
 [verify_native_dishwasher.py](../scripts/verify_native_dishwasher.py). Startup
 schema/runtime checks reject invalid grant lists before profile creation, then

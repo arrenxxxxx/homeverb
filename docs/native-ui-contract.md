@@ -747,6 +747,12 @@ This resolves the read-only startup permission flow in [ADR-0056](adr/0056-read-
 
 Inspection does not check existing permission, refresh membership, change any
 adapter flags, grant authority, save a permission selection or create a receipt.
+The trusted foreground App policy in ADR-0065 and
+[ADR-0071](adr/0071-app-dishwasher-command-preparation.md) performs exact grant
+preparation on device opening instead of showing a separate permission form.
+It admits reviewed low-risk controls and the four reviewed dishwasher cycle
+actions only. Dishwasher preparation additionally requires trusted native approval
+support; each invocation still needs its own immutable preview and user consent.
 Do not label a proposed option as already allowed. Its definitions are not proof
 of live authorization, current appliance state or physical support. Unavailable
 secrets, pending/removing accounts, missing listed membership and identity changes

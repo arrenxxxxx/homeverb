@@ -61,8 +61,10 @@ Current route/component permissions gate visible actions and exact temperature
 steps. Dishwasher parameters that share names with read-only observations remain
 valid arguments to separately confirmed non-idempotent operations, without making
 those observations editable. Existing native confirmation and Core validation stay
-mandatory. Ordinary App startup still does not grant elevated dishwasher actions;
-Meiju refrigerator writes remain unadmitted. See the [App verification record](../apps/mobile/verification.md)
+mandatory. The subsequent [ADR-0071](adr/0071-app-dishwasher-command-preparation.md)
+implementation prepares exact reviewed dishwasher grants when opening a device;
+each operation still requires separate trusted confirmation. Meiju refrigerator
+writes remain unadmitted. See the [App verification record](../apps/mobile/verification.md)
 for fictional widget/approval evidence and remaining physical acceptance.
 
 [ADR-0069](adr/0069-profile-scoped-ac-features.md) integrates reviewed optional AC

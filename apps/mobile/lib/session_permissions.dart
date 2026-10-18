@@ -17,8 +17,13 @@ class SessionPermission {
   String get identity =>
       jsonEncode([device, component, capability, action, value]);
 
+  Map<String, dynamic> get arguments => parameter == 'arguments'
+      ? Map<String, dynamic>.unmodifiable(value as Map)
+      : {parameter: value};
+
   Map<String, dynamic> get startupEntry => {
     'device_id': device,
+    if (startupField == 'meiju_dishwasher_cycle_grants') 'action': action,
     if (startupField == 'meiju_ac_feature_grants') ...{
       'feature': parameter,
       'value': value,
@@ -35,13 +40,21 @@ class SessionPermission {
     ('vendor.midea.ac', 'activate_mode'): ('meiju_mode_grants', 'mode'),
   };
 
-  static List<SessionPermission> choices(Map<String, dynamic> inspection) {
+  static List<SessionPermission> choices(
+    Map<String, dynamic> inspection, {
+    bool trustedApproval = false,
+  }) {
     if (inspection['source'] != 'saved_inventory' ||
         inspection['authorization'] != 'not_checked' ||
         inspection['device_id'] is! String)
       return [];
     final result = <SessionPermission>[];
     for (final option in inspection['options'] as List? ?? []) {
+      if (trustedApproval &&
+          option['capability'] == 'vendor.midea.dishwasher') {
+        result.addAll(_dishwasherChoices(inspection['device_id'], option));
+        continue;
+      }
       final propertiesForMapping =
           option['definition']?['parameters']?['properties'];
       final featureParameter =
@@ -169,6 +182,101 @@ class SessionPermission {
       }
     }
     return List.unmodifiable(result);
+  }
+
+  /// Host configuration only; all writes still consume a trusted native preview.
+  static List<SessionPermission> _dishwasherChoices(String device, Map option) {
+    final action = option['action'];
+    if (option['component_id'] != 'main' ||
+        !{
+          'start_cycle',
+          'pause_cycle',
+          'resume_cycle',
+          'cancel_cycle',
+        }.contains(action))
+      return [];
+    final definition = option['definition'];
+    if (definition is! Map ||
+        definition['risk'] != 'elevated' ||
+        definition['idempotency'] != 'non_idempotent' ||
+        definition['atomic'] != false ||
+        definition['independent_fields'] != false ||
+        definition['verification'] != 'unavailable' ||
+        definition['transports'] is! List ||
+        (definition['transports'] as List).length != 1 ||
+        (definition['transports'] as List).single != 'cloud')
+      return [];
+    final schema = definition['parameters'];
+    if (schema is! Map ||
+        schema['type'] != 'object' ||
+        schema['additionalProperties'] != false ||
+        schema.keys.any(
+          (key) => !{
+            'type',
+            'properties',
+            'required',
+            'additionalProperties',
+            'description',
+            'title',
+          }.contains(key),
+        ))
+      return [];
+    final properties = schema['properties'];
+    final required = schema['required'] ?? const [];
+    if (properties is! Map ||
+        required is! List ||
+        required.length != required.toSet().length ||
+        required.length != properties.length ||
+        required.any((name) => !properties.containsKey(name)) ||
+        properties.keys.any(
+          (name) =>
+              name != 'additional' &&
+              !(name == 'program' && action == 'start_cycle'),
+        ) ||
+        (action == 'start_cycle' && !properties.containsKey('program')))
+      return [];
+    var combinations = <Map<String, Object>>[{}];
+    // Stable key ordering makes exact-grant identities independent of JSON order.
+    for (final name in ['program', 'additional']) {
+      if (!properties.containsKey(name)) continue;
+      final parameter = properties[name];
+      if (parameter is! Map ||
+          parameter['type'] != (name == 'program' ? 'string' : 'integer') ||
+          parameter.keys.any(
+            (key) => !{'type', 'enum', 'description', 'title'}.contains(key),
+          ))
+        return [];
+      final values = parameter['enum'];
+      if (values is! List ||
+          values.isEmpty ||
+          values.length > 64 ||
+          values.length != values.toSet().length ||
+          values.any(
+            (value) => name == 'program'
+                ? value is! String || value.trim().isEmpty
+                : value is! int,
+          ) ||
+          combinations.length * values.length > 64)
+        return [];
+      combinations = [
+        for (final args in combinations)
+          for (final value in values) {...args, name: value as Object},
+      ];
+    }
+    return [
+      for (final args in combinations)
+        SessionPermission._(
+          device,
+          'main',
+          'vendor.midea.dishwasher',
+          action as String,
+          'arguments',
+          Map<String, Object>.unmodifiable(args),
+          action == 'start_cycle'
+              ? 'meiju_dishwasher_grants'
+              : 'meiju_dishwasher_cycle_grants',
+        ),
+    ];
   }
 
   static Map<String, dynamic> startup(List<SessionPermission> permissions) {
