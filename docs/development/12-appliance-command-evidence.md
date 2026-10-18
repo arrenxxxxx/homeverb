@@ -319,7 +319,7 @@ settings and reports that are not Lua appliance commands.
 | Food inventory | Historical provider food service exists; inspect current operations and account scope |
 | Door-open count, cleaning reminder, monthly report, efficiency score | Trace current reporting endpoints and distinguish historical summaries from current appliance state |
 | Dishwasher power button | Bundled E1 `power_on`/`power_off` values; review exact centralized profile, required extra options and trusted authority |
-| Dishwasher detergent, filter and rinse-aid status | Identify current status sources, units and any explicit maintenance-reset operations |
+| Dishwasher detergent, filter and rinse-aid status | Bundled service-center consumables route traced below; current dishwasher plugin association, authenticated response and maintenance-reset operations remain open |
 | Last wash time/mode and water/electricity usage | Trace history/report sources, not synthetic values derived from current state |
 | Monthly electricity, water and water savings | Trace provider aggregate report semantics and period |
 
@@ -423,3 +423,73 @@ appliance-controls APK were rebuilt and checked; see the
 [package record](../../apps/mobile/verification.md#current-appliance-controls-apk--october-18-2026).
 This corrects the earlier build blocker. It does not supply the refrigerator's
 protected protocol selector or an authenticated current-model plugin.
+
+## Current APK consumables service trace
+
+Static inspection of the same pinned 11.7.10.6 APK found a concrete provider-data
+path in `assets/assetsWeex/service-center/deviceInfo.js`, SHA-256
+`1a7c604a6676bb7f911da32029ead338b9d2dda8b4454d3d2f80e37c20dada6c`.
+This is the bundled general service-center screen, not a recovered GX1200Max
+device plugin. The new evidence narrows the remaining consumables investigation:
+
+1. `queryByHomeGroupList` calls `sendCssHttpRequestWrapper` with
+   `/v2/remaining/queryByHomeGroupList`. The helper uses POST and adds
+   `plugin_version` and epoch-seconds `tm`; this call explicitly disables the
+   optional outer `body` wrapper. Its caller supplies `homeGroupInfoList`, each
+   entry containing `homegroupId` and `remainingStatusSet: ["0", "1", "2"]`.
+2. The helper invokes native `sendCentralCloundRequest` (the spelling in the
+   actual bridge). `DefaultBridgeBusinessNetImpl` uses the MAS request-wrapper
+   factory, base body and JSON POST path for the ordinary request branch.
+   Alternate new-request/gzip branches also exist. This trace is not evidence
+   that HomeVerb's existing transport can send the request unchanged.
+3. The caller checks `success`, iterates `data[].applianceConsumablesList`, and
+   matches `applianceCode` against the selected device's `iotDeviceId`. It retains
+   the containing `homeGroupId` and matched `consumables`. These identifiers must
+   remain in protected adapter state if this path is implemented; raw provider
+   results must not be exposed to general UI JSON or stored in plaintext.
+4. Display distinguishes `remainingValue`, `total`, `remainingStatus` and
+   `remainingValueType`. Type 4 renders categorical sufficiency: status 2 is
+   sufficient, with a decorative wave height of 0.4; the alternate wave height
+   is 0.05. Neither height is a measured percentage. Other branches calculate
+   ratios, and missing data has a separate display. Do not convert a categorical
+   warning or absent value into an invented percentage or a physical reset.
+5. The detail navigation targets `customer-service/materialDetail.js` and passes
+   device/product context. The bundled service-center asset does not establish
+   this separate module's maintenance-reset request or the screenshot's exact
+   filter/detergent association.
+
+The existing E1 read mapping exposes optional `softwater_lack` and `bright_lack`
+warning codes. Those fields are not a source for remaining detergent percentage,
+filter lifetime, last-wash consumption or monthly totals. The bundled base E1
+Lua itself does not contain those two warning names or the screenshot's report
+fields; richer protected profiles and provider services must be distinguished.
+
+The static inspector now reproduces the route, request wrapper, response
+association, categorical-display and native-call checks. Its output contains
+allowlisted names and hashes only. It never evaluates downloaded JavaScript/Lua,
+prints arbitrary literals, or admits additional authentication/signing material.
+The pinned inspection passed; separate mutations of the route, categorical status
+and device-match expression were each rejected by the source checks.
+
+An additional bounded public module lookup used `modelList: ["customer-service"]`
+with the already-approved compatibility signer and no account/device data.
+The APK's two module-request DTOs both declare `List<String>`. The official
+`/v1/plugin/update/getModelPlugin` route returned HTTP 200 with business code
+40400 (invalid request); no module was downloaded. This result applies only to
+that public request, not to every module format or authenticated route. No
+consumables endpoint, real account or appliance command was called.
+
+Next implementation evidence is the actual current device plugin association,
+authenticated response/error/units semantics, protected home/device binding and
+the service's current authorization path. Any maintenance-reset action also needs
+its own effect, confirmation and uncertain-write review. This phase changes
+research tooling and documentation only; native API 1.24, existing descriptors,
+grants, storage formats and the delivered APK are unchanged. Real consumables,
+current refrigerator modes and screenshot parity remain unverified.
+
+Phase validation: the pinned APK/demo inspector; the three changed-source
+refusals described above; `validate_docs.py` (146 Markdown files, 1594 local links,
+212 JSON files); `validate_repository.py` (624 maintained text files);
+`.venv/bin/python scripts/validate_contracts.py` (20 schemas, 50 positive and 291
+negative fixtures); and `git diff --check`. No application build, device test,
+account access, remote publication or real-device write occurred in this phase.

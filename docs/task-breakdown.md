@@ -299,3 +299,10 @@ standard paths; the earlier missing-SDK conclusion is corrected in the
 [delivery record](../apps/mobile/verification.md#current-appliance-controls-apk--october-18-2026).
 No installation or real-device operation followed. Current refrigerator protocol
 identity and physical verification remain open.
+
+Further APK inspection traced the bundled service-center consumables POST,
+home/device association and categorical-versus-ratio display. The public
+`customer-service` module lookup did not return an artifact. See the
+[consumables evidence](development/12-appliance-command-evidence.md#current-apk-consumables-service-trace).
+Current-model association, authenticated service responses and maintenance-reset
+semantics are still required; no new production endpoint or control is enabled.

@@ -123,6 +123,50 @@ def inspect_demo(path):
     }
 
 
+def inspect_consumables(archive):
+    """Trace the bundled service UI without exporting unrelated source literals."""
+    path = "assets/assetsWeex/service-center/deviceInfo.js"
+    raw = archive.read(path)
+    source = raw.decode("utf-8")
+
+    def section(start, end):
+        offset = source.index(start)
+        return source[offset:source.index(end, offset)]
+
+    route = "/v2/remaining/queryByHomeGroupList"
+    request = section("t.queryByHomeGroupList=function", "t.getFaultInfoList=function")
+    assert f'sendCssHttpRequestWrapper)("{route}",e,t,!1,!1)' in request
+    wrapper = section("t.sendCssHttpRequestWrapper=function", "t.sendMideaCloundSaleRequest=function")
+    assert 'isWrapWithBody:r' in wrapper and 't.isWrapWithBody?{body:e}:e' in wrapper
+    start = source.rfind("h=function(", 0, source.index("t.sendCssHttpRequestWrapper=function"))
+    helper = source[start:source.index("t.sendCssHttpRequestWrapper=function")]
+    assert 'method:"POST"' in helper and 's.sendCentralCloundRequest(h,' in helper
+    assert 'plugin_version:r.default.plugin_version||"0.0.1"' in helper
+    assert 'tm:Math.round(Date.now()/1e3)' in helper
+    assert 'homegroupId:e.homegroupId,remainingStatusSet:["0","1","2"]' in source
+    assert 'b={homeGroupInfoList:y}' in source
+    assert 'I=C.data,!C.success' in source
+    assert 'T.applianceConsumablesList[Symbol.iterator]()' in source
+    assert 'O=P.value).applianceCode==e.deviceInfo.iotDeviceId' in source
+    assert 'e.homeId=T.homeGroupId,e.consumables=O.consumables' in source
+    wave = section("setWavePercent:function", "caculatePercent:function")
+    assert 'e.remainingValue/e.total' in wave
+    assert '4==e.remainingValueType' in wave and '2==e.remainingStatus?.4:.05' in wave
+    detail = section("goDetailThrottle:function", "getDeviceInfo:function")
+    assert 'url:"customer-service/materialDetail.js?from=externalPage"' in detail
+    return {
+        "asset": path, "sha256": digest(raw), "method": "POST", "path": route,
+        "bridge": "sendCentralCloundRequest", "body_wrapper": False,
+        "request_fields": ["homeGroupInfoList", "homegroupId", "remainingStatusSet", "plugin_version", "tm"],
+        "response_fields": ["success", "data", "homeGroupId", "applianceConsumablesList",
+                            "applianceCode", "consumables", "remainingValue", "total",
+                            "remainingValueType", "remainingStatus"],
+        "categorical_display": "Type 4 uses status 2 for sufficient; decorative wave height is not a measured percentage.",
+        "detail_module": "customer-service/materialDetail.js",
+        "scope": "Bundled service-center path; no current dishwasher plugin association or authenticated response.",
+    }
+
+
 def inspect(apk_path: Path, checkout: Path):
     with apk_path.open("rb") as source:
         actual = hashlib.file_digest(source, "sha256").hexdigest()
@@ -139,6 +183,7 @@ def inspect(apk_path: Path, checkout: Path):
     key = format(ast.literal_eval(init.body[0].value.args[-1]), "x").encode("ascii")
     report = {"apk_sha256": actual, "version": "11.7.10.6", "bundled_protocols": {}}
     with zipfile.ZipFile(apk_path) as archive:
+        report["consumables_service"] = inspect_consumables(archive)
         for name, expected in DECODED_DIGESTS.items():
             encoded = archive.read("assets/lua/" + name)
             decoded = unpad(AES.new(key, AES.MODE_ECB).decrypt(bytes.fromhex(encoded.decode("ascii"))), len(key))
@@ -189,6 +234,10 @@ def inspect(apk_path: Path, checkout: Path):
         {"applianceCode", "order", "timestamp", "isFull"})
     assert len(report["wan_body_fields"]) == 4
     report["plugin_post_annotations"] = plugin_annotations(dex)
+    service_bridge = method("Lcom/midea/hybrid/api/meiju/bridge/impl/DefaultBridgeBusinessNetImpl;",
+                            "sendCentralCloundRequest")
+    report["consumables_service"]["native_bridge_calls"] = require_calls(service_bridge,
+        ["getReqWrapper", "getJsonRequest", "getBaseBody", "setBodyJson", "doPost"])
     downloader = method("Lcom/midea/hybrid/minix/plugin/service/PluginPacketDownloaderServiceImpl;",
                         "getRemotePluginPackageDownloadInfo")
     report["plugin_lookup_calls"] = require_calls(downloader,
