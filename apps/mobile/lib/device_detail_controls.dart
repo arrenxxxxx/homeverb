@@ -130,7 +130,26 @@ class DeviceDetailControls extends StatelessWidget {
               color: muted,
             ),
           ),
-        ...controls,
+        if (controls.isNotEmpty)
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final columns =
+                  constraints.maxWidth >= 320 &&
+                      MediaQuery.textScalerOf(context).scale(14) <= 20 &&
+                      controls.length > 1
+                  ? 2
+                  : 1;
+              final width =
+                  (constraints.maxWidth - 12 * (columns - 1)) / columns;
+              return Wrap(
+                spacing: 12,
+                children: [
+                  for (final control in controls)
+                    SizedBox(width: width, child: control),
+                ],
+              );
+            },
+          ),
         for (final reason in unavailableReasons)
           Padding(
             padding: const EdgeInsets.only(bottom: 12),

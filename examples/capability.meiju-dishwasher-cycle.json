@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "id": "vendor.midea.dishwasher",
   "component_id": "main",
-  "revision": 3,
+  "revision": 6,
   "properties": {
     "mode": {
       "type": "string",
@@ -89,6 +89,38 @@
       "parameters": {
         "type": "object",
         "description": "Request cancellation of the dishwasher cycle. This may terminate the program and does not confirm draining or rollback.",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "non_idempotent",
+      "risk": "elevated",
+      "atomic": false,
+      "independent_fields": false,
+      "verification": "unavailable"
+    },
+    "power_on": {
+      "parameters": {
+        "type": "object",
+        "description": "Request dishwasher power on. This does not confirm that a wash has started.",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "non_idempotent",
+      "risk": "elevated",
+      "atomic": false,
+      "independent_fields": false,
+      "verification": "unavailable"
+    },
+    "power_off": {
+      "parameters": {
+        "type": "object",
+        "description": "Request dishwasher power off. This may interrupt a program and does not confirm electrical isolation, draining or safe door opening.",
         "properties": {},
         "additionalProperties": false
       },

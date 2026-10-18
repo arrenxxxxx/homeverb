@@ -229,7 +229,9 @@
             "enum": [
               "pause_cycle",
               "resume_cycle",
-              "cancel_cycle"
+              "cancel_cycle",
+              "power_on",
+              "power_off"
             ]
           },
           "arguments": {
@@ -597,7 +599,7 @@
     "allow_mock_writes"
   ],
   "additionalProperties": false,
-  "description": "Trusted native startup. data_dir must be an absolute private OS path. adapter defaults to homeverb.mock; scenario defaults to normal. Meiju defaults to read-only; optional meiju_power_grants, meiju_fan_grants, meiju_mode_grants and meiju_temperature_grants separately admit exact-device power, fan, explicit power-on/mode activation and profile-scoped temperature targets over cloud. Meiju rejects Mock grants or fault scenarios. Opening never authenticates, discovers or controls. Optional meiju_dishwasher_grants admit reviewed elevated starts only through separate trusted confirmation. Optional meiju_dishwasher_cycle_grants independently admit reviewed pause, resume and cancel requests through trusted confirmation. Optional meiju_ac_feature_grants independently admit reviewed profile-scoped scalar settings; missing reported prerequisites refuse before send.",
+  "description": "Trusted native startup. data_dir must be an absolute private OS path. adapter defaults to homeverb.mock; scenario defaults to normal. Meiju defaults to read-only; optional meiju_power_grants, meiju_fan_grants, meiju_mode_grants and meiju_temperature_grants separately admit exact-device power, fan, explicit power-on/mode activation and profile-scoped temperature targets over cloud. Meiju rejects Mock grants or fault scenarios. Opening never authenticates, discovers or controls. Optional meiju_dishwasher_grants admit reviewed elevated starts only through separate trusted confirmation. Optional meiju_dishwasher_cycle_grants independently admit reviewed pause, resume, cancel, power-on and power-off requests through trusted confirmation. Optional meiju_ac_feature_grants independently admit reviewed profile-scoped scalar settings; missing reported prerequisites refuse before send.",
   "allOf": [
     {
       "if": {

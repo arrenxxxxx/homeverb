@@ -285,3 +285,10 @@ no appliance write occurred. Current exact-model plugin selection, remaining
 screenshot feature mappings, dishwasher power admission and physical verification
 remain open. Historical demo dispatch and visible official controls do not by
 themselves change HomeVerb's capability or grant contracts.
+
+The subsequent [dishwasher power phase](adr/0072-profile-scoped-dishwasher-power.md)
+implements profile-scoped on/off requests and App buttons under native API 1.24.
+The source comparator checks 18 product/option vectors without executing upstream
+code. Exact grants, trusted confirmation and uncertain-write handling apply.
+Current-owner product matching and real power acceptance remain pending; this
+phase does not close refrigerator parity or the screenshot's provider reports.

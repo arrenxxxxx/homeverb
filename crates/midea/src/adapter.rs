@@ -183,6 +183,7 @@ fn descriptors(
                 cycle.actions.insert("start_cycle".into(), profile.action());
             }
             if let Some(profile) = dishwasher.filter(|_| adapter.dishwasher_cycle) {
+                cycle.revision = 6;
                 for action in crate::DISHWASHER_CYCLE_ACTIONS {
                     cycle
                         .actions
@@ -334,7 +335,7 @@ impl MeijuAdapter {
         self
     }
 
-    /// Admit reviewed cycle operations independently of program-start authority.
+    /// Admit reviewed cycle and power requests independently of program-start authority.
     pub fn with_dishwasher_cycle_control(mut self) -> Self {
         self.dishwasher_cycle = true;
         self
@@ -673,7 +674,7 @@ impl Adapter for MeijuAdapter {
         if dishwasher && !validated.has_user_approval() {
             return Err(Error::new(
                 "POLICY_DENIED",
-                "Controlling a dishwasher cycle requires trusted user approval.",
+                "Controlling a dishwasher requires trusted user approval.",
             ));
         }
         // Repeat the fixed adapter contract even if public stored metadata was modified.

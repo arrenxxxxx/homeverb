@@ -40,3 +40,7 @@ arguments, current-session display scope, native startup admission, actual trust
 confirmation and navigation/background cancellation using fictional data. Public
 upstream source is protocol evidence, not a physical appliance test. Refrigerator
 admission remains a separate model/encoder investigation.
+
+[ADR-0072](0072-profile-scoped-dishwasher-power.md) extends this preparation to
+explicit power-on/off requests returned by API 1.24 control-option inspection.
+The original cycle grants retain their exact scope.

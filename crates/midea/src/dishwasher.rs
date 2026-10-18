@@ -1,4 +1,4 @@
-//! Product-scoped E1 program and cycle mappings; never infer controls from a display model alone.
+//! Product-scoped E1 program, cycle and power mappings; never infer controls from a display model alone.
 
 use crate::control::CloudControl;
 use homeverb_domain::{Action, Idempotency, Risk, Transport, VerificationMethod};
@@ -10,12 +10,16 @@ pub enum DishwasherCycleAction {
     PauseCycle,
     ResumeCycle,
     CancelCycle,
+    PowerOn,
+    PowerOff,
 }
 
-pub const DISHWASHER_CYCLE_ACTIONS: [DishwasherCycleAction; 3] = [
+pub const DISHWASHER_CYCLE_ACTIONS: [DishwasherCycleAction; 5] = [
     DishwasherCycleAction::PauseCycle,
     DishwasherCycleAction::ResumeCycle,
     DishwasherCycleAction::CancelCycle,
+    DishwasherCycleAction::PowerOn,
+    DishwasherCycleAction::PowerOff,
 ];
 
 impl DishwasherCycleAction {
@@ -24,6 +28,8 @@ impl DishwasherCycleAction {
             Self::PauseCycle => "pause_cycle",
             Self::ResumeCycle => "resume_cycle",
             Self::CancelCycle => "cancel_cycle",
+            Self::PowerOn => "power_on",
+            Self::PowerOff => "power_off",
         }
     }
 
@@ -35,6 +41,12 @@ impl DishwasherCycleAction {
 
     fn description(self) -> &'static str {
         match self {
+            Self::PowerOn => {
+                "Request dishwasher power on. This does not confirm that a wash has started."
+            }
+            Self::PowerOff => {
+                "Request dishwasher power off. This may interrupt a program and does not confirm electrical isolation, draining or safe door opening."
+            }
             Self::PauseCycle => {
                 "Request a pause of the dishwasher cycle. This is not a safe-door guarantee."
             }
@@ -171,7 +183,15 @@ impl DishwasherProfile {
                 operator: "start",
                 additional,
             },
-            DishwasherCycleAction::CancelCycle => CloudControl::DishwasherCancel {
+            DishwasherCycleAction::PowerOn => CloudControl::DishwasherWorkStatus {
+                work_status: "power_on",
+                additional,
+            },
+            DishwasherCycleAction::PowerOff => CloudControl::DishwasherWorkStatus {
+                work_status: "power_off",
+                additional,
+            },
+            DishwasherCycleAction::CancelCycle => CloudControl::DishwasherWorkStatus {
                 work_status: "cancel",
                 additional,
             },

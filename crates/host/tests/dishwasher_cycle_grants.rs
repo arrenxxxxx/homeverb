@@ -39,6 +39,13 @@ fn exact_cycle_permissions_remain_independent_and_require_approval() {
             policy.authorize(&c, &ordinary).unwrap(),
             vec![Transport::Cloud]
         );
+        for other in DISHWASHER_CYCLE_ACTIONS {
+            if other != action {
+                let mut peer = c.clone();
+                peer.action = other.action_name().into();
+                assert!(policy.authorize(&peer, &ordinary).is_err());
+            }
+        }
         for field in [
             "device",
             "component",
@@ -77,7 +84,7 @@ fn exact_cycle_permissions_remain_independent_and_require_approval() {
         .collect();
     assert_eq!(
         meiju_dishwasher_cycle_policy(&grants).unwrap().grants.len(),
-        3
+        5
     );
 }
 

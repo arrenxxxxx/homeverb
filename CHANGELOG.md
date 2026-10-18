@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add profile-scoped dishwasher power-on/off requests with independent exact
+  grants and trusted confirmation (native API 1.24). The App exposes reviewed
+  power actions as buttons and names explicit additional-option effects in the
+  confirmation. Physical acceptance remains pending.
+
 ### Open-source preparation
 
 - Allow bounded cold iOS Simulator installation/container lookup/launch time in CI

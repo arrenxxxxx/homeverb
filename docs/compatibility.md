@@ -2033,3 +2033,21 @@ This is research evidence only: native API 1.22.0, SQLite 5, protected payload 3
 control admission and physical compatibility are unchanged. In particular,
 historical light-wave/extreme-freezing/holiday mappings do not yet admit controls
 for the selected current refrigerator model.
+
+## Dishwasher power requests (API 1.24)
+
+[ADR-0072](adr/0072-profile-scoped-dishwasher-power.md) adds `power_on` and
+`power_off` to the existing exact `meiju_dishwasher_cycle_grants` action enum.
+Existing grants do not gain authority. The same five protected profiles apply;
+760Y0026 requires an explicit reviewed additional option. Cycle-enabled
+capabilities have revision 6. All power requests retain elevated risk, trusted
+confirmation, non-idempotent uncertainty handling and no automatic read/retry.
+
+Native API 1.24.0 is additive at the C/JSON boundary. Older native libraries reject
+the new enum values. App preparation follows inspected definitions and does not
+invent them for an older library. The unreleased Rust `DishwasherCycleAction`
+enum gains two variants; downstream exhaustive matches must handle them. Ordinary
+method/export counts, SQLite 5 and protected payload 3 are unchanged.
+The App adds corresponding buttons and explicit option-aware confirmation text.
+This is offline software evidence only; owner-profile matching, physical power,
+mobile packaging and remaining screenshot-feature acceptance remain open.

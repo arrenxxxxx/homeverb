@@ -474,6 +474,24 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	/// en-US: 'Request cancellation on {device} and set {additional}? This may terminate the program and does not confirm draining or rollback.'
 	String vendorMideaDishwasherCancelCycleConfirmAdditional({required Object device, required Object additional}) => 'Request cancellation on ${device} and set ${additional}? This may terminate the program and does not confirm draining or rollback.';
 
+	/// en-US: 'Power on'
+	String get vendorMideaDishwasherPowerOn => 'Power on';
+
+	/// en-US: 'Power off'
+	String get vendorMideaDishwasherPowerOff => 'Power off';
+
+	/// en-US: 'Power on {device}? No wash program is selected by this request.'
+	String vendorMideaDishwasherPowerOnConfirm({required Object device}) => 'Power on ${device}? No wash program is selected by this request.';
+
+	/// en-US: 'Power on {device} with {additional}? This sets the additional option without selecting a wash program.'
+	String vendorMideaDishwasherPowerOnConfirmAdditional({required Object device, required Object additional}) => 'Power on ${device} with ${additional}? This sets the additional option without selecting a wash program.';
+
+	/// en-US: 'Power off {device}? This may interrupt a program and does not confirm draining or safe door opening.'
+	String vendorMideaDishwasherPowerOffConfirm({required Object device}) => 'Power off ${device}? This may interrupt a program and does not confirm draining or safe door opening.';
+
+	/// en-US: 'Power off {device} and set {additional}? This may interrupt a program and does not confirm draining or safe door opening.'
+	String vendorMideaDishwasherPowerOffConfirmAdditional({required Object device, required Object additional}) => 'Power off ${device} and set ${additional}? This may interrupt a program and does not confirm draining or safe door opening.';
+
 	/// en-US: 'Reported cycle operator'
 	String get vendorMideaDishwasherOperator => 'Reported cycle operator';
 

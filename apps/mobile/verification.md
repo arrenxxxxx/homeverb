@@ -2870,3 +2870,42 @@ SHA-256: `6357742c59e7d6c9e10ce4b4c54e8b728f3a1a0412625d6a1c240d7658bf190a`.
 The owner-requested emulator update used `adb -s emulator-5586 install -r`, which
 returned `Success`; launching MainActivity also succeeded. No uninstall, data
 clear, live refresh, appliance command, remote push or publication was performed.
+
+## Dishwasher power buttons and explicit option confirmation
+
+October 18, 2026: native API 1.24 adds reviewed `power_on`/`power_off` lifecycle
+requests. Flutter derives their exact startup grants from protected control-option
+inspection, preserving old-library behavior when those actions are absent.
+The 760Y0026 fixture yields 60 start plus 25 lifecycle grants, with no default
+additional option. Detail controls use two columns at ordinary text size and one
+column for narrow/large-text layouts. The immutable confirmation displays the
+option's setting effect through `confirmAdditional`.
+
+Executed offline checks:
+
+- The pinned public E1 AST comparator passed all 18 power vectors; no upstream code
+  or appliance was executed.
+- Workspace build passed. All 46 Midea adapter tests passed, including the extended
+  dishwasher power execution/outcome/profile/approval loops. Host grant tests and
+  control-option inspection passed; pairwise lifecycle authority remains separate.
+- Native C acceptance passed 34 ordinary methods and 55 examples, including exact
+  power startup grants and separate trusted-confirmation admission.
+- Flutter analysis passed. The focused permission, confirmation-copy, detail,
+  approval, control and appliance tests passed (27 initially; the added old-host
+  case passed in the subsequent targeted run). Button screenshots were inspected;
+  the final large-text test keeps control permissions enabled.
+- Python tooling: 68 passed. Runtime acceptance: 35 cases, 28 passed and 7 existing
+  Linux-only cases skipped on macOS. Presentation: 7 passed.
+- Full workspace Rust tests were attempted but are not all green: 14 existing LAN
+  cases cannot bind their fictional `127.0.0.2` endpoints on this macOS host
+  (`AddrNotAvailable`). No host network configuration was changed.
+- Strict Clippy stopped on four existing `chunks_exact_to_as_chunks` warnings in
+  unchanged Midea codec/LAN files under the installed Rust 1.99 toolchain. A rerun
+  allowing only that lint passed; this is not a claim of unqualified strict success.
+
+The final layout test initially used an incorrect strict gap assertion between
+adjacent rows; comparing row origins corrected the test without changing product
+layout. No Android APK/AAR or iOS framework was rebuilt in this phase. The existing
+Android SDK/NDK/license blocker remains. No real account, appliance command,
+remote push or publication occurred. Physical power, exact owner-product matching,
+refrigerator writes and remaining screenshot features are still pending.

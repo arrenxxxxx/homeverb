@@ -244,11 +244,11 @@ async fn protected_profiles_determine_options_and_match_enabled_descriptors() {
 #[tokio::test(start_paused = true)]
 async fn dishwasher_options_preserve_profile_domains_and_never_supply_approval() {
     for (code, count) in [
-        ("7600020L", 4),
-        ("76006481", 4),
-        ("7600649Q", 4),
-        ("7600V1E7", 4),
-        ("760Y0026", 4),
+        ("7600020L", 6),
+        ("76006481", 6),
+        ("7600649Q", 6),
+        ("7600V1E7", 6),
+        ("760Y0026", 6),
         ("7600016L", 0),
         ("TEST1234", 0),
     ] {

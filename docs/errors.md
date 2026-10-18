@@ -475,3 +475,13 @@ failures keep the basic result and a fixed warning; cancellation, deadline and
 authentication errors stop the operation. The App's foreground refresh failure
 policy remains silent. No failure supplies a default switch state. Sent command
 outcomes and request replay retain the existing accepted/unknown/rejected rules.
+
+
+API 1.24 adds explicit dishwasher `power_on`/`power_off` values to the existing
+lifecycle grant field under [ADR-0072](adr/0072-profile-scoped-dishwasher-power.md).
+Unknown actions, malformed/duplicate/oversized grants still fail with
+`INVALID_ARGUMENT` before storage. Missing exact grants or trusted approval are
+`POLICY_DENIED`; absent/conflicting product evidence or host opt-out remains
+`CAPABILITY_UNSUPPORTED` before transmission. Accepted power requests are not
+verified state. Uncertain transmission remains `WRITE_OUTCOME_UNKNOWN` and may
+not be replayed or treated as a safe-door/drainage guarantee.

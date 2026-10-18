@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "request_id": "dishwasher-pause-additional-1",
+  "device_id": "30000000-0000-4000-8000-000000000001",
+  "component_id": "main",
+  "capability": "vendor.midea.dishwasher",
+  "action": "power_on",
+  "arguments": {
+    "additional": 9
+  },
+  "connection": "cloud",
+  "timeout_ms": 10000,
+  "wait_for": "verified"
+}

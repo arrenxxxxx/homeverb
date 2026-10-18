@@ -271,11 +271,19 @@ void main() {
           expect(tester.widget(start), isA<ActionButton>());
           await tester.ensureVisible(start);
           await tester.pumpAndSettle();
+          expect(
+            tester.getTopLeft(start).dy,
+            tester
+                .getTopLeft(find.byKey(const ValueKey('control:0:pause_cycle')))
+                .dy,
+          );
           await capture('dishwasher-buttons');
           for (final action in [
             'pause_cycle',
             'resume_cycle',
             'cancel_cycle',
+            'power_on',
+            'power_off',
           ]) {
             await tap(find.byKey(ValueKey('control:0:$action')));
             expect(
@@ -284,6 +292,20 @@ void main() {
             );
             expect(core.prepared, isNull);
             await tap(find.text('Cancel'));
+          }
+          for (final action in ['power_on', 'power_off']) {
+            await tap(find.byKey(ValueKey('control:0:$action')));
+            await tap(find.text('Cloud'));
+            await tap(find.text('Review Command'));
+            expect(core.prepared, isNull);
+            await tap(find.byKey(const ValueKey('parameter:additional:9')));
+            await tap(find.text('Review Command'));
+            expect(core.prepared?['action'], action);
+            expect(core.prepared?['arguments'], {'additional': 9});
+            expect(core.prepared?['connection'], 'cloud');
+            expect(core.calls.where((v) => v['method'] == 'execute'), isEmpty);
+            await tap(find.text('Cancel'));
+            core.prepared = null;
           }
           await tap(start);
           await tap(find.byKey(const ValueKey('parameter:program:eco_wash')));
@@ -320,10 +342,22 @@ void main() {
           );
         }
         expect(core.calls.where((v) => v['method'] == 'execute'), isEmpty);
+        core.allowed = allowed;
+        await c.selectDevice(core.device['id']);
         await LocaleSettings.setLocale(AppLocale.zhCn);
         tester.view.physicalSize = const Size(640, 1688);
         tester.platformDispatcher.textScaleFactorTestValue = 2;
         await tester.pumpAndSettle();
+        if (allowed) {
+          await tester.ensureVisible(start);
+          await tester.pumpAndSettle();
+          expect(
+            tester
+                .getTopLeft(find.byKey(const ValueKey('control:0:pause_cycle')))
+                .dy,
+            greaterThan(tester.getTopLeft(start).dy),
+          );
+        }
         await capture('dishwasher-large-text-$allowed');
         expect(tester.takeException(), isNull);
         await tester.pumpWidget(const SizedBox());

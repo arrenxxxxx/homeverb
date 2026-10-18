@@ -132,6 +132,8 @@ async fn reviewed_cycle_payloads_require_approval_and_preserve_observations_and_
                 DishwasherCycleAction::PauseCycle => json!({"operator":"pause"}),
                 DishwasherCycleAction::ResumeCycle => json!({"operator":"start"}),
                 DishwasherCycleAction::CancelCycle => json!({"work_status":"cancel"}),
+                DishwasherCycleAction::PowerOn => json!({"work_status":"power_on"}),
+                DishwasherCycleAction::PowerOff => json!({"work_status":"power_off"}),
             };
             if let Some(code) = additional {
                 body["additional"] = json!(code);

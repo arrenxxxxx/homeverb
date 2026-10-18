@@ -32,7 +32,9 @@ class ApprovalReview extends StatelessWidget {
             labels['$capability.${entry.key}.${entry.value}'] ??
             '${entry.value}',
     };
-    final template = labels['$action.confirm'];
+    final template = arguments.containsKey('additional')
+        ? labels['$action.confirmAdditional'] ?? labels['$action.confirm']
+        : labels['$action.confirm'];
     final effects = template == null
         ? null
         : UiMessage(template, {

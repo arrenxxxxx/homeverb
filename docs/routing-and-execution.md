@@ -470,3 +470,15 @@ possibly-sent/accepted evidence through timeout, cancellation and malformed repl
 only reviewed explicit rejections prove rejection. Reusing its request ID returns
 the stored receipt without more prerequisite reads or sends. Separate foreground
 state refresh remains observation evidence, never physical-causality proof.
+
+
+## Explicit dishwasher power requests
+
+[ADR-0072](adr/0072-profile-scoped-dishwasher-power.md) admits `power_on` and
+`power_off` through the same trusted elevated boundary as dishwasher cycles.
+Each exact action/argument grant is independent. Profile 760Y0026 requires an
+explicit additional option; absent/default/cached options never authorize a send.
+Power requests use one `work_status` control attempt with no wash-program field,
+implicit read, retry, fallback or compensation. Neither power assignment is
+assumed replay-safe. Provider acknowledgements remain accepted; possibly-sent
+failures remain unknown. Power-off is not physical isolation or rollback.

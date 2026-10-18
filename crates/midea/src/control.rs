@@ -52,7 +52,7 @@ pub(crate) enum CloudControl {
         #[serde(skip_serializing_if = "Option::is_none")]
         additional: Option<u8>,
     },
-    DishwasherCancel {
+    DishwasherWorkStatus {
         work_status: &'static str,
         #[serde(skip_serializing_if = "Option::is_none")]
         additional: Option<u8>,

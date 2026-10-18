@@ -193,6 +193,8 @@ class SessionPermission {
           'pause_cycle',
           'resume_cycle',
           'cancel_cycle',
+          'power_on',
+          'power_off',
         }.contains(action))
       return [];
     final definition = option['definition'];

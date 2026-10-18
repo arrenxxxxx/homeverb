@@ -142,7 +142,7 @@ def verify_dishwasher():
 
         for additional in [None, 0, 9, 10, 13, 14]:
             arguments = {} if additional is None else {'additional': additional}
-            for action in ['pause_cycle', 'resume_cycle', 'cancel_cycle']:
+            for action in ['pause_cycle', 'resume_cycle', 'cancel_cycle', 'power_on', 'power_off']:
                 for permission in ['none', 'start', 'different', 'empty', 'wrong_option', 'exact']:
                     path = Path(root) / f'{action}-{permission}-{additional}'
                     config = {**cycle_base, 'data_dir': str(path)}
@@ -182,7 +182,7 @@ def verify_dishwasher():
                         assert call(handle, 'get_execution', request_id=c['request_id'])['data'] == result
                     finally:
                         library.homeverb_close(handle)
-    print('PASS: native dishwasher start/pause/resume/cancel startup, independent exact grants and trusted confirmation; no accounts, credentials or provider traffic.')
+    print('PASS: native dishwasher start/pause/resume/cancel/power startup, independent exact grants and trusted confirmation; no accounts, credentials or provider traffic.')
 
 
 if __name__ == '__main__':

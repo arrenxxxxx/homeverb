@@ -355,3 +355,35 @@ rejection of mismatched APK/demo inputs before decoding; `validate_docs.py`;
 `jsonschema`; rerunning in the existing repository virtual environment passed.
 No Flutter build, Rust runtime test or physical-device test was claimed for this
 research-only phase.
+
+## Implemented dishwasher power extension
+
+[ADR-0072](../adr/0072-profile-scoped-dishwasher-power.md) implements explicit
+`power_on` and `power_off` for the same five protected product profiles as the
+reviewed cycle controls. The exact wire control is `{"work_status":"power_on"}`
+or `{"work_status":"power_off"}`, plus the explicitly selected `additional`
+for 760Y0026. No program is selected by either request.
+
+The [source comparator](../../scripts/verify_dishwasher_power_mapping.py) reads
+only the pinned E1 mapping AST, checks its SHA-256, verifies 18 product/power/option
+vectors and keeps 7600016L excluded because its centralized fields differ:
+
+```bash
+python3 scripts/verify_dishwasher_power_mapping.py /path/to/midea_auto_cloud
+```
+
+The adapter's existing outcome, approval, profile, cache and lifecycle test loops
+now include both power actions. The native startup enum and App inspection-driven
+grant preparation include them independently. The 760Y0026 fixture prepares 60
+start grants and 25 lifecycle grants; old-library inspection without power actions
+still prepares only the old 75 grants. All are exact choices, not wildcard scope.
+
+The App uses compact two-column buttons where width/text size permit and a
+single column for narrow or enlarged text. Each power button opens explicit
+argument/route selection followed by trusted confirmation. The confirmation now
+uses the additional-option-specific effect description when applicable.
+This completes software admission for these reviewed profiles, not proof that
+the owner's device matches one or that physical power behavior has passed.
+Native API is now 1.24.0; ordinary methods, C exports, SQLite 5 and protected payload
+3 are unchanged. Current-model refrigerator control and the other screenshot
+features remain tracked above.

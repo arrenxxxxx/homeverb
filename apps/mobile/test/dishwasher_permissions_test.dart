@@ -78,6 +78,26 @@ class PreparedDishwasher extends PermissionCore implements ApprovalClient {
 }
 
 void main() {
+  test('older inspected actions never invent power authority', () {
+    final inspected = dishwasherInspection();
+    (inspected['options'] as List).removeWhere(
+      (v) => ['power_on', 'power_off'].contains(v['action']),
+    );
+    final permissions = SessionPermission.choices(
+      inspected,
+      trustedApproval: true,
+    );
+    expect(permissions, hasLength(75));
+    final grants =
+        SessionPermission.startup(permissions)['meiju_dishwasher_cycle_grants']
+            as List;
+    expect(grants, hasLength(15));
+    expect(
+      grants.any((v) => ['power_on', 'power_off'].contains(v['action'])),
+      false,
+    );
+  });
+
   test(
     'dishwasher grants enumerate immutable exact arguments only with trusted approval',
     () {
@@ -87,18 +107,24 @@ void main() {
         inspected,
         trustedApproval: true,
       );
-      expect(permissions, hasLength(75));
+      expect(permissions, hasLength(85));
       final startup = SessionPermission.startup(permissions);
       final starts = startup['meiju_dishwasher_grants'] as List;
       final cycles = startup['meiju_dishwasher_cycle_grants'] as List;
       expect(starts, hasLength(60));
-      expect(cycles, hasLength(15));
+      expect(cycles, hasLength(25));
       for (final additional in [0, 9, 10, 13, 14]) {
         expect(
           starts.where((g) => g['arguments']['additional'] == additional),
           hasLength(12),
         );
-        for (final action in ['pause_cycle', 'resume_cycle', 'cancel_cycle']) {
+        for (final action in [
+          'pause_cycle',
+          'resume_cycle',
+          'cancel_cycle',
+          'power_on',
+          'power_off',
+        ]) {
           expect(
             cycles,
             contains(
@@ -144,7 +170,7 @@ void main() {
       );
       final grants = SessionPermission.startup(permissions);
       expect(grants['meiju_dishwasher_grants'], hasLength(12));
-      expect(grants['meiju_dishwasher_cycle_grants'], hasLength(3));
+      expect(grants['meiju_dishwasher_cycle_grants'], hasLength(5));
       expect(
         (grants['meiju_dishwasher_cycle_grants'] as List).every(
           (g) => (g['arguments'] as Map).isEmpty,
@@ -252,7 +278,7 @@ void main() {
         AccountPreferences(),
         reopen: (permissions) async {
           reopened++;
-          expect(permissions, hasLength(75));
+          expect(permissions, hasLength(85));
           session = PreparedDishwasher(inspected);
           return session;
         },

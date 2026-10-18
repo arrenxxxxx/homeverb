@@ -51,6 +51,7 @@ def main() -> int:
         ("capability", "capability.meiju-mode"), ("command", "command.meiju-mode"),
         ("capability", "capability.meiju-temperature"), ("command", "command.meiju-temperature"),
         ("capability", "capability.meiju-dishwasher"), ("command", "command.meiju-dishwasher"),
+        ("command", "command.meiju-dishwasher-power"),
         ("capability", "capability.meiju-dishwasher-cycle-additional"), ("command", "command.meiju-dishwasher-cycle-additional"),
         ("capability", "capability.meiju-dishwasher-cycle"), ("command", "command.meiju-dishwasher-cycle"),
         ("capability", "capability.approved-cycle"), ("command", "command.approved-cycle"),

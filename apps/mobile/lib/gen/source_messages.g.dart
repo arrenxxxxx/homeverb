@@ -230,6 +230,24 @@ String? translateSource(
       additional: args["additional"] ?? "{additional}",
       device: args["device"] ?? "{device}",
     ),
+  "Power on" => t.mobilePowerOn,
+  "Power off" => t.mobilePowerOff,
+  "Power on {device}? No wash program is selected by this request." =>
+    t.vendorMideaDishwasherPowerOnConfirm(device: args["device"] ?? "{device}"),
+  "Power on {device} with {additional}? This sets the additional option without selecting a wash program." =>
+    t.vendorMideaDishwasherPowerOnConfirmAdditional(
+      additional: args["additional"] ?? "{additional}",
+      device: args["device"] ?? "{device}",
+    ),
+  "Power off {device}? This may interrupt a program and does not confirm draining or safe door opening." =>
+    t.vendorMideaDishwasherPowerOffConfirm(
+      device: args["device"] ?? "{device}",
+    ),
+  "Power off {device} and set {additional}? This may interrupt a program and does not confirm draining or safe door opening." =>
+    t.vendorMideaDishwasherPowerOffConfirmAdditional(
+      additional: args["additional"] ?? "{additional}",
+      device: args["device"] ?? "{device}",
+    ),
   "Reported cycle operator" => t.vendorMideaDishwasherOperator,
   "Start a wash on {device} using {program}? This can consume water and heat." =>
     t.vendorMideaDishwasherStartCycleConfirm(
@@ -387,8 +405,6 @@ String? translateSource(
   "Revoke Session Controls" => t.mobileRevokeSessionControls,
   "Reopen Read-only" => t.mobileReopenReadOnly,
   "Retrieve Control Capabilities" => t.mobileRetrieveControlCapabilities,
-  "Power on" => t.mobilePowerOn,
-  "Power off" => t.mobilePowerOff,
   "Powered on" => t.mobilePoweredOn,
   "Powered off" => t.mobilePoweredOff,
   "Turning on\u2026" => t.mobileTurningOn,
@@ -1937,6 +1953,16 @@ String? sourceForKey(String key) => switch (key) {
     "Request cancellation on {device}? This may terminate the program; draining and rollback are not confirmed.",
   "vendor.midea.dishwasher.cancel_cycle.confirmAdditional" =>
     "Request cancellation on {device} and set {additional}? This may terminate the program and does not confirm draining or rollback.",
+  "vendor.midea.dishwasher.power_on" => "Power on",
+  "vendor.midea.dishwasher.power_off" => "Power off",
+  "vendor.midea.dishwasher.power_on.confirm" =>
+    "Power on {device}? No wash program is selected by this request.",
+  "vendor.midea.dishwasher.power_on.confirmAdditional" =>
+    "Power on {device} with {additional}? This sets the additional option without selecting a wash program.",
+  "vendor.midea.dishwasher.power_off.confirm" =>
+    "Power off {device}? This may interrupt a program and does not confirm draining or safe door opening.",
+  "vendor.midea.dishwasher.power_off.confirmAdditional" =>
+    "Power off {device} and set {additional}? This may interrupt a program and does not confirm draining or safe door opening.",
   "vendor.midea.dishwasher.operator" => "Reported cycle operator",
   "vendor.midea.dishwasher.start_cycle.confirm" =>
     "Start a wash on {device} using {program}? This can consume water and heat.",

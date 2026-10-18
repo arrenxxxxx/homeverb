@@ -34,7 +34,7 @@ The 16 C functions in [homeverb.h](../crates/ffi/include/homeverb.h) form the na
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects saved-account cloud reads. `scenario` defaults to `normal`. Meiju requires `allow_mock_writes: false` and rejects any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms `homeverb.mock` or `midea.meiju`. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.23.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.24.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -750,7 +750,7 @@ adapter flags, grant authority, save a permission selection or create a receipt.
 The trusted foreground App policy in ADR-0065 and
 [ADR-0071](adr/0071-app-dishwasher-command-preparation.md) performs exact grant
 preparation on device opening instead of showing a separate permission form.
-It admits reviewed low-risk controls and the four reviewed dishwasher cycle
+It admits reviewed low-risk controls and the reviewed dishwasher lifecycle
 actions only. Dishwasher preparation additionally requires trusted native approval
 support; each invocation still needs its own immutable preview and user consent.
 Do not label a proposed option as already allowed. Its definitions are not proof
@@ -990,13 +990,13 @@ Unreviewed profiles cannot be enabled by adding a grant or passing extra setting
 [pause command](../examples/command.meiju-dishwasher-cycle.json) are fictional
 integration examples; they do not identify an owner's appliance.
 
-Use the existing trusted prepare/display/execute/discard flow for all three
+Use the existing trusted prepare/display/execute/discard flow for all admitted
 elevated actions. Display the immutable device and action and the matching locale
 confirmation. When `additional` is required, demand an explicit selection using
 `vendor.midea.dishwasher.additional.<code>` and display the corresponding
 `vendor.midea.dishwasher.<action>.confirmAdditional` text with `{device}` and
 `{additional}` from the immutable preview. The operation sets that option; never
-claim the cached setting was preserved. See the revision-5
+claim the cached setting was preserved. See the revision-6
 [capability](../examples/capability.meiju-dishwasher-cycle-additional.json) and
 [command](../examples/command.meiju-dishwasher-cycle-additional.json) examples.
 Resume may consume water/heat; cancellation may terminate a program.
@@ -1409,3 +1409,31 @@ Examples: [descriptor](../examples/capability.meiju-ac-features.json),
 Native method/symbol counts, SQLite 5 and protected payload 3 are unchanged.
 Accepted/unknown/rejected outcomes and replay guards remain unchanged. Field
 availability is experimental mapping evidence, not physical certification.
+
+
+## Explicit dishwasher power requests (API 1.24)
+
+[ADR-0072](adr/0072-profile-scoped-dishwasher-power.md) extends
+`meiju_dishwasher_cycle_grants` with exact `power_on` and `power_off` actions.
+The legacy startup field name is retained. These actions belong to
+`main / vendor.midea.dishwasher`, require separate trusted confirmation, and do
+not widen any existing start/pause/resume/cancel grant. The same protected five
+profiles apply: four require empty arguments; 760Y0026 requires explicit
+`additional` in both the grant and command. The 64-entry bound remains.
+
+Power requests are elevated, non-idempotent and cloud-only. A power-on request does
+not select a wash program. Power-off may interrupt one and does not establish
+isolation, safe door opening, drainage or physical rollback. Receipts and
+observations remain separate; uncertain results must not be replayed.
+
+A cycle-enabled descriptor has revision 6. Native App inspection can expose six
+actions including program start; the Flutter host prepares 60 start grants and
+25 lifecycle grants for the 760Y0026 fixture. Controls are buttons opening exact
+argument selection and the existing immutable confirmation view. That view uses
+`confirmAdditional` when the preview explicitly includes the option, rather than
+hiding its setting effect in generic copy. No option is copied from observed state.
+Older libraries return only their admitted options; do not inject power grants
+into an API below 1.24. C exports, ordinary methods, SQLite 5 and protected payload
+3 are unchanged. Exact owner-profile matching and physical acceptance remain open.
+
+See the fictional [power-on command](../examples/command.meiju-dishwasher-power.json).
