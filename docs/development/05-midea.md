@@ -164,6 +164,26 @@ a nickname, login spelling or guessed `userInfo` field. `encode`/`restore` are p
 credential-persistence operations, not public JSON DTOs. `reads` binds a session to
 one exact local credential reference for the existing inventory/state protocols.
 
+On October 18, the owner reported `ACCOUNT_IDENTITY_CONFLICT` when reauthorizing
+the same account in the existing Android emulator. The error is not evidence that
+the owner selected a different human account. The explicit selected-account path
+compares the protected saved subject against the fresh login subject before any
+replacement or inventory retrieval. No private values were captured, so the exact
+reason for the mismatch remains unverified. Saved account/device data is retained.
+
+Static inspection of the pinned official APK 11.7.10.6 distinguishes
+`LoginIdRspData.loginId` from `LoginRspData.iotUserId` and `userInfo`.
+`LoginManager.onUserLoginInternal` uses the latter fields when saving user info
+and publishing login state; `toDataUser` projects both `getUid()` and
+`getIotUserId()`. The reproducible `login_identity_structure` assertions in
+[the APK inspector](../../scripts/inspect_meiju_android_protocol.py) record only
+field/call names. They do not establish identifier stability or a link from an
+expired legacy login-ID binding to a fresh UID. Existing sessions did not retain
+those additional user identifiers. Changing the subject prefix, matching a login
+spelling/device list, or deleting/recreating the account would not supply the
+missing provider identity proof. Safe legacy reconciliation remains unresolved;
+the corrected error wording does not fix reauthorization.
+
 `MeijuHttps` admits only `https://mp-prod.smartmidea.net` and the five reviewed login,
 home, appliance and state endpoints. It exposes no configurable URL, proxy, region
 reroute, certificate bypass, control endpoint or executable download. TLS uses

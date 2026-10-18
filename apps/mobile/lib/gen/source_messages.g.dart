@@ -115,7 +115,7 @@ String? translateSource(
   "Reconnect this platform account to continue." => t.errorAUTHREQUIRED,
   "This local account is no longer available. Reload the account list." =>
     t.errorACCOUNTNOTFOUND,
-  "This is a different platform account. Reconnect the original account to keep its device bindings." =>
+  "The returned identity does not match the saved account binding. Your saved account and devices are unchanged. If you used the same account, this identity mismatch needs investigation." =>
     t.errorACCOUNTIDENTITYCONFLICT,
   "Saved authorization needs recovery. Open this platform account to recover it." =>
     t.errorACCOUNTSESSIONUNCONFIRMED,
@@ -1854,7 +1854,7 @@ String? sourceForKey(String key) => switch (key) {
   "error.ACCOUNT_NOT_FOUND" =>
     "This local account is no longer available. Reload the account list.",
   "error.ACCOUNT_IDENTITY_CONFLICT" =>
-    "This is a different platform account. Reconnect the original account to keep its device bindings.",
+    "The returned identity does not match the saved account binding. Your saved account and devices are unchanged. If you used the same account, this identity mismatch needs investigation.",
   "error.ACCOUNT_SESSION_UNCONFIRMED" =>
     "Saved authorization needs recovery. Open this platform account to recover it.",
   "error.MIDEA_RESPONSE_INVALID" =>

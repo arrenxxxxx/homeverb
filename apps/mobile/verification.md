@@ -2980,3 +2980,52 @@ retained-login usability, live device reads and real-profile button availability
 remain unverified until that unlock. The emulator is left running at its ordinary
 lock screen. No account credential, provider device identifier, appliance command,
 remote push or diagnostic upload was used for this installation check.
+
+### Unlocked startup and saved-session check
+
+After the owner unlocked the existing emulator, Android reported
+`RUNNING_UNLOCKED`. Launching the same installed `MainActivity` returned
+`Status: ok`, `LaunchState: COLD`, and 1591 ms. The app displayed its retained
+Chinese preference, saved account and all six device cards. This resolves the
+lock-screen launch dependency and verifies preservation of local account/device
+presentation after the in-place update; it does not establish usable cloud
+authorization.
+
+Opening the dishwasher displayed the new detail layout, but no allowed controls
+and no populated readings. An explicit state refresh returned `AUTH_REQUIRED`.
+A subsequent explicit Refresh Devices on the saved account also returned
+`AUTH_REQUIRED`, preserving the six local device cards and displaying Reauthorize.
+The protected reauthorization form was opened for the owner to sign in directly.
+Tooling did not read or enter credentials, capture the credential form, attempt
+an appliance control, or clear any data. No claim is made that dishwasher buttons
+are available for the owner's actual protected profile; that remains to be
+checked after successful reauthorization. Refrigerator live reads also remain
+unverified in this run. These are emulator runtime observations, not physical
+appliance acceptance or a successful reauthorization result.
+
+### Same-account reauthorization mismatch
+
+The owner then supplied a screenshot of `ACCOUNT_IDENTITY_CONFLICT` and stated
+that the login was for the same account. The prior localized message incorrectly
+asserted that a different account had been used. Both catalogs now describe an
+identity-binding mismatch without that conclusion. The selected-account native
+path rejects a changed subject before replacing protected material; no account
+was deleted, reset or recreated. The owner's screenshot was inspected locally;
+no credential values were collected or entered by tooling.
+
+Static official-APK evidence distinguishes login IDs from user IDs, as recorded
+in the [Meiju guide](../../docs/development/05-midea.md). This is an investigation
+result, not a live diagnosis of why the identifiers differ. Reauthorization and
+the owner's actual dishwasher controls remain blocked pending identity evidence.
+The copy correction does not relax the account guard or resolve authentication.
+
+Executed for this correction: the pinned static APK inspector passed including
+its new identity-structure assertions; all seven shared presentation tests,
+Flutter analysis, and all 17 tests in `localization_test.dart`,
+`accounts_test.dart` and `account_identity_test.dart` passed. The existing Rust
+`reconnect_refuses_changed_subject_without_overwriting_session_or_fetching_devices`
+regression passed with fictional credentials. Documentation, contract and
+repository checks passed (146 Markdown files, 1596 links, 20 schemas,
+50 positive and 291 negative fixtures, 624 maintained text files). No live
+reauthorization was repeated during these checks. APK delivery is recorded
+separately.

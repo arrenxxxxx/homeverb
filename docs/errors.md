@@ -32,7 +32,7 @@
 | ACCOUNT_SCOPE_CHANGED | The device set differs from the reviewed removal scope | Reload local details and obtain a new user confirmation before removal |
 | ACCOUNT_REMOVAL_UNSUPPORTED | A linked card has routes outside this account/provider | Preserve all data; shared-route detachment needs a separate supported identity flow |
 | ACCOUNT_SESSION_UNCONFIRMED | Credential persistence was not finalized, recovery bytes differ, or protected account state is invalid | Offer saved-session recovery or explicit same-account reauthorization when protected identity is intact; preserve data on validation failure, never reset automatically |
-| ACCOUNT_IDENTITY_CONFLICT | Reauthorization identifies a different provider account | Keep the original session and device bindings; use the original account or a separately reviewed new-account flow |
+| ACCOUNT_IDENTITY_CONFLICT | Returned identity does not match the saved account binding; this alone does not prove a different human account | Keep the original session and device bindings; investigate same-account identifier instability or a genuinely different account before reconciliation |
 | SECRET_STORE_UNAVAILABLE | Secure credential storage unavailable | Fail explicitly; no plaintext fallback |
 | SECRET_STORE_LOCKED | The OS reports a collection/item lock or authentication refusal before mutation | Unlock it through the operating system; HomeVerb does not start an unlock prompt |
 | SECRET_STORE_CONFLICT | Multiple entries match the exact profile and credential reference | Stop without reading, replacing, or deleting ambiguous entries |

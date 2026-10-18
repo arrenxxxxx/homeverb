@@ -225,6 +225,25 @@ def inspect(apk_path: Path, checkout: Path):
         assert len(matches) == 1
         return matches[0]
 
+    login_package = "Lcom/midea/business/login/"
+    identity_fields = {}
+    for name, expected in {
+        "LoginIdRspData": {"loginId"},
+        "LoginRspData": {"iotUserId", "userInfo", "mdata", "key"},
+    }.items():
+        fields = {f.get_name() for f in classes[login_package + "bean/" + name + ";"].get_fields()}
+        assert expected <= fields
+        identity_fields[name] = sorted(expected)
+    manager = login_package + "LoginManager;"
+    report["login_identity_structure"] = {
+        "response_fields": identity_fields,
+        "successful_login_calls": require_calls(method(manager, "onUserLoginInternal"),
+            ["getIotUserId", "getUserInfo", "saveUserInfo", "onLoginStateUpdated$default"]),
+        "stored_user_projection_calls": require_calls(method(manager, "toDataUser"),
+            ["getUid", "getIotUserId"]),
+        "scope": "Distinct login and user identity fields; no identifier stability or legacy-binding proof.",
+    }
+
     transport = "Lcom/midea/iot/msmart/control/DataTransportHelper;"
     report["control_state_dependencies"] = require_calls(method(transport, "controlDeviceState"),
         ["getDeviceStateBySN", "queryDeviceState"])

@@ -276,8 +276,8 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	/// en-US: 'This local account is no longer available. Reload the account list.'
 	String get errorACCOUNTNOTFOUND => 'This local account is no longer available. Reload the account list.';
 
-	/// en-US: 'This is a different platform account. Reconnect the original account to keep its device bindings.'
-	String get errorACCOUNTIDENTITYCONFLICT => 'This is a different platform account. Reconnect the original account to keep its device bindings.';
+	/// en-US: 'The returned identity does not match the saved account binding. Your saved account and devices are unchanged. If you used the same account, this identity mismatch needs investigation.'
+	String get errorACCOUNTIDENTITYCONFLICT => 'The returned identity does not match the saved account binding. Your saved account and devices are unchanged. If you used the same account, this identity mismatch needs investigation.';
 
 	/// en-US: 'Saved authorization needs recovery. Open this platform account to recover it.'
 	String get errorACCOUNTSESSIONUNCONFIRMED => 'Saved authorization needs recovery. Open this platform account to recover it.';
