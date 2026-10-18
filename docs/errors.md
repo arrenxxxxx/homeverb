@@ -527,3 +527,9 @@ malformed-provider-response code). Missing exact authority remains `POLICY_DENIE
 Malformed refrigerator detail fields preserve the old whole snapshot and never
 fall back to optimistic/default values. No new error or execution outcome is
 introduced; [ADR-0074](adr/0074-exact-meiju-reference-profiles.md) defines the scope.
+
+Mijia fan Rust admission returns `CAPABILITY_UNSUPPORTED` before transmission for
+unadmitted services/actions and `INVALID_ARGUMENT` for values outside the protected
+spec domain. Exact protected connection mismatches return
+`DEVICE_IDENTITY_CONFLICT`. Core independently rejects missing exact policy grants.
+A default read-only adapter refuses even if public metadata describes a write.

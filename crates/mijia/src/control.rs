@@ -32,7 +32,7 @@ struct Acknowledgement {
 impl MijiaSession {
     /// Low-level protocol primitive; this does not admit a Core action or grant authority.
     /// Callers must independently validate the protected binding, writable property and
-    /// exact value domain. The production Core adapter still denies all writes.
+    /// exact value domain. The Core adapter defaults to read-only admission.
     /// A correlated code-zero reply means accepted, never physically verified.
     pub async fn set_property(
         &self,

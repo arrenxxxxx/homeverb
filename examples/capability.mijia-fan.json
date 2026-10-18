@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "id": "vendor.xiaomi.mijia.fan",
+  "component_id": "fan-2",
+  "revision": 2,
+  "properties": {
+    "level": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "readable": true,
+      "writable": true
+    }
+  },
+  "actions": {
+    "set_level": {
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "level": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4,
+            "multipleOf": 1
+          }
+        },
+        "required": [
+          "level"
+        ],
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "set_value",
+      "risk": "low",
+      "atomic": false,
+      "independent_fields": false,
+      "verification": "unavailable"
+    }
+  },
+  "events": {}
+}

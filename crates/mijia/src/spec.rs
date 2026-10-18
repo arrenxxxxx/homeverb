@@ -352,6 +352,79 @@ impl ModelMapping {
     }
 }
 
+/// Saved spec-derived choices, independent of Core authorization.
+#[derive(Serialize)]
+pub struct ControlOption {
+    pub component_id: String,
+    pub capability: String,
+    pub action: String,
+    pub definition: homeverb_domain::Action,
+}
+
+impl MappedProperty {
+    pub(crate) fn control_option(&self) -> Option<ControlOption> {
+        use homeverb_domain::{Action, Idempotency, Risk, Transport, VerificationMethod};
+        if !self.component.starts_with("fan-")
+            || !matches!(
+                (self.capability.as_str(), self.property.as_str()),
+                ("power", "state")
+                    | (
+                        "vendor.xiaomi.mijia.fan",
+                        "level" | "mode" | "horizontal_swing" | "horizontal_angle"
+                    )
+            )
+        {
+            return None;
+        }
+        let domain = self.write_domain.as_ref()?;
+        Some(ControlOption {
+            component_id: self.component.clone(),
+            capability: self.capability.clone(),
+            action: if self.capability == "power" {
+                "set".into()
+            } else {
+                format!("set_{}", self.property)
+            },
+            definition: Action {
+                parameters: json!({"type":"object","properties":{self.property.clone():domain},"required":[self.property.clone()],"additionalProperties":false}),
+                transports: vec![Transport::Cloud],
+                idempotency: Idempotency::SetValue,
+                risk: Risk::Low,
+                atomic: false,
+                independent_fields: false,
+                verification: VerificationMethod::Unavailable,
+            },
+        })
+    }
+}
+
+impl ModelMapping {
+    pub(crate) fn control_options(&self) -> Vec<ControlOption> {
+        self.properties
+            .iter()
+            .filter_map(MappedProperty::control_option)
+            .collect()
+    }
+    pub(crate) fn controlled_capabilities(&self) -> Vec<Capability> {
+        let mut capabilities = self.capabilities();
+        for property in &self.properties {
+            if let Some(option) = property.control_option() {
+                let capability = capabilities
+                    .iter_mut()
+                    .find(|c| {
+                        c.id == option.capability
+                            && c.component_id.as_ref() == Some(&option.component_id)
+                    })
+                    .unwrap();
+                capability.properties.get_mut(&property.property).unwrap()["writable"] =
+                    json!(true);
+                capability.actions.insert(option.action, option.definition);
+            }
+        }
+        capabilities
+    }
+}
+
 impl Property {
     fn definition(&self) -> Result<Option<Value>> {
         let value = match self.format.as_str() {
