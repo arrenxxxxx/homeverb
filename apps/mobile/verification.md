@@ -2880,3 +2880,21 @@ Executed with pinned Flutter 3.47.7 on macOS:
 These are fictional desktop tests, not physical-device or signed phone acceptance.
 Actual mainland login, challenge handling, shared-device coverage, readings and
 fan controls remain owner validation. APK packaging is recorded separately below.
+
+
+## Combined Mijia/Meiju Android delivery: October 18, 2026
+
+Clean source `39d646546a6ea0c07bc6a4154212b1c5a9d1ee74` produced the dual-ABI
+release-mode development APK with `HOMEVERB_ADAPTER=homeverb.platforms`.
+The matching native AAR was rebuilt with installed Rust 1.99.1 after the final
+exact-value correction; both ABIs passed 17-export and 16 KiB ELF checks.
+APK signature, archive/alignment, release manifest, API 28 minimum, disabled
+backup and absence of the integration-test plugin passed inspection.
+
+Artifact: `build/delivery/mijia/homeverb-mijia-0.2.0-39d6465.apk`, 73,254,278 bytes.
+SHA-256: `59d0925a8ebfa981a5760695cf411cf912ac55441f0e4f289e1477b1c95ace00`.
+The adjacent ignored `verification.json` retains hashes and source provenance.
+See the [delivery and owner checklist](../../docs/development/11-mijia.md#android-package-and-owner-acceptance)
+for exact commands and scope. No installation, account access, real appliance
+control, emulator journey or iOS package was performed in this delivery phase.
+The APK uses the existing development signing identity; it is not a store release.
