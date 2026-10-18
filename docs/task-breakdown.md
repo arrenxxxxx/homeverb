@@ -1,5 +1,15 @@
 # Implementation status and next tasks
 
+## Active Mijia integration: October 18, 2026
+
+The owner requests mainland-China Mijia connection, all returned devices as named
+cards, unsupported placeholders, and initial doorbell/door-lock/fan adaptation.
+The [integration guide](development/11-mijia.md) tracks protocol, protected
+account/Core, native host/App and owner-acceptance phases. Protocol foundation is
+implemented and synthetic-tested; it is not yet a callable App integration.
+Real-account and physical validation belong to the owner. No door-lock write,
+background polling, project service or shared application secret is admitted.
+
 ## Integrated main: October 16, 2026
 
 The owner resumed development and requested the Flutter UI merge, Core integration

@@ -50,6 +50,10 @@ Start with the progressive development path. Reference documents define invarian
 - Consequential actions: [typed single-command approval](adr/0042-trusted-single-command-approval.md) and [separate trusted native functions](adr/0043-native-trusted-approval-bridge.md); fictional bridge acceptance, with [reviewed dishwasher start mappings](adr/0044-profile-scoped-dishwasher-start.md); Flutter consent UI has fictional native evidence; real-platform consent and physical acceptance remain pending.
 - Evidence: [references](references.md), [fictional examples](../examples/README.md), [diagrams](diagrams/README.md).
 
+The [Mijia integration guide](development/11-mijia.md) tracks native protocol work,
+protected account/Core/App phases and owner-run acceptance under
+[ADR-0070](adr/0070-mijia-native-cloud.md).
+
 ## Decisions
 
 [No daemon](adr/0001-no-daemon.md) | [Embedded core](adr/0002-embedded-core.md) | [Capability first](adr/0003-capability-first.md) | [Uncertain writes](adr/0004-uncertain-writes.md) | [Native authentication](adr/0005-native-auth.md) | [Project name](adr/0006-project-name.md) | [Mock implementation and composite receipts](adr/0007-mock-mvp.md) | [Foreground authorization sharing](adr/0008-foreground-authorization-sharing.md) | [Local organization and receipt retention](adr/0009-local-organization-and-retention.md) | [Scoped write grants](adr/0010-scoped-write-grants.md) | [Native secret storage](adr/0011-system-secret-store.md) | [Explicit action decomposition](adr/0012-explicit-action-decomposition.md) | [Rediscovery identity](adr/0013-preserve-device-connection-identity.md) | [Local receipt lookup](adr/0014-local-receipt-lookup.md) | [Property freshness](adr/0015-property-freshness.md) | [Correlated completion](adr/0016-correlated-completion.md) | [Bounded device batches](adr/0017-bounded-device-batches.md) | [Component capability scopes](adr/0018-component-capability-scopes.md)

@@ -51,6 +51,15 @@ Flutter runtime/engine and transitive package notices remain separate obligation
   image, icon and externally referenced asset before a public release. This
   index is not a completed asset-rights audit or a blanket license grant.
 
+## Mijia community protocol
+
+The independent Rust Mijia login and encrypted cloud request implementation uses
+protocol evidence from MIT-licensed `Squachen/micloud`. Preserve its
+[attribution](third-party/micloud/NOTICE.md) and [license](third-party/micloud/LICENSE).
+The implementation contains no shared confidential client secret and does not
+reuse Xiaomi's Home Assistant OAuth application identity. This is experimental
+community compatibility, not vendor endorsement or physical-device verification.
+
 ## Dependency review before distribution
 
 `Cargo.lock` and `apps/mobile/pubspec.lock` pin dependency resolutions; they do

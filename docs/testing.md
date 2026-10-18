@@ -1,5 +1,15 @@
 # Test plan and quality gates
 
+## Mijia protocol checks
+
+`cargo test -p homeverb-mijia --offline --locked` uses fictional credentials and
+local generated TLS peers. Loopback socket access is required; it never contacts
+Xiaomi or an appliance. Signing has an independent Python known-answer fixture.
+Login/challenge, endpoint admission, encrypted errors, inventory identity,
+property correlation and cancellation/deadline/drop are covered. See the
+[phase record](development/11-mijia.md) for executed results and pending Core/App
+and owner-run physical acceptance.
+
 ## Local verification
 
 For an isolated Python environment, run `python3 -m venv .venv` and `source .venv/bin/activate` first. Install the declared requirements below before running Python tests.

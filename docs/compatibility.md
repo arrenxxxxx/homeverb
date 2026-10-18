@@ -1,5 +1,18 @@
 # Platform and device compatibility matrix
 
+## October 18 Mijia integration
+
+The owner selected mainland China, all returned devices as named cards including
+unsupported placeholders, and initial doorbell, door-lock and fan adaptation.
+`homeverb-mijia` implements a native password-login/cloud protocol foundation
+with fictional tests. It has no registered Core adapter, host or App flow yet.
+The legacy list is not complete-home evidence. Online hints are never power or
+lock state. Door-lock writes remain high-risk and unavailable. Real authentication,
+challenge completion, regional inventory, MIoT model mapping and physical support
+remain unverified. See the [phase record](development/11-mijia.md).
+Existing native API 1.23, SQLite 5, Meiju protected payload 3 and entry points are
+unchanged. A new internal crate and six locked SHA-1 support packages are added.
+
 ## Appliance detail buttons: October 18, 2026
 
 Refrigerator compartments and dishwasher details now share product headers,

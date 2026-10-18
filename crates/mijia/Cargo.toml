@@ -1,0 +1,30 @@
+[package]
+name = "homeverb-mijia"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[dependencies]
+homeverb-core.workspace = true
+homeverb-domain.workspace = true
+async-trait.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+uuid.workspace = true
+zeroize.workspace = true
+sha2.workspace = true
+sha1 = "0.10.7"
+md-5 = "0.11"
+base64 = "0.22.1"
+getrandom = "0.3.4"
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls-webpki-roots"] }
+tokio.workspace = true
+
+[dev-dependencies]
+tokio-util.workspace = true
+homeverb-storage.workspace = true
+rcgen = { version = "0.14", default-features = false, features = ["crypto", "ring"] }
+tokio-rustls = { version = "0.26", default-features = false, features = ["ring", "tls12"] }

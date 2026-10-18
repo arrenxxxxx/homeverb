@@ -19,6 +19,11 @@
 | Code | Typical cause | Response |
 |---|---|---|
 | AUTH_REQUIRED | Login or user consent required | Start login through a trusted UI |
+| MIJIA_AUTH_CHALLENGE_REQUIRED | Mijia requires CAPTCHA or additional account verification | Login remains incomplete; do not retry automatically or expose private challenge URLs |
+| MIJIA_INVALID_RESPONSE | Malformed, oversized, uncorrelated or unsafe Mijia protocol data | Preserve existing evidence and refuse the response |
+| MIJIA_REQUEST_FAILED | Mijia TLS/HTTP operation failed, redirected or disconnected | No implicit retry or authentication; report the bounded failure |
+| MIJIA_REQUEST_REJECTED | Mijia returned a non-success protocol code | Keep sanitized errors; raw vendor messages are private |
+| MIJIA_INVENTORY_PARTIAL | Mijia device enumeration is explicitly truncated | Do not remove prior cards or claim complete inventory |
 | AUTH_EXPIRED | Session cannot be refreshed safely | Request reauthorization |
 | AUTH_FLOW_UNSUPPORTED | Authentication requires an excluded backend | Mark blocked; do not add a hidden backend |
 | INPUT_UNAVAILABLE | The CLI cannot provide protected interactive terminal input | Use an interactive Linux terminal; never pass credentials as arguments or pipe input |
