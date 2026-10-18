@@ -951,6 +951,7 @@ dependencies = [
  "homeverb-core",
  "homeverb-domain",
  "homeverb-midea",
+ "homeverb-mijia",
  "homeverb-mock",
  "homeverb-secrets",
  "homeverb-storage",

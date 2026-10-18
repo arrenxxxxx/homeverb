@@ -162,6 +162,7 @@ pub struct ModelMapping {
     pub model: String,
     pub spec_type: String,
     pub properties: Vec<MappedProperty>,
+    source: Value,
 }
 #[derive(Deserialize)]
 struct Spec {
@@ -310,7 +311,22 @@ impl ModelMapping {
             model: model.into(),
             spec_type: kind.into(),
             properties,
+            source: crate::decode(bytes)?,
         })
+    }
+
+    /// Re-derive saved mappings from the same protected public-spec evidence. Public
+    /// descriptors or edited derived fields cannot select another wire property.
+    pub(crate) fn validate_saved(&self) -> Result<()> {
+        if !crate::bounded_text(&self.model, 256) {
+            return Err(invalid());
+        }
+        let bytes = serde_json::to_vec(&self.source).map_err(|_| invalid())?;
+        let expected = Self::decode(&self.model, &self.spec_type, &bytes)?;
+        if expected != *self {
+            return Err(invalid());
+        }
+        Ok(())
     }
 
     pub fn capabilities(&self) -> Vec<Capability> {

@@ -7,6 +7,23 @@ They inherit the caller's cancellation/deadline, never retry, and never update
 inventory, cached observations, permissions, routes or execution receipts.
 This is not an alternate control route or uncertain-write recovery path.
 
+## Experimental Mijia Core reads
+
+[ADR-0072](adr/0072-mijia-protected-core-reads.md) adds a read-only cloud adapter
+with protected account/model/component/connection checks before each property
+request. Positive partial inventory can publish named cards through explicit
+account connection/refresh. Generic discovery refuses populated Mijia accounts
+before networking because it cannot represent partial coverage. Missing historical
+bindings remain retained; no complete-inventory timestamp is invented.
+
+Reads hold the account lease through one bounded cloud operation and correlate
+every returned device/SIID/PIID. Snapshots carry cloud source, local receipt time,
+no trustworthy observation time and stale values; Core still validates the entire
+snapshot before replacing cache. Invalid replies preserve prior readings.
+There is no automatic login, route fallback, background worker or control path.
+Even forged public actions and Core grants cannot make this adapter send a write.
+Native API, snapshot schemas and existing execution outcome semantics are unchanged.
+
 ## Route policy
 
 `connection=lan` permits LAN only, with no cloud fallback. `cloud` permits vendor-cloud control only. `auto` chooses among action-supported routes with valid credentials, user permission, and current reachability; prefer LAN by default. A readable LAN route is not automatically writable for every action. Route by action, not merely by device.

@@ -4,6 +4,11 @@ Implementation is in progress under [ADR-0070](../adr/0070-mijia-native-cloud.md
 The owner will perform real-account and device acceptance. Do not access saved
 pilot credentials or contact appliances as part of development tests.
 
+Current callable scope is the trusted Rust `MijiaAdapter` account/read API and
+`homeverb_host::open_mijia_read_only`. Native C/App selection, fan control and live
+acceptance remain pending. Historical phase records below distinguish earlier
+protocol-only work from the [protected Core phase](../adr/0072-mijia-protected-core-reads.md).
+
 ## Protocol evidence
 
 - MIT `Squachen/micloud`, commit `dc002b87fc09ef36199715cfa10f1eaa2d2d4210`:
@@ -130,3 +135,48 @@ Public spec response SHA-256 values at inspection (source data is not vendored):
 Each instance is available from
 `https://miot-spec.org/miot-spec-v2/instance?type=<exact-URN>`. Tests use independent
 fictional specifications; public-model facts do not establish a physical test.
+
+## Protected account and Core phase
+
+`MijiaAdapter::connect_devices` consumes protected credentials and persists only
+provider-validated session material. `refresh_devices` reuses it without login;
+`recover_devices` explicitly validates exact pending bytes before confirming them.
+Reconnection by the same protected subject retains local IDs and preferences.
+`accounts`, `account`, `rename_account`, `inspect_inventory` and `remove_account`
+operate on exact local scopes; rename/removal need no provider request.
+
+The system-store payload is version 1, namespaced by provider and region and bound
+to the AccountVault's random account/credential references. Private vendor IDs,
+session material and original MIoT source/derived mappings stay out of SQLite and
+ordinary host JSON. Saved mappings must re-derive identically from their protected
+source. A copied, corrupt, foreign or uncertain payload fails closed.
+
+Explicit account connection/refresh returns positive descriptors plus partial
+coverage/issues for a trusted host to pass to `Core::publish_discovery`. Unsupported
+models remain named cards; optional specification failure preserves placeholders.
+Generic Core discovery refuses populated Mijia accounts before networking, because
+its return type cannot express partial coverage. Missing historical bindings and
+complete-inventory timestamps are never changed based on this partial enumeration.
+
+The Core adapter rechecks protected model/component/account/connection identity,
+holds the account lease through the read, and returns correlated scalar observations
+with cloud source, local receipt time and stale/unknown-source-time evidence.
+Core rejects malformed values before replacing cache. No action is admitted, even
+when public metadata and a Core grant claim otherwise. Native/App composition and
+separately admitted fan controls are the next implementation work.
+
+On October 18, `cargo +1.96.0 test -p homeverb-mijia -p homeverb-host --offline --locked`
+passed 286 checks across 25 targets/doc-test suites, including all 43 Mijia tests,
+three Mijia serialization compile-fail tests and the production empty-startup
+test. Fictional secret-store failure/uncertainty, subject/route/model conflicts,
+copied/corrupt payloads, stable preferences, partial retention, optional spec failure,
+Core cache refusal, cancellation/drop, cleanup and forged-action refusal passed.
+Workspace build, formatting and strict Clippy passed on Rust 1.96; docs/contracts
+and language checks also passed. The prior full-workspace macOS LAN limitations
+remain documented above; this scoped passing run does not waive them.
+
+Existing runtime regressions also passed: `scripts/verify_mvp.py` completed 35
+CLI/MCP cases with seven documented platform skips, and
+`scripts/verify_native_contract.py` passed 34 native methods, 55 fictional examples
+and the trusted approval, dishwasher, scan and connection-link bridge suites.
+No real account, vendor traffic, physical device, push or publication was used.

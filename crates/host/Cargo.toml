@@ -11,6 +11,7 @@ homeverb-domain.workspace = true
 homeverb-core.workspace = true
 homeverb-mock.workspace = true
 homeverb-midea.workspace = true
+homeverb-mijia.workspace = true
 homeverb-storage.workspace = true
 homeverb-secrets.workspace = true
 tokio-util.workspace = true
