@@ -15,7 +15,7 @@ fn exact_device_component_property_value_and_cloud_scope() {
     assert_eq!(rule.component_id, "fan-2");
     assert_eq!(rule.capability, "vendor.xiaomi.mijia.fan");
     assert_eq!(rule.action, "set_level");
-    assert_eq!(rule.argument_schema, json!({"const":{"level":3.0}}));
+    assert_eq!(rule.argument_schema, json!({"const":{"level":3}}));
     assert_eq!(rule.transports, vec![homeverb_domain::Transport::Cloud]);
     for property in ["state", "horizontal_swing"] {
         let mut value = grant();
@@ -76,4 +76,15 @@ fn malformed_grants_fail_before_profile_creation() {
         .is_err()
     );
     assert!(!directory.exists());
+}
+
+#[test]
+fn startup_policy_never_rounds_the_requested_scalar() {
+    let mut value = grant();
+    value["value"] = json!(9007199254740993u64);
+    let policy = mijia_fan_policy(&[parse(value)]).unwrap();
+    assert_eq!(
+        policy.grants[0].argument_schema["const"]["level"].as_u64(),
+        Some(9007199254740993)
+    );
 }
