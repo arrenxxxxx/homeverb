@@ -96,6 +96,64 @@ void main() {
     },
   );
 
+  for (final mode in ['xiaomi.mijia', 'homeverb.platforms']) {
+    test(
+      'native $mode exposes registered account flows without startup traffic',
+      () async {
+        final directory = await Directory.systemTemp.createTemp(
+          'homeverb-mijia-ffi-',
+        );
+        final core = await NativeClient.open(
+          dataDir: directory.path,
+          libraryPath: library,
+          adapter: mode,
+        );
+        try {
+          expect(core.apiAtLeast(24), true);
+          expect(
+            core.accountProviders,
+            mode == 'xiaomi.mijia'
+                ? {'xiaomi.mijia'}
+                : {'midea.meiju', 'xiaomi.mijia'},
+          );
+          expect(await core.call('list_accounts'), isEmpty);
+          expect(await core.call('list_device_cards'), isEmpty);
+          final c = HomeController(
+            core,
+            LocalPreferences(File('${directory.path}/presentation.json')),
+          );
+          c.selectedAccountProvider = 'xiaomi.mijia';
+          expect(c.isMock, false);
+          expect(c.canSignIn, true);
+          c.dispose();
+          core.foreground(false);
+          final login = Uint8List.fromList('fiction@example.invalid'.codeUnits);
+          final password = Uint8List.fromList('fiction-password'.codeUnits);
+          await expectLater(
+            core.connectAccount(
+              login: login,
+              password: password,
+              label: 'Fictional',
+              provider: 'xiaomi.mijia',
+            ),
+            throwsA(
+              isA<NativeFailure>().having(
+                (e) => e.code,
+                'code',
+                'HOST_BACKGROUND',
+              ),
+            ),
+          );
+          expect(login.every((byte) => byte == 0), true);
+          expect(password.every((byte) => byte == 0), true);
+        } finally {
+          await core.close();
+          await directory.delete(recursive: true);
+        }
+      },
+    );
+  }
+
   test(
     'explicit read-only Meiju startup has a separate empty local profile',
     () async {

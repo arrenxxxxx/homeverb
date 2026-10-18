@@ -5,8 +5,8 @@ The owner will perform real-account and device acceptance. Do not access saved
 pilot credentials or contact appliances as part of development tests.
 
 Current callable scope includes trusted Rust account/read APIs and native API 1.24
-Mijia-only/combined sessions. Flutter selection, fan control and live acceptance
-remain pending. Historical phase records below distinguish earlier
+Mijia-only/combined sessions and Flutter platform/account/read views. Fan control
+and live acceptance remain pending. Historical phase records below distinguish earlier
 protocol-only work from the [protected Core phase](../adr/0072-mijia-protected-core-reads.md).
 
 ## Protocol evidence
@@ -213,3 +213,53 @@ Contracts passed 20 schemas, 49 positive fixtures and 278 negative fixtures;
 document links and source hygiene passed. These checks used temporary fictional
 profiles only. Mobile package builds and real accounts/devices were not tested in
 this phase; iOS acceptance's expected API version is updated but was not executed.
+
+
+## Flutter account and read phase
+
+The platform catalog displays providers registered in the native session. Mijia
+sign-in and same-account reauthorization pass only the selected public provider
+through native metadata; credentials remain owned, cleared buffers. Account
+remarks, masked-name fallback, removal and recovery retain the existing lifecycle
+rules. Partial retrieval shows its positive named cards and coverage warning;
+unknown models remain placeholders. The general account-retrieval entry opens the
+account list so a user chooses the account to refresh instead of invoking generic
+multi-adapter discovery, whose result cannot represent Mijia partial coverage.
+
+Generic device details render reported fan values, raw lock status, doorbell
+volume and battery levels without guessed state or actions. Unsupported native
+control-option inspection leaves read-only details accessible. Primary appliance
+components precede auxiliary batteries so a battery service cannot replace fan
+power in a home-card summary. Percentage/degree units render as symbols without
+changing numeric values or ranges. Lock and doorbell symbols are decorative only.
+
+Use a native library built from this branch and the pinned Flutter SDK:
+
+```sh
+cd apps/mobile
+fvm flutter run -d DEVICE_ID --dart-define=HOMEVERB_ADAPTER=homeverb.platforms
+```
+
+Combined mode reuses the existing app-private `native-meiju` profile. Explicit
+`xiaomi.mijia` uses `native-mijia`; default Mock keeps `native`. There is no profile
+copy, secret export or migration. Rebuild the Android AAR or signed iOS framework
+from this checkout before running on a phone; desktop macOS has no production
+credential backend and is suitable only for the fictional native tests.
+
+Owner acceptance should start at Platforms > Add Platform > Mijia. Confirm the
+mainland account, named returned devices and unsupported placeholders, then open
+fan/doorbell/lock cards and compare the actual readable values with the vendor app.
+Online hints do not establish power; a missing field must remain unknown. The
+current community password flow cannot complete CAPTCHA/verification challenges;
+`MIJIA_AUTH_CHALLENGE_REQUIRED` is an incomplete login, not a saved successful
+connection. Shared-device coverage, real authentication and physical readings are
+still unverified. No lock write is available. Fan control is a subsequent phase.
+
+This App phase passed 52 scoped Flutter checks and a subsequent 23-check Mijia/
+state-refresh/permission run after adding the delayed-inspection cancellation
+case. The analyzer passed; fictional catalog/sign-in/account captures were visually
+inspected. Full Flutter regression had 157 passes and the eight previously
+recorded macOS glyph/legacy-click failures, not a full-suite pass. Rust Mijia/host
+regression passed 290 checks across 26 suites, plus workspace build and strict
+Clippy. See the [App verification record](../../apps/mobile/verification.md) for
+commands, evidence scope and remaining phone/package acceptance.

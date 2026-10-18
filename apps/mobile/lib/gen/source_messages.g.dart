@@ -393,7 +393,7 @@ String? translateSource(
   "Powered off" => t.mobilePoweredOff,
   "Turning on\u2026" => t.mobileTurningOn,
   "Turning off\u2026" => t.mobileTurningOff,
-  "Power" => t.mobilePower,
+  "Power" => t.powerState,
   "Cooling" => t.mobileCooling,
   "Heating" => t.mobileHeating,
   "Current temperature" => t.mobileCurrentTemperature,
@@ -1673,10 +1673,10 @@ String? translateSource(
   "Troubleshooting" => t.mobilePlatformTroubleshooting,
   "This only removes the account and its devices from HomeVerb on this device. Your Meiju account is unchanged. Reconnecting will not restore device names or room assignments." =>
     t.mobilePlatformRemovalScope,
-  "Sign in to the same Meiju account. Your device names and rooms will stay." =>
-    t.mobilePlatformSignInAgain,
-  "Sign in with your Meiju account to add your appliances." =>
-    t.mobilePlatformSignIn,
+  "Sign in to the same {platform} account. Your device names and rooms will stay." =>
+    t.mobilePlatformSignInAgain(platform: args["platform"] ?? "{platform}"),
+  "Sign in with your {platform} account to add your appliances." =>
+    t.mobilePlatformSignIn(platform: args["platform"] ?? "{platform}"),
   "Refresh Devices" => t.mobileRefreshAccountDevices,
   "Reported program" => t.vendorMideaDishwasherMode,
   "Cycle status" => t.vendorMideaDishwasherWorkStatus,
@@ -1684,6 +1684,55 @@ String? translateSource(
   "Water supply warning" => t.vendorMideaDishwasherWaterLack,
   "Salt warning" => t.vendorMideaDishwasherSoftwaterLack,
   "Rinse aid warning" => t.vendorMideaDishwasherBrightLack,
+  "Mijia" => t.mobileMijia,
+  "Mijia account" => t.mobileMijiaAccount,
+  "Choose Mijia" => t.mobileChooseMijia,
+  "Connect Mijia" => t.mobileConnectMijia,
+  "Mijia sign-in" => t.mobileMijiaSignIn,
+  "Sign in with your Mijia account to view your appliances and available readings." =>
+    t.mobileMijiaReadIntroduction,
+  "{platform} \u00b7 Mainland China" => t.mobilePlatformRegion(
+    platform: args["platform"] ?? "{platform}",
+  ),
+  "Check that your appliances are added to this account in {platform}." =>
+    t.mobilePlatformAddDevicesHint(platform: args["platform"] ?? "{platform}"),
+  "No devices yet. Update the list after adding appliances in {platform}." =>
+    t.mobilePlatformEmptyHint(platform: args["platform"] ?? "{platform}"),
+  "This only removes the account and its devices from HomeVerb on this device. Your {platform} account is unchanged. Reconnecting will not restore device names or room assignments." =>
+    t.mobilePlatformRemovalHint(platform: args["platform"] ?? "{platform}"),
+  "Devices retrieved" => t.mobileDevicesRetrieved,
+  "Retrieved devices: {count}. The list may be incomplete." =>
+    t.mobilePartialRetrievedCount(count: args["count"] ?? "{count}"),
+  "Electric fan" => t.vendorXiaomiMijiaFan,
+  "Fan level" => t.vendorXiaomiMijiaFanLevel,
+  "Fan mode code" => t.vendorXiaomiMijiaFanMode,
+  "Fan oscillation" => t.vendorXiaomiMijiaFanHorizontalSwing,
+  "Horizontal angle" => t.vendorXiaomiMijiaFanHorizontalAngle,
+  "Door lock" => t.vendorXiaomiMijiaLock,
+  "Lock status code" => t.vendorXiaomiMijiaLockStatus,
+  "Doorbell" => t.vendorXiaomiMijiaDoorbell,
+  "Doorbell volume" => t.vendorXiaomiMijiaDoorbellVolume,
+  "Battery" => t.vendorXiaomiMijiaBattery,
+  "Battery level" => t.vendorXiaomiMijiaBatteryLevel,
+  "Mijia requires additional account verification. This sign-in has not completed; verification challenges are not supported yet." =>
+    t.errorMIJIAAUTHCHALLENGEREQUIRED,
+  "Mijia rejected this request. Check your account and try again explicitly." =>
+    t.errorMIJIAREQUESTREJECTED,
+  "Could not reach Mijia. Your saved devices and readings are retained." =>
+    t.errorMIJIAREQUESTFAILED,
+  "The Mijia response could not be read. Previous readings are retained." =>
+    t.errorMIJIAINVALIDRESPONSE,
+  "Showing the devices returned by Mijia. Complete account coverage is not confirmed; older saved cards are retained." =>
+    t.errorMIJIAINVENTORYPARTIAL,
+  "Some device capabilities could not be loaded. Their named cards remain available." =>
+    t.errorMIJIASPECUNAVAILABLE,
+  "This device has no confirmed account binding for live reads. Refresh the account device list." =>
+    t.errorMIJIADEVICENOTLISTED,
+  "Choose an Account" => t.mobileChooseAnAccount,
+  "Choose a saved account to update its device list." =>
+    t.mobileChooseSavedAccountForRefresh,
+  "0.2.0 \u00b7 Experimental platform integration" =>
+    t.mobileExperimentalPlatformIntegration,
   _ => null,
 };
 
@@ -1730,6 +1779,13 @@ String translateError(Translations t, String code) => switch (code) {
   "LAN_NETWORK_CHANGED" => t.errorLANNETWORKCHANGED,
   "LAN_NETWORK_UNSUPPORTED" => t.errorLANNETWORKUNSUPPORTED,
   "MIDEA_CONFLICT_LIMIT" => t.errorMIDEACONFLICTLIMIT,
+  "MIJIA_AUTH_CHALLENGE_REQUIRED" => t.errorMIJIAAUTHCHALLENGEREQUIRED,
+  "MIJIA_REQUEST_REJECTED" => t.errorMIJIAREQUESTREJECTED,
+  "MIJIA_REQUEST_FAILED" => t.errorMIJIAREQUESTFAILED,
+  "MIJIA_INVALID_RESPONSE" => t.errorMIJIAINVALIDRESPONSE,
+  "MIJIA_INVENTORY_PARTIAL" => t.errorMIJIAINVENTORYPARTIAL,
+  "MIJIA_SPEC_UNAVAILABLE" => t.errorMIJIASPECUNAVAILABLE,
+  "MIJIA_DEVICE_NOT_LISTED" => t.errorMIJIADEVICENOTLISTED,
   _ => t.errorGeneric(code: code),
 };
 
@@ -3295,9 +3351,9 @@ String? sourceForKey(String key) => switch (key) {
   "mobile.platformRemovalScope" =>
     "This only removes the account and its devices from HomeVerb on this device. Your Meiju account is unchanged. Reconnecting will not restore device names or room assignments.",
   "mobile.platformSignInAgain" =>
-    "Sign in to the same Meiju account. Your device names and rooms will stay.",
+    "Sign in to the same {platform} account. Your device names and rooms will stay.",
   "mobile.platformSignIn" =>
-    "Sign in with your Meiju account to add your appliances.",
+    "Sign in with your {platform} account to add your appliances.",
   "mobile.refreshAccountDevices" => "Refresh Devices",
   "vendor.midea.dishwasher.mode" => "Reported program",
   "vendor.midea.dishwasher.work_status" => "Cycle status",
@@ -3307,5 +3363,53 @@ String? sourceForKey(String key) => switch (key) {
   "vendor.midea.dishwasher.bright_lack" => "Rinse aid warning",
   "vendor.midea.dishwasher.temperature" => "Temperature",
   "vendor.midea.dishwasher.remaining_minutes" => "Remaining time",
+  "mobile.mijia" => "Mijia",
+  "mobile.mijiaAccount" => "Mijia account",
+  "mobile.chooseMijia" => "Choose Mijia",
+  "mobile.connectMijia" => "Connect Mijia",
+  "mobile.mijiaSignIn" => "Mijia sign-in",
+  "mobile.mijiaReadIntroduction" =>
+    "Sign in with your Mijia account to view your appliances and available readings.",
+  "mobile.platformRegion" => "{platform} \u00b7 Mainland China",
+  "mobile.platformAddDevicesHint" =>
+    "Check that your appliances are added to this account in {platform}.",
+  "mobile.platformEmptyHint" =>
+    "No devices yet. Update the list after adding appliances in {platform}.",
+  "mobile.platformRemovalHint" =>
+    "This only removes the account and its devices from HomeVerb on this device. Your {platform} account is unchanged. Reconnecting will not restore device names or room assignments.",
+  "mobile.devicesRetrieved" => "Devices retrieved",
+  "mobile.partialRetrievedCount" =>
+    "Retrieved devices: {count}. The list may be incomplete.",
+  "vendor.xiaomi.mijia.fan" => "Electric fan",
+  "vendor.xiaomi.mijia.fan.level" => "Fan level",
+  "vendor.xiaomi.mijia.fan.mode" => "Fan mode code",
+  "vendor.xiaomi.mijia.fan.horizontal_swing" => "Fan oscillation",
+  "vendor.xiaomi.mijia.fan.horizontal_angle" => "Horizontal angle",
+  "vendor.xiaomi.mijia.lock" => "Door lock",
+  "vendor.xiaomi.mijia.lock.status" => "Lock status code",
+  "vendor.xiaomi.mijia.doorbell" => "Doorbell",
+  "vendor.xiaomi.mijia.doorbell.volume" => "Doorbell volume",
+  "vendor.xiaomi.mijia.battery" => "Battery",
+  "vendor.xiaomi.mijia.battery.level" => "Battery level",
+  "error.MIJIA_AUTH_CHALLENGE_REQUIRED" =>
+    "Mijia requires additional account verification. This sign-in has not completed; verification challenges are not supported yet.",
+  "error.MIJIA_REQUEST_REJECTED" =>
+    "Mijia rejected this request. Check your account and try again explicitly.",
+  "error.MIJIA_REQUEST_FAILED" =>
+    "Could not reach Mijia. Your saved devices and readings are retained.",
+  "error.MIJIA_INVALID_RESPONSE" =>
+    "The Mijia response could not be read. Previous readings are retained.",
+  "error.MIJIA_INVENTORY_PARTIAL" =>
+    "Showing the devices returned by Mijia. Complete account coverage is not confirmed; older saved cards are retained.",
+  "error.MIJIA_SPEC_UNAVAILABLE" =>
+    "Some device capabilities could not be loaded. Their named cards remain available.",
+  "error.MIJIA_DEVICE_NOT_LISTED" =>
+    "This device has no confirmed account binding for live reads. Refresh the account device list.",
+  "power.state" => "Power",
+  "mobile.chooseAnAccount" => "Choose an Account",
+  "mobile.chooseSavedAccountForRefresh" =>
+    "Choose a saved account to update its device list.",
+  "mobile.experimentalPlatformIntegration" =>
+    "0.2.0 \u00b7 Experimental platform integration",
   _ => null,
 };

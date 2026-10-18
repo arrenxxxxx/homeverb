@@ -1446,5 +1446,8 @@ Use descriptor-driven `read_state` for fan, doorbell, lock and battery propertie
 Online inventory hints never become power. Readings retain cloud source, local
 receipt time and unknown device observation time. Lock status codes remain raw;
 no unlocking is available. Control options, conflict inspection and LAN scan are
-not admitted for Mijia. The Flutter platform flow remains pending implementation;
-this native phase does not establish real-account or physical-device acceptance.
+not admitted for Mijia. Flutter now selects among registered providers, carries the selected account
+provider into protected reauthorization, and retains positive cards from partial
+retrieval. Missing control-option support leaves read-only device views usable;
+it never grants an action. This does not establish real-account or physical-device
+acceptance.

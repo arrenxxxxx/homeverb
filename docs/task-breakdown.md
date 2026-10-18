@@ -10,8 +10,10 @@ bounded account/home enumeration and selected MIoT readable mappings are
 implemented and synthetic-tested. Protected account persistence and stable device
 bindings now feed the read-only Core adapter and explicit Rust host composition.
 Native API 1.24 now routes Mijia-only and combined Meiju/Mijia sessions through
-protected connection and ordinary account/card/read operations. Flutter selection
-and fan controls remain pending; this is not yet a callable App integration. See
+protected connection and ordinary account/card/read operations. Flutter now has
+registered platform selection, provider-scoped sign-in/reauthorization and partial
+positive cards. Doorbell, lock, fan and battery readings use descriptor-driven
+details; fan controls remain the next phase. See
 [ADR-0072](adr/0072-mijia-protected-core-reads.md) and
 [ADR-0073](adr/0073-mijia-native-account-routing.md).
 Real-account and physical validation belong to the owner. No door-lock write,

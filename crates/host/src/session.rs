@@ -589,6 +589,12 @@ impl Session {
                     .iter()
                     .find(|connection| connection.id == connection_id)
                     .ok_or_else(Error::invalid)?;
+                if connection.adapter == homeverb_mijia::PROVIDER {
+                    return Err(Error::new(
+                        "CAPABILITY_UNSUPPORTED",
+                        "This provider has no admitted control options.",
+                    ));
+                }
                 let options = adapter
                     .inspect_control_options(&descriptor.device, connection, &operation)
                     .await?;

@@ -444,12 +444,24 @@ class HomeController extends ChangeNotifier {
         .toList();
     if (connections.length != 1) return;
     final connection = connections.single;
-    final inspected =
-        await core.call('inspect_control_options', {
-              'device_id': device,
-              'connection_id': connection['id'],
-            })
-            as Json;
+    final Json inspected;
+    try {
+      inspected =
+          await core.call('inspect_control_options', {
+                'device_id': device,
+                'connection_id': connection['id'],
+              })
+              as Json;
+    } on NativeFailure catch (error) {
+      if ([
+        'CAPABILITY_UNSUPPORTED',
+        'AUTH_FLOW_UNSUPPORTED',
+      ].contains(error.code)) {
+        _requireCurrentDevice(device, epoch);
+        return;
+      }
+      rethrow;
+    }
     _requireCurrentDevice(device, epoch);
     if (inspected['device_id'] != device ||
         inspected['connection_id'] != connection['id'] ||
@@ -1008,11 +1020,21 @@ class HomeController extends ChangeNotifier {
   bool accountNeedsReload = false;
   AccountClient? get accountClient =>
       core is AccountClient ? core as AccountClient : null;
-  bool get isMock => accountClient?.adapter != 'midea.meiju';
+  bool get isMock =>
+      accountClient == null || accountClient!.adapter == 'homeverb.mock';
+  String? selectedAccountProvider;
+  String get connectionProvider =>
+      account?['provider'] as String? ??
+      selectedAccountProvider ??
+      (accountClient?.adapter == 'xiaomi.mijia'
+          ? 'xiaomi.mijia'
+          : 'midea.meiju');
+  Set<String> get accountProviders => accountClient?.accountProviders ?? {};
+  String get connectionPlatformName => accountPlatformName(connectionProvider);
   Json? get account => accountDetails?['account'] as Json?;
   String accountRemark(Json account) {
     final label = account['label'] as String? ?? '';
-    return label == 'Meiju account' ||
+    return label == accountDefaultLabel(account['provider'] as String?) ||
             label == preferences.accountLoginLabel(account['id'])
         ? ''
         : label;
@@ -1027,6 +1049,7 @@ class HomeController extends ChangeNotifier {
 
   bool get canSignIn =>
       !isMock &&
+      accountProviders.contains(connectionProvider) &&
       accountClient!.supportsAccountConnection &&
       (account?['credential_state'] != 'pending' ||
           accountClient!.supportsPendingReauthorization) &&
@@ -1177,7 +1200,8 @@ class HomeController extends ChangeNotifier {
       'account_id': selectedAccount,
       'label': label.trim().isNotEmpty
           ? label.trim()
-          : preferences.accountLoginLabel(selectedAccount!) ?? 'Meiju account',
+          : preferences.accountLoginLabel(selectedAccount!) ??
+                accountDefaultLabel(connectionProvider),
     });
     await reloadAccountViews();
   });
@@ -1218,8 +1242,9 @@ class HomeController extends ChangeNotifier {
           password: password,
           label: label.trim().isNotEmpty
               ? label.trim()
-              : loginLabel ?? 'Meiju account',
+              : loginLabel ?? accountDefaultLabel(connectionProvider),
           accountId: selectedAccount,
+          provider: connectionProvider,
         );
         validateAccountReport(accountReport!);
         selectedAccount = accountReport!['account']['id'] as String;

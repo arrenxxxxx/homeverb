@@ -3780,11 +3780,11 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	/// en-US: 'This only removes the account and its devices from HomeVerb on this device. Your Meiju account is unchanged. Reconnecting will not restore device names or room assignments.'
 	String get mobilePlatformRemovalScope => 'This only removes the account and its devices from HomeVerb on this device. Your Meiju account is unchanged. Reconnecting will not restore device names or room assignments.';
 
-	/// en-US: 'Sign in to the same Meiju account. Your device names and rooms will stay.'
-	String get mobilePlatformSignInAgain => 'Sign in to the same Meiju account. Your device names and rooms will stay.';
+	/// en-US: 'Sign in to the same {platform} account. Your device names and rooms will stay.'
+	String mobilePlatformSignInAgain({required Object platform}) => 'Sign in to the same ${platform} account. Your device names and rooms will stay.';
 
-	/// en-US: 'Sign in with your Meiju account to add your appliances.'
-	String get mobilePlatformSignIn => 'Sign in with your Meiju account to add your appliances.';
+	/// en-US: 'Sign in with your {platform} account to add your appliances.'
+	String mobilePlatformSignIn({required Object platform}) => 'Sign in with your ${platform} account to add your appliances.';
 
 	/// en-US: 'Refresh Devices'
 	String get mobileRefreshAccountDevices => 'Refresh Devices';
@@ -3812,4 +3812,106 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Remaining time'
 	String get vendorMideaDishwasherRemainingMinutes => 'Remaining time';
+
+	/// en-US: 'Mijia'
+	String get mobileMijia => 'Mijia';
+
+	/// en-US: 'Mijia account'
+	String get mobileMijiaAccount => 'Mijia account';
+
+	/// en-US: 'Choose Mijia'
+	String get mobileChooseMijia => 'Choose Mijia';
+
+	/// en-US: 'Connect Mijia'
+	String get mobileConnectMijia => 'Connect Mijia';
+
+	/// en-US: 'Mijia sign-in'
+	String get mobileMijiaSignIn => 'Mijia sign-in';
+
+	/// en-US: 'Sign in with your Mijia account to view your appliances and available readings.'
+	String get mobileMijiaReadIntroduction => 'Sign in with your Mijia account to view your appliances and available readings.';
+
+	/// en-US: '{platform} \u00b7 Mainland China'
+	String mobilePlatformRegion({required Object platform}) => '${platform} \u00b7 Mainland China';
+
+	/// en-US: 'Check that your appliances are added to this account in {platform}.'
+	String mobilePlatformAddDevicesHint({required Object platform}) => 'Check that your appliances are added to this account in ${platform}.';
+
+	/// en-US: 'No devices yet. Update the list after adding appliances in {platform}.'
+	String mobilePlatformEmptyHint({required Object platform}) => 'No devices yet. Update the list after adding appliances in ${platform}.';
+
+	/// en-US: 'This only removes the account and its devices from HomeVerb on this device. Your {platform} account is unchanged. Reconnecting will not restore device names or room assignments.'
+	String mobilePlatformRemovalHint({required Object platform}) => 'This only removes the account and its devices from HomeVerb on this device. Your ${platform} account is unchanged. Reconnecting will not restore device names or room assignments.';
+
+	/// en-US: 'Devices retrieved'
+	String get mobileDevicesRetrieved => 'Devices retrieved';
+
+	/// en-US: 'Retrieved devices: {count}. The list may be incomplete.'
+	String mobilePartialRetrievedCount({required Object count}) => 'Retrieved devices: ${count}. The list may be incomplete.';
+
+	/// en-US: 'Electric fan'
+	String get vendorXiaomiMijiaFan => 'Electric fan';
+
+	/// en-US: 'Fan level'
+	String get vendorXiaomiMijiaFanLevel => 'Fan level';
+
+	/// en-US: 'Fan mode code'
+	String get vendorXiaomiMijiaFanMode => 'Fan mode code';
+
+	/// en-US: 'Fan oscillation'
+	String get vendorXiaomiMijiaFanHorizontalSwing => 'Fan oscillation';
+
+	/// en-US: 'Horizontal angle'
+	String get vendorXiaomiMijiaFanHorizontalAngle => 'Horizontal angle';
+
+	/// en-US: 'Door lock'
+	String get vendorXiaomiMijiaLock => 'Door lock';
+
+	/// en-US: 'Lock status code'
+	String get vendorXiaomiMijiaLockStatus => 'Lock status code';
+
+	/// en-US: 'Doorbell'
+	String get vendorXiaomiMijiaDoorbell => 'Doorbell';
+
+	/// en-US: 'Doorbell volume'
+	String get vendorXiaomiMijiaDoorbellVolume => 'Doorbell volume';
+
+	/// en-US: 'Battery'
+	String get vendorXiaomiMijiaBattery => 'Battery';
+
+	/// en-US: 'Battery level'
+	String get vendorXiaomiMijiaBatteryLevel => 'Battery level';
+
+	/// en-US: 'Mijia requires additional account verification. This sign-in has not completed; verification challenges are not supported yet.'
+	String get errorMIJIAAUTHCHALLENGEREQUIRED => 'Mijia requires additional account verification. This sign-in has not completed; verification challenges are not supported yet.';
+
+	/// en-US: 'Mijia rejected this request. Check your account and try again explicitly.'
+	String get errorMIJIAREQUESTREJECTED => 'Mijia rejected this request. Check your account and try again explicitly.';
+
+	/// en-US: 'Could not reach Mijia. Your saved devices and readings are retained.'
+	String get errorMIJIAREQUESTFAILED => 'Could not reach Mijia. Your saved devices and readings are retained.';
+
+	/// en-US: 'The Mijia response could not be read. Previous readings are retained.'
+	String get errorMIJIAINVALIDRESPONSE => 'The Mijia response could not be read. Previous readings are retained.';
+
+	/// en-US: 'Showing the devices returned by Mijia. Complete account coverage is not confirmed; older saved cards are retained.'
+	String get errorMIJIAINVENTORYPARTIAL => 'Showing the devices returned by Mijia. Complete account coverage is not confirmed; older saved cards are retained.';
+
+	/// en-US: 'Some device capabilities could not be loaded. Their named cards remain available.'
+	String get errorMIJIASPECUNAVAILABLE => 'Some device capabilities could not be loaded. Their named cards remain available.';
+
+	/// en-US: 'This device has no confirmed account binding for live reads. Refresh the account device list.'
+	String get errorMIJIADEVICENOTLISTED => 'This device has no confirmed account binding for live reads. Refresh the account device list.';
+
+	/// en-US: 'Power'
+	String get powerState => 'Power';
+
+	/// en-US: 'Choose an Account'
+	String get mobileChooseAnAccount => 'Choose an Account';
+
+	/// en-US: 'Choose a saved account to update its device list.'
+	String get mobileChooseSavedAccountForRefresh => 'Choose a saved account to update its device list.';
+
+	/// en-US: '0.2.0 \u00b7 Experimental platform integration'
+	String get mobileExperimentalPlatformIntegration => '0.2.0 \u00b7 Experimental platform integration';
 }

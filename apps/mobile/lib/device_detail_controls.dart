@@ -110,7 +110,7 @@ class DeviceDetailControls extends StatelessWidget {
             children: [
               for (final part in c.components)
                 ChoiceChip(
-                  label: Copy(controlLabel(part['id'] as String)),
+                  label: Copy(componentLabel(part)),
                   selected: c.component == part['id'],
                   onSelected: c.busy || !c.isForeground
                       ? null
@@ -194,4 +194,17 @@ class DeviceDetailControls extends StatelessWidget {
       ],
     );
   }
+}
+
+String componentLabel(Json component) {
+  final id = component['id'] as String;
+  final match = RegExp(r'^(fan|lock|doorbell|battery)-[0-9]+$').firstMatch(id);
+  return match == null
+      ? controlLabel(id)
+      : const {
+          'fan': 'Electric fan',
+          'lock': 'Door lock',
+          'doorbell': 'Doorbell',
+          'battery': 'Battery',
+        }[match[1]]!;
 }

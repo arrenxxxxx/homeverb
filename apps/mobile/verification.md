@@ -2813,3 +2813,45 @@ SHA-256: `6357742c59e7d6c9e10ce4b4c54e8b728f3a1a0412625d6a1c240d7658bf190a`.
 The owner-requested emulator update used `adb -s emulator-5586 install -r`, which
 returned `Success`; launching MainActivity also succeeded. No uninstall, data
 clear, live refresh, appliance command, remote push or publication was performed.
+
+## Mijia account and read integration: October 18, 2026
+
+This branch adds explicit native API 1.24 Mijia-only and combined platform builds,
+provider-scoped protected sign-in/reauthorization, named partial inventory cards
+and descriptor-driven fan/lock/doorbell/battery reading views. Combined mode keeps
+the existing private Meiju profile; Mijia-only mode has its own private profile.
+Unsupported control-option inspection leaves read-only details usable and cannot
+resume a cancelled/background view. No Mijia control or real-device claim follows.
+
+Executed on this macOS workstation with the pinned Flutter 3.47.7 SDK:
+
+- Offline `fvm flutter pub get` and final `fvm flutter analyze` passed.
+- The final account, Mijia, native-account, account-name, platform, state-refresh,
+  session-permission, generic-device-detail and localization run passed 52 tests.
+- A subsequent lifecycle guard change passed all 23 Mijia/state-refresh/session-
+  permission tests, including a new delayed unsupported-inspection cancellation
+  case. The analyzer passed again after that change.
+- Full `fvm flutter test --reporter expanded`: 157 passed, eight failed. The same
+  four macOS glyph/pixel assertions and four legacy card/footer click cases
+  documented in the preceding baseline still fail. This is not a full-suite pass.
+- The actual local FFI tests opened Mijia and combined sessions with empty temporary
+  profiles, checked provider/version admission and cleared rejected credential
+  buffers. Fictional widget tests exercised mixed-account selection, same-provider
+  reauthorization, positive partial cards, unsupported placeholders, raw lock codes,
+  absent power, unknown fan swing and Chinese 200% text layout.
+- Generated and visually inspected fictional English catalog/sign-in/account PNGs
+  under `apps/mobile/build/verification/mijia`. The initial capture lacked the
+  Material Icons test font; the corrected captures include it. No real credential
+  or device data appears in these images. Chinese layout tests do not establish
+  physical-phone typography or pixel equality.
+- `cargo +1.96.0 test -p homeverb-mijia -p homeverb-host --offline --locked` passed
+  290 checks across 26 targets/doc-test suites, including primary-appliance-before-
+  battery ordering and combined-host control-option refusal without cloud traffic.
+  Workspace build, strict all-target Clippy and Rust formatting passed.
+- Seven shared presentation checks, 20 schemas with 49 positive/278 negative
+  fixtures, documentation links and repository language/hygiene checks passed.
+
+No account sign-in, appliance request/control, push, publication or diagnostic
+upload was performed. Android/iOS package rebuilding, real login/challenge behavior,
+regional device coverage and physical readings remain owner acceptance work. Fan
+controls remain the next development phase; locks have no write path.

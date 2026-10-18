@@ -13,7 +13,13 @@ String controlLabel(String id) {
 }
 
 String controlUnit(dynamic unit) =>
-    const {'celsius': '°C', 'percent': '%', 'kelvin': 'K'}[unit] ??
+    const {
+      'celsius': '°C',
+      'percent': '%',
+      'percentage': '%',
+      'arcdegrees': '°',
+      'kelvin': 'K',
+    }[unit] ??
     (unit?.toString() ?? '');
 
 String propertyValue(dynamic value, Json property, {String? propertyId}) {
@@ -24,7 +30,7 @@ String propertyValue(dynamic value, Json property, {String? propertyId}) {
   final unit = controlUnit(property['unit']);
   return '$text${unit.isEmpty
       ? ''
-      : ['°C', '%'].contains(unit)
+      : ['°C', '%', '°'].contains(unit)
       ? unit
       : ' $unit'}';
 }

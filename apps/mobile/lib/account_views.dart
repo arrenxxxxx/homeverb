@@ -1,4 +1,5 @@
 import 'localization.dart';
+import 'account_identity.dart';
 import 'credential_access.dart';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
@@ -15,7 +16,9 @@ String credentialLabel(dynamic state) => switch (state) {
 
 Object accountDisplayName(HomeController c, Json account) {
   final name = c.accountDisplayName(account);
-  return name == null ? const UiMessage('Meiju account') : LiteralText(name);
+  return name == null
+      ? UiMessage(accountDefaultLabel(account['provider'] as String?))
+      : LiteralText(name);
 }
 
 class PlatformAccounts extends StatelessWidget {
@@ -82,7 +85,11 @@ class PlatformAccounts extends StatelessWidget {
                   children: [
                     Copy(accountDisplayName(c, account), size: 18, bold: true),
                     const SizedBox(height: 6),
-                    const Copy('Meiju', size: 12, color: muted),
+                    Copy(
+                      accountPlatformName(account['provider'] as String?),
+                      size: 12,
+                      color: muted,
+                    ),
                     if (duplicate)
                       Copy(
                         LiteralText(id.split('-').last),
@@ -231,7 +238,8 @@ List<dynamic> savedInventoryBlocks(HomeController c) {
           ],
           ['Device ID', binding['device_id'], null],
           ['Connection ID', binding['connection_id'], null],
-          if (c.supports('inspect_device_conflicts'))
+          if (c.supports('inspect_device_conflicts') &&
+              c.account?['provider'] == 'midea.meiju')
             [
               'Inspect duplicate device records',
               'Saved records only',
@@ -257,9 +265,27 @@ List<dynamic> accountRefreshBlocks(HomeController c) {
       if ((retrieval['device_ids'] as List).isEmpty)
         [
           'note',
-          'Check that your appliances are added to this account in Meiju.',
+          UiMessage(
+            'Check that your appliances are added to this account in {platform}.',
+            {'platform': UiMessage(c.connectionPlatformName)},
+          ),
         ],
     ];
+  if (status == 'partial' && (retrieval['device_ids'] as List).isNotEmpty) {
+    return [
+      [
+        'status',
+        'Devices retrieved',
+        UiMessage('Retrieved devices: {count}. The list may be incomplete.', {
+          'count': (retrieval['device_ids'] as List).length,
+        }),
+        'warning',
+      ],
+      if (retrieval['error'] != null &&
+          retrieval['error']['code'] != 'MIJIA_INVENTORY_PARTIAL')
+        ['note', UiError(retrieval['error']['code'])],
+    ];
+  }
   return [
     [
       'status',
@@ -322,14 +348,17 @@ List<dynamic> accountBlocks(
           'card',
           'Available platforms',
           [
-            ['Meiju', 'Mainland China', 'Choose Meiju'],
+            if (c.isMock || c.accountProviders.contains('midea.meiju'))
+              ['Meiju', 'Mainland China', 'Choose Meiju'],
+            if (c.isMock || c.accountProviders.contains('xiaomi.mijia'))
+              ['Mijia', 'Mainland China', 'Choose Mijia'],
           ],
         ],
         ['note', 'Supported devices vary by model.'],
       ];
     case 'P03':
       return [
-        ['hero', 'platform', 'Meiju', 'Mainland China'],
+        ['hero', 'platform', c.connectionPlatformName, 'Mainland China'],
         if (c.selectedAccount == null) ...[
           ['field', 'Account name', ''],
           ['note', 'Optional. Uses your sign-in account when blank.'],
@@ -337,7 +366,9 @@ List<dynamic> accountBlocks(
         [
           'note',
           c.selectedAccount == null
-              ? 'Use your existing Meiju account. Sign-in retrieves bound devices automatically. Open a supported device to control it.'
+              ? (c.connectionProvider == 'xiaomi.mijia'
+                    ? 'Sign in with your Mijia account to view your appliances and available readings.'
+                    : 'Use your existing Meiju account. Sign-in retrieves bound devices automatically. Open a supported device to control it.')
               : 'Sign in to the original account. Identity must match; local device names, rooms and favorites are preserved. Open a supported device to control it.',
         ],
         [
@@ -350,15 +381,25 @@ List<dynamic> accountBlocks(
     case 'P08':
       final retrieval = c.accountReport?['retrieval'] as Json?;
       final status = retrieval?['status'];
+      final positivePartial =
+          status == 'partial' &&
+          (retrieval?['device_ids'] as List? ?? []).isNotEmpty;
       return [
         [
           'status',
-          status == 'complete'
+          positivePartial
+              ? 'Devices retrieved'
+              : status == 'complete'
               ? 'Device list updated'
               : status == 'partial'
               ? 'Some devices could not be updated'
               : 'Could not update devices',
-          status == 'complete'
+          positivePartial
+              ? UiMessage(
+                  'Retrieved devices: {count}. The list may be incomplete.',
+                  {'count': (retrieval!['device_ids'] as List).length},
+                )
+              : status == 'complete'
               ? UiMessage('{count} devices found.', {
                   'count': (retrieval!['device_ids'] as List).length,
                 })
@@ -368,10 +409,15 @@ List<dynamic> accountBlocks(
         if (status == 'complete' && (retrieval!['device_ids'] as List).isEmpty)
           [
             'note',
-            'Check that your appliances are added to this account in Meiju.',
+            UiMessage(
+              'Check that your appliances are added to this account in {platform}.',
+              {'platform': UiMessage(c.connectionPlatformName)},
+            ),
           ],
         if (status != 'complete') ...[
-          if (retrieval?['error'] != null)
+          if (retrieval?['error'] != null &&
+              !(positivePartial &&
+                  retrieval?['error']['code'] == 'MIJIA_INVENTORY_PARTIAL'))
             ['note', UiError(retrieval!['error']['code'])],
           ...actions.where((action) => action[1] != 'Remove From This Device'),
         ],
@@ -386,7 +432,11 @@ List<dynamic> accountBlocks(
           ['button', 'Reload Accounts'],
         ];
       return [
-        ['summary', accountDisplayName(c, account), 'Meiju'],
+        [
+          'summary',
+          accountDisplayName(c, account),
+          accountPlatformName(account['provider'] as String?),
+        ],
         if (state != 'stored')
           [
             'status',
@@ -408,7 +458,10 @@ List<dynamic> accountBlocks(
         if (c.accountDeviceIds.isEmpty && state == 'stored')
           [
             'note',
-            'No devices yet. Update the list after adding appliances in Meiju.',
+            UiMessage(
+              'No devices yet. Update the list after adding appliances in {platform}.',
+              {'platform': UiMessage(c.connectionPlatformName)},
+            ),
           ],
         if (state == 'stored' && c.supports('refresh_account'))
           [
@@ -522,7 +575,10 @@ List<dynamic> accountBlocks(
           ],
         [
           'note',
-          'This only removes the account and its devices from HomeVerb on this device. Your Meiju account is unchanged. Reconnecting will not restore device names or room assignments.',
+          UiMessage(
+            'This only removes the account and its devices from HomeVerb on this device. Your {platform} account is unchanged. Reconnecting will not restore device names or room assignments.',
+            {'platform': UiMessage(c.connectionPlatformName)},
+          ),
         ],
         if (c.removalScope != null && !c.accountNeedsReload)
           ['button', 'Remove Locally']
@@ -561,12 +617,14 @@ class AccountSignIn extends StatefulWidget {
     required this.needsReload,
     required this.busy,
     this.reauthorizing = false,
+    this.provider = 'midea.meiju',
     this.credentialAccess = const PlatformCredentialAccess(),
     super.key,
   });
   final Future<void> Function(Uint8List login, Uint8List password) onSubmit;
   final VoidCallback onCancel, onReload;
   final bool needsReload, busy, reauthorizing;
+  final String provider;
   final CredentialAccess credentialAccess;
   @override
   State<AccountSignIn> createState() => _AccountSignInState();
@@ -725,17 +783,29 @@ class _AccountSignInState extends State<AccountSignIn>
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      const Copy('Meiju · Mainland China', size: 14, color: muted),
+      Copy(
+        UiMessage('{platform} · Mainland China', {
+          'platform': UiMessage(accountPlatformName(widget.provider)),
+        }),
+        size: 14,
+        color: muted,
+      ),
       const SizedBox(height: 20),
       Copy(
         widget.reauthorizing
-            ? 'Sign in to the same Meiju account. Your device names and rooms will stay.'
-            : 'Sign in with your Meiju account to add your appliances.',
+            ? UiMessage(
+                'Sign in to the same {platform} account. Your device names and rooms will stay.',
+                {'platform': UiMessage(accountPlatformName(widget.provider))},
+              )
+            : UiMessage(
+                'Sign in with your {platform} account to add your appliances.',
+                {'platform': UiMessage(accountPlatformName(widget.provider))},
+              ),
         color: muted,
       ),
       const SizedBox(height: 16),
       if (canEnter) ...[
-        field('Meiju account', login),
+        field(accountDefaultLabel(widget.provider), login),
         field('Password', password, secret: true),
       ] else ...[
         Copy(switch (readiness) {

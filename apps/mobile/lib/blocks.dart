@@ -770,7 +770,11 @@ Widget product(String key, {double size = 80}) {
   final source = dimensions[key];
   if (source == null)
     return Center(
-      child: key == 'appliance'
+      child: key == 'lock'
+          ? const Icon(Icons.lock_outline_rounded, size: 52, color: accent)
+          : key == 'doorbell'
+          ? const Icon(Icons.doorbell_outlined, size: 52, color: accent)
+          : key == 'appliance'
           ? const Icon(Icons.devices_other_outlined, size: 52, color: accent)
           : Glyph(key, size: 52, color: accent),
     );

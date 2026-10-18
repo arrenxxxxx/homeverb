@@ -340,6 +340,14 @@ async fn combined_host_routes_by_saved_provider_and_replays_local_removal() {
     );
     assert_eq!(f.cloud.calls.load(Ordering::SeqCst), calls);
     assert_eq!(f.call(json!({"method":"inspect_device_conflicts","account_id":account,"device_id":Uuid::new_v4()})).await["error"]["code"],"CAPABILITY_UNSUPPORTED");
+    let devices = f.call(json!({"method":"list_devices"})).await;
+    let fan = devices["data"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|d| d["alias"] == "Desk Fan")
+        .unwrap();
+    assert_eq!(f.call(json!({"method":"inspect_control_options","device_id":fan["id"],"connection_id":fan["connections"][0]["id"]})).await["error"]["code"], "CAPABILITY_UNSUPPORTED");
     let removal = json!({"method":"remove_account","account_id":account,"expected_device_ids":connected["data"]["retrieval"]["device_ids"]});
     assert_eq!(f.call(removal.clone()).await["data"]["status"], "removed");
     assert_eq!(f.call(removal).await["data"]["status"], "removed");

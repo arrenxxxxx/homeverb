@@ -1,6 +1,25 @@
 # HomeVerb Flutter application
 
-The native application embeds Core using native UI contract 1.22.0. The separate visual preview contains fictional Window Light fixtures and never opens Core. The default build opens an isolated Mock profile. Explicit Meiju builds provide protected account connection, local metadata, retrieval/recovery and scoped local removal; Android startup wiring and Mock process journeys are emulator-tested; actual Keystore and physical acceptance remain pending. Cache and history clearing are connected with separate confirmations. Nearby sharing and full-profile deletion remain unavailable. Their preview states are not live features.
+The native application embeds Core using native UI contract 1.24.0. The separate visual preview contains fictional Window Light fixtures and never opens Core. The default build opens an isolated Mock profile. Explicit Meiju builds provide protected account connection, local metadata, retrieval/recovery and scoped local removal; Android startup wiring and Mock process journeys are emulator-tested; actual Keystore and physical acceptance remain pending. Cache and history clearing are connected with separate confirmations. Nearby sharing and full-profile deletion remain unavailable. Their preview states are not live features.
+
+## Mijia and combined account builds
+
+Build the native library from the same checkout, then select
+`--dart-define=HOMEVERB_ADAPTER=homeverb.platforms` for Meiju and Mijia together.
+The platform catalog offers both mainland-China account flows. Explicit
+`xiaomi.mijia` selects Mijia only. Combined builds reuse `native-meiju`; Mijia-only
+builds use `native-mijia`, separate from the default `native` Mock profile.
+No credentials are copied between profiles.
+
+Mijia uses the existing protected sign-in boundary and native API 1.24 provider
+selection. Reauthorization keeps the saved account's provider and identity.
+Partial inventory may include positive named cards; unsupported devices remain
+visible. Fan, lock, doorbell and battery readings use the generic capability panel.
+Raw lock status codes never become an unlock action; missing power stays unknown.
+There are no Mijia controls in this phase. Native account verification challenges
+are reported as incomplete login and cannot yet be completed in the App.
+See the [Mijia guide](../../docs/development/11-mijia.md) for owner acceptance and
+[verification](verification.md) for fictional local checks.
 
 ## Device controls
 

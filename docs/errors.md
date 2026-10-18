@@ -1,8 +1,10 @@
 # Errors and result contract
 
 Mijia native API 1.24 returns `AUTH_FLOW_UNSUPPORTED` for an unregistered connection
-provider and `ACCOUNT_NOT_FOUND` for a foreign/missing account scope. Mijia conflict
-inspection remains `CAPABILITY_UNSUPPORTED`. `MIJIA_INVENTORY_PARTIAL` accompanies
+provider and `ACCOUNT_NOT_FOUND` for a foreign/missing account scope. Mijia conflict/control-option
+inspection remains `CAPABILITY_UNSUPPORTED` in a combined host; a host without
+Meiju control inspection can return `AUTH_FLOW_UNSUPPORTED`. The App treats either
+unsupported inspection as a read-only detail view, never as control authority. `MIJIA_INVENTORY_PARTIAL` accompanies
 published positive device IDs when enumeration is incomplete; it is not login
 failure or proof that unseen devices disappeared. See
 [ADR-0073](adr/0073-mijia-native-account-routing.md).

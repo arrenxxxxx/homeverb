@@ -50,7 +50,8 @@ This exits with code 11. Refresh state to inspect the result; do not blindly res
   mainland account login/recovery, bounded account/home enumeration, stable named
   device cards including unsupported placeholders, and exact MIoT fan/doorbell/
   lock/battery reads through Core. Native API 1.24 supports Mijia-only and combined
-  account sessions. Synthetic evidence only; Flutter entry points, fan controls
+  account sessions. Flutter supports protected platform sign-in, named partial
+  inventory cards and read-only details. Synthetic evidence only; fan controls
   and owner-run real-device acceptance remain pending.
   Door-lock writes are unavailable. No account or network work occurs at startup.
 
