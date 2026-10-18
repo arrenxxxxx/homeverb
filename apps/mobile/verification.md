@@ -3192,3 +3192,15 @@ passed, and Midea/Host Clippy passed with the previously recorded unrelated
 ordering in the diagnostic helper; it was corrected before the passing run.
 Both Android ABIs rebuilt with 20 exports and 16 KiB alignment. Documentation,
 contract and repository validators passed; live confirmation is still unresolved.
+
+Source `9bf589e` produced the diagnostic APK
+`output/flutter-verification/android/homeverb-0.2.0-recovery-confirm-trace.apk`,
+SHA-256 `cf39dd6efe348cc7521c4ed41d4f42f83238dea37b45051bf40484afafa07d59`.
+The verifier passed signature, both ABIs, current-AAR matching, 20 exports and
+16 KiB alignment. Both native and Flutter fixed diagnostic markers were found in
+both packaged architectures. In-place `adb install -r` succeeded; a code-only
+pull matched that exact hash. Cold start returned `Status: ok`, 1354 ms.
+The retained account, all six device entries and blank restoration form were
+visually checked before requesting owner input. No account data was cleared,
+and no credentials were entered or captured by tooling. The owner was asked for
+one instrumented confirmation attempt; its result is pending.
