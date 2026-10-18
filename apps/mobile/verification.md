@@ -2859,7 +2859,7 @@ controls remain the next development phase; locks have no write path.
 
 ## Mijia fan controls: October 18, 2026
 
-Branch `codex/mijia-integration` now prepares exact API 1.25 fan startup grants
+Branch `feature/mijia-integration` now prepares exact API 1.25 fan startup grants
 from protected options and admits selected-device setup after positive partial
 publication. Default session authority, read evidence, planning and uncertain
 receipt behavior remain separate. Generic fan buttons and forms retain actual
