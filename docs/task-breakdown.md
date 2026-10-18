@@ -292,3 +292,10 @@ The source comparator checks 18 product/option vectors without executing upstrea
 code. Exact grants, trusted confirmation and uncertain-write handling apply.
 Current-owner product matching and real power acceptance remain pending; this
 phase does not close refrigerator parity or the screenshot's provider reports.
+
+The current appliance-controls APK is now built and archive-verified with both
+Android ABIs and rebuilt API 1.24 Core. A complete SDK already existed outside the
+standard paths; the earlier missing-SDK conclusion is corrected in the
+[delivery record](../apps/mobile/verification.md#current-appliance-controls-apk--october-18-2026).
+No installation or real-device operation followed. Current refrigerator protocol
+identity and physical verification remain open.

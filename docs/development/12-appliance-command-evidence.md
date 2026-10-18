@@ -416,3 +416,10 @@ owner was asked which source is available. Current-model refrigerator writes,
 its renamed modern modes and current provider-report mappings remain incomplete.
 These observations do not change the implemented dishwasher controls or any
 production API, schema, grant or compatibility claim.
+
+The subsequent full toolchain-location check found an existing complete Android
+SDK in another local project's tool directory. Both native ABIs and the current
+appliance-controls APK were rebuilt and checked; see the
+[package record](../../apps/mobile/verification.md#current-appliance-controls-apk--october-18-2026).
+This corrects the earlier build blocker. It does not supply the refrigerator's
+protected protocol selector or an authenticated current-model plugin.

@@ -1,6 +1,6 @@
 # 10. Build and install the integrated Flutter Android app
 
-The app in `apps/mobile` embeds native Core API 1.22.0 directly. It does not invoke
+The app in `apps/mobile` embeds native Core API 1.24.0 directly. It does not invoke
 CLI, require a daemon or use a HomeVerb backend. Android 9 / API 28 is the minimum;
 the development APK includes arm64-v8a and x86_64. Flutter 3.47.7 is pinned in
 `apps/mobile/.fvmrc`. Build outputs are local and ignored by Git.
@@ -84,6 +84,11 @@ Use the selected SDK's build tools against each saved artifact:
 "$HOMEVERB_ANDROID_SDK/build-tools/36.0.0/aapt" dump badging /absolute/homeverb.apk
 shasum -a 256 /absolute/homeverb.apk
 ```
+
+The repository verifier also compares each packaged Core library with the current
+universal AAR, accepting only exact bytes or the same NDK
+`llvm-strip --strip-unneeded` output used by Android packaging. A same-named stale
+library fails even if it has the expected exports.
 
 The repository verifier additionally rejects incomplete extra ABIs and an embedded
 integration-test plugin, and writes an artifact checksum/provenance report:

@@ -30,6 +30,19 @@ def inspect_contents(archive):
         raise ValueError('Corrupt APK archive.')
 
 
+def match_core_library(packaged, rebuilt, strip):
+    """Require current AAR code, allowing only AGP's normal symbol stripping."""
+    if packaged == rebuilt:
+        return 'exact AAR bytes'
+    with tempfile.TemporaryDirectory(prefix='homeverb-core-match-') as directory:
+        library = Path(directory) / 'libhomeverb_ffi.so'
+        library.write_bytes(rebuilt)
+        subprocess.run([str(strip), '--strip-unneeded', str(library)], check=True)
+        if packaged != library.read_bytes():
+            raise ValueError('APK Core does not match the rebuilt AAR, including after symbol stripping.')
+    return 'exact AAR bytes after NDK --strip-unneeded'
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--apk', required=True, type=Path)
@@ -39,7 +52,8 @@ def main():
     parser.add_argument('--report', required=True, type=Path)
     args = parser.parse_args()
     build_tools = args.sdk / 'build-tools/36.0.0'
-    readelf = ndk_tools(args.sdk / 'ndk/28.2.13676358') / 'llvm-readelf'
+    tools = ndk_tools(args.sdk / 'ndk/28.2.13676358')
+    readelf = tools / 'llvm-readelf'
     environment = {**os.environ, 'JAVA_HOME': str(args.java_home)}
     subprocess.run([str(build_tools / 'apksigner'), 'verify', '--verbose', str(args.apk)],
                    env=environment, check=True)
@@ -54,10 +68,13 @@ def main():
                for line in manifest.splitlines()):
         raise ValueError('Application backup must be disabled.')
     native = {}
-    with zipfile.ZipFile(args.apk) as archive, tempfile.TemporaryDirectory() as directory:
+    matches = {}
+    aar_path = ROOT / 'target/android/homeverb-core-universal.aar'
+    with zipfile.ZipFile(args.apk) as archive, zipfile.ZipFile(aar_path) as aar, tempfile.TemporaryDirectory() as directory:
         inspect_contents(archive)
         for abi in ABIS:
             data = archive.read(f'lib/{abi}/libhomeverb_ffi.so')
+            matches[abi] = match_core_library(data, aar.read(f'jni/{abi}/libhomeverb_ffi.so'), tools / 'llvm-strip')
             library = Path(directory) / abi
             library.write_bytes(data)
             inspect_library(readelf, library, abi)
@@ -70,7 +87,8 @@ def main():
         'source_dirty': bool(subprocess.check_output(['git', 'status', '--porcelain'], cwd=ROOT, text=True).strip()),
         'declared_adapter': args.adapter,
         'native_sha256': native,
-        'aar_sha256': hashlib.sha256((ROOT / 'target/android/homeverb-core-universal.aar').read_bytes()).hexdigest(),
+        'aar_sha256': hashlib.sha256(aar_path.read_bytes()).hexdigest(),
+        'native_matches_current_aar': matches,
         'signature': 'verified; local development signing, not distribution acceptance',
         'zip_and_core_elf_alignment': '16 KiB verified',
         'core_exports_per_abi': 17,
@@ -78,7 +96,7 @@ def main():
     }
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, indent=2) + '\n')
-    print(f'PASS: {args.apk.name}; two complete ABIs, native exports, signature and alignment.')
+    print(f'PASS: {args.apk.name}; two complete ABIs, current AAR match, native exports, signature and alignment.')
     print(f'SHA-256: {report["sha256"]}')
 
 

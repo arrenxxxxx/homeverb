@@ -2909,3 +2909,48 @@ layout. No Android APK/AAR or iOS framework was rebuilt in this phase. The exist
 Android SDK/NDK/license blocker remains. No real account, appliance command,
 remote push or publication occurred. Physical power, exact owner-product matching,
 refrigerator writes and remaining screenshot features are still pending.
+
+## Current appliance-controls APK — October 18, 2026
+
+A broader toolchain-location check found an already-installed complete SDK under
+another local development project's `.local/android-sdk`, with API 35/36,
+build-tools 36, NDK 28.2.13676358 and the existing licenses. The earlier conclusion
+that this workstation lacked the SDK was incorrect: Flutter had selected the
+standalone platform-tools directory. No SDK license was accepted and no SDK
+component was installed for this correction.
+
+Using the existing SDK and Temurin JDK 21:
+
+- `scripts/verify_android_store.py` passed Java compilation, fictional network
+  selection, synthetic JVM encryption and Rust/JNI storage checks.
+- `scripts/build_android_native.py` rebuilt both arm64-v8a and x86_64 from current
+  Core, passing the 17-export and 16 KiB ELF-alignment checks.
+- The pinned Flutter dual-ABI release build passed with
+  `--dart-define=HOMEVERB_ADAPTER=midea.meiju`. A temporary `XDG_CONFIG_HOME` held
+  the SDK/JDK settings, while `ANDROID_USER_HOME` retained the existing persistent
+  development signing location. Other-project source was not modified.
+- `scripts/verify_flutter_apk.py` passed two complete ABIs, APK v2 signature,
+  minimum API 28, disabled backup, absence of the integration-test plugin, exports
+  and 16 KiB ZIP/ELF alignment.
+- `apksigner verify --print-certs` confirmed the same development certificate as
+  the prior `homeverb-0.2.0-refresh-spinner.apk`; this is signing continuity only,
+  not evidence of successful installation or retained account access.
+- Packaged native bytes initially differ from raw AAR bytes because AGP strips
+  symbols. Both ABIs exactly match the newly built AAR after the same NDK
+  `--strip-unneeded` operation. The verifier now enforces this check and rejects
+  stale native payloads; five verifier tests passed, including stale-payload
+  refusal despite allowing normal stripping.
+
+Local artifact: `output/flutter-verification/android/homeverb-0.2.0-appliance-controls.apk`.
+Size: 71,255,842 bytes. SHA-256:
+`79001e5f5d8fd035f6b015acde2497158774b14161129fb304915202cf303937`.
+It contains native API 1.24 and the reviewed dishwasher power/cycle buttons.
+The original adjacent JSON records the clean application build revision
+`618bffc05dabafd0c07ee898304f595851d22610`; the separate `.aar-match.json` report
+records the subsequent verifier run while that verification change was uncommitted.
+No production application source changed between those two checks.
+
+No APK installation, emulator launch, account access, appliance command or remote
+publication occurred. This closes the local package-build blocker, not the exact
+refrigerator artifact dependency or physical-device acceptance. The current ADB
+inventory still has zero connected devices. The prior APK artifacts are retained.

@@ -2051,3 +2051,11 @@ method/export counts, SQLite 5 and protected payload 3 are unchanged.
 The App adds corresponding buttons and explicit option-aware confirmation text.
 This is offline software evidence only; owner-profile matching, physical power,
 mobile packaging and remaining screenshot-feature acceptance remain open.
+
+The API 1.24 Android universal AAR and appliance-controls APK were subsequently
+rebuilt using the workstation's existing full SDK. Both ABIs passed export and
+alignment checks, and each packaged Core exactly matches the rebuilt AAR after
+normal NDK symbol stripping. The APK verifier now rejects stale Core libraries.
+This supplies local package evidence only; it does not establish installation,
+current-owner product matching or physical operation. The earlier SDK-location
+blocker is resolved; see the [delivery record](../apps/mobile/verification.md#current-appliance-controls-apk--october-18-2026).
