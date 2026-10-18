@@ -19,7 +19,11 @@ class SessionPermission {
 
   Map<String, dynamic> get startupEntry => {
     'device_id': device,
-    if (startupField == 'meiju_ac_feature_grants') ...{
+    if (startupField == 'mijia_fan_grants') ...{
+      'component_id': component,
+      'property': parameter,
+      'value': value,
+    } else if (startupField == 'meiju_ac_feature_grants') ...{
       'feature': parameter,
       'value': value,
     } else
@@ -48,16 +52,34 @@ class SessionPermission {
           propertiesForMapping is Map && propertiesForMapping.length == 1
           ? propertiesForMapping.keys.single
           : null;
-      final mapping =
-          _startup[(option['capability'], option['action'])] ??
-          (option['capability'] == 'vendor.midea.ac' &&
-                  featureParameter is String &&
-                  option['action'] == 'set_' + featureParameter
-              ? ('meiju_ac_feature_grants', featureParameter)
-              : null);
+      final component = option['component_id'];
+      final fanComponent =
+          component is String &&
+          RegExp(r'^fan-[1-9][0-9]{0,9}$').hasMatch(component);
+      final fanParameter =
+          (option['capability'] == 'power' && option['action'] == 'set')
+          ? 'state'
+          : (option['capability'] == 'vendor.xiaomi.mijia.fan' &&
+                const {
+                  'level',
+                  'mode',
+                  'horizontal_swing',
+                  'horizontal_angle',
+                }.contains(featureParameter) &&
+                option['action'] == 'set_$featureParameter')
+          ? featureParameter as String
+          : null;
+      final mapping = fanComponent
+          ? (fanParameter == null ? null : ('mijia_fan_grants', fanParameter))
+          : _startup[(option['capability'], option['action'])] ??
+                (option['capability'] == 'vendor.midea.ac' &&
+                        featureParameter is String &&
+                        option['action'] == 'set_' + featureParameter
+                    ? ('meiju_ac_feature_grants', featureParameter)
+                    : null);
       final definition = option['definition'] as Map?;
       if (mapping == null ||
-          option['component_id'] != 'main' ||
+          (component != 'main' && !fanComponent) ||
           definition?['risk'] != 'low' ||
           definition?['idempotency'] != 'set_value' ||
           !(definition?['transports'] as List? ?? []).contains('cloud'))
@@ -70,6 +92,11 @@ class SessionPermission {
           (parameters?['required'] as List? ?? []).any((p) => p != mapping.$2))
         continue;
       final schema = properties![mapping.$2] as Map;
+      if (fanComponent &&
+          (const {'state', 'horizontal_swing'}.contains(mapping.$2)
+              ? schema['type'] != 'boolean'
+              : !const {'integer', 'number'}.contains(schema['type'])))
+        continue;
       if (parameters!['additionalProperties'] != false ||
           parameters.keys.any(
             (key) => !{
@@ -150,7 +177,8 @@ class SessionPermission {
       }
       if (values.length >
           (mapping.$1 == 'meiju_temperature_grants' ||
-                  mapping.$1 == 'meiju_ac_feature_grants'
+                  mapping.$1 == 'meiju_ac_feature_grants' ||
+                  mapping.$1 == 'mijia_fan_grants'
               ? 256
               : 64))
         continue;
@@ -158,7 +186,7 @@ class SessionPermission {
         result.add(
           SessionPermission._(
             inspection['device_id'],
-            'main',
+            component as String,
             option['capability'],
             option['action'],
             mapping.$2,
@@ -185,7 +213,8 @@ class SessionPermission {
       entries.add(permission.startupEntry);
       final limit = permission.startupField == 'meiju_temperature_grants'
           ? 256
-          : permission.startupField == 'meiju_ac_feature_grants'
+          : permission.startupField == 'meiju_ac_feature_grants' ||
+                permission.startupField == 'mijia_fan_grants'
           ? 1024
           : 64;
       if (entries.length > limit)

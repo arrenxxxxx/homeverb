@@ -27,6 +27,7 @@ Json inspection() {
 
 class PermissionCore extends AccountFixture {
   PermissionCore(this.inspected) {
+    links[firstAccount] = [inspected['device_id'] as String];
     cards.clear();
     cards.add({
       'device': {

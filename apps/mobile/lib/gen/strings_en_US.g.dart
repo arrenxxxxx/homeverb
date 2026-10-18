@@ -3914,4 +3914,16 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: '0.2.0 \u00b7 Experimental platform integration'
 	String get mobileExperimentalPlatformIntegration => '0.2.0 \u00b7 Experimental platform integration';
+
+	/// en-US: 'Set fan level'
+	String get vendorXiaomiMijiaFanSetLevel => 'Set fan level';
+
+	/// en-US: 'Set fan mode code'
+	String get vendorXiaomiMijiaFanSetMode => 'Set fan mode code';
+
+	/// en-US: 'Set fan oscillation'
+	String get vendorXiaomiMijiaFanSetHorizontalSwing => 'Set fan oscillation';
+
+	/// en-US: 'Set fan angle'
+	String get vendorXiaomiMijiaFanSetHorizontalAngle => 'Set fan angle';
 }

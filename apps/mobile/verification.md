@@ -2855,3 +2855,28 @@ No account sign-in, appliance request/control, push, publication or diagnostic
 upload was performed. Android/iOS package rebuilding, real login/challenge behavior,
 regional device coverage and physical readings remain owner acceptance work. Fan
 controls remain the next development phase; locks have no write path.
+
+
+## Mijia fan controls: October 18, 2026
+
+Branch `codex/mijia-integration` now prepares exact API 1.25 fan startup grants
+from protected options and admits selected-device setup after positive partial
+publication. Default session authority, read evidence, planning and uncertain
+receipt behavior remain separate. Generic fan buttons and forms retain actual
+model ranges/enums and exact component IDs. Lock/doorbell controls remain absent.
+
+Executed with pinned Flutter 3.47.7 on macOS:
+
+- `fvm flutter analyze`: passed.
+- `fvm flutter test test/mijia_controls_test.dart test/session_permissions_test.dart test/mijia_test.dart test/state_refresh_test.dart test/localization_test.dart test/accounts_test.dart test/account_native_test.dart`:
+  48 passed. Includes native API 1.25 startup in Mijia/combined modes using empty
+  temporary profiles, exact permission choices, partial target publication/refusal,
+  form range rejection/exact arguments, account routing and lifecycle fences.
+- `fvm flutter test`: 165 passed, 8 failed. The failures match the prior macOS
+  baseline: button-label ink, field alignment, two control-glyph cases, one legacy
+  app click and three receipt clicks. No test expectation was weakened to hide them.
+- Canonical catalogs regenerated with `python3 scripts/generate_flutter_i18n.py --generate`.
+
+These are fictional desktop tests, not physical-device or signed phone acceptance.
+Actual mainland login, challenge handling, shared-device coverage, readings and
+fan controls remain owner validation. APK packaging is recorded separately below.

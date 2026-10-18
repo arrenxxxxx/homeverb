@@ -1291,5 +1291,9 @@
   "power.state": "电源",
   "mobile.chooseAnAccount": "选择账号",
   "mobile.chooseSavedAccountForRefresh": "选择已保存的账号，更新它的设备列表。",
-  "mobile.experimentalPlatformIntegration": "0.2.0 · 实验性平台接入"
+  "mobile.experimentalPlatformIntegration": "0.2.0 · 实验性平台接入",
+  "vendor.xiaomi.mijia.fan.set_level": "设置电扇档位",
+  "vendor.xiaomi.mijia.fan.set_mode": "设置电扇模式代码",
+  "vendor.xiaomi.mijia.fan.set_horizontal_swing": "设置电扇摇头",
+  "vendor.xiaomi.mijia.fan.set_horizontal_angle": "设置电扇角度"
 }

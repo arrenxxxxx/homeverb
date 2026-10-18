@@ -6,7 +6,7 @@ pilot credentials or contact appliances as part of development tests.
 
 Current callable scope includes trusted Rust account/read APIs and native API 1.25
 Mijia-only/combined sessions with exact fan startup grants and Flutter
-platform/account/read views. App controls and live acceptance remain pending. The Rust adapter
+platform/account/read/control views. Live acceptance remains pending. The Rust adapter
 can explicitly admit protected fan setters under ADR-0074. Historical phase records below distinguish earlier
 protocol-only work from the [protected Core phase](../adr/0072-mijia-protected-core-reads.md).
 
@@ -342,3 +342,24 @@ instead of normalizing it through floating point. Only duplicate detection uses
 numeric normalization; it never changes authority. The four focused grant tests
 pass, including an integer above the exact binary64 integer range. This does not
 admit a new device value: the protected MIoT domain remains independently required.
+
+## Flutter fan controls
+
+The foreground controller derives exact fan startup permissions from protected
+option inspection, retaining each `fan-SIID` component and actual boolean/enum/
+range values. It negotiates API 1.25 for these grants, reopens the native session
+and refreshes only the selected account. A partial inventory may complete device
+setup only if its positive published IDs include that exact device. Missing target
+publication refuses setup. Preparation sends no appliance write.
+
+Generic detail buttons and argument forms expose power, level, mode code,
+horizontal swing and angle only where described and granted. English/Chinese
+labels preserve native mode codes without inventing labels or ranges. Submission
+retains existing planning, observation, receipt and lifecycle behavior. Opening a
+form or editing a value sends nothing. Doorbell/lock/battery remain read-only.
+The owner will validate real login, readings, controls and phone lifecycle.
+
+Flutter fan verification passed 48 focused checks and static analysis. Full
+regression passed 165 with the same eight documented macOS baseline failures;
+it is not a full-suite pass. See the [App record](../../apps/mobile/verification.md)
+for the commands and exact failure scope. No real account/device testing occurred.

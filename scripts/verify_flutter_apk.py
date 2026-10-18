@@ -35,7 +35,7 @@ def main():
     parser.add_argument('--apk', required=True, type=Path)
     parser.add_argument('--sdk', required=True, type=Path)
     parser.add_argument('--java-home', required=True, type=Path)
-    parser.add_argument('--adapter', required=True, choices=['homeverb.mock', 'midea.meiju'])
+    parser.add_argument('--adapter', required=True, choices=['homeverb.mock', 'midea.meiju', 'xiaomi.mijia', 'homeverb.platforms'])
     parser.add_argument('--report', required=True, type=Path)
     args = parser.parse_args()
     build_tools = args.sdk / 'build-tools/36.0.0'

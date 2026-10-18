@@ -1733,6 +1733,10 @@ String? translateSource(
     t.mobileChooseSavedAccountForRefresh,
   "0.2.0 \u00b7 Experimental platform integration" =>
     t.mobileExperimentalPlatformIntegration,
+  "Set fan level" => t.vendorXiaomiMijiaFanSetLevel,
+  "Set fan mode code" => t.vendorXiaomiMijiaFanSetMode,
+  "Set fan oscillation" => t.vendorXiaomiMijiaFanSetHorizontalSwing,
+  "Set fan angle" => t.vendorXiaomiMijiaFanSetHorizontalAngle,
   _ => null,
 };
 
@@ -3411,5 +3415,9 @@ String? sourceForKey(String key) => switch (key) {
     "Choose a saved account to update its device list.",
   "mobile.experimentalPlatformIntegration" =>
     "0.2.0 \u00b7 Experimental platform integration",
+  "vendor.xiaomi.mijia.fan.set_level" => "Set fan level",
+  "vendor.xiaomi.mijia.fan.set_mode" => "Set fan mode code",
+  "vendor.xiaomi.mijia.fan.set_horizontal_swing" => "Set fan oscillation",
+  "vendor.xiaomi.mijia.fan.set_horizontal_angle" => "Set fan angle",
   _ => null,
 };

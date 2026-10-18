@@ -213,7 +213,11 @@ class NativeClient
     List<SessionPermission> permissions = const [],
   }) async {
     if (permissions.isNotEmpty &&
-        !['midea.meiju', 'homeverb.platforms'].contains(adapter)) {
+        ![
+          'midea.meiju',
+          'xiaomi.mijia',
+          'homeverb.platforms',
+        ].contains(adapter)) {
       throw NativeFailure(
         'POLICY_DENIED',
         'This host cannot configure real controls.',
@@ -252,6 +256,12 @@ class NativeClient
         throw NativeFailure(
           'API_UPGRADE_REQUIRED',
           'Mijia requires native API 1.24 or later.',
+        );
+      }
+      if (grants.containsKey('mijia_fan_grants') && !client.apiAtLeast(25)) {
+        throw NativeFailure(
+          'API_UPGRADE_REQUIRED',
+          'Mijia fan controls require native API 1.25 or later.',
         );
       }
       return client;

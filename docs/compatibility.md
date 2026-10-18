@@ -9,14 +9,15 @@ account/home device enumeration and exact released-model MIoT mapping for select
 readable fan/lock/doorbell/battery properties. Its protected account vault bindings
 and read-only Core adapter now have synthetic SQLite/account/read evidence and
 native API 1.24 Mijia-only/combined account composition. Flutter platform login,
-partial named cards and read-only details now use these native flows. Fan controls
-remain pending. A low-level one-property write primitive is synthetic-tested,
+partial named cards and details now use these native flows. Fan controls use
+protected model-specific options and exact API 1.25 startup grants. A low-level one-property write primitive is synthetic-tested,
 and explicit trusted Rust fan composition now admits exact protected properties
 with independent Core grants. Default composition remains read-only. API 1.25 adds exact Mijia fan startup grants
 and permits `fan-SIID` in protected option responses. Strict clients must negotiate
 1.25 before using these fields; existing Meiju contracts and API 1.24 read-only
 startup remain supported. Saved payloads and physical support claims are unchanged.
-Flutter control preparation remains pending.
+Flutter preparation requires positive publication of the selected device even
+when inventory coverage is partial; doorbell/lock controls remain unavailable.
 Community enumeration is not complete-home evidence. Online hints are never power or
 lock state. Door-lock writes remain high-risk and unavailable. Real authentication,
 challenge completion, regional inventory, MIoT model mapping and physical support

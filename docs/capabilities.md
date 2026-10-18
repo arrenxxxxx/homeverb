@@ -99,5 +99,7 @@ protected MIoT property's read/write permission and value domain. The
 [fictional fan capability](../examples/capability.mijia-fan.json) and
 [command](../examples/command.mijia-fan.json) illustrate one model, not universal
 levels. Each setter is low-risk, set-value, cloud-only with unavailable verification.
-Default/native/App sessions remain read-only pending their grant integration.
+Default sessions remain read-only. API 1.25 and the foreground App can prepare
+exact fan grants from protected options; saved descriptors alone provide no
+authority.
 Doorbell, lock and battery mappings expose no actions.

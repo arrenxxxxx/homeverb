@@ -492,7 +492,8 @@ class HomeController extends ChangeNotifier {
       _requireCurrentDevice(device, refreshedEpoch);
       validateAccountReport(result);
       final retrieval = result['retrieval'] as Json;
-      if (retrieval['status'] != 'complete') {
+      if (!['complete', 'partial'].contains(retrieval['status']) ||
+          !(retrieval['device_ids'] as List? ?? []).contains(device)) {
         // Retry must rebuild the policy and refresh; never use stale actions.
         _controlPermissions = const [];
         throw NativeFailure(

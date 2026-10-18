@@ -493,3 +493,23 @@ fan and eligible temperature actions; swing, fixed positions, display and sound
 remain hidden because their native mappings are not yet admitted. This is not
 complete Meiju feature parity. See the [function comparison](../../docs/development/10-meiju-ac-parity.md)
 for unfinished model-specific controls and evidence requirements.
+
+## Mijia and combined platform builds
+
+Build the matching native AAR and use
+`--dart-define=HOMEVERB_ADAPTER=homeverb.platforms` for the Meiju/Mijia catalog.
+Mijia mainland password sign-in uses protected native buffers. Returned devices
+retain named cards even when their model has no readable mapping. Inventory is
+explicitly partial; online hints are not power. Fan/lock/doorbell/battery details
+show only returned mapped values. Lock status and fan mode codes remain numeric.
+CAPTCHA/verification challenge completion is not implemented.
+
+API 1.25 allows foreground device setup to derive exact fan startup permissions
+from protected MIoT options. The selected account refresh must positively publish
+the current device; partial coverage alone does not refuse other published cards.
+Generic controls expose only supported power, level, mode, horizontal swing and
+angle setters. Opening/editing a form sends nothing. Accepted is not verified;
+uncertain writes are never replayed automatically. Doorbell and lock writes remain
+unavailable. Combined mode reuses the private `native-meiju` profile; explicit
+`xiaomi.mijia` uses `native-mijia`. No profile or credential migration occurs.
+See the [Mijia guide](../../docs/development/11-mijia.md) for owner acceptance.

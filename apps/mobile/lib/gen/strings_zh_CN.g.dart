@@ -1326,4 +1326,8 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get mobileChooseAnAccount => '\u9009\u62e9\u8d26\u53f7';
 	@override String get mobileChooseSavedAccountForRefresh => '\u9009\u62e9\u5df2\u4fdd\u5b58\u7684\u8d26\u53f7\uff0c\u66f4\u65b0\u5b83\u7684\u8bbe\u5907\u5217\u8868\u3002';
 	@override String get mobileExperimentalPlatformIntegration => '0.2.0 \u00b7 \u5b9e\u9a8c\u6027\u5e73\u53f0\u63a5\u5165';
+	@override String get vendorXiaomiMijiaFanSetLevel => '\u8bbe\u7f6e\u7535\u6247\u6863\u4f4d';
+	@override String get vendorXiaomiMijiaFanSetMode => '\u8bbe\u7f6e\u7535\u6247\u6a21\u5f0f\u4ee3\u7801';
+	@override String get vendorXiaomiMijiaFanSetHorizontalSwing => '\u8bbe\u7f6e\u7535\u6247\u6447\u5934';
+	@override String get vendorXiaomiMijiaFanSetHorizontalAngle => '\u8bbe\u7f6e\u7535\u6247\u89d2\u5ea6';
 }
