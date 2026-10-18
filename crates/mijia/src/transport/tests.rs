@@ -34,6 +34,30 @@ fn sts_allowlist_rejects_private_or_foreign_destinations() {
 }
 
 #[tokio::test]
+async fn public_spec_requests_never_forward_account_cookies_or_encryption_headers() {
+    let server = Server::start(
+        b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\n{}".to_vec(),
+        false,
+    )
+    .await;
+    let response = transmit(
+        server.client.clone(),
+        Url::parse(&server.url).unwrap(),
+        &request(CloudEndpoint::SpecIndex),
+        &operation(),
+    )
+    .await
+    .unwrap();
+    assert_eq!(response.body.expose(), b"{}");
+    let requests = server.requests.lock().unwrap();
+    let wire = String::from_utf8_lossy(&requests[0]);
+    assert!(wire.starts_with("GET "));
+    assert!(!wire.contains("cookie:"));
+    assert!(!wire.contains("FICTIONAL-TOKEN"));
+    assert!(!wire.contains("miot-encrypt-algorithm"));
+}
+
+#[tokio::test]
 async fn tls_sends_exact_body_and_extracts_single_cookie() {
     let server = Server::start(b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\nSet-Cookie: serviceToken=fictional; Path=/; Secure\r\nConnection: close\r\n\r\n{}".to_vec(), false).await;
     let response = transmit(

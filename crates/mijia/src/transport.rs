@@ -17,6 +17,10 @@ pub enum CloudEndpoint {
     LoginExchange,
     Devices,
     Properties,
+    Homes,
+    HomeDevices,
+    SpecIndex,
+    SpecInstance,
 }
 impl CloudEndpoint {
     pub fn path(self) -> &'static str {
@@ -26,6 +30,10 @@ impl CloudEndpoint {
             Self::LoginExchange => "/sts",
             Self::Devices => "/home/device_list",
             Self::Properties => "/miotspec/prop/get",
+            Self::Homes => "/v2/homeroom/gethome_merged",
+            Self::HomeDevices => "/v2/home/home_device_list",
+            Self::SpecIndex => "/miot-spec-v2/instances",
+            Self::SpecInstance => "/miot-spec-v2/instance",
         }
     }
 }
@@ -58,6 +66,18 @@ impl CloudRequest {
     }
     fn url(&self) -> Result<Url> {
         let value = match self.endpoint {
+            CloudEndpoint::SpecIndex => {
+                "https://miot-spec.org/miot-spec-v2/instances?status=all".to_owned()
+            }
+            CloudEndpoint::SpecInstance => {
+                let kind = self.location.as_ref().ok_or_else(invalid)?;
+                crate::spec::validate_device_type(kind.as_str())?;
+                return Url::parse_with_params(
+                    "https://miot-spec.org/miot-spec-v2/instance",
+                    &[("type", kind.as_str())],
+                )
+                .map_err(|_| invalid());
+            }
             CloudEndpoint::LoginSign => {
                 "https://account.xiaomi.com/pass/serviceLogin?sid=xiaomiio&_json=true".to_owned()
             }
@@ -142,20 +162,21 @@ async fn transmit(
         let mut headers = HeaderMap::new();
         let mut cookie = HeaderValue::from_str(request.cookie.as_str()).map_err(|_| invalid())?;
         cookie.set_sensitive(true);
-        headers.insert("cookie", cookie);
+        if !matches!(request.endpoint, CloudEndpoint::SpecIndex | CloudEndpoint::SpecInstance) { headers.insert("cookie", cookie); }
         headers.insert("content-type", HeaderValue::from_static("application/x-www-form-urlencoded"));
         headers.insert("accept-encoding", HeaderValue::from_static("identity"));
         headers.insert("user-agent", HeaderValue::from_static("Android-7.1.1-1.0.0-ONEPLUS A3010-136-ABCDEFABCDEF0 APP/xiaomi.smarthome APPV/62830"));
-        if matches!(request.endpoint, CloudEndpoint::Devices | CloudEndpoint::Properties) {
+        if matches!(request.endpoint, CloudEndpoint::Devices | CloudEndpoint::Properties | CloudEndpoint::Homes | CloudEndpoint::HomeDevices) {
             headers.insert("miot-encrypt-algorithm", HeaderValue::from_static("ENCRYPT-RC4"));
             headers.insert("x-xiaomi-protocal-flag-cli", HeaderValue::from_static("PROTOCAL-HTTP2"));
         }
-        let method = if matches!(request.endpoint, CloudEndpoint::LoginSign | CloudEndpoint::LoginExchange) { Method::GET } else { Method::POST };
+        let method = if matches!(request.endpoint, CloudEndpoint::LoginSign | CloudEndpoint::LoginExchange | CloudEndpoint::SpecIndex | CloudEndpoint::SpecInstance) { Method::GET } else { Method::POST };
         let outgoing = client.request(method, url).headers(headers).body(request.body.expose().to_vec()).build().map_err(|_| failed())?;
         let mut response = client.execute(outgoing).await.map_err(|_| failed())?;
         if matches!(response.status().as_u16(), 401 | 403) { return Err(auth_required()); }
         if response.status() != reqwest::StatusCode::OK { return Err(failed()); }
-        if response.content_length().is_some_and(|v| v > MAX_RESPONSE_BYTES as u64) { return Err(invalid()); }
+        let limit = if request.endpoint == CloudEndpoint::SpecIndex { crate::spec::MAX_INDEX_BYTES } else { MAX_RESPONSE_BYTES };
+        if response.content_length().is_some_and(|v| v > limit as u64) { return Err(invalid()); }
         let mut token = None;
         if request.endpoint == CloudEndpoint::LoginExchange {
             for cookie in response.headers().get_all("set-cookie") {
@@ -168,7 +189,7 @@ async fn transmit(
         }
         let mut body = zeroize::Zeroizing::new(Vec::new());
         while let Some(chunk) = response.chunk().await.map_err(|_| failed())? {
-            if body.len() + chunk.len() > MAX_RESPONSE_BYTES { return Err(invalid()); }
+            if body.len() + chunk.len() > limit { return Err(invalid()); }
             body.extend_from_slice(&chunk);
         }
         Ok(CloudResponse { body: SecretBytes::new(std::mem::take(&mut *body)), service_token: token })

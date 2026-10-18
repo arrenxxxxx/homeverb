@@ -3,9 +3,11 @@
 mod auth;
 mod codec;
 mod inventory;
+mod spec;
 mod transport;
 pub use auth::{LoginCredentials, MijiaSession, login};
 pub use inventory::{CloudDevice, Inventory, PropertyQuery, PropertyReading};
+pub use spec::{MappedProperty, ModelMapping, SpecIndex};
 pub use transport::{CloudEndpoint, CloudRequest, CloudResponse, CloudTransport, MijiaHttps};
 
 use homeverb_domain::{Error, Result};
@@ -54,6 +56,12 @@ impl Region {
 /// Strings with provider identity/credential content never implement public serialization.
 #[derive(Clone, PartialEq, Eq)]
 pub(crate) struct PrivateString(pub Zeroizing<String>);
+
+impl std::hash::Hash for PrivateString {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        std::hash::Hash::hash(self.as_str(), state);
+    }
+}
 
 impl PrivateString {
     pub fn new(value: String) -> Self {

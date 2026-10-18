@@ -10,6 +10,11 @@ property correlation and cancellation/deadline/drop are covered. See the
 [phase record](development/11-mijia.md) for executed results and pending Core/App
 and owner-run physical acceptance.
 
+The expanded library suite also covers bounded home-page unions, private identity
+conflicts, pagination cycles and partial failures, exact released MIoT model
+selection, readable fan/doorbell/lock/battery mapping and public-spec credential
+isolation. No lock action, event history or physical support follows from it.
+
 ## Local verification
 
 For an isolated Python environment, run `python3 -m venv .venv` and `source .venv/bin/activate` first. Install the declared requirements below before running Python tests.

@@ -4,9 +4,11 @@
 
 The owner selected mainland China, all returned devices as named cards including
 unsupported placeholders, and initial doorbell, door-lock and fan adaptation.
-`homeverb-mijia` implements a native password-login/cloud protocol foundation
-with fictional tests. It has no registered Core adapter, host or App flow yet.
-The legacy list is not complete-home evidence. Online hints are never power or
+`homeverb-mijia` implements native password login, encrypted cloud reads, bounded
+account/home device enumeration and exact released-model MIoT mapping for selected
+readable fan/lock/doorbell/battery properties, with 28 fictional tests. It has no
+registered Core adapter, host or App flow yet. Community enumeration is not
+complete-home evidence. Online hints are never power or
 lock state. Door-lock writes remain high-risk and unavailable. Real authentication,
 challenge completion, regional inventory, MIoT model mapping and physical support
 remain unverified. See the [phase record](development/11-mijia.md).

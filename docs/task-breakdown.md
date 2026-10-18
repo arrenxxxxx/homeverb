@@ -5,8 +5,9 @@
 The owner requests mainland-China Mijia connection, all returned devices as named
 cards, unsupported placeholders, and initial doorbell/door-lock/fan adaptation.
 The [integration guide](development/11-mijia.md) tracks protocol, protected
-account/Core, native host/App and owner-acceptance phases. Protocol foundation is
-implemented and synthetic-tested; it is not yet a callable App integration.
+account/Core, native host/App and owner-acceptance phases. Native protocol,
+bounded account/home enumeration and selected MIoT readable mappings are
+implemented and synthetic-tested; this is not yet a callable App integration.
 Real-account and physical validation belong to the owner. No door-lock write,
 background polling, project service or shared application secret is admitted.
 

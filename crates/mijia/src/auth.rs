@@ -55,7 +55,7 @@ impl MijiaSession {
         operation: &Operation,
     ) -> Result<SecretBytes> {
         operation.run(async {
-            if !matches!(endpoint, CloudEndpoint::Devices | CloudEndpoint::Properties) { return Err(Error::invalid()); }
+            if !matches!(endpoint, CloudEndpoint::Devices | CloudEndpoint::Properties | CloudEndpoint::Homes | CloudEndpoint::HomeDevices) { return Err(Error::invalid()); }
             if data.expose().len() > crate::MAX_RESPONSE_BYTES { return Err(Error::invalid()); }
             let nonce = codec::nonce()?;
             let data = std::str::from_utf8(data.expose()).map_err(|_| Error::invalid())?;
