@@ -15,6 +15,14 @@ conflicts, pagination cycles and partial failures, exact released MIoT model
 selection, readable fan/doorbell/lock/battery mapping and public-spec credential
 isolation. No lock action, event history or physical support follows from it.
 
+Protected account/Core tests use actual temporary SQLite and an injected fictional
+secret store and cloud. They exercise stable IDs/preferences, same-subject reconnect,
+unchanged-secret refresh, uncertain-save recovery, exact copied-payload refusal,
+cross-account conflicts, metadata corruption, placeholders, partial inventory,
+cloud value/cache checks, cancellation/drop lease cleanup, removal and independent
+adapter write denial. `cargo test -p homeverb-host --test mijia_startup --offline --locked`
+checks empty production Rust composition without credential or provider access.
+
 ## Local verification
 
 For an isolated Python environment, run `python3 -m venv .venv` and `source .venv/bin/activate` first. Install the declared requirements below before running Python tests.

@@ -1,10 +1,13 @@
 //! Bounded native Mijia cloud protocol. No background tasks or implicit controls.
 
+mod adapter;
 mod auth;
 mod codec;
 mod inventory;
+mod protected;
 mod spec;
 mod transport;
+pub use adapter::{AccountDiscovery, AccountInventory, DeviceInventoryMembership, MijiaAdapter};
 pub use auth::{LoginCredentials, MijiaSession, login};
 pub use inventory::{CloudDevice, Inventory, PropertyQuery, PropertyReading};
 pub use spec::{MappedProperty, ModelMapping, SpecIndex};

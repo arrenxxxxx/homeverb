@@ -10,6 +10,12 @@ use serde::Deserialize;
 use std::fmt;
 use zeroize::Zeroizing;
 
+/// Protected native inputs cannot be serialized into general host requests.
+/// ```compile_fail
+/// fn export(value: &homeverb_mijia::LoginCredentials) {
+///     let _ = serde_json::to_string(value);
+/// }
+/// ```
 pub struct LoginCredentials {
     account: SecretBytes,
     password: SecretBytes,
@@ -32,6 +38,11 @@ impl LoginCredentials {
 }
 
 /// User-scoped protected session; not serializable through ordinary host APIs.
+/// ```compile_fail
+/// fn export(value: &homeverb_mijia::MijiaSession) {
+///     let _ = serde_json::to_string(value);
+/// }
+/// ```
 pub struct MijiaSession {
     pub(crate) region: Region,
     pub(crate) user_id: PrivateString,

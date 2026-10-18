@@ -7,7 +7,10 @@ cards, unsupported placeholders, and initial doorbell/door-lock/fan adaptation.
 The [integration guide](development/11-mijia.md) tracks protocol, protected
 account/Core, native host/App and owner-acceptance phases. Native protocol,
 bounded account/home enumeration and selected MIoT readable mappings are
-implemented and synthetic-tested; this is not yet a callable App integration.
+implemented and synthetic-tested. Protected account persistence and stable device
+bindings now feed the read-only Core adapter and explicit Rust host composition.
+Native C/App selection and fan controls remain pending; this is not yet a callable
+App integration. See [ADR-0072](adr/0072-mijia-protected-core-reads.md).
 Real-account and physical validation belong to the owner. No door-lock write,
 background polling, project service or shared application secret is admitted.
 

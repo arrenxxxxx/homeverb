@@ -2,6 +2,13 @@
 
 ## Data boundaries
 
+Experimental Mijia stores its version-1 account-bound session and device/mapping
+payload only through AccountVault's system secret store. It does not change SQLite
+schema 5 or Meiju payload 3. Unchanged protected bytes are not rewritten during
+refresh. Uncertain mutations remain pending until explicit exact-byte recovery or
+same-subject reauthorization; no plaintext fallback is allowed. See
+[ADR-0072](adr/0072-mijia-protected-core-reads.md).
+
 | Area | Stores | Does not store |
 |---|---|---|
 | Configuration | Profiles, route defaults, UI preferences | Passwords or tokens |

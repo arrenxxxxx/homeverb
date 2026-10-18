@@ -36,6 +36,14 @@ is neither physical online status nor proof of provider authorization.
 
 ## Local organization
 
+Mijia payload version 1 binds provider-validated subjects and device IDs to random
+local account/device/connection/identity references under
+[ADR-0072](adr/0072-mijia-protected-core-reads.md). Explicit same-subject reconnect
+retains bindings and preferences; cross-account matches require reconciliation
+and never transfer authority automatically. Partial inventory preserves historical
+cards, including unsupported named devices. Saved MIoT source/derived mappings
+are protected evidence, not authentication, current state or write grants.
+
 The trusted native account vault persists immutable random account and credential references within a random profile namespace. Only its local label can be renamed. Credential state is `pending`, `stored` or `removing`; none establishes provider identity or current authorization. `removing` blocks ordinary leases until explicit cleanup completes under [ADR-0028](adr/0028-local-account-removal.md). A lease coordinates session reads and updates. Meiju's protected payload retains an exact native-validated subject and stable per-account appliance bindings under [ADR-0024](adr/0024-meiju-private-device-bindings.md). The native Meiju connection flow uses a successful server login-ID proof as an exact subject guard and preserves bindings on reconnection. Explicit pending-account reauthorization additionally requires intact protected identity and unchanged bytes across login under [ADR-0031](adr/0031-pending-account-reauthorization.md). Native account summaries, local details/rename and protected connection methods are implemented; real reauthorization identity acceptance, explicit cross-account reconciliation and mobile authentication UI remain separate work. See the [account contract](native-ui-contract.md#local-account-details-and-names) and [vault decision](adr/0021-persistent-account-vault.md).
 
 Room IDs are generated locally. Names are trimmed, limited to 80 characters, and unique after Unicode lowercasing. Device preferences survive rediscovery. Deleting a room unassigns its devices without removing them or changing their permissions. Null alias restores the adapter's label. Duplicate aliases are allowed, so ambiguous selection requires an exact device ID. Renaming or moving a device never changes its identity, routes, credentials, or capabilities.

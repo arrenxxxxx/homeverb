@@ -53,6 +53,20 @@ pub fn open_accounts(directory: &Path) -> Result<homeverb_core::AccountVault> {
     Ok(homeverb_core::AccountVault::new(store, secrets))
 }
 
+/// Explicit native Mijia Core composition. Startup opens local metadata only;
+/// trusted account connection/refresh is a separate foreground operation.
+pub fn open_mijia_read_only(directory: &Path) -> Result<Core> {
+    let store = Arc::new(SqliteStore::open(directory)?);
+    let vault = Arc::new(open_accounts(directory)?);
+    let clock = Arc::new(SystemClock);
+    let adapter = Arc::new(homeverb_mijia::MijiaAdapter::new(
+        vault,
+        Arc::new(homeverb_mijia::MijiaHttps),
+        clock.clone(),
+    ));
+    Ok(Core::new(store, vec![adapter], clock, Policy::default()))
+}
+
 /// Compose the real read-only adapter without loading credentials or contacting the provider.
 /// Account connection is a separate trusted native operation; there are no write grants.
 pub fn open_meiju_read_only(directory: &Path) -> Result<Core> {

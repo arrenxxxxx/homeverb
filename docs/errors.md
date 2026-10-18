@@ -24,6 +24,8 @@
 | MIJIA_REQUEST_FAILED | Mijia TLS/HTTP operation failed, redirected or disconnected | No implicit retry or authentication; report the bounded failure |
 | MIJIA_REQUEST_REJECTED | Mijia returned a non-success protocol code | Keep sanitized errors; raw vendor messages are private |
 | MIJIA_INVENTORY_PARTIAL | Mijia device enumeration is explicitly truncated | Do not remove prior cards or claim complete inventory |
+| MIJIA_SPEC_UNAVAILABLE | Optional public MIoT metadata is unavailable within its budget | Keep named device cards; retry capability lookup only on explicit account refresh |
+| MIJIA_DEVICE_NOT_LISTED | Protected Mijia membership does not admit the selected device | Refuse before any property request; do not trust public card metadata as authority |
 | AUTH_EXPIRED | Session cannot be refreshed safely | Request reauthorization |
 | AUTH_FLOW_UNSUPPORTED | Authentication requires an excluded backend | Mark blocked; do not add a hidden backend |
 | INPUT_UNAVAILABLE | The CLI cannot provide protected interactive terminal input | Use an interactive Linux terminal; never pass credentials as arguments or pipe input |

@@ -1,8 +1,9 @@
 # Platform and protocol adapter contract
 
-The Rust `Adapter` trait in [Core](../crates/core/src/lib.rs) is implemented by Mock
-and the experimental Meiju cloud adapter. Meiju has separate native account/login
-functions; the generic authentication/manifest/subscription interfaces below remain
+The Rust `Adapter` trait in [Core](../crates/core/src/lib.rs) is implemented by Mock,
+experimental Meiju and experimental read-only Mijia cloud adapters. Meiju and
+Mijia have separate trusted Rust account/login functions; Mijia C/App entry points
+remain pending. The generic authentication/manifest/subscription interfaces below remain
 design pseudocode. Native LAN helpers are not registered device routes; follow the
 [current integration boundaries](development/05-midea.md#remaining-route-admission-work).
 

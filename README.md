@@ -46,6 +46,13 @@ This exits with code 11. Refresh state to inspect the result; do not blindly res
 
 ## What is implemented
 
+- Experimental [Mijia Rust integration](docs/development/11-mijia.md): protected
+  mainland account login/recovery, bounded account/home enumeration, stable named
+  device cards including unsupported placeholders, and exact MIoT fan/doorbell/
+  lock/battery reads through Core. Synthetic evidence only; Mijia C/App entry
+  points, fan controls and owner-run real-device acceptance remain pending.
+  Door-lock writes are unavailable. No account or network work occurs at startup.
+
 - Capability-driven validation, device/component/argument/route-scoped low-risk grants, shared deadlines, cancellation, and timestamped verification.
 - SQLite metadata/cache/execution journal, cross-process device locks, and request-ID replay protection.
 - A [trusted single-command approval bridge](docs/adr/0043-native-trusted-approval-bridge.md) for elevated actions: immutable preview, matching grants, 60-second expiry, one-use execution and lifecycle invalidation. Three separate C functions and a fictional Mock scenario support Flutter integration; Flutter consent UI is implemented; real-platform consent and physical acceptance remain pending. Profile-scoped experimental Meiju dishwasher starts now require the separate confirmation path and exact startup grants.
