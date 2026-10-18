@@ -13,6 +13,12 @@ selection still requires the existing trusted confirmation flow. API 1.25,
 SQLite 5 and protected payload 3 remain unchanged. Current-model write acceptance,
 refrigerator controls and provider-backed history/consumables remain incomplete.
 
+Live read diagnosis found that the dishwasher's empty `operator` sentinel rejected
+the entire snapshot. The parser now omits that observation and retains valid
+status/program/temperature/supply fields. This changes no commands, grants, API,
+storage format or physical verification status. Refrigerator mode tiles retain
+the source observation's stale marker.
+
 ## October 18 Mijia integration
 
 The owner selected mainland China, all returned devices as named cards including

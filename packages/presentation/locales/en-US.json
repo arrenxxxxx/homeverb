@@ -1306,5 +1306,7 @@
   "vendor.midea.dishwasher.work_status.power_off": "Powered off",
   "vendor.midea.dishwasher.work_status.power_on": "Powered on",
   "vendor.midea.dishwasher.work_status.work": "Washing",
-  "vendor.midea.dishwasher.work_status.cancel": "Cancelled"
+  "vendor.midea.dishwasher.work_status.cancel": "Cancelled",
+  "mobile.applianceMinutes": "{value} min",
+  "mobile.applianceReadAge": "Readings may be out of date; the measurement time is unverified."
 }

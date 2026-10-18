@@ -308,6 +308,11 @@ new read capability. This is not complete screenshot parity: refrigerator writes
 current-model dishwasher admission and provider reports remain separate evidence
 gates. See the [panel evidence](development/12-appliance-command-evidence.md#appliance-panels-and-optional-refrigerator-readings).
 
+Live inventory refresh retained all six cards and exposed the new refrigerator
+readings. Dishwasher read diagnosis identified its empty `operator` sentinel;
+the parser fix preserves other valid readings without adding cycle semantics or
+control authority. Live delivery results are recorded in the App verification log.
+
 The October 18 owner screenshots expand the appliance-detail scope beyond target
 and cycle buttons. Track every control, provider setting and report in the
 [screenshot checklist](development/12-appliance-command-evidence.md#owner-screenshot-parity-checklist).

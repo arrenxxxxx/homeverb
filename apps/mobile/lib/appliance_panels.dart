@@ -41,11 +41,12 @@ class ApplianceReading extends StatelessWidget {
     this.value, {
     this.icon = Icons.sensors_outlined,
     this.active = false,
+    this.stale = false,
     super.key,
   });
   final Object label, value;
   final IconData icon;
-  final bool active;
+  final bool active, stale;
   @override
   Widget build(BuildContext context) => Surface(
     radius: 20,
@@ -58,6 +59,10 @@ class ApplianceReading extends StatelessWidget {
         Copy(label, size: 13, color: muted),
         const SizedBox(height: 6),
         Copy(value, size: 18, bold: true, color: active ? accent : ink),
+        if (stale) ...[
+          const SizedBox(height: 6),
+          const Copy('Stale', size: 12, color: muted),
+        ],
       ],
     ),
   );
@@ -96,6 +101,7 @@ class RefrigeratorModes extends StatelessWidget {
                     e.value as Json,
                     propertyId: '$id.${e.key}',
                   ),
+                  stale: readings['$id.${e.key}']['stale'] == true,
                   active: readings['$id.${e.key}']['value'] == true,
                   icon: e.value['unit'] == 'celsius'
                       ? Icons.thermostat_outlined
@@ -140,19 +146,15 @@ class DishwasherPanel extends StatelessWidget {
       final label = key == 'mode' && value != null
           ? sourceForKey('$id.program.$value')
           : null;
-      return UiMessage('{value}{stale}', {
-        'value': UiMessage(
-          label ??
-              propertyValue(
-                value,
-                properties[key] as Json? ?? {},
-                propertyId: '$id.$key',
-              ),
-        ),
-        'stale': UiMessage(
-          observation(key)?['stale'] == true ? ' · Stale' : '',
-        ),
-      });
+      if (key == 'remaining_minutes' && value is num) {
+        return UiMessage('{value} min', {'value': value});
+      }
+      return label ??
+          propertyValue(
+            value,
+            properties[key] as Json? ?? {},
+            propertyId: '$id.$key',
+          );
     }
 
     bool allowed(String action) =>
@@ -217,6 +219,17 @@ class DishwasherPanel extends StatelessWidget {
             ],
           ),
         ),
+        if ((c.snapshot?['observations'] as Json? ?? {}).values
+            .whereType<Map>()
+            .any((o) => o['stale'] == true))
+          const Padding(
+            padding: EdgeInsets.only(top: 12),
+            child: Copy(
+              'Readings may be out of date; the measurement time is unverified.',
+              size: 12,
+              color: muted,
+            ),
+          ),
         const SizedBox(height: 16),
         ApplianceGrid(
           children: [
@@ -231,6 +244,7 @@ class DishwasherPanel extends StatelessWidget {
                 ApplianceReading(
                   controlLabel('$id.$key'),
                   display(key),
+                  stale: observation(key)?['stale'] == true,
                   icon: key == 'temperature'
                       ? Icons.thermostat_outlined
                       : Icons.tune,
@@ -296,6 +310,7 @@ class DishwasherPanel extends StatelessWidget {
                 ApplianceReading(
                   controlLabel('$id.$key'),
                   display(key),
+                  stale: observation(key)?['stale'] == true,
                   icon: Icons.water_drop_outlined,
                 ),
           ],

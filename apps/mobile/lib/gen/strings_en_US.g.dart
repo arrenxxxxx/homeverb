@@ -3959,4 +3959,10 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Cancelled'
 	String get vendorMideaDishwasherWorkStatusCancel => 'Cancelled';
+
+	/// en-US: '{value} min'
+	String mobileApplianceMinutes({required Object value}) => '${value} min';
+
+	/// en-US: 'Readings may be out of date; the measurement time is unverified.'
+	String get mobileApplianceReadAge => 'Readings may be out of date; the measurement time is unverified.';
 }

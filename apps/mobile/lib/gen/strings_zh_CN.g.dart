@@ -1341,4 +1341,6 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get vendorMideaDishwasherWorkStatusPowerOn => '\u5df2\u5f00\u673a';
 	@override String get vendorMideaDishwasherWorkStatusWork => '\u6d17\u6da4\u4e2d';
 	@override String get vendorMideaDishwasherWorkStatusCancel => '\u5df2\u53d6\u6d88';
+	@override String mobileApplianceMinutes({required Object value}) => '${value} \u5206\u949f';
+	@override String get mobileApplianceReadAge => '\u5e73\u53f0\u672a\u63d0\u4f9b\u53ef\u6838\u5b9e\u7684\u6d4b\u91cf\u65f6\u95f4\uff0c\u6570\u636e\u53ef\u80fd\u5df2\u8fc7\u65f6\u3002';
 }

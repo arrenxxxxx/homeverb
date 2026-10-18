@@ -297,6 +297,11 @@ fn decode(
                 )?;
             }
             for wire in ["mode", "work_status", "operator"] {
+                // The reviewed E1 decoder emits an empty operator outside an active cycle.
+                // It is absence of an observation, not a pause or whole-response failure.
+                if wire == "operator" && data.get(wire).and_then(Value::as_str) == Some("") {
+                    continue;
+                }
                 field(
                     readings,
                     data,

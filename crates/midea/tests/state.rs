@@ -290,6 +290,7 @@ async fn dishwasher_preserves_model_specific_program_status_and_door_codes() {
 async fn dishwasher_operator_is_optional_raw_stale_evidence_not_a_cycle_boolean() {
     for value in [
         json!(null),
+        json!(""),
         json!("pause"),
         json!("start"),
         json!("future_operator"),
@@ -298,7 +299,7 @@ async fn dishwasher_operator_is_optional_raw_stale_evidence_not_a_cycle_boolean(
             .await
             .unwrap();
         let snapshot = state.snapshot("dev-local", "main").unwrap();
-        if value.is_null() {
+        if value.is_null() || value == json!("") {
             assert!(snapshot.observations.is_empty());
         } else {
             let observed = &snapshot.observations["vendor.midea.dishwasher.operator"];
@@ -310,12 +311,65 @@ async fn dishwasher_operator_is_optional_raw_stale_evidence_not_a_cycle_boolean(
     for value in [
         json!(0),
         json!(true),
-        json!(""),
         json!("private value"),
         json!({"pause":true}),
     ] {
         assert_eq!(
             read(&Transport::new("E1", json!({"operator":value})))
+                .await
+                .unwrap_err()
+                .code,
+            "MIDEA_RESPONSE_INVALID"
+        );
+    }
+}
+
+#[tokio::test]
+async fn dishwasher_empty_operator_preserves_other_readings_without_inventing_cycle_state() {
+    let state = read(&Transport::new(
+        "E1",
+        json!({
+            "operator":"", "work_status":"power_off", "mode":"eco_wash",
+            "temperature":24, "left_time":0, "doorswitch":1,
+            "water_lack":0, "softwater_lack":1, "bright_lack":0
+        }),
+    ))
+    .await
+    .unwrap();
+    let snapshot = state.snapshot("dev-local", "main").unwrap();
+    assert_eq!(snapshot.observations.len(), 8);
+    assert_eq!(
+        snapshot.observations["vendor.midea.dishwasher.work_status"].value,
+        json!("power_off")
+    );
+    assert_eq!(
+        snapshot.observations["vendor.midea.dishwasher.temperature"].value,
+        json!(24.0)
+    );
+    assert_eq!(
+        snapshot.observations["vendor.midea.dishwasher.remaining_minutes"].value,
+        json!(0)
+    );
+    assert!(
+        !snapshot
+            .observations
+            .contains_key("vendor.midea.dishwasher.operator")
+    );
+    assert!(
+        !snapshot
+            .observations
+            .contains_key("appliance_cycle.running")
+    );
+    assert!(
+        snapshot
+            .observations
+            .values()
+            .all(|o| o.stale && o.observed_at.is_none())
+    );
+    // This sentinel is specific to operator; other empty tokens remain malformed.
+    for field in ["mode", "work_status"] {
+        assert_eq!(
+            read(&Transport::new("E1", json!({field:""})))
                 .await
                 .unwrap_err()
                 .code,

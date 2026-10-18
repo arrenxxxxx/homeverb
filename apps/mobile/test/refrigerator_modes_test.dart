@@ -61,6 +61,7 @@ void main() {
       expect(find.text('On'), findsOneWidget);
       expect(find.text('Off'), findsOneWidget);
       expect(find.text('-2°C'), findsOneWidget);
+      expect(find.text('Stale'), findsNWidgets(3));
       expect(find.text('Holiday mode'), findsNothing);
       expect(
         core.calls.where(

@@ -32,6 +32,25 @@ integration. This record separates source/encoder evidence, implemented App
 behavior and physical acceptance. No real account, private pilot material or
 appliance command was used in this phase.
 
+## Empty dishwasher operator observation
+
+The October 18 live read returned `MIDEA_RESPONSE_INVALID`. A temporary,
+compile-time Android diagnostic emitted only static field names and JSON shapes;
+it identified `operator` with `type_empty_string`. No response values, account
+material, appliance identifiers or unknown field names were logged. The diagnostic
+was removed from the delivery source and build.
+
+The public [E1 version 22 decoder](https://github.com/midea-lan/midea-local/blob/904bd5ec74d7e173702ecc2603ddb5afe22aabb6/lua/e1/T_0000_E1_22.lua)
+sets `operator` to an empty string when the start bit is absent and the status is
+neither work nor order. Its SHA-256 is
+`435880cb7a00640867b04cc134c25857d0cc9b6eee4dce84ae8dfc50e4f9afc9`.
+This supports interpreting the observed sentinel as absence of that observation,
+without claiming that this device uses that exact decoder. HomeVerb now retains
+the other valid readings instead of rejecting the whole snapshot. It does not
+infer running/paused state, relax other empty tokens or admit a control profile.
+Regression tests cover retained readings, absent operator, unchanged stale/source
+semantics and refusal of malformed types and empty program/status tokens.
+
 ## Concrete cloud send path
 
 The [pinned cloud client](https://github.com/sususweet/midea_auto_cloud/blob/ce0c4b88224def0f6b53714312c19f71aa9c2a50/custom_components/midea_auto_cloud/core/cloud.py)

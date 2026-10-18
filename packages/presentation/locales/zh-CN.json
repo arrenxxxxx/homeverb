@@ -1306,5 +1306,7 @@
   "vendor.midea.dishwasher.work_status.power_off": "已关机",
   "vendor.midea.dishwasher.work_status.power_on": "已开机",
   "vendor.midea.dishwasher.work_status.work": "洗涤中",
-  "vendor.midea.dishwasher.work_status.cancel": "已取消"
+  "vendor.midea.dishwasher.work_status.cancel": "已取消",
+  "mobile.applianceMinutes": "{value} 分钟",
+  "mobile.applianceReadAge": "平台未提供可核实的测量时间，数据可能已过时。"
 }

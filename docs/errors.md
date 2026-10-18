@@ -362,6 +362,11 @@ or null target fields remain absent; `small_temperature` is not a recognized
 field in that selected mapping. Compound profiles retain their two-field checks.
 Neither path applies write bounds to observations or establishes freshness.
 
+The E1 decoder's empty-string `operator` sentinel is treated as an absent
+observation, just like its missing/null form. It does not reject other valid
+dishwasher observations or imply paused/running state. Other malformed operator
+types and empty `mode`/`work_status` tokens still return `MIDEA_RESPONSE_INVALID`.
+
 ## Native account connection results
 
 `homeverb_connect_account` is separate from ordinary JSON and rejects invalid

@@ -1750,6 +1750,9 @@ String? translateSource(
   "Freezing" => t.vendorMideaRefrigeratorVariableModeFreezeMode,
   "Washing" => t.vendorMideaDishwasherWorkStatusWork,
   "Cancelled" => t.vendorMideaDishwasherWorkStatusCancel,
+  "{value} min" => t.mobileApplianceMinutes(value: args["value"] ?? "{value}"),
+  "Readings may be out of date; the measurement time is unverified." =>
+    t.mobileApplianceReadAge,
   _ => null,
 };
 
@@ -3439,5 +3442,8 @@ String? sourceForKey(String key) => switch (key) {
   "vendor.midea.dishwasher.work_status.power_on" => "Powered on",
   "vendor.midea.dishwasher.work_status.work" => "Washing",
   "vendor.midea.dishwasher.work_status.cancel" => "Cancelled",
+  "mobile.applianceMinutes" => "{value} min",
+  "mobile.applianceReadAge" =>
+    "Readings may be out of date; the measurement time is unverified.",
   _ => null,
 };

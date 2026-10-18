@@ -262,8 +262,10 @@ void main() {
         });
         await tester.pumpAndSettle();
         expect(find.byType(DeviceDetailControls), findsOneWidget);
-        expect(find.text('42°C · Stale'), findsOneWidget);
-        expect(find.text('One extra rinse · Stale'), findsOneWidget);
+        expect(find.text('42°C'), findsOneWidget);
+        expect(find.text('One extra rinse'), findsOneWidget);
+        expect(find.text('35 min'), findsOneWidget);
+        expect(find.text('Stale'), findsWidgets);
         expect(find.text('Unknown'), findsWidgets);
         await capture(allowed ? 'dishwasher-status' : 'dishwasher-read-only');
         final start = find.byKey(const ValueKey('control:0:start_cycle'));

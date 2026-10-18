@@ -3235,3 +3235,50 @@ signature, current-AAR matching, 20 exports and 16 KiB alignment. SHA-256:
 `9b80390e78c987189f1f07fb96493af8d8578eb0bf0fa3c458d5e56d74d3bd34`.
 Installation and real-account observations are recorded separately below. No
 appliance command, remote push, publication or diagnostic upload was performed.
+
+### Real-account read acceptance and empty-operator repair
+
+The panel APK installed in place on `emulator-5586`; its first cold launch returned
+`Status: ok` with 9205 ms total time. Explicit account inventory refresh completed
+and retained the six device cards. Refrigerator compartment temperatures and the
+new optional mode/variable-zone readings appeared on the actual signed-in account.
+This proves returned observations and App rendering, not the physical meaning of
+every optional mode or the freshness of the provider's measurement.
+
+Explicit dishwasher refresh exposed `MIDEA_RESPONSE_INVALID`. A temporary native
+diagnostic, restricted to static field names and JSON types, identified an empty
+`operator` string. The public E1 decoder contains this sentinel outside active
+work/order states. The fix omits this observation while retaining other valid
+readings; other malformed fields still fail. No raw responses, private identifiers,
+tokens or credentials were captured. Temporary tracing was removed before the
+delivery build; its tag is absent in both packaged native libraries.
+
+The repaired native parser passed 47 adapter and 15 state tests, including sentinel
+regressions, and Midea all-target Clippy with the previously documented unrelated
+lint allowed. Both Android native architectures rebuilt with 20 exports and 16 KiB
+alignment. The intermediate fix APK installed in place and its code-only installed
+hash matched the verified artifact. Live dishwasher reads then displayed power
+state, a named program, remaining minutes, temperature and supply codes. The
+current protected device profile still has no admitted control actions; no power,
+program, pause/resume/cancel or refrigerator setting command was sent.
+
+The final display refinement localizes minutes and separates age markers from the
+primary readings. It preserves stale metadata and explains that measurement time
+is unverified. Refrigerator modes also retain individual stale markers. The final
+five focused widget tests, seven presentation tests, Flutter analysis and
+documentation/contract/repository checks are recorded with the final artifact
+below. Later emulator cold-start requests timed out, followed by responsive
+screens and successful navigation/reads; those timeouts are not timing passes.
+
+Final artifact: `output/flutter-verification/android/homeverb-0.2.0-appliance-read-fix.apk`,
+SHA-256 `e4ec4090c4bd6755444396d99e695876779395362f1b87c6cddf248c5819e03f`.
+All five focused widget tests, seven presentation tests and Flutter analysis passed.
+Documentation, repository and contract validation passed (21 schemas, 51 positive,
+320 negative fixtures), as did formatting/diff checks. APK verification passed
+both complete ABIs, current-AAR matching, 20 exports, signature and 16 KiB alignment.
+`adb install -r` succeeded; the installed code-only APK matched that exact hash and
+neither native architecture contained the temporary diagnostic tag. Final live
+inspection confirmed the Chinese minute unit, separate measurement-age notice,
+actual dishwasher readings and retained account/device data. Private screenshots
+remain outside the repository. API/storage compatibility is unchanged, and no
+appliance write, publication, push or diagnostic upload occurred.
