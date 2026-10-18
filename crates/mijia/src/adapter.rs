@@ -47,6 +47,7 @@ pub struct MijiaAdapter {
     vault: Arc<AccountVault>,
     transport: Arc<dyn CloudTransport>,
     clock: Arc<dyn Clock>,
+    fan_controls: bool,
 }
 impl MijiaAdapter {
     pub fn new(
@@ -58,7 +59,45 @@ impl MijiaAdapter {
             vault,
             transport,
             clock,
+            fan_controls: false,
         }
+    }
+
+    /// Trusted composition only. Core must independently grant exact arguments.
+    pub fn with_fan_controls(mut self) -> Self {
+        self.fan_controls = true;
+        self
+    }
+
+    /// Inspect protected model evidence locally; this never enables a control.
+    pub async fn inspect_control_options(
+        &self,
+        device: &Device,
+        connection: &Connection,
+        operation: &Operation,
+    ) -> Result<Vec<crate::ControlOption>> {
+        let id = connection
+            .account_id
+            .as_deref()
+            .and_then(|s| Uuid::parse_str(s).ok())
+            .ok_or_else(conflict)?;
+        let account =
+            LoadedAccount::load(self.vault.lease(id, operation).await?, false, operation).await?;
+        let binding = account
+            .payload
+            .bindings
+            .iter()
+            .find(|b| b.device_id.to_string() == device.id)
+            .ok_or_else(conflict)?;
+        validate_device(binding, id, device, connection)?;
+        if !binding.listed {
+            return Err(unsupported());
+        }
+        Ok(binding
+            .mapping
+            .as_ref()
+            .map(|m| m.control_options())
+            .unwrap_or_default())
     }
 
     pub async fn accounts(&self, operation: &Operation) -> Result<Vec<AccountRecord>> {
@@ -432,7 +471,13 @@ impl MijiaAdapter {
         account.save(operation).await?;
         let descriptors = selected
             .into_iter()
-            .map(|i| descriptor(&account.payload.bindings[i], account.lease.record().id))
+            .map(|i| {
+                descriptor(
+                    &account.payload.bindings[i],
+                    account.lease.record().id,
+                    self.fan_controls,
+                )
+            })
             .collect();
         issues.truncate(64);
         operation
@@ -481,11 +526,17 @@ fn unsupported() -> Error {
     )
 }
 
-fn descriptor(binding: &Binding, account: Uuid) -> Descriptor {
+fn descriptor(binding: &Binding, account: Uuid, controls: bool) -> Descriptor {
     let mut capabilities = binding
         .mapping
         .as_ref()
-        .map(ModelMapping::capabilities)
+        .map(|m| {
+            if controls {
+                m.controlled_capabilities()
+            } else {
+                m.capabilities()
+            }
+        })
         .unwrap_or_default();
     let supported = !capabilities.is_empty();
     if capabilities.is_empty() {
@@ -540,6 +591,25 @@ fn descriptor(binding: &Binding, account: Uuid) -> Descriptor {
     }
 }
 
+fn validate_device(
+    binding: &Binding,
+    id: Uuid,
+    device: &Device,
+    connection: &Connection,
+) -> Result<()> {
+    let expected = descriptor(binding, id, false);
+    if device.model != expected.device.model
+        || device.support_status != expected.device.support_status
+        || serde_json::to_value(&device.components).map_err(|_| conflict())?
+            != serde_json::to_value(&expected.device.components).map_err(|_| conflict())?
+        || expected.device.connections.as_slice() != device.connections.as_slice()
+        || expected.device.connections.first() != Some(connection)
+    {
+        return Err(conflict());
+    }
+    Ok(())
+}
+
 #[async_trait]
 impl Adapter for MijiaAdapter {
     fn id(&self) -> &str {
@@ -579,17 +649,7 @@ impl Adapter for MijiaAdapter {
                     .iter()
                     .find(|b| b.device_id.to_string() == device.id)
                     .ok_or_else(conflict)?;
-                let expected = descriptor(binding, id);
-                if device.model != expected.device.model
-                    || device.support_status != expected.device.support_status
-                    || serde_json::to_value(&device.components).map_err(|_| conflict())?
-                        != serde_json::to_value(&expected.device.components)
-                            .map_err(|_| conflict())?
-                    || expected.device.connections.as_slice() != device.connections.as_slice()
-                    || expected.device.connections.first() != Some(connection)
-                {
-                    return Err(conflict());
-                }
+                validate_device(binding, id, device, connection)?;
                 if !binding.listed {
                     return Err(Error::new(
                         "MIJIA_DEVICE_NOT_LISTED",
@@ -655,12 +715,71 @@ impl Adapter for MijiaAdapter {
     }
     async fn execute(
         &self,
-        _: &ValidatedCommand,
-        _: &Connection,
-        _: WriteProgress,
-        _: &Operation,
+        validated: &ValidatedCommand,
+        connection: &Connection,
+        progress: WriteProgress,
+        operation: &Operation,
     ) -> Result<AdapterOutcome> {
-        Err(unsupported())
+        if !self.fan_controls {
+            return Err(unsupported());
+        }
+        operation
+            .run(async {
+                let command = validated.command();
+                let id = connection
+                    .account_id
+                    .as_deref()
+                    .and_then(|s| Uuid::parse_str(s).ok())
+                    .ok_or_else(conflict)?;
+                let account =
+                    LoadedAccount::load(self.vault.lease(id, operation).await?, false, operation)
+                        .await?;
+                let binding = account
+                    .payload
+                    .bindings
+                    .iter()
+                    .find(|b| b.device_id.to_string() == command.device_id)
+                    .ok_or_else(conflict)?;
+                if descriptor(binding, id, false).device.connections.first() != Some(connection) {
+                    return Err(conflict());
+                }
+                if !binding.listed {
+                    return Err(unsupported());
+                }
+                let mapping = binding.mapping.as_ref().ok_or_else(unsupported)?;
+                // Re-derive action semantics from protected model/spec evidence, never from
+                // the public descriptor's risk, parameters, wire IDs or writable flag.
+                let (field, option) = mapping
+                    .properties
+                    .iter()
+                    .filter_map(|p| p.control_option().map(|o| (p, o)))
+                    .find(|(_, o)| {
+                        o.component_id == command.component_id
+                            && o.capability == command.capability
+                            && o.action == command.action
+                    })
+                    .ok_or_else(unsupported)?;
+                option.definition.validate_arguments(&command.arguments)?;
+                account
+                    .payload
+                    .session
+                    .session()?
+                    .set_property(
+                        self.transport.as_ref(),
+                        &binding.device(),
+                        &crate::PropertyWrite {
+                            query: PropertyQuery {
+                                siid: field.siid,
+                                piid: field.piid,
+                            },
+                            value: command.arguments[&field.property].clone(),
+                        },
+                        &progress,
+                        operation,
+                    )
+                    .await
+            })
+            .await
     }
 }
 

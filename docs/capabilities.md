@@ -89,3 +89,15 @@ make stale evidence fresh or replace adapter prerequisite checks. Properties kee
 their readable domains independently of action write domains; unknown enum codes
 can remain visible without becoming commands. See
 [ADR-0069](adr/0069-profile-scoped-ac-features.md) for experimental AC examples.
+
+## Experimental Mijia fan properties
+
+Explicit trusted Rust fan composition under [ADR-0074](adr/0074-mijia-fan-control.md)
+can publish standard `power.set` plus `vendor.xiaomi.mijia.fan` setters for level,
+mode, horizontal swing and horizontal angle. Each action requires the exact
+protected MIoT property's read/write permission and value domain. The
+[fictional fan capability](../examples/capability.mijia-fan.json) and
+[command](../examples/command.mijia-fan.json) illustrate one model, not universal
+levels. Each setter is low-risk, set-value, cloud-only with unavailable verification.
+Default/native/App sessions remain read-only pending their grant integration.
+Doorbell, lock and battery mappings expose no actions.

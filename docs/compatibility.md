@@ -11,7 +11,9 @@ and read-only Core adapter now have synthetic SQLite/account/read evidence and
 native API 1.24 Mijia-only/combined account composition. Flutter platform login,
 partial named cards and read-only details now use these native flows. Fan controls
 remain pending. A low-level one-property write primitive is synthetic-tested,
-but production Core execution remains denied. Native API 1.24, schemas, saved
+and explicit trusted Rust fan composition now admits exact protected properties
+with independent Core grants. Default/native/App composition remains read-only.
+Native API 1.24, schemas, saved
 payloads and supported-device claims are unchanged by that protocol addition.
 Community enumeration is not complete-home evidence. Online hints are never power or
 lock state. Door-lock writes remain high-risk and unavailable. Real authentication,

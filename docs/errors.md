@@ -486,3 +486,9 @@ failures keep the basic result and a fixed warning; cancellation, deadline and
 authentication errors stop the operation. The App's foreground refresh failure
 policy remains silent. No failure supplies a default switch state. Sent command
 outcomes and request replay retain the existing accepted/unknown/rejected rules.
+
+Mijia fan Rust admission returns `CAPABILITY_UNSUPPORTED` before transmission for
+unadmitted services/actions and `INVALID_ARGUMENT` for values outside the protected
+spec domain. Exact protected connection mismatches return
+`DEVICE_IDENTITY_CONFLICT`. Core independently rejects missing exact policy grants.
+A default read-only adapter refuses even if public metadata describes a write.

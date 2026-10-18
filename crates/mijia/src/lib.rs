@@ -12,7 +12,7 @@ pub use adapter::{AccountDiscovery, AccountInventory, DeviceInventoryMembership,
 pub use auth::{LoginCredentials, MijiaSession, login};
 pub use control::PropertyWrite;
 pub use inventory::{CloudDevice, Inventory, PropertyQuery, PropertyReading};
-pub use spec::{MappedProperty, ModelMapping, SpecIndex};
+pub use spec::{ControlOption, MappedProperty, ModelMapping, SpecIndex};
 pub use transport::{CloudEndpoint, CloudRequest, CloudResponse, CloudTransport, MijiaHttps};
 
 use homeverb_domain::{Error, Result};

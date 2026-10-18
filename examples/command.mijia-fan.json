@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "request_id": "fictional-mijia-fan-001",
+  "device_id": "30000000-0000-4000-8000-000000000001",
+  "component_id": "fan-2",
+  "capability": "vendor.xiaomi.mijia.fan",
+  "action": "set_level",
+  "arguments": {
+    "level": 3
+  },
+  "connection": "cloud",
+  "timeout_ms": 10000,
+  "wait_for": "accepted"
+}

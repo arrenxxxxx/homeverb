@@ -21,6 +21,7 @@ def checked_formats() -> FormatChecker:
 def main() -> int:
     formats = checked_formats()
     pairs = [
+        ("capability", "capability.mijia-fan"), ("command", "command.mijia-fan"),
         ("cli-meiju-grants", "cli-meiju-grants"),
         ("native-open", "native-open.meiju-ac-features"),
         ("capability", "capability.meiju-ac-features"),
@@ -137,7 +138,11 @@ def main() -> int:
         validators["capability"].validate(fresh)
     approved_action = Draft202012Validator(load("examples/capability.approved-cycle.json")["actions"]["start"]["parameters"])
     approved_action.validate(load("examples/command.approved-cycle.json")["arguments"])
+    mijia_fan_validator = Draft202012Validator(load("examples/capability.mijia-fan.json")["actions"]["set_level"]["parameters"])
+    mijia_fan_validator.validate(load("examples/command.mijia-fan.json")["arguments"])
     negative = []
+    for arguments in ({"level": 0}, {"level": 5}, {"level": 2.5}, {"level": True}, {"level": "3"}, {"level": 3, "piid": 9}, {}):
+        negative.append((f"invalid exact Mijia fan arguments {arguments}", mijia_fan_validator, arguments))
     for feature, value in [("eco", "on"), ("eco", 1), ("breezeless", 4),
                            ("horizontal_direction", 30), ("unknown", True), ("self_clean", True),
                            ("breezeless", 1.5), ("display", None)]:

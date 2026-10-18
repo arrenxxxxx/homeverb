@@ -5,8 +5,9 @@ The owner will perform real-account and device acceptance. Do not access saved
 pilot credentials or contact appliances as part of development tests.
 
 Current callable scope includes trusted Rust account/read APIs and native API 1.24
-Mijia-only/combined sessions and Flutter platform/account/read views. Fan control
-and live acceptance remain pending. Historical phase records below distinguish earlier
+Mijia-only/combined sessions and Flutter platform/account/read views. Fan
+native grants, App controls and live acceptance remain pending. The Rust adapter
+can explicitly admit protected fan setters under ADR-0074. Historical phase records below distinguish earlier
 protocol-only work from the [protected Core phase](../adr/0072-mijia-protected-core-reads.md).
 
 ## Protocol evidence
@@ -289,3 +290,26 @@ Rust 1.96 `cargo test -p homeverb-mijia --offline --locked` passed 53 unit tests
 and three compile-fail doc tests, including nine new protocol/transport cases.
 The initial sandbox run could not bind loopback sockets; the successful rerun
 used permitted local TLS fixtures. Strict all-target Mijia Clippy passed.
+
+## Protected fan adapter phase
+
+[ADR-0074](../adr/0074-mijia-fan-control.md) adds explicit trusted Rust composition
+with `MijiaAdapter::with_fan_controls()`. It still requires independent Core grants.
+Protected model/spec evidence supplies power, level, mode, horizontal swing and
+horizontal angle actions only when their exact properties are readable/writable
+and have representable domains. Each setter writes one property. The default
+adapter and current native/App composition remain read-only.
+
+Local option inspection checks the protected binding and projects choices without
+networking, descriptor publication or authority changes. Execution rechecks the
+account lease, exact route/identity, component/action and protected argument domain
+before selecting SIID/PIID. Enlarged public schemas and forged actions cannot
+bypass this check. Uncertain replies and cancellation retain unknown receipts;
+repeated request IDs do not send again. Acceptance has no verification evidence.
+Doorbell/lock actions remain absent.
+
+The phase passes 58 Mijia unit tests and three compile-fail tests on Rust 1.96,
+including protected option inspection, exact Core grants, forged public domains,
+identity-mutation refusal, accepted/rejected/unknown receipts and cancellation.
+All evidence is synthetic; no real fan was controlled. Native grant contracts,
+Flutter preparation and phone packaging remain subsequent work.

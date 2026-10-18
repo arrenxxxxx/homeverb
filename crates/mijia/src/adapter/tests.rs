@@ -99,6 +99,7 @@ struct Cloud {
     include_battery: AtomicU8,
     read_gate: tokio::sync::Notify,
     stall_read: AtomicU8,
+    write_mode: AtomicU8,
 }
 impl Cloud {
     fn new() -> Self {
@@ -114,6 +115,7 @@ impl Cloud {
             include_battery: AtomicU8::new(0),
             read_gate: tokio::sync::Notify::new(),
             stall_read: AtomicU8::new(0),
+            write_mode: AtomicU8::new(0),
         }
     }
     fn count(&self, endpoint: CloudEndpoint) -> usize {
@@ -127,6 +129,32 @@ impl Cloud {
 }
 #[async_trait]
 impl CloudTransport for Cloud {
+    async fn send_control(
+        &self,
+        request: &CloudRequest,
+        progress: &WriteProgress,
+        op: &Operation,
+    ) -> Result<CloudResponse> {
+        op.run(async {
+            assert_eq!(request.endpoint(), CloudEndpoint::SetProperty);
+            let url = reqwest::Url::parse(&format!("https://localhost/?{}", std::str::from_utf8(request.body()).unwrap())).unwrap();
+            let fields: HashMap<_,_> = url.query_pairs().into_owned().collect();
+            let key = codec::signed_nonce(&fields["ssecurity"], &fields["_nonce"])?;
+            let data: Value = serde_json::from_slice(codec::decrypt(&key,fields["data"].as_bytes())?.expose()).unwrap();
+            assert_eq!(data["params"].as_array().unwrap().len(), 1);
+            let field = &data["params"][0];
+            assert_eq!(field["did"], "PRIVATE-FAN-IDENTITY");
+            assert_eq!(field["siid"],2);
+            self.calls.lock().unwrap().push(CloudEndpoint::SetProperty);
+            progress.mark_sent();
+            let mode = self.write_mode.load(Ordering::SeqCst);
+            if mode == 1 { return Err(crate::failed()); }
+            if mode == 3 { self.read_gate.notify_one(); std::future::pending::<()>().await; }
+            let result = json!({"code":0,"result":[{"did":field["did"],"siid":field["siid"],"piid":field["piid"],"code":if mode == 2 {-704220043} else {0}}]});
+            let encrypted = codec::encrypt(&key, &serde_json::to_vec(&result).unwrap());
+            Ok(CloudResponse { body: SecretBytes::new(encrypted.as_str().as_bytes().to_vec()), service_token: None })
+        }).await
+    }
     async fn send(&self, request: &CloudRequest, op: &Operation) -> Result<CloudResponse> {
         op.run(async {
             self.calls.lock().unwrap().push(request.endpoint());
@@ -801,3 +829,6 @@ async fn primary_appliance_component_precedes_auxiliary_battery_for_card_reads()
         .unwrap();
     assert_eq!(state.observations["power.state"].value, true);
 }
+
+#[path = "control_tests.rs"]
+mod control_tests;

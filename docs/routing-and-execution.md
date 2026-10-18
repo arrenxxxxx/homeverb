@@ -27,8 +27,8 @@ Reads hold the account lease through one bounded cloud operation and correlate
 every returned device/SIID/PIID. Snapshots carry cloud source, local receipt time,
 no trustworthy observation time and stale values; Core still validates the entire
 snapshot before replacing cache. Invalid replies preserve prior readings.
-There is no automatic login, route fallback, background worker or control path.
-Even forged public actions and Core grants cannot make this adapter send a write.
+There is no automatic login, route fallback or background worker. The default
+read-only adapter refuses writes even with forged public actions and Core grants.
 Native API, snapshot schemas and existing execution outcome semantics are unchanged.
 
 ## Mijia write protocol foundation
@@ -39,8 +39,15 @@ possible send records `possibly_sent`; only an encrypted, exact single
 DID/SIID/PIID acknowledgement can return accepted or explicitly rejected. Global
 codes, malformed replies, cancellation and transport failures after send remain
 uncertain. Accepted acknowledgements have no completion evidence. No retry,
-reauthorization or route replay occurs. The Core adapter still denies writes;
-this protocol addition does not change native schemas or create authority.
+reauthorization or route replay occurs.
+
+[ADR-0074](adr/0074-mijia-fan-control.md) adds explicit trusted Rust fan admission.
+Core grants remain independently required. The adapter selects wire properties
+only from the protected original model/spec, validates exact route and arguments,
+and retains the account lease through the operation. Public descriptor edits
+cannot widen the protected domain or add lock/doorbell writes. Local control-option
+inspection grants no authority. Current native/App sessions still use read-only
+composition; native schemas and outcome meanings are unchanged.
 
 ## Route policy
 
