@@ -336,3 +336,9 @@ verifier passed 34 methods, 55 fictional examples, trusted bridge regressions an
 new Mijia grant/provider denial checks. Contracts passed 20 schemas, 51 positive
 fixtures and 291 negative fixtures. No real account, appliance or mobile runtime
 was used in this phase.
+
+A subsequent exact-value review keeps the original JSON scalar in Core's grant
+instead of normalizing it through floating point. Only duplicate detection uses
+numeric normalization; it never changes authority. The four focused grant tests
+pass, including an integer above the exact binary64 integer range. This does not
+admit a new device value: the protected MIoT domain remains independently required.

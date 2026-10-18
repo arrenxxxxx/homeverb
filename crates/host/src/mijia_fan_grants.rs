@@ -46,7 +46,7 @@ pub fn mijia_fan_policy(grants: &[MijiaFanGrant]) -> Result<Policy> {
             _ => return Err(Error::invalid()),
         };
         // Numeric spellings such as 3 and 3.0 must not evade duplicate bounds.
-        let value = grant
+        let duplicate_key = grant
             .value
             .as_f64()
             .map_or_else(|| grant.value.clone(), |v| json!(v));
@@ -54,7 +54,7 @@ pub fn mijia_fan_policy(grants: &[MijiaFanGrant]) -> Result<Policy> {
             &grant.device_id,
             &grant.component_id,
             &grant.property,
-            value.to_string(),
+            duplicate_key.to_string(),
         )) {
             return Err(Error::invalid());
         }
@@ -68,7 +68,7 @@ pub fn mijia_fan_policy(grants: &[MijiaFanGrant]) -> Result<Policy> {
                 format!("set_{}", grant.property)
             },
             transports: vec![Transport::Cloud],
-            argument_schema: json!({"const":{grant.property.clone():value}}),
+            argument_schema: json!({"const":{grant.property.clone():grant.value.clone()}}),
         });
     }
     Ok(policy)
