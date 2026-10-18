@@ -17,6 +17,7 @@ import 'controller.dart';
 import 'diagnostics_export.dart';
 import 'diagnostics_view.dart';
 import 'device_presentation.dart';
+import 'device_detail_controls.dart';
 import 'controls.dart';
 import 'native_client.dart';
 import 'preferences.dart';
@@ -1211,7 +1212,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         ui['subtitle'] = applianceFamily(c) == null
             ? roomPresentation(c, prefs?['room_id'])
             : '';
-        if (c.capability('climate') != null && c.capability('power') != null) {
+        if (c.capability('climate') == null || c.capability('power') != null) {
           ui['subtitle'] = '';
         }
         final temperature = c.observed('climate.target_temperature');
@@ -1798,6 +1799,11 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           return success;
         },
       );
+    }
+    if (id == 'C01' &&
+        c.capability('climate') == null &&
+        c.currentCard?['device']['support_status'] != 'unsupported') {
+      return DeviceDetailControls(controller: c, onAction: action);
     }
     if (id == 'C10' && actionCapability != null && actionName != null) {
       final epoch = navigation;

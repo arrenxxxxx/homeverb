@@ -1284,4 +1284,12 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get mobilePlatformSignInAgain => '\u8bf7\u767b\u5f55\u539f\u7f8e\u5c45\u8d26\u53f7\uff0c\u8bbe\u5907\u540d\u79f0\u548c\u623f\u95f4\u5206\u914d\u5c06\u4fdd\u7559\u3002';
 	@override String get mobilePlatformSignIn => '\u767b\u5f55\u7f8e\u5c45\u8d26\u53f7\uff0c\u81ea\u52a8\u6dfb\u52a0\u8d26\u53f7\u4e0b\u7684\u5bb6\u7535\u3002';
 	@override String get mobileRefreshAccountDevices => '\u5237\u65b0\u8bbe\u5907';
+	@override String get vendorMideaDishwasherMode => '\u4e0a\u62a5\u7684\u6d17\u6da4\u7a0b\u5e8f';
+	@override String get vendorMideaDishwasherWorkStatus => '\u6d17\u6da4\u72b6\u6001';
+	@override String get vendorMideaDishwasherDoorswitch => '\u673a\u95e8\u72b6\u6001';
+	@override String get vendorMideaDishwasherWaterLack => '\u4f9b\u6c34\u63d0\u9192';
+	@override String get vendorMideaDishwasherSoftwaterLack => '\u6d17\u7897\u76d0\u63d0\u9192';
+	@override String get vendorMideaDishwasherBrightLack => '\u6f02\u6d17\u5242\u63d0\u9192';
+	@override String get vendorMideaDishwasherTemperature => '\u6e29\u5ea6';
+	@override String get vendorMideaDishwasherRemainingMinutes => '\u5269\u4f59\u65f6\u95f4';
 }

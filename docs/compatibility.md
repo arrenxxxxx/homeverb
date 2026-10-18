@@ -1,5 +1,20 @@
 # Platform and device compatibility matrix
 
+## Appliance detail buttons: October 18, 2026
+
+Refrigerator compartments and dishwasher details now share product headers,
+observation cards and explicit buttons. Current session/route/component permission
+gates action visibility and temperature steps. Dishwasher argument entry and
+trusted review remain separate from read-only observations, including the explicit
+additional option required by product 760Y0026. This fixes a Flutter presentation
+refusal without changing adapter admission or Core execution semantics.
+
+Native API, SQLite, protected account payloads and startup authority are unchanged.
+The ordinary App still does not prepare elevated dishwasher grants, and Meiju
+refrigerator writes remain blocked by the existing model/preservation evidence.
+No real appliance control was performed. Fictional UI and existing native approval
+regressions are recorded in the [App verification record](../apps/mobile/verification.md).
+
 ## Open-source preparation scope
 
 The October 17 documentation and obsolete-design cleanup changes no runtime

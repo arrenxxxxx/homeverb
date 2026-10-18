@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'blocks.dart';
 import 'controller.dart';
 import 'controls.dart';
+import 'device_detail_controls.dart';
 import 'native_client.dart';
 import 'receipts.dart';
 import 'skin.dart';
@@ -43,6 +44,7 @@ class CompartmentControls extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
+      DeviceDetailHeader(controller: controller),
       for (final part in controller.components) compartment(context, part),
       const Padding(
         padding: EdgeInsets.fromLTRB(2, 0, 2, 12),
@@ -74,6 +76,7 @@ class CompartmentControls extends StatelessWidget {
     final editable =
         schema != null &&
         targetProperty?['writable'] == true &&
+        controller.hasControlAction('climate', 'set', componentId: id) &&
         actionUnavailable(climate!, action!) == null;
     final direct = editable && hasDirectTarget(action);
     final step =
@@ -93,7 +96,14 @@ class CompartmentControls extends StatelessWidget {
               !controller.busy &&
               target is num &&
               validateValue(target, schema) == null &&
-              validateValue(target + direction * step, schema) == null;
+              validateValue(target + direction * step, schema) == null &&
+              controller.canControlValue(
+                'climate',
+                'set',
+                'target_temperature',
+                target + direction * step,
+                componentId: id,
+              );
           trailing[rows.length] = InlineStepper(
             key: ValueKey('component-stepper:$id'),
             label: localize(
@@ -116,9 +126,7 @@ class CompartmentControls extends StatelessWidget {
               ? 'Target'
               : controlLabel(entry.key),
           propertyValue(observed?['value'], entry.value as Json),
-          isTarget && editable && !controller.busy
-              ? 'edit-component:${Uri.encodeComponent(id)}'
-              : null,
+          null,
         ]);
       }
     }
@@ -127,19 +135,24 @@ class CompartmentControls extends StatelessWidget {
         .any(
           (capability) => (capability['actions'] as Json).entries.any(
             (entry) =>
-                capability['id'] != 'climate' ||
-                entry.key != 'set' ||
-                (entry.value['parameters']['properties'] as Map).keys.any(
-                  (name) => name != 'target_temperature',
-                ),
+                controller.hasControlAction(
+                  capability['id'] as String,
+                  entry.key,
+                  componentId: id,
+                ) &&
+                actionUnavailable(
+                      capability,
+                      entry.value as Json,
+                      trustedApproval: controller.supportsTrustedApproval,
+                    ) ==
+                    null &&
+                (capability['id'] != 'climate' ||
+                    entry.key != 'set' ||
+                    (entry.value['parameters']['properties'] as Map).keys.any(
+                      (name) => name != 'target_temperature',
+                    )),
           ),
         );
-    if (extraActions)
-      rows.add([
-        'More controls',
-        '›',
-        controller.busy ? null : 'open-component:${Uri.encodeComponent(id)}',
-      ]);
     final readError = controller.componentReadError(id);
     final observations = (snapshot?['observations'] as Json? ?? {}).values
         .whereType<Map>();
@@ -151,6 +164,27 @@ class CompartmentControls extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Rows(rows, title: label, trailing: trailing, onAction: onAction),
+        if (editable)
+          ActionButton(
+            localize(
+              context,
+              UiMessage('{component} target', {'component': UiMessage(label)}),
+            ),
+            key: ValueKey('edit-component:$id'),
+            style: 'secondary',
+            onPressed: controller.busy
+                ? null
+                : () => onAction('edit-component:${Uri.encodeComponent(id)}'),
+          ),
+        if (extraActions)
+          ActionButton(
+            'More controls',
+            key: ValueKey('open-component:$id'),
+            style: 'secondary',
+            onPressed: controller.busy
+                ? null
+                : () => onAction('open-component:${Uri.encodeComponent(id)}'),
+          ),
         if (readError != null)
           Padding(
             padding: const EdgeInsets.only(bottom: 12),

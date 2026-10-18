@@ -1249,5 +1249,13 @@
   "mobile.platformRemovalScope": "仅从本机 HomeVerb 移除此账号及其设备，不影响美居账号。重新添加后，设备名称和房间分配不会恢复。",
   "mobile.platformSignInAgain": "请登录原美居账号，设备名称和房间分配将保留。",
   "mobile.platformSignIn": "登录美居账号，自动添加账号下的家电。",
-  "mobile.refreshAccountDevices": "刷新设备"
+  "mobile.refreshAccountDevices": "刷新设备",
+  "vendor.midea.dishwasher.mode": "上报的洗涤程序",
+  "vendor.midea.dishwasher.work_status": "洗涤状态",
+  "vendor.midea.dishwasher.doorswitch": "机门状态",
+  "vendor.midea.dishwasher.water_lack": "供水提醒",
+  "vendor.midea.dishwasher.softwater_lack": "洗碗盐提醒",
+  "vendor.midea.dishwasher.bright_lack": "漂洗剂提醒",
+  "vendor.midea.dishwasher.temperature": "温度",
+  "vendor.midea.dishwasher.remaining_minutes": "剩余时间"
 }

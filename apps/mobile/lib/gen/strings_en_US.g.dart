@@ -3788,4 +3788,28 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Refresh Devices'
 	String get mobileRefreshAccountDevices => 'Refresh Devices';
+
+	/// en-US: 'Reported program'
+	String get vendorMideaDishwasherMode => 'Reported program';
+
+	/// en-US: 'Cycle status'
+	String get vendorMideaDishwasherWorkStatus => 'Cycle status';
+
+	/// en-US: 'Door status'
+	String get vendorMideaDishwasherDoorswitch => 'Door status';
+
+	/// en-US: 'Water supply warning'
+	String get vendorMideaDishwasherWaterLack => 'Water supply warning';
+
+	/// en-US: 'Salt warning'
+	String get vendorMideaDishwasherSoftwaterLack => 'Salt warning';
+
+	/// en-US: 'Rinse aid warning'
+	String get vendorMideaDishwasherBrightLack => 'Rinse aid warning';
+
+	/// en-US: 'Temperature'
+	String get vendorMideaDishwasherTemperature => 'Temperature';
+
+	/// en-US: 'Remaining time'
+	String get vendorMideaDishwasherRemainingMinutes => 'Remaining time';
 }

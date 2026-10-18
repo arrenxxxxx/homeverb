@@ -1,5 +1,67 @@
 # Flutter implementation verification
 
+## Refrigerator and dishwasher detail buttons: October 18, 2026
+
+Capability exploration traced the current refrigerator write-evidence review,
+dishwasher profile/action definitions, ADRs 0044/0055/0063 and the App's low-risk
+startup permissions. Meiju refrigerator targets remain read-only. Dishwasher
+cycle operations exist only for admitted profiles with exact startup grants and
+separate trusted confirmation; ordinary App startup does not prepare those grants.
+No provider login, private pilot data or appliance write was used for this work.
+
+Changed presentation files are `lib/device_detail_controls.dart`,
+`lib/compartment_controls.dart`, `lib/controller.dart`, `lib/controls.dart` and
+`lib/main.dart`. Refrigerator and dishwasher details share product artwork and
+observation cards. Available operations use explicit buttons; dishwasher actions
+appear above readings. Current route/component grants gate visibility and exact
+temperature increments. Target/edit buttons retain component scope. Empty
+authority shows an explanation, never a fabricated power switch or program.
+Namespaced English/Chinese status labels were added to the shared catalogs and
+the bundled/generated bindings. User-assigned room names remain literal.
+
+The generic argument form previously rejected dishwasher `additional` because
+the same-named observation is read-only. It now distinguishes a non-idempotent
+operation argument from a property setter. Set-value actions still reject
+read-only properties. Existing native preview/consent and Core argument/grant
+checks remain mandatory; no execution, API, storage or compatibility contract
+changed. The new fictional fixture stops at the approval boundary without sending.
+
+Executed with Flutter 3.47.7 on macOS:
+
+- `fvm flutter analyze`: no issues.
+- `fvm dart format --output=none --set-exit-if-changed lib test`: 66 files unchanged.
+- `fvm flutter test test/device_detail_controls_test.dart
+  test/compartment_overview_test.dart test/component_test.dart test/controls_test.dart
+  test/approval_test.dart test/appliance_controls_test.dart
+  test/climate_controls_test.dart test/climate_rows_test.dart
+  test/session_permissions_test.dart test/localization_test.dart
+  test/state_refresh_test.dart --reporter expanded`: **60 passed** on the final
+  revision. Existing native approval tests used the available host library.
+- The separate final layout/label run with `test/control_labels_test.dart` passed
+  15 tests and failed its two existing macOS glyph-pixel assertions (centering and
+  body glyph tops). These are the previously recorded one-pixel raster differences
+  in unchanged skin code; references and tolerances were not modified.
+- `node packages/presentation/test/i18n.test.mjs`: seven passed.
+- Documentation, contract, repository hygiene and commit-message checks passed.
+  System Python initially lacked the contract dependencies; the existing `.venv`
+  supplied them for the successful checks. These inspect the working tree, which
+  also contains unrelated concurrent adapter development excluded from this phase.
+
+`test/device_detail_controls_test.dart` adds current-permission/revocation,
+component isolation, action-argument versus observation, mandatory additional
+choice, trusted-route review and narrow Chinese layout regressions.
+`test/compartment_overview_test.dart` now waits for product image decoding before
+captures. Screenshots under `build/verification/appliance-details/` and
+`build/verification/compartments/` use fictional data. English refrigerator and
+dishwasher captures were visually inspected; Chinese widget layout does not prove
+physical-platform font rendering or full pixel equality.
+
+The full Flutter/Rust suites, new native builds, Android/iOS packages and device
+installation were not run for this presentation phase. Physical refrigerator
+control remains blocked by model/encoding/preservation evidence; physical
+dishwasher testing requires separate owner authorization and exact-product
+acceptance. No push, publication, diagnostic upload or real-device write occurred.
+
 ## Platform accounts and display names: October 17, 2026
 
 The native platform page uses white account cards with explicit Account details

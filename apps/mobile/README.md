@@ -4,6 +4,26 @@ The native application embeds Core using native UI contract 1.22.0. The separate
 
 ## Device controls
 
+Refrigerator and dishwasher details share the Window Light product header,
+observation cards and explicit action buttons. Refrigerator targets retain separate
+component limits and exact session permissions; target editing and More controls
+are buttons rather than clickable status rows. The descriptor-driven dishwasher
+panel places available actions above observations. Start, pause, resume and cancel
+appear only when the selected route has current authority and trusted confirmation
+is available. Program and additional-option choices remain explicit in the existing
+review flow; opening a button never sends a command. Read-only observations remain
+noninteractive, missing values stay unknown and stale values retain their marker.
+
+The capability exploration used the existing [refrigerator evidence](../../docs/development/05-midea.md#refrigerator-write-evidence)
+and dishwasher ADRs [0044](../../docs/adr/0044-profile-scoped-dishwasher-start.md),
+[0055](../../docs/adr/0055-profile-scoped-dishwasher-cycle-controls.md) and
+[0063](../../docs/adr/0063-explicit-dishwasher-cycle-options.md), plus the current
+adapter descriptors and App startup policy. Meiju refrigerators remain read-only.
+The ordinary App does not automatically prepare elevated dishwasher grants, so
+its saved dishwasher cards can show observations and utility buttons without
+cycle controls. Fictional authorized fixtures exercise those buttons; this UI
+revision neither broadens startup authority nor establishes physical support.
+
 Open a supported device after sign-in or retrieval to use its available controls.
 There is no session-permission form, extra checkbox, review or revocation menu.
 The trusted app prepares all reviewed low-risk control values for the opened

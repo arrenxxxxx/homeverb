@@ -58,7 +58,11 @@ String? actionUnavailable(
         )) {
       return 'This form is not supported.';
     }
-    if (capability['properties']?[entry.key]?['writable'] == false) {
+    // Non-idempotent operations can accept arguments with the same name as
+    // read-only observations (for example a cycle's explicit additional option).
+    // A setter still must not present a read-only property as editable.
+    if (action['idempotency'] == 'set_value' &&
+        capability['properties']?[entry.key]?['writable'] == false) {
       return 'This property is read-only.';
     }
   }

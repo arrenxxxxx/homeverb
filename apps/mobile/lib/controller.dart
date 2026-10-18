@@ -323,26 +323,34 @@ class HomeController extends ChangeNotifier {
     String capability,
     String action,
     String parameter,
-    Object value,
-  ) => _controlRules(capability, action).any(
+    Object value, {
+    String? componentId,
+  }) => _controlRules(capability, action, componentId: componentId).any(
     (rule) => _matchesDisplayGrant(rule['argument_schema'], {parameter: value}),
   );
 
-  bool hasControlAction(String capability, String action) =>
-      _controlRules(capability, action).any((rule) {
-        final schema = rule['argument_schema'];
-        if (schema is bool) return schema;
-        if (schema is! Map) return false;
-        if (schema['const'] case final Map args) {
-          return _matchesDisplayGrant(schema, args.cast<String, dynamic>());
-        }
-        return _matchesDisplayGrant(schema, {});
-      });
+  bool hasControlAction(
+    String capability,
+    String action, {
+    String? componentId,
+  }) => _controlRules(capability, action, componentId: componentId).any((rule) {
+    final schema = rule['argument_schema'];
+    if (schema is bool) return schema;
+    if (schema is! Map) return false;
+    if (schema['const'] case final Map args) {
+      return _matchesDisplayGrant(schema, args.cast<String, dynamic>());
+    }
+    return _matchesDisplayGrant(schema, {});
+  });
 
-  Iterable<Json> _controlRules(String capability, String action) sync* {
+  Iterable<Json> _controlRules(
+    String capability,
+    String action, {
+    String? componentId,
+  }) sync* {
+    final selected = componentId ?? component;
     final definition =
-        componentCapability(component, capability)?['actions']?[action]
-            as Json?;
+        componentCapability(selected, capability)?['actions']?[action] as Json?;
     if (definition == null) return;
     final route = preferences.route(selectedDevice);
     final transports = definition['transports'] as List? ?? [];
@@ -352,7 +360,7 @@ class HomeController extends ChangeNotifier {
             !transports.contains(policy['transport']))
           continue;
         for (final grant in policy['grants'] as List) {
-          if (grant['component_id'] == component &&
+          if (grant['component_id'] == selected &&
               grant['capability'] == capability &&
               grant['action'] == action)
             yield grant as Json;
@@ -364,7 +372,7 @@ class HomeController extends ChangeNotifier {
         return;
       for (final p in _controlPermissions) {
         if (p.device == selectedDevice &&
-            p.component == component &&
+            p.component == selected &&
             p.capability == capability &&
             p.action == action) {
           yield {

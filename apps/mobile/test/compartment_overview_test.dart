@@ -218,6 +218,15 @@ void main() {
           expect(app.currentState!.id, 'C08');
           expect(find.text('Fridge'), findsOneWidget);
           expect(find.text('Freezer'), findsOneWidget);
+          await tester.runAsync(() async {
+            for (final image in tester.widgetList<Image>(find.byType(Image))) {
+              await precacheImage(
+                image.image,
+                tester.element(find.byType(NativeApp)),
+              );
+            }
+          });
+          await tester.pumpAndSettle();
           await capture(missing ? 'missing' : 'initial');
           if (missing) {
             expect(stepper('freezer').value, 'Unknown');

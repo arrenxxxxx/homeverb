@@ -44,6 +44,16 @@ No runtime contract, authority or physical compatibility changed.
 
 ## Task status
 
+The October 18 appliance-detail revision shares product headers and explicit
+buttons across refrigerator compartments and descriptor-driven dishwasher details.
+Current route/component permissions gate visible actions and exact temperature
+steps. Dishwasher parameters that share names with read-only observations remain
+valid arguments to separately confirmed non-idempotent operations, without making
+those observations editable. Existing native confirmation and Core validation stay
+mandatory. Ordinary App startup still does not grant elevated dishwasher actions;
+Meiju refrigerator writes remain unadmitted. See the [App verification record](../apps/mobile/verification.md)
+for fictional widget/approval evidence and remaining physical acceptance.
+
 [ADR-0069](adr/0069-profile-scoped-ac-features.md) integrates reviewed optional AC
 scalar mappings, exact feature/value startup grants, prerequisite reads and Flutter
 reported-state rows. ECO, breezeless, both swing axes, exact directions, display,

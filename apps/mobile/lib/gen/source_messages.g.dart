@@ -544,7 +544,7 @@ String? translateSource(
   "Cycle" => t.mobileCycle,
   "Program" => t.mobileProgram,
   "Duration" => t.mobileDuration,
-  "Remaining time" => t.mobileRemainingTime,
+  "Remaining time" => t.vendorMideaDishwasherRemainingMinutes,
   "Closed" => t.mobileClosed,
   "Active" => t.mobileActive,
   "Stale" => t.mobileStale,
@@ -1031,7 +1031,7 @@ String? translateSource(
   "Supported step: 1\u00b0C for this fictional device." =>
     t.mobileSupportedStep1CForThisFictionalDevice,
   "Target controls are unavailable." => t.mobileTargetControlsAreUnavailable,
-  "Temperature" => t.mobileTemperature,
+  "Temperature" => t.vendorMideaDishwasherTemperature,
   "Temperature is read-only here." => t.mobileTemperatureIsReadOnlyHere,
   "Text follows system accessibility settings." =>
     t.mobileTextFollowsSystemAccessibilitySettings,
@@ -1678,6 +1678,12 @@ String? translateSource(
   "Sign in with your Meiju account to add your appliances." =>
     t.mobilePlatformSignIn,
   "Refresh Devices" => t.mobileRefreshAccountDevices,
+  "Reported program" => t.vendorMideaDishwasherMode,
+  "Cycle status" => t.vendorMideaDishwasherWorkStatus,
+  "Door status" => t.vendorMideaDishwasherDoorswitch,
+  "Water supply warning" => t.vendorMideaDishwasherWaterLack,
+  "Salt warning" => t.vendorMideaDishwasherSoftwaterLack,
+  "Rinse aid warning" => t.vendorMideaDishwasherBrightLack,
   _ => null,
 };
 
@@ -3293,5 +3299,13 @@ String? sourceForKey(String key) => switch (key) {
   "mobile.platformSignIn" =>
     "Sign in with your Meiju account to add your appliances.",
   "mobile.refreshAccountDevices" => "Refresh Devices",
+  "vendor.midea.dishwasher.mode" => "Reported program",
+  "vendor.midea.dishwasher.work_status" => "Cycle status",
+  "vendor.midea.dishwasher.doorswitch" => "Door status",
+  "vendor.midea.dishwasher.water_lack" => "Water supply warning",
+  "vendor.midea.dishwasher.softwater_lack" => "Salt warning",
+  "vendor.midea.dishwasher.bright_lack" => "Rinse aid warning",
+  "vendor.midea.dishwasher.temperature" => "Temperature",
+  "vendor.midea.dishwasher.remaining_minutes" => "Remaining time",
   _ => null,
 };
