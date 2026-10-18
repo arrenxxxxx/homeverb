@@ -387,3 +387,32 @@ the owner's device matches one or that physical power behavior has passed.
 Native API is now 1.24.0; ordinary methods, C exports, SQLite 5 and protected payload
 3 are unchanged. Current-model refrigerator control and the other screenshot
 features remain tracked above.
+
+## Current refrigerator artifact acquisition boundary
+
+After the power-button phase, another bounded public lookup used only the
+fictional refrigerator entry already returned by the official virtual-plugin
+catalog (`appModel: plugdemo`). The old device-plugin update alias
+`/v1/plugin/update/getplugin`, signed with the existing approved community
+material, returned HTTP 200 and business code `40001` with an explicit missing
+access-token error. No account credential, real appliance identity or control
+request was used. This establishes a login requirement for that attempted path,
+not for every vendor catalog or protocol endpoint. No updated plugin was obtained.
+
+The exact-model official product page was fetched again and inspected for
+`smartProductId`, `modelNumber`, `sn8`, product/material-code fields and recognizable
+product-code tokens. It contains the display model but none of those candidate
+selectors. Public model searches yielded product/manual information, not a
+reviewed model-to-encoder association. Do not turn a retail item ID or the public
+`plugdemo` selector into a physical-device profile.
+
+A successful bounded ADB inventory check found zero ready and zero unauthorized
+devices; device identifiers were not printed and no device data was read. The
+remaining artifact dependency is an authorized exact-product selector/source,
+for example product/model codes supplied by the owner or inspection on an
+available Android device with the owner's existing App session. Passwords,
+access tokens and full serial numbers must not be requested through chat. The
+owner was asked which source is available. Current-model refrigerator writes,
+its renamed modern modes and current provider-report mappings remain incomplete.
+These observations do not change the implemented dishwasher controls or any
+production API, schema, grant or compatibility claim.
