@@ -272,3 +272,16 @@ system reports secure/unlocked state. Flutter now checks that prerequisite befor
 credential entry and submission. Subsequent real login, account persistence across
 upgrade and the bounded power test are recorded above; readiness alone was not
 provider or Keystore success.
+
+### Refrigerator and dishwasher screenshot parity research
+
+The October 18 owner screenshots expand the appliance-detail scope beyond target
+and cycle buttons. Track every control, provider setting and report in the
+[screenshot checklist](development/12-appliance-command-evidence.md#owner-screenshot-parity-checklist).
+The official APK bridge/cache/transparent transport and a public historical
+refrigerator plugin have now been statically traced. The expanded hash-pinned
+inspector passed. Public catalog access succeeded without account credentials;
+no appliance write occurred. Current exact-model plugin selection, remaining
+screenshot feature mappings, dishwasher power admission and physical verification
+remain open. Historical demo dispatch and visible official controls do not by
+themselves change HomeVerb's capability or grant contracts.

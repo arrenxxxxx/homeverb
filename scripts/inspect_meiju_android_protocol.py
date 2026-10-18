@@ -12,6 +12,7 @@ import ast
 import hashlib
 import json
 from pathlib import Path
+import re
 import zipfile
 
 from loguru import logger
@@ -34,6 +35,7 @@ DECODED_DIGESTS = {
     "T_0000_CA_5.lua": "2cafdc84e967d79b86e7687939f2b114353690b22444987f52ce05e8bdbe6b5a",
     "T_0000_E1_3.lua": "95ed6b64d97b978d66e7d699d57e92aaa868c6ae777e97f0c68528d07d3437e1",
 }
+DEMO_SHA256 = "9fddb089c412c9662e1a5ff5aa52ab92b4e3acacc9ae040b43f471ef4c21ce27"
 
 
 def digest(data):
@@ -45,6 +47,79 @@ def literal_strings(method):
         instruction.get_operands()[-1][-1]
         for instruction in method.get_instructions()
         if instruction.get_name().startswith("const-string")
+    }
+
+
+def calls(method):
+    return [i.get_output() for i in method.get_instructions() if i.get_name().startswith("invoke")]
+
+
+def require_calls(method, names):
+    found = {name: any("->" + name + "(" in call for call in calls(method)) for name in names}
+    assert all(found.values()), (method.get_name(), found)
+    return found
+
+
+def plugin_annotations(dex):
+    cls = next(c for c in dex.get_classes() if c.get_name() ==
+               "Lcom/midea/business/plugin/api/PluginDownloadInfoApiService;")
+    expected = {
+        "getModelPluginDownloadInfo": "proxy?alias=/v1/plugin/update/getModelPlugin",
+        "getLoginModelPluginDownloadInfo": "proxy?alias=/v1/plugin/update/getLoginModelPlugin",
+        "getPluginDownloadInfo": "proxy?alias=/v1/plugin/update/getplugin",
+        "getVirtualPluginDownloadInfo": "proxy?alias=/v1/plugin/virtualplugin/get",
+    }
+    found = {}
+    methods = {m.get_method_idx(): m for m in cls.get_methods()}
+    for item in cls.annotations_directory_item.get_method_annotations():
+        name = methods[item.get_method_idx()].get_name()
+        if name not in expected:
+            continue
+        annotations = dex.CM.get_annotation_set_item(item.get_annotations_off())
+        for offset in annotations.get_annotation_off_item():
+            annotation = offset.get_annotation_item().get_annotation()
+            if dex.CM.get_type(annotation.get_type_idx()) != "Lretrofit2/http/POST;":
+                continue
+            for element in annotation.get_elements():
+                if dex.CM.get_string(element.get_name_idx()) == "value":
+                    value = element.get_value().get_value()
+                    assert value == expected[name]
+                    found[name] = expected[name]
+    assert found == expected
+    return found
+
+
+def inspect_demo(path):
+    """Inspect the public historical demo as data, never as a device profile."""
+    with path.open("rb") as source:
+        actual = hashlib.file_digest(source, "sha256").hexdigest()
+    if actual != DEMO_SHA256:
+        raise ValueError("Unreviewed demo digest; update evidence before inspecting another archive.")
+    with zipfile.ZipFile(path) as archive:
+        source = archive.read("T0xCA_plugdemo/weex.js").decode("utf-8")
+        # Restrict the extraction to the reviewed dispatch function, rather than
+        # finding a similarly named observation or simulated demo response.
+        start = source.index("setFridgeCtrlModeCmd:function")
+        end = source.index("modifyKongShiZhuangtai:function", start)
+        function = source[start:end]
+        fields = sorted(set(re.findall(r"setLuaFridgeModeCtrl\(\{([a-z_]+):i\}", function)))
+        expected = sorted([
+            "storage_mode", "freezing_mode", "holiday_mode", "intelligent_mode",
+            "energy_saving_mode", "moisturize_mode", "preservation_mode",
+            "acme_freezing_mode", "radar_mode_power", "milk_mode_power",
+            "icea_mode_power", "plasma_aseptic_mode_power", "microcrystal_fresh",
+            "electronic_smell", "eradicate_pesticide_residue",
+        ])
+        assert fields == expected
+        start = source.index("setLuaFridgeModeCtrl:function")
+        end = source.index("setFridgeCtrlModeCmd:function", start)
+        assert 'operation:"luaControl",params:e' in source[start:end]
+        assert 'var i=t?"on":"off"' in function
+        assert '1!=t.isDummy' in source
+    return {
+        "sha256": DEMO_SHA256, "toggle_dispatch_fields": fields,
+        "bridge_operation": "luaControl", "toggle_values": ["on", "off"],
+        "scope": "Historical demo source with a non-dummy branch; no exact-model admission.",
     }
 
 
@@ -94,6 +169,30 @@ def inspect(apk_path: Path, checkout: Path):
     assert fields == {"deviceinfo", "deviceSubType", "control", "status"}
     assert any("->encodeJsonToBytes(" in i.get_output() for m in methods for i in m.get_instructions())
     report["encoder_field_literals"] = sorted(fields)
+    classes = {c.get_name(): c for c in dex.get_classes()}
+
+    def method(class_name, name):
+        matches = [m for m in classes[class_name].get_methods() if m.get_name() == name]
+        assert len(matches) == 1
+        return matches[0]
+
+    transport = "Lcom/midea/iot/msmart/control/DataTransportHelper;"
+    report["control_state_dependencies"] = require_calls(method(transport, "controlDeviceState"),
+        ["getDeviceStateBySN", "queryDeviceState"])
+    report["send_task_dependencies"] = require_calls(method(
+        "Lcom/midea/iot/msmart/control/DataTransportHelper$SendStateTask;", "run"),
+        ["getDeviceStateBySN", "getStateMap", "getControlStatusProtocol"])
+    wan = method(transport, "startSendDevDataByWan")
+    report["wan_transport_calls"] = require_calls(wan,
+        ["getTransparentUrl", "bytesToDecString", "encodeAES", "submitPost"])
+    report["wan_body_fields"] = sorted(literal_strings(wan) &
+        {"applianceCode", "order", "timestamp", "isFull"})
+    assert len(report["wan_body_fields"]) == 4
+    report["plugin_post_annotations"] = plugin_annotations(dex)
+    downloader = method("Lcom/midea/hybrid/minix/plugin/service/PluginPacketDownloaderServiceImpl;",
+                        "getRemotePluginPackageDownloadInfo")
+    report["plugin_lookup_calls"] = require_calls(downloader,
+        ["isLogin", "getModelPluginDownloadInfo", "getLoginModelPluginDownloadInfo", "setModelList"])
     report["scope"] = "Static structure only; no exact-model association or physical verification."
     return report
 
@@ -102,5 +201,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("apk", type=Path)
     parser.add_argument("community_checkout", type=Path)
+    parser.add_argument("--demo-plugin", type=Path, help="Optional pinned historical refrigerator demo ZIP")
     args = parser.parse_args()
-    print(json.dumps(inspect(args.apk, args.community_checkout), indent=2))
+    report = inspect(args.apk, args.community_checkout)
+    if args.demo_plugin:
+        report["historical_refrigerator_demo"] = inspect_demo(args.demo_plugin)
+    print(json.dumps(report, indent=2))

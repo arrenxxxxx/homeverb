@@ -2020,3 +2020,16 @@ separate cloud observations, without automatic navigation or write replay.
 These observations do not upgrade either receipt to `verified` or prove physical
 temperature behavior. The in-place upgrade retained the saved account and Chinese
 locale; native API 1.22.0, SQLite schema 5 and protected payload 3 remain unchanged.
+
+## Official Android appliance command research
+
+The October 18 [APK and plugin investigation](development/12-appliance-command-evidence.md#control-bridge-and-actual-wan-transport)
+traces the official Lua bridge, cached-state overlay and transparent WAN request,
+and statically checks a hash-pinned historical public refrigerator demo's toggle
+dispatch. The public virtual-plugin catalog returned a refrigerator archive;
+no account or appliance command was used. The owner's screenshots define the
+remaining feature-parity scope, including provider reports and AI settings.
+This is research evidence only: native API 1.22.0, SQLite 5, protected payload 3,
+control admission and physical compatibility are unchanged. In particular,
+historical light-wave/extreme-freezing/holiday mappings do not yet admit controls
+for the selected current refrigerator model.

@@ -187,3 +187,171 @@ connection can enable device-side inspection but does not by itself grant access
 to private App data. The current read-only ADB inventory found zero connected
 Android devices; no private data was accessed. The incomplete local Android SDK
 blocks building HomeVerb's APK, not this public protocol investigation.
+
+### Control bridge and actual WAN transport
+
+Further static tracing in the same APK established a complete SDK path:
+
+1. `DefaultBridgeDeviceImpl.luaControl` selects the supplied appliance reference
+   or the current device; `luaControlByTransport` turns `params` into a map.
+2. The bridge also reads a top-level integer `mode`, defaulting to zero. The
+   inspected `MideaDeviceManagerProxy.controlDeviceState` overload checks login
+   and forwards the device and map, without using that integer. It is not evidence
+   of a refrigerator operating-mode argument.
+3. `DataTransportHelper.controlDeviceState` queries state only when the device pool
+   has no cached state. Otherwise it immediately schedules `SendStateTask`.
+4. That task reads the cached state again and passes `getStateMap()` separately
+   from the requested change to `getControlStatusProtocol`. It refuses a missing
+   cache. The previously inspected callback places these in `status` and `control`
+   for Lua encoding. This branch has no demonstrated freshness check.
+5. `startSendDevDataByWan` uses `ServerUrls.getTransparentUrl`, converts the encoded
+   bytes to a decimal string, encrypts with session data material, and submits
+   `applianceCode`, `order`, `timestamp: "true"`, and `isFull: "false"`.
+
+Thus this official bridge uses local Lua encoding followed by transparent cloud
+transport. The existing HomeVerb `/mjl/v1/device/lua/control` path instead submits
+JSON for server-side encoding. Both are observed protocol designs; do not claim
+that every official button uses the same endpoint as the community client. No
+session material was extracted, and no transparent command was sent.
+
+### Public plugin lookup and historical refrigerator UI
+
+Retrofit annotations identify four POST aliases:
+
+| Method | Alias | Observed scope |
+| --- | --- | --- |
+| `getModelPluginDownloadInfo` | `/v1/plugin/update/getModelPlugin` | Module/plugin lookup with `modelList` |
+| `getLoginModelPluginDownloadInfo` | `/v1/plugin/update/getLoginModelPlugin` | Logged-in variant |
+| `getPluginDownloadInfo` | `/v1/plugin/update/getplugin` | Device plugin lookup with appliance descriptors |
+| `getVirtualPluginDownloadInfo` | `/v1/plugin/virtualplugin/get` | Public demo plugin catalog |
+
+The module downloader explicitly chooses the first or second method based on
+login state. Despite its name, `modelList` is a list of plugin-ID strings in the
+inspected caller; it is not a list of marketing model names. A separate caller
+supplies an empty list. The DTO defaults are `iotAppId: "900"`, `clientType: "1"`,
+`clientVersion: 201`, and empty `phoneNumber`; `RequestUtils.createBody` serializes
+ordinary JSON. Device plugin factories separately use category, model number,
+SN-derived product data and other device metadata. These two lookup paths must
+not be conflated.
+
+Bounded public requests on October 18 produced:
+
+- An unsigned empty-list module request returned HTTP 200 with business code
+  `44001` (missing signature).
+- The same request using only the already-approved pinned community signer
+  returned HTTP 200 with business code `40400` (invalid business request).
+  This does not establish either successful lookup or a login requirement.
+- The virtual-plugin POST with an empty body and the same signer returned HTTP
+  200, business code `0`, and 19 public demo entries, including a refrigerator.
+  No dishwasher entry appeared in this particular response.
+
+The refrigerator entry points to
+`http://mjfile-pro.smartmidea.net/T0xCA_plugdemo_20200512.zip`.
+An HTTPS attempt failed during TLS negotiation. The exact catalog-provided HTTP
+URL then returned 8,122,564 bytes, SHA-256
+`9fddb089c412c9662e1a5ff5aa52ab92b4e3acacc9ae040b43f471ef4c21ce27`.
+This hash pins the inspected input; it does not authenticate an HTTP download or
+establish publisher-signature verification. The archive remains temporary, was
+not installed or executed, and is not bundled with HomeVerb.
+
+Its historical `weex.js` contains both a simulated `isDummy` branch and a
+non-dummy bridge branch. Static inspection of `setFridgeCtrlModeCmd` and
+`setLuaFridgeModeCtrl` finds explicit label-to-command dispatch using
+`{operation: "luaControl", params: ...}`. The following are historical UI
+mappings, not admissions for the owner's current model:
+
+| Historical UI function | Command field | Values |
+| --- | --- | --- |
+| Rapid cooling | `storage_mode` | `on`, `off` |
+| Rapid freezing | `freezing_mode` | `on`, `off` |
+| Light-wave preservation | `preservation_mode` | `on`, `off` |
+| Extreme freezing | `acme_freezing_mode` | `on`, `off` |
+| Energy saving | `energy_saving_mode` | `on`, `off` |
+| Holiday | `holiday_mode` | `on`, `off` |
+| Intelligent mode | `intelligent_mode` | `on`, `off`, with a product-specific alternate dispatch |
+| Variable compartment | `variable_mode` | Named presets, including `soft_freezing_mode`, `fresh_product_mode`, `zero_fresh_mode` |
+
+The latest APK's bundled scene UI independently labels `storage_mode` as rapid
+cooling and `freezing_mode` as rapid freezing. Its bundled E1 Lua declares
+`work_status` values `power_on` and `power_off`. This is additional evidence for
+investigating the dishwasher power button, not sufficient exact-profile admission.
+
+The historical plugin obtains model-specific UI configuration from
+`/fridgesn/v2/getInfo.do`, with an SN-derived product selector and an additional
+signed request. Its response controls `fridgeZoneList`, model labels and feature
+flags. That signing mechanism was not extracted or admitted. Consequently the
+presence of a shared toggle function does not prove that it appears for every
+model or that a renamed modern feature uses the same command.
+
+The plugin also separates provider data services from appliance Lua commands.
+Historical code references `https://fridge-api.mideav.com/fridge` and
+`https://fridge-api2.mideav.com/fridge`, including
+`/FridgeStatistics/openDoorRecord`, `/FridgeStatistics/getCleanTime`,
+`/FridgeStatistics/intelligentCenter2`, `/FridgeStatistics/getPatternSetting`,
+`/FridgeStatistics/setPattern`, and annual-report routes. None of those account
+or setting endpoints was called. Their presence identifies further research paths;
+it does not prove that current AI features use the historical service.
+
+### Owner screenshot parity checklist
+
+The owner supplied official App screenshots on October 18. They establish the
+requested UI scope and visible product features. Screenshots and private displayed
+usage values are not copied into the repository. A visible button is evidence of
+an official feature; its exact arguments, preconditions and response semantics
+still require tracing. All rows below remain in scope, including provider-backed
+settings and reports that are not Lua appliance commands.
+
+| Visible feature | Evidence and next implementation dependency |
+| --- | --- |
+| Refrigerator cold-storage and freezer targets | Existing read mappings; resolve exact encoder and preservation before admitting writes |
+| Variable compartment with a maternal/infant preset | Historical variable presets exist; find the current preset's exact code and allowed transitions |
+| Rapid cooling and rapid freezing | Current APK scene labels and historical explicit toggle dispatch; bind to the current protected profile |
+| Daily mode | Find whether the current plugin sends a preset or a coordinated set of flags |
+| Minus-30-degree deep freezing | Historical `acme_freezing_mode` is a lead, not an established mapping for this label or temperature |
+| Ice making | Base Lua contains several distinct ice-related fields; identify the current button's exact one |
+| Light-wave freshness | Historical `preservation_mode` dispatch is a lead; confirm current model and state overlay |
+| Bulk-food freshness | Find its current plugin command and any coordinated temperature/mode changes |
+| Long-vacation energy saving | Historical holiday and energy-saving flags are distinct; resolve the current button's actual combination |
+| PST+ purification and percentage | Identify status source, available settings and reset semantics |
+| Intelligent freshness, noise reduction, energy saving, family protection | Trace each current provider feature's settings, status and lifecycle; historical statistics/pattern endpoints are leads |
+| Ambient lighting settings | Base lighting field exists; current subpage may expose additional arguments |
+| Door-open notification sound | Find the exact sound-setting command and distinguish it from cloud notification preferences |
+| Food inventory | Historical provider food service exists; inspect current operations and account scope |
+| Door-open count, cleaning reminder, monthly report, efficiency score | Trace current reporting endpoints and distinguish historical summaries from current appliance state |
+| Dishwasher power button | Bundled E1 `power_on`/`power_off` values; review exact centralized profile, required extra options and trusted authority |
+| Dishwasher detergent, filter and rinse-aid status | Identify current status sources, units and any explicit maintenance-reset operations |
+| Last wash time/mode and water/electricity usage | Trace history/report sources, not synthetic values derived from current state |
+| Monthly electricity, water and water savings | Trace provider aggregate report semantics and period |
+
+The dishwasher screenshot shows its powered-off screen. It does not enumerate
+all controls displayed after power-on; the existing program/start/pause/resume/
+cancel investigation remains in scope. Food-shopping and social navigation do
+not themselves establish additional appliance commands.
+
+### Reproducible expanded inspection
+
+The static inspector now additionally checks plugin POST annotations, cache/query
+and encoding calls, transparent-transport construction, and the historical demo's
+actual toggle dispatch. It never sends these requests, executes plugin JavaScript
+or Lua, extracts new signing material, or outputs arbitrary source strings:
+
+```bash
+python scripts/inspect_meiju_android_protocol.py /path/to/meiju.apk /path/to/midea_auto_cloud --demo-plugin /path/to/T0xCA_plugdemo_20200512.zip
+```
+
+The expanded inspection passed against both pinned archives. The investigation
+used public download/catalog requests only: no account login, private App data,
+real-device command, repository push or publication occurred. Native API 1.22.0,
+SQLite schema 5, protected payload 3 and existing capability/grant admission remain
+unchanged. Current-model plugin selection, the screenshot's remaining feature
+mappings and physical verification remain open; the historical demo does not
+complete those tasks.
+
+Phase checks actually run: the expanded inspector with both pinned archives;
+rejection of mismatched APK/demo inputs before decoding; `validate_docs.py`;
+`validate_repository.py`; `.venv/bin/python scripts/validate_contracts.py`
+(20 schemas, 49 positive and 267 negative fixtures); and
+`validate_commits.py --all`. The initial system-Python contract invocation lacked
+`jsonschema`; rerunning in the existing repository virtual environment passed.
+No Flutter build, Rust runtime test or physical-device test was claimed for this
+research-only phase.
