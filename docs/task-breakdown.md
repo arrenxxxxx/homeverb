@@ -55,6 +55,15 @@ No runtime contract, authority or physical compatibility changed.
 
 ## Task status
 
+The October 18 existing-emulator check retained the saved account and six device
+cards, but both explicit state and inventory refresh returned `AUTH_REQUIRED`.
+The owner then reported `ACCOUNT_IDENTITY_CONFLICT` for the same account.
+The localized explanation is corrected, and static APK inspection distinguishes
+login IDs from user IDs. Legacy identity reconciliation remains unresolved;
+neither a successful reauthorization nor actual dishwasher-control availability
+has been established. See the [identity investigation](development/05-midea.md)
+and [runtime record](../apps/mobile/verification.md).
+
 The October 18 appliance-detail revision shares product headers and explicit
 buttons across refrigerator compartments and descriptor-driven dishwasher details.
 Current route/component permissions gate visible actions and exact temperature

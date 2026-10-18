@@ -3029,3 +3029,21 @@ repository checks passed (146 Markdown files, 1596 links, 20 schemas,
 50 positive and 291 negative fixtures, 624 maintained text files). No live
 reauthorization was repeated during these checks. APK delivery is recorded
 separately.
+
+### Corrected identity-message APK delivery
+
+Source commit `96d4987` built the dual-ABI release APK with the unchanged native
+AAR and explicit `HOMEVERB_ADAPTER=midea.meiju`. The artifact is
+`output/flutter-verification/android/homeverb-0.2.0-account-identity-message.apk`,
+SHA-256 `b804fabd99983d61411ea2841be4e967d4215867072c891ff82c82d6af66f79c`.
+The archive verifier passed both ABIs, current-AAR byte matching, 17 Core exports
+per ABI, development signature and 16 KiB alignment. Documentation status edits
+were present when the packaging report was generated; no additional runtime code
+changed after that source commit.
+
+`adb -s emulator-5586 install -r` succeeded without clearing app data. The installed
+APK was pulled as code only and its SHA-256 exactly matched the verified artifact.
+Launch returned `Status: ok`, `LaunchState: COLD` and 1293 ms. No private app data,
+credential fields or new screenshots were captured. No login was retried, and no
+appliance command, remote publication or diagnostic upload occurred. This verifies
+installation/startup of the wording correction, not successful reauthorization.

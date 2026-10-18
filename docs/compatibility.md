@@ -17,6 +17,13 @@ unchanged. A new internal crate and six locked SHA-1 support packages are added.
 
 ## Appliance detail buttons: October 18, 2026
 
+The existing Android emulator retained six cards after the update, but live reads
+required renewed authorization. The owner's same-account reauthorization then
+returned an identity-binding conflict. Corrected wording and static official-APK
+identity evidence do not resolve this authentication gate or establish live
+control support. Account bindings, native API and persistence formats are
+unchanged; see the [runtime record](../apps/mobile/verification.md).
+
 Refrigerator compartments and dishwasher details now share product headers,
 observation cards and explicit buttons. Current session/route/component permission
 gates action visibility and temperature steps. Dishwasher argument entry and
