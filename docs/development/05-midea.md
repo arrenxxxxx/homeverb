@@ -184,6 +184,20 @@ spelling/device list, or deleting/recreating the account would not supply the
 missing provider identity proof. Safe legacy reconciliation remains unresolved;
 the corrected error wording does not fix reauthorization.
 
+For an owner-directed Android investigation, building native Core with
+`HOMEVERB_AUTH_TRACE=1` enables the local `HomeVerbAuthTrace` Android log tag.
+Ordinary builds omit its output. Its closed enum accepts no caller text and
+emits only selected-account/protected-validation/login/persistence/inventory
+stages, exact versus ASCII-case-only subject comparison, and matching/differing
+or absent legacy client identifiers. It emits no raw identifiers, lengths,
+hashes, credentials, response bodies or device details. Client-identifier
+comparison is diagnostic only: it is derived from login spelling and cannot
+prove account identity. Even a case-only subject difference remains rejected.
+Inventory success marks a returned result, not necessarily complete membership.
+The probe adds no requests, retry, storage operation or authority. Capture only
+this tag for one explicit user login; remove the opt-in in a normal rebuild after
+the investigation. This is local diagnostic evidence, not uploaded telemetry.
+
 `MeijuHttps` admits only `https://mp-prod.smartmidea.net` and the five reviewed login,
 home, appliance and state endpoints. It exposes no configurable URL, proxy, region
 reroute, certificate bypass, control endpoint or executable download. TLS uses

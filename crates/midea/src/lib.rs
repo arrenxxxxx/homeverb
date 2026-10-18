@@ -2,6 +2,7 @@
 
 mod ac_features;
 mod auth;
+mod auth_trace;
 mod cloud;
 mod codec;
 mod control;

@@ -3047,3 +3047,33 @@ Launch returned `Status: ok`, `LaunchState: COLD` and 1293 ms. No private app da
 credential fields or new screenshots were captured. No login was retried, and no
 appliance command, remote publication or diagnostic upload occurred. This verifies
 installation/startup of the wording correction, not successful reauthorization.
+
+### Opt-in authentication stage probe
+
+The owner requested continued live verification. Native Core now supports the
+compile-time `HOMEVERB_AUTH_TRACE=1` Android-only log probe documented in the
+[Meiju guide](../../docs/development/05-midea.md). It accepts only closed enum
+markers, with no identifier values, hashes, credentials or response bodies.
+Existing exact-subject guards, protected storage and login request counts are
+unchanged. Matching login-derived client identifiers is diagnostic, never identity
+proof. The regression now also rejects an ASCII-case-only subject change without
+writing secrets or fetching inventory.
+
+With the opt-in enabled, all 37 Midea account tests and all nine selected host
+reauthorization tests passed. The expanded case-only refusal regression passed
+separately. Both Android ABI release builds passed AAR/export/alignment checks.
+Documentation/repository validation and formatting passed. Strict Clippy failed
+on four existing `chunks_exact_to_as_chunks` warnings in codec/LAN files under
+the current toolchain; these are unrelated to the diagnostic probe. Live probe
+results and APK installation are recorded separately. No credential was requested
+in chat or read by tooling; user entry remains inside the protected app form.
+
+Clippy passed with only that pre-existing lint explicitly allowed
+(`-D warnings -A clippy::chunks_exact_to_as_chunks`); this is not a strict-pass
+claim. The opt-in APK passed signature, both complete ABIs, exact current-AAR
+matching, exports and 16 KiB alignment. Artifact:
+`output/flutter-verification/android/homeverb-0.2.0-auth-trace.apk`; SHA-256:
+`9d2742d31baaaf9f15e6baa567ee47caceaf1e0561926d6e6a2143b018dc6787`.
+`adb -s emulator-5586 install -r` returned `Success`, retaining app data.
+The owner was asked to submit one login directly in the existing app. Live
+comparison results remain pending and no appliance control has been sent.

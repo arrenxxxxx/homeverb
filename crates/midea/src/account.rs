@@ -469,6 +469,9 @@ impl MeijuAccount {
         let mut payload = operation
             .run(async {
                 let payload = Payload::decode(original, self.record())?;
+                if crate::auth_trace::enabled() {
+                    session.trace_reauthorization(&payload.cloud_session()?);
+                }
                 if payload.subject != session.subject().expose() {
                     return Err(Error::new(
                         "ACCOUNT_IDENTITY_CONFLICT",
@@ -850,6 +853,7 @@ pub async fn connect(
     let _registration = vault.lock_registration(operation).await?;
     vault.check_secure_storage(operation).await?;
     let mut selected = if let Some(id) = existing {
+        crate::auth_trace::emit(crate::auth_trace::Event::SelectedAccount);
         let account = MeijuAccount {
             lease: vault.lease(id, operation).await?,
         };
@@ -860,6 +864,7 @@ pub async fn connect(
             ));
         }
         let original = account.reauthorization_material(operation).await?;
+        crate::auth_trace::emit(crate::auth_trace::Event::ProtectedBindingValidated);
         Some((account, original))
     } else {
         None
@@ -881,6 +886,7 @@ pub async fn connect(
     }
     let session = login(transport, &credentials, operation).await?;
     drop(credentials);
+    crate::auth_trace::emit(crate::auth_trace::Event::LoginSucceeded);
     if selected.is_none() {
         let matches: Vec<_> = subjects
             .iter()
@@ -910,7 +916,13 @@ pub async fn connect(
                 .await?
         }
     };
+    crate::auth_trace::emit(crate::auth_trace::Event::SessionSaved);
     let retrieval = account.retrieve(transport, operation).await;
+    crate::auth_trace::emit(if retrieval.is_ok() {
+        crate::auth_trace::Event::InventorySucceeded
+    } else {
+        crate::auth_trace::Event::InventoryFailed
+    });
     Ok(ConnectReport {
         account: account.record().clone(),
         retrieval,

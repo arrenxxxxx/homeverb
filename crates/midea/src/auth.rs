@@ -328,6 +328,29 @@ struct RestoredSession {
 }
 
 impl MeijuSession {
+    /// Diagnostic comparisons never participate in account admission or persistence.
+    pub(crate) fn trace_reauthorization(&self, previous: &Self) {
+        use crate::auth_trace::{Event, emit};
+        emit(if self.subject.expose() == previous.subject.expose() {
+            Event::SubjectMatches
+        } else if self
+            .subject
+            .expose()
+            .eq_ignore_ascii_case(previous.subject.expose())
+        {
+            Event::SubjectDiffersOnlyInAsciiCase
+        } else {
+            Event::SubjectDiffers
+        });
+        emit(match (&previous.client_device_id, &self.client_device_id) {
+            (Some(old), Some(new)) if old.expose() == new.expose() => {
+                Event::ClientIdentifierMatches
+            }
+            (Some(_), Some(_)) => Event::ClientIdentifierDiffers,
+            _ => Event::LegacyClientIdentifierAbsent,
+        });
+    }
+
     pub(crate) fn control_request(
         &self,
         appliance: &crate::CloudId,

@@ -969,24 +969,26 @@ async fn reconnect_refuses_changed_subject_without_overwriting_session_or_fetchi
     .unwrap();
     let original = f.bytes(first.account.credential_ref);
     let puts = f.puts();
-    let changed = LoginTransport::complete("OTHER-LOGIN-ID");
-    assert_eq!(
-        connect(
-            &f.vault,
-            &changed,
-            login_credentials(),
-            Some(first.account.id),
-            "Home",
-            &operation()
-        )
-        .await
-        .unwrap_err()
-        .code,
-        "ACCOUNT_IDENTITY_CONFLICT"
-    );
-    assert_eq!(f.puts(), puts);
-    assert_eq!(f.bytes(first.account.credential_ref), original);
-    assert_eq!(changed.calls.load(Ordering::Relaxed), 2);
+    for subject in ["OTHER-LOGIN-ID", "private-login-id"] {
+        let changed = LoginTransport::complete(subject);
+        assert_eq!(
+            connect(
+                &f.vault,
+                &changed,
+                login_credentials(),
+                Some(first.account.id),
+                "Home",
+                &operation()
+            )
+            .await
+            .unwrap_err()
+            .code,
+            "ACCOUNT_IDENTITY_CONFLICT"
+        );
+        assert_eq!(f.puts(), puts);
+        assert_eq!(f.bytes(first.account.credential_ref), original);
+        assert_eq!(changed.calls.load(Ordering::Relaxed), 2);
+    }
 }
 
 #[tokio::test]
