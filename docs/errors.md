@@ -31,7 +31,7 @@ failure or proof that unseen devices disappeared. See
 | MIJIA_AUTH_CHALLENGE_REQUIRED | Mijia requires CAPTCHA or additional account verification | Login remains incomplete; do not retry automatically or expose private challenge URLs |
 | MIJIA_INVALID_RESPONSE | Malformed, oversized, uncorrelated or unsafe Mijia protocol data | Preserve existing evidence and refuse the response |
 | MIJIA_REQUEST_FAILED | Mijia TLS/HTTP operation failed, redirected or disconnected | No implicit retry or authentication; report the bounded failure |
-| MIJIA_REQUEST_REJECTED | Mijia returned a non-success protocol code | Keep sanitized errors; raw vendor messages are private |
+| MIJIA_REQUEST_REJECTED | Mijia returned a non-success protocol code | Keep sanitized errors; raw vendor messages are private. For the low-level write protocol, only an exact correlated item rejection establishes rejected; global/HTTP errors after send remain uncertain |
 | MIJIA_INVENTORY_PARTIAL | Mijia device enumeration is explicitly truncated | Do not remove prior cards or claim complete inventory |
 | MIJIA_SPEC_UNAVAILABLE | Optional public MIoT metadata is unavailable within its budget | Keep named device cards; retry capability lookup only on explicit account refresh |
 | MIJIA_DEVICE_NOT_LISTED | Protected Mijia membership does not admit the selected device | Refuse before any property request; do not trust public card metadata as authority |

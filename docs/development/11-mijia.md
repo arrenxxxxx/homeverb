@@ -263,3 +263,29 @@ recorded macOS glyph/legacy-click failures, not a full-suite pass. Rust Mijia/ho
 regression passed 290 checks across 26 suites, plus workspace build and strict
 Clippy. See the [App verification record](../../apps/mobile/verification.md) for
 commands, evidence scope and remaining phone/package acceptance.
+
+## Single-property write protocol foundation
+
+The protocol crate now has a separate `send_control` path for the fixed
+`/miotspec/prop/set` endpoint. Read transports refuse that endpoint, and transports
+without explicit write support refuse without falling back to `send`. One scalar
+property is sent once under the inherited operation. Synchronous preflight occurs
+before the possibly-sent marker; subsequent cancellation, deadline, DNS/TLS/HTTP
+failure or malformed response preserves uncertainty. There is no retry, redirect,
+automatic login or alternate-route send.
+
+An encrypted response must contain exactly one matching device/SIID/PIID result.
+Its zero code means accepted with no completion evidence; a correlated nonzero
+item code is explicit rejection. Plaintext/global codes and missing, duplicate or
+foreign results do not establish acceptance or rejection. HTTP 200 alone never
+advances the write to accepted. Existing outcome schemas are unchanged.
+
+This low-level Rust protocol primitive is not a grant. The production Core adapter
+still denies execution; protected fan admission, native grants and App controls
+remain pending. No control is available through native JSON, CLI, MCP or Flutter.
+No real account or appliance was used.
+
+Rust 1.96 `cargo test -p homeverb-mijia --offline --locked` passed 53 unit tests
+and three compile-fail doc tests, including nine new protocol/transport cases.
+The initial sandbox run could not bind loopback sockets; the successful rerun
+used permitted local TLS fixtures. Strict all-target Mijia Clippy passed.

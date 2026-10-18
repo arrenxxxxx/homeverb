@@ -2,7 +2,7 @@
 
 use crate::{MAX_RESPONSE_BYTES, PrivateString, Region, auth_required, failed, invalid};
 use async_trait::async_trait;
-use homeverb_core::{Operation, SecretBytes};
+use homeverb_core::{Operation, SecretBytes, WriteProgress};
 use homeverb_domain::Result;
 use reqwest::{
     Client, Method, Url,
@@ -17,6 +17,7 @@ pub enum CloudEndpoint {
     LoginExchange,
     Devices,
     Properties,
+    SetProperty,
     Homes,
     HomeDevices,
     SpecIndex,
@@ -30,6 +31,7 @@ impl CloudEndpoint {
             Self::LoginExchange => "/sts",
             Self::Devices => "/home/device_list",
             Self::Properties => "/miotspec/prop/get",
+            Self::SetProperty => "/miotspec/prop/set",
             Self::Homes => "/v2/homeroom/gethome_merged",
             Self::HomeDevices => "/v2/home/home_device_list",
             Self::SpecIndex => "/miot-spec-v2/instances",
@@ -123,6 +125,23 @@ impl fmt::Debug for CloudResponse {
 pub trait CloudTransport: Send + Sync {
     /// Send once, with no logging, retry, redirects or deadline extension.
     async fn send(&self, request: &CloudRequest, operation: &Operation) -> Result<CloudResponse>;
+
+    /// Separate, fail-closed write path. Never delegate to the read transport.
+    async fn send_control(
+        &self,
+        _: &CloudRequest,
+        _: &WriteProgress,
+        _: &Operation,
+    ) -> Result<CloudResponse> {
+        Err(control_unsupported())
+    }
+}
+
+fn control_unsupported() -> homeverb_domain::Error {
+    homeverb_domain::Error::new(
+        "CAPABILITY_UNSUPPORTED",
+        "The transport does not admit this control path.",
+    )
 }
 
 #[derive(Default)]
@@ -142,11 +161,32 @@ fn client_builder() -> reqwest::ClientBuilder {
 #[async_trait]
 impl CloudTransport for MijiaHttps {
     async fn send(&self, request: &CloudRequest, operation: &Operation) -> Result<CloudResponse> {
+        if request.endpoint == CloudEndpoint::SetProperty {
+            return Err(control_unsupported());
+        }
         operation
             .run(async {
                 let url = request.url()?;
                 let client = client_builder().build().map_err(|_| failed())?;
-                transmit(client, url, request, operation).await
+                transmit(client, url, request, None, operation).await
+            })
+            .await
+    }
+
+    async fn send_control(
+        &self,
+        request: &CloudRequest,
+        progress: &WriteProgress,
+        operation: &Operation,
+    ) -> Result<CloudResponse> {
+        if request.endpoint != CloudEndpoint::SetProperty {
+            return Err(control_unsupported());
+        }
+        operation
+            .run(async {
+                let url = request.url()?;
+                let client = client_builder().build().map_err(|_| failed())?;
+                transmit(client, url, request, Some(progress), operation).await
             })
             .await
     }
@@ -156,8 +196,12 @@ async fn transmit(
     client: Client,
     url: Url,
     request: &CloudRequest,
+    progress: Option<&WriteProgress>,
     operation: &Operation,
 ) -> Result<CloudResponse> {
+    if (request.endpoint == CloudEndpoint::SetProperty) != progress.is_some() {
+        return Err(control_unsupported());
+    }
     operation.run(async {
         let mut headers = HeaderMap::new();
         let mut cookie = HeaderValue::from_str(request.cookie.as_str()).map_err(|_| invalid())?;
@@ -166,12 +210,15 @@ async fn transmit(
         headers.insert("content-type", HeaderValue::from_static("application/x-www-form-urlencoded"));
         headers.insert("accept-encoding", HeaderValue::from_static("identity"));
         headers.insert("user-agent", HeaderValue::from_static("Android-7.1.1-1.0.0-ONEPLUS A3010-136-ABCDEFABCDEF0 APP/xiaomi.smarthome APPV/62830"));
-        if matches!(request.endpoint, CloudEndpoint::Devices | CloudEndpoint::Properties | CloudEndpoint::Homes | CloudEndpoint::HomeDevices) {
+        if matches!(request.endpoint, CloudEndpoint::Devices | CloudEndpoint::Properties | CloudEndpoint::SetProperty | CloudEndpoint::Homes | CloudEndpoint::HomeDevices) {
             headers.insert("miot-encrypt-algorithm", HeaderValue::from_static("ENCRYPT-RC4"));
             headers.insert("x-xiaomi-protocal-flag-cli", HeaderValue::from_static("PROTOCAL-HTTP2"));
         }
         let method = if matches!(request.endpoint, CloudEndpoint::LoginSign | CloudEndpoint::LoginExchange | CloudEndpoint::SpecIndex | CloudEndpoint::SpecInstance) { Method::GET } else { Method::POST };
         let outgoing = client.request(method, url).headers(headers).body(request.body.expose().to_vec()).build().map_err(|_| failed())?;
+        operation.run(async { Ok(()) }).await?;
+        // Conservative boundary: DNS/TLS errors after this point cannot prove no send.
+        if let Some(progress) = progress { progress.mark_sent(); }
         let mut response = client.execute(outgoing).await.map_err(|_| failed())?;
         if matches!(response.status().as_u16(), 401 | 403) { return Err(auth_required()); }
         if response.status() != reqwest::StatusCode::OK { return Err(failed()); }

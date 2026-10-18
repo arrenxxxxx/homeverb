@@ -31,6 +31,17 @@ There is no automatic login, route fallback, background worker or control path.
 Even forged public actions and Core grants cannot make this adapter send a write.
 Native API, snapshot schemas and existing execution outcome semantics are unchanged.
 
+## Mijia write protocol foundation
+
+The low-level Rust protocol uses a separate progress-tracked, single-property
+transport. Default/read transports refuse controls before sending. The first
+possible send records `possibly_sent`; only an encrypted, exact single
+DID/SIID/PIID acknowledgement can return accepted or explicitly rejected. Global
+codes, malformed replies, cancellation and transport failures after send remain
+uncertain. Accepted acknowledgements have no completion evidence. No retry,
+reauthorization or route replay occurs. The Core adapter still denies writes;
+this protocol addition does not change native schemas or create authority.
+
 ## Route policy
 
 `connection=lan` permits LAN only, with no cloud fallback. `cloud` permits vendor-cloud control only. `auto` chooses among action-supported routes with valid credentials, user permission, and current reachability; prefer LAN by default. A readable LAN route is not automatically writable for every action. Route by action, not merely by device.

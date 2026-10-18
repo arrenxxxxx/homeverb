@@ -13,7 +13,9 @@ Native API 1.24 now routes Mijia-only and combined Meiju/Mijia sessions through
 protected connection and ordinary account/card/read operations. Flutter now has
 registered platform selection, provider-scoped sign-in/reauthorization and partial
 positive cards. Doorbell, lock, fan and battery readings use descriptor-driven
-details; fan controls remain the next phase. See
+details. The separately progress-tracked single-property write protocol is
+synthetic-tested; protected fan admission, native grants and App controls remain
+the next phase. See
 [ADR-0072](adr/0072-mijia-protected-core-reads.md) and
 [ADR-0073](adr/0073-mijia-native-account-routing.md).
 Real-account and physical validation belong to the owner. No door-lock write,

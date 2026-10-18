@@ -10,7 +10,9 @@ readable fan/lock/doorbell/battery properties. Its protected account vault bindi
 and read-only Core adapter now have synthetic SQLite/account/read evidence and
 native API 1.24 Mijia-only/combined account composition. Flutter platform login,
 partial named cards and read-only details now use these native flows. Fan controls
-remain pending.
+remain pending. A low-level one-property write primitive is synthetic-tested,
+but production Core execution remains denied. Native API 1.24, schemas, saved
+payloads and supported-device claims are unchanged by that protocol addition.
 Community enumeration is not complete-home evidence. Online hints are never power or
 lock state. Door-lock writes remain high-risk and unavailable. Real authentication,
 challenge completion, regional inventory, MIoT model mapping and physical support
