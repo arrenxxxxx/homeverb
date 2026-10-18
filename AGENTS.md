@@ -44,6 +44,11 @@ MCP principals come from trusted host configuration. Tool parameters must not se
 
 ## Language and commit policy
 
+Name new branches by purpose: use `feature/` for features, `fix/` for fixes, and
+other appropriate prefixes such as `docs/`, `refactor/`, or `chore/`. Do not use
+the `codex/` prefix. This branch naming rule is separate from commit types;
+feature commits still use `feat`.
+
 Use the owner-approved name **HomeVerb** in prose and app branding, `homeverb` for the repository and executable, and `homeverb-` for proposed module names. Follow `docs/adr/0006-project-name.md`. Do not mark the name as provisional.
 
 Write all documentation, code comments, diagram labels, example messages, issue/PR text, commit subjects, and commit bodies in English. Keep public identifiers stable and English. Do not add translated documentation. The owner-authorized exception is the `packages/presentation/locales/zh-CN.json` UI translation catalog; all public identifiers and other source text remain English.

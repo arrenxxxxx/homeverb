@@ -368,7 +368,7 @@ for the commands and exact failure scope. No real account/device testing occurre
 
 The combined-platform development APK was built from clean source revision
 `39d646546a6ea0c07bc6a4154212b1c5a9d1ee74` on October 18, 2026. The dedicated
-branch is `codex/mijia-integration`; all development phases are local commits.
+branch is `feature/mijia-integration`; all development phases are local commits.
 No merge, push, installation, account login or physical-device operation was
 performed for this delivery.
 
