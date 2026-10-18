@@ -271,6 +271,7 @@ pub async fn login(
         operation,
     )
     .await?;
+    crate::auth_trace::login_identity_shape(response.expose());
     let result: LoginData = decode(&response)?;
     if !ascii(result.mdata.token.0.as_bytes(), 8192, false) {
         return Err(invalid());

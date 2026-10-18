@@ -1,6 +1,45 @@
 //! Trusted legacy-account recovery, outside the ordinary JSON dispatcher.
 use super::*;
 
+enum Stage {
+    ConfirmReceived,
+    PreviewUnavailable,
+    PreviewTaken,
+    HostUnavailable,
+    PreviewExpired,
+    HostSealed,
+}
+impl Stage {
+    fn emit(self) {
+        if option_env!("HOMEVERB_AUTH_TRACE") != Some("1") {
+            return;
+        }
+        let marker = match self {
+            Self::ConfirmReceived => c"recovery_host_confirm_received",
+            Self::PreviewUnavailable => c"recovery_host_preview_unavailable",
+            Self::PreviewTaken => c"recovery_host_preview_taken",
+            Self::HostUnavailable => c"recovery_host_unavailable",
+            Self::PreviewExpired => c"recovery_host_preview_expired",
+            Self::HostSealed => c"recovery_host_sealed",
+        };
+        #[cfg(target_os = "android")]
+        {
+            #[link(name = "log")]
+            unsafe extern "C" {
+                fn __android_log_write(
+                    priority: std::ffi::c_int,
+                    tag: *const std::ffi::c_char,
+                    text: *const std::ffi::c_char,
+                ) -> std::ffi::c_int;
+            }
+            // Only fixed enum markers; never format request or account data.
+            unsafe { __android_log_write(4, c"HomeVerbAuthTrace".as_ptr(), marker.as_ptr()) };
+        }
+        #[cfg(not(target_os = "android"))]
+        let _ = marker;
+    }
+}
+
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ConfirmIdentityRecoveryRequest {
@@ -71,6 +110,7 @@ impl Session {
         &self,
         input: ConfirmIdentityRecoveryRequest,
     ) -> Value {
+        Stage::ConfirmReceived.emit();
         let result = async {
             let preview = self
                 .state
@@ -78,7 +118,11 @@ impl Session {
                 .map_err(|_| invalid())?
                 .identity_recoveries
                 .remove(&input.recovery_id)
-                .ok_or_else(invalid)?;
+                .ok_or_else(|| {
+                    Stage::PreviewUnavailable.emit();
+                    invalid()
+                })?;
+            Stage::PreviewTaken.emit();
             let (operation, _registration) =
                 self.register(&input.schema_version, input.operation_id, input.timeout_ms)?;
             let adapter = self
@@ -93,7 +137,12 @@ impl Session {
                         "Finish other operations before account recovery.",
                     ));
                 }
-                if state.closed || !state.foreground || preview.is_expired() {
+                if state.closed || !state.foreground {
+                    Stage::HostUnavailable.emit();
+                    return Err(invalid());
+                }
+                if preview.is_expired() {
+                    Stage::PreviewExpired.emit();
                     return Err(invalid());
                 }
                 state.closed = true;
@@ -103,6 +152,7 @@ impl Session {
                 state.connection_links.clear();
                 state.identity_recoveries.clear();
             }
+            Stage::HostSealed.emit();
             self.core.invalidate_user_approvals();
             let result = adapter.confirm_identity_recovery(preview, &operation).await;
             let result = match result {

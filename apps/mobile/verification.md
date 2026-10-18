@@ -3132,3 +3132,63 @@ ABI builds passed with diagnostic logging disabled; final packaging and installe
 artifact evidence are recorded below. Live same-account restoration and the
 original refrigerator/dishwasher acceptance remain pending, not synthetic-test
 claims. No diagnostic upload, remote push or appliance write occurred.
+
+### Identity-recovery APK installation and UI check
+
+Source `974b2e9` produced
+`output/flutter-verification/android/homeverb-0.2.0-identity-recovery.apk`, SHA-256
+`9e5437d82bc4b6e1ecbcc9f7dfcd3d41f01a48312ef2673d670de40ed56c40f6`.
+The verifier passed both complete ABIs, exact current-AAR code matching, 20 native
+exports per ABI, development signature and 16 KiB alignment. Auth trace output
+is disabled in this build. `adb -s emulator-5586 install -r` returned `Success`;
+pulling the installed code-only APK verified an identical SHA-256. No app data
+was cleared.
+
+The `am start -W` command returned a timeout after 12518 ms, so it is not recorded
+as a passing cold-start timing check. Subsequent screenshots and actual taps
+verified the responsive Chinese platform/account screens, retained account and
+six device entries, expanded account management and the new blank protected
+sign-in form with Restore Saved Account. No credentials were entered by tooling.
+The blank form was captured immediately on opening, before requesting user input;
+no form capture follows that request. Private runtime images stay outside the
+repository. The owner was directed to the new restore action and its separate
+same-account confirmation, with live restoration still pending.
+
+### Recovery failure and bounded stage diagnosis
+
+The owner reported that this recovery attempt failed. The cleared-credential
+result screen still displayed `ACCOUNT_IDENTITY_CONFLICT` and required a local
+account reload. The owner subsequently confirmed that the matched-device-count
+dialog appeared and that the error followed its confirmation button. With the
+verified installed code, this places the failure after successful preparation:
+login, canonical identity admission and complete inventory matching passed.
+The installed build had tracing disabled; the only available trace entries were
+from the older ordinary-login process and cannot diagnose this attempt. Live
+restoration remains failed/unresolved, not accepted. The earlier missing-canonical-
+field hypothesis is not consistent with reaching this dialog. Static inspection
+found no serialized-name annotation on that DTO field; no alternate identity
+field was substituted. Confirmation preview retention, expiry and final saved
+binding checks require direct stage evidence.
+
+The next diagnostic revision adds fixed recovery-stage markers and presence-only
+inspection of four known login identity fields. It changes no identity guards,
+requests, storage formats, API version or device authority. Private values are
+discarded by `IgnoredAny`; no raw responses or identifiers are logged. The original
+account is never deleted or recreated. One shape/privacy test, all 37 Midea account
+tests, nine authentication tests and seven host recovery tests passed. Packaging
+and live results are recorded separately; no new provider login or appliance write
+was initiated by those tests.
+
+The opt-in also covers fixed Flutter confirmation dispatch markers and native
+host preview lookup, expiry and host sealing, so a failure before reaching the
+adapter can be distinguished. Flutter requires the explicit build flag
+`--dart-define=HOMEVERB_AUTH_TRACE=true`; normal builds omit it. It writes only
+closed enum names with the `HomeVerbRecoveryTrace` prefix, never exception text.
+
+After adding the confirmation-boundary markers, the seven host recovery tests
+passed again, Flutter analysis and eight focused recovery/native-account tests
+passed, and Midea/Host Clippy passed with the previously recorded unrelated
+`chunks_exact_to_as_chunks` lint allowed. The initial Clippy run caught test-module
+ordering in the diagnostic helper; it was corrected before the passing run.
+Both Android ABIs rebuilt with 20 exports and 16 KiB alignment. Documentation,
+contract and repository validators passed; live confirmation is still unresolved.

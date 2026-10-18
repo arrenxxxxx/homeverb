@@ -4,9 +4,26 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'client_contract.dart';
 import 'session_permissions.dart';
 export 'client_contract.dart';
+
+enum _RecoveryStage {
+  previewReady,
+  confirmRequested,
+  previewUnavailable,
+  previewExpired,
+  nativeConfirmDispatched,
+  nativeConfirmReturned,
+}
+
+void _traceRecovery(_RecoveryStage stage) {
+  if (const bool.fromEnvironment('HOMEVERB_AUTH_TRACE')) {
+    // Only closed enum names; no account, response or credential values.
+    debugPrint('HomeVerbRecoveryTrace: ${stage.name}');
+  }
+}
 
 /// Native scope is immutable and is never reconstructed from editable form state.
 class _NativeApprovalPreview implements ApprovalPreview {
@@ -571,14 +588,23 @@ class NativeClient
       );
     }
     _identityRecoveries.add(preview);
+    _traceRecovery(_RecoveryStage.previewReady);
     return preview;
   }
 
   @override
   Future<Json> confirmIdentityRecovery(IdentityRecoveryPreview preview) async {
+    _traceRecovery(_RecoveryStage.confirmRequested);
     if (preview is! _IdentityRecoveryPreview ||
-        !_identityRecoveries.remove(preview) ||
-        preview.clock.elapsed >= const Duration(seconds: 60)) {
+        !_identityRecoveries.remove(preview)) {
+      _traceRecovery(_RecoveryStage.previewUnavailable);
+      throw NativeFailure(
+        'ACCOUNT_IDENTITY_CONFLICT',
+        'Review account recovery again.',
+      );
+    }
+    if (preview.clock.elapsed >= const Duration(seconds: 60)) {
+      _traceRecovery(_RecoveryStage.previewExpired);
       throw NativeFailure(
         'ACCOUNT_IDENTITY_CONFLICT',
         'Review account recovery again.',
@@ -593,6 +619,7 @@ class NativeClient
     };
     final libraryPath = path, nativeHandle = handle;
     try {
+      _traceRecovery(_RecoveryStage.nativeConfirmDispatched);
       return decodeResponse(
             await Isolate.run(
               () => NativeBindings(
@@ -602,6 +629,7 @@ class NativeClient
           )
           as Json;
     } finally {
+      _traceRecovery(_RecoveryStage.nativeConfirmReturned);
       _identityRecoveries.clear();
       endOperation(id);
     }

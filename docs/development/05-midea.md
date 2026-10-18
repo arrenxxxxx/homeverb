@@ -202,6 +202,23 @@ The probe adds no requests, retry, storage operation or authority. Capture only
 this tag for one explicit user login; remove the opt-in in a normal rebuild after
 the investigation. This is local diagnostic evidence, not uploaded telemetry.
 
+The recovery probe additionally marks legacy eligibility, saved membership,
+canonical-identity availability, login-input comparison, inventory completeness,
+count/identity/model/profile conflicts, preview readiness and confirmed persistence.
+Login-response inspection reports only presence/absence of the known root
+`iotUserId` and `uid` fields and the same fields under `userInfo`. It discards
+their values while parsing; an unavailable shape is diagnostic only. Presence
+does not validate a field's type or authorize using it as an account subject.
+No alternate identity field is automatically substituted. These markers are
+needed because the normal public `ACCOUNT_IDENTITY_CONFLICT` deliberately does
+not disclose private comparison data. Old markers from a different process or
+earlier APK do not establish which recovery check failed in the current attempt.
+The same native opt-in covers host confirmation lookup/expiry/sealing. An explicit
+Flutter `--dart-define=HOMEVERB_AUTH_TRACE=true` adds fixed
+`HomeVerbRecoveryTrace` markers for preview ownership, expiry and native dispatch;
+it never prints exception contents. Capture only that prefix from the Flutter
+tag and `HomeVerbAuthTrace`, and omit both opt-ins in a normal rebuild.
+
 `MeijuHttps` admits only `https://mp-prod.smartmidea.net` and the five reviewed login,
 home, appliance and state endpoints. It exposes no configurable URL, proxy, region
 reroute, certificate bypass, control endpoint or executable download. TLS uses
