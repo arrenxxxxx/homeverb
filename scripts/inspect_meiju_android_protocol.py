@@ -125,6 +125,9 @@ def inspect_demo(path):
 
 def inspect_consumables(archive):
     """Trace the bundled service UI without exporting unrelated source literals."""
+    manifest = json.loads(archive.read("assets/weex_packages.json"))
+    modules = {entry["moduleCode"]: entry["moduleNo"] for entry in manifest["weexPackets"]}
+    assert modules["customer-service"] == "30001"
     path = "assets/assetsWeex/service-center/deviceInfo.js"
     raw = archive.read(path)
     source = raw.decode("utf-8")
@@ -163,6 +166,7 @@ def inspect_consumables(archive):
                             "remainingValueType", "remainingStatus"],
         "categorical_display": "Type 4 uses status 2 for sufficient; decorative wave height is not a measured percentage.",
         "detail_module": "customer-service/materialDetail.js",
+        "detail_module_number": modules["customer-service"],
         "scope": "Bundled service-center path; no current dishwasher plugin association or authenticated response.",
     }
 

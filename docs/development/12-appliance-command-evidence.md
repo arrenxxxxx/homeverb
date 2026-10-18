@@ -479,6 +479,13 @@ The APK's two module-request DTOs both declare `List<String>`. The official
 that public request, not to every module format or authenticated route. No
 consumables endpoint, real account or appliance command was called.
 
+A subsequent manifest check resolved `customer-service` to module number `30001`
+in `assets/weex_packages.json`; the static inspector now verifies this association.
+A bounded retry with `modelList: ["30001"]` also returned HTTP 200/business 40400.
+Neither request acquired the detail module. The module name and number are public
+download selectors, not device-profile evidence. A fresh bounded ADB inventory
+still found zero ready and zero unauthorized devices, without printing identifiers.
+
 Next implementation evidence is the actual current device plugin association,
 authenticated response/error/units semantics, protected home/device binding and
 the service's current authorization path. Any maintenance-reset action also needs
