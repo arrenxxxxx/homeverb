@@ -15,8 +15,8 @@ registered platform selection, provider-scoped sign-in/reauthorization and parti
 positive cards. Doorbell, lock, fan and battery readings use descriptor-driven
 details. The separately progress-tracked single-property write protocol is
 synthetic-tested. Explicit trusted Rust fan admission and local protected option
-inspection are implemented under ADR-0074; native grants and App controls remain
-the next phase. See
+inspection are implemented under ADR-0074. Native API 1.25 adds exact fan startup
+grants and protected option routing; Flutter controls and packaging remain next. See
 [ADR-0072](adr/0072-mijia-protected-core-reads.md) and
 [ADR-0073](adr/0073-mijia-native-account-routing.md).
 Real-account and physical validation belong to the owner. No door-lock write,

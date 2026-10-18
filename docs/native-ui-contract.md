@@ -1,6 +1,6 @@
 # Native UI contract
 
-API 1.24 adds [Mijia and combined platform sessions](#mijia-and-combined-platform-sessions-api-124).
+API 1.25 adds [exact Mijia fan startup grants](#mijia-fan-grants-api-125) and protected control-option inspection.
 Negotiate this version before using the new modes or accepting partial retrieval
 with positive device IDs. Existing Mock and Meiju defaults are preserved.
 
@@ -38,7 +38,7 @@ The 16 C functions in [homeverb.h](../crates/ffi/include/homeverb.h) form the na
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects Meiju, `xiaomi.mijia` selects Mijia, and `homeverb.platforms` selects both. `scenario` defaults to `normal`. All platform modes require `allow_mock_writes: false` and reject any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms the selected mode. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.24.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.25.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -1451,3 +1451,28 @@ provider into protected reauthorization, and retains positive cards from partial
 retrieval. Missing control-option support leaves read-only device views usable;
 it never grants an action. This does not establish real-account or physical-device
 acceptance.
+
+## Mijia fan grants (API 1.25)
+
+[ADR-0074](adr/0074-mijia-fan-control.md) adds `mijia_fan_grants` to trusted startup
+in `xiaomi.mijia` and `homeverb.platforms` modes only. Each entry contains local
+`device_id`, exact `component_id` (`fan-SIID`), `property` and scalar `value`.
+Admitted property names are `state`, `level`, `mode`, `horizontal_swing` and
+`horizontal_angle`. State/swing require booleans; other properties require numbers.
+There are at most 1024 unique exact grants. Runtime validation additionally requires
+canonical UUID v4 identity and nonzero u32 SIID. No grant admits other services.
+
+`inspect_control_options` now routes by the saved connection's registered adapter
+and returns protected Mijia fan options in addition to existing Meiju options.
+Its component field permits `fan-SIID`, so strict clients must negotiate 1.25
+before consuming these options or submitting grants. Inspection is local, read-only
+and not current provider authorization. It publishes no action and changes no grant.
+
+Startup grants independently enable the adapter's fan gate and exact Core policy;
+account refresh publishes spec-admitted actions. Refresh may be partial: only
+positive `retrieval.device_ids` establish which descriptors were published. The
+adapter still independently checks protected identity, model/spec and argument
+bounds at execution. Saved descriptors and UI booleans cannot supply authority.
+A default session remains read-only. Meiju grants, 34 JSON methods, C exports,
+SQLite 5, protected Mijia payload 1 and Meiju payload 3 are unchanged. Lock and
+doorbell writes remain unavailable. Physical fan control remains owner acceptance.

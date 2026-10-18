@@ -421,6 +421,33 @@ def main():
                 assert decode(library.homeverb_open(json.dumps(config).encode()))['error']['code'] == 'INVALID_ARGUMENT'
                 assert not private.exists()
 
+    # API 1.25 exact Mijia fan grants are startup-only and provider-scoped.
+    mijia_grant = {'device_id':'40000000-0000-4000-8000-000000000001',
+                   'component_id':'fan-2', 'property':'state', 'value':True}
+    for adapter in ['xiaomi.mijia', 'homeverb.platforms']:
+        with tempfile.TemporaryDirectory(prefix='homeverb-ui-mijia-grants-') as directory:
+            config = {'schema_version':'1.0','data_dir':directory,'adapter':adapter,
+                      'allow_mock_writes':False,'mijia_fan_grants':[mijia_grant]}
+            open_schema.validate(config)
+            opened = decode(library.homeverb_open(json.dumps(config).encode()))
+            assert opened['error'] is None
+            try:
+                assert raw(opened['data']['handle'], envelope('list_devices'))['data'] == []
+                assert raw(opened['data']['handle'], envelope('get_api_info'))['data']['api_version'] == '1.25.0'
+            finally:
+                library.homeverb_close(opened['data']['handle'])
+    for adapter, entry in [('homeverb.mock',mijia_grant), ('midea.meiju',mijia_grant),
+                           ('xiaomi.mijia',{**mijia_grant,'property':'unlock'}),
+                           ('xiaomi.mijia',{**mijia_grant,'component_id':'lock-2'}),
+                           ('xiaomi.mijia',{**mijia_grant,'value':1})]:
+        with tempfile.TemporaryDirectory(prefix='homeverb-ui-mijia-grants-denied-') as directory:
+            private = Path(directory) / 'not-created'
+            config = {'schema_version':'1.0','data_dir':str(private),'adapter':adapter,
+                      'allow_mock_writes':False,'mijia_fan_grants':[entry]}
+            assert not open_schema.is_valid(config)
+            assert decode(library.homeverb_open(json.dumps(config).encode()))['error']['code'] == 'INVALID_ARGUMENT'
+            assert not private.exists()
+
     # Local account metadata remains usable without creating any protected session.
     with tempfile.TemporaryDirectory(prefix='homeverb-ui-local-accounts-') as directory:
         account_id = '40000000-0000-4000-8000-000000000001'

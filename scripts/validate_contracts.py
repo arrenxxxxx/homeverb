@@ -138,9 +138,19 @@ def main() -> int:
         validators["capability"].validate(fresh)
     approved_action = Draft202012Validator(load("examples/capability.approved-cycle.json")["actions"]["start"]["parameters"])
     approved_action.validate(load("examples/command.approved-cycle.json")["arguments"])
+    mijia_startup = {"schema_version":"1.0","data_dir":"/fictional/private","allow_mock_writes":False,"adapter":"xiaomi.mijia","mijia_fan_grants":[{"device_id":"40000000-0000-4000-8000-000000000001","component_id":"fan-2","property":"level","value":3}]}
+    validators["native-open"].validate(mijia_startup)
     mijia_fan_validator = Draft202012Validator(load("examples/capability.mijia-fan.json")["actions"]["set_level"]["parameters"])
     mijia_fan_validator.validate(load("examples/command.mijia-fan.json")["arguments"])
     negative = []
+    for field, value in [("component_id","main"),("component_id","fan-0"),("property","unlock"),("value",True)]:
+        bad = copy.deepcopy(mijia_startup)
+        bad["mijia_fan_grants"][0][field] = value
+        negative.append((f"invalid Mijia startup {field}/{value}", validators["native-open"], bad))
+    for adapter in ("homeverb.mock","midea.meiju"):
+        bad = copy.deepcopy(mijia_startup)
+        bad["adapter"] = adapter
+        negative.append((f"Mijia grant with wrong adapter {adapter}", validators["native-open"], bad))
     for arguments in ({"level": 0}, {"level": 5}, {"level": 2.5}, {"level": True}, {"level": "3"}, {"level": 3, "piid": 9}, {}):
         negative.append((f"invalid exact Mijia fan arguments {arguments}", mijia_fan_validator, arguments))
     for feature, value in [("eco", "on"), ("eco", 1), ("breezeless", 4),

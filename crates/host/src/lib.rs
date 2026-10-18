@@ -15,6 +15,8 @@ pub use session::{
 };
 mod accounts;
 pub use accounts::{AccountConnection, AccountProvider, AccountSummary, ConnectRequest};
+mod mijia_fan_grants;
+pub use mijia_fan_grants::{MijiaFanGrant, mijia_fan_policy};
 mod power_grants;
 pub use power_grants::{MeijuPowerGrant, meiju_power_policy};
 mod ac_feature_grants;
@@ -158,19 +160,21 @@ fn meiju_parts(
     directory: &Path,
     grants: MeijuControlGrants<'_>,
 ) -> Result<(Core, Arc<homeverb_midea::MeijuAdapter>)> {
-    platform_parts(directory, grants, false).map(|(core, meiju, _)| (core, meiju))
+    platform_parts(directory, grants, false, &[]).map(|(core, meiju, _)| (core, meiju))
 }
 
 fn platform_parts(
     directory: &Path,
     grants: MeijuControlGrants<'_>,
     include_mijia: bool,
+    mijia_grants: &[MijiaFanGrant],
 ) -> Result<(
     Core,
     Arc<homeverb_midea::MeijuAdapter>,
     Option<Arc<homeverb_mijia::MijiaAdapter>>,
 )> {
     let mut policy = meiju_power_policy(grants.power)?;
+    policy.grants.extend(mijia_fan_policy(mijia_grants)?.grants);
     policy.grants.extend(meiju_fan_policy(grants.fan)?.grants);
     policy
         .grants
@@ -218,11 +222,16 @@ fn platform_parts(
     }
     let adapter = Arc::new(adapter);
     let mijia = include_mijia.then(|| {
-        Arc::new(homeverb_mijia::MijiaAdapter::new(
+        let adapter = homeverb_mijia::MijiaAdapter::new(
             vault,
             Arc::new(homeverb_mijia::MijiaHttps),
             clock.clone(),
-        ))
+        );
+        Arc::new(if mijia_grants.is_empty() {
+            adapter
+        } else {
+            adapter.with_fan_controls()
+        })
     });
     let mut adapters: Vec<Arc<dyn homeverb_core::Adapter>> = vec![adapter.clone()];
     if let Some(mijia) = &mijia {
@@ -269,20 +278,41 @@ pub fn open_mock(directory: &Path, scenario: Scenario, allow_writes: bool) -> Re
 
 /// Foreground Mijia-only account host. Startup does not access secrets or the network.
 pub fn open_mijia_session(directory: &Path) -> Result<Session> {
+    open_mijia_session_with_grants(directory, &[])
+}
+
+pub fn open_mijia_session_with_grants(
+    directory: &Path,
+    grants: &[MijiaFanGrant],
+) -> Result<Session> {
+    let policy = mijia_fan_policy(grants)?;
     let store = Arc::new(SqliteStore::open(directory)?);
     let vault = Arc::new(open_accounts(directory)?);
     let clock = Arc::new(SystemClock);
-    let adapter = Arc::new(homeverb_mijia::MijiaAdapter::new(
+    let adapter = homeverb_mijia::MijiaAdapter::new(
         vault,
         Arc::new(homeverb_mijia::MijiaHttps),
         clock.clone(),
-    ));
-    let core = Core::new(store, vec![adapter.clone()], clock, Policy::default());
+    );
+    let adapter = Arc::new(if grants.is_empty() {
+        adapter
+    } else {
+        adapter.with_fan_controls()
+    });
+    let core = Core::new(store, vec![adapter.clone()], clock, policy);
     Ok(Session::with_platform_accounts(core, None, Some(adapter)))
 }
 
 /// Shared local profile with both reviewed cloud providers and independent Meiju grants.
 pub fn open_platform_session(directory: &Path, grants: MeijuControlGrants<'_>) -> Result<Session> {
-    let (core, meiju, mijia) = platform_parts(directory, grants, true)?;
+    open_platform_session_with_grants(directory, grants, &[])
+}
+
+pub fn open_platform_session_with_grants(
+    directory: &Path,
+    grants: MeijuControlGrants<'_>,
+    mijia_grants: &[MijiaFanGrant],
+) -> Result<Session> {
+    let (core, meiju, mijia) = platform_parts(directory, grants, true, mijia_grants)?;
     Ok(Session::with_platform_accounts(core, Some(meiju), mijia))
 }

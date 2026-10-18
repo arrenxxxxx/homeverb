@@ -1,6 +1,6 @@
 # HomeVerb Flutter application
 
-The native application embeds Core using native UI contract 1.24.0. The separate visual preview contains fictional Window Light fixtures and never opens Core. The default build opens an isolated Mock profile. Explicit Meiju builds provide protected account connection, local metadata, retrieval/recovery and scoped local removal; Android startup wiring and Mock process journeys are emulator-tested; actual Keystore and physical acceptance remain pending. Cache and history clearing are connected with separate confirmations. Nearby sharing and full-profile deletion remain unavailable. Their preview states are not live features.
+The native application embeds Core using native UI contract 1.25.0. The separate visual preview contains fictional Window Light fixtures and never opens Core. The default build opens an isolated Mock profile. Explicit Meiju builds provide protected account connection, local metadata, retrieval/recovery and scoped local removal; Android startup wiring and Mock process journeys are emulator-tested; actual Keystore and physical acceptance remain pending. Cache and history clearing are connected with separate confirmations. Nearby sharing and full-profile deletion remain unavailable. Their preview states are not live features.
 
 ## Mijia and combined account builds
 

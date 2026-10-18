@@ -46,8 +46,10 @@ Core grants remain independently required. The adapter selects wire properties
 only from the protected original model/spec, validates exact route and arguments,
 and retains the account lease through the operation. Public descriptor edits
 cannot widen the protected domain or add lock/doorbell writes. Local control-option
-inspection grants no authority. Current native/App sessions still use read-only
-composition; native schemas and outcome meanings are unchanged.
+inspection grants no authority. Native API 1.25 accepts exact `mijia_fan_grants` only at trusted Mijia/combined
+startup. Default sessions remain read-only; ordinary JSON cannot edit grants.
+Option inspection permits protected `fan-SIID` component scopes. Existing outcome
+schemas and semantics are unchanged.
 
 ## Route policy
 

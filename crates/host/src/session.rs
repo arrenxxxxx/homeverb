@@ -575,10 +575,9 @@ impl Session {
                 device_id,
                 connection_id,
             } => {
-                let adapter = self
-                    .accounts
-                    .as_ref()
-                    .ok_or_else(crate::accounts::unsupported)?;
+                if self.accounts.is_none() && self.mijia_accounts.is_none() {
+                    return Err(crate::accounts::unsupported());
+                }
                 let descriptor = self.core.describe(&device_id)?;
                 if descriptor.device.id != device_id {
                     return Err(Error::invalid());
@@ -589,15 +588,29 @@ impl Session {
                     .iter()
                     .find(|connection| connection.id == connection_id)
                     .ok_or_else(Error::invalid)?;
-                if connection.adapter == homeverb_mijia::PROVIDER {
-                    return Err(Error::new(
-                        "CAPABILITY_UNSUPPORTED",
-                        "This provider has no admitted control options.",
-                    ));
-                }
-                let options = adapter
-                    .inspect_control_options(&descriptor.device, connection, &operation)
-                    .await?;
+                let options = if connection.adapter == homeverb_mijia::PROVIDER {
+                    let adapter = self
+                        .mijia_accounts
+                        .as_ref()
+                        .ok_or_else(crate::accounts::unsupported)?;
+                    serde_json::to_value(
+                        adapter
+                            .inspect_control_options(&descriptor.device, connection, &operation)
+                            .await?,
+                    )
+                    .map_err(|_| Error::invalid())?
+                } else {
+                    let adapter = self
+                        .accounts
+                        .as_ref()
+                        .ok_or_else(crate::accounts::unsupported)?;
+                    serde_json::to_value(
+                        adapter
+                            .inspect_control_options(&descriptor.device, connection, &operation)
+                            .await?,
+                    )
+                    .map_err(|_| Error::invalid())?
+                };
                 operation.run(async {
                     if json!(self.core.describe(&device_id)?) != json!(descriptor) {
                         return Err(Error::new("DEVICE_IDENTITY_CONFLICT", "The device metadata changed during inspection."));

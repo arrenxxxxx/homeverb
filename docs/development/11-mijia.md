@@ -4,9 +4,9 @@ Implementation is in progress under [ADR-0070](../adr/0070-mijia-native-cloud.md
 The owner will perform real-account and device acceptance. Do not access saved
 pilot credentials or contact appliances as part of development tests.
 
-Current callable scope includes trusted Rust account/read APIs and native API 1.24
-Mijia-only/combined sessions and Flutter platform/account/read views. Fan
-native grants, App controls and live acceptance remain pending. The Rust adapter
+Current callable scope includes trusted Rust account/read APIs and native API 1.25
+Mijia-only/combined sessions with exact fan startup grants and Flutter
+platform/account/read views. App controls and live acceptance remain pending. The Rust adapter
 can explicitly admit protected fan setters under ADR-0074. Historical phase records below distinguish earlier
 protocol-only work from the [protected Core phase](../adr/0072-mijia-protected-core-reads.md).
 
@@ -313,3 +313,26 @@ including protected option inspection, exact Core grants, forged public domains,
 identity-mutation refusal, accepted/rejected/unknown receipts and cancellation.
 All evidence is synthetic; no real fan was controlled. Native grant contracts,
 Flutter preparation and phone packaging remain subsequent work.
+
+## Native fan grant phase
+
+API 1.25 adds exact startup-only `mijia_fan_grants` and routes protected
+`inspect_control_options` by the saved registered provider. Mijia-only and combined
+sessions independently compose fan adapter admission and Core policy. Malformed
+or foreign-provider grants fail before profile creation; ordinary requests cannot
+change authority. Default constructors remain read-only. Protected option
+inspection uses no network and publishes no descriptors. Strict clients must
+negotiate the new `fan-SIID` response scope before enabling controls.
+
+The native contract and examples retain 34 ordinary methods and unchanged C
+exports. SQLite 5, protected Mijia payload 1 and Meiju payload 3 are unchanged.
+Flutter preparation and installation packages are the next phase. Native physical
+and account acceptance remain owner work.
+
+Native phase verification: 246 host tests/doc tests passed on Rust 1.96, including
+three new exact-grant cases and protected Mijia inspection through the response
+schema. Workspace build and strict all-target Clippy passed. The actual C ABI
+verifier passed 34 methods, 55 fictional examples, trusted bridge regressions and
+new Mijia grant/provider denial checks. Contracts passed 20 schemas, 51 positive
+fixtures and 291 negative fixtures. No real account, appliance or mobile runtime
+was used in this phase.

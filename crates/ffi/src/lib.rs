@@ -6,7 +6,8 @@ use homeverb_host::{
     ConfirmConnectionLinkRequest, ConfirmLanScanRequest, ConnectRequest, ExecuteApprovalRequest,
     HostRequest, MeijuAcFeatureGrant, MeijuControlGrants, MeijuDishwasherCycleGrant,
     MeijuDishwasherGrant, MeijuFanGrant, MeijuModeGrant, MeijuPowerGrant, MeijuTemperatureGrant,
-    PrepareApprovalRequest, PrepareConnectionLinkRequest, PrepareLanScanRequest, Session,
+    MijiaFanGrant, PrepareApprovalRequest, PrepareConnectionLinkRequest, PrepareLanScanRequest,
+    Session,
 };
 use homeverb_mock::Scenario;
 use serde::Deserialize;
@@ -45,6 +46,8 @@ struct Config {
     allow_mock_writes: bool,
     #[serde(default)]
     meiju_power_grants: Vec<MeijuPowerGrant>,
+    #[serde(default)]
+    mijia_fan_grants: Vec<MijiaFanGrant>,
     #[serde(default)]
     meiju_fan_grants: Vec<MeijuFanGrant>,
     #[serde(default)]
@@ -145,6 +148,14 @@ pub unsafe extern "C" fn homeverb_open(config: *const c_char) -> *mut c_char {
                 "Meiju control grants require the Meiju adapter.",
             );
         }
+        if !matches!(config.adapter, AdapterMode::Mijia | AdapterMode::Platforms)
+            && !config.mijia_fan_grants.is_empty()
+        {
+            return error(
+                "INVALID_ARGUMENT",
+                "Mijia fan grants require the Mijia adapter.",
+            );
+        }
         let (adapter, session) = match config.adapter {
             AdapterMode::Mock => (
                 "homeverb.mock",
@@ -157,7 +168,10 @@ pub unsafe extern "C" fn homeverb_open(config: *const c_char) -> *mut c_char {
             ),
             AdapterMode::Mijia => (
                 "xiaomi.mijia",
-                homeverb_host::open_mijia_session(&config.data_dir),
+                homeverb_host::open_mijia_session_with_grants(
+                    &config.data_dir,
+                    &config.mijia_fan_grants,
+                ),
             ),
             AdapterMode::Meiju | AdapterMode::Platforms => (
                 if config.adapter == AdapterMode::Meiju {
@@ -165,13 +179,8 @@ pub unsafe extern "C" fn homeverb_open(config: *const c_char) -> *mut c_char {
                 } else {
                     "homeverb.platforms"
                 },
-                (if config.adapter == AdapterMode::Meiju {
-                    homeverb_host::open_meiju_session_with_grants
-                } else {
-                    homeverb_host::open_platform_session
-                })(
-                    &config.data_dir,
-                    MeijuControlGrants {
+                {
+                    let grants = MeijuControlGrants {
                         ac_features: &config.meiju_ac_feature_grants,
                         power: &config.meiju_power_grants,
                         fan: &config.meiju_fan_grants,
@@ -179,8 +188,17 @@ pub unsafe extern "C" fn homeverb_open(config: *const c_char) -> *mut c_char {
                         temperature: &config.meiju_temperature_grants,
                         dishwasher: &config.meiju_dishwasher_grants,
                         dishwasher_cycle: &config.meiju_dishwasher_cycle_grants,
-                    },
-                ),
+                    };
+                    if config.adapter == AdapterMode::Meiju {
+                        homeverb_host::open_meiju_session_with_grants(&config.data_dir, grants)
+                    } else {
+                        homeverb_host::open_platform_session_with_grants(
+                            &config.data_dir,
+                            grants,
+                            &config.mijia_fan_grants,
+                        )
+                    }
+                },
             ),
         };
         let session = match session {

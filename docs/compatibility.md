@@ -12,9 +12,11 @@ native API 1.24 Mijia-only/combined account composition. Flutter platform login,
 partial named cards and read-only details now use these native flows. Fan controls
 remain pending. A low-level one-property write primitive is synthetic-tested,
 and explicit trusted Rust fan composition now admits exact protected properties
-with independent Core grants. Default/native/App composition remains read-only.
-Native API 1.24, schemas, saved
-payloads and supported-device claims are unchanged by that protocol addition.
+with independent Core grants. Default composition remains read-only. API 1.25 adds exact Mijia fan startup grants
+and permits `fan-SIID` in protected option responses. Strict clients must negotiate
+1.25 before using these fields; existing Meiju contracts and API 1.24 read-only
+startup remain supported. Saved payloads and physical support claims are unchanged.
+Flutter control preparation remains pending.
 Community enumeration is not complete-home evidence. Online hints are never power or
 lock state. Door-lock writes remain high-risk and unavailable. Real authentication,
 challenge completion, regional inventory, MIoT model mapping and physical support

@@ -1,5 +1,5 @@
 {
-  "api_version": "1.24.0",
+  "api_version": "1.25.0",
   "functions": {
     "homeverb_prepare_connection_link": {
       "request": "native-connection-link#/$defs/prepare",

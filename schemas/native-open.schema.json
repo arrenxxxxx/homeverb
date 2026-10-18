@@ -591,6 +591,75 @@
           }
         ]
       }
+    },
+    "mijia_fan_grants": {
+      "type": "array",
+      "maxItems": 1024,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "component_id": {
+            "type": "string",
+            "pattern": "^fan-[1-9][0-9]{0,9}$"
+          },
+          "property": {
+            "enum": [
+              "state",
+              "level",
+              "mode",
+              "horizontal_swing",
+              "horizontal_angle"
+            ]
+          },
+          "value": {
+            "type": [
+              "boolean",
+              "number"
+            ]
+          }
+        },
+        "required": [
+          "device_id",
+          "component_id",
+          "property",
+          "value"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "property": {
+                  "enum": [
+                    "state",
+                    "horizontal_swing"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "value": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "value": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        ]
+      }
     }
   },
   "required": [
@@ -599,7 +668,7 @@
     "allow_mock_writes"
   ],
   "additionalProperties": false,
-  "description": "Trusted native startup. data_dir must be an absolute private OS path. adapter defaults to homeverb.mock; scenario defaults to normal. Meiju defaults to read-only; optional meiju_power_grants, meiju_fan_grants, meiju_mode_grants and meiju_temperature_grants separately admit exact-device power, fan, explicit power-on/mode activation and profile-scoped temperature targets over cloud. Meiju rejects Mock grants or fault scenarios. Opening never authenticates, discovers or controls. Optional meiju_dishwasher_grants admit reviewed elevated starts only through separate trusted confirmation. Optional meiju_dishwasher_cycle_grants independently admit reviewed pause, resume and cancel requests through trusted confirmation. Optional meiju_ac_feature_grants independently admit reviewed profile-scoped scalar settings; missing reported prerequisites refuse before send. API 1.24 admits Mijia-only and combined platform sessions. Mijia is read-only; combined sessions retain independent Meiju grants.",
+  "description": "Trusted native startup. data_dir must be an absolute private OS path. adapter defaults to homeverb.mock; scenario defaults to normal. Meiju defaults to read-only; optional meiju_power_grants, meiju_fan_grants, meiju_mode_grants and meiju_temperature_grants separately admit exact-device power, fan, explicit power-on/mode activation and profile-scoped temperature targets over cloud. Meiju rejects Mock grants or fault scenarios. Opening never authenticates, discovers or controls. Optional meiju_dishwasher_grants admit reviewed elevated starts only through separate trusted confirmation. Optional meiju_dishwasher_cycle_grants independently admit reviewed pause, resume and cancel requests through trusted confirmation. Optional meiju_ac_feature_grants independently admit reviewed profile-scoped scalar settings; missing reported prerequisites refuse before send. API 1.24 admits Mijia-only and combined platform sessions. Mijia is read-only; combined sessions retain independent Meiju grants. API 1.25 adds exact mijia_fan_grants in Mijia-only and combined sessions. Protected model/spec domains are independently rechecked; startup schema acceptance is not device support.",
   "allOf": [
     {
       "if": {
@@ -669,6 +738,28 @@
           },
           "scenario": {
             "const": "normal"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "adapter": {
+            "enum": [
+              "xiaomi.mijia",
+              "homeverb.platforms"
+            ]
+          }
+        },
+        "required": [
+          "adapter"
+        ]
+      },
+      "else": {
+        "properties": {
+          "mijia_fan_grants": {
+            "maxItems": 0
           }
         }
       }
