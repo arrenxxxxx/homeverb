@@ -347,7 +347,13 @@ async fn combined_host_routes_by_saved_provider_and_replays_local_removal() {
         .iter()
         .find(|d| d["alias"] == "Desk Fan")
         .unwrap();
-    assert_eq!(f.call(json!({"method":"inspect_control_options","device_id":fan["id"],"connection_id":fan["connections"][0]["id"]})).await["error"]["code"], "CAPABILITY_UNSUPPORTED");
+    let inspected = f.call(json!({"method":"inspect_control_options","device_id":fan["id"],"connection_id":fan["connections"][0]["id"]})).await;
+    assert!(inspected["error"].is_null());
+    assert_eq!(inspected["data"]["authorization"], "not_checked");
+    assert_eq!(inspected["data"]["source"], "saved_inventory");
+    assert_eq!(inspected["data"]["options"][0]["component_id"], "fan-2");
+    assert_eq!(inspected["data"]["options"][0]["action"], "set");
+    assert_eq!(f.cloud.calls.load(Ordering::SeqCst), calls);
     let removal = json!({"method":"remove_account","account_id":account,"expected_device_ids":connected["data"]["retrieval"]["device_ids"]});
     assert_eq!(f.call(removal.clone()).await["data"]["status"], "removed");
     assert_eq!(f.call(removal).await["data"]["status"], "removed");

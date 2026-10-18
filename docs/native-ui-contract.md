@@ -1,6 +1,6 @@
 # Native UI contract
 
-API 1.24 adds [Mijia and combined platform sessions](#mijia-and-combined-platform-sessions-api-124).
+API 1.25 adds [exact Mijia fan startup grants](#mijia-fan-grants-api-125) and protected control-option inspection.
 Negotiate this version before using the new modes or accepting partial retrieval
 with positive device IDs. Existing Mock and Meiju defaults are preserved.
 
@@ -1534,3 +1534,28 @@ provider into protected reauthorization, and retains positive cards from partial
 retrieval. Missing control-option support leaves read-only device views usable;
 it never grants an action. This does not establish real-account or physical-device
 acceptance.
+
+## Mijia fan grants (API 1.25)
+
+[ADR-0074](adr/0074-mijia-fan-control.md) adds `mijia_fan_grants` to trusted startup
+in `xiaomi.mijia` and `homeverb.platforms` modes only. Each entry contains local
+`device_id`, exact `component_id` (`fan-SIID`), `property` and scalar `value`.
+Admitted property names are `state`, `level`, `mode`, `horizontal_swing` and
+`horizontal_angle`. State/swing require booleans; other properties require numbers.
+There are at most 1024 unique exact grants. Runtime validation additionally requires
+canonical UUID v4 identity and nonzero u32 SIID. No grant admits other services.
+
+`inspect_control_options` now routes by the saved connection's registered adapter
+and returns protected Mijia fan options in addition to existing Meiju options.
+Its component field permits `fan-SIID`, so strict clients must negotiate 1.25
+before consuming these options or submitting grants. Inspection is local, read-only
+and not current provider authorization. It publishes no action and changes no grant.
+
+Startup grants independently enable the adapter's fan gate and exact Core policy;
+account refresh publishes spec-admitted actions. Refresh may be partial: only
+positive `retrieval.device_ids` establish which descriptors were published. The
+adapter still independently checks protected identity, model/spec and argument
+bounds at execution. Saved descriptors and UI booleans cannot supply authority.
+A default session remains read-only. Meiju grants, 34 JSON methods, C exports,
+SQLite 5, protected Mijia payload 1 and Meiju payload 3 are unchanged. Lock and
+doorbell writes remain unavailable. Physical fan control remains owner acceptance.

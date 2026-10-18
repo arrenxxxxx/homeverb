@@ -39,8 +39,13 @@ implicit login, redirect, alternate route or retry is permitted.
 
 ## Consequences
 
-The Rust adapter path is additive. Native API/Flutter grant integration is a
-subsequent phase and must update versioned contracts before enabling controls.
+The Rust adapter path is additive. Native API 1.25 adds `mijia_fan_grants` only to
+trusted Mijia/combined startup, each with a local device, `fan-SIID` component,
+property and exact scalar value. Its 1024-entry bound and duplicate checks apply
+before opening a profile. Ordinary requests cannot edit grants. Existing
+`inspect_control_options` routes by saved adapter and returns protected fan options
+without networking or mutation. API 1.24 read-only callers remain supported.
+Flutter must negotiate API 1.25 before submitting these startup grants.
 SQLite schema 5 and protected Mijia payload 1 retain the saved original MIoT spec;
 no new secret storage format is needed. Physical-device support remains
 experimental until the owner completes model-specific acceptance.
