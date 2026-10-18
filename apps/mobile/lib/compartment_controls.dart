@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'blocks.dart';
 import 'controller.dart';
 import 'controls.dart';
-import 'device_detail_controls.dart';
+import 'appliance_panels.dart';
 import 'native_client.dart';
 import 'receipts.dart';
 import 'skin.dart';
@@ -44,20 +44,23 @@ class CompartmentControls extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      DeviceDetailHeader(controller: controller),
-      for (final part in controller.components) compartment(context, part),
       const Padding(
-        padding: EdgeInsets.fromLTRB(2, 0, 2, 12),
-        child: Copy(
-          'One appliance, separate components. Each uses its own supported limits.',
-          color: muted,
-        ),
+        padding: EdgeInsets.only(bottom: 16),
+        child: Copy('Temperature zones', size: 22, bold: true),
       ),
+      for (final part in controller.components) compartment(context, part),
+      RefrigeratorModes(controller: controller),
       ActionButton(
         'Refresh State',
         style: 'secondary',
         onPressed: controller.busy ? null : () => onAction('Refresh State'),
       ),
+      for (final label in ['Device information', 'Recent Operations'])
+        ActionButton(
+          label,
+          style: 'secondary',
+          onPressed: controller.busy ? null : () => onAction(label),
+        ),
     ],
   );
 
@@ -83,8 +86,10 @@ class CompartmentControls extends StatelessWidget {
         schema?['multipleOf'] as num? ??
         (schema?['type'] == 'integer' ? 1 : null);
     final rows = <List<dynamic>>[];
+    final extraRows = <List<dynamic>>[];
     final trailing = <int, Widget>{};
     for (final capability in controller.capabilitiesFor(id)) {
+      if (capability['id'] == 'vendor.midea.refrigerator') continue;
       for (final entry in (capability['properties'] as Json).entries) {
         if (entry.value['readable'] != true) continue;
         final propertyId = '${capability['id']}.${entry.key}',
@@ -128,6 +133,9 @@ class CompartmentControls extends StatelessWidget {
           propertyValue(observed?['value'], entry.value as Json),
           null,
         ]);
+        if (capability['id'] != 'climate' && capability['id'] != 'power') {
+          extraRows.add(rows.last);
+        }
       }
     }
     final extraActions = controller
@@ -163,7 +171,61 @@ class CompartmentControls extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Rows(rows, title: label, trailing: trailing, onAction: onAction),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Surface(
+            radius: 24,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      id == 'freezer' ? Icons.ac_unit : Icons.kitchen_outlined,
+                      color: accent,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(child: Copy(label, bold: true, size: 18)),
+                    if (controller.componentCapability(id, 'power') != null)
+                      Copy(
+                        propertyValue(observation('power.state')?['value'], {}),
+                        size: 13,
+                        color: muted,
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                const Copy('Target', size: 13, color: muted),
+                Copy(
+                  propertyValue(target, targetProperty ?? {}),
+                  size: 42,
+                  bold: true,
+                ),
+                const SizedBox(height: 8),
+                Copy(
+                  UiMessage('Current: {value}', {
+                    'value': UiMessage(
+                      propertyValue(
+                        observation('climate.current_temperature')?['value'],
+                        climate?['properties']?['current_temperature']
+                                as Json? ??
+                            {},
+                      ),
+                    ),
+                  }),
+                  color: muted,
+                ),
+                for (final stepper in trailing.values)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: stepper,
+                  ),
+              ],
+            ),
+          ),
+        ),
+        if (extraRows.isNotEmpty) Rows(extraRows, onAction: onAction),
         if (editable)
           ActionButton(
             localize(

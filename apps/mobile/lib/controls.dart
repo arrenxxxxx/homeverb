@@ -173,9 +173,11 @@ class CapabilityActionForm extends StatefulWidget {
     required this.onCancel,
     required this.error,
     this.onPrepare,
+    this.initialSelection = const {},
     super.key,
   });
   final Json capability;
+  final Json initialSelection;
   final String action;
   final Json? Function(String) observation;
   final Future<bool> Function(Json) onSubmit;
@@ -195,6 +197,19 @@ class _CapabilityActionFormState extends State<CapabilityActionForm> {
   Json get descriptor => widget.capability['actions'][widget.action] as Json;
   Json get parameters => descriptor['parameters'] as Json;
   Json get properties => parameters['properties'] as Json? ?? {};
+  @override
+  void initState() {
+    super.initState();
+    for (final entry in widget.initialSelection.entries) {
+      final schema = properties[entry.key];
+      if (schema is Map<String, dynamic> &&
+          schema['enum'] is List &&
+          validateValue(entry.value, schema) == null) {
+        selected[entry.key] = entry.value;
+      }
+    }
+  }
+
   @override
   void dispose() {
     for (final field in fields.values) {

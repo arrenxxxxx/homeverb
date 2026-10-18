@@ -47,6 +47,7 @@ def main() -> int:
         ("batch-command", "batch-command"), ("batch-result", "batch-result"),
         ("device", "device.refrigerator"),
         ("capability", "capability.fridge"), ("capability", "capability.freezer"),
+        ("capability", "capability.meiju-refrigerator"),
         ("capability", "capability.meiju-fan"), ("command", "command.meiju-fan"),
         ("capability", "capability.meiju-mode"), ("command", "command.meiju-mode"),
         ("capability", "capability.meiju-temperature"), ("command", "command.meiju-temperature"),

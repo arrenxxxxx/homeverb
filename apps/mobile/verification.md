@@ -3204,3 +3204,34 @@ The retained account, all six device entries and blank restoration form were
 visually checked before requesting owner input. No account data was cleared,
 and no credentials were entered or captured by tooling. The owner was asked for
 one instrumented confirmation attempt; its result is pending.
+
+## Refrigerator and dishwasher panels — October 18, 2026
+
+The owner reported that sign-in was now working and redirected work to the sparse
+appliance pages. Authentication repair is no longer the active acceptance task;
+that report alone does not establish which recovery path succeeded.
+
+The App now renders compartment target/current cards, optional refrigerator mode
+and variable-zone readings, and a dedicated dishwasher status/time, controls,
+program and supply panel. Program buttons preselect only the requested valid enum;
+additional options, explicit connection and trusted approval remain mandatory.
+Reported refrigerator modes are read-only. Unreported features stay absent, and
+raw dishwasher door/supply codes are not invented percentages or physical claims.
+The protected model/grant rules and native API 1.25 remain unchanged.
+
+Validation passed: Flutter analysis; 14 focused component/control/dishwasher tests;
+one additional refrigerator absence/no-write widget test; 47 Midea adapter and
+14 state tests, including optional-field refusal and old-descriptor migration;
+seven presentation tests; documentation/contracts/repository checks; formatting;
+and Midea/Host Clippy with only the previously recorded pre-existing lint allowed.
+The initial Flutter regression exposed missing denied-grant explanation in the
+new panel; that was corrected and the complete focused group rerun successfully.
+Fictional dishwasher captures were reviewed for layout. These are not live-device
+or complete official-App feature-parity tests.
+
+Both Android ABIs rebuilt with authentication trace disabled. The final APK
+`output/flutter-verification/android/homeverb-0.2.0-appliance-panels.apk` passed
+signature, current-AAR matching, 20 exports and 16 KiB alignment. SHA-256:
+`9b80390e78c987189f1f07fb96493af8d8578eb0bf0fa3c458d5e56d74d3bd34`.
+Installation and real-account observations are recorded separately below. No
+appliance command, remote push, publication or diagnostic upload was performed.

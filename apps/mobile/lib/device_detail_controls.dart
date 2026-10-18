@@ -6,6 +6,7 @@ import 'device_presentation.dart';
 import 'localization.dart';
 import 'native_client.dart';
 import 'skin.dart';
+import 'appliance_panels.dart';
 
 /// Shared detail material; artwork never selects command semantics.
 class DeviceDetailHeader extends StatelessWidget {
@@ -61,6 +62,9 @@ class DeviceDetailControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = controller;
+    if (c.capability('vendor.midea.dishwasher') != null) {
+      return DishwasherPanel(controller: c, onAction: onAction);
+    }
     final controls = <Widget>[];
     final unavailableReasons = <String>{};
     for (var i = 0; i < c.capabilities.length; i++) {

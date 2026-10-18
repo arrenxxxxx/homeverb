@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "id": "vendor.midea.refrigerator",
+  "component_id": "fridge",
+  "revision": 1,
+  "properties": {
+    "storage_mode": {
+      "type": "boolean",
+      "readable": true,
+      "writable": false
+    },
+    "freezing_mode": {
+      "type": "boolean",
+      "readable": true,
+      "writable": false
+    },
+    "intelligent_mode": {
+      "type": "boolean",
+      "readable": true,
+      "writable": false
+    },
+    "energy_saving_mode": {
+      "type": "boolean",
+      "readable": true,
+      "writable": false
+    },
+    "holiday_mode": {
+      "type": "boolean",
+      "readable": true,
+      "writable": false
+    },
+    "moisturize_mode": {
+      "type": "boolean",
+      "readable": true,
+      "writable": false
+    },
+    "preservation_mode": {
+      "type": "boolean",
+      "readable": true,
+      "writable": false
+    },
+    "acme_freezing_mode": {
+      "type": "boolean",
+      "readable": true,
+      "writable": false
+    },
+    "icea_mode_power": {
+      "type": "boolean",
+      "readable": true,
+      "writable": false
+    },
+    "freezing_ice_machine_power": {
+      "type": "boolean",
+      "readable": true,
+      "writable": false
+    },
+    "left_flexzone_temperature": {
+      "type": "number",
+      "unit": "celsius",
+      "readable": true,
+      "writable": false
+    },
+    "right_flexzone_temperature": {
+      "type": "number",
+      "unit": "celsius",
+      "readable": true,
+      "writable": false
+    },
+    "left_variable_real_temperature": {
+      "type": "number",
+      "unit": "celsius",
+      "readable": true,
+      "writable": false
+    },
+    "right_variable_real_temperature": {
+      "type": "number",
+      "unit": "celsius",
+      "readable": true,
+      "writable": false
+    },
+    "variable_mode": {
+      "type": "string",
+      "readable": true,
+      "writable": false
+    }
+  },
+  "actions": {},
+  "events": {}
+}

@@ -128,6 +128,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   String? selectedMode;
   Json? actionCapability;
   String? actionName;
+  Json actionInitialSelection = {};
   String? formError;
   LocalCleanup? cleanupScope;
   bool editingAccountName = false;
@@ -523,6 +524,9 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       if (index == null || index < 0 || index >= c.capabilities.length) return;
       actionCapability = c.capabilities[index];
       actionName = Uri.decodeComponent(parts[2]);
+      actionInitialSelection = parts.length == 4
+          ? jsonDecode(Uri.decodeComponent(parts[3])) as Json
+          : {};
       await go('C10');
       return;
     }
@@ -540,6 +544,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         if (edit && setter != null && !hasDirectTarget(setter)) {
           actionCapability = c.capability('climate');
           actionName = 'set';
+          actionInitialSelection = {};
           await go('C10');
         } else {
           await go(edit ? 'C14' : 'C01');
@@ -1909,6 +1914,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         key: ValueKey('$epoch:${actionCapability!['id']}:$actionName'),
         capability: actionCapability!,
         action: actionName!,
+        initialSelection: actionInitialSelection,
         onPrepare: c.supportsTrustedApproval
             ? (arguments, route) => c.prepareApproval(
                 actionCapability!['id'],

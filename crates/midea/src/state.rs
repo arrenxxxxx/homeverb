@@ -330,6 +330,32 @@ fn decode(
             )?;
         }
         ApplianceFamily::Refrigerator => {
+            let readings = output.entry("fridge").or_default();
+            for wire in crate::refrigerator::FLAGS {
+                field(
+                    readings,
+                    data,
+                    wire,
+                    &format!("vendor.midea.refrigerator.{wire}"),
+                    on_off,
+                )?;
+            }
+            for wire in crate::refrigerator::TEMPERATURES {
+                field(
+                    readings,
+                    data,
+                    wire,
+                    &format!("vendor.midea.refrigerator.{wire}"),
+                    numeric,
+                )?;
+            }
+            field(
+                readings,
+                data,
+                "variable_mode",
+                "vendor.midea.refrigerator.variable_mode",
+                vendor_token,
+            )?;
             for (component, power, target, current) in [
                 (
                     "fridge",

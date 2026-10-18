@@ -307,6 +307,25 @@ void main() {
             await tap(find.text('Cancel'));
             core.prepared = null;
           }
+          await tap(find.byKey(const ValueKey('wash-program:eco_wash')));
+          expect(
+            tester
+                .widget<ChoiceChip>(
+                  find.byKey(const ValueKey('parameter:program:eco_wash')),
+                )
+                .selected,
+            true,
+          );
+          expect(
+            tester
+                .widget<ChoiceChip>(
+                  find.byKey(const ValueKey('parameter:additional:9')),
+                )
+                .selected,
+            false,
+          );
+          expect(core.prepared, isNull);
+          await tap(find.text('Cancel'));
           await tap(start);
           await tap(find.byKey(const ValueKey('parameter:program:eco_wash')));
           await tap(find.text('Cloud'));

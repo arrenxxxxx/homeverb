@@ -3845,4 +3845,118 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Confirm Same Account and Restore'
 	String get mobileIdentityRecoveryConfirm => 'Confirm Same Account and Restore';
+
+	/// en-US: 'Temperature zones'
+	String get mobileTemperatureZones => 'Temperature zones';
+
+	/// en-US: 'Modes and freshness'
+	String get mobileModesFreshness => 'Modes and freshness';
+
+	/// en-US: 'No mode readings have been returned yet.'
+	String get mobileNoModeReadings => 'No mode readings have been returned yet.';
+
+	/// en-US: 'Reported modes are read-only on this connection.'
+	String get mobileReadOnlyModes => 'Reported modes are read-only on this connection.';
+
+	/// en-US: 'Wash controls'
+	String get mobileWashControls => 'Wash controls';
+
+	/// en-US: 'Wash programs'
+	String get mobileWashPrograms => 'Wash programs';
+
+	/// en-US: 'Controls are not connected for this model yet. Available readings are shown below.'
+	String get mobileModelControlsPending => 'Controls are not connected for this model yet. Available readings are shown below.';
+
+	/// en-US: 'Supplies and reminders'
+	String get mobileSuppliesReminders => 'Supplies and reminders';
+
+	/// en-US: 'Unreported readings stay unknown. Supply codes are not remaining percentages.'
+	String get mobileSupplyReadingsNotice => 'Unreported readings stay unknown. Supply codes are not remaining percentages.';
+
+	/// en-US: 'Current: {value}'
+	String mobileCurrentValue({required Object value}) => 'Current: ${value}';
+
+	/// en-US: 'Rapid cooling'
+	String get vendorMideaRefrigeratorStorageMode => 'Rapid cooling';
+
+	/// en-US: 'Rapid freezing'
+	String get vendorMideaRefrigeratorFreezingMode => 'Rapid freezing';
+
+	/// en-US: 'Intelligent mode'
+	String get vendorMideaRefrigeratorIntelligentMode => 'Intelligent mode';
+
+	/// en-US: 'Energy saving'
+	String get vendorMideaRefrigeratorEnergySavingMode => 'Energy saving';
+
+	/// en-US: 'Holiday mode'
+	String get vendorMideaRefrigeratorHolidayMode => 'Holiday mode';
+
+	/// en-US: 'Moisture preservation'
+	String get vendorMideaRefrigeratorMoisturizeMode => 'Moisture preservation';
+
+	/// en-US: 'Light-wave freshness'
+	String get vendorMideaRefrigeratorPreservationMode => 'Light-wave freshness';
+
+	/// en-US: 'Extreme freezing'
+	String get vendorMideaRefrigeratorAcmeFreezingMode => 'Extreme freezing';
+
+	/// en-US: 'Ice function'
+	String get vendorMideaRefrigeratorIceaModePower => 'Ice function';
+
+	/// en-US: 'Freezer ice maker'
+	String get vendorMideaRefrigeratorFreezingIceMachinePower => 'Freezer ice maker';
+
+	/// en-US: 'Left variable-zone target'
+	String get vendorMideaRefrigeratorLeftFlexzoneTemperature => 'Left variable-zone target';
+
+	/// en-US: 'Right variable-zone target'
+	String get vendorMideaRefrigeratorRightFlexzoneTemperature => 'Right variable-zone target';
+
+	/// en-US: 'Left variable-zone temperature'
+	String get vendorMideaRefrigeratorLeftVariableRealTemperature => 'Left variable-zone temperature';
+
+	/// en-US: 'Right variable-zone temperature'
+	String get vendorMideaRefrigeratorRightVariableRealTemperature => 'Right variable-zone temperature';
+
+	/// en-US: 'Variable-zone mode'
+	String get vendorMideaRefrigeratorVariableMode => 'Variable-zone mode';
+
+	/// en-US: 'No preset'
+	String get vendorMideaRefrigeratorVariableModeNoneMode => 'No preset';
+
+	/// en-US: 'Soft freezing'
+	String get vendorMideaRefrigeratorVariableModeSoftFreezingMode => 'Soft freezing';
+
+	/// en-US: 'Zero-degree freshness'
+	String get vendorMideaRefrigeratorVariableModeZeroFreshMode => 'Zero-degree freshness';
+
+	/// en-US: 'Cold drinks'
+	String get vendorMideaRefrigeratorVariableModeColdDrinkMode => 'Cold drinks';
+
+	/// en-US: 'Fresh food'
+	String get vendorMideaRefrigeratorVariableModeFreshProductMode => 'Fresh food';
+
+	/// en-US: 'Partial freezing'
+	String get vendorMideaRefrigeratorVariableModePartialFreezingMode => 'Partial freezing';
+
+	/// en-US: 'Dry zone'
+	String get vendorMideaRefrigeratorVariableModeDryZoneMode => 'Dry zone';
+
+	/// en-US: 'Variable temperature'
+	String get vendorMideaRefrigeratorVariableModeFreezeWarmMode => 'Variable temperature';
+
+	/// en-US: 'Freezing'
+	String get vendorMideaRefrigeratorVariableModeFreezeMode => 'Freezing';
+
+	/// en-US: 'Powered off'
+	String get vendorMideaDishwasherWorkStatusPowerOff => 'Powered off';
+
+	/// en-US: 'Powered on'
+	String get vendorMideaDishwasherWorkStatusPowerOn => 'Powered on';
+
+	/// en-US: 'Washing'
+	String get vendorMideaDishwasherWorkStatusWork => 'Washing';
+
+	/// en-US: 'Cancelled'
+	String get vendorMideaDishwasherWorkStatusCancel => 'Cancelled';
 }

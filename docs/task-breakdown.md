@@ -299,6 +299,15 @@ provider or Keystore success.
 
 ### Refrigerator and dishwasher screenshot parity research
 
+The subsequent appliance panel revision implements compartment temperature cards,
+optional read-only refrigerator mode/variable-zone observations, and a dedicated
+dishwasher status, program-button and supply-reminder panel. Program buttons
+prefill only the selected enum and retain additional-argument/route/approval
+requirements. Existing descriptors require an explicit inventory refresh for the
+new read capability. This is not complete screenshot parity: refrigerator writes,
+current-model dishwasher admission and provider reports remain separate evidence
+gates. See the [panel evidence](development/12-appliance-command-evidence.md#appliance-panels-and-optional-refrigerator-readings).
+
 The October 18 owner screenshots expand the appliance-detail scope beyond target
 and cycle buttons. Track every control, provider setting and report in the
 [screenshot checklist](development/12-appliance-command-evidence.md#owner-screenshot-parity-checklist).

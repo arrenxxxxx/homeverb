@@ -12,6 +12,7 @@ mod dishwasher;
 pub mod lan;
 mod material;
 mod product;
+mod refrigerator;
 mod temperature;
 pub use auth::{LoginCredentials, MeijuSession, SessionReads, login};
 pub use cloud::{CloudEndpoint, CloudTransport, MeijuHttps, SignedRequest};

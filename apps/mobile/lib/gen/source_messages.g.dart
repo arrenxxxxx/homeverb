@@ -405,8 +405,8 @@ String? translateSource(
   "Revoke Session Controls" => t.mobileRevokeSessionControls,
   "Reopen Read-only" => t.mobileReopenReadOnly,
   "Retrieve Control Capabilities" => t.mobileRetrieveControlCapabilities,
-  "Powered on" => t.mobilePoweredOn,
-  "Powered off" => t.mobilePoweredOff,
+  "Powered on" => t.vendorMideaDishwasherWorkStatusPowerOn,
+  "Powered off" => t.vendorMideaDishwasherWorkStatusPowerOff,
   "Turning on\u2026" => t.mobileTurningOn,
   "Turning off\u2026" => t.mobileTurningOff,
   "Power" => t.mobilePower,
@@ -1621,7 +1621,7 @@ String? translateSource(
   "Horizontal swing" => t.vendorMideaAcHorizontalSwing,
   "Avoid direct airflow" => t.vendorMideaAcAvoidDirectAirflow,
   "Sleep" => t.vendorMideaAcSleep,
-  "Energy saving" => t.vendorMideaAcEco,
+  "Energy saving" => t.vendorMideaRefrigeratorEnergySavingMode,
   "Boost" => t.vendorMideaAcBoost,
   "Display" => t.mobileClimateDisplay,
   "Auxiliary heat" => t.vendorMideaAcAuxiliaryHeat,
@@ -1708,6 +1708,48 @@ String? translateSource(
   "Confirm this is the same Meiju account. HomeVerb will update its identity binding and keep your devices, names and rooms. Existing control permissions will be cleared. Shared devices alone do not prove account identity." =>
     t.mobileIdentityRecoveryConsent,
   "Confirm Same Account and Restore" => t.mobileIdentityRecoveryConfirm,
+  "Temperature zones" => t.mobileTemperatureZones,
+  "Modes and freshness" => t.mobileModesFreshness,
+  "No mode readings have been returned yet." => t.mobileNoModeReadings,
+  "Reported modes are read-only on this connection." => t.mobileReadOnlyModes,
+  "Wash controls" => t.mobileWashControls,
+  "Wash programs" => t.mobileWashPrograms,
+  "Controls are not connected for this model yet. Available readings are shown below." =>
+    t.mobileModelControlsPending,
+  "Supplies and reminders" => t.mobileSuppliesReminders,
+  "Unreported readings stay unknown. Supply codes are not remaining percentages." =>
+    t.mobileSupplyReadingsNotice,
+  "Current: {value}" => t.mobileCurrentValue(value: args["value"] ?? "{value}"),
+  "Rapid cooling" => t.vendorMideaRefrigeratorStorageMode,
+  "Rapid freezing" => t.vendorMideaRefrigeratorFreezingMode,
+  "Intelligent mode" => t.vendorMideaRefrigeratorIntelligentMode,
+  "Holiday mode" => t.vendorMideaRefrigeratorHolidayMode,
+  "Moisture preservation" => t.vendorMideaRefrigeratorMoisturizeMode,
+  "Light-wave freshness" => t.vendorMideaRefrigeratorPreservationMode,
+  "Extreme freezing" => t.vendorMideaRefrigeratorAcmeFreezingMode,
+  "Ice function" => t.vendorMideaRefrigeratorIceaModePower,
+  "Freezer ice maker" => t.vendorMideaRefrigeratorFreezingIceMachinePower,
+  "Left variable-zone target" =>
+    t.vendorMideaRefrigeratorLeftFlexzoneTemperature,
+  "Right variable-zone target" =>
+    t.vendorMideaRefrigeratorRightFlexzoneTemperature,
+  "Left variable-zone temperature" =>
+    t.vendorMideaRefrigeratorLeftVariableRealTemperature,
+  "Right variable-zone temperature" =>
+    t.vendorMideaRefrigeratorRightVariableRealTemperature,
+  "Variable-zone mode" => t.vendorMideaRefrigeratorVariableMode,
+  "No preset" => t.vendorMideaRefrigeratorVariableModeNoneMode,
+  "Soft freezing" => t.vendorMideaRefrigeratorVariableModeSoftFreezingMode,
+  "Zero-degree freshness" => t.vendorMideaRefrigeratorVariableModeZeroFreshMode,
+  "Cold drinks" => t.vendorMideaRefrigeratorVariableModeColdDrinkMode,
+  "Fresh food" => t.vendorMideaRefrigeratorVariableModeFreshProductMode,
+  "Partial freezing" =>
+    t.vendorMideaRefrigeratorVariableModePartialFreezingMode,
+  "Dry zone" => t.vendorMideaRefrigeratorVariableModeDryZoneMode,
+  "Variable temperature" => t.vendorMideaRefrigeratorVariableModeFreezeWarmMode,
+  "Freezing" => t.vendorMideaRefrigeratorVariableModeFreezeMode,
+  "Washing" => t.vendorMideaDishwasherWorkStatusWork,
+  "Cancelled" => t.vendorMideaDishwasherWorkStatusCancel,
   _ => null,
 };
 
@@ -3349,5 +3391,53 @@ String? sourceForKey(String key) => switch (key) {
   "mobile.identityRecoveryConsent" =>
     "Confirm this is the same Meiju account. HomeVerb will update its identity binding and keep your devices, names and rooms. Existing control permissions will be cleared. Shared devices alone do not prove account identity.",
   "mobile.identityRecoveryConfirm" => "Confirm Same Account and Restore",
+  "mobile.temperatureZones" => "Temperature zones",
+  "mobile.modesFreshness" => "Modes and freshness",
+  "mobile.noModeReadings" => "No mode readings have been returned yet.",
+  "mobile.readOnlyModes" => "Reported modes are read-only on this connection.",
+  "mobile.washControls" => "Wash controls",
+  "mobile.washPrograms" => "Wash programs",
+  "mobile.modelControlsPending" =>
+    "Controls are not connected for this model yet. Available readings are shown below.",
+  "mobile.suppliesReminders" => "Supplies and reminders",
+  "mobile.supplyReadingsNotice" =>
+    "Unreported readings stay unknown. Supply codes are not remaining percentages.",
+  "mobile.currentValue" => "Current: {value}",
+  "vendor.midea.refrigerator.storage_mode" => "Rapid cooling",
+  "vendor.midea.refrigerator.freezing_mode" => "Rapid freezing",
+  "vendor.midea.refrigerator.intelligent_mode" => "Intelligent mode",
+  "vendor.midea.refrigerator.energy_saving_mode" => "Energy saving",
+  "vendor.midea.refrigerator.holiday_mode" => "Holiday mode",
+  "vendor.midea.refrigerator.moisturize_mode" => "Moisture preservation",
+  "vendor.midea.refrigerator.preservation_mode" => "Light-wave freshness",
+  "vendor.midea.refrigerator.acme_freezing_mode" => "Extreme freezing",
+  "vendor.midea.refrigerator.icea_mode_power" => "Ice function",
+  "vendor.midea.refrigerator.freezing_ice_machine_power" => "Freezer ice maker",
+  "vendor.midea.refrigerator.left_flexzone_temperature" =>
+    "Left variable-zone target",
+  "vendor.midea.refrigerator.right_flexzone_temperature" =>
+    "Right variable-zone target",
+  "vendor.midea.refrigerator.left_variable_real_temperature" =>
+    "Left variable-zone temperature",
+  "vendor.midea.refrigerator.right_variable_real_temperature" =>
+    "Right variable-zone temperature",
+  "vendor.midea.refrigerator.variable_mode" => "Variable-zone mode",
+  "vendor.midea.refrigerator.variable_mode.none_mode" => "No preset",
+  "vendor.midea.refrigerator.variable_mode.soft_freezing_mode" =>
+    "Soft freezing",
+  "vendor.midea.refrigerator.variable_mode.zero_fresh_mode" =>
+    "Zero-degree freshness",
+  "vendor.midea.refrigerator.variable_mode.cold_drink_mode" => "Cold drinks",
+  "vendor.midea.refrigerator.variable_mode.fresh_product_mode" => "Fresh food",
+  "vendor.midea.refrigerator.variable_mode.partial_freezing_mode" =>
+    "Partial freezing",
+  "vendor.midea.refrigerator.variable_mode.dry_zone_mode" => "Dry zone",
+  "vendor.midea.refrigerator.variable_mode.freeze_warm_mode" =>
+    "Variable temperature",
+  "vendor.midea.refrigerator.variable_mode.freeze_mode" => "Freezing",
+  "vendor.midea.dishwasher.work_status.power_off" => "Powered off",
+  "vendor.midea.dishwasher.work_status.power_on" => "Powered on",
+  "vendor.midea.dishwasher.work_status.work" => "Washing",
+  "vendor.midea.dishwasher.work_status.cancel" => "Cancelled",
   _ => null,
 };

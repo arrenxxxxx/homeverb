@@ -314,6 +314,46 @@ impl Fixture {
 }
 
 #[tokio::test]
+async fn refrigerator_optional_reads_require_refreshed_descriptor_without_gaining_controls() {
+    let f = Fixture::new(vec![appliances()[4].clone()]).await;
+    let device = f.discover().await.remove(0);
+    *f.wire.state.lock().unwrap() = Some(json!({"storage_temperature":4,"storage_mode":"on"}));
+    let current = f.read(&device, "fridge", false).await.unwrap();
+    assert_eq!(
+        current.observations["vendor.midea.refrigerator.storage_mode"].value,
+        json!(true)
+    );
+    let mut legacy = f.core.describe(&device.id).unwrap();
+    legacy
+        .capabilities
+        .retain(|c| c.id != "vendor.midea.refrigerator");
+    for part in &mut legacy.device.components {
+        part.capabilities
+            .retain(|id| id != "vendor.midea.refrigerator");
+    }
+    f.store.save_device(&legacy).unwrap();
+    let old = f.read(&legacy.device, "fridge", false).await.unwrap();
+    assert_eq!(
+        old.observations["climate.target_temperature"].value,
+        json!(4.0)
+    );
+    assert!(
+        !old.observations
+            .contains_key("vendor.midea.refrigerator.storage_mode")
+    );
+    f.discover().await;
+    let refreshed = f.core.describe(&device.id).unwrap();
+    let cap = refreshed
+        .capabilities
+        .iter()
+        .find(|c| c.id == "vendor.midea.refrigerator")
+        .unwrap();
+    assert!(cap.actions.is_empty());
+    assert!(cap.properties.values().all(|p| p["writable"] == false));
+    assert!(f.wire.controls.lock().unwrap().is_empty());
+}
+
+#[tokio::test]
 async fn six_models_publish_read_only_scopes_and_pass_core_validation() {
     let fixture = Fixture::new(appliances()).await;
     assert_eq!(fixture.calls(), 0);

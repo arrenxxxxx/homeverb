@@ -1,5 +1,18 @@
 # Platform and device compatibility matrix
 
+## October 18 appliance panel revision
+
+The [appliance panel revision](development/12-appliance-command-evidence.md#appliance-panels-and-optional-refrigerator-readings)
+adds optional mode/ice and variable-zone readings for the already-reviewed Meiju
+refrigerator model. A new read-only capability stays on its existing fridge
+component; explicit inventory refresh upgrades saved descriptors. Missing fields
+remain absent and no new write, range, compartment or physical support is inferred.
+Flutter adds compartment cards, reported-mode tiles, and a dedicated dishwasher
+status/program/supply panel using existing protected actions and grants. Program
+selection still requires the existing trusted confirmation flow. API 1.25,
+SQLite 5 and protected payload 3 remain unchanged. Current-model write acceptance,
+refrigerator controls and provider-backed history/consumables remain incomplete.
+
 ## October 18 Mijia integration
 
 The owner selected mainland China, all returned devices as named cards including

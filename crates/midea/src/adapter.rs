@@ -154,6 +154,17 @@ fn descriptors(
                 ));
                 capabilities.push(capability(component, "climate", &temperatures));
             }
+            let fields: Vec<_> = crate::refrigerator::FLAGS
+                .iter()
+                .map(|name| (*name, "boolean", None))
+                .chain(
+                    crate::refrigerator::TEMPERATURES
+                        .iter()
+                        .map(|name| (*name, "number", Some("celsius"))),
+                )
+                .chain([("variable_mode", "string", None)])
+                .collect();
+            capabilities.push(capability("fridge", "vendor.midea.refrigerator", &fields));
         }
         Some(ApplianceFamily::Dishwasher) => {
             let mut cycle = capability(

@@ -741,6 +741,18 @@ impl MeijuAccount {
         )
         .await?;
         let mut snapshot = state.snapshot(&device.id, component)?;
+        if !device.components.iter().any(|part| {
+            part.id == component
+                && part
+                    .capabilities
+                    .iter()
+                    .any(|id| id == "vendor.midea.refrigerator")
+        }) {
+            // Saved descriptors are upgraded only by explicit inventory refresh.
+            snapshot
+                .observations
+                .retain(|name, _| !name.starts_with("vendor.midea.refrigerator."));
+        }
         if include_features
             && let Some(profile) = appliance
                 .product_profile

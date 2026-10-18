@@ -205,6 +205,48 @@ async fn refrigerator_keeps_compartments_on_one_local_device_with_separate_readi
 }
 
 #[tokio::test]
+async fn refrigerator_optional_modes_preserve_absence_and_reject_malformed_values() {
+    let transport = Transport::new(
+        "CA",
+        json!({
+            "storage_mode":"on", "freezing_mode":"off", "preservation_mode":"on",
+            "left_flexzone_temperature":"-2", "variable_mode":"fresh_product_mode",
+            "right_flexzone_temperature": null, "private_unknown":"PRIVATE-SERIAL"
+        }),
+    );
+    let state = read(&transport).await.unwrap();
+    let snapshot = state.snapshot("fixture-fridge", "fridge").unwrap();
+    let readings = &snapshot.observations;
+    assert_eq!(
+        readings["vendor.midea.refrigerator.storage_mode"].value,
+        json!(true)
+    );
+    assert_eq!(
+        readings["vendor.midea.refrigerator.freezing_mode"].value,
+        json!(false)
+    );
+    assert_eq!(
+        readings["vendor.midea.refrigerator.left_flexzone_temperature"].value,
+        json!(-2.0)
+    );
+    assert!(!readings.contains_key("vendor.midea.refrigerator.right_flexzone_temperature"));
+    assert!(!readings.contains_key("vendor.midea.refrigerator.icea_mode_power"));
+    assert!(
+        !serde_json::to_string(&snapshot)
+            .unwrap()
+            .contains("PRIVATE")
+    );
+    assert!(readings.values().all(|r| r.stale));
+    for bad in [
+        json!({"storage_mode":1}),
+        json!({"variable_mode":true}),
+        json!({"left_flexzone_temperature":"invalid"}),
+    ] {
+        assert!(read(&Transport::new("CA", bad)).await.is_err());
+    }
+}
+
+#[tokio::test]
 async fn dishwasher_preserves_model_specific_program_status_and_door_codes() {
     for program in ["normal", "standard_wash", "90min"] {
         let transport = Transport::new(

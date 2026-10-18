@@ -1,5 +1,32 @@
 # 12. Trace refrigerator and dishwasher commands
 
+## Appliance panels and optional refrigerator readings
+
+The October 18 panel revision adds optional `vendor.midea.refrigerator` reads to
+the already-reviewed `BCD-600WUFIPZM(E)` descriptor, scoped to its existing
+`fridge` component. The [fictional contract](../../examples/capability.meiju-refrigerator.json)
+contains ten Boolean mode/ice observations, four variable-zone temperatures and
+the raw variable-mode token. Field names follow the pinned CA community mapping
+and the official rapid-cooling/freezing UI trace below. Only reported values are
+emitted. Missing/null values stay absent; malformed recognized values reject the
+read without overwriting prior evidence. Unknown fields are discarded. No write
+action, temperature range, preset equivalence or additional compartment identity
+is inferred. Exact physical feature behavior remains unverified.
+
+Existing saved descriptors retain basic readings until an explicit inventory
+refresh publishes the added capability. Optional observations are filtered out
+for those older descriptors. Native API 1.25, SQLite 5 and protected payload 3
+are unchanged. Refrigerator writes and unresolved screenshot features remain open.
+
+Flutter shows large compartment target/current readings and separate mode tiles.
+Reported modes remain read-only; missing modes are never filled with fake off
+states. The dishwasher capability has a status/time panel, temperature/door
+observations, supply reminders and descriptor/grant-driven control/program buttons.
+Choosing a program prefills only that valid enum value. Required additional
+choices, explicit route and trusted confirmation remain separate. Viewing a tile
+or choosing a program sends no command. Numeric supply and door codes remain
+literal where interpretation is unproven; no percentages or history are invented.
+
 Reviewed October 18, 2026 in response to the owner's request for actual command
 integration. This record separates source/encoder evidence, implemented App
 behavior and physical acceptance. No real account, private pilot material or
