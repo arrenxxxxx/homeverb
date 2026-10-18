@@ -1,6 +1,6 @@
 # 11. Mijia native integration
 
-Implementation is in progress under [ADR-0070](../adr/0070-mijia-native-cloud.md).
+The experimental integration is implemented under [ADR-0070](../adr/0070-mijia-native-cloud.md).
 The owner will perform real-account and device acceptance. Do not access saved
 pilot credentials or contact appliances as part of development tests.
 
@@ -363,3 +363,67 @@ Flutter fan verification passed 48 focused checks and static analysis. Full
 regression passed 165 with the same eight documented macOS baseline failures;
 it is not a full-suite pass. See the [App record](../../apps/mobile/verification.md)
 for the commands and exact failure scope. No real account/device testing occurred.
+
+## Android package and owner acceptance
+
+The combined-platform development APK was built from clean source revision
+`39d646546a6ea0c07bc6a4154212b1c5a9d1ee74` on October 18, 2026. The dedicated
+branch is `codex/mijia-integration`; all development phases are local commits.
+No merge, push, installation, account login or physical-device operation was
+performed for this delivery.
+
+Artifact: `apps/mobile/build/delivery/mijia/homeverb-mijia-0.2.0-39d6465.apk`
+(73,254,278 bytes). The adjacent `verification.json` records the APK/AAR/native
+hashes and exact source revision. SHA-256:
+`59d0925a8ebfa981a5760695cf411cf912ac55441f0e4f289e1477b1c95ace00`.
+Generated artifacts are ignored build outputs, not repository source files.
+
+Executed build and inspection:
+
+- `python3 scripts/build_android_native.py --ndk NDK --android-jar ANDROID_JAR --java-home JDK --abi arm64-v8a --abi x86_64`:
+  passed on installed Rust 1.99.1, NDK 28.2.13676358 and JDK 21; both libraries have
+  17 exports and 16 KiB ELF alignment. The AAR was rebuilt after the exact-value fix.
+- `fvm flutter build apk --release --target-platform android-arm64,android-x64 --dart-define=HOMEVERB_ADAPTER=homeverb.platforms`:
+  passed with pinned Flutter 3.47.7 and a temporary SDK configuration. The existing
+  persistent development signing key was used. This remains a development APK,
+  not a store-signed release.
+- `python3 scripts/verify_flutter_apk.py --apk APK --sdk SDK --java-home JDK --adapter homeverb.platforms --report REPORT`:
+  passed signature, ZIP and Core ELF alignment, exactly two complete ABIs, 17 Core
+  exports per ABI, release manifest/API 28 minimum, disabled backup and absence of
+  the integration-test plugin. This inspects the archive, not running-device behavior.
+- Presentation tests: seven passed. Documentation, contracts, hygiene and commit
+  conventions passed. Full Flutter baseline failures remain as recorded above.
+
+The principal changed files are the [Mijia adapter](../../crates/mijia/src/adapter.rs),
+[fixed cloud transport](../../crates/mijia/src/transport.rs),
+[MIoT mapping](../../crates/mijia/src/spec.rs),
+[native grant policy](../../crates/host/src/mijia_fan_grants.rs),
+[native startup bridge](../../crates/ffi/src/lib.rs),
+[App grant preparation](../../apps/mobile/lib/session_permissions.dart),
+[App controller](../../apps/mobile/lib/controller.dart) and
+[versioned startup contract](../../schemas/native-open.schema.json).
+
+Owner validation can proceed without a HomeVerb service:
+
+1. Install the APK on Android 9 or later. It uses the existing HomeVerb package ID;
+   installation replaces an older build and combined mode reuses its private Meiju
+   profile. This delivery does not automatically install or remove application data.
+2. Open Platforms, choose Add Platform and Mijia, then sign in with the mainland
+   account. Password/session material stays in native protected buffers and Android
+   Keystore. CAPTCHA/additional verification currently returns
+   `MIJIA_AUTH_CHALLENGE_REQUIRED`; challenge completion is not implemented.
+3. Compare returned names with the Mijia app. Unsupported devices should retain
+   cards. Partial coverage is explicit; do not interpret absent devices as removed.
+4. Open the doorbell, lock and fan. Compare available power/level/battery/volume or
+   raw lock status readings. Missing fields remain unknown. These services are
+   model-dependent; doorbell event/history/streaming and lock unlocking are absent.
+5. For a fan, only the model's writable options should appear. If choosing to test
+   a control, submit one safe value and compare the resulting state with the vendor
+   app/device. Accepted is not physical verification; unknown outcomes must not
+   trigger automatic resend. Background/foreground and restart should preserve
+   account/card identity while cancelling in-flight work.
+
+Real-account authentication, shared-device completeness, exact physical models,
+Android phone lifecycle and iOS packaging/runtime remain unverified. The owner
+explicitly owns real-device validation. Do not upload credentials, private device
+IDs or raw provider replies when reporting a mismatch.
