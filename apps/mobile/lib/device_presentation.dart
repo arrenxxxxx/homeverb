@@ -28,7 +28,11 @@ String deviceArtwork(Json device) {
   if (capabilities.contains('climate') && components.length == 1) return 'ac';
   if (capabilities.contains('light')) return 'lamp';
   if (capabilities.contains('media')) return 'tv';
-  if (capabilities.contains('fan')) return 'fan';
+  if (capabilities.contains('fan') ||
+      ids.any((id) => id.toString().startsWith('fan-')))
+    return 'fan';
+  if (capabilities.contains('lock')) return 'lock';
+  if (capabilities.contains('doorbell')) return 'doorbell';
   if (capabilities.contains('sensor')) return 'sensor';
   return 'appliance';
 }

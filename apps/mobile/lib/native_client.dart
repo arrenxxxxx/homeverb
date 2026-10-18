@@ -257,6 +257,13 @@ class NativeClient
       methods.contains('list_accounts') &&
       methods.contains('refresh_account');
   @override
+  Set<String> get accountProviders => switch (adapter) {
+    'midea.meiju' => {'midea.meiju'},
+    'xiaomi.mijia' when apiAtLeast(24) => {'xiaomi.mijia'},
+    'homeverb.platforms' when apiAtLeast(24) => {'midea.meiju', 'xiaomi.mijia'},
+    _ => {},
+  };
+  @override
   bool get supportsPendingReauthorization =>
       supportsAccountConnection && apiAtLeast(8);
   @override
@@ -283,7 +290,8 @@ class NativeClient
     String adapter = 'homeverb.mock',
     List<SessionPermission> permissions = const [],
   }) async {
-    if (permissions.isNotEmpty && adapter != 'midea.meiju') {
+    if (permissions.isNotEmpty &&
+        !['midea.meiju', 'homeverb.platforms'].contains(adapter)) {
       throw NativeFailure(
         'POLICY_DENIED',
         'This host cannot configure real controls.',
@@ -317,6 +325,13 @@ class NativeClient
       }
       client.apiVersion = info['api_version'] as String;
       client.methods = (info['methods'] as Map).keys.cast<String>().toSet();
+      if (['xiaomi.mijia', 'homeverb.platforms'].contains(adapter) &&
+          !client.apiAtLeast(24)) {
+        throw NativeFailure(
+          'API_UPGRADE_REQUIRED',
+          'Mijia requires native API 1.24 or later.',
+        );
+      }
       return client;
     } catch (error) {
       await client.close();
@@ -468,11 +483,13 @@ class NativeClient
     required Uint8List password,
     required String label,
     String? accountId,
+    String? provider,
   }) => _connectAccount(
     login: login,
     password: password,
     label: label,
     accountId: accountId,
+    provider: provider,
   );
 
   Future<Json> _connectAccount({
@@ -481,6 +498,7 @@ class NativeClient
     required String label,
     String? accountId,
     bool recovery = false,
+    String? provider,
   }) async {
     Pointer<Uint8>? loginMemory, passwordMemory;
     String? id;
@@ -490,6 +508,18 @@ class NativeClient
         throw NativeFailure(
           'API_UPGRADE_REQUIRED',
           'Protected account connection requires native API 1.2 or later.',
+        );
+      }
+      if (provider != null && !accountProviders.contains(provider)) {
+        throw NativeFailure(
+          'AUTH_FLOW_UNSUPPORTED',
+          'This provider is unavailable in the current host.',
+        );
+      }
+      if (provider == 'xiaomi.mijia' && !apiAtLeast(24)) {
+        throw NativeFailure(
+          'API_UPGRADE_REQUIRED',
+          'Mijia requires native API 1.24 or later.',
         );
       }
       if (loginLength < 1 ||
@@ -519,6 +549,7 @@ class NativeClient
         'timeout_ms': 180000,
         'label': label,
         'account_id': accountId,
+        if (apiAtLeast(24) && provider != null) 'provider': provider,
       };
       return decodeResponse(
             await _connectOnWorker(

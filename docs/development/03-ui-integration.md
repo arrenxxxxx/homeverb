@@ -9,7 +9,9 @@ The current design handoff is the [complete Window Light prototype](../../output
 The [Flutter app](../../apps/mobile/README.md#account-integration) now has protected
 account input and local account/retrieval/recovery/removal pages. The default build
 remains Mock; an explicit Meiju build uses a separate read-only private profile.
-Fixture clicks and native admission checks do not establish real account, secure
+API 1.24 also exposes explicit Mijia-only and combined platform builds, with
+protected provider selection and partial positive device cards; see the
+[Mijia guide](11-mijia.md). Fixture clicks and native admission checks do not establish real account, secure
 storage or phone acceptance. See the [verification report](../../apps/mobile/verification.md).
 
 API 1.13 adds separate trusted C prepare/execute/discard functions for one elevated

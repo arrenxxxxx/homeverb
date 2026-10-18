@@ -46,16 +46,19 @@ Future<void> main() async {
       'HOMEVERB_ADAPTER',
       defaultValue: 'homeverb.mock',
     );
-    Future<CoreClient> openSession(
-      List<SessionPermission> permissions,
-    ) => NativeClient.open(
-      dataDir:
-          '${directory.path}/${adapter == 'homeverb.mock' ? 'native' : 'native-meiju'}',
-      adapter: adapter,
-      libraryPath: library.isEmpty ? null : library,
-      allowMockWrites: adapter == 'homeverb.mock',
-      permissions: permissions,
-    );
+    Future<CoreClient> openSession(List<SessionPermission> permissions) =>
+        NativeClient.open(
+          dataDir:
+              '${directory.path}/${adapter == 'homeverb.mock'
+                  ? 'native'
+                  : adapter == 'xiaomi.mijia'
+                  ? 'native-mijia'
+                  : 'native-meiju'}',
+          adapter: adapter,
+          libraryPath: library.isEmpty ? null : library,
+          allowMockWrites: adapter == 'homeverb.mock',
+          permissions: permissions,
+        );
     runApp(
       TranslationProvider(
         child: NativeApp(
@@ -63,7 +66,9 @@ Future<void> main() async {
           controller: HomeController(
             await openSession(const []),
             prefs,
-            reopen: adapter == 'midea.meiju' ? openSession : null,
+            reopen: ['midea.meiju', 'homeverb.platforms'].contains(adapter)
+                ? openSession
+                : null,
           )..startAutomaticRefresh(),
         ),
       ),
@@ -343,12 +348,16 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     }
     if ([
       'Choose Meiju',
+      'Choose Mijia',
       'Reauthorize',
       'Sign In to the Original Account',
     ].contains(label)) {
       if (c.busy) return;
       editingAccountName = false;
-      if (label == 'Choose Meiju') {
+      if (label == 'Choose Meiju' || label == 'Choose Mijia') {
+        c.selectedAccountProvider = label == 'Choose Mijia'
+            ? 'xiaomi.mijia'
+            : 'midea.meiju';
         c.selectedAccount = null;
         c.accountDetails = null;
         c.accountReport = null;
@@ -624,6 +633,11 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         await c.refreshComponents();
       else
         await c.refresh();
+      return;
+    }
+    if (['Retrieve Saved Accounts', 'Choose an Account'].contains(label) &&
+        !c.isMock) {
+      await finish(c.loadAccounts(), 'P01');
       return;
     }
     if (label == 'Discover Mock device' ||
@@ -974,7 +988,10 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     List<dynamic>? b;
     if (id.startsWith('P')) {
       b = accountBlocks(c, id, refreshing: accountRefreshing);
-      if (id == 'P03') ui['header'] = 'Connect Meiju';
+      if (id == 'P03')
+        ui['header'] = c.connectionProvider == 'xiaomi.mijia'
+            ? 'Connect Mijia'
+            : 'Connect Meiju';
       if (id == 'P13') ui['header'] = 'Platform connection';
       if (id == 'P03' && editingAccountName) {
         ui['header'] = 'Account name';
@@ -989,13 +1006,20 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           ['button', 'Cancel', 'secondary'],
         ];
       }
-      if (id == 'P04') ui['header'] = 'Meiju sign-in';
+      if (id == 'P04')
+        ui['header'] = c.connectionProvider == 'xiaomi.mijia'
+            ? 'Mijia sign-in'
+            : 'Meiju sign-in';
       if (id == 'P09' || id == 'P10') ui['header'] = 'Account details';
       if (id == 'P08') ui['header'] = 'Account result';
       if ((id == 'P09' || id == 'P10') &&
           accountEditor != null &&
           c.account != null) {
-        final summary = ['summary', accountDisplayName(c, c.account!), 'Meiju'];
+        final summary = [
+          'summary',
+          accountDisplayName(c, c.account!),
+          c.connectionPlatformName,
+        ];
         b = [
           summary,
           if (accountEditor == 'rename') ...[
@@ -1440,13 +1464,10 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             c.isMock ? 'Mock discovery' : 'Saved-account retrieval',
             c.isMock
                 ? 'Only a fictional appliance can be discovered by this host.'
-                : 'Explicitly retrieve cloud inventory from saved Meiju accounts. No LAN scan or pairing is started.',
+                : 'Choose a saved account to update its device list.',
             'neutral',
           ],
-          [
-            'button',
-            c.isMock ? 'Discover Mock device' : 'Retrieve Saved Accounts',
-          ],
+          ['button', c.isMock ? 'Discover Mock device' : 'Choose an Account'],
           ['button', 'Add Platform', 'secondary'],
           [
             'note',
@@ -1581,7 +1602,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             'note',
             c.isMock
                 ? '0.2.0 · Native Mock host · Fictional devices'
-                : '0.2.0 · Experimental Meiju · Device controls',
+                : '0.2.0 · Experimental platform integration',
           ],
           [
             'rows',
@@ -1712,6 +1733,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       final signIn = AccountSignIn(
         key: ValueKey('signin:$epoch'),
         reauthorizing: c.selectedAccount != null,
+        provider: c.connectionProvider,
         needsReload: c.accountNeedsReload,
         busy: c.busy,
         onRecover: !c.canRecoverIdentity
@@ -1794,7 +1816,11 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
               children: [
                 Blocks(
                   [
-                    ['summary', accountDisplayName(c, c.account!), 'Meiju'],
+                    [
+                      'summary',
+                      accountDisplayName(c, c.account!),
+                      c.connectionPlatformName,
+                    ],
                   ],
                   onAction: action,
                   fields: fields,

@@ -23,3 +23,15 @@ String? maskedAccountLogin(Uint8List login) {
   if (login.length < 5) return '${part(0, 1)}***';
   return '${part(0, 2)}***${part(login.length - 2, login.length)}';
 }
+
+/// Platform labels are account presentation only, never device business semantics.
+String accountPlatformName(String? provider) => switch (provider) {
+  'xiaomi.mijia' => 'Mijia',
+  'midea.meiju' => 'Meiju',
+  _ => 'Platform',
+};
+String accountDefaultLabel(String? provider) => switch (provider) {
+  'xiaomi.mijia' => 'Mijia account',
+  'midea.meiju' => 'Meiju account',
+  _ => 'Account name',
+};

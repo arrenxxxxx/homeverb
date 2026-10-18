@@ -27,7 +27,9 @@ class AccountPreferences extends LocalPreferences {
 
 class AccountFixture implements CoreClient, AccountClient {
   @override
-  String get adapter => 'midea.meiju';
+  String adapter = 'midea.meiju';
+  @override
+  Set<String> accountProviders = {'midea.meiju'};
   @override
   bool supportsAccountConnection = true;
   @override
@@ -35,6 +37,7 @@ class AccountFixture implements CoreClient, AccountClient {
   final requests = <Json>[];
   final connectionTargets = <String?>[];
   final connectionLabels = <String>[];
+  final connectionProviders = <String?>[];
   final records = <Json>[
     for (final id in [firstAccount, secondAccount])
       {
@@ -170,8 +173,10 @@ class AccountFixture implements CoreClient, AccountClient {
     required Uint8List password,
     required String label,
     String? accountId,
+    String? provider,
   }) async {
     connectionTargets.add(accountId);
+    connectionProviders.add(provider);
     connectionLabels.add(label);
     ownedLogin = login;
     ownedPassword = password;

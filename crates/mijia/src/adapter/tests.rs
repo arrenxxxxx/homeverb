@@ -96,6 +96,7 @@ struct Cloud {
     devices: Mutex<Vec<Value>>,
     power: Mutex<Value>,
     spec_failure: AtomicU8,
+    include_battery: AtomicU8,
     read_gate: tokio::sync::Notify,
     stall_read: AtomicU8,
 }
@@ -110,6 +111,7 @@ impl Cloud {
             ]),
             power: Mutex::new(json!(true)),
             spec_failure: AtomicU8::new(0),
+            include_battery: AtomicU8::new(0),
             read_gate: tokio::sync::Notify::new(),
             stall_read: AtomicU8::new(0),
         }
@@ -136,7 +138,13 @@ impl CloudTransport for Cloud {
                     if self.spec_failure.load(Ordering::SeqCst)!=0 {return Err(crate::failed());}
                     Some(json!({"instances":[{"model":"fiction.fan.one","type":fan_kind(),"status":"released","version":1}]}))
                 },
-                CloudEndpoint::SpecInstance=>Some(fan_spec()),
+                CloudEndpoint::SpecInstance=>{
+                    let mut spec = fan_spec();
+                    if self.include_battery.load(Ordering::SeqCst) != 0 {
+                        spec["services"].as_array_mut().unwrap().insert(0, json!({"iid":1,"type":"urn:miot-spec-v2:service:battery:00007805:fiction-one:1","properties":[{"iid":1,"type":"urn:miot-spec-v2:property:battery-level:00000014:fiction-one:1","format":"uint8","access":["read"],"value-range":[0,100,1],"unit":"percentage"}]}));
+                    }
+                    Some(spec)
+                },
                 _=>None,
             };
             if let Some(raw)=raw {return Ok(CloudResponse{body:SecretBytes::new(serde_json::to_vec(&raw).unwrap()),service_token:None});}
@@ -763,4 +771,33 @@ async fn read_only_adapter_denies_a_forged_public_action_even_with_a_core_grant(
     assert_eq!(receipt.attempts.len(), 1);
     assert_eq!(receipt.attempts[0].phase, homeverb_domain::Phase::NotSent);
     assert_eq!(f.cloud.calls.lock().unwrap().len(), calls);
+}
+
+#[tokio::test]
+async fn primary_appliance_component_precedes_auxiliary_battery_for_card_reads() {
+    let f = Fixture::new();
+    f.cloud.include_battery.store(1, Ordering::SeqCst);
+    let report = f.connect().await;
+    f.publish(&report).await;
+    let fan = f.fan();
+    assert_eq!(
+        fan.components
+            .iter()
+            .map(|c| c.id.as_str())
+            .collect::<Vec<_>>(),
+        vec!["fan-2", "battery-1"]
+    );
+    assert!(fan.components[0].capabilities.contains(&"power".into()));
+    let state = f
+        .core
+        .read(
+            &fan.id,
+            &fan.components[0].id,
+            Route::Cloud,
+            false,
+            &operation(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(state.observations["power.state"].value, true);
 }

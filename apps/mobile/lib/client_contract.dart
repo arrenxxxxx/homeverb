@@ -51,6 +51,7 @@ abstract interface class NativeSessionClient implements CoreClient {
 abstract interface class AccountClient {
   String get adapter;
   bool get supportsAccountConnection;
+  Set<String> get accountProviders;
   bool get supportsPendingReauthorization;
   // Takes ownership of the byte arrays and clears them on every return path.
   Future<Json> connectAccount({
@@ -58,6 +59,7 @@ abstract interface class AccountClient {
     required Uint8List password,
     required String label,
     String? accountId,
+    String? provider,
   });
 }
 

@@ -506,6 +506,13 @@ fn descriptor(binding: &Binding, account: Uuid) -> Descriptor {
             .or_default()
             .push(capability.id.clone());
     }
+    let mut components: Vec<_> = components
+        .into_iter()
+        .map(|(id, capabilities)| Component { id, capabilities })
+        .collect();
+    // Primary appliance services precede auxiliary battery readings for host summaries.
+    components
+        .sort_by_key(|component| (component.id.starts_with("battery-"), component.id.clone()));
     Descriptor {
         device: Device {
             schema_version: "1.0".into(),
@@ -514,10 +521,7 @@ fn descriptor(binding: &Binding, account: Uuid) -> Descriptor {
                 .unwrap_or_else(|_| "Mijia device".into()),
             brand: "Unknown".into(),
             model: binding.model.clone(),
-            components: components
-                .into_iter()
-                .map(|(id, capabilities)| Component { id, capabilities })
-                .collect(),
+            components,
             support_status: if supported {
                 "experimental"
             } else {
