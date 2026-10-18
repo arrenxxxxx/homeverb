@@ -65,29 +65,57 @@ impl MijiaSession {
         data: &SecretBytes,
         operation: &Operation,
     ) -> Result<SecretBytes> {
-        operation.run(async {
-            if !matches!(endpoint, CloudEndpoint::Devices | CloudEndpoint::Properties | CloudEndpoint::Homes | CloudEndpoint::HomeDevices) { return Err(Error::invalid()); }
-            if data.expose().len() > crate::MAX_RESPONSE_BYTES { return Err(Error::invalid()); }
-            let nonce = codec::nonce()?;
-            let data = std::str::from_utf8(data.expose()).map_err(|_| Error::invalid())?;
-            let (body, key) = codec::encode(endpoint.path(), data, self.security.as_str(), &nonce)?;
-            let request = CloudRequest {
-                endpoint, region: self.region, location: None,
-                cookie: PrivateString::new(format!("userId={}; serviceToken={}; yetAnotherServiceToken={}; locale=en_US; timezone=GMT%2B08%3A00; is_daylight=0; dst_offset=0; channel=MI_APP_STORE", self.user_id.as_str(), self.token.as_str(), self.token.as_str())),
-                body,
-            };
-            let response = transport.send(&request, operation).await?;
-            // Unencrypted provider errors are not successful property/inventory evidence.
-            if response.body.expose().trim_ascii_start().first() == Some(&b'{') {
-                let status: Status = decode(response.body.expose())?;
+        operation
+            .run(async {
+                if !matches!(
+                    endpoint,
+                    CloudEndpoint::Devices
+                        | CloudEndpoint::Properties
+                        | CloudEndpoint::Homes
+                        | CloudEndpoint::HomeDevices
+                ) {
+                    return Err(Error::invalid());
+                }
+                let (request, key) = self.prepare_request(endpoint, data)?;
+                let response = transport.send(&request, operation).await?;
+                // Unencrypted provider errors are not successful property/inventory evidence.
+                if response.body.expose().trim_ascii_start().first() == Some(&b'{') {
+                    let status: Status = decode(response.body.expose())?;
+                    check_code(status.code)?;
+                    return Err(invalid());
+                }
+                let decoded = codec::decrypt(key.expose(), response.body.expose())?;
+                let status: Status = decode(decoded.expose())?;
                 check_code(status.code)?;
-                return Err(invalid());
-            }
-            let decoded = codec::decrypt(key.expose(), response.body.expose())?;
-            let status: Status = decode(decoded.expose())?;
-            check_code(status.code)?;
-            Ok(decoded)
-        }).await
+                Ok(decoded)
+            })
+            .await
+    }
+
+    pub(crate) fn prepare_request(
+        &self,
+        endpoint: CloudEndpoint,
+        data: &SecretBytes,
+    ) -> Result<(CloudRequest, SecretBytes)> {
+        if data.expose().len() > crate::MAX_RESPONSE_BYTES {
+            return Err(Error::invalid());
+        }
+        let nonce = codec::nonce()?;
+        let data = std::str::from_utf8(data.expose()).map_err(|_| Error::invalid())?;
+        let (body, key) = codec::encode(endpoint.path(), data, self.security.as_str(), &nonce)?;
+        let request = CloudRequest {
+            endpoint,
+            region: self.region,
+            location: None,
+            cookie: PrivateString::new(format!(
+                "userId={}; serviceToken={}; yetAnotherServiceToken={}; locale=en_US; timezone=GMT%2B08%3A00; is_daylight=0; dst_offset=0; channel=MI_APP_STORE",
+                self.user_id.as_str(),
+                self.token.as_str(),
+                self.token.as_str()
+            )),
+            body,
+        };
+        Ok((request, key))
     }
 }
 

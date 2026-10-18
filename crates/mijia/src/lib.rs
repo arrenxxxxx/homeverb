@@ -3,12 +3,14 @@
 mod adapter;
 mod auth;
 mod codec;
+mod control;
 mod inventory;
 mod protected;
 mod spec;
 mod transport;
 pub use adapter::{AccountDiscovery, AccountInventory, DeviceInventoryMembership, MijiaAdapter};
 pub use auth::{LoginCredentials, MijiaSession, login};
+pub use control::PropertyWrite;
 pub use inventory::{CloudDevice, Inventory, PropertyQuery, PropertyReading};
 pub use spec::{MappedProperty, ModelMapping, SpecIndex};
 pub use transport::{CloudEndpoint, CloudRequest, CloudResponse, CloudTransport, MijiaHttps};

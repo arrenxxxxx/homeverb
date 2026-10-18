@@ -13,6 +13,116 @@ fn operation() -> Operation {
     Operation::new(5000, CancellationToken::new()).unwrap()
 }
 
+#[tokio::test]
+async fn production_read_and_write_transports_refuse_wrong_endpoints_before_send() {
+    let progress = WriteProgress::default();
+    assert_eq!(
+        MijiaHttps
+            .send(&request(CloudEndpoint::SetProperty), &operation())
+            .await
+            .unwrap_err()
+            .code,
+        "CAPABILITY_UNSUPPORTED"
+    );
+    assert_eq!(
+        MijiaHttps
+            .send_control(&request(CloudEndpoint::Properties), &progress, &operation())
+            .await
+            .unwrap_err()
+            .code,
+        "CAPABILITY_UNSUPPORTED"
+    );
+    assert_eq!(progress.phase(), homeverb_domain::Phase::NotSent);
+    assert_eq!(
+        request(CloudEndpoint::SetProperty).url().unwrap().as_str(),
+        "https://api.io.mi.com/app/miotspec/prop/set"
+    );
+}
+
+#[tokio::test]
+async fn write_transport_marks_send_without_interpreting_http_acceptance() {
+    for reply in [
+        "HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\n{}",
+        "HTTP/1.1 302 Found\r\nLocation: SERVER_URL\r\nContent-Length: 0\r\nConnection: close\r\n\r\n",
+        "HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\nConnection: close\r\n\r\n",
+        "HTTP/1.1 200 OK\r\nContent-Length: 8\r\nConnection: close\r\n\r\nshort",
+    ] {
+        let server = Server::start(reply.as_bytes().to_vec(), false).await;
+        let progress = WriteProgress::default();
+        let result = transmit(
+            server.client.clone(),
+            Url::parse(&server.url).unwrap(),
+            &request(CloudEndpoint::SetProperty),
+            Some(&progress),
+            &operation(),
+        )
+        .await;
+        assert_eq!(result.is_ok(), reply.ends_with("{}"));
+        assert_eq!(progress.phase(), homeverb_domain::Phase::PossiblySent);
+        assert_eq!(server.connections.load(Ordering::SeqCst), 1);
+        let requests = server.requests.lock().unwrap();
+        assert_eq!(requests.len(), 1);
+        let wire = String::from_utf8_lossy(&requests[0]);
+        assert!(wire.starts_with("POST "));
+        assert!(wire.contains("miot-encrypt-algorithm: ENCRYPT-RC4"));
+        assert!(wire.ends_with("data=fictional"));
+    }
+}
+
+#[tokio::test]
+async fn write_preflight_failure_is_not_sent_but_cancel_deadline_and_drop_after_send_are_uncertain()
+{
+    for mode in 0..4 {
+        let server = Server::start(vec![], true).await;
+        let op = operation();
+        let request = request(CloudEndpoint::SetProperty);
+        let progress = WriteProgress::default();
+        if mode == 0 {
+            op.cancellation.cancel();
+        }
+        let mut op = op;
+        if mode == 2 {
+            op.deadline = tokio::time::Instant::now() + Duration::from_millis(200);
+        }
+        let mut send = Box::pin(transmit(
+            server.client.clone(),
+            Url::parse(&server.url).unwrap(),
+            &request,
+            Some(&progress),
+            &op,
+        ));
+        if mode == 0 {
+            assert_eq!(send.await.unwrap_err().code, "CANCELLED");
+            assert_eq!(progress.phase(), homeverb_domain::Phase::NotSent);
+            assert_eq!(server.connections.load(Ordering::SeqCst), 0);
+            continue;
+        }
+        loop {
+            tokio::select! {
+                result = &mut send => panic!("Unexpected result: {result:?}"),
+                _ = tokio::time::sleep(Duration::from_millis(1)) => { if !server.requests.lock().unwrap().is_empty() { break; } }
+            }
+        }
+        if mode == 1 {
+            op.cancellation.cancel();
+            assert_eq!(send.await.unwrap_err().code, "CANCELLED");
+        } else if mode == 2 {
+            assert_eq!(send.await.unwrap_err().code, "DEADLINE_EXCEEDED");
+        } else {
+            drop(send);
+        }
+        assert_eq!(progress.phase(), homeverb_domain::Phase::PossiblySent);
+        tokio::time::timeout(Duration::from_secs(2), async {
+            while server.closed.load(Ordering::SeqCst) == 0 {
+                tokio::time::sleep(Duration::from_millis(1)).await;
+            }
+        })
+        .await
+        .unwrap();
+        assert_eq!(server.connections.load(Ordering::SeqCst), 1);
+    }
+}
+
 #[test]
 fn sts_allowlist_rejects_private_or_foreign_destinations() {
     assert!(exchange_url("https://sts.api.io.mi.com/sts?ticket=fictional").is_ok());
@@ -44,6 +154,7 @@ async fn public_spec_requests_never_forward_account_cookies_or_encryption_header
         server.client.clone(),
         Url::parse(&server.url).unwrap(),
         &request(CloudEndpoint::SpecIndex),
+        None,
         &operation(),
     )
     .await
@@ -64,6 +175,7 @@ async fn tls_sends_exact_body_and_extracts_single_cookie() {
         server.client.clone(),
         Url::parse(&server.url).unwrap(),
         &request(CloudEndpoint::LoginExchange),
+        None,
         &operation(),
     )
     .await
@@ -87,7 +199,7 @@ async fn redirect_auth_large_body_and_duplicate_cookie_fail_once() {
         ("HTTP/1.1 200 OK\r\nContent-Length: 8\r\nConnection: close\r\n\r\nshort".into(), "MIJIA_REQUEST_FAILED"),
     ] {
         let server = Server::start(wire.into_bytes(), false).await;
-        let error = transmit(server.client.clone(), Url::parse(&server.url).unwrap(), &request(CloudEndpoint::LoginExchange), &operation()).await.unwrap_err();
+        let error = transmit(server.client.clone(), Url::parse(&server.url).unwrap(), &request(CloudEndpoint::LoginExchange), None, &operation()).await.unwrap_err();
         assert_eq!(error.code, expected);
         assert_eq!(server.connections.load(Ordering::SeqCst), 1);
         assert_eq!(server.requests.lock().unwrap().len(), 1);
@@ -105,6 +217,7 @@ async fn untrusted_tls_and_cancelled_preflight_refuse() {
             server.client.clone(),
             Url::parse(&server.url).unwrap(),
             &request,
+            None,
             &op
         )
         .await
@@ -119,6 +232,7 @@ async fn untrusted_tls_and_cancelled_preflight_refuse() {
             client,
             Url::parse(&server.url).unwrap(),
             &request,
+            None,
             &operation()
         )
         .await
@@ -143,6 +257,7 @@ async fn cancellation_deadline_and_drop_close_pending_socket() {
             server.client.clone(),
             Url::parse(&server.url).unwrap(),
             &req,
+            None,
             &operation_for_send,
         );
         let mut send = Box::pin(send);
