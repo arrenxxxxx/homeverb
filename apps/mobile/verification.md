@@ -2954,3 +2954,29 @@ No APK installation, emulator launch, account access, appliance command or remot
 publication occurred. This closes the local package-build blocker, not the exact
 refrigerator artifact dependency or physical-device acceptance. The current ADB
 inventory still has zero connected devices. The prior APK artifacts are retained.
+
+## Existing emulator appliance-controls update — October 18, 2026
+
+At the owner's explicit request to use the already-signed-in local emulator,
+toolchain and AVD inspection located `homeverb-control-api35` in the existing
+temporary AVD directory. It was stopped, explaining why the earlier online ADB
+inventory was empty. An empty online inventory did not establish that no saved
+emulator or account existed. The existing AVD was started on port 5586 using its
+original data partition, host GPU and no snapshot restoration. No AVD was created,
+wiped or reset.
+
+Before updating, the installed HomeVerb APK's signing certificate was compared
+with `homeverb-0.2.0-appliance-controls.apk` and matched. The delivery checksum
+also matched. `adb install -r` returned `Success`, without uninstalling the app or
+clearing its data. Pulling only the installed application code afterward confirmed
+an exact SHA-256 match with the delivered APK:
+`79001e5f5d8fd035f6b015acde2497158774b14161129fb304915202cf303937`.
+
+The initial activity launch returned Android error type 3. System inspection
+reported user 0 as `RUNNING_LOCKED`; waking the display showed the system PIN
+entry page. No PIN was read, guessed, entered by tooling or requested in chat.
+The owner was asked to unlock directly in the emulator window. App startup,
+retained-login usability, live device reads and real-profile button availability
+remain unverified until that unlock. The emulator is left running at its ordinary
+lock screen. No account credential, provider device identifier, appliance command,
+remote push or diagnostic upload was used for this installation check.
