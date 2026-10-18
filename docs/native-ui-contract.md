@@ -1,5 +1,9 @@
 # Native UI contract
 
+API 1.24 adds [Mijia and combined platform sessions](#mijia-and-combined-platform-sessions-api-124).
+Negotiate this version before using the new modes or accepting partial retrieval
+with positive device IDs. Existing Mock and Meiju defaults are preserved.
+
 Status: implemented Linux native contract, October 16, 2026, with Mock, default read-only Meiju startup, protected account connection and scoped experimental AC power, fan, mode activation and profile-scoped temperature grants. Six real devices passed the native read path; Android app packaging and emulator Mock journeys have separate Flutter evidence; complete provider/physical-phone and iOS app acceptance remain pending. See [ADR-0019](adr/0019-native-ui-contract.md).
 
 ## Start here in a Flutter worktree
@@ -26,15 +30,15 @@ Branch from a commit containing both the Mock MVP and this contract. Put the Flu
 
 Read the [UI integration guide](development/03-ui-integration.md) for existing behavior and the [functional handoff](ui-functional-spec.md) for screens. Use [api.json](../packages/native-contract/api.json) as the callable-method catalog and [examples.json](../packages/native-contract/examples.json) as fictional request/response examples. The examples were obtained from the built native library. They contain temporary fictional IDs and observations, not defaults for a production device.
 
-Startup explicitly selects Mock or Meiju; Meiju remains read-only unless the trusted host supplies the independently scoped power, fan, mode activation or temperature grants below. Meiju uses an existing local account or the protected connection function below; opening the library alone does not establish connection or authorization. Preview-only refrigerator, dishwasher, and sharing screens can use isolated UI fixture repositories; never mix those records with a native installation or label them live.
+Startup explicitly selects Mock, Meiju, Mijia or combined platforms; Meiju remains read-only unless the trusted host supplies the independently scoped power, fan, mode activation or temperature grants below. Meiju uses an existing local account or the protected connection function below; opening the library alone does not establish connection or authorization. Preview-only refrigerator, dishwasher, and sharing screens can use isolated UI fixture repositories; never mix those records with a native installation or label them live.
 
 ## Startup, ownership, and version negotiation
 
 The 16 C functions in [homeverb.h](../crates/ffi/include/homeverb.h) form the native boundary. There is no project HTTP endpoint, CLI subprocess, or daemon.
 
-1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects saved-account cloud reads. `scenario` defaults to `normal`. Meiju requires `allow_mock_writes: false` and rejects any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
-2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms `homeverb.mock` or `midea.meiju`. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.23.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects Meiju, `xiaomi.mijia` selects Mijia, and `homeverb.platforms` selects both. `scenario` defaults to `normal`. All platform modes require `allow_mock_writes: false` and reject any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
+2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms the selected mode. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.24.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -487,7 +491,7 @@ Its data has `account`, `authentication: "succeeded"`, and `retrieval`:
 | Retrieval status | Fields and UI action |
 |---|---|
 | `complete` | `device_ids` lists the current retrieved cards, including unsupported models; `error` is null. Load `list_device_cards` and describe/read supported components. An empty list does not delete older cards. |
-| `partial` | Empty `device_ids`, fixed error `MIDEA_INVENTORY_PARTIAL`; existing cards remain. Offer explicit `refresh_account`, not another login. |
+| `partial` | Mijia may return positive `device_ids` and `MIJIA_INVENTORY_PARTIAL`; load these named cards while retaining the coverage warning. Meiju retains empty IDs and `MIDEA_INVENTORY_PARTIAL`. Existing cards remain; offer explicit refresh. |
 | `failed` | Empty `device_ids` and a fixed error; handle the cause. `AUTH_REQUIRED` needs explicit reauthorization; identity conflict needs reconciliation; cancellation must not automatically retry. |
 
 Top-level query errors mean no completed connection report is available. After
@@ -1403,3 +1407,44 @@ Examples: [descriptor](../examples/capability.meiju-ac-features.json),
 Native method/symbol counts, SQLite 5 and protected payload 3 are unchanged.
 Accepted/unknown/rejected outcomes and replay guards remain unchanged. Field
 availability is experimental mapping evidence, not physical certification.
+
+
+## Mijia and combined platform sessions (API 1.24)
+
+[ADR-0073](adr/0073-mijia-native-account-routing.md) adds two explicit trusted
+`homeverb_open` modes. `adapter: "xiaomi.mijia"` registers the read-only Mijia
+adapter; `adapter: "homeverb.platforms"` registers both Meiju and Mijia against the
+same private profile. Both require `allow_mock_writes: false` and the normal
+scenario. Meiju grants are accepted only in Meiju or combined mode and retain
+exact device/action/value scope. Mijia has no write grants in this phase.
+
+The existing protected `homeverb_connect_account` metadata accepts optional
+`provider: "xiaomi.mijia"` or `"midea.meiju"`. Omitted/null provider selects Mijia
+in a Mijia-only session and Meiju otherwise. The selection cannot register an
+adapter, change authority or override the selected account's protected identity.
+Use the provider from the selected account for reauthorization. Login/password
+still travel through the two disjoint 1–256-byte writable buffers; no credential
+is accepted in JSON. The current Mijia password flow returns
+`MIJIA_AUTH_CHALLENGE_REQUIRED` when native verification cannot complete; challenge
+completion is not yet implemented.
+
+Local list/details/rename/removal and explicit refresh/recovery route by the saved
+account ID and registered provider. Removal retries also consult the provider-bound
+durable cleanup ledger, including already removed accounts; an `ACCOUNT_NOT_FOUND`
+from another provider occurs before any deletion. Foreign providers are excluded.
+No account list, startup or return to foreground triggers cloud requests.
+
+Mijia connection/refresh returns named positive cards, including placeholders,
+with `retrieval.status: "partial"` and `MIJIA_INVENTORY_PARTIAL`. Missing older
+cards remain saved. A returned device ID is evidence of publication, not online,
+power or physical support. Inventory inspection uses `membership: "unconfirmed"`
+for Mijia because that field describes a complete saved inventory, which this
+integration cannot establish. The last-complete timestamp remains null. Exact
+positive protected bindings still permit model-specific reads.
+
+Use descriptor-driven `read_state` for fan, doorbell, lock and battery properties.
+Online inventory hints never become power. Readings retain cloud source, local
+receipt time and unknown device observation time. Lock status codes remain raw;
+no unlocking is available. Control options, conflict inspection and LAN scan are
+not admitted for Mijia. The Flutter platform flow remains pending implementation;
+this native phase does not establish real-account or physical-device acceptance.

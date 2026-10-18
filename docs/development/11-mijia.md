@@ -4,9 +4,9 @@ Implementation is in progress under [ADR-0070](../adr/0070-mijia-native-cloud.md
 The owner will perform real-account and device acceptance. Do not access saved
 pilot credentials or contact appliances as part of development tests.
 
-Current callable scope is the trusted Rust `MijiaAdapter` account/read API and
-`homeverb_host::open_mijia_read_only`. Native C/App selection, fan control and live
-acceptance remain pending. Historical phase records below distinguish earlier
+Current callable scope includes trusted Rust account/read APIs and native API 1.24
+Mijia-only/combined sessions. Flutter selection, fan control and live acceptance
+remain pending. Historical phase records below distinguish earlier
 protocol-only work from the [protected Core phase](../adr/0072-mijia-protected-core-reads.md).
 
 ## Protocol evidence
@@ -180,3 +180,36 @@ CLI/MCP cases with seven documented platform skips, and
 `scripts/verify_native_contract.py` passed 34 native methods, 55 fictional examples
 and the trusted approval, dishwasher, scan and connection-link bridge suites.
 No real account, vendor traffic, physical device, push or publication was used.
+
+
+## Native account routing phase
+
+[ADR-0073](../adr/0073-mijia-native-account-routing.md) adds API 1.24 startup modes
+`xiaomi.mijia` and `homeverb.platforms` with the existing protected native connection
+function. The combined mode shares one vault/Core with Meiju while preserving exact
+Meiju startup grants. Optional provider metadata chooses an already registered
+connection flow. Ordinary account methods route using saved account ownership;
+completed removal retries consult each provider-bound ledger before any mutation.
+
+Mijia partial retrieval publishes positive device IDs instead of hiding named
+cards. Failed publication returns an error and no result IDs; callers reload local
+cards because storage errors do not promise rollback. Inventory inspection remains
+`unconfirmed`: partial positive bindings do not establish membership in a complete
+inventory. Source online hints never become actual power state.
+
+The native contract has 34 ordinary methods and the same C exports. SQLite 5,
+Mijia protected payload 1 and Meiju protected payload 3 are unchanged. Flutter and
+reviewed fan control are the next phases. No real account or appliance has been
+used for this phase's fictional tests.
+
+On October 18, `cargo +1.96.0 test -p homeverb-host --offline --locked` passed
+243 tests across 24 targets/doc-test suites, including three new encrypted fictional
+Mijia account tests and the existing Meiju/Mock regressions. Workspace build and
+strict all-target Clippy passed on Rust 1.96. The actual C ABI verifier passed all
+34 methods, 55 fictional examples, the existing trusted bridge suites and new
+Mijia/combined startup, provider admission and buffer/lifecycle checks. CLI/MCP
+runtime verification passed 35 cases with seven documented platform skips.
+Contracts passed 20 schemas, 49 positive fixtures and 278 negative fixtures;
+document links and source hygiene passed. These checks used temporary fictional
+profiles only. Mobile package builds and real accounts/devices were not tested in
+this phase; iOS acceptance's expected API version is updated but was not executed.

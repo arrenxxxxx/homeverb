@@ -137,6 +137,7 @@ struct State {
 pub struct Session {
     core: Core,
     accounts: Option<Arc<homeverb_midea::MeijuAdapter>>,
+    mijia_accounts: Option<Arc<homeverb_mijia::MijiaAdapter>>,
     state: Arc<Mutex<State>>,
 }
 
@@ -157,6 +158,7 @@ impl Session {
         Self {
             core,
             accounts: None,
+            mijia_accounts: None,
             state: Arc::new(Mutex::new(State {
                 foreground: true,
                 closed: false,
@@ -175,6 +177,44 @@ impl Session {
         session
     }
 
+    /// Trusted compile-time adapter composition; no credentials or networking.
+    pub fn with_platform_accounts(
+        core: Core,
+        meiju: Option<Arc<homeverb_midea::MeijuAdapter>>,
+        mijia: Option<Arc<homeverb_mijia::MijiaAdapter>>,
+    ) -> Self {
+        let mut session = Self::new(core);
+        session.accounts = meiju;
+        session.mijia_accounts = mijia;
+        session
+    }
+
+    async fn account_adapter(
+        &self,
+        id: uuid::Uuid,
+        op: &Operation,
+    ) -> Result<crate::accounts::AccountAdapter<'_>> {
+        homeverb_core::valid_account_id(id)?;
+        if let Some(adapter) = &self.accounts
+            && adapter.accounts(op).await?.iter().any(|a| a.id == id)
+        {
+            return Ok(crate::accounts::AccountAdapter::Meiju(adapter));
+        }
+        if let Some(adapter) = &self.mijia_accounts
+            && adapter.accounts(op).await?.iter().any(|a| a.id == id)
+        {
+            return Ok(crate::accounts::AccountAdapter::Mijia(adapter));
+        }
+        if self.accounts.is_none() && self.mijia_accounts.is_none() {
+            Err(crate::accounts::unsupported())
+        } else {
+            Err(Error::new(
+                "ACCOUNT_NOT_FOUND",
+                "The selected account does not exist in this host.",
+            ))
+        }
+    }
+
     /// Trusted native secret inputs only. The general JSON dispatcher has no login method.
     pub async fn connect_account(
         &self,
@@ -185,15 +225,41 @@ impl Session {
         let result = async {
             let (operation, _registration) =
                 self.register(&input.schema_version, input.operation_id, input.timeout_ms)?;
-            let adapter = self
-                .accounts
-                .as_ref()
-                .ok_or_else(crate::accounts::unsupported)?;
-            let credentials = homeverb_midea::LoginCredentials::new(login, password)?;
-            let report = adapter
-                .connect_devices(credentials, input.account_id, &input.label, &operation)
-                .await?;
-            Ok(crate::accounts::publish(&self.core, report, "succeeded", &operation).await)
+            use crate::accounts::AccountProvider;
+            let provider = input.provider.unwrap_or(
+                if self.accounts.is_none() && self.mijia_accounts.is_some() {
+                    AccountProvider::Mijia
+                } else {
+                    AccountProvider::Meiju
+                },
+            );
+            match provider {
+                AccountProvider::Meiju => {
+                    let adapter = self
+                        .accounts
+                        .as_ref()
+                        .ok_or_else(crate::accounts::unsupported)?;
+                    let credentials = homeverb_midea::LoginCredentials::new(login, password)?;
+                    let report = adapter
+                        .connect_devices(credentials, input.account_id, &input.label, &operation)
+                        .await?;
+                    Ok(crate::accounts::publish(&self.core, report, "succeeded", &operation).await)
+                }
+                AccountProvider::Mijia => {
+                    let adapter = self
+                        .mijia_accounts
+                        .as_ref()
+                        .ok_or_else(crate::accounts::unsupported)?;
+                    let credentials = homeverb_mijia::LoginCredentials::new(login, password)?;
+                    let report = adapter
+                        .connect_devices(credentials, input.account_id, &input.label, &operation)
+                        .await?;
+                    Ok(
+                        crate::accounts::publish_mijia(&self.core, report, "succeeded", &operation)
+                            .await,
+                    )
+                }
+            }
         }
         .await;
         json!(Query::from_result(result))
@@ -461,10 +527,14 @@ impl Session {
             self.register(&input.schema_version, input.operation_id, input.timeout_ms)?;
         let result = match input.request {
             Request::ListAccounts {} => {
-                let accounts = match &self.accounts {
+                let mut accounts = match &self.accounts {
                     Some(adapter) => adapter.accounts(&operation).await?,
                     None => vec![],
                 };
+                if let Some(adapter) = &self.mijia_accounts {
+                    accounts.extend(adapter.accounts(&operation).await?);
+                }
+                accounts.sort_by_key(|a| a.id);
                 Ok(json!(
                     accounts
                         .into_iter()
@@ -473,10 +543,7 @@ impl Session {
                 ))
             }
             Request::GetAccount { account_id } => {
-                let adapter = self
-                    .accounts
-                    .as_ref()
-                    .ok_or_else(crate::accounts::unsupported)?;
+                let adapter = self.account_adapter(account_id, &operation).await?;
                 let account = adapter.account(account_id, &operation).await?;
                 crate::accounts::details(&self.core, account, &operation).await
             }
@@ -484,10 +551,15 @@ impl Session {
                 account_id,
                 device_id,
             } => {
-                let adapter = self
-                    .accounts
-                    .as_ref()
-                    .ok_or_else(crate::accounts::unsupported)?;
+                let adapter = match self.account_adapter(account_id, &operation).await? {
+                    crate::accounts::AccountAdapter::Meiju(adapter) => adapter,
+                    crate::accounts::AccountAdapter::Mijia(_) => {
+                        return Err(Error::new(
+                            "CAPABILITY_UNSUPPORTED",
+                            "Saved device conflict inspection is unavailable for this provider.",
+                        ));
+                    }
+                };
                 let inspection = adapter
                     .inspect_device_conflicts(account_id, device_id, &operation)
                     .await?;
@@ -496,14 +568,8 @@ impl Session {
                     .await
             }
             Request::InspectAccountInventory { account_id } => {
-                let adapter = self
-                    .accounts
-                    .as_ref()
-                    .ok_or_else(crate::accounts::unsupported)?;
-                let inspection = adapter.inspect_inventory(account_id, &operation).await?;
-                operation
-                    .run(async { Ok(crate::accounts::inventory(inspection)) })
-                    .await
+                let adapter = self.account_adapter(account_id, &operation).await?;
+                adapter.inventory(account_id, &operation).await
             }
             Request::InspectControlOptions {
                 device_id,
@@ -543,47 +609,47 @@ impl Session {
                     .await
             }
             Request::RenameAccount { account_id, label } => {
-                let adapter = self
-                    .accounts
-                    .as_ref()
-                    .ok_or_else(crate::accounts::unsupported)?;
-                let account = adapter
-                    .rename_account(account_id, &label, &operation)
-                    .await?;
-                Ok(json!(crate::AccountSummary::from(account)))
+                let adapter = self.account_adapter(account_id, &operation).await?;
+                Ok(json!(crate::AccountSummary::from(
+                    adapter.rename(account_id, &label, &operation).await?
+                )))
             }
             Request::RemoveAccount {
                 account_id,
                 expected_device_ids,
             } => {
-                let adapter = self
-                    .accounts
-                    .as_ref()
-                    .ok_or_else(crate::accounts::unsupported)?;
+                // Provider-scoped removal checks its durable ledger before mutation.
+                // An already removed account is absent from the ordinary account list.
+                let mut result = Err(crate::accounts::unsupported());
+                if let Some(adapter) = &self.accounts {
+                    result = adapter
+                        .remove_account(account_id, &expected_device_ids, &operation)
+                        .await;
+                }
+                if (self.accounts.is_none()
+                    || matches!(&result, Err(e) if e.code == "ACCOUNT_NOT_FOUND"))
+                    && let Some(adapter) = &self.mijia_accounts
+                {
+                    result = adapter
+                        .remove_account(account_id, &expected_device_ids, &operation)
+                        .await;
+                }
+                result.map(|value| json!(value))
+            }
+            Request::RefreshAccount { account_id } => {
+                let adapter = self.account_adapter(account_id, &operation).await?;
                 Ok(json!(
                     adapter
-                        .remove_account(account_id, &expected_device_ids, &operation)
+                        .retrieve(&self.core, account_id, false, &operation)
                         .await?
                 ))
             }
-            Request::RefreshAccount { account_id } => {
-                let adapter = self
-                    .accounts
-                    .as_ref()
-                    .ok_or_else(crate::accounts::unsupported)?;
-                let report = adapter.refresh_devices(account_id, &operation).await?;
-                Ok(json!(
-                    crate::accounts::publish(&self.core, report, "not_attempted", &operation).await
-                ))
-            }
             Request::RecoverAccount { account_id } => {
-                let adapter = self
-                    .accounts
-                    .as_ref()
-                    .ok_or_else(crate::accounts::unsupported)?;
-                let report = adapter.recover_devices(account_id, &operation).await?;
+                let adapter = self.account_adapter(account_id, &operation).await?;
                 Ok(json!(
-                    crate::accounts::publish(&self.core, report, "not_attempted", &operation).await
+                    adapter
+                        .retrieve(&self.core, account_id, true, &operation)
+                        .await?
                 ))
             }
             Request::GetApiInfo {} => Ok(serde_json::from_str(include_str!(

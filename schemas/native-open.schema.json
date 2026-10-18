@@ -32,7 +32,9 @@
     "adapter": {
       "enum": [
         "homeverb.mock",
-        "midea.meiju"
+        "midea.meiju",
+        "xiaomi.mijia",
+        "homeverb.platforms"
       ],
       "default": "homeverb.mock"
     },
@@ -597,13 +599,16 @@
     "allow_mock_writes"
   ],
   "additionalProperties": false,
-  "description": "Trusted native startup. data_dir must be an absolute private OS path. adapter defaults to homeverb.mock; scenario defaults to normal. Meiju defaults to read-only; optional meiju_power_grants, meiju_fan_grants, meiju_mode_grants and meiju_temperature_grants separately admit exact-device power, fan, explicit power-on/mode activation and profile-scoped temperature targets over cloud. Meiju rejects Mock grants or fault scenarios. Opening never authenticates, discovers or controls. Optional meiju_dishwasher_grants admit reviewed elevated starts only through separate trusted confirmation. Optional meiju_dishwasher_cycle_grants independently admit reviewed pause, resume and cancel requests through trusted confirmation. Optional meiju_ac_feature_grants independently admit reviewed profile-scoped scalar settings; missing reported prerequisites refuse before send.",
+  "description": "Trusted native startup. data_dir must be an absolute private OS path. adapter defaults to homeverb.mock; scenario defaults to normal. Meiju defaults to read-only; optional meiju_power_grants, meiju_fan_grants, meiju_mode_grants and meiju_temperature_grants separately admit exact-device power, fan, explicit power-on/mode activation and profile-scoped temperature targets over cloud. Meiju rejects Mock grants or fault scenarios. Opening never authenticates, discovers or controls. Optional meiju_dishwasher_grants admit reviewed elevated starts only through separate trusted confirmation. Optional meiju_dishwasher_cycle_grants independently admit reviewed pause, resume and cancel requests through trusted confirmation. Optional meiju_ac_feature_grants independently admit reviewed profile-scoped scalar settings; missing reported prerequisites refuse before send. API 1.24 admits Mijia-only and combined platform sessions. Mijia is read-only; combined sessions retain independent Meiju grants.",
   "allOf": [
     {
       "if": {
         "properties": {
           "adapter": {
-            "const": "midea.meiju"
+            "enum": [
+              "midea.meiju",
+              "homeverb.platforms"
+            ]
           }
         },
         "required": [
@@ -642,6 +647,28 @@
           },
           "meiju_ac_feature_grants": {
             "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "adapter": {
+            "const": "xiaomi.mijia"
+          }
+        },
+        "required": [
+          "adapter"
+        ]
+      },
+      "then": {
+        "properties": {
+          "allow_mock_writes": {
+            "const": false
+          },
+          "scenario": {
+            "const": "normal"
           }
         }
       }

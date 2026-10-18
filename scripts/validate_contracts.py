@@ -384,6 +384,21 @@ def main() -> int:
     for field in ["descriptor", "anchor", "connection", "transport_grants", "expires_at"]:
         bad = copy.deepcopy(link["prepare_result"]); del bad["data"][field]
         negative.append((f"link preview requires {field}", native_validator("native-connection-link", "prepare_result"), bad))
+    mijia_connect = {"schema_version":"1.0", "operation_id":"fictional-connect", "timeout_ms":1000, "label":"Mijia", "provider":"xiaomi.mijia"}
+    validators["native-connect"].validate(mijia_connect)
+    for provider in ["other.provider", True, {}, "CN"]:
+        negative.append(("unregistered account provider", validators["native-connect"], {**mijia_connect, "provider":provider}))
+    for mode in ["xiaomi.mijia", "homeverb.platforms"]:
+        startup = {"schema_version":"1.0", "data_dir":"/fictional/private", "allow_mock_writes":False, "adapter":mode}
+        validators["native-open"].validate(startup)
+        negative.append(("platform startup rejects Mock writes", validators["native-open"], {**startup,"allow_mock_writes":True}))
+        negative.append(("platform startup rejects Mock scenarios", validators["native-open"], {**startup,"scenario":"lost-ack"}))
+    retrieval = {"status":"partial", "device_ids":["40000000-0000-4000-8000-000000000001"], "error":{"code":"MIJIA_INVENTORY_PARTIAL","message":"Fictional partial inventory.","retryable":False}}
+    shape = native_validator("native-response", "account_retrieval")
+    shape.validate(retrieval)
+    negative.append(("failed inventory cannot publish device IDs", shape, {**retrieval,"status":"failed"}))
+    negative.append(("partial inventory requires an error", shape, {**retrieval,"error":None}))
+    negative.append(("partial inventory forbids duplicate IDs", shape, {**retrieval,"device_ids":retrieval["device_ids"]*2}))
     for name, validator, data in negative:
         if validator.is_valid(data):
             raise AssertionError(f"Counterexample was not rejected: {name}")

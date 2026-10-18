@@ -1443,7 +1443,9 @@
                 "adapter": {
                   "enum": [
                     "homeverb.mock",
-                    "midea.meiju"
+                    "midea.meiju",
+                    "xiaomi.mijia",
+                    "homeverb.platforms"
                   ]
                 }
               },
@@ -1484,7 +1486,10 @@
           "format": "uuid"
         },
         "provider": {
-          "const": "midea.meiju"
+          "enum": [
+            "midea.meiju",
+            "xiaomi.mijia"
+          ]
         },
         "region": {
           "const": "CN"
@@ -1554,14 +1559,54 @@
           "type": "object",
           "properties": {
             "status": {
-              "enum": [
-                "partial",
-                "failed"
-              ]
+              "const": "failed"
             },
             "device_ids": {
               "type": "array",
               "maxItems": 0
+            },
+            "error": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "message": {
+                  "type": "string"
+                },
+                "retryable": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "code",
+                "message",
+                "retryable"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "device_ids",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "const": "partial"
+            },
+            "device_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "uniqueItems": true
             },
             "error": {
               "type": "object",

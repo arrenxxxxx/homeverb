@@ -381,6 +381,7 @@ impl Fixture {
             .session
             .connect_account(
                 ConnectRequest {
+                    provider: None,
                     schema_version: "1.0".into(),
                     operation_id: "connect".into(),
                     timeout_ms: 1000,

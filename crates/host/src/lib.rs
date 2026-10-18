@@ -14,7 +14,7 @@ pub use session::{
     PrepareConnectionLinkRequest, PrepareLanScanRequest, Request, Session,
 };
 mod accounts;
-pub use accounts::{AccountConnection, AccountSummary, ConnectRequest};
+pub use accounts::{AccountConnection, AccountProvider, AccountSummary, ConnectRequest};
 mod power_grants;
 pub use power_grants::{MeijuPowerGrant, meiju_power_policy};
 mod ac_feature_grants;
@@ -158,6 +158,18 @@ fn meiju_parts(
     directory: &Path,
     grants: MeijuControlGrants<'_>,
 ) -> Result<(Core, Arc<homeverb_midea::MeijuAdapter>)> {
+    platform_parts(directory, grants, false).map(|(core, meiju, _)| (core, meiju))
+}
+
+fn platform_parts(
+    directory: &Path,
+    grants: MeijuControlGrants<'_>,
+    include_mijia: bool,
+) -> Result<(
+    Core,
+    Arc<homeverb_midea::MeijuAdapter>,
+    Option<Arc<homeverb_mijia::MijiaAdapter>>,
+)> {
     let mut policy = meiju_power_policy(grants.power)?;
     policy.grants.extend(meiju_fan_policy(grants.fan)?.grants);
     policy
@@ -177,7 +189,7 @@ fn meiju_parts(
     let vault = Arc::new(open_accounts(directory)?);
     let clock = Arc::new(SystemClock);
     let mut adapter = homeverb_midea::MeijuAdapter::new(
-        vault,
+        vault.clone(),
         Arc::new(homeverb_midea::MeijuHttps),
         clock.clone(),
     );
@@ -205,10 +217,18 @@ fn meiju_parts(
         adapter = adapter.with_dishwasher_cycle_control();
     }
     let adapter = Arc::new(adapter);
-    Ok((
-        Core::new(store, vec![adapter.clone()], clock, policy),
-        adapter,
-    ))
+    let mijia = include_mijia.then(|| {
+        Arc::new(homeverb_mijia::MijiaAdapter::new(
+            vault,
+            Arc::new(homeverb_mijia::MijiaHttps),
+            clock.clone(),
+        ))
+    });
+    let mut adapters: Vec<Arc<dyn homeverb_core::Adapter>> = vec![adapter.clone()];
+    if let Some(mijia) = &mijia {
+        adapters.push(mijia.clone());
+    }
+    Ok((Core::new(store, adapters, clock, policy), adapter, mijia))
 }
 
 pub fn open_mock(directory: &Path, scenario: Scenario, allow_writes: bool) -> Result<Core> {
@@ -245,4 +265,24 @@ pub fn open_mock(directory: &Path, scenario: Scenario, allow_writes: bool) -> Re
         });
     }
     Ok(Core::new(store, vec![adapter], clock, Policy { grants }))
+}
+
+/// Foreground Mijia-only account host. Startup does not access secrets or the network.
+pub fn open_mijia_session(directory: &Path) -> Result<Session> {
+    let store = Arc::new(SqliteStore::open(directory)?);
+    let vault = Arc::new(open_accounts(directory)?);
+    let clock = Arc::new(SystemClock);
+    let adapter = Arc::new(homeverb_mijia::MijiaAdapter::new(
+        vault,
+        Arc::new(homeverb_mijia::MijiaHttps),
+        clock.clone(),
+    ));
+    let core = Core::new(store, vec![adapter.clone()], clock, Policy::default());
+    Ok(Session::with_platform_accounts(core, None, Some(adapter)))
+}
+
+/// Shared local profile with both reviewed cloud providers and independent Meiju grants.
+pub fn open_platform_session(directory: &Path, grants: MeijuControlGrants<'_>) -> Result<Session> {
+    let (core, meiju, mijia) = platform_parts(directory, grants, true)?;
+    Ok(Session::with_platform_accounts(core, Some(meiju), mijia))
 }

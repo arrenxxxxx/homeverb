@@ -1,5 +1,5 @@
 {
-  "api_version": "1.23.0",
+  "api_version": "1.24.0",
   "functions": {
     "homeverb_prepare_approval": {
       "request": "native-approval#/$defs/prepare",

@@ -68,6 +68,10 @@ enum AdapterMode {
     Mock,
     #[serde(rename = "midea.meiju")]
     Meiju,
+    #[serde(rename = "xiaomi.mijia")]
+    Mijia,
+    #[serde(rename = "homeverb.platforms")]
+    Platforms,
 }
 
 fn error(code: &str, message: &str) -> Value {
@@ -119,15 +123,15 @@ pub unsafe extern "C" fn homeverb_open(config: *const c_char) -> *mut c_char {
                 "Use schema version 1.0 and an absolute private data directory.",
             );
         }
-        if config.adapter == AdapterMode::Meiju
+        if config.adapter != AdapterMode::Mock
             && (config.allow_mock_writes || config.scenario != Scenario::Normal)
         {
             return error(
                 "INVALID_ARGUMENT",
-                "Meiju startup does not accept Mock scenarios or grants.",
+                "Platform startup does not accept Mock scenarios or grants.",
             );
         }
-        if config.adapter != AdapterMode::Meiju
+        if !matches!(config.adapter, AdapterMode::Meiju | AdapterMode::Platforms)
             && (!config.meiju_power_grants.is_empty()
                 || !config.meiju_fan_grants.is_empty()
                 || !config.meiju_mode_grants.is_empty()
@@ -151,9 +155,21 @@ pub unsafe extern "C" fn homeverb_open(config: *const c_char) -> *mut c_char {
                 )
                 .map(Session::new),
             ),
-            AdapterMode::Meiju => (
-                "midea.meiju",
-                homeverb_host::open_meiju_session_with_grants(
+            AdapterMode::Mijia => (
+                "xiaomi.mijia",
+                homeverb_host::open_mijia_session(&config.data_dir),
+            ),
+            AdapterMode::Meiju | AdapterMode::Platforms => (
+                if config.adapter == AdapterMode::Meiju {
+                    "midea.meiju"
+                } else {
+                    "homeverb.platforms"
+                },
+                (if config.adapter == AdapterMode::Meiju {
+                    homeverb_host::open_meiju_session_with_grants
+                } else {
+                    homeverb_host::open_platform_session
+                })(
                     &config.data_dir,
                     MeijuControlGrants {
                         ac_features: &config.meiju_ac_feature_grants,

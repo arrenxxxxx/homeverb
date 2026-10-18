@@ -80,6 +80,7 @@ pub async fn run(
                 &session,
                 session.connect_account(
                     ConnectRequest {
+                        provider: None,
                         schema_version: SCHEMA_VERSION.into(),
                         operation_id,
                         timeout_ms,

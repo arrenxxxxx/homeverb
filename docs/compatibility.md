@@ -8,13 +8,17 @@ unsupported placeholders, and initial doorbell, door-lock and fan adaptation.
 account/home device enumeration and exact released-model MIoT mapping for selected
 readable fan/lock/doorbell/battery properties. Its protected account vault bindings
 and read-only Core adapter now have synthetic SQLite/account/read evidence and
-explicit Rust host composition. Native C/App flows and fan controls remain pending.
+native API 1.24 Mijia-only/combined account composition. Flutter flows and fan
+controls remain pending.
 Community enumeration is not complete-home evidence. Online hints are never power or
 lock state. Door-lock writes remain high-risk and unavailable. Real authentication,
 challenge completion, regional inventory, MIoT model mapping and physical support
 remain unverified. See the [phase record](development/11-mijia.md).
-Existing native API 1.23, SQLite 5, Meiju protected payload 3 and CLI/MCP/App entry
-points are unchanged. Mijia protected payload 1 is separate and account-bound.
+Native API 1.24 adds startup modes, optional protected-connect provider selection
+and partial retrieval with positive device IDs. Strict clients must negotiate the
+new version before selecting these modes. C exports, SQLite 5, Meiju protected
+payload 3 and CLI/MCP/App entry points are unchanged. Mijia protected payload 1
+is separate and account-bound.
 A new internal crate and six locked SHA-1 support packages are added.
 
 ## Appliance detail buttons: October 18, 2026

@@ -1,5 +1,5 @@
 {
-  "api_version": "1.23.0",
+  "api_version": "1.24.0",
   "provenance": "Fictional account DTO examples. Actual synthetic host responses are checked against the same schemas by crates/host/tests/meiju_accounts.rs. No live identities or credentials.",
   "connect_metadata": {
     "schema_version": "1.0",
@@ -846,6 +846,37 @@
         "warnings": [],
         "error": null
       }
+    },
+    {
+      "response_definition": "connect_account",
+      "response": {
+        "schema_version": "1.0",
+        "data": {
+          "account": {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "provider": "xiaomi.mijia",
+            "region": "CN",
+            "label": "Example Mijia account",
+            "credential_state": "stored",
+            "authorization": "not_checked",
+            "last_complete_inventory_at": null
+          },
+          "authentication": "succeeded",
+          "retrieval": {
+            "status": "partial",
+            "device_ids": [
+              "00000000-0000-4000-8000-000000000002"
+            ],
+            "error": {
+              "code": "MIJIA_INVENTORY_PARTIAL",
+              "message": "Returned devices are available; complete account coverage is not established.",
+              "retryable": false
+            }
+          }
+        },
+        "warnings": [],
+        "error": null
+      }
     }
   ],
   "reauthorize_metadata": {
@@ -854,5 +885,13 @@
     "timeout_ms": 180000,
     "label": "Example account",
     "account_id": "00000000-0000-4000-8000-000000000001"
+  },
+  "mijia_connect_metadata": {
+    "schema_version": "1.0",
+    "operation_id": "connect-example",
+    "timeout_ms": 180000,
+    "label": "Example account",
+    "account_id": null,
+    "provider": "xiaomi.mijia"
   }
 }
