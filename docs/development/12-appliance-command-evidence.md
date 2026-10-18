@@ -39,6 +39,12 @@ non-idempotent uncertainty handling and no automatic write replay.
 
 ## Identify the refrigerator's actual encoder
 
+The subsequent [official Android package inspection](#official-android-package-inspection)
+adds direct client evidence, including a nonempty `smartProductId` lookup argument
+missing from the pinned community request. The phone operating system is not a
+prerequisite for cloud-protocol research; public Android assets can be inspected
+without a connected phone, account or Android SDK.
+
 The pinned client's `MeijuCloud.download_lua` uses
 `/v1/appliance/protocol/lua/luaGet`. Its request contains `applianceSn`,
 `applianceType`, `applianceMFCode`, `version`, `iotAppId` and `modelNumber`.
@@ -110,3 +116,74 @@ input step and omitted-field behavior, and review preservation against actual
 model status. A separately authorized physical test must confirm the intended
 change and unchanged settings. The implemented dishwasher path can be tested
 independently; its physical acceptance remains pending too.
+
+## Official Android package inspection
+
+After the owner selected Android, a public-package investigation proceeded without
+waiting for a connected device. The [official Meiju download page](https://msmart.midea.com/mideaApp/)
+and its [page script](https://msmart.midea.com/_nuxt/f68251f.js) expose a public
+release lookup at `/meiju-web/v1/apisix/gray/app/getUpgradeStrategy` through the
+existing vendor proxy origin. The webpage supplies `os: Android`, `iotAppId: 900`
+and `sourceType: H5`; no account credentials are involved. This is a download-page
+lookup, not a new HomeVerb production endpoint.
+
+The vendor returned version **11.7.10.6** from `mjdownload-pro.smartmidea.net`.
+The 207,629,116-byte APK matched the download response's MD5. Its independently
+computed SHA-256 is
+`5da32e92638806d55e9ce533b917bbbbba6db0bd7d3a02c45e08ed0dee62d849`.
+No APK installation, APK code execution, signature verification, account login or
+appliance command was performed. The APK and extracted source remain temporary
+research inputs outside the repository; they are not redistributed with HomeVerb.
+
+The archive contains encrypted `assets/lua/T_0000_CA_5.lua` and
+`assets/lua/T_0000_E1_3.lua`. The already-pinned community decoding method reads
+both; no new APK signing/credential material was extracted or admitted. The CA
+file again contains the generic 2-8 fridge and -24 to -15 freezer bounds, with
+status applied before control and temperatures/modes/power packed together.
+Those bounds are not the selected model's writable contract. Neither decoded
+base file contains the `600WUFIPZM` model literal. This is a limited static-search
+result, not proof that the App lacks model support or that a device uses the base
+file. Neither official Lua file was executed.
+
+Static DEX inspection of `ProtocolControlManager` established:
+
+- `prepareLocalLuaFile` checks cached/local files and bundled assets, constructs
+  several increasingly general filename keys and calls `checkDownloadLastLuaFile`.
+  A bundled family file alone therefore does not identify the device's actual
+  selected protocol.
+- `getLastVersion` builds `iotAppId`, `applianceMFCode`, `applianceType`,
+  `modelNumber`, `applianceSn` and `version`, and adds `smartProductId` when nonempty.
+  The pinned community `download_lua` accepts a similarly named argument but omits
+  it from the outgoing request. Preserve the actual protected value when reviewing
+  a native lookup; do not invent one or assume omission has equivalent semantics.
+- The same method obtains a URL, filename and integrity metadata from its response.
+  Request construction is static evidence; this phase did not perform an
+  authenticated protocol lookup or download a device-specific file.
+- The control callback constructs `deviceinfo` with `deviceSubType`, supplies
+  distinct `control` and `status` maps and calls `LuaManager.encodeJsonToBytes`.
+  This corroborates the state-overlay dependency found in the public Lua sources;
+  it does not establish cloud-state freshness or the selected model's preservation.
+
+A repeatable [static inspector](../../scripts/inspect_meiju_android_protocol.py)
+checks the exact APK and community decoder SHA-256 values, decodes the two bundled
+files in memory, and reports only hashes, allowlisted field names and selected
+method-call checks. It emits no arbitrary DEX strings, proprietary source,
+credentials or device identifiers. Use a temporary environment containing
+`androguard==4.1.3` and `pycryptodome==4.0.1`:
+
+```bash
+python scripts/inspect_meiju_android_protocol.py /path/to/meiju.apk /path/to/midea_auto_cloud
+```
+
+The inspector passed against the pinned official package and community checkout.
+These checks confirm static structure only. They neither validate field values
+from a live account nor execute an appliance-control path. No native API, storage,
+App grant, refrigerator capability or physical compatibility claim changes.
+
+The next device-specific input is the actual lookup tuple and returned protocol
+identity for this refrigerator. It must come from an authorized account operation
+or a sanitized device-specific artifact, not from the Android/iOS choice. A USB
+connection can enable device-side inspection but does not by itself grant access
+to private App data. The current read-only ADB inventory found zero connected
+Android devices; no private data was accessed. The incomplete local Android SDK
+blocks building HomeVerb's APK, not this public protocol investigation.
