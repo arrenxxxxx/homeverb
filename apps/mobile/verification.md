@@ -43,6 +43,20 @@ Refrigerator controls remain blocked by exact-model encoder/step/preservation
 evidence. Native API 1.23, SQLite 5 and protected Meiju payload 3 are unchanged;
 only trusted foreground App preparation policy expands.
 
+Follow-up delivery audit on the same workstation attempted
+`fvm flutter build apk --release --target-platform android-arm64,android-x64 --dart-define=HOMEVERB_ADAPTER=midea.meiju`.
+It failed before compilation: the configured SDK points to the Homebrew
+platform-tools directory, and Gradle requires NDK `28.2.13676358` with an accepted
+license. No complete SDK was found in the inspected standard/development locations.
+No licenses were accepted or SDK packages installed. The existing October 17 AAR
+was not rebuilt, and no older APK is represented as this revision's deliverable.
+APK delivery is **blocked: a complete licensed SDK/NDK and a matching native AAR
+build are required**. A read-only device-list check outside the sandbox found zero
+connected Android devices or emulators; no device identifiers or account data were
+exported. Exact refrigerator protocol association still requires the connected
+Meiju environment or a sanitized exact-model artifact described in the command
+evidence record. This audit adds no new physical-support claim.
+
 ## Refrigerator and dishwasher detail buttons: October 18, 2026
 
 Capability exploration traced the current refrigerator write-evidence review,
