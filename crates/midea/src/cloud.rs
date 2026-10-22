@@ -14,6 +14,8 @@ use zeroize::Zeroizing;
 
 const ORIGIN: &str = "https://mp-prod.smartmidea.net/mas/v5/app/proxy?alias=";
 
+mod read_probe;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CloudEndpoint {
     LoginId,
@@ -233,7 +235,9 @@ impl CloudTransport for MeijuHttps {
             .run(async {
                 let client = client_builder().build().map_err(|_| failed())?;
                 let url = format!("{ORIGIN}{}", request.endpoint.path());
-                send_once(client, &url, request, operation).await
+                let response = send_once(client, &url, request, operation).await?;
+                read_probe::run(request, operation).await;
+                Ok(response)
             })
             .await
     }

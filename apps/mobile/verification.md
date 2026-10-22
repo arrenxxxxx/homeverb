@@ -3407,3 +3407,79 @@ This new isolated profile contains no previous account/session. Startup and
 platform navigation passed; account authentication, inventory, modern MAS session
 compatibility and real-device controls were not tested. No credentials were
 entered by tooling, no appliance command was sent, and no artifact was uploaded.
+
+
+### Existing-session modern read acceptance — October 22, 2026
+
+The owner completed sign-in directly in the new isolated emulator and requested
+trying the existing authentication. The account page reported complete inventory
+and six devices. The exact refrigerator rendered freezer, fridge and separate
+variable-zone target/current observations through the existing transport. These
+are cloud readings with unproven physical sample time, not physical verification.
+No names, account references, vendor identifiers or actual readings are copied
+into this record; screenshots remained in local temporary storage.
+
+The earlier blanket statement that missing modern signing material prevents all
+new MAS access was too broad. [ADR-0075](../../docs/adr/0075-one-shot-meiju-read-compatibility-probe.md)
+now supplies an explicitly compiled, one-shot read experiment. It uses the existing
+protected HomeVerb session and admitted signer, not an exported official-App
+session or any new secret. Two fixed POST routes, with bodies from the supplied
+read-only client, may each be attempted once per process; they inherit bounded
+foreground transport/lifecycle rules. Only closed outcomes are logged. Responses
+do not enter ordinary account/device/state storage or grant admission.
+
+Executed evidence:
+
+- `cargo test -p homeverb-midea --lib cloud::read_probe --offline --locked`:
+  five passed, including exact read-trigger admission, bounded request bodies,
+  concurrent one-shot consumption and closed business-result classification.
+- `cargo test -p homeverb-midea --lib cloud::tests --offline --locked`:
+  seven fictional TLS/HTTP, cancellation, cap, refusal and transmission tests
+  passed outside the restrictive loopback sandbox.
+- `cargo test -p homeverb-midea --test adapter --offline --locked`: 50 passed.
+  `cargo +1.96.0 clippy -p homeverb-midea --all-targets --offline --locked -- -D warnings`:
+  passed. No Flutter source changed and no new Flutter widget suite was run for
+  this experiment.
+- Both Android ABIs rebuilt with `HOMEVERB_MEIJU_READ_PROBE=1` and the same
+  previously documented native build command. Twenty exports and 16 KiB ELF
+  alignment passed. The separate explicit-Meiju Flutter release build passed in
+  11.8 seconds. Its development signature, both ABIs, current probe-AAR match,
+  integration-plugin absence and ZIP/ELF alignment passed APK inspection.
+- Probe artifact:
+  `output/flutter-verification/android/homeverb-0.2.0-meiju-read-probe-20261022.apk`.
+  SHA-256: `6ec7d8e293b168b3e07e209311426cb9ea4f65d2cd412b9b2092adc5bde5fcd1`.
+  The adjacent verification JSON records pre-commit revision/dirty build state;
+  the corresponding probe AAR is saved separately in the same local directory.
+- In-place installation retained the signed-in account. Probe cold start returned
+  `Status: ok`, 1466 ms. At 21:55 Asia/Shanghai the modern Lua-state route logged
+  `lua_state_started`, then `business_success_object`. An explicit account
+  Refresh Devices at 21:57 logged aggregate `inventory_started`, then
+  `business_success_object`. Each result means business code zero with an object
+  in `data`, not HTTP success alone. No other probe request or appliance control
+  was sent; no payload or credential was logged/exported.
+
+Both modern POST requests accepted the existing session and admitted signer.
+This removes the missing-authentication blocker for those tested requests, not
+for all endpoints, regions/accounts, independent modern renewal, GET/query
+serialization or vendor business signatures. Full response mapping, inventory
+completeness, device semantics, new ordinary App route adoption and real controls
+remain unverified/unimplemented. The
+[closed evidence](../../docs/development/meiju-read-probe-evidence.json) and
+67-operation ledger now distinguish probe acceptance from feature implementation.
+
+After the experiment `adb install -r` restored the ordinary reference APK
+(`8617d96e585162a8e9d22c61d167e05bf560ba9490e493d4e4281c478ce6ed15`).
+Its cold start returned `Status: ok`, 1283 ms. The installed code-only APK hash
+matched the ordinary artifact, both packaged native libraries lacked probe
+markers, and the account card remained visible. The original ordinary AAR was
+also restored. The emulator is left running on the account list, with no open
+device state timer. Native API 1.26, SQLite 5, protected payload 3, control grants
+and ordinary route behavior are unchanged. No account data was reset, appliance
+command sent, remote push/publication performed or diagnostic uploaded.
+
+
+Final phase checks passed: Rust formatting; archive/evidence projection;
+documentation validation (151 Markdown files, 1654 local links, 233 JSON files);
+contract validation (21 schemas, 52 positive and 341 negative fixtures);
+repository validation (656 maintained text files); and `git diff --check`.
+These checks do not turn probe acceptance into complete interface implementation.

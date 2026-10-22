@@ -1,7 +1,8 @@
 {
   "reference_sha256": "fa4d5c978b7a7b0197f64c7cbd8badff49f57ecf83034e1f6ae93c038831e453",
   "status": "partial_implementation",
-  "network_used": false,
+  "projection_network_used": false,
+  "live_read_evidence": "meiju-read-probe-evidence.json",
   "operations": [
     {
       "id": "login_id",
@@ -15,35 +16,35 @@
       "method": "POST",
       "route": "/v6/mj/user/login",
       "semantics": "authentication",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "auto_login",
       "method": "POST",
       "route": "/mj/user/autoLogin",
       "semantics": "authentication",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "home_list",
       "method": "POST",
       "route": "/v2/homegroup/list/get",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "home_aggregate",
       "method": "POST",
       "route": "/v1/homegroup/aggregate/get",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "home_cards",
       "method": "POST",
       "route": "/v1/appliance/home/list/aggregate",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "existing_session_probe_passed_not_integrated"
     },
     {
       "id": "home_devices",
@@ -57,147 +58,147 @@
       "method": "POST",
       "route": "/v1/homegroup/member/get",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "devices_by_ids",
       "method": "POST",
       "route": "/v1/appliance/info/bind/batch",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "batch_device_info",
       "method": "POST",
       "route": "/v1/appliance/batch/info/get",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "device_auth_status",
       "method": "POST",
       "route": "/v1/appliance/auth/batch/get",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "device_status_list",
       "method": "POST",
       "route": "/v1/appliance/batch/getStatus",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "status_aggregator",
       "method": "POST",
       "route": "/api/v1/aggregator/appliances",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "lua_status_json",
       "method": "POST",
       "route": "/v1/device/status/lua/get",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "existing_session_probe_passed_not_integrated"
     },
     {
       "id": "tsl_templates",
       "method": "POST",
       "route": "/v1/appliance/thing/template/get",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "composite_property_codes",
       "method": "POST",
       "route": "/v1/appliance/composite/card/config/get",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "update_tsl_card",
       "method": "POST",
       "route": "/v1/appliance/thing/card/update",
       "semantics": "write",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "plugin_v3",
       "method": "POST",
       "route": "/v1/plugin/update/getPluginV3",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "plugin_legacy",
       "method": "POST",
       "route": "/v1/plugin/update/getplugin",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "plugin_model_login",
       "method": "POST",
       "route": "/v1/plugin/update/getLoginModelPlugin",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "plugin_model",
       "method": "POST",
       "route": "/v1/plugin/update/getModelPlugin",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "virtual_plugins",
       "method": "POST",
       "route": "/v1/plugin/virtualplugin/get",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "tsl_all",
       "method": "GET",
       "route": "/v1/thing/properties/{applianceCode}",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "tsl_selected",
       "method": "POST",
       "route": "/v1/thing/properties/{applianceCode}",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "tsl_batch_selected",
       "method": "POST",
       "route": "/v1/thing/batch/properties",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "tsl_batch_all",
       "method": "GET",
       "route": "/v1/thing/batch/properties",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "tsl_set",
       "method": "PUT",
       "route": "/v1/thing/properties/{applianceCode}",
       "semantics": "write",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "tsl_action",
       "method": "POST",
       "route": "/v1/thing/action/{moduleCode}/{actionCode}/{applianceCode}",
       "semantics": "write",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "tsl_custom_action",
@@ -211,210 +212,210 @@
       "method": "POST",
       "route": "/v1/thing/batch/history",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "house_summary",
       "method": "POST",
       "route": "/v1/home/summary",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "house_summary_config",
       "method": "POST",
       "route": "/v1/home/summary/config/query",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "house_summary_save",
       "method": "POST",
       "route": "/v1/home/summary/config/save",
       "semantics": "write",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "timer_list",
       "method": "GET",
       "route": "/v1/scene/pluginpage/timer/list",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "timer_batch_list",
       "method": "POST",
       "route": "/v1/scene/pluginpage/timer/batch/list",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "timer_delete",
       "method": "POST",
       "route": "/v1/scene/pluginpage/timer/batch/deletion",
       "semantics": "write",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "timer_switch",
       "method": "POST",
       "route": "/v1/scene/pluginpage/timer/switch",
       "semantics": "write",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "timer_results",
       "method": "POST",
       "route": "/v1/scene/pluginpage/timer/actionresult/list",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "timer_results_delete",
       "method": "POST",
       "route": "/v1/scene/pluginpage/timer/delete/actionresult",
       "semantics": "write",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "message_categories",
       "method": "POST",
       "route": "/mc/v6/app/messagecenter/assemble/list",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "home_messages",
       "method": "POST",
       "route": "/mc/v6/app/messagecenter/getHomeMsgList",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "category_messages",
       "method": "POST",
       "route": "/mc/v6/app/messagecenter/msgList",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "message_detail",
       "method": "POST",
       "route": "/mc/v6/app/messagecenter/getDetail",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "message_unread",
       "method": "POST",
       "route": "/mc/v6/app/messagecenter/assemble/totalUnread",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "message_status",
       "method": "POST",
       "route": "/mc/v6/app/messagecenter/getMessageStatus",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "message_important",
       "method": "POST",
       "route": "/mc/v6/app/messagecenter/scale/msg",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "message_read",
       "method": "POST",
       "route": "/mc/v6/app/messagecenter/setMessageReaded",
       "semantics": "write",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "message_status_set",
       "method": "POST",
       "route": "/mc/v6/app/messagecenter/setMessageStatus",
       "semantics": "write",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "message_delete",
       "method": "POST",
       "route": "/mc/v6/app/messagecenter/delete",
       "semantics": "write",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "message_home_delete",
       "method": "POST",
       "route": "/mc/v6/app/messagecenter/deleteByHome",
       "semantics": "write",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "message_category_delete",
       "method": "POST",
       "route": "/mc/v6/app/messagecenter/assemble/delete",
       "semantics": "write",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "device_messages_v2",
       "method": "POST",
       "route": "/mc/v6/app/messagecenter/appliance/list",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "messages_v2",
       "method": "POST",
       "route": "/mc/v6/app/messagecenter/newList",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "message_update_v2",
       "method": "POST",
       "route": "/mc/v6/app/messagecenter/updateMessageStatus",
       "semantics": "write",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "mute_get",
       "method": "POST",
       "route": "/mc/v6/app/messagecenter/getMute",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "mute_set",
       "method": "POST",
       "route": "/mc/v6/app/messagecenter/setMute",
       "semantics": "write",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "lua_resource",
       "method": "POST",
       "route": "v1/appliance/protocol/lua/luaGet",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "lua_resource_cbc",
       "method": "POST",
       "route": "v2/luaEncryption/luaGet",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "lua_resource_oem",
       "method": "POST",
       "route": "/v2/open/sdk/product/encrptedLuaGet",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "transparent",
@@ -456,21 +457,21 @@
       "method": "POST",
       "route": "/v1/appliance/list/codes",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "ota_check",
       "method": "POST",
       "route": "/v2/mix/device/update/has/check",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     },
     {
       "id": "ota_list_check",
       "method": "POST",
       "route": "/v1/device/update/has/check/list",
       "semantics": "read_candidate",
-      "implementation": "blocked_modern_authentication_and_contract"
+      "implementation": "unimplemented_endpoint_compatibility_and_contract"
     }
   ]
 }

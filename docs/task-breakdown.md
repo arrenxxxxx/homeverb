@@ -10,12 +10,15 @@ prerequisite checks, lifecycle and receipt rules remain mandatory. This supplies
 software integration, not new physical compatibility.
 
 The [integration guide](development/13-meiju-reference-integration.md) and generated
-67-operation ledger record the remaining work. Modern MAS signing/session
-material, independent authentication/renewal, business response contracts and
-some referenced source resources are absent from the supplied package. The
-owner confirmed no complete source directory is available. New TSL/statistical/
-history/configuration services, current GX1200Max controls and refrigerator writes
-remain blocked; they are not implemented by adding routes or controls to the UI.
+67-operation ledger record the remaining work. A subsequent owner-authorized
+[read experiment](adr/0075-one-shot-meiju-read-compatibility-probe.md) proved that
+the existing protected session and admitted POST signer work for modern Lua-state
+and aggregate-inventory reads. The blanket missing-authentication blocker is
+withdrawn for those requests; the ordinary App has not yet adopted their response
+contracts. Independent modern renewal, endpoint/query/business contracts and some
+referenced resources are still absent or untested. The owner confirmed no complete
+source directory is available. New TSL/statistical/history/configuration services,
+current GX1200Max controls and refrigerator writes remain incomplete.
 See the [App verification record](../apps/mobile/verification.md) for actual
 offline/runtime/package checks and the existing macOS LAN-test blockers.
 

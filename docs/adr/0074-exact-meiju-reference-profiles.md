@@ -43,11 +43,14 @@ fewer optional actions than the historical category union; stale actions cannot
 bypass the protected selector. Other reviewed community product overrides remain
 unchanged. Foreground state-read scheduling is unchanged.
 
-The new MAS routes use a different authentication/signing contract whose
-material is excluded from the supplied package. Existing admitted community
-material is not assumed equivalent. Modern TSL, new aggregate inventory,
-statistics, history, configuration, resource downloads and vendor-service
-requests remain blocked on an independently admitted authentication path.
+The source package excludes modern app signing material and initially did not
+establish compatibility with the admitted community material. The owner-requested
+[ADR-0075 experiment](0075-one-shot-meiju-read-compatibility-probe.md) established
+that the existing session/signer works for fixed modern Lua-state and aggregate
+inventory POST requests. Their response mappings remain unimplemented; blanket
+session incompatibility is not a current blocker for those reads. Modern TSL,
+statistics, history, configuration, resource downloads and vendor services still
+require endpoint-specific contract and compatibility evidence.
 The GX1200Max 760064BA firmware-1 TSL program/action conversion is not the
 existing five legacy dishwasher profiles. No legacy grant or program number
 implicitly admits it. Empty settingInfo, missing source resources, conditional

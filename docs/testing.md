@@ -418,3 +418,24 @@ compartment, permissions and localization regressions before packaging. See the
 [executed results](../apps/mobile/verification.md). Real appliances are not used
 by these checks; the complete-interface blockers remain explicit in the
 [integration guide](development/13-meiju-reference-integration.md).
+
+
+### Opt-in modern Meiju read experiment
+
+[ADR-0075](adr/0075-one-shot-meiju-read-compatibility-probe.md) documents the
+owner-requested, read-only existing-session experiment. Set
+`HOMEVERB_MEIJU_READ_PROBE=1` only while building the separate development AAR.
+The ordinary Flutter entry point uses that AAR without any new JSON method or
+request parameter. Each process sends at most one aggregate-inventory read
+following a legacy home-list read and one empty-command modern Lua-state read
+following a legacy appliance-state read. The environment flag is compiled into
+the native library; setting it only for Flutter does not enable the probe.
+
+Run `cargo test -p homeverb-midea --lib cloud::read_probe --offline --locked`
+and the shared `cloud::tests` TLS/lifecycle suite. Capture only the closed
+`HomeVerbReadProbeInventory` and `HomeVerbReadProbeLua` Android markers. Never
+capture ordinary provider logs, raw responses or protected storage. Response
+business success does not verify complete device semantics. Preserve ordinary
+APK/AAR artifacts and restore them afterward. Actual evidence is recorded in
+[App verification](../apps/mobile/verification.md) and the
+[closed read evidence](development/meiju-read-probe-evidence.json).

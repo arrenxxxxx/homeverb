@@ -77,16 +77,24 @@ def project():
                          'preserve': ['buzzer'], 'features': features})
     if len(profiles) != 4:
         raise ValueError('Expected four reviewed AC profiles.')
+    evidence = json.loads((COVERAGE.parent / 'meiju-read-probe-evidence.json').read_text())
+    if evidence['appliance_controls_sent'] != 0 or evidence['ordinary_app_route_adoption']:
+        raise ValueError('Expected read-only compatibility evidence without route adoption.')
+    probed = {item['operation']: item['route'] for item in evidence['requests']
+              if item['result'] == 'business_code_zero_with_object_data' and item['method'] == 'POST'}
     coverage = {
         'reference_sha256': SHA256,
         'status': 'partial_implementation',
-        'network_used': False,
+        'projection_network_used': False,
+        'live_read_evidence': 'meiju-read-probe-evidence.json',
         'operations': [],
     }
     for operation in generic['operations']:
         identifier = operation['id']
-        status = 'blocked_modern_authentication_and_contract'
-        if identifier in {'login_id', 'home_devices'}:
+        status = 'unimplemented_endpoint_compatibility_and_contract'
+        if probed.get(identifier) == operation['route']:
+            status = 'existing_session_probe_passed_not_integrated'
+        elif identifier in {'login_id', 'home_devices'}:
             status = 'existing_community_path_only'
         elif identifier in {'tsl_custom_action', 'plugin_cloud_bridge', 'transparent', 'transparent_oem'}:
             status = 'generic_execution_not_admitted'

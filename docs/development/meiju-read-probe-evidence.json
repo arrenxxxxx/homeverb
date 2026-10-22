@@ -1,0 +1,32 @@
+{
+  "status": "owner_authorized_read_experiment",
+  "date": "2026-10-22",
+  "scope": "One owner account on an Android 15 API 35 arm64 emulator",
+  "session": "Existing HomeVerb protected session; direct user sign-in; no session export",
+  "signer": "Existing ADR-0022 admitted POST signer; no new key material",
+  "requests": [
+    {
+      "operation": "lua_status_json",
+      "route": "/v1/device/status/lua/get",
+      "method": "POST",
+      "requests_sent": 1,
+      "command": "empty read command",
+      "result": "business_code_zero_with_object_data"
+    },
+    {
+      "operation": "home_cards",
+      "route": "/v1/appliance/home/list/aggregate",
+      "method": "POST",
+      "requests_sent": 1,
+      "result": "business_code_zero_with_object_data"
+    }
+  ],
+  "appliance_controls_sent": 0,
+  "responses_persisted": false,
+  "ordinary_app_route_adoption": false,
+  "other_endpoints_verified": false,
+  "physical_freshness_verified": false,
+  "api_version": "1.26.0",
+  "sqlite_version": 5,
+  "protected_payload_version": 3
+}

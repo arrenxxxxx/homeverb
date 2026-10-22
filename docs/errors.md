@@ -1,5 +1,11 @@
 # Errors and result contract
 
+The [opt-in Meiju read experiment](adr/0075-one-shot-meiju-read-compatibility-probe.md)
+records only closed diagnostic markers. Probe rejection, authentication refusal
+and malformed/transport failures never become an action receipt or account
+admission decision. Probe business success does not verify a physical observation.
+The ordinary JSON error/result schemas are unchanged.
+
 ## Error envelope
 
 ```json

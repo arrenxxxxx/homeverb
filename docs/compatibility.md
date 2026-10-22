@@ -1,5 +1,19 @@
 # Platform and device compatibility matrix
 
+## October 22 existing-session read experiment
+
+The owner signed in directly in the isolated API 35 arm64 emulator. Existing
+login/inventory returned six devices, and the exact refrigerator displayed three
+reported temperature zones. An opt-in development probe reused that protected
+session and the admitted POST signer for modern Lua-state and aggregate-inventory
+reads; both returned business success with object data. No new secret, second
+login or appliance control was used. This corrects the earlier blanket modern
+MAS authentication blocker for those two requests. Ordinary App route adoption,
+other endpoints, complete response semantics, physical sample freshness, phone
+policy and write support are not established. See the
+[integration record](development/13-meiju-reference-integration.md) and
+[probe decision](adr/0075-one-shot-meiju-read-compatibility-probe.md).
+
 ## October 18 appliance panel revision
 
 The [appliance panel revision](development/12-appliance-command-evidence.md#appliance-panels-and-optional-refrigerator-readings)

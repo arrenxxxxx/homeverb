@@ -1,5 +1,12 @@
 # Routing and execution semantics
 
+The owner-requested [one-shot Meiju compatibility experiment](adr/0075-one-shot-meiju-read-compatibility-probe.md)
+is disabled in ordinary builds. An explicitly compiled development library may
+append at most two fixed authenticated reads to foreground legacy operations.
+They inherit the caller's cancellation/deadline, never retry, and never update
+inventory, cached observations, permissions, routes or execution receipts.
+This is not an alternate control route or uncertain-write recovery path.
+
 ## Route policy
 
 `connection=lan` permits LAN only, with no cloud fallback. `cloud` permits vendor-cloud control only. `auto` chooses among action-supported routes with valid credentials, user permission, and current reachability; prefer LAN by default. A readable LAN route is not automatically writable for every action. Route by action, not merely by device.

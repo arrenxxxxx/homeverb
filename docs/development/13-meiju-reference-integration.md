@@ -62,29 +62,50 @@ and preferences. New detail fields are omitted for older saved descriptors. The
 existing automatic foreground state-read policy does not refresh inventory or
 enable missing controls.
 
+## Existing-session compatibility experiment
+
+After direct user sign-in in the isolated Android emulator, the opt-in
+[ADR-0075 probe](../adr/0075-one-shot-meiju-read-compatibility-probe.md) tried
+`/v1/device/status/lua/get` and `/v1/appliance/home/list/aggregate` once each.
+Both returned business code zero with an object in `data`, using the existing
+protected HomeVerb session and already-admitted POST signer. No new signing
+material or second login was required. The initial blanket authentication blocker
+was too broad and is withdrawn for these two tested requests. This does not prove
+every response field, other endpoints, renewal or another account/region works.
+The [closed evidence record](meiju-read-probe-evidence.json) contains no account
+or device identifiers, credentials, state values or raw responses.
+
+These are development-probe results, not ordinary App integration of the two
+new routes. The ordinary APK retains its existing inventory/state paths. Actual
+response mapping, list completeness, model-specific semantics and remaining
+GET/query/business wrappers still require implementation and verification.
+
 ## Remaining interface groups and concrete blockers
 
 | Interface/function group | HomeVerb status | Missing evidence or dependency |
 |---|---|---|
-| Native account login, saved session, legacy inventory and Lua reads | Existing implementation retained | New MAS client compatibility is not established by this older flow |
-| `/v1/appliance/home/list/aggregate` | Blocked; no replacement of existing inventory | Independent modern MAS authentication; complete response/card flattening and membership fixtures |
-| `/v1/device/status/lua/get` and TSL GET/POST properties | Blocked; existing `/mjl/...` reads remain | Different signer/query serialization, current-session admission and complete response fixtures |
-| TSL PUT properties and module actions | Blocked | Modern authentication, per-model argument/response/effect review and transmission tracking; never generic URL/body access |
+| Native account login, saved session, legacy inventory and Lua reads | Existing implementation retained; same-session compatibility proven for two modern POST reads | Other endpoints and independent modern renewal remain untested |
+| `/v1/appliance/home/list/aggregate` | Same-session probe passed; no replacement of existing inventory | Complete response/card flattening, completeness and membership fixtures |
+| `/v1/device/status/lua/get` | Same-session empty-command probe passed; existing `/mjl/...` reads remain | Model-specific response semantics, decoding and complete positive/negative fixtures |
+| TSL GET/POST properties | Unimplemented and untested | Exact GET/query signing and serialization, current-session admission and response fixtures |
+| TSL PUT properties and module actions | Blocked | Endpoint-specific authentication, per-model argument/response/effect review and transmission tracking; never generic URL/body access |
 | AC energy/statistics, fault history, sleep curves and filter records | Blocked | Exact app2base UID/dataKey/service wrapper; business error/units/pagination/response fixtures |
 | AC sleep/ECO/default heat, dual anti-draft, child/mother-baby modes, self-clean and timers | Incomplete | Conditional/coupled effects, precise current-profile encoding and trusted-risk review; no project scheduler |
 | Refrigerator targets and modes | Read-only | Cloud configuration conflict, exact encoder behavior/step/effects, prerequisite preservation and grants; no generic centralized replay |
-| Refrigerator config, reports and existing diagnostic results | Blocked | Modern MAS plus independent business signature and authorization wrapper; original signing constant is excluded |
-| GX1200Max 760064BA program/action controls | Blocked; old five legacy profiles unchanged | Protected current firmware branch, full state-dependent TSL conversion, program-option constraints and modern authentication |
+| Refrigerator config, reports and existing diagnostic results | Blocked | Endpoint-specific compatibility plus independent business signature and authorization wrapper; original signing constant is excluded |
+| GX1200Max 760064BA program/action controls | Blocked; old five legacy profiles unchanged | Protected current firmware branch, full state-dependent TSL conversion, program-option constraints and endpoint-specific compatibility |
 | Dishwasher settings/statistics/history/consumables | Blocked | E1 msg/action envelopes, user binding, complete business response fixtures; settingInfo returned empty |
-| Device templates/plugins/Lua resources | Not downloaded or executed | Authentication/source admission and resource integrity; runtime executable plugins remain prohibited |
+| Device templates/plugins/Lua resources | Not downloaded or executed | Endpoint/source admission and resource integrity; runtime executable plugins remain prohibited |
 | Firmware upgrade/reset, shared cloud services and unclassified route fragments | Unadmitted | Exact device applicability, complete semantics and consequential/high-risk policy review |
 
-The package explicitly withholds masKey/mucSecret values and does not establish
-their equivalence to the already-admitted community material. Its read-only
-client loads an existing official-App session instead of performing independent
-login/renewal. Do not silently substitute old material, import raw official-App
-credentials, embed confidential developer secrets, or publish generic route
-execution. No new account material or real-device access was used in this phase.
+The package explicitly withholds masKey/mucSecret values. Its read-only client
+loads an existing official-App session instead of implementing independent
+login/renewal. The owner-requested live experiment subsequently demonstrated
+that the already-admitted signer/session works for the two fixed POST reads;
+it does not establish equivalence for all app/business signatures. No raw
+session was exported, confidential developer secret added or generic route
+executor published. Live acceptance used only the owner's direct in-App sign-in
+and bounded reads. No appliance control was sent.
 
 ## Compatibility and validation
 
@@ -101,7 +122,10 @@ subtype, independent scalar encodings, invalid/missing prerequisite state,
 accepted/unknown replay, three-zone isolation, old-descriptor behavior and
 malformed-read cache preservation. Flutter checks cover switch dispatch, retained
 observed state, lifecycle invalidation, the read-only third zone and localization.
-Executed results and package identity are recorded in the
+Executed fictional and owner-authorized read results and package identity are
+recorded in the
 [App verification record](../../apps/mobile/verification.md). Real optional
-controls, new refrigerator observations, phone policy and full parity remain
-unverified. No real appliance command is authorized by this source integration.
+controls, physical meaning/freshness of refrigerator observations, phone policy
+and full parity remain unverified. Actual three-zone cloud readings and rendering
+passed after direct sign-in in the emulator. No real appliance command is
+authorized by this source integration.
