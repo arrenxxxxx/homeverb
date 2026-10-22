@@ -110,6 +110,13 @@ class _ClimateControlsState extends State<ClimateControls>
     ('Sleep', {'sleep'}, Icons.bedtime_outlined),
     ('Energy saving', {'energy_saving', 'eco'}, Icons.eco_outlined),
     (
+      'Cool energy saving',
+      {'cool_energy_saving'},
+      Icons.energy_savings_leaf_outlined,
+    ),
+    ('Strong cooling', {'strong_cooling'}, Icons.ac_unit),
+    ('Light sensing', {'light_sensing'}, Icons.light_mode_outlined),
+    (
       'Comfort energy saving',
       {'comfort_energy_saving'},
       Icons.energy_savings_leaf_outlined,

@@ -6,7 +6,7 @@ import 'receipts.dart';
 import 'skin.dart';
 
 String controlLabel(String id) {
-  final shared = sourceForKey(id);
+  final shared = sourceForKey(id) ?? sourceForKey('mobile.$id');
   if (shared != null) return shared;
   final words = id.replaceAll('_', ' ');
   return words.isEmpty ? id : '${words[0].toUpperCase()}${words.substring(1)}';

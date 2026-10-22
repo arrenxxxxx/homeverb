@@ -20,3 +20,20 @@ pub(crate) const TEMPERATURES: &[&str] = &[
     "left_variable_real_temperature",
     "right_variable_real_temperature",
 ];
+
+/// Exact 310A2111 observations, kept in a separate descriptor scope so old
+/// descriptors do not receive undeclared fields before an inventory refresh.
+pub(crate) const DETAILS: &str = "vendor.midea.refrigerator.details";
+pub(crate) const DETAIL_FLAGS: &[&str] = &[
+    "deep_cold_mode",
+    "plasma_aseptic_mode_power",
+    "electronic_smell",
+    "rapid_ice_making",
+    "open_door_tips_switch",
+    "telstar_saving_mode",
+];
+pub(crate) const DOORS: &[&str] = &[
+    "storage_door_state",
+    "freezer_door_state",
+    "flexzone_door_state",
+];

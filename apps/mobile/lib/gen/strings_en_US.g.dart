@@ -3965,4 +3965,46 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Readings may be out of date; the measurement time is unverified.'
 	String get mobileApplianceReadAge => 'Readings may be out of date; the measurement time is unverified.';
+
+	/// en-US: 'Variable zone'
+	String get mobileVariable => 'Variable zone';
+
+	/// en-US: 'Cool energy saving'
+	String get vendorMideaAcCoolEnergySaving => 'Cool energy saving';
+
+	/// en-US: 'Strong cooling'
+	String get vendorMideaAcStrongCooling => 'Strong cooling';
+
+	/// en-US: 'Light sensing'
+	String get vendorMideaAcLightSensing => 'Light sensing';
+
+	/// en-US: 'Deep cooling'
+	String get vendorMideaRefrigeratorDetailsDeepColdMode => 'Deep cooling';
+
+	/// en-US: 'Plasma sterilization'
+	String get vendorMideaRefrigeratorDetailsPlasmaAsepticModePower => 'Plasma sterilization';
+
+	/// en-US: 'Odor purification'
+	String get vendorMideaRefrigeratorDetailsElectronicSmell => 'Odor purification';
+
+	/// en-US: 'Quick ice making'
+	String get vendorMideaRefrigeratorDetailsRapidIceMaking => 'Quick ice making';
+
+	/// en-US: 'Door alert'
+	String get vendorMideaRefrigeratorDetailsOpenDoorTipsSwitch => 'Door alert';
+
+	/// en-US: 'Saving star mode'
+	String get vendorMideaRefrigeratorDetailsTelstarSavingMode => 'Saving star mode';
+
+	/// en-US: 'Fridge door state'
+	String get vendorMideaRefrigeratorDetailsStorageDoorState => 'Fridge door state';
+
+	/// en-US: 'Freezer door state'
+	String get vendorMideaRefrigeratorDetailsFreezerDoorState => 'Freezer door state';
+
+	/// en-US: 'Variable-zone door state'
+	String get vendorMideaRefrigeratorDetailsFlexzoneDoorState => 'Variable-zone door state';
+
+	/// en-US: 'Odor purification progress'
+	String get vendorMideaRefrigeratorDetailsECleaningPercentage => 'Odor purification progress';
 }

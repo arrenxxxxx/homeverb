@@ -1,5 +1,5 @@
 {
-  "api_version": "1.25.0",
+  "api_version": "1.26.0",
   "functions": {
     "homeverb_prepare_lan_scan": {
       "parameters": [

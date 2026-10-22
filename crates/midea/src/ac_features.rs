@@ -25,6 +25,8 @@ pub(crate) struct AcFeature {
 pub(crate) struct AcFeatureProfile {
     selector: String,
     codes: Vec<String>,
+    #[serde(default)]
+    models: Vec<String>,
     queries: Vec<String>,
     preserve: Vec<String>,
     pub features: Vec<AcFeature>,
@@ -33,7 +35,15 @@ pub(crate) struct AcFeatureProfile {
 fn catalog() -> &'static [AcFeatureProfile] {
     static PROFILES: OnceLock<Vec<AcFeatureProfile>> = OnceLock::new();
     PROFILES.get_or_init(|| {
-        serde_json::from_str(include_str!("ac_features.json")).expect("reviewed AC catalog")
+        let mut profiles: Vec<AcFeatureProfile> =
+            serde_json::from_str(include_str!("ac_features.json")).expect("reviewed AC catalog");
+        profiles.extend(
+            serde_json::from_str::<Vec<AcFeatureProfile>>(include_str!(
+                "ac_reference_features.json"
+            ))
+            .expect("reviewed exact AC reference catalog"),
+        );
+        profiles
     })
 }
 
@@ -45,6 +55,17 @@ pub(crate) fn select(
 ) -> Option<&'static AcFeatureProfile> {
     if !model.is_some_and(crate::adapter::reviewed_wall_ac) {
         return None;
+    }
+    // Exact official product evidence takes precedence over the broad community
+    // default. Contradictory model/subtype evidence must not regain that default.
+    if let Some(profile) = catalog()
+        .iter()
+        .find(|p| !p.models.is_empty() && code.is_some_and(|c| p.codes.iter().any(|v| v == c)))
+    {
+        return (subtype != Some("524")
+            && model.is_some_and(|m| profile.models.iter().any(|v| v == m))
+            && category.is_some_and(|c| c.replace('-', "_") == "wall_air_conditioner"))
+        .then_some(profile);
     }
     if subtype == Some("524") {
         return catalog().iter().find(|p| p.selector == "portable");
@@ -360,6 +381,92 @@ pub fn validate_ac_feature_value(name: &str, value: &Value) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn exact_reference_profiles_do_not_inherit_other_models_or_generic_features() {
+        for (code, model, horizontal, breezeless, strong) in [
+            ("22012559", "KFR-26G/N8VJC3", false, false, false),
+            ("22040089", "KFR-35G/N8HE1\u{2161}Pro", true, false, true),
+            ("22013331", "KFR-35G/WF2", true, true, false),
+            ("220F4057", "KFR-72G/N8HA1Pro", true, false, false),
+        ] {
+            let profile =
+                select(None, Some(code), Some("wall_air_conditioner"), Some(model)).unwrap();
+            assert_eq!(profile.feature("horizontal_swing").is_some(), horizontal);
+            assert_eq!(profile.feature("breezeless").is_some(), breezeless);
+            assert_eq!(profile.feature("strong_cooling").is_some(), strong);
+            assert!(profile.feature("comfort_energy_saving").is_none());
+            assert!(profile.feature("follow_airflow").is_none());
+            assert!(profile.feature("eco").is_none());
+            assert!(profile.feature("auxiliary_heat").is_none());
+            assert!(profile.feature("vertical_swing").is_some());
+            assert!(
+                select(
+                    Some("524"),
+                    Some(code),
+                    Some("wall_air_conditioner"),
+                    Some(model)
+                )
+                .is_none()
+            );
+            assert!(select(None, Some(code), None, Some(model)).is_none());
+            let wrong_model = if model == MODEL {
+                "KFR-26G/N8VJC3"
+            } else {
+                MODEL
+            };
+            assert!(
+                select(
+                    None,
+                    Some(code),
+                    Some("wall_air_conditioner"),
+                    Some(wrong_model)
+                )
+                .is_none()
+            );
+        }
+    }
+
+    #[test]
+    fn official_independent_scalars_require_reports_and_keep_exact_encoding() {
+        let p = select(
+            None,
+            Some("22040089"),
+            Some("wall_air_conditioner"),
+            Some("KFR-35G/N8HE1\u{2161}Pro"),
+        )
+        .unwrap();
+        for (name, wire, on) in [
+            ("cool_energy_saving", "cool_power_saving", 1),
+            ("strong_cooling", "strong_cool", 1),
+            ("light_sensing", "light_sensitive", 3),
+        ] {
+            let feature = p.feature(name).unwrap();
+            for value in [false, true] {
+                let control = p
+                    .control(
+                        feature,
+                        &json!({name:value}),
+                        &BTreeMap::from([(wire.into(), json!(0)), ("buzzer".into(), json!("off"))]),
+                    )
+                    .unwrap();
+                let CloudControl::AcFeature(control) = control else {
+                    panic!("Wrong control kind")
+                };
+                assert_eq!(
+                    json!(control),
+                    json!({wire:if value {on} else {0}, "buzzer":"off"})
+                );
+            }
+            for raw in [
+                BTreeMap::new(),
+                BTreeMap::from([(wire.into(), json!(2))]),
+                BTreeMap::from([(wire.into(), json!(false))]),
+            ] {
+                assert!(p.control(feature, &json!({name:true}), &raw).is_err());
+            }
+        }
+    }
+
     const MODEL: &str = "KFR-35G/WF2";
     fn wall() -> &'static AcFeatureProfile {
         select(

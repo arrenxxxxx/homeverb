@@ -34,7 +34,7 @@ The 19 C functions in [homeverb.h](../crates/ffi/include/homeverb.h) form the na
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects saved-account cloud reads. `scenario` defaults to `normal`. Meiju requires `allow_mock_writes: false` and rejects any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms `homeverb.mock` or `midea.meiju`. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.25.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.26.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -1467,3 +1467,23 @@ Fresh canonical session version 3 is not readable by old binaries. SQLite 5,
 outer payload 3 and all 34 ordinary methods are unchanged. Do not downgrade or
 reset a migrated account. Successful restore does not establish appliance support
 or authorize any appliance operation.
+
+
+## Exact Meiju reference profiles (API 1.26)
+
+The existing `meiju_ac_feature_grants` field additionally accepts Boolean
+`cool_energy_saving`, `strong_cooling` and `light_sensing` values. These retain
+exact device/value/cloud scope and current-operation reported-state checks.
+Older native libraries reject the new names; derive App startup choices only
+from their inspected definitions. The four known official SN8/model pairs
+now override the old category union, so previously saved optional actions can
+be refused. This never expands authority from saved metadata.
+
+Exact refrigerator product 310A2111/subtype 56 adds a read-only `variable`
+component and `vendor.midea.refrigerator.details` on `fridge`. Explicit inventory
+refresh publishes these scopes with unchanged local identity. Component caches
+stay separate, missing readings stay absent and physical sample time remains
+unproven. No refrigerator writes or GX1200Max 760064BA controls are added.
+The 34 ordinary methods, 19 trusted/public C functions plus Android initializer,
+JSON envelope, SQLite 5 and protected payload 3 are unchanged. See the
+[integration and remaining-interface ledger](development/13-meiju-reference-integration.md).

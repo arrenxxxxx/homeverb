@@ -1753,6 +1753,23 @@ String? translateSource(
   "{value} min" => t.mobileApplianceMinutes(value: args["value"] ?? "{value}"),
   "Readings may be out of date; the measurement time is unverified." =>
     t.mobileApplianceReadAge,
+  "Variable zone" => t.mobileVariable,
+  "Cool energy saving" => t.vendorMideaAcCoolEnergySaving,
+  "Strong cooling" => t.vendorMideaAcStrongCooling,
+  "Light sensing" => t.vendorMideaAcLightSensing,
+  "Deep cooling" => t.vendorMideaRefrigeratorDetailsDeepColdMode,
+  "Plasma sterilization" =>
+    t.vendorMideaRefrigeratorDetailsPlasmaAsepticModePower,
+  "Odor purification" => t.vendorMideaRefrigeratorDetailsElectronicSmell,
+  "Quick ice making" => t.vendorMideaRefrigeratorDetailsRapidIceMaking,
+  "Door alert" => t.vendorMideaRefrigeratorDetailsOpenDoorTipsSwitch,
+  "Saving star mode" => t.vendorMideaRefrigeratorDetailsTelstarSavingMode,
+  "Fridge door state" => t.vendorMideaRefrigeratorDetailsStorageDoorState,
+  "Freezer door state" => t.vendorMideaRefrigeratorDetailsFreezerDoorState,
+  "Variable-zone door state" =>
+    t.vendorMideaRefrigeratorDetailsFlexzoneDoorState,
+  "Odor purification progress" =>
+    t.vendorMideaRefrigeratorDetailsECleaningPercentage,
   _ => null,
 };
 
@@ -3445,5 +3462,23 @@ String? sourceForKey(String key) => switch (key) {
   "mobile.applianceMinutes" => "{value} min",
   "mobile.applianceReadAge" =>
     "Readings may be out of date; the measurement time is unverified.",
+  "mobile.variable" => "Variable zone",
+  "vendor.midea.ac.cool_energy_saving" => "Cool energy saving",
+  "vendor.midea.ac.strong_cooling" => "Strong cooling",
+  "vendor.midea.ac.light_sensing" => "Light sensing",
+  "vendor.midea.refrigerator.details.deep_cold_mode" => "Deep cooling",
+  "vendor.midea.refrigerator.details.plasma_aseptic_mode_power" =>
+    "Plasma sterilization",
+  "vendor.midea.refrigerator.details.electronic_smell" => "Odor purification",
+  "vendor.midea.refrigerator.details.rapid_ice_making" => "Quick ice making",
+  "vendor.midea.refrigerator.details.open_door_tips_switch" => "Door alert",
+  "vendor.midea.refrigerator.details.telstar_saving_mode" => "Saving star mode",
+  "vendor.midea.refrigerator.details.storage_door_state" => "Fridge door state",
+  "vendor.midea.refrigerator.details.freezer_door_state" =>
+    "Freezer door state",
+  "vendor.midea.refrigerator.details.flexzone_door_state" =>
+    "Variable-zone door state",
+  "vendor.midea.refrigerator.details.e_cleaning_percentage" =>
+    "Odor purification progress",
   _ => null,
 };

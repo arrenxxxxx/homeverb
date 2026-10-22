@@ -399,3 +399,22 @@ checks run on either host and never require real credentials. Fourteen LAN Rust
 fixtures require assigned loopback aliases `127.0.0.2` and `127.0.1.1` on macOS;
 without administrator setup they are blocked, not passing tests. Do not weaken
 production subnet/endpoint checks to accommodate an unconfigured test host.
+
+
+## October 22 Meiju reference checks
+
+`python3 scripts/extract_meiju_reference_facts.py --check` verifies the pinned
+archive, reviewed scalar constructor fragments, all four compiled AC catalogs
+and the 67-operation coverage ledger without bundled-code execution or network.
+The Meiju adapter tests exercise exact-reference accepted/unknown writes, replay
+and prerequisite failures plus protected three-zone reads, old descriptors and
+malformed-read cache preservation. `homeverb-host`'s `ac_feature_grants` tests and
+contract fixtures cover independent Boolean startup permissions.
+
+Flutter's `climate_controls_test.dart` and `refrigerator_modes_test.dart` exercise
+all three new switches, retained observations, stale callbacks, the read-only
+third zone and English/Simplified Chinese rendering. Run them with the existing
+compartment, permissions and localization regressions before packaging. See the
+[executed results](../apps/mobile/verification.md). Real appliances are not used
+by these checks; the complete-interface blockers remain explicit in the
+[integration guide](development/13-meiju-reference-integration.md).

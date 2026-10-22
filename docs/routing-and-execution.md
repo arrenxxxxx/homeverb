@@ -493,3 +493,18 @@ invalidates existing approvals. Reopen read-only; do not copy command grants int
 the replacement session. Uncertain credential persistence stays pending and is
 never automatically replayed. Device/connection IDs and existing receipts remain
 unchanged; neither restoration nor cancellation proves any physical state.
+
+
+## Exact October 22 AC scalar profiles
+
+[ADR-0074](adr/0074-exact-meiju-reference-profiles.md) replaces the generic
+optional catalog for four exact protected AC product/model pairs. Model/category
+conflicts and portable-subtype contradictions refuse optional controls. A saved
+old action or a startup grant does not override this protected selection.
+`cool_energy_saving`, `strong_cooling` and `light_sensing` independently encode
+0/1, 0/1 and 0/3 on their reviewed profiles. Each uses the existing scoped grant,
+prerequisite read and single tracked Lua send. Any reported buzzer preference is
+preserved, never invented. Prerequisite failures are proven not sent; a possibly
+sent failure remains unknown. Replay returns the original receipt without
+additional reads or writes. No transport, fallback, retry, verification or
+background behavior changes. The new refrigerator scopes contain reads only.

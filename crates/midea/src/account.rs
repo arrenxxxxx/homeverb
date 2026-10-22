@@ -712,7 +712,11 @@ impl MeijuAccount {
                 let family = match binding.family {
                     0xac if component == "main" => ApplianceFamily::AirConditioner,
                     0xe1 if component == "main" => ApplianceFamily::Dishwasher,
-                    0xca if matches!(component, "fridge" | "freezer") => {
+                    0xca if matches!(component, "fridge" | "freezer")
+                        || (component == "variable"
+                            && ProductProfile::from_stored(&binding.product_profile)
+                                .three_zone_refrigerator(binding.model.as_deref())) =>
+                    {
                         ApplianceFamily::Refrigerator
                     }
                     _ => return Err(crate::state::unsupported()),
@@ -741,6 +745,17 @@ impl MeijuAccount {
         )
         .await?;
         let mut snapshot = state.snapshot(&device.id, component)?;
+        if !device.components.iter().any(|part| {
+            part.id == component
+                && part
+                    .capabilities
+                    .iter()
+                    .any(|id| id == crate::refrigerator::DETAILS)
+        }) {
+            snapshot
+                .observations
+                .retain(|name, _| !name.starts_with("vendor.midea.refrigerator.details."));
+        }
         if !device.components.iter().any(|part| {
             part.id == component
                 && part

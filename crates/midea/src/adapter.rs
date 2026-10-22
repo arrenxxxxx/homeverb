@@ -165,6 +165,25 @@ fn descriptors(
                 .chain([("variable_mode", "string", None)])
                 .collect();
             capabilities.push(capability("fridge", "vendor.midea.refrigerator", &fields));
+            if profile.is_some_and(|p| p.three_zone_refrigerator(appliance.model.as_deref())) {
+                capabilities.push(capability(
+                    "variable",
+                    "power",
+                    &[("state", "boolean", None)],
+                ));
+                capabilities.push(capability("variable", "climate", &temperatures));
+                let fields: Vec<_> = crate::refrigerator::DETAIL_FLAGS
+                    .iter()
+                    .map(|name| (*name, "boolean", None))
+                    .chain(
+                        crate::refrigerator::DOORS
+                            .iter()
+                            .map(|name| (*name, "string", None)),
+                    )
+                    .chain([("e_cleaning_percentage", "number", Some("percent"))])
+                    .collect();
+                capabilities.push(capability("fridge", crate::refrigerator::DETAILS, &fields));
+            }
         }
         Some(ApplianceFamily::Dishwasher) => {
             let mut cycle = capability(
@@ -621,7 +640,9 @@ impl MeijuAdapter {
                     || bound.inventory.appliances.iter().any(|appliance| {
                         matches!(
                             appliance.family,
-                            ApplianceFamily::AirConditioner | ApplianceFamily::Dishwasher
+                            ApplianceFamily::AirConditioner
+                                | ApplianceFamily::Dishwasher
+                                | ApplianceFamily::Refrigerator
                         )
                     }) {
                     account.product_profiles(operation).await?

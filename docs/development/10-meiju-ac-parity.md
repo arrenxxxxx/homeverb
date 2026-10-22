@@ -120,3 +120,13 @@ conditional fresh-air mode, coupled intake/exhaust selectors, kitchen cooking
 helpers and the unidentified `remove_arofene` field. These are not claimed as
 implemented or absent hardware. The owner's selected official-App function list
 and authorized physical validation remain required to establish complete parity.
+
+
+## October 22 exact-profile correction
+
+The supplied official model configuration supersedes the broad category union
+for the four exact products. See the [reference integration](13-meiju-reference-integration.md)
+for the candidate matrix, new independent cool-energy-saving/strong-cooling/light-
+sensing settings and unresolved coupled controls. The historical scalar union
+above is no longer the feature list of each known exact product. Full parity and
+physical optional-control acceptance remain incomplete.

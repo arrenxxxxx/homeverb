@@ -89,7 +89,9 @@ class CompartmentControls extends StatelessWidget {
     final extraRows = <List<dynamic>>[];
     final trailing = <int, Widget>{};
     for (final capability in controller.capabilitiesFor(id)) {
-      if (capability['id'] == 'vendor.midea.refrigerator') continue;
+      if (capability['id'] == 'vendor.midea.refrigerator' ||
+          capability['id'] == 'vendor.midea.refrigerator.details')
+        continue;
       for (final entry in (capability['properties'] as Json).entries) {
         if (entry.value['readable'] != true) continue;
         final propertyId = '${capability['id']}.${entry.key}',

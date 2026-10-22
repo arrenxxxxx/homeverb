@@ -32,6 +32,7 @@ Start with the progressive development path. Reference documents define invarian
 - Inventory inspection: [foreground saved account evidence](adr/0036-local-account-inventory-inspection.md) for the native UI.
 - Inventory timing: [historical complete-retrieval metadata](adr/0060-account-inventory-timestamp.md), nullable after upgrade and never an authorization or online signal.
 - Optional AC controls: [profile-scoped features and prerequisites](adr/0069-profile-scoped-ac-features.md), with exact native grants and reported-state presentation.
+- October 22 Meiju analysis: [exact-profile App integration and complete remaining interface ledger](development/13-meiju-reference-integration.md), with [admission decision](adr/0074-exact-meiju-reference-profiles.md).
 - Appliance commands: [foreground dishwasher preparation](adr/0071-app-dishwasher-command-preparation.md) and [refrigerator/dishwasher protocol evidence](development/12-appliance-command-evidence.md).
 - App account names: [optional remarks and masked sign-in labels](adr/0068-app-account-display-names.md), without provider-profile retrieval or exposing original login inputs.
 - Connection linking: [trusted native preview/confirm/discard](adr/0061-native-connection-link-bridge.md), with independent adapter admission and no ordinary JSON method.

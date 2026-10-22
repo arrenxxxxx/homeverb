@@ -292,6 +292,72 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
+  testWidgets(
+    'exact reference settings stay independent and use observed values',
+    (tester) async {
+      final (core, c, app) = await open(tester);
+      final cap = core.capabilities.last;
+      for (final name in [
+        'cool_energy_saving',
+        'strong_cooling',
+        'light_sensing',
+      ]) {
+        cap['properties'][name] = {
+          'type': 'boolean',
+          'readable': true,
+          'writable': true,
+          'control_requires_observation': true,
+        };
+        cap['actions']['set_$name'] = setter(
+          {
+            name: {'type': 'boolean'},
+          },
+          required: [name],
+        );
+        core.observations['vendor.midea.ac.$name'] = false;
+      }
+      await c.refresh();
+      await tester.pumpAndSettle();
+      expect(find.text('Cool energy saving'), findsOneWidget);
+      expect(find.text('Strong cooling'), findsOneWidget);
+      expect(find.text('Light sensing'), findsOneWidget);
+      for (final name in [
+        'cool_energy_saving',
+        'strong_cooling',
+        'light_sensing',
+      ]) {
+        core.calls.clear();
+        await tap(tester, find.byKey(ValueKey('climate-switch:$name')));
+        final command = core.calls
+            .where((v) => v['method'] == 'execute')
+            .single['command'];
+        expect(command['capability'], 'vendor.midea.ac');
+        expect(command['action'], 'set_$name');
+        expect(command['arguments'], {name: true});
+        expect(c.observed('vendor.midea.ac.$name'), false);
+        expect(app.currentState!.id, 'C01');
+      }
+      LocaleSettings.setLocale(AppLocale.zhCn);
+      await tester.pumpAndSettle();
+      expect(find.text('\u9177\u7701\u7535'), findsOneWidget);
+      expect(find.text('\u5f3a\u51b7'), findsOneWidget);
+      expect(find.text('\u667a\u80fd\u5149\u611f'), findsOneWidget);
+      final old = tester
+          .widget<Switch>(
+            find.byKey(const ValueKey('climate-switch:light_sensing')),
+          )
+          .onChanged!;
+      core.calls.clear();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      await tester.pumpAndSettle();
+      old(true);
+      await tester.pumpAndSettle();
+      expect(core.calls.where((v) => v['method'] == 'execute'), isEmpty);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
   testWidgets('temperature slider sends once on release within device bounds', (
     tester,
   ) async {

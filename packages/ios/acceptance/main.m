@@ -126,7 +126,7 @@ static void coreFlow(NSString *documents, NSString *phase, NSString *runID) {
     check(handle != 0);
     @try {
         stage = @"core_api";
-        check([query(handle, @{@"method": @"get_api_info"})[@"api_version"] isEqual:@"1.24.0"]);
+        check([query(handle, @{@"method": @"get_api_info"})[@"api_version"] isEqual:@"1.26.0"]);
         if ([phase isEqual:@"write"]) {
             stage = @"core_discover";
             NSArray *devices = query(handle, @{@"method": @"discover"});

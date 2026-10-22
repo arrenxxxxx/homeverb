@@ -1308,5 +1308,19 @@
   "vendor.midea.dishwasher.work_status.work": "洗涤中",
   "vendor.midea.dishwasher.work_status.cancel": "已取消",
   "mobile.applianceMinutes": "{value} 分钟",
-  "mobile.applianceReadAge": "平台未提供可核实的测量时间，数据可能已过时。"
+  "mobile.applianceReadAge": "平台未提供可核实的测量时间，数据可能已过时。",
+  "mobile.variable": "变温区",
+  "vendor.midea.ac.cool_energy_saving": "酷省电",
+  "vendor.midea.ac.strong_cooling": "强冷",
+  "vendor.midea.ac.light_sensing": "智能光感",
+  "vendor.midea.refrigerator.details.deep_cold_mode": "深冷",
+  "vendor.midea.refrigerator.details.plasma_aseptic_mode_power": "等离子除菌",
+  "vendor.midea.refrigerator.details.electronic_smell": "净味",
+  "vendor.midea.refrigerator.details.rapid_ice_making": "快速制冰",
+  "vendor.midea.refrigerator.details.open_door_tips_switch": "开门提醒",
+  "vendor.midea.refrigerator.details.telstar_saving_mode": "省电星模式",
+  "vendor.midea.refrigerator.details.storage_door_state": "冷藏室门状态",
+  "vendor.midea.refrigerator.details.freezer_door_state": "冷冻室门状态",
+  "vendor.midea.refrigerator.details.flexzone_door_state": "变温区门状态",
+  "vendor.midea.refrigerator.details.e_cleaning_percentage": "净味进度"
 }

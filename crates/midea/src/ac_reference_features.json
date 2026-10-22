@@ -1,0 +1,1059 @@
+[
+  {
+    "selector": "official-22040089",
+    "codes": [
+      "22040089"
+    ],
+    "models": [
+      "KFR-35G/N8HE1\u2161Pro"
+    ],
+    "queries": [
+      "prevent_straight_wind",
+      "prevent_super_cool",
+      "wind_swing_lr_angle",
+      "wind_swing_ud_angle"
+    ],
+    "preserve": [
+      "buzzer"
+    ],
+    "features": [
+      {
+        "name": "horizontal_swing",
+        "wire": "wind_swing_lr",
+        "read_field": "wind_swing_lr",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "wind_swing_lr": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "wind_swing_lr": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "vertical_swing",
+        "wire": "wind_swing_ud",
+        "read_field": "wind_swing_ud",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "wind_swing_ud": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "wind_swing_ud": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "display",
+        "wire": "screen_display",
+        "read_field": "screen_display_now",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "screen_display": 0
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "screen_display": 100
+            }
+          }
+        ]
+      },
+      {
+        "name": "prevent_overcooling",
+        "wire": "prevent_super_cool",
+        "read_field": "prevent_super_cool",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "prevent_super_cool": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "prevent_super_cool": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "dry_after_shutdown",
+        "wire": "dry",
+        "read_field": "dry",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "dry": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "dry": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "vertical_direction",
+        "wire": "wind_swing_ud_angle",
+        "read_field": "wind_swing_ud_angle",
+        "parameter": {
+          "type": "integer",
+          "enum": [
+            0,
+            1,
+            25,
+            50,
+            75,
+            100
+          ]
+        },
+        "options": [
+          {
+            "value": 0,
+            "control": {
+              "wind_swing_ud_angle": 0
+            }
+          },
+          {
+            "value": 1,
+            "control": {
+              "wind_swing_ud_angle": 1
+            }
+          },
+          {
+            "value": 25,
+            "control": {
+              "wind_swing_ud_angle": 25
+            }
+          },
+          {
+            "value": 50,
+            "control": {
+              "wind_swing_ud_angle": 50
+            }
+          },
+          {
+            "value": 75,
+            "control": {
+              "wind_swing_ud_angle": 75
+            }
+          },
+          {
+            "value": 100,
+            "control": {
+              "wind_swing_ud_angle": 100
+            }
+          }
+        ]
+      },
+      {
+        "name": "horizontal_direction",
+        "wire": "wind_swing_lr_angle",
+        "read_field": "wind_swing_lr_angle",
+        "parameter": {
+          "type": "integer",
+          "enum": [
+            0,
+            1,
+            25,
+            50,
+            75,
+            100
+          ]
+        },
+        "options": [
+          {
+            "value": 0,
+            "control": {
+              "wind_swing_lr_angle": 0
+            }
+          },
+          {
+            "value": 1,
+            "control": {
+              "wind_swing_lr_angle": 1
+            }
+          },
+          {
+            "value": 25,
+            "control": {
+              "wind_swing_lr_angle": 25
+            }
+          },
+          {
+            "value": 50,
+            "control": {
+              "wind_swing_lr_angle": 50
+            }
+          },
+          {
+            "value": 75,
+            "control": {
+              "wind_swing_lr_angle": 75
+            }
+          },
+          {
+            "value": 100,
+            "control": {
+              "wind_swing_lr_angle": 100
+            }
+          }
+        ]
+      },
+      {
+        "name": "avoid_direct_airflow",
+        "wire": "prevent_straight_wind",
+        "read_field": "prevent_straight_wind",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "prevent_straight_wind": 1
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "prevent_straight_wind": 2
+            }
+          }
+        ]
+      },
+      {
+        "name": "cool_energy_saving",
+        "wire": "cool_power_saving",
+        "read_field": "cool_power_saving",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "cool_power_saving": 0
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "cool_power_saving": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "strong_cooling",
+        "wire": "strong_cool",
+        "read_field": "strong_cool",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "strong_cool": 0
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "strong_cool": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "light_sensing",
+        "wire": "light_sensitive",
+        "read_field": "light_sensitive",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "light_sensitive": 0
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "light_sensitive": 3
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "selector": "official-22013331",
+    "codes": [
+      "22013331"
+    ],
+    "models": [
+      "KFR-35G/WF2"
+    ],
+    "queries": [
+      "no_wind_sense",
+      "prevent_super_cool",
+      "wind_swing_lr_angle",
+      "wind_swing_ud_angle"
+    ],
+    "preserve": [
+      "buzzer"
+    ],
+    "features": [
+      {
+        "name": "horizontal_swing",
+        "wire": "wind_swing_lr",
+        "read_field": "wind_swing_lr",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "wind_swing_lr": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "wind_swing_lr": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "vertical_swing",
+        "wire": "wind_swing_ud",
+        "read_field": "wind_swing_ud",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "wind_swing_ud": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "wind_swing_ud": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "display",
+        "wire": "screen_display",
+        "read_field": "screen_display_now",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "screen_display": 0
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "screen_display": 100
+            }
+          }
+        ]
+      },
+      {
+        "name": "prevent_overcooling",
+        "wire": "prevent_super_cool",
+        "read_field": "prevent_super_cool",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "prevent_super_cool": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "prevent_super_cool": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "dry_after_shutdown",
+        "wire": "dry",
+        "read_field": "dry",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "dry": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "dry": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "vertical_direction",
+        "wire": "wind_swing_ud_angle",
+        "read_field": "wind_swing_ud_angle",
+        "parameter": {
+          "type": "integer",
+          "enum": [
+            0,
+            1,
+            25,
+            50,
+            75,
+            100
+          ]
+        },
+        "options": [
+          {
+            "value": 0,
+            "control": {
+              "wind_swing_ud_angle": 0
+            }
+          },
+          {
+            "value": 1,
+            "control": {
+              "wind_swing_ud_angle": 1
+            }
+          },
+          {
+            "value": 25,
+            "control": {
+              "wind_swing_ud_angle": 25
+            }
+          },
+          {
+            "value": 50,
+            "control": {
+              "wind_swing_ud_angle": 50
+            }
+          },
+          {
+            "value": 75,
+            "control": {
+              "wind_swing_ud_angle": 75
+            }
+          },
+          {
+            "value": 100,
+            "control": {
+              "wind_swing_ud_angle": 100
+            }
+          }
+        ]
+      },
+      {
+        "name": "horizontal_direction",
+        "wire": "wind_swing_lr_angle",
+        "read_field": "wind_swing_lr_angle",
+        "parameter": {
+          "type": "integer",
+          "enum": [
+            0,
+            1,
+            25,
+            50,
+            75,
+            100
+          ]
+        },
+        "options": [
+          {
+            "value": 0,
+            "control": {
+              "wind_swing_lr_angle": 0
+            }
+          },
+          {
+            "value": 1,
+            "control": {
+              "wind_swing_lr_angle": 1
+            }
+          },
+          {
+            "value": 25,
+            "control": {
+              "wind_swing_lr_angle": 25
+            }
+          },
+          {
+            "value": 50,
+            "control": {
+              "wind_swing_lr_angle": 50
+            }
+          },
+          {
+            "value": 75,
+            "control": {
+              "wind_swing_lr_angle": 75
+            }
+          },
+          {
+            "value": 100,
+            "control": {
+              "wind_swing_lr_angle": 100
+            }
+          }
+        ]
+      },
+      {
+        "name": "breezeless",
+        "wire": "no_wind_sense",
+        "read_field": "no_wind_sense",
+        "parameter": {
+          "type": "integer",
+          "enum": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        "options": [
+          {
+            "value": 0,
+            "control": {
+              "no_wind_sense": 0
+            }
+          },
+          {
+            "value": 1,
+            "control": {
+              "no_wind_sense": 1
+            }
+          },
+          {
+            "value": 2,
+            "control": {
+              "no_wind_sense": 2
+            }
+          },
+          {
+            "value": 3,
+            "control": {
+              "no_wind_sense": 3
+            }
+          }
+        ]
+      },
+      {
+        "name": "cool_energy_saving",
+        "wire": "cool_power_saving",
+        "read_field": "cool_power_saving",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "cool_power_saving": 0
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "cool_power_saving": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "light_sensing",
+        "wire": "light_sensitive",
+        "read_field": "light_sensitive",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "light_sensitive": 0
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "light_sensitive": 3
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "selector": "official-220F4057",
+    "codes": [
+      "220F4057"
+    ],
+    "models": [
+      "KFR-72G/N8HA1Pro"
+    ],
+    "queries": [
+      "prevent_super_cool",
+      "wind_swing_lr_angle",
+      "wind_swing_ud_angle"
+    ],
+    "preserve": [
+      "buzzer"
+    ],
+    "features": [
+      {
+        "name": "horizontal_swing",
+        "wire": "wind_swing_lr",
+        "read_field": "wind_swing_lr",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "wind_swing_lr": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "wind_swing_lr": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "vertical_swing",
+        "wire": "wind_swing_ud",
+        "read_field": "wind_swing_ud",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "wind_swing_ud": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "wind_swing_ud": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "display",
+        "wire": "screen_display",
+        "read_field": "screen_display_now",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "screen_display": 0
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "screen_display": 100
+            }
+          }
+        ]
+      },
+      {
+        "name": "prevent_overcooling",
+        "wire": "prevent_super_cool",
+        "read_field": "prevent_super_cool",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "prevent_super_cool": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "prevent_super_cool": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "dry_after_shutdown",
+        "wire": "dry",
+        "read_field": "dry",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "dry": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "dry": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "vertical_direction",
+        "wire": "wind_swing_ud_angle",
+        "read_field": "wind_swing_ud_angle",
+        "parameter": {
+          "type": "integer",
+          "enum": [
+            0,
+            1,
+            25,
+            50,
+            75,
+            100
+          ]
+        },
+        "options": [
+          {
+            "value": 0,
+            "control": {
+              "wind_swing_ud_angle": 0
+            }
+          },
+          {
+            "value": 1,
+            "control": {
+              "wind_swing_ud_angle": 1
+            }
+          },
+          {
+            "value": 25,
+            "control": {
+              "wind_swing_ud_angle": 25
+            }
+          },
+          {
+            "value": 50,
+            "control": {
+              "wind_swing_ud_angle": 50
+            }
+          },
+          {
+            "value": 75,
+            "control": {
+              "wind_swing_ud_angle": 75
+            }
+          },
+          {
+            "value": 100,
+            "control": {
+              "wind_swing_ud_angle": 100
+            }
+          }
+        ]
+      },
+      {
+        "name": "horizontal_direction",
+        "wire": "wind_swing_lr_angle",
+        "read_field": "wind_swing_lr_angle",
+        "parameter": {
+          "type": "integer",
+          "enum": [
+            0,
+            1,
+            25,
+            50,
+            75,
+            100
+          ]
+        },
+        "options": [
+          {
+            "value": 0,
+            "control": {
+              "wind_swing_lr_angle": 0
+            }
+          },
+          {
+            "value": 1,
+            "control": {
+              "wind_swing_lr_angle": 1
+            }
+          },
+          {
+            "value": 25,
+            "control": {
+              "wind_swing_lr_angle": 25
+            }
+          },
+          {
+            "value": 50,
+            "control": {
+              "wind_swing_lr_angle": 50
+            }
+          },
+          {
+            "value": 75,
+            "control": {
+              "wind_swing_lr_angle": 75
+            }
+          },
+          {
+            "value": 100,
+            "control": {
+              "wind_swing_lr_angle": 100
+            }
+          }
+        ]
+      },
+      {
+        "name": "cool_energy_saving",
+        "wire": "cool_power_saving",
+        "read_field": "cool_power_saving",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "cool_power_saving": 0
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "cool_power_saving": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "light_sensing",
+        "wire": "light_sensitive",
+        "read_field": "light_sensitive",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "light_sensitive": 0
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "light_sensitive": 3
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "selector": "official-22012559",
+    "codes": [
+      "22012559"
+    ],
+    "models": [
+      "KFR-26G/N8VJC3"
+    ],
+    "queries": [
+      "prevent_straight_wind",
+      "prevent_super_cool"
+    ],
+    "preserve": [
+      "buzzer"
+    ],
+    "features": [
+      {
+        "name": "vertical_swing",
+        "wire": "wind_swing_ud",
+        "read_field": "wind_swing_ud",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "wind_swing_ud": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "wind_swing_ud": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "display",
+        "wire": "screen_display",
+        "read_field": "screen_display_now",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "screen_display": 0
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "screen_display": 100
+            }
+          }
+        ]
+      },
+      {
+        "name": "prevent_overcooling",
+        "wire": "prevent_super_cool",
+        "read_field": "prevent_super_cool",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "prevent_super_cool": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "prevent_super_cool": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "dry_after_shutdown",
+        "wire": "dry",
+        "read_field": "dry",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "dry": "off"
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "dry": "on"
+            }
+          }
+        ]
+      },
+      {
+        "name": "avoid_direct_airflow",
+        "wire": "prevent_straight_wind",
+        "read_field": "prevent_straight_wind",
+        "parameter": {
+          "type": "boolean"
+        },
+        "options": [
+          {
+            "value": false,
+            "control": {
+              "prevent_straight_wind": 1
+            }
+          },
+          {
+            "value": true,
+            "control": {
+              "prevent_straight_wind": 2
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

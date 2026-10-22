@@ -23,6 +23,7 @@ def main() -> int:
     pairs = [
         ("cli-meiju-grants", "cli-meiju-grants"),
         ("native-open", "native-open.meiju-ac-features"),
+        ("native-open", "native-open.meiju-reference-features"),
         ("capability", "capability.meiju-ac-features"),
         ("command", "command.meiju-ac-features"),
         ("state", "state.meiju-ac-features"),
@@ -140,6 +141,11 @@ def main() -> int:
     approved_action = Draft202012Validator(load("examples/capability.approved-cycle.json")["actions"]["start"]["parameters"])
     approved_action.validate(load("examples/command.approved-cycle.json")["arguments"])
     negative = []
+    for feature in ("cool_energy_saving", "strong_cooling", "light_sensing"):
+        for value in (0, 1, "on", "true", None, {}, []):
+            bad = load("examples/native-open.meiju-reference-features.json")
+            bad["meiju_ac_feature_grants"][0].update(feature=feature, value=value)
+            negative.append((f"invalid exact-reference setting {feature}/{value}", validators["native-open"], bad))
     for feature, value in [("eco", "on"), ("eco", 1), ("breezeless", 4),
                            ("horizontal_direction", 30), ("unknown", True), ("self_clean", True),
                            ("breezeless", 1.5), ("display", None)]:

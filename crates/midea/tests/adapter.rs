@@ -314,6 +314,131 @@ impl Fixture {
 }
 
 #[tokio::test]
+async fn exact_refrigerator_reads_three_zones_without_changing_identity_or_legacy_scopes() {
+    let mut entry = appliances()[4].clone();
+    entry["sn8"] = json!("310A2111");
+    entry["modelNumber"] = json!(56);
+    let f = Fixture::new(vec![entry]).await;
+    let device = f.discover().await.remove(0);
+    assert_eq!(
+        device
+            .components
+            .iter()
+            .map(|c| c.id.as_str())
+            .collect::<Vec<_>>(),
+        ["freezer", "fridge", "variable"]
+    );
+    let descriptor = f.core.describe(&device.id).unwrap();
+    assert!(
+        descriptor
+            .capabilities
+            .iter()
+            .all(|c| c.actions.is_empty() && c.properties.values().all(|p| p["writable"] == false))
+    );
+    *f.wire.state.lock().unwrap() = Some(json!({
+        "storage_temperature":"4", "freezing_temperature":"-18",
+        "left_flexzone_temperature":"6", "left_variable_real_temperature":"5.5",
+        "left_flexzone_power":"on", "deep_cold_mode":"on",
+        "electronic_smell":"off", "storage_door_state":"closed",
+        "e_cleaning_percentage":"35"
+    }));
+    let variable = f.read(&device, "variable", false).await.unwrap();
+    assert_eq!(
+        variable.observations["climate.target_temperature"].value,
+        json!(6.0)
+    );
+    assert_eq!(
+        variable.observations["climate.current_temperature"].value,
+        json!(5.5)
+    );
+    assert_eq!(variable.observations["power.state"].value, json!(true));
+    assert!(
+        variable
+            .observations
+            .values()
+            .all(|v| v.stale && v.observed_at.is_none())
+    );
+    let fridge = f.read(&device, "fridge", false).await.unwrap();
+    assert_eq!(
+        fridge.observations["climate.target_temperature"].value,
+        json!(4.0)
+    );
+    assert_eq!(
+        fridge.observations["vendor.midea.refrigerator.details.deep_cold_mode"].value,
+        json!(true)
+    );
+    assert_eq!(
+        fridge.observations["vendor.midea.refrigerator.details.storage_door_state"].value,
+        json!("closed")
+    );
+    let freezer = f.read(&device, "freezer", false).await.unwrap();
+    assert_eq!(
+        freezer.observations["climate.target_temperature"].value,
+        json!(-18.0)
+    );
+    assert_eq!(
+        json!(f.store.snapshot(&device.id, "variable").unwrap().unwrap()),
+        json!(variable)
+    );
+
+    // New read fields cannot break a saved descriptor that predates the scope.
+    let mut legacy = descriptor.clone();
+    legacy.device.components.retain(|c| c.id != "variable");
+    legacy.capabilities.retain(|c| {
+        c.component_id.as_deref() != Some("variable") && c.id != "vendor.midea.refrigerator.details"
+    });
+    for part in &mut legacy.device.components {
+        part.capabilities
+            .retain(|id| id != "vendor.midea.refrigerator.details");
+    }
+    f.store.save_device(&legacy).unwrap();
+    let snapshot = f.read(&legacy.device, "fridge", false).await.unwrap();
+    assert!(
+        !snapshot
+            .observations
+            .keys()
+            .any(|k| k.starts_with("vendor.midea.refrigerator.details."))
+    );
+    let calls = f.calls();
+    assert!(f.read(&legacy.device, "variable", false).await.is_err());
+    assert_eq!(f.calls(), calls);
+    assert_eq!(json!(f.discover().await.remove(0)), json!(device));
+
+    // A malformed new reading must preserve the entire previous cache.
+    let before = f.read(&device, "fridge", false).await.unwrap();
+    *f.wire.state.lock().unwrap() =
+        Some(json!({"storage_temperature":5,"deep_cold_mode":"invalid"}));
+    assert!(f.read(&device, "fridge", false).await.is_err());
+    assert_eq!(
+        json!(f.store.snapshot(&device.id, "fridge").unwrap().unwrap()),
+        json!(before)
+    );
+    assert!(f.wire.controls.lock().unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn refrigerator_three_zone_scope_requires_all_protected_product_evidence() {
+    for product in [
+        json!({}),
+        json!({"sn8":"310A2111"}),
+        json!({"sn8":"310A2111","modelNumber":55}),
+        json!({"sn8":"TEST1234","modelNumber":56}),
+    ] {
+        let mut entry = appliances()[4].clone();
+        entry
+            .as_object_mut()
+            .unwrap()
+            .extend(product.as_object().unwrap().clone());
+        let f = Fixture::new(vec![entry]).await;
+        let device = f.discover().await.remove(0);
+        assert_eq!(device.components.len(), 2);
+        let calls = f.calls();
+        assert!(f.read(&device, "variable", false).await.is_err());
+        assert_eq!(f.calls(), calls);
+    }
+}
+
+#[tokio::test]
 async fn refrigerator_optional_reads_require_refreshed_descriptor_without_gaining_controls() {
     let f = Fixture::new(vec![appliances()[4].clone()]).await;
     let device = f.discover().await.remove(0);

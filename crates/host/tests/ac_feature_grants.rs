@@ -95,3 +95,21 @@ fn startup_rejects_unsupported_values_duplicate_numeric_forms_and_unbounded_auth
         assert!(serde_json::from_value::<MeijuAcFeatureGrant>(value).is_err());
     }
 }
+
+#[test]
+fn reference_scalars_have_independent_exact_boolean_grants() {
+    let id = Uuid::new_v4().to_string();
+    for feature in ["cool_energy_saving", "strong_cooling", "light_sensing"] {
+        for value in [false, true] {
+            let policy = meiju_ac_feature_policy(&[grant(&id, feature, json!(value))]).unwrap();
+            assert_eq!(policy.grants[0].action, format!("set_{feature}"));
+            assert_eq!(
+                policy.grants[0].argument_schema,
+                json!({"const":{feature:value}})
+            );
+        }
+        for value in [json!(0), json!(1), json!("on"), Value::Null] {
+            assert!(meiju_ac_feature_policy(&[grant(&id, feature, value)]).is_err());
+        }
+    }
+}

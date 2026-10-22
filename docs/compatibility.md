@@ -2100,3 +2100,25 @@ normal NDK symbol stripping. The APK verifier now rejects stale Core libraries.
 This supplies local package evidence only; it does not establish installation,
 current-owner product matching or physical operation. The earlier SDK-location
 blocker is resolved; see the [delivery record](../apps/mobile/verification.md#current-appliance-controls-apk--october-18-2026).
+
+
+## October 22 exact Meiju reference profiles (API 1.26)
+
+The owner-supplied 11.7.10.6 package supplies static model configurations and
+reported independent read evidence. HomeVerb now compiles exact optional AC
+profiles for products 22012559/22040089/22013331/220F4057, adds reviewed independent
+cool-energy-saving/strong-cooling/light-sensing encodings, and exposes the exact
+310A2111/subtype-56 refrigerator third zone and extra read-only details.
+Fictional Core/App tests do not repeat the package's real reads or establish
+physical control support. The model-specific source scope and all remaining
+blocked interfaces are in the [integration guide](development/13-meiju-reference-integration.md).
+
+Exact AC profiles intentionally narrow the old generic optional union; no generic
+ECO pairing, auxiliary-heat defaults or shared-plugin feature is inherited without
+review. New fields require current descriptors after explicit inventory refresh.
+Old saved refrigerator descriptors retain their two-zone reads and omit the new
+detail scope. Local device/connection IDs, authority, receipts, SQLite schema 5
+and protected payload 3 are preserved. Native startup accepts three new Boolean
+feature names; older libraries reject them. Ordinary method/C function counts and
+existing CLI/MCP defaults are unchanged. No new physical-device, cloud-statistical,
+GX1200Max write, refrigerator write or full-parity claim is made.

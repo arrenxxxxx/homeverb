@@ -588,6 +588,36 @@
                 "type": "boolean"
               }
             }
+          },
+          {
+            "properties": {
+              "feature": {
+                "const": "cool_energy_saving"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "properties": {
+              "feature": {
+                "const": "strong_cooling"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "properties": {
+              "feature": {
+                "const": "light_sensing"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
           }
         ]
       }

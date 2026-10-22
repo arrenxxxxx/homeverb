@@ -1,6 +1,6 @@
 # HomeVerb Flutter application
 
-The native application embeds Core using native UI contract 1.22.0. The separate visual preview contains fictional Window Light fixtures and never opens Core. The default build opens an isolated Mock profile. Explicit Meiju builds provide protected account connection, local metadata, retrieval/recovery and scoped local removal; Android startup wiring and Mock process journeys are emulator-tested; actual Keystore and physical acceptance remain pending. Cache and history clearing are connected with separate confirmations. Nearby sharing and full-profile deletion remain unavailable. Their preview states are not live features.
+The native application embeds Core using native UI contract 1.26.0. The separate visual preview contains fictional Window Light fixtures and never opens Core. The default build opens an isolated Mock profile. Explicit Meiju builds provide protected account connection, local metadata, retrieval/recovery and scoped local removal; Android startup wiring and Mock process journeys are emulator-tested; actual Keystore and physical acceptance remain pending. Cache and history clearing are connected with separate confirmations. Nearby sharing and full-profile deletion remain unavailable. Their preview states are not live features.
 
 ## Device controls
 
@@ -472,7 +472,12 @@ their existing meanings and uncertainty protections.
 
 The live AC panel uses the owner-approved expanded Window Light composition and
 direct descriptor-bounded actions. The current Meiju adapter admits power, mode,
-fan and eligible temperature actions; swing, fixed positions, display and sound
-remain hidden because their native mappings are not yet admitted. This is not
-complete Meiju feature parity. See the [function comparison](../../docs/development/10-meiju-ac-parity.md)
-for unfinished model-specific controls and evidence requirements.
+fan, eligible temperature actions and reviewed product-specific optional controls.
+The October 22 exact profiles add independent cool energy saving, strong cooling
+and light sensing where supported; unrelated optional functions are omitted.
+The exact three-zone refrigerator also has a read-only variable compartment and
+additional reported details. See the [reference integration record](../../docs/development/13-meiju-reference-integration.md)
+for exact product catalogs and remaining authentication, TSL and service gaps,
+and the [function comparison](../../docs/development/10-meiju-ac-parity.md)
+for unfinished controls. These changes do not establish complete feature parity
+or physical-device support.

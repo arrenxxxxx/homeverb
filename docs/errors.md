@@ -500,3 +500,13 @@ bytes. Existing credential-write uncertainty codes retain their pending semantic
 Once confirmation seals the host, reopen read-only even if restoration fails;
 `HOST_CLOSED` is expected for further requests on that old handle. See
 [ADR-0073](adr/0073-meiju-account-identity-recovery.md).
+
+
+API 1.26 uses the existing codes for the three exact-reference Boolean AC
+settings. Unknown names/non-Boolean startup values fail `INVALID_ARGUMENT`;
+unreviewed or conflicting protected profile evidence and unavailable prerequisite
+state refuse before sending with `CAPABILITY_UNSUPPORTED` (or the existing
+malformed-provider-response code). Missing exact authority remains `POLICY_DENIED`.
+Malformed refrigerator detail fields preserve the old whole snapshot and never
+fall back to optimistic/default values. No new error or execution outcome is
+introduced; [ADR-0074](adr/0074-exact-meiju-reference-profiles.md) defines the scope.

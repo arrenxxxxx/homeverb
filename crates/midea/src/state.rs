@@ -392,6 +392,53 @@ fn decode(
                     numeric,
                 )?;
             }
+            if appliance
+                .product_profile
+                .three_zone_refrigerator(appliance.model.as_deref())
+            {
+                let readings = output.entry("variable").or_default();
+                field(readings, data, "left_flexzone_power", "power.state", on_off)?;
+                field(
+                    readings,
+                    data,
+                    "left_flexzone_temperature",
+                    "climate.target_temperature",
+                    numeric,
+                )?;
+                field(
+                    readings,
+                    data,
+                    "left_variable_real_temperature",
+                    "climate.current_temperature",
+                    numeric,
+                )?;
+                let readings = output.entry("fridge").or_default();
+                for wire in crate::refrigerator::DETAIL_FLAGS {
+                    field(
+                        readings,
+                        data,
+                        wire,
+                        &format!("{}.{wire}", crate::refrigerator::DETAILS),
+                        on_off,
+                    )?;
+                }
+                for wire in crate::refrigerator::DOORS {
+                    field(
+                        readings,
+                        data,
+                        wire,
+                        &format!("{}.{wire}", crate::refrigerator::DETAILS),
+                        vendor_token,
+                    )?;
+                }
+                field(
+                    readings,
+                    data,
+                    "e_cleaning_percentage",
+                    &format!("{}.e_cleaning_percentage", crate::refrigerator::DETAILS),
+                    numeric,
+                )?;
+            }
         }
         ApplianceFamily::Other(_) => return Err(unsupported()),
     }

@@ -73,14 +73,23 @@ class RefrigeratorModes extends StatelessWidget {
   final HomeController controller;
   @override
   Widget build(BuildContext context) {
-    const id = 'vendor.midea.refrigerator';
-    final cap = controller.componentCapability('fridge', id);
-    if (cap == null) return const SizedBox.shrink();
+    final caps = controller
+        .capabilitiesFor('fridge')
+        .where(
+          (cap) =>
+              cap['id'] == 'vendor.midea.refrigerator' ||
+              cap['id'] == 'vendor.midea.refrigerator.details',
+        )
+        .toList();
+    if (caps.isEmpty) return const SizedBox.shrink();
     final readings =
         controller.componentSnapshot('fridge')?['observations'] as Json? ?? {};
-    final entries = (cap['properties'] as Json).entries
-        .where((e) => readings['$id.${e.key}']?['value'] != null)
-        .toList();
+    final entries = <(String, Json)>[
+      for (final cap in caps)
+        for (final entry in (cap['properties'] as Json).entries)
+          if (readings['${cap['id']}.${entry.key}']?['value'] != null)
+            ('${cap['id']}.${entry.key}', entry.value as Json),
+    ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -95,15 +104,15 @@ class RefrigeratorModes extends StatelessWidget {
             children: [
               for (final e in entries)
                 ApplianceReading(
-                  controlLabel('$id.${e.key}'),
+                  controlLabel(e.$1),
                   propertyValue(
-                    readings['$id.${e.key}']['value'],
-                    e.value as Json,
-                    propertyId: '$id.${e.key}',
+                    readings[e.$1]['value'],
+                    e.$2,
+                    propertyId: e.$1,
                   ),
-                  stale: readings['$id.${e.key}']['stale'] == true,
-                  active: readings['$id.${e.key}']['value'] == true,
-                  icon: e.value['unit'] == 'celsius'
+                  stale: readings[e.$1]['stale'] == true,
+                  active: readings[e.$1]['value'] == true,
+                  icon: e.$2['unit'] == 'celsius'
                       ? Icons.thermostat_outlined
                       : Icons.kitchen_outlined,
                 ),

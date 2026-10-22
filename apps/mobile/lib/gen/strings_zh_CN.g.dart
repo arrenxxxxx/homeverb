@@ -1343,4 +1343,18 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get vendorMideaDishwasherWorkStatusCancel => '\u5df2\u53d6\u6d88';
 	@override String mobileApplianceMinutes({required Object value}) => '${value} \u5206\u949f';
 	@override String get mobileApplianceReadAge => '\u5e73\u53f0\u672a\u63d0\u4f9b\u53ef\u6838\u5b9e\u7684\u6d4b\u91cf\u65f6\u95f4\uff0c\u6570\u636e\u53ef\u80fd\u5df2\u8fc7\u65f6\u3002';
+	@override String get mobileVariable => '\u53d8\u6e29\u533a';
+	@override String get vendorMideaAcCoolEnergySaving => '\u9177\u7701\u7535';
+	@override String get vendorMideaAcStrongCooling => '\u5f3a\u51b7';
+	@override String get vendorMideaAcLightSensing => '\u667a\u80fd\u5149\u611f';
+	@override String get vendorMideaRefrigeratorDetailsDeepColdMode => '\u6df1\u51b7';
+	@override String get vendorMideaRefrigeratorDetailsPlasmaAsepticModePower => '\u7b49\u79bb\u5b50\u9664\u83cc';
+	@override String get vendorMideaRefrigeratorDetailsElectronicSmell => '\u51c0\u5473';
+	@override String get vendorMideaRefrigeratorDetailsRapidIceMaking => '\u5feb\u901f\u5236\u51b0';
+	@override String get vendorMideaRefrigeratorDetailsOpenDoorTipsSwitch => '\u5f00\u95e8\u63d0\u9192';
+	@override String get vendorMideaRefrigeratorDetailsTelstarSavingMode => '\u7701\u7535\u661f\u6a21\u5f0f';
+	@override String get vendorMideaRefrigeratorDetailsStorageDoorState => '\u51b7\u85cf\u5ba4\u95e8\u72b6\u6001';
+	@override String get vendorMideaRefrigeratorDetailsFreezerDoorState => '\u51b7\u51bb\u5ba4\u95e8\u72b6\u6001';
+	@override String get vendorMideaRefrigeratorDetailsFlexzoneDoorState => '\u53d8\u6e29\u533a\u95e8\u72b6\u6001';
+	@override String get vendorMideaRefrigeratorDetailsECleaningPercentage => '\u51c0\u5473\u8fdb\u5ea6';
 }

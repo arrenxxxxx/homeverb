@@ -1,5 +1,24 @@
 # Implementation status and next tasks
 
+## October 22 Meiju reference integration
+
+The owner's full-integration request is **incomplete**. API 1.26 implements four
+exact AC optional catalogs, independent cool-energy-saving/strong-cooling/light-
+sensing settings through the existing Lua path, and exact-product refrigerator
+third-zone/detail observations in Core and App. Existing shared grants,
+prerequisite checks, lifecycle and receipt rules remain mandatory. This supplies
+software integration, not new physical compatibility.
+
+The [integration guide](development/13-meiju-reference-integration.md) and generated
+67-operation ledger record the remaining work. Modern MAS signing/session
+material, independent authentication/renewal, business response contracts and
+some referenced source resources are absent from the supplied package. The
+owner confirmed no complete source directory is available. New TSL/statistical/
+history/configuration services, current GX1200Max controls and refrigerator writes
+remain blocked; they are not implemented by adding routes or controls to the UI.
+See the [App verification record](../apps/mobile/verification.md) for actual
+offline/runtime/package checks and the existing macOS LAN-test blockers.
+
 ## Active Mijia integration: October 18, 2026
 
 The owner requests mainland-China Mijia connection, all returned devices as named

@@ -3282,3 +3282,99 @@ inspection confirmed the Chinese minute unit, separate measurement-age notice,
 actual dishwasher readings and retained account/device data. Private screenshots
 remain outside the repository. API/storage compatibility is unchanged, and no
 appliance write, publication, push or diagnostic upload occurred.
+
+
+## October 22 exact Meiju reference integration
+
+The owner requested all interfaces from the newly supplied 11.7.10.6 analysis.
+This phase implements the independently supportable exact AC catalogs and
+read-only three-zone refrigerator mapping, not full interface parity. The
+[reference integration record](../../docs/development/13-meiju-reference-integration.md)
+and generated 67-operation ledger retain the remaining authentication, modern
+TSL, statistics/history and exact GX1200Max conversion blockers. The owner
+confirmed that no additional complete source or analysis directory is available.
+No new authentication material, real account or appliance request was used.
+
+The four exact AC catalogs take precedence over the older generic category
+catalog. Three independent Boolean controls have reviewed scalar encodings;
+unsupported generic controls are omitted. Existing protected product identity,
+exact grant checks, prerequisite reads, one-send tracking and uncertain-receipt
+replay refusal remain in force. The exact refrigerator adds a separate read-only
+variable component and reported details. New fields require explicit inventory
+refresh; old descriptors retain their declared scopes and device identities.
+The Flutter panels use descriptors and shared English/Simplified Chinese labels.
+
+Native API is now 1.26.0 for three additional Boolean startup feature names.
+There are still 34 ordinary methods and 19 C functions plus Android initialization;
+SQLite schema 5 and protected payload 3 are unchanged. Older libraries refuse
+new feature names. No storage migration or expanded background policy is added.
+The iOS synthetic harness API expectation was synchronized; no iOS package,
+simulator acceptance or phone verification was executed in this phase.
+
+Executed checks on this macOS workstation:
+
+- Workspace Rust tests with only the 14 existing unavailable-loopback cases
+  excluded: 532 passed, one ignored, 14 filtered. The initial unfiltered Meiju
+  library run passed 51 and failed those 14 with `AddrNotAvailable`; aliases
+  `127.0.0.2` and `127.0.1.1` are not assigned. Those cases remain blocked,
+  not passed; no host networking was modified. The exact adapter suite also
+  passed independently: `cargo test -p homeverb-midea --test adapter --offline
+  --locked` (50 tests).
+- `cargo build --workspace --offline --locked`: passed.
+  `cargo +1.96.0 clippy --workspace --all-targets --offline --locked -- -D warnings`:
+  passed on the project baseline. The initial Rust 1.99 strict Clippy attempt
+  failed on four pre-existing `chunks_exact_to_as_chunks` suggestions in codec/LAN;
+  no unrelated source was changed to suppress them.
+- `fvm flutter analyze`: passed. The climate, refrigerator, compartment overview,
+  session permissions and localization group passed 30 tests. The current
+  contract, device detail, component and generic controls group passed 12 tests.
+  These are selected regressions, not an all-Flutter or golden-suite result.
+- `.venv/bin/python -m unittest discover -s tests`: 70 passed. System Python
+  lacks `jsonschema`; verification used the existing virtual environment.
+- `.venv/bin/python scripts/verify_mvp.py`: 35 cases, 28 passed and seven
+  explicitly skipped Linux-only grant-file/pipe-capacity checks.
+- `.venv/bin/python scripts/verify_native_contract.py`: passed 34 methods and
+  55 live fictional examples plus trusted approval, scan, connection-link and
+  identity-recovery C checks. No provider traffic was used.
+- `node packages/presentation/test/i18n.test.mjs`: seven passed.
+  Contract validation passed 21 schemas, 52 positive fixtures and 341 negative
+  cases, including rejection of non-Boolean values for all three new controls.
+  Documentation/repository validation, archive projection checks and formatting
+  passed; final counts are recorded with the delivery checks below.
+
+Both Android ABIs rebuilt using `scripts/build_android_native.py` with the
+existing SDK under `<ANDROID_SDK>`,
+NDK 28.2.13676358, API 36 and Android Studio's bundled JDK. The universal AAR
+passed 20 exports per ABI and 16 KiB ELF alignment. The first Flutter build
+selected the standalone platform-tools directory and failed because it lacked
+the NDK/license setup. The retry uses a temporary `XDG_CONFIG_HOME` with explicit
+SDK/JDK paths and the existing `ANDROID_USER_HOME` for signing; no SDK license
+was accepted and no SDK component was installed.
+
+
+The explicit Meiju dual-ABI release build passed in 39.0 seconds with
+`fvm flutter build apk --release --target-platform android-arm64,android-x64
+--dart-define=HOMEVERB_ADAPTER=midea.meiju`. Authentication tracing was not enabled.
+Local delivery artifact:
+`output/flutter-verification/android/homeverb-0.2.0-meiju-reference-20261022.apk`.
+Size: 71,828,586 bytes. SHA-256:
+`8617d96e585162a8e9d22c61d167e05bf560ba9490e493d4e4281c478ce6ed15`.
+
+`scripts/verify_flutter_apk.py` passed APK v2 development signature, both complete
+ABIs, minimum API 28, disabled backup, no integration-test plugin, 20 Core exports,
+16 KiB ZIP/ELF alignment and exact current-AAR matching after normal NDK symbol
+stripping. The report is
+`output/flutter-verification/android/meiju-reference-20261022-verification.json`.
+It records the pre-commit source revision and dirty status used for this build;
+packaging inspection does not establish runtime or physical-device acceptance.
+The APK was not installed, launched against a real account, uploaded or published.
+
+Final delivery checks passed: `cargo fmt --all -- --check`, archive projection
+`--check`, documentation validation (150 Markdown files, 1641 local links,
+231 JSON files), contract validation (21 schemas, 52 positive and 341 negative
+fixtures), repository validation (652 maintained text files), existing local
+commit validation (218 messages), and `git diff --check`. The build and checks
+use local artifacts only. No appliance write, push or other remote delivery was
+performed. New optional controls and refrigerator observations still require
+exact-model real-device acceptance; modern-interface completion remains blocked
+as detailed in the integration record.

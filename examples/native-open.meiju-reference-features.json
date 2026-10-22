@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "data_dir": "/private/homeverb-fictional",
+  "adapter": "midea.meiju",
+  "allow_mock_writes": false,
+  "meiju_ac_feature_grants": [
+    {
+      "device_id": "30000000-0000-4000-8000-000000000001",
+      "feature": "cool_energy_saving",
+      "value": true
+    },
+    {
+      "device_id": "30000000-0000-4000-8000-000000000001",
+      "feature": "strong_cooling",
+      "value": false
+    },
+    {
+      "device_id": "30000000-0000-4000-8000-000000000001",
+      "feature": "light_sensing",
+      "value": true
+    }
+  ]
+}

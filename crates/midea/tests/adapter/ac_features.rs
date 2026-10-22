@@ -72,6 +72,92 @@ fn command(device: &Device, name: &str, value: Value) -> Command {
     c.arguments = json!({name:value});
     c
 }
+
+#[tokio::test]
+async fn exact_reference_settings_follow_core_grants_prerequisites_and_uncertain_write_rules() {
+    let mut entry = appliances()[0].clone();
+    entry["sn8"] = json!("22040089");
+    entry["category"] = json!("wall_air_conditioner");
+    let f = Fixture::new(vec![entry]).await;
+    let device = f.discover().await.remove(0);
+    let names = ["cool_energy_saving", "strong_cooling", "light_sensing"];
+    let c = Core::new(
+        f.store.clone(),
+        vec![Arc::new(
+            MeijuAdapter::new(f.vault.clone(), f.wire.clone(), Arc::new(SystemClock))
+                .with_ac_feature_control(),
+        )],
+        Arc::new(SystemClock),
+        Policy {
+            grants: names
+                .iter()
+                .map(|name| Grant {
+                    device_id: device.id.clone(),
+                    component_id: "main".into(),
+                    capability: "vendor.midea.ac".into(),
+                    action: format!("set_{name}"),
+                    transports: vec![Transport::Cloud],
+                    argument_schema: json!({"const":{*name:true}}),
+                })
+                .collect(),
+        },
+    );
+    c.discover(&operation()).await.unwrap();
+    for (name, wire, value) in [
+        ("cool_energy_saving", "cool_power_saving", 1),
+        ("strong_cooling", "strong_cool", 1),
+        ("light_sensing", "light_sensitive", 3),
+    ] {
+        *f.wire.state.lock().unwrap() = Some(json!({wire:0,"buzzer":"off"}));
+        let cmd = command(&device, name, json!(true));
+        let result = c.execute(cmd.clone(), CancellationToken::new()).await;
+        assert_eq!(
+            result.status,
+            Status::Accepted,
+            "{name}: {:?}",
+            result.error
+        );
+        assert!(result.verification.is_none());
+        assert_eq!(
+            f.wire.controls.lock().unwrap().last().unwrap()["command"],
+            json!({"control":{wire:value,"buzzer":"off"}})
+        );
+        let sends = f.wire.controls.lock().unwrap().len();
+        let calls = f.calls();
+        assert_eq!(
+            json!(c.execute(cmd, CancellationToken::new()).await),
+            json!(result)
+        );
+        assert_eq!(f.calls(), calls);
+        assert_eq!(f.wire.controls.lock().unwrap().len(), sends);
+
+        *f.wire.state.lock().unwrap() = Some(json!({wire:2}));
+        let result = c
+            .execute(
+                command(&device, name, json!(true)),
+                CancellationToken::new(),
+            )
+            .await;
+        assert_eq!(result.status, Status::Failed);
+        assert!(result.attempts.iter().all(|a| a.phase == Phase::NotSent));
+        assert_eq!(f.wire.controls.lock().unwrap().len(), sends);
+
+        *f.wire.state.lock().unwrap() = Some(json!({wire:0}));
+        f.wire.control_fault.store(2, Ordering::Relaxed);
+        let cmd = command(&device, name, json!(true));
+        let result = c.execute(cmd.clone(), CancellationToken::new()).await;
+        assert_eq!(result.status, Status::Unknown);
+        let calls = f.calls();
+        assert_eq!(
+            json!(c.execute(cmd, CancellationToken::new()).await),
+            json!(result)
+        );
+        assert_eq!(f.calls(), calls);
+        assert_eq!(f.wire.controls.lock().unwrap().len(), sends + 1);
+        f.wire.control_fault.store(0, Ordering::Relaxed);
+    }
+    assert!(c.plan(&command(&device, "eco", json!(true))).is_err());
+}
 #[tokio::test]
 async fn optional_controls_use_prerequisite_reads_one_exact_send_and_no_optimistic_cache() {
     let (f, device) = fixture().await;
