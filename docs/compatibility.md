@@ -2136,3 +2136,18 @@ and protected payload 3 are preserved. Native startup accepts three new Boolean
 feature names; older libraries reject them. Ordinary method/C function counts and
 existing CLI/MCP defaults are unchanged. No new physical-device, cloud-statistical,
 GX1200Max write, refrigerator write or full-parity claim is made.
+
+## October 22 refrigerator App presentation groups
+
+The App groups existing refrigerator readings into variable-zone details,
+smart/energy saving, refrigerator functions, operating status and other settings.
+Groups require readable descriptor properties with reported values; false, zero,
+unknown codes and stale markers remain observations. Missing groups are omitted;
+future unclassified properties retain an Other readings fallback. Exact property
+IDs select presentation without brand/model branching or new capability admission.
+
+This is a UI-only change. Native API 1.26, schemas, SQLite 5, protected payload 3,
+old descriptor support, grants, routing and execution outcomes are unchanged.
+Fixture checks cover English/Chinese, narrow enlarged text and component
+regressions. No new appliance access, official-App report service, refrigerator
+write, package installation or physical-device acceptance is claimed.

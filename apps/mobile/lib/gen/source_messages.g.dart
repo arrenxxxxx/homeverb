@@ -1770,6 +1770,11 @@ String? translateSource(
     t.vendorMideaRefrigeratorDetailsFlexzoneDoorState,
   "Odor purification progress" =>
     t.vendorMideaRefrigeratorDetailsECleaningPercentage,
+  "Variable-zone details" => t.mobileRefrigeratorVariableDetails,
+  "Smart and energy saving" => t.mobileRefrigeratorSmartSaving,
+  "Refrigerator functions" => t.mobileRefrigeratorFunctions,
+  "Refrigerator status" => t.mobileRefrigeratorStatus,
+  "Other readings" => t.mobileRefrigeratorOtherReadings,
   _ => null,
 };
 
@@ -3480,5 +3485,10 @@ String? sourceForKey(String key) => switch (key) {
     "Variable-zone door state",
   "vendor.midea.refrigerator.details.e_cleaning_percentage" =>
     "Odor purification progress",
+  "mobile.refrigeratorVariableDetails" => "Variable-zone details",
+  "mobile.refrigeratorSmartSaving" => "Smart and energy saving",
+  "mobile.refrigeratorFunctions" => "Refrigerator functions",
+  "mobile.refrigeratorStatus" => "Refrigerator status",
+  "mobile.refrigeratorOtherReadings" => "Other readings",
   _ => null,
 };

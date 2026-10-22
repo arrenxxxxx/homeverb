@@ -1357,4 +1357,9 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get vendorMideaRefrigeratorDetailsFreezerDoorState => '\u51b7\u51bb\u5ba4\u95e8\u72b6\u6001';
 	@override String get vendorMideaRefrigeratorDetailsFlexzoneDoorState => '\u53d8\u6e29\u533a\u95e8\u72b6\u6001';
 	@override String get vendorMideaRefrigeratorDetailsECleaningPercentage => '\u51c0\u5473\u8fdb\u5ea6';
+	@override String get mobileRefrigeratorVariableDetails => '\u53d8\u6e29\u533a\u8be6\u60c5';
+	@override String get mobileRefrigeratorSmartSaving => '\u667a\u80fd\u4e0e\u8282\u80fd';
+	@override String get mobileRefrigeratorFunctions => '\u51b0\u7bb1\u529f\u80fd';
+	@override String get mobileRefrigeratorStatus => '\u51b0\u7bb1\u8fd0\u884c\u72b6\u6001';
+	@override String get mobileRefrigeratorOtherReadings => '\u5176\u4ed6\u72b6\u6001';
 }

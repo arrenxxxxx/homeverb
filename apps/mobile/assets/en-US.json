@@ -1322,5 +1322,10 @@
   "vendor.midea.refrigerator.details.storage_door_state": "Fridge door state",
   "vendor.midea.refrigerator.details.freezer_door_state": "Freezer door state",
   "vendor.midea.refrigerator.details.flexzone_door_state": "Variable-zone door state",
-  "vendor.midea.refrigerator.details.e_cleaning_percentage": "Odor purification progress"
+  "vendor.midea.refrigerator.details.e_cleaning_percentage": "Odor purification progress",
+  "mobile.refrigeratorVariableDetails": "Variable-zone details",
+  "mobile.refrigeratorSmartSaving": "Smart and energy saving",
+  "mobile.refrigeratorFunctions": "Refrigerator functions",
+  "mobile.refrigeratorStatus": "Refrigerator status",
+  "mobile.refrigeratorOtherReadings": "Other readings"
 }

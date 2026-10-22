@@ -1,5 +1,16 @@
 # Implementation status and next tasks
 
+## October 22 refrigerator presentation groups
+
+The App replaces the flat Modes and freshness grid with observed variable-zone,
+smart/energy-saving, refrigerator-function, operating-status and settings groups.
+Exact capability/property IDs determine presentation; brand/model names do not.
+Empty groups are omitted and future unclassified readings remain visible.
+English/Chinese and 320-pixel double-text-scale fixtures pass; existing compartment
+and localization regressions pass. No appliance requests, new controls, report
+services or physical acceptance are supplied by this presentation change. See the
+[verification record](../apps/mobile/verification.md#refrigerator-presentation-groups--october-22-2026).
+
 ## October 22 Meiju reference integration
 
 The owner's full-integration request is **incomplete**. API 1.26 implements four

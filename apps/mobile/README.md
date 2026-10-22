@@ -93,6 +93,13 @@ types use a generic device symbol. The [artwork record](artwork.md) contains the
 built-in image-generation prompts, refinement scope and actual source dimensions.
 Large source images decode at the card's bounded physical pixel size.
 
+Refrigerator details retain the temperature-zone overview, followed by separate
+variable-zone details, smart/energy-saving readings, refrigerator functions,
+operating status and other settings. Only groups with descriptor-declared,
+readable observations appear. Unclassified future readings remain in Other
+readings. The current Meiju groups are read-only, preserve stale/unknown values,
+and do not imply official-App report services or refrigerator write support.
+
 After a command, one bounded foreground read updates observations without rewriting
 its receipt or retrying the write. Navigation, device/component changes and background
 transitions prevent late reads. The outcome is shown inline with an optional View

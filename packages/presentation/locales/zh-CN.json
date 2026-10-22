@@ -1322,5 +1322,10 @@
   "vendor.midea.refrigerator.details.storage_door_state": "冷藏室门状态",
   "vendor.midea.refrigerator.details.freezer_door_state": "冷冻室门状态",
   "vendor.midea.refrigerator.details.flexzone_door_state": "变温区门状态",
-  "vendor.midea.refrigerator.details.e_cleaning_percentage": "净味进度"
+  "vendor.midea.refrigerator.details.e_cleaning_percentage": "净味进度",
+  "mobile.refrigeratorVariableDetails": "变温区详情",
+  "mobile.refrigeratorSmartSaving": "智能与节能",
+  "mobile.refrigeratorFunctions": "冰箱功能",
+  "mobile.refrigeratorStatus": "冰箱运行状态",
+  "mobile.refrigeratorOtherReadings": "其他状态"
 }

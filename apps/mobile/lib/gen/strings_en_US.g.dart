@@ -4007,4 +4007,19 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Odor purification progress'
 	String get vendorMideaRefrigeratorDetailsECleaningPercentage => 'Odor purification progress';
+
+	/// en-US: 'Variable-zone details'
+	String get mobileRefrigeratorVariableDetails => 'Variable-zone details';
+
+	/// en-US: 'Smart and energy saving'
+	String get mobileRefrigeratorSmartSaving => 'Smart and energy saving';
+
+	/// en-US: 'Refrigerator functions'
+	String get mobileRefrigeratorFunctions => 'Refrigerator functions';
+
+	/// en-US: 'Refrigerator status'
+	String get mobileRefrigeratorStatus => 'Refrigerator status';
+
+	/// en-US: 'Other readings'
+	String get mobileRefrigeratorOtherReadings => 'Other readings';
 }

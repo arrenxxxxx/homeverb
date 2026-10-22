@@ -3483,3 +3483,43 @@ documentation validation (151 Markdown files, 1654 local links, 233 JSON files);
 contract validation (21 schemas, 52 positive and 341 negative fixtures);
 repository validation (656 maintained text files); and `git diff --check`.
 These checks do not turn probe acceptance into complete interface implementation.
+
+## Refrigerator presentation groups -- October 22, 2026
+
+Replaced the flat refrigerator Modes and freshness grid in
+`lib/appliance_panels.dart` with variable-zone, smart/energy-saving, refrigerator
+function, operating-status and settings groups. Exact capability/property IDs
+classify existing observations without changing descriptors or authority.
+Empty groups are hidden; readable unknown fields have an Other readings fallback.
+Reported false/zero/unknown codes and stale flags remain visible. The canonical
+locale catalogs and generated Flutter translations include the new headings.
+
+Executed on macOS with the FVM-pinned Flutter 3.47.7:
+
+- `cargo build -p homeverb-ffi --locked --offline`: passed.
+- `python3 scripts/generate_flutter_i18n.py --generate`: passed, 1329 shared
+  messages; generated catalogs and the English fixture asset are synchronized.
+- `fvm flutter analyze`: passed with no issues.
+- `fvm flutter test test/refrigerator_modes_test.dart test/compartment_overview_test.dart test/component_test.dart test/localization_test.dart --reporter expanded`:
+  all 18 tests passed. Group fixtures check present/missing readings, read-only
+  widgets, retained unknown fields, false/zero values, unchanged snapshots and
+  absence of additional Core calls in English/Chinese at 400 pixels and at 320
+  pixels with double text scale.
+- After adding optional local CJK font loading and the capture background, reran
+  all seven refrigerator tests with
+  `--dart-define=HOMEVERB_CJK_FONT=/System/Library/Fonts/Hiragino\ Sans\ GB.ttc`:
+  passed. Inspected the fictional Chinese capture at
+  `build/verification/refrigerator/grouped-zh-CN.png`; it includes deliberate
+  unknown-code/future-property fixtures and is not a live appliance screenshot.
+  The final focused four-file run also passed all 18 tests with this CJK option
+  and explicit translated-heading assertions.
+- `node packages/presentation/test/i18n.test.mjs`: all seven tests passed.
+- Documentation, contract and repository validators passed. Contract validation
+  used `.venv/bin/python` with the existing development dependencies; the system
+  Python lacked them. No dependency or lockfile changed.
+
+Native API 1.26, SQLite 5, protected payload 3, descriptors, read scheduling,
+permissions and write semantics are unchanged. No real account/appliance,
+Android/iOS build or installation, physical-device test, remote CI, push,
+publication or diagnostic upload was used for this phase. Official-App reports
+and refrigerator writes remain outside the implemented grouping.

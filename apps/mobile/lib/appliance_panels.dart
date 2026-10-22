@@ -71,6 +71,72 @@ class ApplianceReading extends StatelessWidget {
 class RefrigeratorModes extends StatelessWidget {
   const RefrigeratorModes({required this.controller, super.key});
   final HomeController controller;
+
+  static const _base = 'vendor.midea.refrigerator';
+  static const _details = '$_base.details';
+  // Exact property IDs classify presentation only; descriptors and observations
+  // still determine which readings exist. Unknown fields remain visible below.
+  static const _groups = [
+    (
+      id: 'variable',
+      title: 'Variable-zone details',
+      icon: Icons.thermostat_outlined,
+      properties: [
+        '$_base.variable_mode',
+        '$_base.left_flexzone_temperature',
+        '$_base.left_variable_real_temperature',
+        '$_base.right_flexzone_temperature',
+        '$_base.right_variable_real_temperature',
+      ],
+    ),
+    (
+      id: 'smart',
+      title: 'Smart and energy saving',
+      icon: Icons.eco_outlined,
+      properties: [
+        '$_base.intelligent_mode',
+        '$_base.energy_saving_mode',
+        '$_details.telstar_saving_mode',
+      ],
+    ),
+    (
+      id: 'functions',
+      title: 'Refrigerator functions',
+      icon: Icons.kitchen_outlined,
+      properties: [
+        '$_details.e_cleaning_percentage',
+        '$_details.electronic_smell',
+        '$_details.plasma_aseptic_mode_power',
+        '$_base.storage_mode',
+        '$_base.freezing_mode',
+        '$_details.deep_cold_mode',
+        '$_base.acme_freezing_mode',
+        '$_base.moisturize_mode',
+        '$_base.preservation_mode',
+        '$_base.icea_mode_power',
+        '$_base.freezing_ice_machine_power',
+        '$_details.rapid_ice_making',
+        '$_base.holiday_mode',
+      ],
+    ),
+    (
+      id: 'status',
+      title: 'Refrigerator status',
+      icon: Icons.door_front_door_outlined,
+      properties: [
+        '$_details.storage_door_state',
+        '$_details.freezer_door_state',
+        '$_details.flexzone_door_state',
+      ],
+    ),
+    (
+      id: 'settings',
+      title: 'Other settings',
+      icon: Icons.settings_outlined,
+      properties: ['$_details.open_door_tips_switch'],
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
     final caps = controller
@@ -84,48 +150,84 @@ class RefrigeratorModes extends StatelessWidget {
     if (caps.isEmpty) return const SizedBox.shrink();
     final readings =
         controller.componentSnapshot('fridge')?['observations'] as Json? ?? {};
-    final entries = <(String, Json)>[
+    final entries = <String, Json>{
       for (final cap in caps)
         for (final entry in (cap['properties'] as Json).entries)
-          if (readings['${cap['id']}.${entry.key}']?['value'] != null)
-            ('${cap['id']}.${entry.key}', entry.value as Json),
-    ];
+          if (entry.value['readable'] == true &&
+              readings['${cap['id']}.${entry.key}']?['value'] != null)
+            '${cap['id']}.${entry.key}': entry.value as Json,
+    };
+    Widget section(
+      String id,
+      String title,
+      IconData icon,
+      Iterable<String> properties,
+    ) => Column(
+      key: ValueKey('refrigerator-group:$id'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 24, bottom: 12),
+          child: Semantics(
+            header: true,
+            child: Copy(title, bold: true, size: 20),
+          ),
+        ),
+        ApplianceGrid(
+          children: [
+            for (final property in properties)
+              ApplianceReading(
+                controlLabel(property),
+                propertyValue(
+                  readings[property]['value'],
+                  entries[property]!,
+                  propertyId: property,
+                ),
+                key: ValueKey('refrigerator-reading:$property'),
+                stale: readings[property]['stale'] == true,
+                active: readings[property]['value'] == true,
+                icon: entries[property]!['unit'] == 'celsius'
+                    ? Icons.thermostat_outlined
+                    : icon,
+              ),
+          ],
+        ),
+      ],
+    );
+    final classified = _groups.expand((group) => group.properties).toSet();
+    final other = entries.keys.where(
+      (property) => !classified.contains(property),
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 16),
-          child: Copy('Modes and freshness', bold: true, size: 20),
-        ),
         if (entries.isEmpty)
-          const Copy('No mode readings have been returned yet.', color: muted)
-        else ...[
-          ApplianceGrid(
-            children: [
-              for (final e in entries)
-                ApplianceReading(
-                  controlLabel(e.$1),
-                  propertyValue(
-                    readings[e.$1]['value'],
-                    e.$2,
-                    propertyId: e.$1,
-                  ),
-                  stale: readings[e.$1]['stale'] == true,
-                  active: readings[e.$1]['value'] == true,
-                  icon: e.$2['unit'] == 'celsius'
-                      ? Icons.thermostat_outlined
-                      : Icons.kitchen_outlined,
-                ),
-            ],
-          ),
           const Padding(
-            padding: EdgeInsets.only(top: 12),
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Copy(
+              'No mode readings have been returned yet.',
+              color: muted,
+            ),
+          )
+        else ...[
+          const Padding(
+            padding: EdgeInsets.only(top: 8),
             child: Copy(
               'Reported modes are read-only on this connection.',
               size: 12,
               color: muted,
             ),
           ),
+          for (final group in _groups)
+            if (group.properties.any(entries.containsKey))
+              section(
+                group.id,
+                group.title,
+                group.icon,
+                group.properties.where(entries.containsKey),
+              ),
+          if (other.isNotEmpty)
+            section('other', 'Other readings', Icons.sensors_outlined, other),
         ],
         const SizedBox(height: 16),
       ],
