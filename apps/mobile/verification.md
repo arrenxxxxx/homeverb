@@ -3378,3 +3378,32 @@ use local artifacts only. No appliance write, push or other remote delivery was
 performed. New optional controls and refrigerator observations still require
 exact-model real-device acceptance; modern-interface completion remains blocked
 as detailed in the integration record.
+
+
+### Owner-requested emulator launch — October 22, 2026
+
+The owner requested opening the delivered APK in a local emulator. ADB initially
+had no running devices. The old temporary `homeverb-control-api35` directory
+retains some runtime/data files but lacks its AVD registration, configuration and
+base images; it was not reconstructed or modified. The registered Medium Phone
+AVD references a Play Store image absent from the available SDK. Its data was
+also left intact.
+
+A separate `homeverb-reference-20261022` Pixel 7 AVD was created under
+`/private/tmp/homeverb-reference-emulator-20261022` using the already-installed
+Android 15 / API 35 Google APIs arm64 image. It started visibly with host graphics,
+no snapshot restoration and port 5586. No image download, SDK installation,
+license acceptance or existing-data reset was performed.
+
+`adb -s emulator-5586 install -r` returned `Success` for
+`homeverb-0.2.0-meiju-reference-20261022.apk` (the previously recorded hash).
+`adb -s emulator-5586 shell am start -W -n
+dev.homeverb.homeverb_mobile/.MainActivity` returned `Status: ok`, `COLD`,
+2239 ms total time. A local screenshot confirmed the empty HomeVerb home screen;
+Add Platform then showed Meiju / Mainland China. The Meiju row was opened and
+the visible emulator was left running for direct user sign-in.
+
+This new isolated profile contains no previous account/session. Startup and
+platform navigation passed; account authentication, inventory, modern MAS session
+compatibility and real-device controls were not tested. No credentials were
+entered by tooling, no appliance command was sent, and no artifact was uploaded.
