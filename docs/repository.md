@@ -19,6 +19,7 @@ examples/                  # Fictional positive fixtures
 scripts/                   # Validation, runtime acceptance, publishing helper
 tests/                     # Repository-tool tests
 docs/development/          # Progressive contributor guides
+docs/adapter-references/   # Original adapter-analysis packages and English index
 docs/adr/                  # Architecture decisions
 ```
 
