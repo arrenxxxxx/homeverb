@@ -99,6 +99,9 @@ operating status and other settings. Only groups with descriptor-declared,
 readable observations appear. Unclassified future readings remain in Other
 readings. The current Meiju groups are read-only, preserve stale/unknown values,
 and do not imply official-App report services or refrigerator write support.
+Refrigerator cards and temperature-zone captions omit routine Stale labels;
+snapshots retain their original freshness flags and timestamps. Missing readings
+and explicit read failures remain visible, and foreground state refresh is unchanged.
 
 After a command, one bounded foreground read updates observations without rewriting
 its receipt or retrying the write. Navigation, device/component changes and background

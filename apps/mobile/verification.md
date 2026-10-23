@@ -3567,3 +3567,34 @@ are unchanged. No appliance write, physical-phone acceptance, credential entry,
 remote CI, push/publication or diagnostic upload was performed. Rendering retained
 or stale cloud values does not establish a new physical reading or authentication
 acceptance.
+
+### Refrigerator freshness captions -- October 23, 2026
+
+At the owner's request, refrigerator feature cards and temperature-zone captions
+omit routine Stale labels. Core snapshots retain original freshness flags and
+timestamps; receipt/source captions, missing values and explicit read failures
+remain visible. The foreground-only three-second refresh, background cancellation,
+write admission, native API 1.26 and storage schemas are unchanged.
+
+`fvm flutter analyze` passed. The focused refrigerator, compartment overview,
+component, localization and state-refresh run passed all 26 tests. Existing
+refrigerator fixtures now assert absent English/Chinese expiry labels while
+retaining stale snapshot values. Documentation/repository validation and
+`git diff --check` passed. The native AAR is unchanged from the preceding verified
+dual-ABI build; no Rust source or localization catalog changed in this phase.
+
+The explicit Meiju dual-ABI release build passed in 79.1 seconds. Saved artifact:
+`output/flutter-verification/android/homeverb-0.2.0-meiju-fridge-clean-20261023.apk`.
+SHA-256: `07477909d596674a856dc07fef30c2b737cdcd72026c9409c1d1d1116e856bf3`.
+The APK verifier passed development signing, both ABIs, current native AAR match,
+exports and 16 KiB alignment; its adjacent
+`meiju-fridge-clean-20261023-verification.json` records the dirty source build.
+`adb -s emulator-5586 install -r` returned `Success`; the installed base APK's
+checksum matched. An initial Activity wait timed out on the splash screen.
+Stopping only the app and relaunching returned `Status: ok`, `COLD`, 12036 ms;
+the sampled AndroidRuntime/Flutter error log contained no fatal/unhandled exception
+markers. Local screenshots confirmed retained device cards and refrigerator zone
+captions/feature cards without expiry labels. No app data was cleared, appliance
+write sent, physical-phone test run, artifact uploaded or remote push performed.
+Only foreground reads remain permitted; rendering cached values is not proof of
+fresh physical measurements.

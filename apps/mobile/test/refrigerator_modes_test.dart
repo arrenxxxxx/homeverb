@@ -91,6 +91,11 @@ class ReferenceFridgeFixture extends ModeFixture {
   @override
   Future<dynamic> call(String method, [Json fields = const {}]) async {
     final result = await super.call(method, fields);
+    if (method == 'read_state') {
+      for (final observation in (result['observations'] as Json).values) {
+        observation['stale'] = true;
+      }
+    }
     if (method == 'read_state' && fields['component'] == 'fridge') {
       result['observations'].addAll({
         'vendor.midea.refrigerator.details.deep_cold_mode': {
@@ -263,6 +268,7 @@ void main() {
           expect(find.text('0%'), findsOneWidget);
           expect(find.text('unrecognized-code'), findsNWidgets(3));
           expect(find.byType(Switch), findsNothing);
+          expect(find.text(locale.translations.mobileStale), findsNothing);
           expect(find.text('Modes and freshness'), findsNothing);
           final headings = find.byWidgetPredicate(
             (widget) => widget is Semantics && widget.properties.header == true,
@@ -364,6 +370,13 @@ void main() {
       expect(find.text('Deep cooling'), findsOneWidget);
       expect(find.text('35%'), findsOneWidget);
       expect(find.text('Fridge door state'), findsOneWidget);
+      expect(find.textContaining('Stale'), findsNothing);
+      expect(
+        (c.componentSnapshot('fridge')!['observations'] as Json).values.every(
+          (observation) => observation['stale'] == true,
+        ),
+        true,
+      );
       expect(
         find.byKey(const ValueKey('edit-component:variable')),
         findsNothing,
@@ -376,6 +389,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('\u53d8\u6e29\u533a'), findsOneWidget);
       expect(find.text('\u6df1\u51b7'), findsOneWidget);
+      expect(find.textContaining('\u5df2\u8fc7\u671f'), findsNothing);
       expect(
         core.calls.where((v) => ['plan', 'execute'].contains(v['method'])),
         isEmpty,
@@ -411,7 +425,7 @@ void main() {
       expect(find.text('On'), findsOneWidget);
       expect(find.text('Off'), findsOneWidget);
       expect(find.text('-2°C'), findsOneWidget);
-      expect(find.text('Stale'), findsNWidgets(3));
+      expect(find.text('Stale'), findsNothing);
       expect(find.text('Holiday mode'), findsNothing);
       expect(
         find.byKey(const ValueKey('refrigerator-group:smart')),

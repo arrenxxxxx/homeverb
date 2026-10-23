@@ -166,7 +166,6 @@ class CompartmentControls extends StatelessWidget {
     final readError = controller.componentReadError(id);
     final observations = (snapshot?['observations'] as Json? ?? {}).values
         .whereType<Map>();
-    final stale = observations.any((o) => o['stale'] == true);
     final times =
         observations.map((o) => o['received_at']).whereType<String>().toList()
           ..sort((a, b) => DateTime.parse(a).compareTo(DateTime.parse(b)));
@@ -273,7 +272,7 @@ class CompartmentControls extends StatelessWidget {
                       snapshot?['from_cache'] == true ? 'Cached' : 'Read',
                     ),
                     'time': receiptTime(times.last, compact: true),
-                    'stale': UiMessage(stale ? ' · Stale' : ''),
+                    'stale': '',
                   }),
             size: 12,
             color: muted,

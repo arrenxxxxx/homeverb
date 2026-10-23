@@ -1,5 +1,9 @@
 # Implementation status and next tasks
 
+The October 23 refrigerator presentation removes repetitive Stale labels from
+feature cards and temperature-zone captions at the owner's request. Core freshness
+flags, timestamps, missing/error states and foreground refresh remain unchanged.
+
 ## October 22 refrigerator presentation groups
 
 The App replaces the flat Modes and freshness grid with observed variable-zone,

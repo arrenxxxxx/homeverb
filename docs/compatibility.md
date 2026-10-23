@@ -2151,3 +2151,7 @@ old descriptor support, grants, routing and execution outcomes are unchanged.
 Fixture checks cover English/Chinese, narrow enlarged text and component
 regressions. No new appliance access, official-App report service, refrigerator
 write, package installation or physical-device acceptance is claimed.
+
+The October 23 presentation revision omits routine refrigerator Stale badges and
+zone-caption suffixes. It retains Core freshness flags/timestamps and explicit
+read failures without changing API 1.26, schemas, authority or foreground scheduling.

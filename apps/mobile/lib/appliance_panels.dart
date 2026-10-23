@@ -184,7 +184,6 @@ class RefrigeratorModes extends StatelessWidget {
                   propertyId: property,
                 ),
                 key: ValueKey('refrigerator-reading:$property'),
-                stale: readings[property]['stale'] == true,
                 active: readings[property]['value'] == true,
                 icon: entries[property]!['unit'] == 'celsius'
                     ? Icons.thermostat_outlined
