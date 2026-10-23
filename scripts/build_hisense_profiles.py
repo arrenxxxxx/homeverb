@@ -9,10 +9,10 @@ from pathlib import Path
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-ARCHIVE = ROOT / 'docs/adapter-references/2026-10-22/hisense-aijia-7.0.8.12-washers-readonly-20261022.zip'
-ARCHIVE_SHA256 = '6a5e43de1dc844cbbc15d0066e267d4c5f9cdcca9ea5f3ad4e469cac24bd4bde'
+ARCHIVE = ROOT / 'docs/adapter-references/2026-10-23/hisense-aijia-7.0.8.12-washers-standalone-auth-20261023.zip'
+ARCHIVE_SHA256 = 'b9d64f1ec39fcd9141d10b6f54e5f25afa67acfd9417962a8bbd31bef58b6bb1'
 OUTPUT = ROOT / 'crates/hisense/src/profiles.json'
-PREFIX = 'hisense-aijia-7.0.8.12-washers-readonly/'
+PREFIX = ''
 FUNCTION_PREFIX = 'connector.device.function.'
 CAPABILITY = 'vendor.hisense.washer'
 # Only these reviewed state meanings are projected. Actions/defaults are excluded.

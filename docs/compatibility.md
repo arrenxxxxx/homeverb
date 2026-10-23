@@ -8,10 +8,12 @@ products WV20W-1/WH120E5S-1 and projects component-specific read-only metadata,
 repeat the archive's account observations or establish physical compatibility.
 The virtual family card is not admitted as a third physical device. Independent
 native authentication/material review, protected account inventory, live reads
-and host/App integration remain incomplete. HisenseHA beta provides a concrete
-modern protocol lead, not exact-product verification. Native API, storage and
-execution contracts are unchanged. One internal crate is added without new
-external dependencies or routes.
+and host/App integration remain incomplete. The October 23 owner-supplied
+[replacement analysis](adapter-references/README.md) independently verifies SMS
+login, refresh/readback and AIHome H5 state reads for both exact products outside
+HomeVerb. It does not establish compiled-adapter or physical freshness acceptance.
+Native API, storage and execution contracts are unchanged. One internal crate is
+added without new external dependencies or runtime routes.
 
 ## October 22 existing-session read experiment
 

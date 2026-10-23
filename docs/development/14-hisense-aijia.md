@@ -7,10 +7,12 @@ remains **incomplete**. Date: October 23, 2026.
 
 The owner requested a new branch from main for domestic Aijia washer integration.
 The [supplied reference package](../adapter-references/README.md) pins Aijia
-7.0.8.12, two internal product identities and original-App cache observations.
-It contains no independent login, renewal or signed HTTP implementation. Its
-model codes are not independently confirmed retail labels, and its virtual
-family card is not a third physical appliance.
+7.0.8.12 and two internal product identities. On October 23 the owner replaced
+the original cache-only archive with independently verified SMS login, refresh,
+renewed-token readback and AIHome H5 washer-state evidence. The archive includes
+fixed-route Python clients; HomeVerb has not integrated those clients or enabled
+account access. Its model codes are not independently confirmed retail labels,
+and its virtual family card is not a third physical appliance.
 
 `homeverb-hisense` is an offline Rust library. Exact product/category/partner
 selection supplies component-scoped read-only capability definitions, program
@@ -77,8 +79,10 @@ it does not establish an independent modern refresh-token exchange.
 The source hardcodes portal app material. Its classification and independently
 public native-client provenance still need review before any HomeVerb admission;
 public GitHub availability alone does not prove that a backend secret is safe to
-embed. No literal key, secret, upstream code or credential was imported. The
-source's logging, automatic retries, optimistic state and HA persistence are not
+embed. The replacement reference ZIP retains public application constants and a
+MIT notice; none has been admitted to the compiled adapter, and no real account
+credential is bundled. The source's logging, automatic retries, optimistic state
+and HA persistence are not
 HomeVerb behavior. Its generic washer interpretations are not reused: for these
 profiles, stage `1` is reservation waiting, not proof of running.
 
@@ -87,6 +91,23 @@ Pinned `pyhisenseapi.py` SHA-256:
 - Main: `6be35406795f414faa259a6b75cbfbf6d3a9f61fb93479cf397423863a0a12f7`.
 - Beta: `84845b5ce7724ef12f06e9c735bece06114e5d9057213740c098f6437aa3ecf9`.
 - PR: `9a5eb2cf648e9d3902f53fcdf66535b60a6a702df9facaeb459d2db2661b0099`.
+
+## Replacement reference acceptance
+
+The October 23 analysis delivery reports one independent SMS login with generated
+terminal identities, one refresh-token exchange and a successful signed
+home-list readback using the renewed token. It read both exact washer identities:
+124 state fields for WV20W-1 and 206 for WH120E5S-1. Device IDs, products and
+serials were matched privately; those identifiers and sessions are excluded.
+The successful login has nested signature fields; removing the first instead of
+the final matching field incorrectly rejects that response. The supplied client
+fixes this and retains UTF-8 wire diagnostics privately before rejection.
+
+This is external analysis evidence, not a HomeVerb account or live-adapter test.
+The three read routes use the AIHome H5 commonweb envelope, distinct from the
+unrecovered native gateWay. Complete per-program coverage, source freshness and
+long-term token expiry recovery remain open. All controls remain unavailable.
+The new archive preserves the exact model bytes used by the offline library.
 
 ## Remaining phases and acceptance
 
@@ -121,7 +142,7 @@ cargo test -p homeverb-hisense --offline --locked
 cargo clippy -p homeverb-hisense --all-targets --offline --locked -- -D warnings
 ```
 
-The generator verifies the original ZIP checksum and model-manifest checksum,
+The generator verifies the replacement ZIP checksum and model-manifest checksum,
 then projects only reviewed state metadata and non-private program identifiers.
 It executes no archive script and imports no historic account readings. Use
 `python3 scripts/build_hisense_profiles.py` after a reviewed source/projection
@@ -145,4 +166,6 @@ Executed on this branch:
 
 No remote CI, mobile package, account login, live cloud read or physical-device
 test is implied. Upstream source was read only; no upstream implementation was
-executed or bundled.
+executed during that research phase. The replacement reference ZIP separately
+contains the owner's analysis clients and retained MIT notice; they are not
+compiled or invoked by HomeVerb.

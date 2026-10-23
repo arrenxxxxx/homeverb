@@ -60,6 +60,17 @@ The implementation contains no shared confidential client secret and does not
 reuse Xiaomi's Home Assistant OAuth application identity. This is experimental
 community compatibility, not vendor endorsement or physical-device verification.
 
+## Supplied Hisense analysis reference
+
+The owner-supplied [Hisense reference archive](docs/adapter-references/README.md)
+contains standalone analysis clients informed by MIT-licensed
+[manymuch/HisenseHA](https://github.com/manymuch/HisenseHA/tree/43c7f17ca7a2eb92ff064f7ac40bc18f04ad56f6)
+and the public official account web client. Its embedded
+`scripts/LICENSE-HisenseHA.txt` retains the upstream license and copyright.
+Preserve that notice when redistributing the archive or derived portions.
+This archived reference is not a compiled HomeVerb authentication implementation;
+protocol-material admission and product integration remain separate reviews.
+
 ## Dependency review before distribution
 
 `Cargo.lock` and `apps/mobile/pubspec.lock` pin dependency resolutions; they do
