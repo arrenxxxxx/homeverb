@@ -1,5 +1,18 @@
 # Platform and device compatibility matrix
 
+## October 23 Hisense Aijia foundation
+
+The [offline Aijia library](development/14-hisense-aijia.md) selects exact internal
+products WV20W-1/WH120E5S-1 and projects component-specific read-only metadata,
+91 program records and stale original-App cache values. Fictional tests do not
+repeat the archive's account observations or establish physical compatibility.
+The virtual family card is not admitted as a third physical device. Independent
+native authentication/material review, protected account inventory, live reads
+and host/App integration remain incomplete. HisenseHA beta provides a concrete
+modern protocol lead, not exact-product verification. Native API, storage and
+execution contracts are unchanged. One internal crate is added without new
+external dependencies or routes.
+
 ## October 22 existing-session read experiment
 
 The owner signed in directly in the isolated API 35 arm64 emulator. Existing

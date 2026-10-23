@@ -9,6 +9,7 @@ crates/storage/            # SQLite metadata/journal, migration, retention, and 
 crates/secret-store/       # Linux Secret Service, Android JNI and iOS Keychain credential backends
 crates/mock/               # Persistent fictional appliance and fault scenarios
 crates/midea/              # Meiju account/cloud protocols, protected bindings and scoped controls
+crates/hisense/            # Offline Aijia washer profiles; authentication/host integration pending
 crates/host/               # Composition root and foreground session contract
 crates/ffi/                # Native in-process C ABI and public header
 packages/android/          # Android Keystore/ciphertext package and synthetic JVM fixtures

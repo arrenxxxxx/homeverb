@@ -72,6 +72,9 @@ This exits with code 11. Refresh state to inspect the result; do not blindly res
 
 ## Boundaries
 
+Hisense Aijia washer integration is in progress: [offline exact-product profiles](docs/development/14-hisense-aijia.md)
+are implemented; independent login, cloud reads and App connection remain pending.
+
 Each host owns its Core instance. No HA, NAS, project backend, daemon, relay, background polling, cloud sync, or remote HTTP MCP is required or implemented. The experimental Meiju adapter contacts the vendor cloud directly through the owner-admitted native flow. Mock success does not establish device compatibility or mobile support.
 
 ## Develop progressively

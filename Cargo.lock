@@ -943,6 +943,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "homeverb-hisense"
+version = "0.2.0"
+dependencies = [
+ "chrono",
+ "homeverb-domain",
+ "jsonschema",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "homeverb-host"
 version = "0.2.0"
 dependencies = [

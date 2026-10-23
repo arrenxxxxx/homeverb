@@ -1,5 +1,19 @@
 # Implementation status and next tasks
 
+## Active Hisense Aijia integration: October 23, 2026
+
+The owner requested a new branch from main for domestic Aijia washers. The
+[integration guide](development/14-hisense-aijia.md) records the implemented
+offline `homeverb-hisense` profiles for WV20W-1 and WH120E5S-1, separate left/right
+components, 91 program records and strictly stale read-only cache projection.
+The platform integration remains **incomplete**. Community HisenseHA beta source
+now provides concrete portal-login and modern AIHome request leads, with material
+admission and exact-product live acceptance still open. HomeVerb has no Hisense
+authentication, protected account binding, registered adapter or App flow yet.
+No appliance request or control was sent. Complete per-program parameters,
+physical freshness, mobile integration and separately authorized controls remain
+blocked by missing independent protocol/account/device evidence.
+
 ## October 22 Meiju reference integration
 
 The owner's full-integration request is **incomplete**. API 1.26 implements four

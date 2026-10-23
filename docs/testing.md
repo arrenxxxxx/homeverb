@@ -1,5 +1,15 @@
 # Test plan and quality gates
 
+## Hisense offline profile checks
+
+`python3 scripts/build_hisense_profiles.py --check` verifies the pinned reference
+projection. `cargo test -p homeverb-hisense --offline --locked` covers exact
+product/category/partner selection, left/right isolation, 91 program records,
+different model-specific stage/pause encodings, stale cache semantics, invalid
+input refusal and read-only capability schema/property domains. It performs no
+networking, login or profile persistence. See the
+[integration guide](development/14-hisense-aijia.md) for remaining platform work.
+
 ## Mijia protocol checks
 
 `cargo test -p homeverb-mijia --offline --locked` uses fictional credentials and

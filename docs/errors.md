@@ -24,6 +24,7 @@ The ordinary JSON error/result schemas are unchanged.
 
 | Code | Typical cause | Response |
 |---|---|---|
+| HISENSE_INVALID_CACHE | Malformed, oversized or unreviewed value in a known Aijia cache field | Refuse the offline projection; no raw values, default readings, network request or receipt change |
 | AUTH_REQUIRED | Login or user consent required | Start login through a trusted UI |
 | MIJIA_AUTH_CHALLENGE_REQUIRED | Mijia requires CAPTCHA or additional account verification | Login remains incomplete; do not retry automatically or expose private challenge URLs |
 | MIJIA_INVALID_RESPONSE | Malformed, oversized, uncorrelated or unsafe Mijia protocol data | Preserve existing evidence and refuse the response |
