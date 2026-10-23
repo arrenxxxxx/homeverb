@@ -3523,3 +3523,47 @@ permissions and write semantics are unchanged. No real account/appliance,
 Android/iOS build or installation, physical-device test, remote CI, push,
 publication or diagnostic upload was used for this phase. Official-App reports
 and refrigerator writes remain outside the implemented grouping.
+
+### Refrigerator groups APK and emulator update -- October 23, 2026
+
+The owner requested packaging and installation, then explicitly resumed the
+interrupted delivery. Source revision `8fa383b` was clean for packaging.
+The dual-ABI native builder passed 20 exports per ABI and 16 KiB ELF alignment
+using NDK 28.2.13676358, API 36 and Android Studio's bundled JDK 21.0.3.
+The explicit Meiju Flutter release build completed on October 22 in 42.6 seconds:
+`fvm flutter build apk --release --target-platform android-arm64,android-x64 --dart-define=HOMEVERB_ADAPTER=midea.meiju`.
+An isolated temporary SDK/JDK configuration and the existing persistent Android
+signing directory were used; no SDK component or license was installed.
+
+Delivery resumed on October 23. Saved artifact:
+`output/flutter-verification/android/homeverb-0.2.0-meiju-fridge-groups-20261023.apk`.
+Size: 71,902,762 bytes. SHA-256:
+`25600e8bbf13f73bfab7c46546cae52ab0ab28ac6e33cae10b208d9d55c08fb4`.
+`scripts/verify_flutter_apk.py` passed APK v2 development signing, both complete
+ABIs, API 28 minimum, disabled backup, integration-test plugin absence, 20 native
+exports, 16 KiB ZIP/ELF alignment and current-AAR matching. The local provenance
+report is `output/flutter-verification/android/meiju-fridge-groups-20261023-verification.json`.
+
+Unlike the earlier ordinary APK, this build includes the disabled probe module's
+static log strings, so a supplementary string-absence check was not an applicable
+gate. Both Rust target dependency records explicitly recorded the
+`HOMEVERB_MEIJU_READ_PROBE` compile environment as unset; its source gate requires
+exactly `1`. Experimental compatibility requests were not enabled.
+
+ADB initially found no running emulator. Restarted the existing
+`homeverb-reference-20261022` AVD on port 5586 with host graphics and
+`-no-snapshot-load`, preserving its disk data. No AVD reset or new image was used.
+`adb -s emulator-5586 install -r` returned `Success`. Reading back only the installed
+base APK confirmed the exact delivery SHA-256. Activity launch returned
+`Status: ok`, `COLD`, 1718 ms total time. Local screenshots confirmed the retained
+six device cards, three read-only refrigerator zones and the new variable-zone
+and smart/energy-saving sections. The emulator was left on refrigerator groups.
+Screenshots remain in local temporary storage; no account identifiers or actual
+appliance readings are copied into this report.
+
+This phase added only this verification record to maintained source. Native API
+1.26, schemas, permissions, receipt semantics and existing foreground state reads
+are unchanged. No appliance write, physical-phone acceptance, credential entry,
+remote CI, push/publication or diagnostic upload was performed. Rendering retained
+or stale cloud values does not establish a new physical reading or authentication
+acceptance.
