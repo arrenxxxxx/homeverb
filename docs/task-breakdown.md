@@ -61,7 +61,7 @@ registered platform selection, provider-scoped sign-in/reauthorization and parti
 positive cards. Doorbell, lock, fan and battery readings use descriptor-driven
 details. The separately progress-tracked single-property write protocol is
 synthetic-tested. Explicit trusted Rust fan admission and local protected option
-inspection are implemented under ADR-0074. Native API 1.25 adds exact fan startup
+inspection are implemented under ADR-0078. Native API 1.25 adds exact fan startup
 grants and protected option routing. Flutter prepares exact fan permissions and
 exposes bounded generic controls, including positive partial-inventory admission.
 A dual-ABI combined-platform Android development APK built from `39d6465` has

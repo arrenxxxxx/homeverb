@@ -2183,3 +2183,12 @@ write, package installation or physical-device acceptance is claimed.
 The October 23 presentation revision omits routine refrigerator Stale badges and
 zone-caption suffixes. It retains Core freshness flags/timestamps and explicit
 read failures without changing API 1.26, schemas, authority or foreground scheduling.
+
+## Mijia reference component selector correction -- October 25, 2026
+
+Multiple components with the same short family label use distinct localized
+component labels; singleton labels stay unchanged. The generic selector supports
+intrinsic chip layout and enlarged text. Existing component IDs, observations,
+API 1.27, SQLite 5, protected payloads and grants are unchanged. English/Chinese
+synthetic selection checks do not establish physical battery identity or new
+model acceptance.

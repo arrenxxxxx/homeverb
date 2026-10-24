@@ -16,7 +16,7 @@ pilot credentials or contact appliances as part of development tests.
 Current callable scope includes trusted Rust account/read APIs and native API 1.25
 Mijia-only/combined sessions with exact fan startup grants and Flutter
 platform/account/read/control views. Live acceptance remains pending. The Rust adapter
-can explicitly admit protected fan setters under ADR-0074. Historical phase records below distinguish earlier
+can explicitly admit protected fan setters under ADR-0078. Historical phase records below distinguish earlier
 protocol-only work from the [protected Core phase](../adr/0076-mijia-protected-core-reads.md).
 
 ## Protocol evidence

@@ -148,6 +148,41 @@ class MijiaReadFixture extends ControlsFixture
   }
 }
 
+class MultiBatteryFixture extends MijiaReadFixture {
+  MultiBatteryFixture() : super('lock') {
+    capabilities
+      ..clear()
+      ..add(
+        capability('vendor.xiaomi.mijia.battery', {
+          'level': {
+            'type': 'integer',
+            'readable': true,
+            'writable': false,
+            'unit': 'percentage',
+          },
+        }, {}),
+      );
+    device['components'] = [
+      for (final id in ['battery-4', 'battery-10'])
+        {
+          'id': id,
+          'capabilities': ['vendor.xiaomi.mijia.battery'],
+        },
+    ];
+  }
+
+  @override
+  Future<dynamic> call(String method, [Json fields = const {}]) async {
+    if (method == 'read_state') {
+      observations
+        ..clear()
+        ..['vendor.xiaomi.mijia.battery.level'] =
+            fields['component'] == 'battery-4' ? 61 : 28;
+    }
+    return super.call(method, fields);
+  }
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late ScreenCatalog catalog;
@@ -380,6 +415,80 @@ void main() {
       c.dispose();
     },
   );
+
+  for (final locale in [AppLocale.enUs, AppLocale.zhCn]) {
+    testWidgets(
+      'duplicate battery selectors remain distinct in ${locale.name}',
+      (tester) async {
+        LocaleSettings.setLocale(locale);
+        tester.view.physicalSize = const Size(640, 1600);
+        tester.view.devicePixelRatio = 2;
+        tester.platformDispatcher.textScaleFactorTestValue = 2;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+        final core = MultiBatteryFixture();
+        final c = HomeController(core, AccountPreferences());
+        addTearDown(c.dispose);
+        expect(await c.selectDevice(core.device['id'] as String), true);
+        await tester.pumpWidget(
+          TranslationProvider(
+            child: MaterialApp(
+              theme: windowTheme(),
+              home: Scaffold(
+                body: SingleChildScrollView(
+                  child: ListenableBuilder(
+                    listenable: c,
+                    builder: (context, _) => DeviceDetailControls(
+                      controller: c,
+                      onAction: (action) {
+                        expect(action, startsWith('component:'));
+                        c.selectComponent(
+                          action.substring('component:'.length),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final context = tester.element(find.byType(DeviceDetailControls));
+        final first = find.widgetWithText(
+          ChoiceChip,
+          localize(context, 'Battery 4'),
+        );
+        final second = find.widgetWithText(
+          ChoiceChip,
+          localize(context, 'Battery 10'),
+        );
+        expect(first, findsOneWidget);
+        expect(second, findsOneWidget);
+        expect(c.observed('vendor.xiaomi.mijia.battery.level'), 61);
+        await tester.ensureVisible(second);
+        await tester.tap(second);
+        await tester.pumpAndSettle();
+        expect(c.component, 'battery-10');
+        expect(c.snapshot!['component_id'], 'battery-10');
+        expect(c.observed('vendor.xiaomi.mijia.battery.level'), 28);
+        expect(tester.widget<ChoiceChip>(second).selected, true);
+        expect(tester.widget<ChoiceChip>(first).selected, false);
+        await tester.ensureVisible(first);
+        await tester.tap(first);
+        await tester.pumpAndSettle();
+        expect(c.snapshot!['component_id'], 'battery-4');
+        expect(c.observed('vendor.xiaomi.mijia.battery.level'), 61);
+        expect(
+          core.calls.where((call) => call['method'] == 'execute'),
+          isEmpty,
+        );
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox());
+      },
+    );
+  }
 
   test('native units and decorative service families preserve semantics', () {
     expect(propertyValue(61, {'unit': 'percentage'}), '61%');

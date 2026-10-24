@@ -57,16 +57,20 @@ Use `<type>(<optional-scope>): <English imperative summary>`. Allowed types: `fe
 
 ## Implementation status and test honesty
 
-Experimental Mijia Rust integration is implemented under
-[ADR-0076](docs/adr/0076-mijia-protected-core-reads.md): mainland native login,
-version-1 protected account/device/spec bindings, partial inventory cards and
-reviewed MIoT fan/doorbell/lock/battery reads through Core. Read
-[the Mijia guide](docs/development/11-mijia.md) before changing it. Native API 1.24 adds Mijia-only/combined account routing and partial positive
-card results under [ADR-0077](docs/adr/0077-mijia-native-account-routing.md).
-Flutter now exposes registered Mijia/Meiju platform choices, protected sign-in,
-partial named cards and capability-driven read-only detail views. Fan controls and
-owner-run real-account/device acceptance remain pending. No lock write or complete-inventory claim is admitted. Existing Meiju
-payload 3, Mijia payload 1 and SQLite 5 remain unchanged.
+Experimental Mijia Rust integration provides native mainland login, protected
+account/device/spec bindings, partial inventory cards and exact scalar Core reads
+under [ADR-0076](docs/adr/0076-mijia-protected-core-reads.md). Native API 1.27
+reconciles combined Meiju/Mijia routing with mainline; historical version numbers
+in phase records are not the current API. Exact fan startup grants and bounded
+Flutter controls are implemented under
+[ADR-0078](docs/adr/0078-mijia-fan-control.md). Seventeen pinned reference
+specifications map 264 scalar readings; repeated component labels remain distinct.
+Read [the Mijia guide](docs/development/11-mijia.md) and
+[the coverage ledger guide](docs/development/14-mijia-reference-integration.md)
+before changing this integration. Modern authentication, additional controls,
+events and owner-run real-account/device acceptance remain incomplete. No lock
+write or complete-inventory claim is admitted. Meiju payload 3, Mijia payload 1
+and SQLite 5 remain unchanged.
 
 The Rust Mock MVP, Linux Secret Service library, and native account vault are implemented. Read the progressive guides in `docs/development/` before changing them. Native Meiju login, protected connection and automatic inventory are synthetic-tested with a local read-only probe. One real mainland account has passed login/inventory and saved-session refresh; six exact models have experimental read-only Core/native mappings. Native API 1.22.0 provides local account details/rename/removal and explicit cache/history clearing, selects Mock by default or explicit Meiju reads, lists/refreshes/recovers accounts and accepts protected connection buffers outside general JSON, including explicit pending-account reauthorization with intact protected identity. Read-only control-option inspection exposes reviewed model-specific choices before grants without networking, descriptor mutation or authority changes. Local session-grant inspection separates current authority from saved capabilities without credentials or networking. API 1.22 adds saved cross-account device-conflict inspection with local references only; it does not merge devices or transfer authority. API 1.19 account summaries expose nullable historical complete-inventory time from SQLite schema 5; this is never authorization or online evidence, and does not rewrite unchanged credentials. API 1.18 additionally exposes three separate trusted LAN-scan preview/confirm/discard functions; platform-assigned interface/permission and actual UI consent remain required, and scan results never expose endpoints or add routes. Trusted startup can independently grant exact-device AC power states, reviewed vendor fan codes, explicit power-on/mode activation or protected-profile temperature targets over cloud; ordinary requests cannot edit authority. Exact dishwasher program/argument startup grants additionally require a reviewed protected product mapping and separate trusted user confirmation; ordinary plan/execute remain denied for this elevated non-idempotent action. Independent profile-scoped pause/resume/cancel grants use the same trusted confirmation boundary; product 760Y0026 requires an explicit additional option in both the exact grant and command, while other unreviewed centralized profiles remain unavailable. An explicitly opted-in AC power probe is synthetic-tested; default native Meiju sessions remain read-only and real writes require separate owner authorization. An Android Keystore/JNI backend has synthetic JVM evidence, and its API 28 arm64 AAR cross-build passed archive/export/alignment checks. Real reauthorization and Flutter account acceptance, physical Android Keystore/phone acceptance, physical iOS Keychain/Flutter acceptance, and physical-device support remain pending; see `docs/task-breakdown.md`. A real adapter is `verified` only after model-specific physical-device testing.
 

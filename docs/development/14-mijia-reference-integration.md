@@ -138,3 +138,22 @@ binding synthetic interface addresses (`AddrNotAvailable`, macOS error 49).
 The required local interface aliases are absent; host network configuration was
 not changed. This run is not a passing workspace test. The separately executed
 Mijia/Host suites above remain the scoped evidence.
+
+## Distinct component selectors -- October 25, 2026
+
+Repeated family labels now use their exact localized component labels, so the
+reference lock's `battery-4` and `battery-10` remain independently selectable.
+Singleton families retain their short label. Unknown component IDs keep a stable
+ID fallback. No provider/model branching or change to component identity is added.
+The selector also uses the existing control-text layout, fixing the Flutter
+`ChoiceChip` dry-layout assertion caused by ordinary `Copy` text.
+
+Executed `fvm flutter analyze` passed. All 18 tests in `test/mijia_test.dart`,
+`test/mijia_reference_test.dart` and `test/mijia_controls_test.dart` passed.
+The two new regression cases first reproduced the selector failures and then
+passed in English/Chinese at 320 logical pixels and double text scale. They
+select both batteries, verify independent snapshots and confirm no writes occur.
+The previously recorded full-suite failures remain unresolved; this scoped run
+is not a new full-suite pass. Native API 1.27, data schemas and grants are unchanged.
+The APK from `87ff5b1` predates this UI fix; its earlier archive verification is
+valid for that source revision only.
