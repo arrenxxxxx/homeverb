@@ -102,3 +102,39 @@ The Android native AAR cross-build passed arm64-v8a and x86_64, 20 exports per A
 and 16 KiB ELF alignment using the already-installed NDK 28.2.13676358 and JDK 21.
 APK assembly and archive verification are a separate delivery phase; no package
 installation or account/device request has occurred.
+
+
+## Combined Mijia reference APK -- October 25, 2026
+
+Clean application source `87ff5b12a246f46525d7cf50ab154a3bfe154a87` built the
+combined `homeverb.platforms` release APK with the FVM-pinned Flutter 3.47.7.
+The build used the existing SDK/NDK and persistent development signing location,
+with temporary Flutter SDK/JDK configuration. No license or SDK was installed.
+
+Artifact: `apps/mobile/build/delivery/mijia/homeverb-mijia-0.2.0-87ff5b1.apk`.
+Size: 74,466,398 bytes. SHA-256:
+`e271a2cabd20d5eae87232e0355a084987840608e65d95c30e246fb70ae112e4`.
+The adjacent `verification.json` records clean source, AAR/native digests, APK v2
+development signature, exactly arm64-v8a/x86_64, API 28 minimum, disabled backup,
+no integration-test plugin, 20 Core exports per ABI and 16 KiB ZIP/ELF alignment.
+Both native payloads exactly match the current AAR after normal NDK stripping.
+
+Final full Flutter regression: **194 passed, eight failed**. All eight match the
+previously recorded macOS glyph/pixel and legacy app/outcome-click cases. The
+introduced Mock recovery assertion is fixed and passes. Final workspace strict
+Clippy and Flutter analysis passed. This is not a full Flutter test-suite pass.
+
+The recovered worktree moved from `/private/tmp/homeverb-mijia-current` to the
+persistent `/Users/zhao/develop/codes/any/homeverb-mijia` directory after packaging.
+The old damaged temporary directory's residual files remain untouched; only its
+stale Git registration was pruned. Offline Flutter dependency resolution and
+analysis passed again after relocation. Mainline remains unchanged. No merge
+commit, remote push, installation, account access, real appliance operation,
+physical-phone test, telemetry upload or publication was performed.
+
+A full `cargo +1.96.0 test --workspace --offline --locked` attempt on October 25
+stopped in the existing Meiju LAN suite: 56 tests passed and 14 failed while
+binding synthetic interface addresses (`AddrNotAvailable`, macOS error 49).
+The required local interface aliases are absent; host network configuration was
+not changed. This run is not a passing workspace test. The separately executed
+Mijia/Host suites above remain the scoped evidence.

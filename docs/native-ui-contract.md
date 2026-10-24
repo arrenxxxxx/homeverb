@@ -1499,7 +1499,7 @@ JSON envelope, SQLite 5 and protected payload 3 are unchanged. See the
 
 ## Mijia and combined platform sessions (API 1.24)
 
-[ADR-0073](adr/0077-mijia-native-account-routing.md) adds two explicit trusted
+[ADR-0077](adr/0077-mijia-native-account-routing.md) adds two explicit trusted
 `homeverb_open` modes. `adapter: "xiaomi.mijia"` registers the read-only Mijia
 adapter; `adapter: "homeverb.platforms"` registers both Meiju and Mijia against the
 same private profile. Both require `allow_mock_writes: false` and the normal
@@ -1542,7 +1542,7 @@ acceptance.
 
 ## Mijia fan grants (API 1.25)
 
-[ADR-0074](adr/0078-mijia-fan-control.md) adds `mijia_fan_grants` to trusted startup
+[ADR-0078](adr/0078-mijia-fan-control.md) adds `mijia_fan_grants` to trusted startup
 in `xiaomi.mijia` and `homeverb.platforms` modes only. Each entry contains local
 `device_id`, exact `component_id` (`fan-SIID`), `property` and scalar `value`.
 Admitted property names are `state`, `level`, `mode`, `horizontal_swing` and

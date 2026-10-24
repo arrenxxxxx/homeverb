@@ -194,7 +194,7 @@ No real account, vendor traffic, physical device, push or publication was used.
 
 ## Native account routing phase
 
-[ADR-0073](../adr/0077-mijia-native-account-routing.md) adds API 1.24 startup modes
+[ADR-0077](../adr/0077-mijia-native-account-routing.md) adds API 1.24 startup modes
 `xiaomi.mijia` and `homeverb.platforms` with the existing protected native connection
 function. The combined mode shares one vault/Core with Meiju while preserving exact
 Meiju startup grants. Optional provider metadata chooses an already registered
@@ -302,7 +302,7 @@ used permitted local TLS fixtures. Strict all-target Mijia Clippy passed.
 
 ## Protected fan adapter phase
 
-[ADR-0074](../adr/0078-mijia-fan-control.md) adds explicit trusted Rust composition
+[ADR-0078](../adr/0078-mijia-fan-control.md) adds explicit trusted Rust composition
 with `MijiaAdapter::with_fan_controls()`. It still requires independent Core grants.
 Protected model/spec evidence supplies power, level, mode, horizontal swing and
 horizontal angle actions only when their exact properties are readable/writable

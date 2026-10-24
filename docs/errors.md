@@ -14,7 +14,7 @@ control options for registered Mijia connections; unregistered providers return
 unsupported inspection as a read-only detail view, never as control authority. `MIJIA_INVENTORY_PARTIAL` accompanies
 published positive device IDs when enumeration is incomplete; it is not login
 failure or proof that unseen devices disappeared. See
-[ADR-0073](adr/0077-mijia-native-account-routing.md).
+[ADR-0077](adr/0077-mijia-native-account-routing.md).
 
 ## Error envelope
 

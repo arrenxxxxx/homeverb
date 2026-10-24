@@ -92,7 +92,7 @@ can remain visible without becoming commands. See
 
 ## Experimental Mijia fan properties
 
-Explicit trusted Rust fan composition under [ADR-0074](adr/0078-mijia-fan-control.md)
+Explicit trusted Rust fan composition under [ADR-0078](adr/0078-mijia-fan-control.md)
 can publish standard `power.set` plus `vendor.xiaomi.mijia.fan` setters for level,
 mode, horizontal swing and horizontal angle. Each action requires the exact
 protected MIoT property's read/write permission and value domain. The

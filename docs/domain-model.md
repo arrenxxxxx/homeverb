@@ -38,7 +38,7 @@ is neither physical online status nor proof of provider authorization.
 
 Mijia payload version 1 binds provider-validated subjects and device IDs to random
 local account/device/connection/identity references under
-[ADR-0072](adr/0076-mijia-protected-core-reads.md). Explicit same-subject reconnect
+[ADR-0076](adr/0076-mijia-protected-core-reads.md). Explicit same-subject reconnect
 retains bindings and preferences; cross-account matches require reconciliation
 and never transfer authority automatically. Partial inventory preserves historical
 cards, including unsupported named devices. Saved MIoT source/derived mappings

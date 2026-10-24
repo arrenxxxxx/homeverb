@@ -67,8 +67,8 @@ exposes bounded generic controls, including positive partial-inventory admission
 A dual-ABI combined-platform Android development APK built from `39d6465` has
 passed archive/signature/alignment inspection. Owner acceptance remains pending;
 the integration guide contains the artifact hash and checklist. See
-[ADR-0072](adr/0076-mijia-protected-core-reads.md) and
-[ADR-0073](adr/0077-mijia-native-account-routing.md).
+[ADR-0076](adr/0076-mijia-protected-core-reads.md) and
+[ADR-0077](adr/0077-mijia-native-account-routing.md).
 Real-account and physical validation belong to the owner. No door-lock write,
 background polling, project service or shared application secret is admitted.
 
