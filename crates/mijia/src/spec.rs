@@ -98,7 +98,9 @@ impl SpecIndex {
                 let Some(kind) = self.resolve(model, reported_type)? else {
                     return Ok(None);
                 };
-                if !matches!(urn(&kind, "device")?.0, "fan" | "doorbell" | "lock") {
+                if !matches!(urn(&kind, "device")?.0, "fan" | "doorbell" | "lock")
+                    && reference(model, &kind).is_none()
+                {
                     return Ok(None);
                 }
                 let response = transport
@@ -120,7 +122,9 @@ impl SpecIndex {
 fn urn<'a>(value: &'a str, category: &str) -> Result<(&'a str, &'a str)> {
     let parts: Vec<_> = value.split(':').collect();
     if value.len() > 512
-        || parts.len() != 7
+        || !matches!(parts.len(), 7 | 8)
+        || (parts.len() == 8
+            && (parts[7].len() != 8 || !parts[7].bytes().all(|b| b.is_ascii_hexdigit())))
         || parts[0] != "urn"
         || parts[1] != "miot-spec-v2"
         || parts[2] != category
@@ -198,11 +202,22 @@ struct EnumValue {
 
 impl ModelMapping {
     fn decode(model: &str, kind: &str, bytes: &[u8]) -> Result<Self> {
+        Self::decode_inner(model, kind, bytes, true)
+    }
+
+    fn decode_inner(
+        model: &str,
+        kind: &str,
+        bytes: &[u8],
+        include_reference: bool,
+    ) -> Result<Self> {
         let (device, code) = urn(kind, "device")?;
-        if !matches!(
-            (device, code),
-            ("fan", "0000A005") | ("lock", "0000A038") | ("doorbell", "0000A03B")
-        ) {
+        if !(include_reference && reference(model, kind).is_some()
+            || matches!(
+                (device, code),
+                ("fan", "0000A005") | ("lock", "0000A038") | ("doorbell", "0000A03B")
+            ))
+        {
             return Err(invalid());
         }
         let spec: Spec = crate::decode(bytes)?;
@@ -304,7 +319,10 @@ impl ModelMapping {
                 });
             }
         }
-        if properties.len() > 64 {
+        if include_reference {
+            append_reference(model, kind, bytes, &mut properties)?;
+        }
+        if properties.len() > 512 {
             return Err(invalid());
         }
         Ok(Self {
@@ -323,10 +341,42 @@ impl ModelMapping {
         }
         let bytes = serde_json::to_vec(&self.source).map_err(|_| invalid())?;
         let expected = Self::decode(&self.model, &self.spec_type, &bytes)?;
-        if expected != *self {
+        if expected != *self
+            && Self::decode_inner(&self.model, &self.spec_type, &bytes, false)
+                .ok()
+                .as_ref()
+                != Some(self)
+        {
             return Err(invalid());
         }
         Ok(())
+    }
+
+    pub(crate) fn upgraded(&self) -> Result<Self> {
+        self.validate_saved()?;
+        Self::decode(
+            &self.model,
+            &self.spec_type,
+            &serde_json::to_vec(&self.source).map_err(|_| invalid())?,
+        )
+    }
+
+    pub(crate) fn pinned(model: &str, reported: Option<&str>) -> Result<Option<Self>> {
+        let profiles = references();
+        let matches: Vec<_> = profiles
+            .iter()
+            .filter(|p| p.model == model && reported.is_none_or(|kind| p.spec_type == kind))
+            .collect();
+        if matches.len() != 1 {
+            return Ok(None);
+        }
+        let profile = matches[0];
+        Self::decode(
+            model,
+            &profile.spec_type,
+            &serde_json::to_vec(&profile.source).map_err(|_| invalid())?,
+        )
+        .map(Some)
     }
 
     pub fn capabilities(&self) -> Vec<Capability> {
@@ -441,7 +491,21 @@ impl Property {
         };
         let mut value = value;
         if let Some(unit) = &self.unit
-            && ["percentage", "arcdegrees"].contains(&unit.as_str())
+            && [
+                "percentage",
+                "arcdegrees",
+                "celsius",
+                "kelvin",
+                "watt",
+                "kWh",
+                "A",
+                "V",
+                "ppm",
+                "seconds",
+                "minutes",
+                "hours",
+            ]
+            .contains(&unit.as_str())
         {
             value["unit"] = json!(unit);
         }
@@ -517,3 +581,124 @@ fn within_format(input: &Value, definition: &Value) -> bool {
 
 #[cfg(test)]
 mod tests;
+
+#[derive(Deserialize)]
+struct ReferenceProfile {
+    model: String,
+    spec_type: String,
+    source: Value,
+}
+fn references() -> &'static [ReferenceProfile] {
+    static PROFILES: std::sync::OnceLock<Vec<ReferenceProfile>> = std::sync::OnceLock::new();
+    PROFILES.get_or_init(|| {
+        serde_json::from_str(include_str!("reference_profiles.json"))
+            .expect("compiled reviewed reference catalog")
+    })
+}
+fn reference(model: &str, kind: &str) -> Option<&'static ReferenceProfile> {
+    references()
+        .iter()
+        .find(|p| p.model == model && p.spec_type == kind)
+}
+fn append_reference(
+    model: &str,
+    kind: &str,
+    bytes: &[u8],
+    properties: &mut Vec<MappedProperty>,
+) -> Result<()> {
+    let Some(profile) = reference(model, kind) else {
+        return Ok(());
+    };
+    let actual: Value = crate::decode(bytes)?;
+    let spec: Spec = crate::decode(bytes)?;
+    for service in spec.services {
+        let Some(known_service) = profile.source["services"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|s| s["iid"] == service.iid && s["type"] == service.kind)
+        else {
+            continue;
+        };
+        let mut ids = HashSet::new();
+        for property in service.properties {
+            if property.iid == 0 || !ids.insert(property.iid) {
+                return Err(invalid());
+            }
+            if properties
+                .iter()
+                .any(|p| p.siid == service.iid && p.piid == property.iid)
+            {
+                continue;
+            }
+            let Some(known) = known_service["properties"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|p| {
+                    p["iid"] == property.iid
+                        && p["type"] == property.kind
+                        && p["format"] == property.format
+                })
+            else {
+                continue;
+            };
+            let actual_property = actual["services"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|s| s["iid"] == service.iid)
+                .unwrap()["properties"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|p| p["iid"] == property.iid)
+                .unwrap();
+            if !property.access.iter().any(|a| a == "read")
+                || actual_property.get("unit") != known.get("unit")
+            {
+                continue;
+            }
+            let Some(mut definition) = property.definition()? else {
+                continue;
+            };
+            definition["readable"] = json!(true);
+            definition["writable"] = json!(false);
+            let service_name = service
+                .kind
+                .split(':')
+                .nth(3)
+                .ok_or_else(invalid)?
+                .replace('-', "_");
+            let name = property
+                .kind
+                .split(':')
+                .nth(3)
+                .ok_or_else(invalid)?
+                .replace(['-', '.'], "_");
+            let common_power = matches!(service_name.as_str(), "air_purifier" | "switch" | "light")
+                && property.kind.split(':').nth(1) == Some("miot-spec-v2")
+                && property.kind.split(':').nth(4) == Some("00000006")
+                && name == "on"
+                && property.format == "bool";
+            properties.push(MappedProperty {
+                siid: service.iid,
+                piid: property.iid,
+                component: format!("{service_name}-{}", service.iid),
+                capability: if common_power {
+                    "power".into()
+                } else {
+                    format!("vendor.xiaomi.mijia.{service_name}")
+                },
+                property: if common_power {
+                    "state".into()
+                } else {
+                    format!("{name}_{}", property.iid)
+                },
+                definition,
+                write_domain: None,
+            });
+        }
+    }
+    Ok(())
+}

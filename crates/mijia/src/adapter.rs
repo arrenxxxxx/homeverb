@@ -389,12 +389,16 @@ impl MijiaAdapter {
                     .min(Duration::from_secs(5)),
         };
         let needs_mapping = inventory.devices.iter().any(|d| {
-            account
-                .payload
-                .bindings
-                .iter()
-                .find(|b| b.did == d.did)
-                .is_none_or(|b| b.mapping.is_none() || b.reported_spec != d.spec_type)
+            ModelMapping::pinned(&d.model, d.spec_type.as_deref())
+                .ok()
+                .flatten()
+                .is_none()
+                && account
+                    .payload
+                    .bindings
+                    .iter()
+                    .find(|b| b.did == d.did)
+                    .is_none_or(|b| b.mapping.is_none() || b.reported_spec != d.spec_type)
         });
         let index = if needs_mapping && !inventory.devices.is_empty() {
             match SpecIndex::fetch(self.transport.as_ref(), &metadata).await {
@@ -430,9 +434,15 @@ impl MijiaAdapter {
             let binding = &mut account.payload.bindings[position];
             binding.name = device.name.clone();
             binding.listed = true;
+            if let Some(mapping) = &binding.mapping {
+                binding.mapping = Some(mapping.upgraded()?);
+            }
             if binding.reported_spec != device.spec_type {
                 binding.mapping = None;
                 binding.reported_spec = device.spec_type.clone();
+            }
+            if binding.mapping.is_none() {
+                binding.mapping = ModelMapping::pinned(&device.model, device.spec_type.as_deref())?;
             }
             if binding.mapping.is_none()
                 && let Some(index) = &index
@@ -562,8 +572,25 @@ fn descriptor(binding: &Binding, account: Uuid, controls: bool) -> Descriptor {
         .map(|(id, capabilities)| Component { id, capabilities })
         .collect();
     // Primary appliance services precede auxiliary battery readings for host summaries.
-    components
-        .sort_by_key(|component| (component.id.starts_with("battery-"), component.id.clone()));
+    let family = binding
+        .mapping
+        .as_ref()
+        .and_then(|m| m.spec_type.split(':').nth(3))
+        .unwrap_or("")
+        .replace('-', "_");
+    let primary = match family.as_str() {
+        "outlet" => "switch",
+        "camera" => "camera_control",
+        "lock" => "door",
+        other => other,
+    };
+    components.sort_by_key(|component| {
+        (
+            !component.id.starts_with(&format!("{primary}-")),
+            component.id.starts_with("battery-"),
+            component.id.clone(),
+        )
+    });
     Descriptor {
         device: Device {
             schema_version: "1.0".into(),

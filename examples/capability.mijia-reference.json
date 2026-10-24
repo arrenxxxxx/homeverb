@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "id": "vendor.xiaomi.mijia.environment",
+  "component_id": "environment-3",
+  "revision": 1,
+  "properties": {
+    "relative_humidity_1": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "unit": "percentage",
+      "readable": true,
+      "writable": false
+    },
+    "pm2_5_density_2": {
+      "type": "number",
+      "readable": true,
+      "writable": false
+    },
+    "temperature_3": {
+      "type": "number",
+      "unit": "celsius",
+      "readable": true,
+      "writable": false
+    }
+  },
+  "actions": {},
+  "events": {}
+}

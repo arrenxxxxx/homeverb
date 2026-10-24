@@ -21,6 +21,7 @@ def checked_formats() -> FormatChecker:
 def main() -> int:
     formats = checked_formats()
     pairs = [
+        ("capability", "capability.mijia-reference"), ("state", "state.mijia-reference"),
         ("capability", "capability.mijia-fan"), ("command", "command.mijia-fan"),
         ("cli-meiju-grants", "cli-meiju-grants"),
         ("native-open", "native-open.meiju-ac-features"),

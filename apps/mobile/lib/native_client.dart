@@ -594,9 +594,7 @@ class NativeClient
   final Set<_IdentityRecoveryPreview> _identityRecoveries = {};
   @override
   bool get supportsIdentityRecovery =>
-      supportsAccountConnection &&
-      accountProviders.contains('midea.meiju') &&
-      apiAtLeast(25);
+      supportsAccountConnection && adapter != 'xiaomi.mijia' && apiAtLeast(25);
 
   @override
   Future<IdentityRecoveryPreview> prepareIdentityRecovery({

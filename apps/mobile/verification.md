@@ -3683,3 +3683,20 @@ See the [delivery and owner checklist](../../docs/development/11-mijia.md#androi
 for exact commands and scope. No installation, account access, real appliance
 control, emulator journey or iOS package was performed in this delivery phase.
 The APK uses the existing development signing identity; it is not a store release.
+
+## Exact Mijia reference readings -- October 25, 2026
+
+API 1.27 combines the current mainline Meiju and Mijia branches without a merge
+commit. The reference integration adds 264 exact-model scalar readings, typed
+vendor fields, separate components and English/Chinese labels. Existing fan
+writes retain independent grants; additional reference fields are read-only.
+See the [full coverage record](../../docs/development/14-mijia-reference-integration.md).
+
+Flutter analysis passed. The final account-native, Mijia, Mijia-control, reference,
+localization and identity-recovery subset passed 32 cases. Reference widgets run
+at 320 pixels and double text scale in both locales, retaining missing/zero values
+and units without sends. Initial full regression: 193 passed/nine failed. The new
+Mock recovery feature-detection regression was fixed and its FFI case passed;
+the eight existing macOS pixel/legacy-click failures remain. Final full regression
+and package verification are recorded separately below. No real credentials,
+appliance request, phone or installation was used.

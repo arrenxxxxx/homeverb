@@ -4271,4 +4271,1054 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Set fan angle'
 	String get vendorXiaomiMijiaFanSetHorizontalAngle => 'Set fan angle';
+
+	/// en-US: 'Light'
+	String get vendorXiaomiMijiaLight => 'Light';
+
+	/// en-US: 'Light 2'
+	String get componentLight2 => 'Light 2';
+
+	/// en-US: 'Reported on'
+	String get vendorXiaomiMijiaLightOn1 => 'Reported on';
+
+	/// en-US: 'Brightness'
+	String get vendorXiaomiMijiaLightBrightness2 => 'Brightness';
+
+	/// en-US: 'Color temperature'
+	String get vendorXiaomiMijiaLightColorTemperature3 => 'Color temperature';
+
+	/// en-US: 'Reported mode'
+	String get vendorXiaomiMijiaLightMode7 => 'Reported mode';
+
+	/// en-US: 'Default power on state'
+	String get vendorXiaomiMijiaLightDefaultPowerOnState9 => 'Default power on state';
+
+	/// en-US: 'Flex switch'
+	String get vendorXiaomiMijiaLightFlexSwitch12 => 'Flex switch';
+
+	/// en-US: 'Night light switch'
+	String get vendorXiaomiMijiaLightNightLightSwitch13 => 'Night light switch';
+
+	/// en-US: 'Default'
+	String get vendorXiaomiMijiaDefault => 'Default';
+
+	/// en-US: 'Default 5'
+	String get componentDefault5 => 'Default 5';
+
+	/// en-US: 'Fade time'
+	String get vendorXiaomiMijiaDefaultFadeTime4 => 'Fade time';
+
+	/// en-US: 'Lowest brightness'
+	String get vendorXiaomiMijiaDefaultLowestBrightness5 => 'Lowest brightness';
+
+	/// en-US: 'Lock state'
+	String get vendorXiaomiMijiaDefaultLockState6 => 'Lock state';
+
+	/// en-US: 'Light mode one'
+	String get vendorXiaomiMijiaDefaultLightModeOne7 => 'Light mode one';
+
+	/// en-US: 'Light mode two'
+	String get vendorXiaomiMijiaDefaultLightModeTwo8 => 'Light mode two';
+
+	/// en-US: 'Light mode three'
+	String get vendorXiaomiMijiaDefaultLightModeThree9 => 'Light mode three';
+
+	/// en-US: 'Light mode four'
+	String get vendorXiaomiMijiaDefaultLightModeFour10 => 'Light mode four';
+
+	/// en-US: 'Sleep config'
+	String get vendorXiaomiMijiaDefaultSleepConfig11 => 'Sleep config';
+
+	/// en-US: 'Breathing mode set'
+	String get vendorXiaomiMijiaDefaultBreathingModeSet15 => 'Breathing mode set';
+
+	/// en-US: 'Beat mode set'
+	String get vendorXiaomiMijiaDefaultBeatModeSet16 => 'Beat mode set';
+
+	/// en-US: 'Master slave switch'
+	String get vendorXiaomiMijiaDefaultMasterSlaveSwitch19 => 'Master slave switch';
+
+	/// en-US: 'Very dark brightness'
+	String get vendorXiaomiMijiaDefaultVeryDarkBrightness21 => 'Very dark brightness';
+
+	/// en-US: 'Rhythmic function'
+	String get vendorXiaomiMijiaRhythmicFunction => 'Rhythmic function';
+
+	/// en-US: 'Rhythmic function 7'
+	String get componentRhythmicFunction7 => 'Rhythmic function 7';
+
+	/// en-US: 'Rhythm function'
+	String get vendorXiaomiMijiaRhythmicFunctionRhythmFunction1 => 'Rhythm function';
+
+	/// en-US: 'Light mode a'
+	String get vendorXiaomiMijiaRhythmicFunctionLightModeA2 => 'Light mode a';
+
+	/// en-US: 'Light mode b'
+	String get vendorXiaomiMijiaRhythmicFunctionLightModeB3 => 'Light mode b';
+
+	/// en-US: 'Light mode c'
+	String get vendorXiaomiMijiaRhythmicFunctionLightModeC4 => 'Light mode c';
+
+	/// en-US: 'Light mode d'
+	String get vendorXiaomiMijiaRhythmicFunctionLightModeD5 => 'Light mode d';
+
+	/// en-US: 'Light mode e'
+	String get vendorXiaomiMijiaRhythmicFunctionLightModeE6 => 'Light mode e';
+
+	/// en-US: 'Switch'
+	String get vendorXiaomiMijiaSwitch => 'Switch';
+
+	/// en-US: 'Switch 2'
+	String get componentSwitch2 => 'Switch 2';
+
+	/// en-US: 'Reported on'
+	String get vendorXiaomiMijiaSwitchOn1 => 'Reported on';
+
+	/// en-US: 'Default power on state'
+	String get vendorXiaomiMijiaSwitchDefaultPowerOnState2 => 'Default power on state';
+
+	/// en-US: 'Fault'
+	String get vendorXiaomiMijiaSwitchFault3 => 'Fault';
+
+	/// en-US: 'Physical controls locked'
+	String get vendorXiaomiMijiaPhysicalControlsLocked => 'Physical controls locked';
+
+	/// en-US: 'Physical controls locked 7'
+	String get componentPhysicalControlsLocked7 => 'Physical controls locked 7';
+
+	/// en-US: 'Physical controls locked'
+	String get vendorXiaomiMijiaPhysicalControlsLockedPhysicalControlsLocked1 => 'Physical controls locked';
+
+	/// en-US: 'Power consumption'
+	String get vendorXiaomiMijiaPowerConsumption => 'Power consumption';
+
+	/// en-US: 'Power consumption 11'
+	String get componentPowerConsumption11 => 'Power consumption 11';
+
+	/// en-US: 'Power consumption'
+	String get vendorXiaomiMijiaPowerConsumptionPowerConsumption1 => 'Power consumption';
+
+	/// en-US: 'Electric power'
+	String get vendorXiaomiMijiaPowerConsumptionElectricPower2 => 'Electric power';
+
+	/// en-US: 'Indicator light'
+	String get vendorXiaomiMijiaIndicatorLight => 'Indicator light';
+
+	/// en-US: 'Indicator light 13'
+	String get componentIndicatorLight13 => 'Indicator light 13';
+
+	/// en-US: 'Reported on'
+	String get vendorXiaomiMijiaIndicatorLightOn1 => 'Reported on';
+
+	/// en-US: 'Indicator light 3'
+	String get componentIndicatorLight3 => 'Indicator light 3';
+
+	/// en-US: 'Reported mode'
+	String get vendorXiaomiMijiaIndicatorLightMode2 => 'Reported mode';
+
+	/// en-US: 'Start time'
+	String get vendorXiaomiMijiaIndicatorLightStartTime3 => 'Start time';
+
+	/// en-US: 'End time'
+	String get vendorXiaomiMijiaIndicatorLightEndTime4 => 'End time';
+
+	/// en-US: 'Charging protection'
+	String get vendorXiaomiMijiaChargingProtection => 'Charging protection';
+
+	/// en-US: 'Charging protection 4'
+	String get componentChargingProtection4 => 'Charging protection 4';
+
+	/// en-US: 'Reported on'
+	String get vendorXiaomiMijiaChargingProtectionOn1 => 'Reported on';
+
+	/// en-US: 'Reported power'
+	String get vendorXiaomiMijiaChargingProtectionPower2 => 'Reported power';
+
+	/// en-US: 'Protect time'
+	String get vendorXiaomiMijiaChargingProtectionProtectTime3 => 'Protect time';
+
+	/// en-US: 'Reported cycle'
+	String get vendorXiaomiMijiaCycle => 'Reported cycle';
+
+	/// en-US: 'Cycle 5'
+	String get componentCycle5 => 'Cycle 5';
+
+	/// en-US: 'Status'
+	String get vendorXiaomiMijiaCycleStatus1 => 'Status';
+
+	/// en-US: 'Quick countdown'
+	String get vendorXiaomiMijiaQuickCountdown => 'Quick countdown';
+
+	/// en-US: 'Quick countdown 8'
+	String get componentQuickCountdown8 => 'Quick countdown 8';
+
+	/// en-US: 'Reported on'
+	String get vendorXiaomiMijiaQuickCountdownOn1 => 'Reported on';
+
+	/// en-US: 'Duration'
+	String get vendorXiaomiMijiaQuickCountdownDuration2 => 'Duration';
+
+	/// en-US: 'Left time'
+	String get vendorXiaomiMijiaQuickCountdownLeftTime3 => 'Left time';
+
+	/// en-US: 'Max power limit'
+	String get vendorXiaomiMijiaMaxPowerLimit => 'Max power limit';
+
+	/// en-US: 'Max power limit 9'
+	String get componentMaxPowerLimit9 => 'Max power limit 9';
+
+	/// en-US: 'Reported on'
+	String get vendorXiaomiMijiaMaxPowerLimitOn1 => 'Reported on';
+
+	/// en-US: 'Reported power'
+	String get vendorXiaomiMijiaMaxPowerLimitPower2 => 'Reported power';
+
+	/// en-US: 'Over use ele alert'
+	String get vendorXiaomiMijiaOverUseEleAlert => 'Over use ele alert';
+
+	/// en-US: 'Over use ele alert 10'
+	String get componentOverUseEleAlert10 => 'Over use ele alert 10';
+
+	/// en-US: 'Reported on'
+	String get vendorXiaomiMijiaOverUseEleAlertOn1 => 'Reported on';
+
+	/// en-US: 'Over ele day'
+	String get vendorXiaomiMijiaOverUseEleAlertOverEleDay2 => 'Over ele day';
+
+	/// en-US: 'Over ele month'
+	String get vendorXiaomiMijiaOverUseEleAlertOverEleMonth3 => 'Over ele month';
+
+	/// en-US: 'On off count'
+	String get vendorXiaomiMijiaOnOffCount => 'On off count';
+
+	/// en-US: 'On off count 12'
+	String get componentOnOffCount12 => 'On off count 12';
+
+	/// en-US: 'On off count'
+	String get vendorXiaomiMijiaOnOffCountOnOffCount1 => 'On off count';
+
+	/// en-US: 'Temperature'
+	String get vendorXiaomiMijiaOnOffCountTemperature2 => 'Temperature';
+
+	/// en-US: 'Charge prt ext'
+	String get vendorXiaomiMijiaChargePrtExt => 'Charge prt ext';
+
+	/// en-US: 'Charge prt ext 14'
+	String get componentChargePrtExt14 => 'Charge prt ext 14';
+
+	/// en-US: 'Reported power'
+	String get vendorXiaomiMijiaChargePrtExtPower1 => 'Reported power';
+
+	/// en-US: 'Protect time'
+	String get vendorXiaomiMijiaChargePrtExtProtectTime2 => 'Protect time';
+
+	/// en-US: 'Power limit ext'
+	String get vendorXiaomiMijiaPowerLimitExt => 'Power limit ext';
+
+	/// en-US: 'Power limit ext 15'
+	String get componentPowerLimitExt15 => 'Power limit ext 15';
+
+	/// en-US: 'Power ext'
+	String get vendorXiaomiMijiaPowerLimitExtPowerExt1 => 'Power ext';
+
+	/// en-US: 'Fan 2'
+	String get componentFan2 => 'Fan 2';
+
+	/// en-US: 'Reported on'
+	String get vendorXiaomiMijiaFanOn1 => 'Reported on';
+
+	/// en-US: 'Reported mode'
+	String get vendorXiaomiMijiaFanMode3 => 'Reported mode';
+
+	/// en-US: 'Fan level'
+	String get vendorXiaomiMijiaFanFanLevel4 => 'Fan level';
+
+	/// en-US: 'Fault'
+	String get vendorXiaomiMijiaFanFault2 => 'Fault';
+
+	/// en-US: 'Reported horizontal swing'
+	String get vendorXiaomiMijiaFanHorizontalSwing5 => 'Reported horizontal swing';
+
+	/// en-US: 'Horizontal swing included angle'
+	String get vendorXiaomiMijiaFanHorizontalSwingIncludedAngle6 => 'Horizontal swing included angle';
+
+	/// en-US: 'Reported vertical swing'
+	String get vendorXiaomiMijiaFanVerticalSwing7 => 'Reported vertical swing';
+
+	/// en-US: 'Vertical swing included angle'
+	String get vendorXiaomiMijiaFanVerticalSwingIncludedAngle8 => 'Vertical swing included angle';
+
+	/// en-US: 'Anion'
+	String get vendorXiaomiMijiaFanAnion9 => 'Anion';
+
+	/// en-US: 'Function'
+	String get vendorXiaomiMijiaFunction => 'Function';
+
+	/// en-US: 'Function 3'
+	String get componentFunction3 => 'Function 3';
+
+	/// en-US: 'Timing'
+	String get vendorXiaomiMijiaFunctionTiming1 => 'Timing';
+
+	/// en-US: 'Reserve'
+	String get vendorXiaomiMijiaFunctionReserve2 => 'Reserve';
+
+	/// en-US: 'Quiet'
+	String get vendorXiaomiMijiaFunctionQuiet5 => 'Quiet';
+
+	/// en-US: 'Temperature humidity sensor'
+	String get vendorXiaomiMijiaTemperatureHumiditySensor => 'Temperature humidity sensor';
+
+	/// en-US: 'Temperature humidity sensor 2'
+	String get componentTemperatureHumiditySensor2 => 'Temperature humidity sensor 2';
+
+	/// en-US: 'Temperature'
+	String get vendorXiaomiMijiaTemperatureHumiditySensorTemperature1001 => 'Temperature';
+
+	/// en-US: 'Relative humidity'
+	String get vendorXiaomiMijiaTemperatureHumiditySensorRelativeHumidity1008 => 'Relative humidity';
+
+	/// en-US: 'Battery 4'
+	String get componentBattery4 => 'Battery 4';
+
+	/// en-US: 'Reported battery level'
+	String get vendorXiaomiMijiaBatteryBatteryLevel1003 => 'Reported battery level';
+
+	/// en-US: 'Switch sensor for ble'
+	String get vendorXiaomiMijiaSwitchSensorForBle => 'Switch sensor for ble';
+
+	/// en-US: 'Switch sensor for ble 5'
+	String get componentSwitchSensorForBle5 => 'Switch sensor for ble 5';
+
+	/// en-US: 'Reported mode'
+	String get vendorXiaomiMijiaSwitchSensorForBleMode1020 => 'Reported mode';
+
+	/// en-US: 'Reported door'
+	String get vendorXiaomiMijiaDoor => 'Reported door';
+
+	/// en-US: 'Door 3'
+	String get componentDoor3 => 'Door 3';
+
+	/// en-US: 'Door state'
+	String get vendorXiaomiMijiaDoorDoorState1021 => 'Door state';
+
+	/// en-US: 'Charging state'
+	String get vendorXiaomiMijiaBatteryChargingState1034 => 'Charging state';
+
+	/// en-US: 'Video doorbell'
+	String get vendorXiaomiMijiaVideoDoorbell => 'Video doorbell';
+
+	/// en-US: 'Video doorbell 7'
+	String get componentVideoDoorbell7 => 'Video doorbell 7';
+
+	/// en-US: 'Reported on'
+	String get vendorXiaomiMijiaVideoDoorbellOn1 => 'Reported on';
+
+	/// en-US: 'Status'
+	String get vendorXiaomiMijiaVideoDoorbellStatus2 => 'Status';
+
+	/// en-US: 'Night shot'
+	String get vendorXiaomiMijiaVideoDoorbellNightShot3 => 'Night shot';
+
+	/// en-US: 'Wdr mode'
+	String get vendorXiaomiMijiaVideoDoorbellWdrMode5 => 'Wdr mode';
+
+	/// en-US: 'Eco'
+	String get vendorXiaomiMijiaVideoDoorbellEco6 => 'Eco';
+
+	/// en-US: 'Ringtone'
+	String get vendorXiaomiMijiaVideoDoorbellRingtone7 => 'Ringtone';
+
+	/// en-US: 'Image distortion correction'
+	String get vendorXiaomiMijiaVideoDoorbellImageDistortionCorrection8 => 'Image distortion correction';
+
+	/// en-US: 'Auto screen on'
+	String get vendorXiaomiMijiaVideoDoorbellAutoScreenOn11 => 'Auto screen on';
+
+	/// en-US: 'Motion detection'
+	String get vendorXiaomiMijiaMotionDetection => 'Motion detection';
+
+	/// en-US: 'Motion detection 8'
+	String get componentMotionDetection8 => 'Motion detection 8';
+
+	/// en-US: 'Detection sensitivity'
+	String get vendorXiaomiMijiaMotionDetectionDetectionSensitivity3 => 'Detection sensitivity';
+
+	/// en-US: 'Battery 10'
+	String get componentBattery10 => 'Battery 10';
+
+	/// en-US: 'Reported battery level'
+	String get vendorXiaomiMijiaBatteryBatteryLevel1 => 'Reported battery level';
+
+	/// en-US: 'Customized for wifi'
+	String get vendorXiaomiMijiaCustomizedForWifi => 'Customized for wifi';
+
+	/// en-US: 'Customized for wifi 11'
+	String get componentCustomizedForWifi11 => 'Customized for wifi 11';
+
+	/// en-US: 'Screen on duration'
+	String get vendorXiaomiMijiaCustomizedForWifiScreenOnDuration2 => 'Screen on duration';
+
+	/// en-US: 'Record someone pass'
+	String get vendorXiaomiMijiaCustomizedForWifiRecordSomeonePass3 => 'Record someone pass';
+
+	/// en-US: 'Record someone stay'
+	String get vendorXiaomiMijiaCustomizedForWifiRecordSomeoneStay4 => 'Record someone stay';
+
+	/// en-US: 'Stay duration'
+	String get vendorXiaomiMijiaCustomizedForWifiStayDuration5 => 'Stay duration';
+
+	/// en-US: 'Glimmer full color'
+	String get vendorXiaomiMijiaCustomizedForWifiGlimmerFullColor6 => 'Glimmer full color';
+
+	/// en-US: 'Eco wakeup duration'
+	String get vendorXiaomiMijiaCustomizedForWifiEcoWakeupDuration7 => 'Eco wakeup duration';
+
+	/// en-US: 'Lcd show mode'
+	String get vendorXiaomiMijiaCustomizedForWifiLcdShowMode14 => 'Lcd show mode';
+
+	/// en-US: 'Battery update time'
+	String get vendorXiaomiMijiaCustomizedForWifiBatteryUpdateTime15 => 'Battery update time';
+
+	/// en-US: 'Device status'
+	String get vendorXiaomiMijiaCustomizedForWifiDeviceStatus16 => 'Device status';
+
+	/// en-US: 'Online timestamp'
+	String get vendorXiaomiMijiaCustomizedForWifiOnlineTimestamp17 => 'Online timestamp';
+
+	/// en-US: 'Battery 2'
+	String get componentBattery2 => 'Battery 2';
+
+	/// en-US: 'Switch sensor for ble 3'
+	String get componentSwitchSensorForBle3 => 'Switch sensor for ble 3';
+
+	/// en-US: 'Video doorbell 2'
+	String get componentVideoDoorbell2 => 'Video doorbell 2';
+
+	/// en-US: 'Motion detection 4'
+	String get componentMotionDetection4 => 'Motion detection 4';
+
+	/// en-US: 'Alarm interval'
+	String get vendorXiaomiMijiaMotionDetectionAlarmInterval2 => 'Alarm interval';
+
+	/// en-US: 'Motion detection'
+	String get vendorXiaomiMijiaMotionDetectionMotionDetection4 => 'Motion detection';
+
+	/// en-US: 'Alarm'
+	String get vendorXiaomiMijiaAlarm => 'Alarm';
+
+	/// en-US: 'Alarm 7'
+	String get componentAlarm7 => 'Alarm 7';
+
+	/// en-US: 'Alarm'
+	String get vendorXiaomiMijiaAlarmAlarm1 => 'Alarm';
+
+	/// en-US: 'Battery 8'
+	String get componentBattery8 => 'Battery 8';
+
+	/// en-US: 'Indicator light 11'
+	String get componentIndicatorLight11 => 'Indicator light 11';
+
+	/// en-US: 'Speaker'
+	String get vendorXiaomiMijiaSpeaker => 'Speaker';
+
+	/// en-US: 'Speaker 12'
+	String get componentSpeaker12 => 'Speaker 12';
+
+	/// en-US: 'Volume'
+	String get vendorXiaomiMijiaSpeakerVolume1 => 'Volume';
+
+	/// en-US: 'Madv doorbell'
+	String get vendorXiaomiMijiaMadvDoorbell => 'Madv doorbell';
+
+	/// en-US: 'Madv doorbell 10'
+	String get componentMadvDoorbell10 => 'Madv doorbell 10';
+
+	/// en-US: 'Motionpush pushtype'
+	String get vendorXiaomiMijiaMadvDoorbellMotionpushPushtype7 => 'Motionpush pushtype';
+
+	/// en-US: 'Videodelay'
+	String get vendorXiaomiMijiaMadvDoorbellVideodelay11 => 'Videodelay';
+
+	/// en-US: 'Videolength'
+	String get vendorXiaomiMijiaMadvDoorbellVideolength12 => 'Videolength';
+
+	/// en-US: 'Autoreply'
+	String get vendorXiaomiMijiaMadvDoorbellAutoreply13 => 'Autoreply';
+
+	/// en-US: 'Fw autoupgrade'
+	String get vendorXiaomiMijiaMadvDoorbellFwAutoupgrade19 => 'Fw autoupgrade';
+
+	/// en-US: 'Eco code'
+	String get vendorXiaomiMijiaMadvDoorbellEcoCode36 => 'Eco code';
+
+	/// en-US: 'Ringer music'
+	String get vendorXiaomiMijiaMadvDoorbellRingerMusic52 => 'Ringer music';
+
+	/// en-US: 'Vistpush'
+	String get vendorXiaomiMijiaMadvDoorbellVistpush53 => 'Vistpush';
+
+	/// en-US: 'Motionpush'
+	String get vendorXiaomiMijiaMadvDoorbellMotionpush54 => 'Motionpush';
+
+	/// en-US: 'Motion detection'
+	String get vendorXiaomiMijiaMadvDoorbellMotionDetection55 => 'Motion detection';
+
+	/// en-US: 'Gateway'
+	String get vendorXiaomiMijiaGateway => 'Gateway';
+
+	/// en-US: 'Gateway 2'
+	String get componentGateway2 => 'Gateway 2';
+
+	/// en-US: 'Status'
+	String get vendorXiaomiMijiaGatewayStatus1 => 'Status';
+
+	/// en-US: 'Switch 3'
+	String get componentSwitch3 => 'Switch 3';
+
+	/// en-US: 'Reported mode'
+	String get vendorXiaomiMijiaSwitchMode2 => 'Reported mode';
+
+	/// en-US: 'Switch 11'
+	String get componentSwitch11 => 'Switch 11';
+
+	/// en-US: 'Switch 12'
+	String get componentSwitch12 => 'Switch 12';
+
+	/// en-US: 'Camera control'
+	String get vendorXiaomiMijiaCameraControl => 'Camera control';
+
+	/// en-US: 'Camera control 2'
+	String get componentCameraControl2 => 'Camera control 2';
+
+	/// en-US: 'Reported on'
+	String get vendorXiaomiMijiaCameraControlOn1 => 'Reported on';
+
+	/// en-US: 'Ptz camera'
+	String get vendorXiaomiMijiaCameraControlPtzCamera10 => 'Ptz camera';
+
+	/// en-US: 'Night shot'
+	String get vendorXiaomiMijiaCameraControlNightShot3 => 'Night shot';
+
+	/// en-US: 'Time watermark'
+	String get vendorXiaomiMijiaCameraControlTimeWatermark4 => 'Time watermark';
+
+	/// en-US: 'Glimmer full color'
+	String get vendorXiaomiMijiaCameraControlGlimmerFullColor6 => 'Glimmer full color';
+
+	/// en-US: 'Human tracking'
+	String get vendorXiaomiMijiaCameraControlHumanTracking11 => 'Human tracking';
+
+	/// en-US: 'Recording mode'
+	String get vendorXiaomiMijiaCameraControlRecordingMode7 => 'Recording mode';
+
+	/// en-US: 'Image distortion correction'
+	String get vendorXiaomiMijiaCameraControlImageDistortionCorrection14 => 'Image distortion correction';
+
+	/// en-US: 'Zoom ratio'
+	String get vendorXiaomiMijiaCameraControlZoomRatio21 => 'Zoom ratio';
+
+	/// en-US: 'Power frequency'
+	String get vendorXiaomiMijiaCameraControlPowerFrequency22 => 'Power frequency';
+
+	/// en-US: 'Image rollover'
+	String get vendorXiaomiMijiaCameraControlImageRollover23 => 'Image rollover';
+
+	/// en-US: 'Memory card management'
+	String get vendorXiaomiMijiaMemoryCardManagement => 'Memory card management';
+
+	/// en-US: 'Memory card management 4'
+	String get componentMemoryCardManagement4 => 'Memory card management 4';
+
+	/// en-US: 'Status'
+	String get vendorXiaomiMijiaMemoryCardManagementStatus1 => 'Status';
+
+	/// en-US: 'Storage total space'
+	String get vendorXiaomiMijiaMemoryCardManagementStorageTotalSpace2 => 'Storage total space';
+
+	/// en-US: 'Storage free space'
+	String get vendorXiaomiMijiaMemoryCardManagementStorageFreeSpace3 => 'Storage free space';
+
+	/// en-US: 'Storage used space'
+	String get vendorXiaomiMijiaMemoryCardManagementStorageUsedSpace4 => 'Storage used space';
+
+	/// en-US: 'Dialog ejected'
+	String get vendorXiaomiMijiaMemoryCardManagementDialogEjected5 => 'Dialog ejected';
+
+	/// en-US: 'Remaining recording duration'
+	String get vendorXiaomiMijiaMemoryCardManagementRemainingRecordingDuration6 => 'Remaining recording duration';
+
+	/// en-US: 'Motion detection 5'
+	String get componentMotionDetection5 => 'Motion detection 5';
+
+	/// en-US: 'Motion detection'
+	String get vendorXiaomiMijiaMotionDetectionMotionDetection1 => 'Motion detection';
+
+	/// en-US: 'Speaker 6'
+	String get componentSpeaker6 => 'Speaker 6';
+
+	/// en-US: 'Volume'
+	String get vendorXiaomiMijiaSpeakerVolume2 => 'Volume';
+
+	/// en-US: 'Mute'
+	String get vendorXiaomiMijiaSpeakerMute1 => 'Mute';
+
+	/// en-US: 'Ai detection'
+	String get vendorXiaomiMijiaAiDetection => 'Ai detection';
+
+	/// en-US: 'Ai detection 8'
+	String get componentAiDetection8 => 'Ai detection 8';
+
+	/// en-US: 'Face detection switch'
+	String get vendorXiaomiMijiaAiDetectionFaceDetectionSwitch4 => 'Face detection switch';
+
+	/// en-US: 'Pet detection switch'
+	String get vendorXiaomiMijiaAiDetectionPetDetectionSwitch5 => 'Pet detection switch';
+
+	/// en-US: 'Hand gesture detection switch'
+	String get vendorXiaomiMijiaAiDetectionHandGestureDetectionSwitch6 => 'Hand gesture detection switch';
+
+	/// en-US: 'Human detection'
+	String get vendorXiaomiMijiaAiDetectionHumanDetection8 => 'Human detection';
+
+	/// en-US: 'Move detection'
+	String get vendorXiaomiMijiaAiDetectionMoveDetection9 => 'Move detection';
+
+	/// en-US: 'Babycry detection switch'
+	String get vendorXiaomiMijiaAiDetectionBabycryDetectionSwitch10 => 'Babycry detection switch';
+
+	/// en-US: 'People number'
+	String get vendorXiaomiMijiaAiDetectionPeopleNumber25 => 'People number';
+
+	/// en-US: 'Pet tracking'
+	String get vendorXiaomiMijiaAiDetectionPetTracking21 => 'Pet tracking';
+
+	/// en-US: 'Detection sensitivity'
+	String get vendorXiaomiMijiaAiDetectionDetectionSensitivity23 => 'Detection sensitivity';
+
+	/// en-US: 'Human close up'
+	String get vendorXiaomiMijiaAiDetectionHumanCloseUp24 => 'Human close up';
+
+	/// en-US: 'Abnormal sound detection'
+	String get vendorXiaomiMijiaAiDetectionAbnormalSoundDetection28 => 'Abnormal sound detection';
+
+	/// en-US: 'Detection sensitivity'
+	String get vendorXiaomiMijiaAiDetectionDetectionSensitivity29 => 'Detection sensitivity';
+
+	/// en-US: 'Zoom close up function switch'
+	String get vendorXiaomiMijiaAiDetectionZoomCloseUpFunctionSwitch30 => 'Zoom close up function switch';
+
+	/// en-US: 'Close up function status'
+	String get vendorXiaomiMijiaAiDetectionCloseUpFunctionStatus31 => 'Close up function status';
+
+	/// en-US: 'Camera fav area'
+	String get vendorXiaomiMijiaCameraFavArea => 'Camera fav area';
+
+	/// en-US: 'Camera fav area 10'
+	String get componentCameraFavArea10 => 'Camera fav area 10';
+
+	/// en-US: 'Active fav area'
+	String get vendorXiaomiMijiaCameraFavAreaActiveFavArea2 => 'Active fav area';
+
+	/// en-US: 'Cruise'
+	String get vendorXiaomiMijiaCruise => 'Cruise';
+
+	/// en-US: 'Cruise 11'
+	String get componentCruise11 => 'Cruise 11';
+
+	/// en-US: 'Cruise switch'
+	String get vendorXiaomiMijiaCruiseCruiseSwitch1 => 'Cruise switch';
+
+	/// en-US: 'Cruise cycle'
+	String get vendorXiaomiMijiaCruiseCruiseCycle2 => 'Cruise cycle';
+
+	/// en-US: 'Cruise mode'
+	String get vendorXiaomiMijiaCruiseCruiseMode6 => 'Cruise mode';
+
+	/// en-US: 'Camera ipc cloud'
+	String get vendorXiaomiMijiaCameraIpcCloud => 'Camera ipc cloud';
+
+	/// en-US: 'Camera ipc cloud 14'
+	String get componentCameraIpcCloud14 => 'Camera ipc cloud 14';
+
+	/// en-US: 'Gop value'
+	String get vendorXiaomiMijiaCameraIpcCloudGopValue1 => 'Gop value';
+
+	/// en-US: 'Vip offset num'
+	String get vendorXiaomiMijiaCameraIpcCloudVipOffsetNum2 => 'Vip offset num';
+
+	/// en-US: 'Non vip offset num'
+	String get vendorXiaomiMijiaCameraIpcCloudNonVipOffsetNum3 => 'Non vip offset num';
+
+	/// en-US: 'Virtual fence'
+	String get vendorXiaomiMijiaVirtualFence => 'Virtual fence';
+
+	/// en-US: 'Virtual fence 15'
+	String get componentVirtualFence15 => 'Virtual fence 15';
+
+	/// en-US: 'Virtual fence switch'
+	String get vendorXiaomiMijiaVirtualFenceVirtualFenceSwitch1 => 'Virtual fence switch';
+
+	/// en-US: 'People fence in'
+	String get vendorXiaomiMijiaVirtualFencePeopleFenceIn3 => 'People fence in';
+
+	/// en-US: 'People fence out'
+	String get vendorXiaomiMijiaVirtualFencePeopleFenceOut4 => 'People fence out';
+
+	/// en-US: 'Area shape'
+	String get vendorXiaomiMijiaVirtualFenceAreaShape7 => 'Area shape';
+
+	/// en-US: 'Area support concave'
+	String get vendorXiaomiMijiaVirtualFenceAreaSupportConcave8 => 'Area support concave';
+
+	/// en-US: 'Area display switch'
+	String get vendorXiaomiMijiaVirtualFenceAreaDisplaySwitch5 => 'Area display switch';
+
+	/// en-US: 'Area count'
+	String get vendorXiaomiMijiaVirtualFenceAreaCount6 => 'Area count';
+
+	/// en-US: 'Fire smoke'
+	String get vendorXiaomiMijiaFireSmoke => 'Fire smoke';
+
+	/// en-US: 'Fire smoke 18'
+	String get componentFireSmoke18 => 'Fire smoke 18';
+
+	/// en-US: 'Fire smoke switch'
+	String get vendorXiaomiMijiaFireSmokeFireSmokeSwitch1 => 'Fire smoke switch';
+
+	/// en-US: 'Fire smoke alarm switch'
+	String get vendorXiaomiMijiaFireSmokeFireSmokeAlarmSwitch2 => 'Fire smoke alarm switch';
+
+	/// en-US: 'Region privacy'
+	String get vendorXiaomiMijiaRegionPrivacy => 'Region privacy';
+
+	/// en-US: 'Region privacy 24'
+	String get componentRegionPrivacy24 => 'Region privacy 24';
+
+	/// en-US: 'Region privacy switch'
+	String get vendorXiaomiMijiaRegionPrivacyRegionPrivacySwitch1 => 'Region privacy switch';
+
+	/// en-US: 'Self check'
+	String get vendorXiaomiMijiaSelfCheck => 'Self check';
+
+	/// en-US: 'Self check 26'
+	String get componentSelfCheck26 => 'Self check 26';
+
+	/// en-US: 'Manual check results'
+	String get vendorXiaomiMijiaSelfCheckManualCheckResults3 => 'Manual check results';
+
+	/// en-US: 'Key call'
+	String get vendorXiaomiMijiaKeyCall => 'Key call';
+
+	/// en-US: 'Key call 12'
+	String get componentKeyCall12 => 'Key call 12';
+
+	/// en-US: 'Key call status'
+	String get vendorXiaomiMijiaKeyCallKeyCallStatus4 => 'Key call status';
+
+	/// en-US: 'Other functions'
+	String get vendorXiaomiMijiaOtherFunctions => 'Other functions';
+
+	/// en-US: 'Other functions 19'
+	String get componentOtherFunctions19 => 'Other functions 19';
+
+	/// en-US: 'Reid switch'
+	String get vendorXiaomiMijiaOtherFunctionsReidSwitch2 => 'Reid switch';
+
+	/// en-US: 'Submersion sensor'
+	String get vendorXiaomiMijiaSubmersionSensor => 'Submersion sensor';
+
+	/// en-US: 'Submersion sensor 2'
+	String get componentSubmersionSensor2 => 'Submersion sensor 2';
+
+	/// en-US: 'Submersion state'
+	String get vendorXiaomiMijiaSubmersionSensorSubmersionState1006 => 'Submersion state';
+
+	/// en-US: 'Submersion state top'
+	String get vendorXiaomiMijiaSubmersionSensorSubmersionStateTop1123 => 'Submersion state top';
+
+	/// en-US: 'Status'
+	String get vendorXiaomiMijiaSubmersionSensorStatus1004 => 'Status';
+
+	/// en-US: 'Battery 3'
+	String get componentBattery3 => 'Battery 3';
+
+	/// en-US: 'Access mode'
+	String get vendorXiaomiMijiaGatewayAccessMode1 => 'Access mode';
+
+	/// en-US: 'Hood'
+	String get vendorXiaomiMijiaHood => 'Hood';
+
+	/// en-US: 'Hood 2'
+	String get componentHood2 => 'Hood 2';
+
+	/// en-US: 'Reported on'
+	String get vendorXiaomiMijiaHoodOn1 => 'Reported on';
+
+	/// en-US: 'Fault'
+	String get vendorXiaomiMijiaHoodFault2 => 'Fault';
+
+	/// en-US: 'Off delay'
+	String get vendorXiaomiMijiaHoodOffDelay5 => 'Off delay';
+
+	/// en-US: 'Off delay time'
+	String get vendorXiaomiMijiaHoodOffDelayTime6 => 'Off delay time';
+
+	/// en-US: 'Countdown time'
+	String get vendorXiaomiMijiaHoodCountdownTime7 => 'Countdown time';
+
+	/// en-US: 'Stove link status'
+	String get vendorXiaomiMijiaHoodStoveLinkStatus8 => 'Stove link status';
+
+	/// en-US: 'Power on with light'
+	String get vendorXiaomiMijiaHoodPowerOnWithLight9 => 'Power on with light';
+
+	/// en-US: 'Power off with light'
+	String get vendorXiaomiMijiaHoodPowerOffWithLight10 => 'Power off with light';
+
+	/// en-US: 'Clean remind on'
+	String get vendorXiaomiMijiaHoodCleanRemindOn11 => 'Clean remind on';
+
+	/// en-US: 'Clean remind time'
+	String get vendorXiaomiMijiaHoodCleanRemindTime12 => 'Clean remind time';
+
+	/// en-US: 'Gestures'
+	String get vendorXiaomiMijiaHoodGestures18 => 'Gestures';
+
+	/// en-US: 'Auto ventilation on'
+	String get vendorXiaomiMijiaHoodAutoVentilationOn20 => 'Auto ventilation on';
+
+	/// en-US: 'Pm trig push value'
+	String get vendorXiaomiMijiaHoodPmTrigPushValue21 => 'Pm trig push value';
+
+	/// en-US: 'Pm trig fresh value'
+	String get vendorXiaomiMijiaHoodPmTrigFreshValue23 => 'Pm trig fresh value';
+
+	/// en-US: 'Ch4 out auto ventilation'
+	String get vendorXiaomiMijiaHoodCh4OutAutoVentilation24 => 'Ch4 out auto ventilation';
+
+	/// en-US: 'Auto ventilation on'
+	String get vendorXiaomiMijiaHoodAutoVentilationOn25 => 'Auto ventilation on';
+
+	/// en-US: 'Off delay time'
+	String get vendorXiaomiMijiaHoodOffDelayTime26 => 'Off delay time';
+
+	/// en-US: 'Off delay'
+	String get vendorXiaomiMijiaHoodOffDelay27 => 'Off delay';
+
+	/// en-US: 'Off delay time'
+	String get vendorXiaomiMijiaHoodOffDelayTime28 => 'Off delay time';
+
+	/// en-US: 'Clean remind time'
+	String get vendorXiaomiMijiaHoodCleanRemindTime29 => 'Clean remind time';
+
+	/// en-US: 'Fan control'
+	String get vendorXiaomiMijiaFanControl => 'Fan control';
+
+	/// en-US: 'Fan control 3'
+	String get componentFanControl3 => 'Fan control 3';
+
+	/// en-US: 'Fan level'
+	String get vendorXiaomiMijiaFanControlFanLevel1 => 'Fan level';
+
+	/// en-US: 'Light 6'
+	String get componentLight6 => 'Light 6';
+
+	/// en-US: 'Kitchen stove'
+	String get vendorXiaomiMijiaKitchenStove => 'Kitchen stove';
+
+	/// en-US: 'Kitchen stove 7'
+	String get componentKitchenStove7 => 'Kitchen stove 7';
+
+	/// en-US: 'Status'
+	String get vendorXiaomiMijiaKitchenStoveStatus1 => 'Status';
+
+	/// en-US: 'Current heat level'
+	String get vendorXiaomiMijiaKitchenStoveCurrentHeatLevel5 => 'Current heat level';
+
+	/// en-US: 'Left time'
+	String get vendorXiaomiMijiaKitchenStoveLeftTime7 => 'Left time';
+
+	/// en-US: 'Stove hood linkage'
+	String get vendorXiaomiMijiaKitchenStoveStoveHoodLinkage8 => 'Stove hood linkage';
+
+	/// en-US: 'Working remind time'
+	String get vendorXiaomiMijiaKitchenStoveWorkingRemindTime9 => 'Working remind time';
+
+	/// en-US: 'Status'
+	String get vendorXiaomiMijiaKitchenStoveStatus10 => 'Status';
+
+	/// en-US: 'Stove hood linkage'
+	String get vendorXiaomiMijiaKitchenStoveStoveHoodLinkage11 => 'Stove hood linkage';
+
+	/// en-US: 'Status'
+	String get vendorXiaomiMijiaKitchenStoveStatus12 => 'Status';
+
+	/// en-US: 'Current heat level'
+	String get vendorXiaomiMijiaKitchenStoveCurrentHeatLevel13 => 'Current heat level';
+
+	/// en-US: 'Status'
+	String get vendorXiaomiMijiaKitchenStoveStatus14 => 'Status';
+
+	/// en-US: 'Kitchen stove 8'
+	String get componentKitchenStove8 => 'Kitchen stove 8';
+
+	/// en-US: 'Current heat level'
+	String get vendorXiaomiMijiaKitchenStoveCurrentHeatLevel9 => 'Current heat level';
+
+	/// en-US: 'Hood smart dry wash'
+	String get vendorXiaomiMijiaHoodSmartDryWash => 'Hood smart dry wash';
+
+	/// en-US: 'Hood smart dry wash 10'
+	String get componentHoodSmartDryWash10 => 'Hood smart dry wash 10';
+
+	/// en-US: 'Dry cleaning timing on'
+	String get vendorXiaomiMijiaHoodSmartDryWashDryCleaningTimingOn1 => 'Dry cleaning timing on';
+
+	/// en-US: 'Dry cleaning status'
+	String get vendorXiaomiMijiaHoodSmartDryWashDryCleaningStatus2 => 'Dry cleaning status';
+
+	/// en-US: 'Dry cleaning guide'
+	String get vendorXiaomiMijiaHoodSmartDryWashDryCleaningGuide3 => 'Dry cleaning guide';
+
+	/// en-US: 'Dry cleaning left time'
+	String get vendorXiaomiMijiaHoodSmartDryWashDryCleaningLeftTime4 => 'Dry cleaning left time';
+
+	/// en-US: 'Battery 11'
+	String get componentBattery11 => 'Battery 11';
+
+	/// en-US: 'Environment'
+	String get vendorXiaomiMijiaEnvironment => 'Environment';
+
+	/// en-US: 'Environment 12'
+	String get componentEnvironment12 => 'Environment 12';
+
+	/// en-US: 'Pm2.5 density'
+	String get vendorXiaomiMijiaEnvironmentPm25Density1 => 'Pm2.5 density';
+
+	/// en-US: 'Pm1'
+	String get vendorXiaomiMijiaEnvironmentPm12 => 'Pm1';
+
+	/// en-US: 'Ch4 density'
+	String get vendorXiaomiMijiaEnvironmentCh4Density3 => 'Ch4 density';
+
+	/// en-US: 'Ch4 density'
+	String get vendorXiaomiMijiaEnvironmentCh4Density4 => 'Ch4 density';
+
+	/// en-US: 'Pm1'
+	String get vendorXiaomiMijiaEnvironmentPm15 => 'Pm1';
+
+	/// en-US: 'Screen'
+	String get vendorXiaomiMijiaScreen => 'Screen';
+
+	/// en-US: 'Screen 13'
+	String get componentScreen13 => 'Screen 13';
+
+	/// en-US: 'Display state'
+	String get vendorXiaomiMijiaScreenDisplayState1 => 'Display state';
+
+	/// en-US: 'Auto screen off'
+	String get vendorXiaomiMijiaScreenAutoScreenOff2 => 'Auto screen off';
+
+	/// en-US: 'Auto screen off time'
+	String get vendorXiaomiMijiaScreenAutoScreenOffTime3 => 'Auto screen off time';
+
+	/// en-US: 'Auto screen off'
+	String get vendorXiaomiMijiaScreenAutoScreenOff4 => 'Auto screen off';
+
+	/// en-US: 'Auto screen off time'
+	String get vendorXiaomiMijiaScreenAutoScreenOffTime5 => 'Auto screen off time';
+
+	/// en-US: 'Display state'
+	String get vendorXiaomiMijiaScreenDisplayState6 => 'Display state';
+
+	/// en-US: 'Auto screen off time'
+	String get vendorXiaomiMijiaScreenAutoScreenOffTime7 => 'Auto screen off time';
+
+	/// en-US: 'Power consumption 3'
+	String get componentPowerConsumption3 => 'Power consumption 3';
+
+	/// en-US: 'Power consumption accumulation way'
+	String get vendorXiaomiMijiaPowerConsumptionPowerConsumptionAccumulationWay3 => 'Power consumption accumulation way';
+
+	/// en-US: 'Electric current'
+	String get vendorXiaomiMijiaPowerConsumptionElectricCurrent4 => 'Electric current';
+
+	/// en-US: 'Voltage'
+	String get vendorXiaomiMijiaPowerConsumptionVoltage5 => 'Voltage';
+
+	/// en-US: 'Indicator light 4'
+	String get componentIndicatorLight4 => 'Indicator light 4';
+
+	/// en-US: 'Custom'
+	String get vendorXiaomiMijiaCustom => 'Custom';
+
+	/// en-US: 'Custom 7'
+	String get componentCustom7 => 'Custom 7';
+
+	/// en-US: 'Max voltage'
+	String get vendorXiaomiMijiaCustomMaxVoltage3 => 'Max voltage';
+
+	/// en-US: 'Double click close'
+	String get vendorXiaomiMijiaCustomDoubleClickClose4 => 'Double click close';
+
+	/// en-US: 'Jog mode'
+	String get vendorXiaomiMijiaCustomJogMode6 => 'Jog mode';
+
+	/// en-US: 'Child lock'
+	String get vendorXiaomiMijiaCustomChildLock7 => 'Child lock';
+
+	/// en-US: 'Air purifier'
+	String get vendorXiaomiMijiaAirPurifier => 'Air purifier';
+
+	/// en-US: 'Air purifier 2'
+	String get componentAirPurifier2 => 'Air purifier 2';
+
+	/// en-US: 'Reported on'
+	String get vendorXiaomiMijiaAirPurifierOn1 => 'Reported on';
+
+	/// en-US: 'Fan level'
+	String get vendorXiaomiMijiaAirPurifierFanLevel2 => 'Fan level';
+
+	/// en-US: 'Reported mode'
+	String get vendorXiaomiMijiaAirPurifierMode3 => 'Reported mode';
+
+	/// en-US: 'Environment 3'
+	String get componentEnvironment3 => 'Environment 3';
+
+	/// en-US: 'Relative humidity'
+	String get vendorXiaomiMijiaEnvironmentRelativeHumidity1 => 'Relative humidity';
+
+	/// en-US: 'Pm2.5 density'
+	String get vendorXiaomiMijiaEnvironmentPm25Density2 => 'Pm2.5 density';
+
+	/// en-US: 'Temperature'
+	String get vendorXiaomiMijiaEnvironmentTemperature3 => 'Temperature';
+
+	/// en-US: 'Filter'
+	String get vendorXiaomiMijiaFilter => 'Filter';
+
+	/// en-US: 'Filter 4'
+	String get componentFilter4 => 'Filter 4';
+
+	/// en-US: 'Filter life level'
+	String get vendorXiaomiMijiaFilterFilterLifeLevel1 => 'Filter life level';
+
+	/// en-US: 'Filter used time'
+	String get vendorXiaomiMijiaFilterFilterUsedTime2 => 'Filter used time';
+
+	/// en-US: 'Indicator light 5'
+	String get componentIndicatorLight5 => 'Indicator light 5';
+
+	/// en-US: 'Alarm 6'
+	String get componentAlarm6 => 'Alarm 6';
+
+	/// en-US: 'Air purifier favorite'
+	String get vendorXiaomiMijiaAirPurifierFavorite => 'Air purifier favorite';
+
+	/// en-US: 'Air purifier favorite 8'
+	String get componentAirPurifierFavorite8 => 'Air purifier favorite 8';
+
+	/// en-US: 'Favorite fan level'
+	String get vendorXiaomiMijiaAirPurifierFavoriteFavoriteFanLevel1 => 'Favorite fan level';
 }

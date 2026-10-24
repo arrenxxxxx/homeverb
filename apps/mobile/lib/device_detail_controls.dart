@@ -223,7 +223,7 @@ String componentLabel(Json component) {
   final id = component['id'] as String;
   final match = RegExp(r'^(fan|lock|doorbell|battery)-[0-9]+$').firstMatch(id);
   return match == null
-      ? controlLabel(id)
+      ? sourceForKey('component.${id.replaceAll('-', '_')}') ?? controlLabel(id)
       : const {
           'fan': 'Electric fan',
           'lock': 'Door lock',

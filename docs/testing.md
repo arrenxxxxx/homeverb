@@ -455,3 +455,12 @@ business success does not verify complete device semantics. Preserve ordinary
 APK/AAR artifacts and restore them afterward. Actual evidence is recorded in
 [App verification](../apps/mobile/verification.md) and the
 [closed read evidence](development/meiju-read-probe-evidence.json).
+
+## Exact Mijia reference regression
+
+Run `python3 scripts/extract_mijia_reference_facts.py --check` before the Mijia
+suite. Every catalog model is published and its readable components exercised
+through Core with fictional identities and values. URN/profile conflicts, unsafe
+field exclusion, old mapping upgrade, unchanged authority and cloud staleness are
+covered. Flutter `test/mijia_reference_test.dart` checks localized read-only
+readings at 320 pixels and double text scale. This is not physical acceptance.

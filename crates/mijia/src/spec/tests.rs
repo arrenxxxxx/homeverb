@@ -230,3 +230,125 @@ async fn explicit_metadata_fetch_uses_no_account_and_honors_cancellation() {
     assert!(SpecIndex::fetch(&transport, &operation).await.is_err());
     assert_eq!(transport.calls.load(Ordering::SeqCst), 2);
 }
+
+#[test]
+fn exact_reference_catalog_maps_only_reviewed_scalar_reads() {
+    let mut count = 0;
+    assert_eq!(references().len(), 17);
+    for profile in references() {
+        let mapping = ModelMapping::pinned(&profile.model, Some(&profile.spec_type))
+            .unwrap()
+            .unwrap();
+        mapping.validate_saved().unwrap();
+        count += mapping.properties.len();
+        assert!(
+            mapping
+                .properties
+                .iter()
+                .all(|p| p.definition["type"] != "string")
+        );
+        assert!(
+            mapping
+                .capabilities()
+                .iter()
+                .all(|c| c.actions.is_empty() && c.events.is_empty())
+        );
+        assert!(
+            mapping
+                .control_options()
+                .iter()
+                .all(|o| o.component_id.starts_with("fan-")
+                    && matches!(
+                        o.action.as_str(),
+                        "set"
+                            | "set_level"
+                            | "set_mode"
+                            | "set_horizontal_swing"
+                            | "set_horizontal_angle"
+                    ))
+        );
+        assert!(
+            ModelMapping::pinned(
+                &format!("{}.other", profile.model),
+                Some(&profile.spec_type)
+            )
+            .unwrap()
+            .is_none()
+        );
+        assert!(
+            ModelMapping::pinned(&profile.model, Some(&format!("{}0", profile.spec_type)))
+                .unwrap()
+                .is_none()
+        );
+    }
+    assert!(
+        count > 250,
+        "catalog unexpectedly lost read mappings: {count}"
+    );
+    let fan = ModelMapping::pinned("jdjz.fan.2072fc", None)
+        .unwrap()
+        .unwrap();
+    assert_eq!(fan.properties.len(), 12);
+    assert!(
+        fan.properties
+            .iter()
+            .any(|p| p.property == "vertical_swing_7" && p.write_domain.is_none())
+    );
+    let hub = ModelMapping::pinned("xiaomi.gateway.hub1", None)
+        .unwrap()
+        .unwrap();
+    assert_eq!(hub.properties.len(), 2);
+    assert!(
+        hub.properties
+            .iter()
+            .all(|p| !p.property.contains("mac") && !p.property.contains("address"))
+    );
+    assert!(
+        ModelMapping::pinned("miwear.watch.n66tc", None)
+            .unwrap()
+            .is_none()
+    );
+}
+
+#[test]
+fn extended_urns_and_reference_fields_keep_exact_identity_and_types() {
+    let profile = reference(
+        "jdjz.fan.2072fc",
+        "urn:miot-spec-v2:device:fan:0000A005:jdjz-2072fc:1:0000D062",
+    )
+    .unwrap();
+    assert!(validate_device_type(&profile.spec_type).is_ok());
+    for suffix in [":", ":0000D062:1", ":0000D06Z", ":123"] {
+        assert!(
+            validate_device_type(&format!(
+                "urn:miot-spec-v2:device:fan:0000A005:fiction:1{suffix}"
+            ))
+            .is_err()
+        );
+    }
+    let original = ModelMapping::pinned(&profile.model, None).unwrap().unwrap();
+    let mut forged = original.clone();
+    forged.properties[0].piid += 100;
+    assert!(forged.validate_saved().is_err());
+    let mut source = profile.source.clone();
+    let services = source["services"].as_array_mut().unwrap();
+    let custom = services.iter_mut().find(|s| s["iid"] == 3).unwrap();
+    custom["properties"][0]["format"] = json!("bool");
+    let mapped = ModelMapping::decode(
+        &profile.model,
+        &profile.spec_type,
+        &serde_json::to_vec(&source).unwrap(),
+    )
+    .unwrap();
+    assert!(!mapped.properties.iter().any(|p| p.siid == 3 && p.piid == 1));
+    let legacy = ModelMapping::decode_inner(
+        &profile.model,
+        &profile.spec_type,
+        &serde_json::to_vec(&profile.source).unwrap(),
+        false,
+    )
+    .unwrap();
+    assert!(legacy.properties.len() < original.properties.len());
+    legacy.validate_saved().unwrap();
+    assert_eq!(legacy.upgraded().unwrap(), original);
+}

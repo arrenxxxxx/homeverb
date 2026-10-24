@@ -566,3 +566,14 @@ preserved, never invented. Prerequisite failures are proven not sent; a possibly
 sent failure remains unknown. Replay returns the original receipt without
 additional reads or writes. No transport, fallback, retry, verification or
 background behavior changes. The new refrigerator scopes contain reads only.
+
+## Exact Mijia reference observations
+
+[ADR-0080](adr/0080-mijia-exact-reference-readings.md) admits additional exact-model
+scalar reads through the existing protected account lease and cloud operation.
+Pinned public facts avoid optional public-spec requests on explicit account
+retrieval; they are neither current firmware evidence nor account authority.
+Reference properties retain device/SIID/PIID correlation, local receipt time,
+unknown physical observation time and stale flags. New fields have no setters.
+Existing fan grants, one-send outcomes, replay protection and lifecycle rules are
+unchanged. No credential is forwarded from the legacy SID to the modern origin.

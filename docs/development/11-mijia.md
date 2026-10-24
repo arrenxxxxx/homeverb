@@ -1,5 +1,9 @@
 # 11. Mijia native integration
 
+October 25: 17 exact Mijia reference specifications now supply 264 scalar read
+mappings and localized App labels. Additional writes and modern authentication
+remain incomplete; see the [full coverage and blockers](14-mijia-reference-integration.md).
+
 The October 24 integration uses native API **1.27.0** after the linear mainline
 update. Earlier Mijia phase versions are historical. See
 [contract reconciliation](../adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls

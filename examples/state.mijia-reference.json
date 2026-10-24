@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "device_id": "40000000-0000-4000-8000-000000000002",
+  "component_id": "environment-3",
+  "from_cache": false,
+  "observations": {
+    "vendor.xiaomi.mijia.environment.relative_humidity_1": {
+      "value": 55,
+      "source": "cloud",
+      "observed_at": null,
+      "received_at": "2026-10-25T00:00:00Z",
+      "stale": true
+    },
+    "vendor.xiaomi.mijia.environment.pm2_5_density_2": {
+      "value": 0,
+      "source": "cloud",
+      "observed_at": null,
+      "received_at": "2026-10-25T00:00:00Z",
+      "stale": true
+    },
+    "vendor.xiaomi.mijia.environment.temperature_3": {
+      "value": 22.5,
+      "source": "cloud",
+      "observed_at": null,
+      "received_at": "2026-10-25T00:00:00Z",
+      "stale": true
+    }
+  },
+  "warnings": [
+    "Cloud readings have no trustworthy physical sampling timestamp."
+  ]
+}

@@ -534,3 +534,10 @@ unadmitted services/actions and `INVALID_ARGUMENT` for values outside the protec
 spec domain. Exact protected connection mismatches return
 `DEVICE_IDENTITY_CONFLICT`. Core independently rejects missing exact policy grants.
 A default read-only adapter refuses even if public metadata describes a write.
+
+Exact Mijia reference reads retain existing errors. Missing/foreign model or URN
+facts cannot select the pinned fallback; unreadable services remain unsupported.
+Malformed values fail Core observation validation before replacing cache; provider
+property errors remain absent values, never false/zero defaults. No reference
+write can bypass protected fan admission. See
+[ADR-0080](adr/0080-mijia-exact-reference-readings.md).

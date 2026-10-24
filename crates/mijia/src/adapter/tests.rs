@@ -185,7 +185,17 @@ impl CloudTransport for Cloud {
                 CloudEndpoint::Homes=>json!({"homelist":[],"has_more":false}),
                 CloudEndpoint::Properties=>{
                     if self.stall_read.load(Ordering::SeqCst)!=0 {self.read_gate.notify_one();std::future::pending::<()>().await;}
-                    let values:Vec<_>=data["params"].as_array().unwrap().iter().map(|p|json!({"did":p["did"],"siid":p["siid"],"piid":p["piid"],"code":0,"value":if p["piid"]==1 {self.power.lock().unwrap().clone()}else{json!(3)}})).collect();
+                    let values:Vec<_>=data["params"].as_array().unwrap().iter().map(|p| {
+                        let model = self.devices.lock().unwrap().iter().find(|d| d["did"] == p["did"]).and_then(|d| d["model"].as_str()).map(str::to_owned);
+                        let reference = model.and_then(|m| ModelMapping::pinned(&m, None).unwrap());
+                        let value = if let Some(mapping) = reference {
+                            let field = mapping.properties.iter().find(|f| json!(f.siid) == p["siid"] && json!(f.piid) == p["piid"]).unwrap();
+                            match field.definition["type"].as_str().unwrap() {
+                                "boolean" => json!(false), "number" => json!(1.25), _ => json!(0),
+                            }
+                        } else if p["piid"]==1 {self.power.lock().unwrap().clone()}else{json!(3)};
+                        json!({"did":p["did"],"siid":p["siid"],"piid":p["piid"],"code":0,"value":value})
+                    }).collect();
                     json!(values)
                 },
                 _=>panic!("unexpected endpoint"),
@@ -832,3 +842,90 @@ async fn primary_appliance_component_precedes_auxiliary_battery_for_card_reads()
 
 #[path = "control_tests.rs"]
 mod control_tests;
+
+#[tokio::test]
+async fn reference_inventory_publishes_exact_components_without_public_spec_networking() {
+    let f = Fixture::new();
+    *f.cloud.devices.lock().unwrap() = json!([
+        {"did":"FICTIONAL-REFERENCE-FAN","name":"Reference fan","model":"jdjz.fan.2072fc","spec_type":"urn:miot-spec-v2:device:fan:0000A005:jdjz-2072fc:1:0000D062"},
+        {"did":"FICTIONAL-REFERENCE-PURIFIER","name":"Reference purifier","model":"zhimi.airpurifier.v6"},
+        {"did":"FICTIONAL-REFERENCE-SWITCH","name":"Reference switch","model":"opple.switch.0010d6"}
+    ]).as_array().unwrap().clone();
+    let report = f
+        .adapter
+        .connect_devices(credentials(), None, "Reference fixtures", &operation())
+        .await
+        .unwrap();
+    let account = report.account.id;
+    let descriptors = report.descriptors.unwrap();
+    assert_eq!(descriptors.len(), 3);
+    for descriptor in &descriptors {
+        f.core
+            .publish_discovery(PROVIDER, std::slice::from_ref(descriptor), &operation())
+            .await
+            .unwrap();
+        assert!(descriptor.capabilities.iter().all(|c| c.actions.is_empty()));
+    }
+    assert_eq!(f.cloud.count(CloudEndpoint::SpecIndex), 0);
+    assert_eq!(f.cloud.count(CloudEndpoint::SpecInstance), 0);
+    let switch = descriptors
+        .iter()
+        .find(|d| d.device.model == "opple.switch.0010d6")
+        .unwrap();
+    assert_eq!(switch.device.components.len(), 2);
+    let ids: Vec<_> = descriptors.iter().map(|d| d.device.id.clone()).collect();
+    let refreshed = f
+        .adapter
+        .refresh_devices(account, &operation())
+        .await
+        .unwrap();
+    assert_eq!(
+        refreshed
+            .descriptors
+            .unwrap()
+            .iter()
+            .map(|d| d.device.id.clone())
+            .collect::<Vec<_>>(),
+        ids
+    );
+}
+
+#[tokio::test]
+async fn every_reference_model_publishes_and_reads_scalar_components_through_core() {
+    let profiles: Value = serde_json::from_str(include_str!("../reference_profiles.json")).unwrap();
+    let f = Fixture::new();
+    *f.cloud.devices.lock().unwrap() = profiles.as_array().unwrap().iter().enumerate().map(|(index,p)| json!({
+        "did": format!("FICTIONAL-REFERENCE-{index}"), "name": format!("Reference fixture {index}"), "model": p["model"], "spec_type": p["spec_type"]
+    })).collect();
+    let report = f.connect().await;
+    f.publish(&report).await;
+    let mut readings = 0;
+    for descriptor in report.descriptors.as_ref().unwrap() {
+        if descriptor.device.support_status == "unsupported" {
+            continue;
+        }
+        for component in &descriptor.device.components {
+            let snapshot = f
+                .core
+                .read(
+                    &descriptor.device.id,
+                    &component.id,
+                    Route::Cloud,
+                    false,
+                    &operation(),
+                )
+                .await
+                .unwrap();
+            assert!(
+                snapshot
+                    .observations
+                    .values()
+                    .all(|v| v.stale && v.observed_at.is_none())
+            );
+            readings += snapshot.observations.len();
+        }
+    }
+    assert_eq!(readings, 264);
+    assert_eq!(f.cloud.count(CloudEndpoint::SetProperty), 0);
+    assert_eq!(f.cloud.count(CloudEndpoint::SpecIndex), 0);
+}

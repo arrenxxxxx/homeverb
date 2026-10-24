@@ -1,0 +1,5395 @@
+{
+  "reference_sha256": "cb0c7f5855be9b647ca9124999b35d612de58be7a1cd6657fbefba88d0fa00c4",
+  "status": "partial_implementation",
+  "physical_acceptance": "pending_owner",
+  "operations": [
+    {
+      "id": "directory",
+      "route": "/v2/home/device_list_page",
+      "status": "legacy_session_path_only",
+      "reason": "Modern SID/session origin differs; no credential crossover or arbitrary RPC."
+    },
+    {
+      "id": "homes",
+      "route": "/v2/homeroom/gethome_merged",
+      "status": "legacy_session_path_only",
+      "reason": "Modern SID/session origin differs; no credential crossover or arbitrary RPC."
+    },
+    {
+      "id": "properties",
+      "route": "/miotspec/prop/get",
+      "status": "legacy_session_path_only",
+      "reason": "Modern SID/session origin differs; no credential crossover or arbitrary RPC."
+    },
+    {
+      "id": "property_write_candidate",
+      "route": "/miotspec/prop/set",
+      "status": "not_admitted_by_reference",
+      "reason": "Modern SID/session origin differs; no credential crossover or arbitrary RPC."
+    },
+    {
+      "id": "action_candidate",
+      "route": "/miotspec/action",
+      "status": "not_admitted_by_reference",
+      "reason": "Modern SID/session origin differs; no credential crossover or arbitrary RPC."
+    },
+    {
+      "id": "event_candidate",
+      "route": "/miotspec/event/get",
+      "status": "not_admitted_by_reference",
+      "reason": "Modern SID/session origin differs; no credential crossover or arbitrary RPC."
+    },
+    {
+      "id": "rpc_candidate",
+      "route": "/home/rpc/{did}; /home/rpcv2/{did}",
+      "status": "not_admitted_by_reference",
+      "reason": "Modern SID/session origin differs; no credential crossover or arbitrary RPC."
+    }
+  ],
+  "models": [
+    {
+      "model": "abhome.light.wy0a01",
+      "spec_type": "urn:miot-spec-v2:device:light:0000A001:abhome-wy0a01:1:0000C802",
+      "status": "exact_scalar_reads_only",
+      "reference_read_summary": {
+        "requested": 31,
+        "successful_items": 0,
+        "successful_instances": 0,
+        "codes": {
+          "-704042011": 31
+        }
+      },
+      "entries": [
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 1,
+          "name": "manufacturer",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 2,
+          "name": "model",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 3,
+          "name": "serial-number",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 4,
+          "name": "firmware-revision",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 1,
+          "name": "on",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 2,
+          "name": "brightness",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 3,
+          "name": "color-temperature",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 7,
+          "name": "mode",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 9,
+          "name": "default-power-on-state",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 12,
+          "name": "flex-switch",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 13,
+          "name": "night-light-switch",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "action",
+          "siid": 2,
+          "iid": 1,
+          "name": "toggle",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "action",
+          "siid": 2,
+          "iid": 2,
+          "name": "brightness-up",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "action",
+          "siid": 2,
+          "iid": 3,
+          "name": "brightness-down",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "action",
+          "siid": 2,
+          "iid": 4,
+          "name": "toggle-light-mode",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 6,
+          "iid": 1,
+          "name": "remote-control-addable",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 6,
+          "iid": 3,
+          "name": "remote-control-list",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 6,
+          "iid": 4,
+          "name": "remote-control-list",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 6,
+          "iid": 5,
+          "name": "remote-control-list",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 6,
+          "iid": 6,
+          "name": "remote-control-list",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 6,
+          "iid": 7,
+          "name": "remote-control-addable",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "action",
+          "siid": 6,
+          "iid": 1,
+          "name": "delete-remote-control",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "action",
+          "siid": 6,
+          "iid": 2,
+          "name": "delete-remote-control",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "action",
+          "siid": 6,
+          "iid": 3,
+          "name": "delete-remote-control",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "action",
+          "siid": 6,
+          "iid": 4,
+          "name": "delete-remote-control",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "action",
+          "siid": 6,
+          "iid": 5,
+          "name": "delete-remote-control",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 4,
+          "iid": 1,
+          "name": "brightness-switch",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 4,
+          "iid": 2,
+          "name": "colortemperature-add",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 4,
+          "iid": 3,
+          "name": "colortemperatre-dec",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 4,
+          "iid": 4,
+          "name": "colortemperature-sw",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 4,
+          "iid": 5,
+          "name": "on-or-brightness",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 4,
+          "iid": 6,
+          "name": "on-or-colortemp",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 4,
+          "iid": 7,
+          "name": "brightness-add",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 4,
+          "iid": 8,
+          "name": "brightness-dec",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 3,
+          "name": "delay",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 4,
+          "name": "fade-time",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 5,
+          "name": "lowest-brightness",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 6,
+          "name": "lock-state",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 7,
+          "name": "light-mode-one",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 8,
+          "name": "light-mode-two",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 9,
+          "name": "light-mode-three",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 10,
+          "name": "light-mode-four",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 11,
+          "name": "sleep-config",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 13,
+          "name": "factory-reset",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 14,
+          "name": "get",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 15,
+          "name": "breathing-mode-set",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 16,
+          "name": "beat-mode-set",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 17,
+          "name": "binding-id",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 18,
+          "name": "binding-id-b",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 19,
+          "name": "master-slave-switch",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 20,
+          "name": "interactive",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 21,
+          "name": "very-dark-brightness",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 1,
+          "name": "rhythm-function",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 2,
+          "name": "light-mode-a",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 3,
+          "name": "light-mode-b",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 4,
+          "name": "light-mode-c",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 5,
+          "name": "light-mode-d",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 6,
+          "name": "light-mode-e",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        }
+      ]
+    },
+    {
+      "model": "cuco.plug.v3",
+      "spec_type": "urn:miot-spec-v2:device:outlet:0000A002:cuco-v3:2",
+      "status": "exact_scalar_reads_only",
+      "reference_read_summary": {
+        "requested": 28,
+        "successful_items": 4,
+        "successful_instances": 1,
+        "codes": {
+          "-704220043": 24,
+          "0": 4
+        }
+      },
+      "entries": [
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 1,
+          "name": "manufacturer",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 2,
+          "name": "model",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 3,
+          "name": "serial-number",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 4,
+          "name": "firmware-revision",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 5,
+          "name": "serial-no",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 1,
+          "name": "on",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 2,
+          "name": "default-power-on-state",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 3,
+          "name": "fault",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "action",
+          "siid": 2,
+          "iid": 1,
+          "name": "toggle",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 1,
+          "name": "physical-controls-locked",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 1,
+          "name": "power-consumption",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 2,
+          "name": "electric-power",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 13,
+          "iid": 1,
+          "name": "on",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 3,
+          "iid": 2,
+          "name": "mode",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "property",
+          "siid": 3,
+          "iid": 3,
+          "name": "start-time",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 3,
+          "iid": 4,
+          "name": "end-time",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 4,
+          "iid": 1,
+          "name": "on",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 4,
+          "iid": 2,
+          "name": "power",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 4,
+          "iid": 3,
+          "name": "protect-time",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 1,
+          "name": "status",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 2,
+          "name": "data-value",
+          "read_status": "opaque_value_requires_separate_contract",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 1,
+          "name": "on",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 2,
+          "name": "duration",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 3,
+          "name": "left-time",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "event",
+          "siid": 8,
+          "iid": 1,
+          "name": "open-event",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 9,
+          "iid": 1,
+          "name": "on",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 9,
+          "iid": 2,
+          "name": "power",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 1,
+          "name": "on",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 2,
+          "name": "over-ele-day",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 3,
+          "name": "over-ele-month",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "event",
+          "siid": 10,
+          "iid": 1,
+          "name": "over-day-push",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 10,
+          "iid": 2,
+          "name": "over-month-push",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 12,
+          "iid": 1,
+          "name": "on-off-count",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 12,
+          "iid": 2,
+          "name": "temperature",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 14,
+          "iid": 1,
+          "name": "power",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 14,
+          "iid": 2,
+          "name": "protect-time",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 15,
+          "iid": 1,
+          "name": "power-ext",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        }
+      ]
+    },
+    {
+      "model": "hmpace.scales.mibfs",
+      "spec_type": null,
+      "status": "placeholder_no_reviewed_readable_spec",
+      "reference_read_summary": {
+        "requested": 0,
+        "successful_items": 0,
+        "successful_instances": 0,
+        "codes": {}
+      },
+      "entries": []
+    },
+    {
+      "model": "jdjz.fan.2072fc",
+      "spec_type": "urn:miot-spec-v2:device:fan:0000A005:jdjz-2072fc:1:0000D062",
+      "status": "exact_scalar_reads_only",
+      "reference_read_summary": {
+        "requested": 12,
+        "successful_items": 12,
+        "successful_instances": 1,
+        "codes": {
+          "0": 12
+        }
+      },
+      "entries": [
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 1,
+          "name": "manufacturer",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 2,
+          "name": "model",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 3,
+          "name": "serial-number",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 4,
+          "name": "firmware-revision",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 5,
+          "name": "serial-no",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 1,
+          "name": "on",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 3,
+          "name": "mode",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 4,
+          "name": "fan-level",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 2,
+          "name": "fault",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 5,
+          "name": "horizontal-swing",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 6,
+          "name": "horizontal-swing-included-angle",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 7,
+          "name": "vertical-swing",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 8,
+          "name": "vertical-swing-included-angle",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 9,
+          "name": "anion",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "action",
+          "siid": 2,
+          "iid": 1,
+          "name": "toggle",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 3,
+          "iid": 1,
+          "name": "timing",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "property",
+          "siid": 3,
+          "iid": 2,
+          "name": "reserve",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "property",
+          "siid": 3,
+          "iid": 5,
+          "name": "quiet",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        }
+      ]
+    },
+    {
+      "model": "linp.sensor_ht.ks1bp",
+      "spec_type": "urn:miot-spec-v2:device:temperature-humidity-sensor:0000A00A:linp-ks1bp:1",
+      "status": "exact_scalar_reads_only",
+      "reference_read_summary": {
+        "requested": 4,
+        "successful_items": 0,
+        "successful_instances": 0,
+        "codes": {
+          "-704010000": 4
+        }
+      },
+      "entries": [
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 1,
+          "name": "manufacturer",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 2,
+          "name": "model",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 3,
+          "name": "serial-number",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 4,
+          "name": "firmware-revision",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 5,
+          "name": "serial-no",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 1001,
+          "name": "temperature",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 1008,
+          "name": "relative-humidity",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 4,
+          "iid": 1003,
+          "name": "battery-level",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 1,
+          "name": "button-type",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 1020,
+          "name": "mode",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "event",
+          "siid": 5,
+          "iid": 1012,
+          "name": "click",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 5,
+          "iid": 1013,
+          "name": "double-click",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 5,
+          "iid": 1014,
+          "name": "long-press",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        }
+      ]
+    },
+    {
+      "model": "loock.lock.h01myk",
+      "spec_type": "urn:miot-spec-v2:device:lock:0000A038:loock-h01myk:1",
+      "status": "exact_scalar_reads_only",
+      "reference_read_summary": {
+        "requested": 31,
+        "successful_items": 0,
+        "successful_instances": 0,
+        "codes": {
+          "-704002000": 31
+        }
+      },
+      "entries": [
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 1,
+          "name": "manufacturer",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 2,
+          "name": "model",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 3,
+          "name": "serial-number",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 4,
+          "name": "firmware-revision",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 5,
+          "name": "serial-no",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 1,
+          "name": "operation-position",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 2,
+          "name": "operation-method",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 3,
+          "name": "lock-action",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 4,
+          "name": "operation-id",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 5,
+          "name": "current-time",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 6,
+          "name": "abnormal-condition",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "event",
+          "siid": 2,
+          "iid": 1020,
+          "name": "lock-event",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 2,
+          "iid": 1007,
+          "name": "exception-occurred",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 3,
+          "iid": 1021,
+          "name": "door-state",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 4,
+          "iid": 1003,
+          "name": "battery-level",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 4,
+          "iid": 1034,
+          "name": "charging-state",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 1,
+          "name": "current-time",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "event",
+          "siid": 5,
+          "iid": 1006,
+          "name": "doorbell-ring",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 1,
+          "name": "on",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 2,
+          "name": "status",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 3,
+          "name": "night-shot",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 5,
+          "name": "wdr-mode",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 6,
+          "name": "eco",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 7,
+          "name": "ringtone",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 8,
+          "name": "image-distortion-correction",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 9,
+          "name": "cloud-video-id",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 10,
+          "name": "current-time",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 11,
+          "name": "auto-screen-on",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "event",
+          "siid": 7,
+          "iid": 1,
+          "name": "doorbell-ring",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 7,
+          "iid": 3,
+          "name": "someone-passed-by",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 7,
+          "iid": 4,
+          "name": "someone-at-the-door",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 3,
+          "name": "detection-sensitivity",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 4,
+          "name": "motion-detection-start-time",
+          "read_status": "opaque_value_requires_separate_contract",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 5,
+          "name": "motion-detection-end-time",
+          "read_status": "opaque_value_requires_separate_contract",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "action",
+          "siid": 9,
+          "iid": 1,
+          "name": "start-p2p-stream",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "action",
+          "siid": 9,
+          "iid": 2,
+          "name": "stop-stream",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 1,
+          "name": "battery-level",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "event",
+          "siid": 10,
+          "iid": 1,
+          "name": "low-battery",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 2,
+          "name": "screen-on-duration",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 3,
+          "name": "record-someone-pass",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 4,
+          "name": "record-someone-stay",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 5,
+          "name": "stay-duration",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 6,
+          "name": "glimmer-full-color",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 7,
+          "name": "eco-wakeup-duration",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 8,
+          "name": "real-view-start-time",
+          "read_status": "opaque_value_requires_separate_contract",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 9,
+          "name": "real-view-end-time",
+          "read_status": "opaque_value_requires_separate_contract",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 10,
+          "name": "ver-wifi-detail",
+          "read_status": "opaque_value_requires_separate_contract",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 11,
+          "name": "ver-lock-detail",
+          "read_status": "opaque_value_requires_separate_contract",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 12,
+          "name": "ver-camera-detail",
+          "read_status": "opaque_value_requires_separate_contract",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 13,
+          "name": "ver-fw-camera",
+          "read_status": "opaque_value_requires_separate_contract",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 14,
+          "name": "lcd-show-mode",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 15,
+          "name": "battery-update-time",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 16,
+          "name": "device-status",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 17,
+          "name": "online-timestamp",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 18,
+          "name": "customized-property",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "action",
+          "siid": 11,
+          "iid": 1,
+          "name": "rpc-doorbell",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "action",
+          "siid": 11,
+          "iid": 2,
+          "name": "rpc-preview",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "action",
+          "siid": 11,
+          "iid": 3,
+          "name": "rpc-record",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "action",
+          "siid": 11,
+          "iid": 4,
+          "name": "system-reboot",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "action",
+          "siid": 11,
+          "iid": 5,
+          "name": "sync-setting-ask",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        }
+      ]
+    },
+    {
+      "model": "lumi.remote.mcn001",
+      "spec_type": "urn:miot-spec-v2:device:remote-control:0000A021:lumi-mcn001:1",
+      "status": "exact_scalar_reads_only",
+      "reference_read_summary": {
+        "requested": 2,
+        "successful_items": 0,
+        "successful_instances": 0,
+        "codes": {
+          "-704010000": 2
+        }
+      },
+      "entries": [
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 1,
+          "name": "manufacturer",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 2,
+          "name": "model",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 3,
+          "name": "serial-number",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 4,
+          "name": "firmware-revision",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 5,
+          "name": "serial-no",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 1003,
+          "name": "battery-level",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "event",
+          "siid": 2,
+          "iid": 1001,
+          "name": "low-battery",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 3,
+          "iid": 1020,
+          "name": "mode",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "event",
+          "siid": 3,
+          "iid": 1012,
+          "name": "click",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 3,
+          "iid": 1013,
+          "name": "double-click",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 3,
+          "iid": 1014,
+          "name": "long-press",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 3,
+          "iid": 1028,
+          "name": "device-be-reset",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        }
+      ]
+    },
+    {
+      "model": "madv.cateye.mi3iot",
+      "spec_type": "urn:miot-spec-v2:device:video-doorbell:0000A03A:madv-mi3iot:1",
+      "status": "exact_scalar_reads_only",
+      "reference_read_summary": {
+        "requested": 26,
+        "successful_items": 0,
+        "successful_instances": 0,
+        "codes": {
+          "-704083036": 26
+        }
+      },
+      "entries": [
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 1,
+          "name": "manufacturer",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 2,
+          "name": "model",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 3,
+          "name": "serial-number",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 4,
+          "name": "firmware-revision",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 2,
+          "name": "status",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 3,
+          "name": "night-shot",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 6,
+          "name": "eco",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 7,
+          "name": "ringtone",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 8,
+          "name": "cloud-video-id",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "event",
+          "siid": 2,
+          "iid": 1,
+          "name": "doorbell-forcibly-removed",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 2,
+          "iid": 2,
+          "name": "doorbell-ring",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 2,
+          "iid": 3,
+          "name": "someone-at-the-door",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 2,
+          "iid": 4,
+          "name": "someone-passed-by",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 4,
+          "iid": 2,
+          "name": "alarm-interval",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 4,
+          "iid": 3,
+          "name": "detection-sensitivity",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 4,
+          "iid": 4,
+          "name": "motion-detection",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 1,
+          "name": "alarm",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 1,
+          "name": "battery-level",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "event",
+          "siid": 8,
+          "iid": 1,
+          "name": "low-battery",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 1,
+          "name": "on",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 12,
+          "iid": 1,
+          "name": "volume",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 7,
+          "name": "motionpush-pushtype",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 11,
+          "name": "videodelay",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 12,
+          "name": "videolength",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 13,
+          "name": "autoreply",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 14,
+          "name": "autoreply-week",
+          "read_status": "opaque_value_requires_separate_contract",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 15,
+          "name": "autoreply-time",
+          "read_status": "opaque_value_requires_separate_contract",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 16,
+          "name": "autoreply-item",
+          "read_status": "opaque_value_requires_separate_contract",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 18,
+          "name": "ringer-time",
+          "read_status": "opaque_value_requires_separate_contract",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 19,
+          "name": "fw-autoupgrade",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 36,
+          "name": "eco-code",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 38,
+          "name": "motion-time",
+          "read_status": "opaque_value_requires_separate_contract",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 39,
+          "name": "test-spec",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 40,
+          "name": "settingsync-time",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 41,
+          "name": "battypedate",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 42,
+          "name": "workinglength",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 43,
+          "name": "startuptimes",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 44,
+          "name": "threeday-work",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 45,
+          "name": "syswork",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 46,
+          "name": "pir",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 47,
+          "name": "videonum",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 48,
+          "name": "fourbat-work",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 49,
+          "name": "connected",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 50,
+          "name": "pwrdate",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 51,
+          "name": "mcu-pir",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 52,
+          "name": "ringer-music",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 53,
+          "name": "vistpush",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 54,
+          "name": "motionpush",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 55,
+          "name": "motion-detection",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "event",
+          "siid": 10,
+          "iid": 8,
+          "name": "upgrade-event",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 10,
+          "iid": 10,
+          "name": "upgrade-success",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 10,
+          "iid": 11,
+          "name": "upgrade-fail",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 10,
+          "iid": 12,
+          "name": "no-battery",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 10,
+          "iid": 16,
+          "name": "low-battery",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 10,
+          "iid": 17,
+          "name": "new-battery",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 10,
+          "iid": 18,
+          "name": "temp-abnormal",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        }
+      ]
+    },
+    {
+      "model": "miwear.watch.n66tc",
+      "spec_type": null,
+      "status": "placeholder_no_reviewed_readable_spec",
+      "reference_read_summary": {
+        "requested": 0,
+        "successful_items": 0,
+        "successful_instances": 0,
+        "codes": {}
+      },
+      "entries": []
+    },
+    {
+      "model": "njcuk.fitting.ad1204",
+      "spec_type": "urn:miot-spec-v2:device:fitting:0000A0D1:njcuk-ad1204:2",
+      "status": "placeholder_no_reviewed_readable_spec",
+      "reference_read_summary": {
+        "requested": 0,
+        "successful_items": 0,
+        "successful_instances": 0,
+        "codes": {}
+      },
+      "entries": [
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 1,
+          "name": "manufacturer",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 2,
+          "name": "model",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 3,
+          "name": "serial-number",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 4,
+          "name": "firmware-revision",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 5,
+          "name": "serial-no",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 1,
+          "name": "port-c-one-info",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 2,
+          "name": "port-c-two-info",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 3,
+          "name": "port-c-three-info",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 4,
+          "name": "port-a-info",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 5,
+          "name": "scene-mode",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 6,
+          "name": "screen-save-time",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 7,
+          "name": "protocol-ctl",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 8,
+          "name": "count-down-setting",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 9,
+          "name": "c-one-countdown-time",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 10,
+          "name": "c-two-countdown-time",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 11,
+          "name": "c-three-down-time",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 12,
+          "name": "usb-a-countdown-time",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 13,
+          "name": "device-language",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 14,
+          "name": "enter",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 15,
+          "name": "usb-a-always-on",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 16,
+          "name": "port-ctl",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 17,
+          "name": "c-one-c-two-protocol",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 18,
+          "name": "c-three-a-protocol",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 19,
+          "name": "screenoff-while-idle",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 20,
+          "name": "screen-dir-lock",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 21,
+          "name": "protocol-ctl-extend",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "action",
+          "siid": 2,
+          "iid": 1,
+          "name": "reset-setting",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        }
+      ]
+    },
+    {
+      "model": "opple.gateway.opgw",
+      "spec_type": "urn:miot-spec-v2:device:gateway:0000A019:opple-opgw:1",
+      "status": "exact_scalar_reads_only",
+      "reference_read_summary": {
+        "requested": 1,
+        "successful_items": 1,
+        "successful_instances": 1,
+        "codes": {
+          "0": 1
+        }
+      },
+      "entries": [
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 1,
+          "name": "manufacturer",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 2,
+          "name": "model",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 3,
+          "name": "serial-number",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 4,
+          "name": "firmware-revision",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 5,
+          "name": "serial-no",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 1,
+          "name": "status",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        }
+      ]
+    },
+    {
+      "model": "opple.switch.0010d5",
+      "spec_type": "urn:miot-spec-v2:device:switch:0000A003:opple-0010d5:1:0000C808",
+      "status": "exact_scalar_reads_only",
+      "reference_read_summary": {
+        "requested": 4,
+        "successful_items": 4,
+        "successful_instances": 2,
+        "codes": {
+          "0": 4
+        }
+      },
+      "entries": [
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 1,
+          "name": "manufacturer",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 2,
+          "name": "model",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 3,
+          "name": "serial-number",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 4,
+          "name": "firmware-revision",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 3,
+          "iid": 1,
+          "name": "on",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 2
+        },
+        {
+          "kind": "property",
+          "siid": 3,
+          "iid": 2,
+          "name": "mode",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 2
+        },
+        {
+          "kind": "action",
+          "siid": 3,
+          "iid": 1,
+          "name": "toggle",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 2,
+          "iid": 1,
+          "name": "click",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 2,
+          "iid": 2,
+          "name": "double-click",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 2,
+          "iid": 3,
+          "name": "long-press",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        }
+      ]
+    },
+    {
+      "model": "opple.switch.0010d6",
+      "spec_type": "urn:miot-spec-v2:device:switch:0000A003:opple-0010d6:1:0000C809",
+      "status": "exact_scalar_reads_only",
+      "reference_read_summary": {
+        "requested": 12,
+        "successful_items": 4,
+        "successful_instances": 1,
+        "codes": {
+          "-704002000": 8,
+          "0": 4
+        }
+      },
+      "entries": [
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 1,
+          "name": "manufacturer",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 2,
+          "name": "model",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 3,
+          "name": "serial-number",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 4,
+          "name": "firmware-revision",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 1,
+          "name": "on",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 2,
+          "name": "mode",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "action",
+          "siid": 11,
+          "iid": 1,
+          "name": "toggle",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 12,
+          "iid": 1,
+          "name": "on",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "property",
+          "siid": 12,
+          "iid": 2,
+          "name": "mode",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "action",
+          "siid": 12,
+          "iid": 1,
+          "name": "toggle",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 2,
+          "iid": 1,
+          "name": "click",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 2,
+          "iid": 2,
+          "name": "double-click",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 2,
+          "iid": 3,
+          "name": "long-press",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 3,
+          "iid": 1,
+          "name": "click",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 3,
+          "iid": 2,
+          "name": "double-click",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 3,
+          "iid": 3,
+          "name": "long-press",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        }
+      ]
+    },
+    {
+      "model": "xiaomi.camera.083ac1",
+      "spec_type": "urn:miot-spec-v2:device:camera:0000A01C:xiaomi-083ac1:2:0000D070",
+      "status": "exact_scalar_reads_only",
+      "reference_read_summary": {
+        "requested": 79,
+        "successful_items": 0,
+        "successful_instances": 0,
+        "codes": {
+          "-704042011": 79
+        }
+      },
+      "entries": [
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 1,
+          "name": "manufacturer",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 2,
+          "name": "model",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 3,
+          "name": "serial-number",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 4,
+          "name": "firmware-revision",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 5,
+          "name": "serial-no",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 1,
+          "name": "on",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 10,
+          "name": "ptz-camera",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 3,
+          "name": "night-shot",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 4,
+          "name": "time-watermark",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 6,
+          "name": "glimmer-full-color",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 11,
+          "name": "human-tracking",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 7,
+          "name": "recording-mode",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 14,
+          "name": "image-distortion-correction",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 21,
+          "name": "zoom-ratio",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 22,
+          "name": "power-frequency",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 23,
+          "name": "image-rollover",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "action",
+          "siid": 2,
+          "iid": 1,
+          "name": "ptz-calibrate",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "action",
+          "siid": 2,
+          "iid": 2,
+          "name": "restart-device",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 2,
+          "iid": 1,
+          "name": "ir-turned-on",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 2,
+          "iid": 2,
+          "name": "ir-turned-off",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 4,
+          "iid": 1,
+          "name": "status",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 4,
+          "iid": 2,
+          "name": "storage-total-space",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 4,
+          "iid": 3,
+          "name": "storage-free-space",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 4,
+          "iid": 4,
+          "name": "storage-used-space",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 4,
+          "iid": 5,
+          "name": "dialog-ejected",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 4,
+          "iid": 6,
+          "name": "remaining-recording-duration",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "action",
+          "siid": 4,
+          "iid": 1,
+          "name": "format",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "action",
+          "siid": 4,
+          "iid": 2,
+          "name": "pop-up",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 1,
+          "name": "motion-detection",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 3,
+          "name": "detection-sensitivity",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 4,
+          "name": "motion-detection-start-time",
+          "read_status": "opaque_value_requires_separate_contract",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 5,
+          "name": "motion-detection-end-time",
+          "read_status": "opaque_value_requires_separate_contract",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 2,
+          "name": "alarm-interval",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 3,
+          "iid": 1,
+          "name": "on",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 6,
+          "iid": 2,
+          "name": "volume",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 6,
+          "iid": 1,
+          "name": "mute",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 4,
+          "name": "face-detection-switch",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 1,
+          "name": "identity-id",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 5,
+          "name": "pet-detection-switch",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 6,
+          "name": "hand-gesture-detection-switch",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 7,
+          "name": "hand-gesture-name",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 8,
+          "name": "human-detection",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 9,
+          "name": "move-detection",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 10,
+          "name": "babycry-detection-switch",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 2,
+          "name": "pets-type",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 11,
+          "name": "current-time",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 25,
+          "name": "people-number",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 21,
+          "name": "pet-tracking",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 23,
+          "name": "detection-sensitivity",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 24,
+          "name": "human-close-up",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 28,
+          "name": "abnormal-sound-detection",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 29,
+          "name": "detection-sensitivity",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 30,
+          "name": "zoom-close-up-function-switch",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 31,
+          "name": "close-up-function-status",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "event",
+          "siid": 8,
+          "iid": 7,
+          "name": "detected-babycry-event",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 8,
+          "iid": 10,
+          "name": "object-motion",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 8,
+          "iid": 2,
+          "name": "someone-appeared",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 8,
+          "iid": 6,
+          "name": "pet-appeared",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 8,
+          "iid": 18,
+          "name": "abnormal-sound",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 1,
+          "name": "fav-area",
+          "read_status": "opaque_value_requires_separate_contract",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 2,
+          "name": "active-fav-area",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "event",
+          "siid": 10,
+          "iid": 1,
+          "name": "into-fav-area",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 10,
+          "iid": 2,
+          "name": "out-fav-area",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 1,
+          "name": "cruise-switch",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 2,
+          "name": "cruise-cycle",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 3,
+          "name": "cruise-start-time",
+          "read_status": "opaque_value_requires_separate_contract",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 4,
+          "name": "cruise-end-time",
+          "read_status": "opaque_value_requires_separate_contract",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 5,
+          "name": "cruise-repetition",
+          "read_status": "opaque_value_requires_separate_contract",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 6,
+          "name": "cruise-mode",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 7,
+          "name": "cruise-position",
+          "read_status": "opaque_value_requires_separate_contract",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "event",
+          "siid": 11,
+          "iid": 1,
+          "name": "cruise-started",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 11,
+          "iid": 2,
+          "name": "cruise-ended",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 14,
+          "iid": 1,
+          "name": "gop-value",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 14,
+          "iid": 2,
+          "name": "vip-offset-num",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 14,
+          "iid": 3,
+          "name": "non-vip-offset-num",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 15,
+          "iid": 1,
+          "name": "virtual-fence-switch",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 15,
+          "iid": 2,
+          "name": "virtual-fence-area",
+          "read_status": "opaque_value_requires_separate_contract",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 15,
+          "iid": 3,
+          "name": "people-fence-in",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 15,
+          "iid": 4,
+          "name": "people-fence-out",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 15,
+          "iid": 7,
+          "name": "area-shape",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 15,
+          "iid": 8,
+          "name": "area-support-concave",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 15,
+          "iid": 5,
+          "name": "area-display-switch",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 15,
+          "iid": 6,
+          "name": "area-count",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "event",
+          "siid": 15,
+          "iid": 1,
+          "name": "people-fence-in",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 15,
+          "iid": 2,
+          "name": "people-fence-out",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 18,
+          "iid": 1,
+          "name": "fire-smoke-switch",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 18,
+          "iid": 2,
+          "name": "fire-smoke-alarm-switch",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 18,
+          "iid": 3,
+          "name": "current-time",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "event",
+          "siid": 18,
+          "iid": 1,
+          "name": "fire-smoke-event",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 9,
+          "iid": 1,
+          "name": "talk-mode",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 9,
+          "iid": 2,
+          "name": "audio-codec",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 9,
+          "iid": 3,
+          "name": "audio-bit-width",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 9,
+          "iid": 4,
+          "name": "video-codec",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 9,
+          "iid": 5,
+          "name": "audio-smp-rate",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 9,
+          "iid": 6,
+          "name": "audio-channel",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 9,
+          "iid": 7,
+          "name": "talk-codec",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 9,
+          "iid": 8,
+          "name": "distortion-crt-osdx",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 9,
+          "iid": 9,
+          "name": "distortion-crt-osdy",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 9,
+          "iid": 10,
+          "name": "resolution-types",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "action",
+          "siid": 9,
+          "iid": 1,
+          "name": "start-p2p-stream",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "action",
+          "siid": 9,
+          "iid": 2,
+          "name": "stop-stream",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "action",
+          "siid": 9,
+          "iid": 3,
+          "name": "upload-video",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 24,
+          "iid": 1,
+          "name": "region-privacy-switch",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 24,
+          "iid": 3,
+          "name": "region-privacy-area",
+          "read_status": "opaque_value_requires_separate_contract",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 25,
+          "iid": 2,
+          "name": "qrcode-information",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 26,
+          "iid": 1,
+          "name": "self-check-items",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 26,
+          "iid": 2,
+          "name": "self-check-results",
+          "read_status": "opaque_value_requires_separate_contract",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 26,
+          "iid": 3,
+          "name": "manual-check-results",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "action",
+          "siid": 26,
+          "iid": 1,
+          "name": "start-check",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "action",
+          "siid": 26,
+          "iid": 2,
+          "name": "stop-check",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "action",
+          "siid": 26,
+          "iid": 3,
+          "name": "sync-manual-check",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "action",
+          "siid": 26,
+          "iid": 4,
+          "name": "stop-check",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 26,
+          "iid": 1,
+          "name": "self-check-complete",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 12,
+          "iid": 4,
+          "name": "key-call-status",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "event",
+          "siid": 12,
+          "iid": 1,
+          "name": "key-call-start",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 12,
+          "iid": 2,
+          "name": "phone-call-start",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 16,
+          "iid": 1,
+          "name": "family-guard-config",
+          "read_status": "opaque_value_requires_separate_contract",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 16,
+          "iid": 2,
+          "name": "clock-key",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "event",
+          "siid": 16,
+          "iid": 1,
+          "name": "long-time-no-humang",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 19,
+          "iid": 1,
+          "name": "long-time-no-humang",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 19,
+          "iid": 2,
+          "name": "reid-switch",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 19,
+          "iid": 3,
+          "name": "identity-reid",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 19,
+          "iid": 4,
+          "name": "time",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "event",
+          "siid": 19,
+          "iid": 1,
+          "name": "no-huamn-appear",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 19,
+          "iid": 2,
+          "name": "reid-event",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        }
+      ]
+    },
+    {
+      "model": "xiaomi.flood.oh83w",
+      "spec_type": "urn:miot-spec-v2:device:submersion-sensor:0000A024:xiaomi-oh83w:1:0000D017",
+      "status": "exact_scalar_reads_only",
+      "reference_read_summary": {
+        "requested": 8,
+        "successful_items": 0,
+        "successful_instances": 0,
+        "codes": {
+          "-704010000": 8
+        }
+      },
+      "entries": [
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 1,
+          "name": "manufacturer",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 2,
+          "name": "model",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 3,
+          "name": "serial-number",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 4,
+          "name": "firmware-revision",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 5,
+          "name": "serial-no",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 1006,
+          "name": "submersion-state",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 1123,
+          "name": "submersion-state-top",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 1,
+          "name": "alarm-switch",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 2,
+          "name": "alarm-interval",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 4,
+          "name": "event-type",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 1004,
+          "name": "status",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "event",
+          "siid": 2,
+          "iid": 1104,
+          "name": "submersion-sensor-event",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 2,
+          "iid": 1028,
+          "name": "device-be-reset",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 3,
+          "iid": 1003,
+          "name": "battery-level",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 1,
+          "name": "long-endurance-mode-on",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 6,
+          "iid": 1,
+          "name": "customized-argument-1",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 6,
+          "iid": 2,
+          "name": "customized-argument-2",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "event",
+          "siid": 6,
+          "iid": 1022,
+          "name": "customized-event-1",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        }
+      ]
+    },
+    {
+      "model": "xiaomi.gateway.hub1",
+      "spec_type": "urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:3",
+      "status": "exact_scalar_reads_only",
+      "reference_read_summary": {
+        "requested": 3,
+        "successful_items": 3,
+        "successful_instances": 1,
+        "codes": {
+          "0": 3
+        }
+      },
+      "entries": [
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 1,
+          "name": "manufacturer",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 2,
+          "name": "model",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 3,
+          "name": "serial-number",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 4,
+          "name": "firmware-revision",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 5,
+          "name": "serial-no",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 1,
+          "name": "access-mode",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 2,
+          "name": "ip-address",
+          "read_status": "private_identity_or_credentials",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 3,
+          "name": "wifi-ssid",
+          "read_status": "private_identity_or_credentials",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 4,
+          "name": "current-time",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 5,
+          "name": "dhcp-server-mac-adress",
+          "read_status": "private_identity_or_credentials",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "event",
+          "siid": 2,
+          "iid": 1,
+          "name": "network-changed",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 2,
+          "iid": 2,
+          "name": "network-changed",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 3,
+          "iid": 1,
+          "name": "on",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "property",
+          "siid": 4,
+          "iid": 1,
+          "name": "virtual-param",
+          "read_status": "not_readable",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "action",
+          "siid": 4,
+          "iid": 1,
+          "name": "emit-virtual-event",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 4,
+          "iid": 1,
+          "name": "virtual-event",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        }
+      ]
+    },
+    {
+      "model": "xiaomi.hood.cyp10",
+      "spec_type": "urn:miot-spec-v2:device:hood:0000A01B:xiaomi-cyp10:2",
+      "status": "exact_scalar_reads_only",
+      "reference_read_summary": {
+        "requested": 55,
+        "successful_items": 0,
+        "successful_instances": 0,
+        "codes": {
+          "-704220043": 55
+        }
+      },
+      "entries": [
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 1,
+          "name": "manufacturer",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 2,
+          "name": "model",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 3,
+          "name": "serial-number",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 4,
+          "name": "firmware-revision",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 5,
+          "name": "serial-no",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 1,
+          "name": "on",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 2,
+          "name": "fault",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 5,
+          "name": "off-delay",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 6,
+          "name": "off-delay-time",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 7,
+          "name": "countdown-time",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 8,
+          "name": "stove-link-status",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 9,
+          "name": "power-on-with-light",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 10,
+          "name": "power-off-with-light",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 11,
+          "name": "clean-remind-on",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 12,
+          "name": "clean-remind-time",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 18,
+          "name": "gestures",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 20,
+          "name": "auto-ventilation-on",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 21,
+          "name": "pm-trig-push-value",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 23,
+          "name": "pm-trig-fresh-value",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 24,
+          "name": "ch4-out-auto-ventilation",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 25,
+          "name": "auto-ventilation-on",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 26,
+          "name": "off-delay-time",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 27,
+          "name": "off-delay",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 28,
+          "name": "off-delay-time",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 29,
+          "name": "clean-remind-time",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "event",
+          "siid": 2,
+          "iid": 1,
+          "name": "clean-remind",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 2,
+          "iid": 4,
+          "name": "auto-ventilation-open",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 2,
+          "iid": 5,
+          "name": "auto-ventilation-close",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 2,
+          "iid": 6,
+          "name": "auto-ventilation-invalid",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 2,
+          "iid": 7,
+          "name": "oil-cup-clean-remind",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 2,
+          "iid": 8,
+          "name": "oil-cup-clean-remind",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 2,
+          "iid": 9,
+          "name": "auto-ventilation-open",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 3,
+          "iid": 1,
+          "name": "fan-level",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 6,
+          "iid": 1,
+          "name": "on",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 6,
+          "iid": 2,
+          "name": "brightness",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "action",
+          "siid": 6,
+          "iid": 1,
+          "name": "toggle",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 1,
+          "name": "status",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 5,
+          "name": "current-heat-level",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 7,
+          "name": "left-time",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 8,
+          "name": "stove-hood-linkage",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 9,
+          "name": "working-remind-time",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 10,
+          "name": "status",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 11,
+          "name": "stove-hood-linkage",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 12,
+          "name": "status",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 13,
+          "name": "current-heat-level",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 14,
+          "name": "status",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "action",
+          "siid": 7,
+          "iid": 1,
+          "name": "unbind",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "action",
+          "siid": 7,
+          "iid": 2,
+          "name": "bind",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 7,
+          "iid": 1,
+          "name": "working-remind",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 7,
+          "iid": 2,
+          "name": "off-on-time",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 7,
+          "iid": 3,
+          "name": "cooking-finished",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 1,
+          "name": "status",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 5,
+          "name": "current-heat-level",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 7,
+          "name": "left-time",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 9,
+          "name": "current-heat-level",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 10,
+          "name": "status",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 1,
+          "name": "dry-cleaning-timing-on",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 2,
+          "name": "dry-cleaning-status",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 3,
+          "name": "dry-cleaning-guide",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 10,
+          "iid": 4,
+          "name": "dry-cleaning-left-time",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "action",
+          "siid": 10,
+          "iid": 1,
+          "name": "stop-dry-cleaning",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "action",
+          "siid": 10,
+          "iid": 2,
+          "name": "execute-dry-cleaning",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "event",
+          "siid": 10,
+          "iid": 1,
+          "name": "dry-cleaning-timing-remind",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 11,
+          "iid": 1,
+          "name": "battery-level",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "event",
+          "siid": 11,
+          "iid": 1,
+          "name": "low-battery",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 12,
+          "iid": 1,
+          "name": "pm2.5-density",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 12,
+          "iid": 2,
+          "name": "pm1",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 12,
+          "iid": 3,
+          "name": "ch4-density",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 12,
+          "iid": 4,
+          "name": "ch4-density",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 12,
+          "iid": 5,
+          "name": "pm1",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "event",
+          "siid": 12,
+          "iid": 1,
+          "name": "pm-warning",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 13,
+          "iid": 1,
+          "name": "display-state",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 13,
+          "iid": 2,
+          "name": "auto-screen-off",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 13,
+          "iid": 3,
+          "name": "auto-screen-off-time",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 13,
+          "iid": 4,
+          "name": "auto-screen-off",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 13,
+          "iid": 5,
+          "name": "auto-screen-off-time",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 13,
+          "iid": 6,
+          "name": "display-state",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 13,
+          "iid": 7,
+          "name": "auto-screen-off-time",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        }
+      ]
+    },
+    {
+      "model": "yutai.plug.jdls1",
+      "spec_type": "urn:miot-spec-v2:device:outlet:0000A002:yutai-jdls1:1:0000D032",
+      "status": "exact_scalar_reads_only",
+      "reference_read_summary": {
+        "requested": 16,
+        "successful_items": 0,
+        "successful_instances": 0,
+        "codes": {
+          "-704220043": 16
+        }
+      },
+      "entries": [
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 1,
+          "name": "manufacturer",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 2,
+          "name": "model",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 3,
+          "name": "serial-number",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 4,
+          "name": "firmware-revision",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 1,
+          "name": "on",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 2,
+          "name": "default-power-on-state",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 3,
+          "name": "fault",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "action",
+          "siid": 2,
+          "iid": 1,
+          "name": "toggle",
+          "status": "blocked_runtime_contract_and_separate_admission"
+        },
+        {
+          "kind": "property",
+          "siid": 3,
+          "iid": 1,
+          "name": "power-consumption",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 3,
+          "iid": 2,
+          "name": "electric-power",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 3,
+          "iid": 3,
+          "name": "power-consumption-accumulation-way",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 3,
+          "iid": 4,
+          "name": "electric-current",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 3,
+          "iid": 5,
+          "name": "voltage",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 4,
+          "iid": 1,
+          "name": "on",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 1,
+          "name": "indicator-set",
+          "read_status": "opaque_value_requires_separate_contract",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 2,
+          "name": "circle-task",
+          "read_status": "opaque_value_requires_separate_contract",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 3,
+          "name": "max-voltage",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 4,
+          "name": "double-click-close",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 6,
+          "name": "jog-mode",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 7,
+          "name": "child-lock",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 8,
+          "name": "local-timing",
+          "read_status": "opaque_value_requires_separate_contract",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        }
+      ]
+    },
+    {
+      "model": "zhimi.airpurifier.v6",
+      "spec_type": "urn:miot-spec-v2:device:air-purifier:0000A007:zhimi-v6:1",
+      "status": "exact_scalar_reads_only",
+      "reference_read_summary": {
+        "requested": 12,
+        "successful_items": 12,
+        "successful_instances": 1,
+        "codes": {
+          "0": 12
+        }
+      },
+      "entries": [
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 1,
+          "name": "manufacturer",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 2,
+          "name": "model",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 3,
+          "name": "serial-number",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 4,
+          "name": "name",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 1,
+          "iid": 5,
+          "name": "firmware-revision",
+          "read_status": "identity_pairing_or_media",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 0
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 1,
+          "name": "on",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 2,
+          "name": "fan-level",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "property",
+          "siid": 2,
+          "iid": 3,
+          "name": "mode",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "property",
+          "siid": 3,
+          "iid": 1,
+          "name": "relative-humidity",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "property",
+          "siid": 3,
+          "iid": 2,
+          "name": "pm2.5-density",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "property",
+          "siid": 3,
+          "iid": 3,
+          "name": "temperature",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "property",
+          "siid": 4,
+          "iid": 1,
+          "name": "filter-life-level",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "property",
+          "siid": 4,
+          "iid": 2,
+          "name": "filter-used-time",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "property",
+          "siid": 5,
+          "iid": 1,
+          "name": "on",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "property",
+          "siid": 6,
+          "iid": 1,
+          "name": "alarm",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "property",
+          "siid": 7,
+          "iid": 1,
+          "name": "physical-controls-locked",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        },
+        {
+          "kind": "property",
+          "siid": 8,
+          "iid": 1,
+          "name": "favorite-fan-level",
+          "read_status": "implemented_exact_scalar_mapping",
+          "write_status": "not_admitted_by_reference",
+          "reference_successful_instances": 1
+        }
+      ]
+    }
+  ],
+  "remaining": [
+    "modern_native_login_and_renewal",
+    "cloud_cache_inventory_reconciliation",
+    "specialized_failed_property_read_paths",
+    "BLE_and_LAN",
+    "history_and_events",
+    "health_and_media",
+    "additional_write_runtime_contracts"
+  ]
+}
