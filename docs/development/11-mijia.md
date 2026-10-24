@@ -1,5 +1,10 @@
 # 11. Mijia native integration
 
+The October 24 integration uses native API **1.27.0** after the linear mainline
+update. Earlier Mijia phase versions are historical. See
+[contract reconciliation](../adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
+remain available alongside Mijia; identity restoration remains Meiju-only.
+
 The experimental integration is implemented under [ADR-0070](../adr/0070-mijia-native-cloud.md).
 The owner will perform real-account and device acceptance. Do not access saved
 pilot credentials or contact appliances as part of development tests.
@@ -8,7 +13,7 @@ Current callable scope includes trusted Rust account/read APIs and native API 1.
 Mijia-only/combined sessions with exact fan startup grants and Flutter
 platform/account/read/control views. Live acceptance remains pending. The Rust adapter
 can explicitly admit protected fan setters under ADR-0074. Historical phase records below distinguish earlier
-protocol-only work from the [protected Core phase](../adr/0072-mijia-protected-core-reads.md).
+protocol-only work from the [protected Core phase](../adr/0076-mijia-protected-core-reads.md).
 
 ## Protocol evidence
 
@@ -185,7 +190,7 @@ No real account, vendor traffic, physical device, push or publication was used.
 
 ## Native account routing phase
 
-[ADR-0073](../adr/0073-mijia-native-account-routing.md) adds API 1.24 startup modes
+[ADR-0073](../adr/0077-mijia-native-account-routing.md) adds API 1.24 startup modes
 `xiaomi.mijia` and `homeverb.platforms` with the existing protected native connection
 function. The combined mode shares one vault/Core with Meiju while preserving exact
 Meiju startup grants. Optional provider metadata chooses an already registered
@@ -293,7 +298,7 @@ used permitted local TLS fixtures. Strict all-target Mijia Clippy passed.
 
 ## Protected fan adapter phase
 
-[ADR-0074](../adr/0074-mijia-fan-control.md) adds explicit trusted Rust composition
+[ADR-0074](../adr/0078-mijia-fan-control.md) adds explicit trusted Rust composition
 with `MijiaAdapter::with_fan_controls()`. It still requires independent Core grants.
 Protected model/spec evidence supplies power, level, mode, horizontal swing and
 horizontal angle actions only when their exact properties are readable/writable
@@ -427,3 +432,29 @@ Real-account authentication, shared-device completeness, exact physical models,
 Android phone lifecycle and iOS packaging/runtime remain unverified. The owner
 explicitly owns real-device validation. Do not upload credentials, private device
 IDs or raw provider replies when reporting a mismatch.
+
+## Mainline reconciliation verification -- October 25, 2026
+
+Fetched `origin` and rebased the ten Mijia commits onto mainline `ccf2975`.
+`git log --merges origin/main..HEAD` is empty. The old temporary worktree had lost
+its Git pointer/source files; its residual outputs were preserved and a new
+worktree was created at `/private/tmp/homeverb-mijia-current`.
+
+API 1.27 resolves independent version collisions and retains both providers,
+Meiju identity recovery, dishwasher permissions and exact reference profiles.
+Mijia cannot enter the Meiju identity-restoration path. Branch-only decisions are
+now ADR-0076/0077/0078; ADR-0079 records the combined contract.
+
+Executed: Rust 1.96 Mijia/Host tests (316 passed), workspace build and strict
+all-target Clippy; the final identity-recovery subset (8 passed); Flutter analysis
+and the six-file Mijia/control/recovery/permission/foreground suite (42 passed).
+The actual C ABI verifier passed 34 methods, 55 examples and all trusted bridge
+suites. CLI/MCP passed 35 cases with seven existing platform skips. Documentation,
+21 schemas with 54 positive/365 negative fixtures, repository hygiene and seven
+presentation checks passed. Generated locale catalogs were regenerated together.
+
+Initial integration failures (missing provider fields, stale verifier API literal,
+and fixtures without selected account metadata) were corrected and rerun. No
+physical account/appliance, Android/iOS package, remote CI, push or publication
+was used. Full workspace LAN and full Flutter suites were not run in this phase.
+The October 22 reference feature audit remains subsequent work.

@@ -1,4 +1,4 @@
-# ADR-0072: Protected Mijia account identity and Core reads
+# ADR-0076: Protected Mijia account identity and Core reads
 
 Status: accepted for implementation. Date: October 18, 2026.
 

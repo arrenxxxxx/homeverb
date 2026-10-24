@@ -5,6 +5,7 @@ async fn prepare(f: &Fixture, id: Uuid) -> Value {
     f.session
         .prepare_native_identity_recovery(
             ConnectRequest {
+                provider: None,
                 schema_version: "1.0".into(),
                 operation_id: "prepare-recovery".into(),
                 timeout_ms: 1000,
@@ -223,6 +224,7 @@ async fn recovery_refuses_different_login_input_and_existing_canonical_account()
         .session
         .prepare_native_identity_recovery(
             ConnectRequest {
+                provider: None,
                 schema_version: "1.0".into(),
                 operation_id: "other-input".into(),
                 timeout_ms: 1000,
@@ -253,4 +255,31 @@ async fn recovery_refuses_different_login_input_and_existing_canonical_account()
         "ACCOUNT_IDENTITY_CONFLICT"
     );
     assert_eq!(saved(&f), before);
+}
+
+#[tokio::test(start_paused = true)]
+async fn recovery_rejects_explicit_mijia_provider_before_network_or_mutation() {
+    let f = Fixture::new();
+    f.connect(None).await;
+    let id = f.store.accounts().unwrap()[0].id;
+    let before = saved(&f);
+    let calls = f.calls();
+    let result = f
+        .session
+        .prepare_native_identity_recovery(
+            ConnectRequest {
+                provider: Some(homeverb_host::AccountProvider::Mijia),
+                schema_version: "1.0".into(),
+                operation_id: "foreign-provider-recovery".into(),
+                timeout_ms: 1000,
+                label: "Account".into(),
+                account_id: Some(id),
+            },
+            secret("owner@example.test"),
+            secret("Synthetic password 42!"),
+        )
+        .await;
+    assert_eq!(result["error"]["code"], "AUTH_FLOW_UNSUPPORTED");
+    assert_eq!(saved(&f), before);
+    assert_eq!(f.calls(), calls);
 }

@@ -1,4 +1,4 @@
-# ADR-0073: Mijia native account routing
+# ADR-0077: Mijia native account routing
 
 - Status: Accepted
 - Date: 2026-10-18

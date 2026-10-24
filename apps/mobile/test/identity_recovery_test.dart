@@ -107,6 +107,20 @@ void main() {
       expect(normal, 0);
     },
   );
+  test('Mijia accounts cannot enter Meiju identity restoration', () {
+    final controller =
+        HomeController(
+            RecoveryFixture(),
+            AccountPreferences(),
+            reopen: (_) async => AccountFixture(),
+          )
+          ..selectedAccount = firstAccount
+          ..accountDetails = {
+            'account': {'id': firstAccount, 'provider': 'xiaomi.mijia'},
+          };
+    expect(controller.canRecoverIdentity, false);
+    controller.dispose();
+  });
   for (final mode in ['confirm', 'decline', 'background', 'uncertain']) {
     test(
       'legacy recovery $mode requires actual consent and clears credentials',
@@ -114,15 +128,20 @@ void main() {
         final old = RecoveryFixture()..uncertain = mode == 'uncertain';
         final replacement = AccountFixture();
         var reopened = 0;
-        final controller = HomeController(
-          old,
-          AccountPreferences(),
-          reopen: (grants) async {
-            expect(grants, isEmpty);
-            reopened++;
-            return replacement;
-          },
-        )..selectedAccount = firstAccount;
+        final controller =
+            HomeController(
+                old,
+                AccountPreferences(),
+                reopen: (grants) async {
+                  expect(grants, isEmpty);
+                  reopened++;
+                  return replacement;
+                },
+              )
+              ..selectedAccount = firstAccount
+              ..accountDetails = {
+                'account': {'id': firstAccount, 'provider': 'midea.meiju'},
+              };
         final login = Uint8List.fromList('fictional@example.test'.codeUnits);
         final password = Uint8List.fromList('Fictional password'.codeUnits);
         final result = await controller.recoverIdentity(

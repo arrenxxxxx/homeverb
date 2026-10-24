@@ -1,5 +1,10 @@
 # Native UI contract
 
+The October 24 integration uses native API **1.27.0** after the linear mainline
+update. Earlier Mijia phase versions are historical. See
+[contract reconciliation](adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
+remain available alongside Mijia; identity restoration remains Meiju-only.
+
 API 1.25 adds [exact Mijia fan startup grants](#mijia-fan-grants-api-125) and protected control-option inspection.
 Negotiate this version before using the new modes or accepting partial retrieval
 with positive device IDs. Existing Mock and Meiju defaults are preserved.
@@ -38,7 +43,7 @@ The 19 C functions in [homeverb.h](../crates/ffi/include/homeverb.h) form the na
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects Meiju, `xiaomi.mijia` selects Mijia, and `homeverb.platforms` selects both. `scenario` defaults to `normal`. All platform modes require `allow_mock_writes: false` and reject any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms the selected mode. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.26.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.27.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -1494,7 +1499,7 @@ JSON envelope, SQLite 5 and protected payload 3 are unchanged. See the
 
 ## Mijia and combined platform sessions (API 1.24)
 
-[ADR-0073](adr/0073-mijia-native-account-routing.md) adds two explicit trusted
+[ADR-0073](adr/0077-mijia-native-account-routing.md) adds two explicit trusted
 `homeverb_open` modes. `adapter: "xiaomi.mijia"` registers the read-only Mijia
 adapter; `adapter: "homeverb.platforms"` registers both Meiju and Mijia against the
 same private profile. Both require `allow_mock_writes: false` and the normal
@@ -1537,7 +1542,7 @@ acceptance.
 
 ## Mijia fan grants (API 1.25)
 
-[ADR-0074](adr/0074-mijia-fan-control.md) adds `mijia_fan_grants` to trusted startup
+[ADR-0074](adr/0078-mijia-fan-control.md) adds `mijia_fan_grants` to trusted startup
 in `xiaomi.mijia` and `homeverb.platforms` modes only. Each entry contains local
 `device_id`, exact `component_id` (`fan-SIID`), `property` and scalar `value`.
 Admitted property names are `state`, `level`, `mode`, `horizontal_swing` and

@@ -259,8 +259,8 @@ class NativeClient
   @override
   Set<String> get accountProviders => switch (adapter) {
     'midea.meiju' => {'midea.meiju'},
-    'xiaomi.mijia' when apiAtLeast(24) => {'xiaomi.mijia'},
-    'homeverb.platforms' when apiAtLeast(24) => {'midea.meiju', 'xiaomi.mijia'},
+    'xiaomi.mijia' when apiAtLeast(27) => {'xiaomi.mijia'},
+    'homeverb.platforms' when apiAtLeast(27) => {'midea.meiju', 'xiaomi.mijia'},
     _ => {},
   };
   @override
@@ -330,16 +330,16 @@ class NativeClient
       client.apiVersion = info['api_version'] as String;
       client.methods = (info['methods'] as Map).keys.cast<String>().toSet();
       if (['xiaomi.mijia', 'homeverb.platforms'].contains(adapter) &&
-          !client.apiAtLeast(24)) {
+          !client.apiAtLeast(27)) {
         throw NativeFailure(
           'API_UPGRADE_REQUIRED',
-          'Mijia requires native API 1.24 or later.',
+          'Mijia requires native API 1.27 or later.',
         );
       }
-      if (grants.containsKey('mijia_fan_grants') && !client.apiAtLeast(25)) {
+      if (grants.containsKey('mijia_fan_grants') && !client.apiAtLeast(27)) {
         throw NativeFailure(
           'API_UPGRADE_REQUIRED',
-          'Mijia fan controls require native API 1.25 or later.',
+          'Mijia fan controls require native API 1.27 or later.',
         );
       }
       return client;
@@ -526,10 +526,10 @@ class NativeClient
           'This provider is unavailable in the current host.',
         );
       }
-      if (provider == 'xiaomi.mijia' && !apiAtLeast(24)) {
+      if (provider == 'xiaomi.mijia' && !apiAtLeast(27)) {
         throw NativeFailure(
           'API_UPGRADE_REQUIRED',
-          'Mijia requires native API 1.24 or later.',
+          'Mijia requires native API 1.27 or later.',
         );
       }
       if (loginLength < 1 ||
@@ -559,7 +559,7 @@ class NativeClient
         'timeout_ms': 180000,
         'label': label,
         'account_id': accountId,
-        if (apiAtLeast(24) && provider != null) 'provider': provider,
+        if (apiAtLeast(27) && provider != null) 'provider': provider,
       };
       return decodeResponse(
             await _connectOnWorker(
@@ -594,7 +594,9 @@ class NativeClient
   final Set<_IdentityRecoveryPreview> _identityRecoveries = {};
   @override
   bool get supportsIdentityRecovery =>
-      supportsAccountConnection && apiAtLeast(25);
+      supportsAccountConnection &&
+      accountProviders.contains('midea.meiju') &&
+      apiAtLeast(25);
 
   @override
   Future<IdentityRecoveryPreview> prepareIdentityRecovery({

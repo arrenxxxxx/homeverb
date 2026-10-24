@@ -8,7 +8,7 @@ inventory, cached observations, permissions, routes or execution receipts.
 This is not an alternate control route or uncertain-write recovery path.
 
 API 1.24 routes account operations by registered provider and saved account ID
-under [ADR-0073](adr/0073-mijia-native-account-routing.md). Combined sessions keep
+under [ADR-0073](adr/0077-mijia-native-account-routing.md). Combined sessions keep
 one Core policy with exact Meiju grants and read-only Mijia admission. Positive
 Mijia partial inventory publishes cards with explicit partial status. Ordinary
 requests cannot change provider registration or authority. Device execution and
@@ -23,7 +23,7 @@ retain their existing meaning; no Mijia write is added by this App phase.
 
 ## Experimental Mijia Core reads
 
-[ADR-0072](adr/0072-mijia-protected-core-reads.md) adds a read-only cloud adapter
+[ADR-0072](adr/0076-mijia-protected-core-reads.md) adds a read-only cloud adapter
 with protected account/model/component/connection checks before each property
 request. Positive partial inventory can publish named cards through explicit
 account connection/refresh. Generic discovery refuses populated Mijia accounts
@@ -48,7 +48,7 @@ codes, malformed replies, cancellation and transport failures after send remain
 uncertain. Accepted acknowledgements have no completion evidence. No retry,
 reauthorization or route replay occurs.
 
-[ADR-0074](adr/0074-mijia-fan-control.md) adds explicit trusted Rust fan admission.
+[ADR-0074](adr/0078-mijia-fan-control.md) adds explicit trusted Rust fan admission.
 Core grants remain independently required. The adapter selects wire properties
 only from the protected original model/spec, validates exact route and arguments,
 and retains the account lease through the operation. Public descriptor edits

@@ -1265,6 +1265,7 @@ class HomeController extends ChangeNotifier {
   }
 
   bool get canRecoverIdentity =>
+      account?['provider'] == 'midea.meiju' &&
       reopen != null &&
       selectedAccount != null &&
       core is IdentityRecoveryClient &&

@@ -1,5 +1,10 @@
 # Implementation status and next tasks
 
+The October 24 integration uses native API **1.27.0** after the linear mainline
+update. Earlier Mijia phase versions are historical. See
+[contract reconciliation](adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
+remain available alongside Mijia; identity restoration remains Meiju-only.
+
 The October 23 refrigerator presentation removes repetitive Stale labels from
 feature cards and temperature-zone captions at the owner's request. Core freshness
 flags, timestamps, missing/error states and foreground refresh remain unchanged.
@@ -58,8 +63,8 @@ exposes bounded generic controls, including positive partial-inventory admission
 A dual-ABI combined-platform Android development APK built from `39d6465` has
 passed archive/signature/alignment inspection. Owner acceptance remains pending;
 the integration guide contains the artifact hash and checklist. See
-[ADR-0072](adr/0072-mijia-protected-core-reads.md) and
-[ADR-0073](adr/0073-mijia-native-account-routing.md).
+[ADR-0072](adr/0076-mijia-protected-core-reads.md) and
+[ADR-0073](adr/0077-mijia-native-account-routing.md).
 Real-account and physical validation belong to the owner. No door-lock write,
 background polling, project service or shared application secret is admitted.
 

@@ -1,4 +1,4 @@
-# ADR-0074: Protected Mijia fan property controls
+# ADR-0078: Protected Mijia fan property controls
 
 - Status: Accepted for implementation; physical acceptance pending
 - Date: 2026-10-18

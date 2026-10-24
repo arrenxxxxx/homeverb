@@ -433,7 +433,7 @@ def main():
             assert opened['error'] is None
             try:
                 assert raw(opened['data']['handle'], envelope('list_devices'))['data'] == []
-                assert raw(opened['data']['handle'], envelope('get_api_info'))['data']['api_version'] == '1.25.0'
+                assert raw(opened['data']['handle'], envelope('get_api_info'))['data']['api_version'] == api['api_version']
             finally:
                 library.homeverb_close(opened['data']['handle'])
     for adapter, entry in [('homeverb.mock',mijia_grant), ('midea.meiju',mijia_grant),

@@ -58,11 +58,11 @@ Use `<type>(<optional-scope>): <English imperative summary>`. Allowed types: `fe
 ## Implementation status and test honesty
 
 Experimental Mijia Rust integration is implemented under
-[ADR-0072](docs/adr/0072-mijia-protected-core-reads.md): mainland native login,
+[ADR-0072](docs/adr/0076-mijia-protected-core-reads.md): mainland native login,
 version-1 protected account/device/spec bindings, partial inventory cards and
 reviewed MIoT fan/doorbell/lock/battery reads through Core. Read
 [the Mijia guide](docs/development/11-mijia.md) before changing it. Native API 1.24 adds Mijia-only/combined account routing and partial positive
-card results under [ADR-0073](docs/adr/0073-mijia-native-account-routing.md).
+card results under [ADR-0073](docs/adr/0077-mijia-native-account-routing.md).
 Flutter now exposes registered Mijia/Meiju platform choices, protected sign-in,
 partial named cards and capability-driven read-only detail views. Fan controls and
 owner-run real-account/device acceptance remain pending. No lock write or complete-inventory claim is admitted. Existing Meiju

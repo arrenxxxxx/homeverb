@@ -6,8 +6,8 @@ use homeverb_host::{
     ConfirmConnectionLinkRequest, ConfirmIdentityRecoveryRequest, ConfirmLanScanRequest,
     ConnectRequest, ExecuteApprovalRequest, HostRequest, MeijuAcFeatureGrant, MeijuControlGrants,
     MeijuDishwasherCycleGrant, MeijuDishwasherGrant, MeijuFanGrant, MeijuModeGrant,
-    MeijuPowerGrant, MeijuTemperatureGrant, PrepareApprovalRequest, PrepareConnectionLinkRequest,
-    PrepareLanScanRequest, Session, MijiaFanGrant,
+    MeijuPowerGrant, MeijuTemperatureGrant, MijiaFanGrant, PrepareApprovalRequest,
+    PrepareConnectionLinkRequest, PrepareLanScanRequest, Session,
 };
 use homeverb_mock::Scenario;
 use serde::Deserialize;

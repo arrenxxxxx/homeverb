@@ -1,5 +1,10 @@
 # Platform and device compatibility matrix
 
+The October 24 integration uses native API **1.27.0** after the linear mainline
+update. Earlier Mijia phase versions are historical. See
+[contract reconciliation](adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
+remain available alongside Mijia; identity restoration remains Meiju-only.
+
 ## October 22 existing-session read experiment
 
 The owner signed in directly in the isolated API 35 arm64 emulator. Existing

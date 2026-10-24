@@ -64,6 +64,12 @@ impl Session {
         let result = async {
             let (operation, _registration) =
                 self.register(&input.schema_version, input.operation_id, input.timeout_ms)?;
+            if input
+                .provider
+                .is_some_and(|provider| provider != crate::AccountProvider::Meiju)
+            {
+                return Err(crate::accounts::unsupported());
+            }
             let account_id = input.account_id.ok_or_else(Error::invalid)?;
             let generation = {
                 let mut state = self.state.lock().map_err(|_| invalid())?;
