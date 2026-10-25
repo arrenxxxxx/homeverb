@@ -1760,5 +1760,11 @@
   "component.alarm_6": "Alarm 6",
   "vendor.xiaomi.mijia.air_purifier_favorite": "Air purifier favorite",
   "component.air_purifier_favorite_8": "Air purifier favorite 8",
-  "vendor.xiaomi.mijia.air_purifier_favorite.favorite_fan_level_1": "Favorite fan level"
+  "vendor.xiaomi.mijia.air_purifier_favorite.favorite_fan_level_1": "Favorite fan level",
+  "mobile.captcha.title": "Complete Sign-in Verification",
+  "mobile.captcha.notice": "Enter the letters and numbers in the image. Verification expires shortly; sign in again if it closes.",
+  "mobile.captcha.imageFailure": "The verification image could not load. Cancel and sign in again.",
+  "mobile.captcha.code": "Verification Code",
+  "mobile.captcha.invalid": "Use only the letters and numbers shown.",
+  "mobile.captcha.continue": "Verify and Continue"
 }

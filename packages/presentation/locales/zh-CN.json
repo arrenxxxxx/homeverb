@@ -1760,5 +1760,11 @@
   "component.alarm_6": "告警 6",
   "vendor.xiaomi.mijia.air_purifier_favorite": "常用净化设置",
   "component.air_purifier_favorite_8": "常用净化设置 8",
-  "vendor.xiaomi.mijia.air_purifier_favorite.favorite_fan_level_1": "常用风速档位"
+  "vendor.xiaomi.mijia.air_purifier_favorite.favorite_fan_level_1": "常用风速档位",
+  "mobile.captcha.title": "完成登录验证",
+  "mobile.captcha.notice": "请输入图片中的字母和数字。验证将在短时间内过期；关闭后请重新登录。",
+  "mobile.captcha.imageFailure": "验证码图片加载失败，请取消后重新登录。",
+  "mobile.captcha.code": "验证码",
+  "mobile.captcha.invalid": "请仅输入图片中显示的字母和数字。",
+  "mobile.captcha.continue": "验证并继续"
 }

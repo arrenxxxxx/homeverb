@@ -1795,4 +1795,10 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get vendorXiaomiMijiaAirPurifierFavorite => '\u5e38\u7528\u51c0\u5316\u8bbe\u7f6e';
 	@override String get componentAirPurifierFavorite8 => '\u5e38\u7528\u51c0\u5316\u8bbe\u7f6e 8';
 	@override String get vendorXiaomiMijiaAirPurifierFavoriteFavoriteFanLevel1 => '\u5e38\u7528\u98ce\u901f\u6863\u4f4d';
+	@override String get mobileCaptchaTitle => '\u5b8c\u6210\u767b\u5f55\u9a8c\u8bc1';
+	@override String get mobileCaptchaNotice => '\u8bf7\u8f93\u5165\u56fe\u7247\u4e2d\u7684\u5b57\u6bcd\u548c\u6570\u5b57\u3002\u9a8c\u8bc1\u5c06\u5728\u77ed\u65f6\u95f4\u5185\u8fc7\u671f\uff1b\u5173\u95ed\u540e\u8bf7\u91cd\u65b0\u767b\u5f55\u3002';
+	@override String get mobileCaptchaImageFailure => '\u9a8c\u8bc1\u7801\u56fe\u7247\u52a0\u8f7d\u5931\u8d25\uff0c\u8bf7\u53d6\u6d88\u540e\u91cd\u65b0\u767b\u5f55\u3002';
+	@override String get mobileCaptchaCode => '\u9a8c\u8bc1\u7801';
+	@override String get mobileCaptchaInvalid => '\u8bf7\u4ec5\u8f93\u5165\u56fe\u7247\u4e2d\u663e\u793a\u7684\u5b57\u6bcd\u548c\u6570\u5b57\u3002';
+	@override String get mobileCaptchaContinue => '\u9a8c\u8bc1\u5e76\u7ee7\u7eed';
 }

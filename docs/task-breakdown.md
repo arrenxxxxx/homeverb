@@ -1,8 +1,9 @@
 # Implementation status and next tasks
 
 October 25: community-derived typed Rust captcha continuation and protected
-account/Host registries and dedicated C entry points are implemented. App challenge UI, SMS/email verification
-and historical readings remain pending; see the [phase record](development/14-mijia-reference-integration.md#community-captcha-protocol-phase--october-25-2026).
+account/Host registries, dedicated C entry points and bilingual App challenge UI
+are implemented and synthetic-tested. SMS/email verification, historical readings
+and real-account acceptance remain pending; see the [phase record](development/14-mijia-reference-integration.md#community-captcha-protocol-phase--october-25-2026).
 
 October 25: 17 exact Mijia reference specifications now supply 264 scalar read
 mappings and localized App labels. Additional writes and modern authentication

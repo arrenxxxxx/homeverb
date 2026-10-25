@@ -35,6 +35,7 @@ class HomeController extends ChangeNotifier {
   bool _foreground = true;
   bool get isForeground => _foreground;
   int get controlEpoch => _readEpoch;
+  final accountLoginCancellation = ChangeNotifier();
   List<Json>? _controlPolicies;
   Timer? _automaticRefreshTimer;
   Future<void>? _automaticRefreshWork;
@@ -142,6 +143,8 @@ class HomeController extends ChangeNotifier {
 
   @override
   void dispose() {
+    accountLoginCancellation.notifyListeners();
+    accountLoginCancellation.dispose();
     stopAutomaticRefresh();
     super.dispose();
   }
@@ -544,6 +547,7 @@ class HomeController extends ChangeNotifier {
   final Set<String> selection = {};
   int _readEpoch = 0;
   void cancelPending() {
+    accountLoginCancellation.notifyListeners();
     _pauseAutomaticRefresh(cancelRead: false);
     discardApproval();
     _readEpoch++;
@@ -556,6 +560,7 @@ class HomeController extends ChangeNotifier {
   void setForeground(bool foreground) {
     _foreground = foreground;
     if (!foreground) {
+      accountLoginCancellation.notifyListeners();
       _pauseAutomaticRefresh(cancelRead: false);
       discardApproval();
       _readEpoch++;
@@ -1226,8 +1231,9 @@ class HomeController extends ChangeNotifier {
   Future<bool> connectAccount(
     Uint8List login,
     Uint8List password,
-    String label,
-  ) async {
+    String label, {
+    Future<Uint8List?> Function(AccountLoginCaptcha)? onChallenge,
+  }) async {
     try {
       final loginLabel = maskedAccountLogin(login);
       return await perform(() async {
@@ -1239,15 +1245,74 @@ class HomeController extends ChangeNotifier {
         accountNeedsReload = true;
         accountReport = null;
         final epoch = _readEpoch;
-        accountReport = await accountClient!.connectAccount(
-          login: login,
-          password: password,
-          label: label.trim().isNotEmpty
-              ? label.trim()
-              : loginLabel ?? accountDefaultLabel(connectionProvider),
-          accountId: selectedAccount,
-          provider: connectionProvider,
-        );
+        final client = core;
+        final chosenAccount = selectedAccount;
+        final provider = connectionProvider;
+        final accountLabel = label.trim().isNotEmpty
+            ? label.trim()
+            : loginLabel ?? accountDefaultLabel(provider);
+        void requireCurrent() {
+          if (!_foreground ||
+              epoch != _readEpoch ||
+              core != client ||
+              selectedAccount != chosenAccount ||
+              connectionProvider != provider) {
+            throw NativeFailure('CANCELLED', 'Sign-in was cancelled.');
+          }
+        }
+
+        Json report;
+        final interactive = client is InteractiveAccountClient
+            ? client as InteractiveAccountClient
+            : null;
+        if (provider == 'xiaomi.mijia' &&
+            onChallenge != null &&
+            interactive != null &&
+            interactive.supportsInteractiveLogin) {
+          var progress = await interactive.beginAccountLogin(
+            login: login,
+            password: password,
+            label: accountLabel,
+            accountId: chosenAccount,
+          );
+          while (progress is AccountLoginCaptcha) {
+            final challenge = progress;
+            Uint8List? answer;
+            try {
+              requireCurrent();
+              answer = await onChallenge(challenge);
+              requireCurrent();
+              if (answer == null || challenge.remaining == Duration.zero) {
+                throw NativeFailure('CANCELLED', 'Sign-in was cancelled.');
+              }
+              progress = await interactive.continueAccountLogin(
+                challenge,
+                answer,
+              );
+            } finally {
+              answer?.fillRange(0, answer.length, 0);
+              challenge.clearImage();
+              await interactive.discardAccountLogin(challenge);
+            }
+          }
+          if (progress is! AccountLoginConnected) {
+            throw NativeFailure(
+              'UNSUPPORTED_OUTCOME',
+              'Unsupported sign-in response.',
+            );
+          }
+          report = progress.report;
+        } else {
+          report = await accountClient!.connectAccount(
+            login: login,
+            password: password,
+            label: accountLabel,
+            accountId: chosenAccount,
+            provider: provider,
+          );
+        }
+        requireCurrent();
+        accountReport = report;
         validateAccountReport(accountReport!);
         selectedAccount = accountReport!['account']['id'] as String;
         if (_foreground &&

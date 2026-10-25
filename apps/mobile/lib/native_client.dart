@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart' show debugPrint;
 import 'client_contract.dart';
 import 'session_permissions.dart';
 export 'client_contract.dart';
+part 'native_account_login.dart';
 
 enum _RecoveryStage {
   previewReady,
@@ -100,6 +101,53 @@ class NativeBindings {
           int,
         )
       >('homeverb_connect_account');
+  late final beginAccountLogin = library
+      .lookupFunction<
+        Pointer<Utf8> Function(
+          Uint64,
+          Pointer<Utf8>,
+          Pointer<Uint8>,
+          Size,
+          Pointer<Uint8>,
+          Size,
+        ),
+        Pointer<Utf8> Function(
+          int,
+          Pointer<Utf8>,
+          Pointer<Uint8>,
+          int,
+          Pointer<Uint8>,
+          int,
+        )
+      >('homeverb_begin_account_login');
+
+  late final continueAccountLogin = library
+      .lookupFunction<
+        Pointer<Utf8> Function(Uint64, Pointer<Utf8>, Pointer<Uint8>, Size),
+        Pointer<Utf8> Function(int, Pointer<Utf8>, Pointer<Uint8>, int)
+      >('homeverb_continue_account_login');
+  late final discardAccountLogin = library
+      .lookupFunction<Bool Function(Uint64, Uint64), bool Function(int, int)>(
+        'homeverb_discard_account_login',
+      );
+
+  Json answerLoginRequest(int handle, Json metadata, int address, int length) {
+    final input = jsonEncode(metadata).toNativeUtf8();
+    Pointer<Utf8>? output;
+    try {
+      output = continueAccountLogin(
+        handle,
+        input,
+        Pointer<Uint8>.fromAddress(address),
+        length,
+      );
+      if (output == nullptr) throw NativeFailure('NATIVE_ERROR', 'No response');
+      return jsonDecode(output.toDartString()) as Json;
+    } finally {
+      calloc.free(input);
+      if (output != null && output != nullptr) free(output);
+    }
+  }
 
   late final prepareIdentityRecovery = library
       .lookupFunction<
@@ -152,18 +200,24 @@ class NativeBindings {
     int passwordAddress,
     int passwordLength,
     bool recovery,
+    bool interactive,
   ) {
     final input = jsonEncode(metadata).toNativeUtf8();
     Pointer<Utf8>? output;
     try {
-      output = (recovery ? prepareIdentityRecovery : connect)(
-        handle,
-        input,
-        Pointer<Uint8>.fromAddress(loginAddress),
-        loginLength,
-        Pointer<Uint8>.fromAddress(passwordAddress),
-        passwordLength,
-      );
+      output =
+          (recovery
+          ? prepareIdentityRecovery
+          : interactive
+          ? beginAccountLogin
+          : connect)(
+            handle,
+            input,
+            Pointer<Uint8>.fromAddress(loginAddress),
+            loginLength,
+            Pointer<Uint8>.fromAddress(passwordAddress),
+            passwordLength,
+          );
       if (output == nullptr) throw NativeFailure('NATIVE_ERROR', 'No response');
       return jsonDecode(output.toDartString()) as Json;
     } finally {
@@ -236,11 +290,13 @@ class NativeBindings {
 }
 
 class NativeClient
+    with _InteractiveNativeLogin
     implements
         NativeSessionClient,
         AccountClient,
         ApprovalClient,
-        IdentityRecoveryClient {
+        IdentityRecoveryClient,
+        InteractiveAccountClient {
   NativeClient._(this.path, this.handle, this.adapter)
     : bindings = NativeBindings(path);
   final String path;
@@ -508,12 +564,19 @@ class NativeClient
     required String label,
     String? accountId,
     bool recovery = false,
+    bool interactive = false,
     String? provider,
   }) async {
     Pointer<Uint8>? loginMemory, passwordMemory;
     String? id;
     final loginLength = login.length, passwordLength = password.length;
     try {
+      if (interactive && !supportsInteractiveLogin) {
+        throw NativeFailure(
+          "API_UPGRADE_REQUIRED",
+          "Interactive login requires native API 1.28.",
+        );
+      }
       if (!supportsAccountConnection) {
         throw NativeFailure(
           'API_UPGRADE_REQUIRED',
@@ -571,6 +634,7 @@ class NativeClient
               passwordAddress,
               passwordLength,
               recovery,
+              interactive,
             ),
           )
           as Json;
@@ -671,6 +735,7 @@ class NativeClient
           as Json;
     } finally {
       _traceRecovery(_RecoveryStage.nativeConfirmReturned);
+      _clearLoginChallenges();
       _identityRecoveries.clear();
       endOperation(id);
     }
@@ -689,6 +754,7 @@ class NativeClient
     _foreground = value;
     if (_closed) return;
     if (!value) {
+      _clearLoginChallenges();
       _identityRecoveries.clear();
       _approvalGeneration++;
       _approvals.clear();
@@ -702,13 +768,16 @@ class NativeClient
 
   @override
   void cancelAll() {
+    final hadLogins = _loginChallenges.isNotEmpty;
+    _clearLoginChallenges();
     final hadRecoveries = _identityRecoveries.isNotEmpty;
     _identityRecoveries.clear();
     _approvalGeneration++;
     final hadApprovals = _approvals.isNotEmpty;
     _approvals.clear();
     // Hold the native gate closed until even not-yet-started isolates drain.
-    if ((active.isNotEmpty || hadApprovals || hadRecoveries) && !_closed) {
+    if ((active.isNotEmpty || hadApprovals || hadRecoveries || hadLogins) &&
+        !_closed) {
       _suspended = true;
       bindings.foreground(handle, false);
     }
@@ -746,6 +815,7 @@ Future<Json> _connectOnWorker(
   int passwordAddress,
   int passwordLength,
   bool recovery,
+  bool interactive,
 ) => Isolate.run(
   () => NativeBindings(path).connectRequest(
     handle,
@@ -755,5 +825,6 @@ Future<Json> _connectOnWorker(
     passwordAddress,
     passwordLength,
     recovery,
+    interactive,
   ),
 );

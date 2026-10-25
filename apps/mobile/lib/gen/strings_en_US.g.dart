@@ -5321,4 +5321,22 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Favorite fan level'
 	String get vendorXiaomiMijiaAirPurifierFavoriteFavoriteFanLevel1 => 'Favorite fan level';
+
+	/// en-US: 'Complete Sign-in Verification'
+	String get mobileCaptchaTitle => 'Complete Sign-in Verification';
+
+	/// en-US: 'Enter the letters and numbers in the image. Verification expires shortly; sign in again if it closes.'
+	String get mobileCaptchaNotice => 'Enter the letters and numbers in the image. Verification expires shortly; sign in again if it closes.';
+
+	/// en-US: 'The verification image could not load. Cancel and sign in again.'
+	String get mobileCaptchaImageFailure => 'The verification image could not load. Cancel and sign in again.';
+
+	/// en-US: 'Verification Code'
+	String get mobileCaptchaCode => 'Verification Code';
+
+	/// en-US: 'Use only the letters and numbers shown.'
+	String get mobileCaptchaInvalid => 'Use only the letters and numbers shown.';
+
+	/// en-US: 'Verify and Continue'
+	String get mobileCaptchaContinue => 'Verify and Continue';
 }

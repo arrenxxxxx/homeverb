@@ -1,6 +1,6 @@
 # ADR-0082: Additive native interactive account login
 
-Status: accepted; C exports synthetic-tested; Flutter integration pending.
+Status: accepted; C exports and Flutter integration synthetic-tested.
 Date: October 25, 2026.
 
 ## Context and authorization

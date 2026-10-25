@@ -2187,6 +2187,14 @@ String? translateSource(
   "Air purifier favorite 8" => t.componentAirPurifierFavorite8,
   "Favorite fan level" =>
     t.vendorXiaomiMijiaAirPurifierFavoriteFavoriteFanLevel1,
+  "Complete Sign-in Verification" => t.mobileCaptchaTitle,
+  "Enter the letters and numbers in the image. Verification expires shortly; sign in again if it closes." =>
+    t.mobileCaptchaNotice,
+  "The verification image could not load. Cancel and sign in again." =>
+    t.mobileCaptchaImageFailure,
+  "Verification Code" => t.mobileCaptchaCode,
+  "Use only the letters and numbers shown." => t.mobileCaptchaInvalid,
+  "Verify and Continue" => t.mobileCaptchaContinue,
   _ => null,
 };
 
@@ -4429,5 +4437,13 @@ String? sourceForKey(String key) => switch (key) {
   "component.air_purifier_favorite_8" => "Air purifier favorite 8",
   "vendor.xiaomi.mijia.air_purifier_favorite.favorite_fan_level_1" =>
     "Favorite fan level",
+  "mobile.captcha.title" => "Complete Sign-in Verification",
+  "mobile.captcha.notice" =>
+    "Enter the letters and numbers in the image. Verification expires shortly; sign in again if it closes.",
+  "mobile.captcha.imageFailure" =>
+    "The verification image could not load. Cancel and sign in again.",
+  "mobile.captcha.code" => "Verification Code",
+  "mobile.captcha.invalid" => "Use only the letters and numbers shown.",
+  "mobile.captcha.continue" => "Verify and Continue",
   _ => null,
 };

@@ -2216,3 +2216,8 @@ New UI callers must negotiate API 1.28 before resolving symbols. Existing one-sh
 clients retain their original behavior. The iOS verifier derives exports from the
 header; Android's explicit list now includes the three functions. Edited package
 checks do not establish a rebuilt package or mobile runtime acceptance.
+
+The App now uses the API 1.28 bridge for foreground Mijia captcha continuation,
+with explicit input and cancellation. Older supported hosts retain one-shot
+connection. No ordinary JSON/CLI/MCP method or saved record format changes.
+English/Chinese synthetic App flows do not establish provider or phone acceptance.

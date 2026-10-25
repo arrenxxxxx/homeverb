@@ -3774,3 +3774,23 @@ SDK/NDK/JDK and existing development signing material were reused. No installati
 provider request, real-device operation, upload, push or publication occurred.
 This APK supersedes the `87ff5b1` package for local evaluation; it does not close
 the protocol gaps or the previously recorded full-suite/physical acceptance limits.
+
+## Community Mijia captcha App flow -- October 25, 2026
+
+Source now requires native API 1.28 only for the interactive Mijia login path;
+older supported libraries retain one-shot sign-in. Flutter analysis passed.
+The 16-case `account_captcha_test.dart` suite passed: full App sign-in, replacement
+image, exact-account partial retrieval, protected array clearing, late-result
+refusal, old API fallback, native lifecycle admission, both locales at 320 pixels
+and double text, and cancel/background/back/expiry/navigation dismissal. Existing
+accounts, account-native, inventory and identity-recovery tests passed alongside
+all 16 captcha cases in the final 38-case run. Final analysis and formatting passed. Seven shared presentation
+tests passed. All credentials/images were fictional; no vendor request was sent.
+
+Initial tests caught intrinsic dialog layout and delayed background cleanup; both
+were fixed and the affected checks rerun. Full-App tests use bounded frame pumping
+while waiting for input because the underlying login indicator is animated;
+waiting for all animations would advance simulated time through captcha expiry.
+Earlier full-suite macOS pixel/click failures were not reclassified as passing.
+Previously delivered API 1.27 APKs do not contain this feature. Matching Android
+packaging and real-account/device acceptance remain separate checks.

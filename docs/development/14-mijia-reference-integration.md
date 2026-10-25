@@ -1,6 +1,6 @@
 # 14. Mijia reference integration and remaining coverage
 
-The October 25 worktree uses API 1.27 and the owner-supplied October 22 Xiaomi Home
+The October 25 worktree uses API 1.28 and the owner-supplied October 22 Xiaomi Home
 11.7.709 analysis. The full official-App feature request remains **incomplete**.
 The source archive explicitly does not supply all authentication, protocol or
 runtime control contracts. An implemented decoder is not physical acceptance.
@@ -318,3 +318,28 @@ new login-buffer/lifecycle/refusal verifier. Contract validation passed 22 schem
 hygiene checks passed. All login material was fictional; no vendor request was
 sent. Flutter captcha UI, SMS/email verification and real-account acceptance are
 still pending.
+
+## App captcha continuation -- October 25, 2026
+
+The App negotiates API 1.28 before resolving dedicated interactive symbols and
+retains one-shot login on older supported hosts. Mijia sign-in and exact-account
+reauthorization display a bilingual bounded image prompt. Only explicit user
+answers continue the flow. Wrong answers replace the challenge without changing
+account selection; completed authentication still reports partial inventory
+separately. There is no automatic answer, relogin, password persistence or command
+replay. Account/password/answer arrays and native allocations clear on every path.
+
+Cancellation, navigation, background, close and expiry clear input and image
+buffers, evict decoded images and invalidate pending challenges. Late results
+cannot replace account state or restore a dismissed dialog. Managed immutable
+strings and engine-decoded pixels cannot offer a physical-memory zeroization
+guarantee; they are not logged or intentionally cached/persisted after dismissal.
+
+Executed: Flutter analysis; 16 new fictional controller, widget and native-admission
+checks, including the complete App journey, wrong-answer replacement, exact-account
+partial retrieval, late-result refusal, navigation/background/expiry/back dismissal,
+API fallback and both locales at 320 pixels with doubled text. The final five-file account, account-native, inventory, identity-recovery and
+captcha subset passed all 38 tests. Final analysis and formatting passed after
+reviewing native-client background invalidation. Seven shared presentation tests and source hygiene passed.
+The prior full-suite macOS pixel/click failures remain unverified by this subset.
+New native/mobile packaging and real-account acceptance are separate delivery gates.

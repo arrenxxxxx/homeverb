@@ -97,3 +97,32 @@ abstract interface class ApprovalPreview {
   DateTime get expiresAt;
   Duration get remaining;
 }
+
+/// Dedicated foreground UI flow; images and answers must never be persisted.
+sealed class AccountLoginProgress {}
+
+class AccountLoginConnected extends AccountLoginProgress {
+  AccountLoginConnected(this.report);
+  final Json report;
+}
+
+abstract class AccountLoginCaptcha extends AccountLoginProgress {
+  Uint8List get image;
+  Duration get remaining;
+  void clearImage();
+}
+
+abstract interface class InteractiveAccountClient {
+  bool get supportsInteractiveLogin;
+  Future<AccountLoginProgress> beginAccountLogin({
+    required Uint8List login,
+    required Uint8List password,
+    required String label,
+    String? accountId,
+  });
+  Future<AccountLoginProgress> continueAccountLogin(
+    AccountLoginCaptcha challenge,
+    Uint8List answer,
+  );
+  Future<void> discardAccountLogin(AccountLoginCaptcha challenge);
+}

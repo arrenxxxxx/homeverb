@@ -1596,3 +1596,10 @@ state. A late response cannot restore a dismissed flow. Never solve, renew,
 retry login, or replay appliance commands automatically. Unknown challenge kinds
 require a fresh explicit sign-in. Native C synthetic verification does not prove
 Flutter integration, mobile packaging or real-account acceptance.
+
+The Flutter implementation now negotiates this path through a separate
+`InteractiveAccountClient`. Its opaque challenge objects belong to the originating
+native client; consuming/dismissing one clears image bytes. The App keeps the
+account and provider selected before sign-in, waits for explicit input, and rejects
+late results after navigation/lifecycle invalidation. Synthetic App verification
+is recorded in the [Mijia guide](development/14-mijia-reference-integration.md#app-captcha-continuation--october-25-2026).

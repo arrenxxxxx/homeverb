@@ -12,6 +12,7 @@ import 'blocks.dart';
 import 'appliance_controls.dart';
 import 'climate_controls.dart';
 import 'account_views.dart';
+import 'account_captcha.dart';
 import 'approval_review.dart';
 import 'compartment_controls.dart';
 import 'controller.dart';
@@ -1795,6 +1796,18 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             login,
             password,
             connectionLabel,
+            onChallenge: (challenge) async {
+              if (!mounted || epoch != navigation || !c.isForeground)
+                return null;
+              return showDialog<Uint8List>(
+                context: navigator.currentContext!,
+                barrierDismissible: false,
+                builder: (_) => AccountCaptchaPrompt(
+                  challenge: challenge,
+                  cancellation: c.accountLoginCancellation,
+                ),
+              );
+            },
           );
           if (success && mounted && epoch == navigation && c.isForeground) {
             if (inline) {
