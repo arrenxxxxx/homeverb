@@ -3917,3 +3917,28 @@ No provider/account/appliance requests or physical writes were used. Earlier
 full-suite macOS glyph and Meiju LAN alias limitations remain outside this
 passing scope. The iOS version assertion is synchronized but no iOS build was
 run. The prior API 1.29 APK does not contain this phase until separately rebuilt.
+
+## Light and purifier APK delivery -- October 25, 2026
+
+Clean source `37e9f1c3a9a62cbdf7b3a19f05639231c09328b9` produced the combined-platform API 1.30
+release-mode development package:
+`apps/mobile/build/delivery/mijia/37e9f1c/homeverb-mijia-0.2.0-37e9f1c.apk`.
+Size: 75,177,578 bytes. SHA-256:
+`8b7e1fb97ce1625a174d0e49124e0463b36835613ff62c3292ea225bfe7bf2f4`. The adjacent `verification.json`
+records clean source, exact AAR/library digests and actual archive checks.
+
+Executed `scripts/build_android_native.py` with installed stable Rust 1.99.1,
+NDK 28.2.13676358 and JDK 21 for both arm64-v8a and x86_64. Both native libraries
+passed all 23 exports and 16 KiB ELF alignment. Executed
+`fvm flutter build apk --release --target-platform android-arm64,android-x64
+--dart-define=HOMEVERB_ADAPTER=homeverb.platforms` with the existing SDK/JDK and
+development signing identity. `scripts/verify_flutter_apk.py` passed signature,
+ZIP/ELF alignment, API 28 minimum, disabled backup, absence of the integration-test
+plugin and exact matching against the current AAR after NDK stripping.
+The host `cargo +1.96.0 test -p homeverb-ffi --offline --locked` unit test also passed.
+
+This package supersedes API 1.29 `71d7ad1` for local evaluation and contains
+the new light/purifier controls. No installation, account/appliance operation,
+real write, physical-phone/iOS acceptance, push, upload or publication occurred.
+`git rev-list --count --merges origin/main..HEAD` still returned zero. This is
+a verified local build, not completion of the remaining Mijia reference scope.
