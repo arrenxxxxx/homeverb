@@ -27,7 +27,8 @@ protocol-only work from the [protected Core phase](../adr/0076-mijia-protected-c
   HomeVerb independently implements the wire format in Rust; attribution and
   the source license are retained under `third-party/micloud`.
 - Pinned [community MIoT client](https://github.com/al-one/hass-xiaomi-miot/blob/a3a07b8504bacfee114a6052ae864d7dd149bf71/custom_components/xiaomi_miot/core/xiaomi_cloud.py)
-  was inspected for endpoint and response facts only. No GPL source is included.
+  was inspected for endpoint and response facts only. Its pinned root license is
+  Apache-2.0; the earlier GPL description was incorrect. No source was copied.
 - [Xiaomi's HA client](https://github.com/XiaoMi/ha_xiaomi_home/blob/main/custom_components/xiaomi_home/miot/miot_cloud.py)
   demonstrates a distinct registered OAuth flow; its application identity is not
   HomeVerb's authorization and is not reused.

@@ -68,7 +68,9 @@ legacy enumerator retains its bounded account/home union and partial status;
 complete inventory, logical-parent reconciliation and missing-device removal are
 not claimed. No private identifiers enter this ledger.
 
-Blocked pending additional evidence: modern native authentication/renewal;
+The HA source review below supplies further community authentication and history
+research leads; it does not implement those features. Blocked pending additional
+evidence: modern native authentication/renewal;
 specialized paths for failed cloud properties and BLE devices; history/statistics,
 event pagination and foreground subscriptions; health/media/streams; plugin-specific
 composite conversion and additional write constraints. Door unlocking stays denied.
@@ -177,3 +179,72 @@ SDK/NDK/JDK and existing development signing material were reused. No installati
 provider request, real-device operation, upload, push or publication occurred.
 This APK supersedes the `87ff5b1` package for local evaluation; it does not close
 the protocol gaps or the previously recorded full-suite/physical acceptance limits.
+
+## Home Assistant reuse assessment -- October 25, 2026
+
+The owner asked whether Home Assistant integration can supply missing contracts.
+Two distinct integrations were inspected at pinned revisions. The earlier blanket
+assessment that all remaining work lacks source evidence was too broad: community
+code supplies concrete challenge handling and a legacy history-query candidate.
+None of the upstream code was executed, copied into production, or used with an
+account. This is source evidence, not live acceptance or a new runtime feature.
+
+### Official Xiaomi Home integration
+
+Reviewed revision: `75b3acb6325a3a8d295688b13904737d6738a6a5`.
+The [OAuth client](https://github.com/XiaoMi/ha_xiaomi_home/blob/75b3acb6325a3a8d295688b13904737d6738a6a5/custom_components/xiaomi_home/miot/miot_cloud.py)
+exchanges an authorization code and later a refresh token at the HA-specific
+`/app/v2/ha/oauth/get_token` endpoint. Both use client ID and redirect URI; the
+inspected client requests do not contain a client secret. That does not make the
+registered HA application identity available to HomeVerb.
+[Constants](https://github.com/XiaoMi/ha_xiaomi_home/blob/75b3acb6325a3a8d295688b13904737d6738a6a5/custom_components/xiaomi_home/miot/const.py)
+select `ha.api.io.mi.com`, `ha.mqtt.io.mi.com`, a fixed registered application and
+HA callback. This is neither HomeVerb's legacy `xiaomiio` session nor the archived
+modern App `mijia` session. Its token refresh does not resolve either session's
+independent authentication contract.
+
+The [README](https://github.com/XiaoMi/ha_xiaomi_home/blob/75b3acb6325a3a8d295688b13904737d6738a6a5/README.md)
+describes cloud MQTT subscriptions for property changes and events, central-hub
+MQTT for local operation, and a separate partial IP-device LAN mode. MQTT event
+push is not the missing `/miotspec/event/get` history/pagination contract. A future
+HomeVerb subscription would be foreground-scoped and closed on background; HA's
+persistent runtime and plaintext token storage cannot be adopted.
+
+The [license](https://github.com/XiaoMi/ha_xiaomi_home/blob/75b3acb6325a3a8d295688b13904737d6738a6a5/LICENSE.md)
+explicitly limits the integration and related cloud API interface to non-commercial
+Home Assistant use and excludes development of other applications and services.
+Direct transplantation into HomeVerb is therefore not admitted under that license.
+A separately authorized native-client integration would need its own provider
+permission, client registration and callback contract; none was obtained here.
+
+### Community Xiaomi Miot integration
+
+Reviewed revision: `f78158257e19a21902adaf6bcc8440c3ba172a91`.
+The root [license](https://github.com/al-one/hass-xiaomi-miot/blob/f78158257e19a21902adaf6bcc8440c3ba172a91/LICENSE)
+is Apache-2.0, as is the previously cited revision's root license. The earlier
+GPL label in the Mijia guide is corrected. Any future code reuse must preserve
+applicable notices and check the selected files and dependencies separately.
+A Python HA component is not an embeddable Rust Core adapter.
+
+The [cloud client](https://github.com/al-one/hass-xiaomi-miot/blob/f78158257e19a21902adaf6bcc8440c3ba172a91/custom_components/xiaomi_miot/core/xiaomi_cloud.py)
+provides the following evidence:
+
+| Area | Upstream behavior | HomeVerb disposition |
+|---|---|---|
+| Authentication | Defaults to `xiaomiio`; service login, password digest, captcha and user verification paths | Existing native route has the same service family; explicit protected challenge continuation is a concrete follow-up candidate |
+| Expiry | Detects expired sessions, attempts logout/login, requests user reauthentication when necessary | This is relogin, not official OAuth refresh; preserve explicit foreground reauthorization and protected identity |
+| History | `user/get_user_device_data` with `did`, `key`, `type`, `time_start`, `time_end`, `limit` | A concrete legacy bounded-read candidate; exact model keys, record semantics, retention and pagination still require review |
+| Properties/actions | `miotspec/prop/get`, `prop/set`, `action` using service/property/action IDs | Useful protocol evidence; new commands still need exact model semantics and independent grants |
+| Scheduling/retries | HA-managed scheduling and some setter retries or relogin/request replay | Do not transplant automatic uncertain-write replay or background work |
+
+The community client's generic SID parameter and non-default SID branch do not
+prove `mijia` login, its STS targets, continuous-stream encryption or modern App
+host compatibility. No existing token is forwarded to another origin or service.
+
+Next implementation candidates are protected user-driven captcha/verification
+continuation and a narrow, exact-model legacy history read. Each requires a bounded
+Core contract, sanitized observations, lifecycle/error tests and native/App entry
+points before becoming callable. Official HA event push, legacy history reads and
+modern App event history must remain separate contracts. Full coverage is still
+incomplete, but further community-source investigation can proceed without another
+private archive or account access.
