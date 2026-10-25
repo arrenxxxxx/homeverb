@@ -372,3 +372,49 @@ and 16 KiB alignment checks.
 This supersedes the API 1.27 `28cf192` artifact for local evaluation. No installation,
 real-account login, appliance request, physical-device acceptance, iOS package,
 upload, push or publication was performed. This is not a store release.
+
+## Further community verification and history evidence -- October 25, 2026
+
+Source inspection at `f78158257e19a21902adaf6bcc8440c3ba172a91` continued after
+the captcha delivery. These are implementation inputs, not newly callable features.
+The [cloud client](https://github.com/al-one/hass-xiaomi-miot/blob/f78158257e19a21902adaf6bcc8440c3ba172a91/custom_components/xiaomi_miot/core/xiaomi_cloud.py),
+[verification tests](https://github.com/al-one/hass-xiaomi-miot/blob/f78158257e19a21902adaf6bcc8440c3ba172a91/tests/test_cloud_auth_verify.py),
+[login tests](https://github.com/al-one/hass-xiaomi-miot/blob/f78158257e19a21902adaf6bcc8440c3ba172a91/tests/test_cloud_auth_login.py)
+and [config flow](https://github.com/al-one/hass-xiaomi-miot/blob/f78158257e19a21902adaf6bcc8440c3ba172a91/custom_components/xiaomi_miot/config_flow.py)
+provide concrete distinctions:
+
+- Notification verification starts with the provider's verification webpage and a
+  user-entered `verify_ticket`. The inspected flow does not directly implement a
+  native send-SMS/send-email endpoint. Do not present a ticket-entry primitive as
+  complete native code delivery or assume every ticket is a short numeric code.
+- `check_identity_list` changes `fe/service/identity/authStart` to `identity/list`,
+  retains `identity_session`, and reads options 4 (phone) and 8 (email).
+  `verify_ticket` submits `_flag`, `ticket`, `trust=false` and `_json=true` to
+  `/identity/auth/verifyPhone` or `/identity/auth/verifyEmail` with that cookie.
+  Upstream may try both methods; HomeVerb must retain explicit user selection and
+  bounded, single-use continuation instead of blindly replaying an answer.
+- A successful ticket returns a location. Upstream follows redirects, gathers
+  cookies, optionally follows a provider `skipUrl` from an `/fe/` URL, and calls
+  `/pass/serviceLogin` again to obtain `ssecurity`. A service token without that
+  signing key is insufficient. Tests explicitly reject extracting a skip URL from
+  arbitrary HTML. HomeVerb must validate each origin/path and cookie scope rather
+  than adopt unrestricted redirects or automatic account-setting confirmation.
+- The dedicated continuation needs browser/lifecycle handoff, protected cookie
+  ownership and complete session/subject correlation. Existing captcha output
+  deliberately has no URL field; a webpage handoff requires its own reviewed
+  trusted contract. The independent modern `mijia` SID remains a separate gap.
+
+For history, the pinned cloud client admits `did`, `key`, `type`, epoch-second
+`time_start`/`time_end` and `limit` at `user/get_user_device_data`. It returns
+`result` records; its last-value helper JSON-decodes `value` and takes the first
+array item. [Device code](https://github.com/al-one/hass-xiaomi-miot/blob/f78158257e19a21902adaf6bcc8440c3ba172a91/custom_components/xiaomi_miot/core/device.py)
+and [customizations](https://github.com/al-one/hass-xiaomi-miot/blob/f78158257e19a21902adaf6bcc8440c3ba172a91/custom_components/xiaomi_miot/core/device_customizes.py)
+show distinct keys such as `prop_cal_day.power_cost` for `chuangmi.plug.v3`,
+`store.powerCost` with day grouping for `zimi.powerstrip.v2`, and
+`event.human_visit_details` for the `mxiang.cateye` family. These examples do not
+establish the same keys for the reference's `cuco.plug.v3` or `madv.cateye.mi3iot`.
+Do not transfer a model's energy conversion or event/media payload to another
+model by family name. A bounded query is possible with exact evidence; complete
+pagination, retention guarantees and the modern `/miotspec/event/get` contract
+are not established by these helpers. No upstream source, account identifiers,
+webpage execution or provider traffic was copied into this research record.
