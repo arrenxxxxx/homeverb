@@ -594,3 +594,19 @@ Possibly-sent failures remain `unknown` with no automatic replay or route fallba
 Old reference mappings remain readable and gain options only after explicit
 inventory refresh. Foreground cancellation and independent Core policy checks
 apply unchanged; no timer, reservation, MIoT action or modern-origin route is added.
+
+## Exact reference light and purifier execution
+
+[ADR-0084](adr/0084-exact-light-and-purifier-controls.md) admits 14 exact light
+and purifier settings through the same correlated single-property legacy route.
+`with_reference_controls` is independent of `with_fan_controls`; both default
+off. Native `mijia_setting_grants` supplies only exact local targets. Protected
+model/specification/identity/connection and arguments are checked again at send.
+
+One setting sends once without automatic mode/power companions. An acknowledged
+setting can depend on the appliance's current mode to have an observable effect;
+acceptance does not assert effectiveness or physical verification. Timeout,
+malformed response and cancellation after possible transmission remain unknown
+with no replay or fallback. Nothing schedules HomeVerb work or uses the modern
+origin. Socket/wall-switch power and custom composite fields are not admitted
+by this opt-in. Saved older derivations stay readable until explicit refresh.

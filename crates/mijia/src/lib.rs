@@ -17,7 +17,7 @@ pub use auth::{
 };
 pub use control::PropertyWrite;
 pub use inventory::{CloudDevice, Inventory, PropertyQuery, PropertyReading};
-pub use spec::{ControlOption, MappedProperty, ModelMapping, SpecIndex};
+pub use spec::{ControlOption, MappedProperty, ModelMapping, SpecIndex, reference_setting_option};
 pub use transport::{
     CaptchaRequest, CaptchaResponse, CloudEndpoint, CloudRequest, CloudResponse, CloudTransport,
     MijiaHttps,

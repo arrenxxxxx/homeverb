@@ -1,6 +1,6 @@
 # HomeVerb native contract
 
-Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.29.0 has 34 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions three trusted connection-link functions and three trusted account-identity recovery functions and three dedicated interactive login functions; the JSON envelope schema is 1.0.
+Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.30.0 has 34 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions three trusted connection-link functions and three trusted account-identity recovery functions and three dedicated interactive login functions; the JSON envelope schema is 1.0.
 
 API 1.19 adds nullable `last_complete_inventory_at` to account summaries. It is
 historical local retrieval metadata, not authorization or online status. SQLite
@@ -122,3 +122,9 @@ without changing the 34 JSON methods or 22 C exports. Negotiate 1.29 before pass
 these fields to `homeverb_open`; see the
 [fan contract](../../docs/native-ui-contract.md#exact-reference-fan-settings-api-129)
 and [startup example](../../examples/native-open.mijia-reference-fan.json).
+
+API 1.30 adds `mijia_setting_grants` for the exact light/purifier controls in
+[ADR-0084](../../docs/adr/0084-exact-light-and-purifier-controls.md), with closed
+component/property domains, 4,096 exact targets maximum and independent fan
+admission. See the [startup fixture](../../examples/native-open.mijia-settings.json).
+Negotiate 1.30 before passing the new field; method/export counts are unchanged.

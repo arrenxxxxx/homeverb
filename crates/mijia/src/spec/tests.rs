@@ -253,24 +253,22 @@ fn exact_reference_catalog_maps_only_reviewed_scalar_reads() {
                 .iter()
                 .all(|c| c.actions.is_empty() && c.events.is_empty())
         );
-        assert!(
-            mapping
-                .control_options()
-                .iter()
-                .all(|o| o.component_id.starts_with("fan-")
-                    && matches!(
-                        o.action.as_str(),
-                        "set"
-                            | "set_level"
-                            | "set_mode"
-                            | "set_horizontal_swing"
-                            | "set_horizontal_angle"
-                            | "set_horizontal_swing_included_angle_6"
-                            | "set_vertical_swing_7"
-                            | "set_vertical_swing_included_angle_8"
-                            | "set_anion_9"
-                    ))
-        );
+        assert!(mapping.control_options().iter().all(|o| matches!(
+            profile.model.as_str(),
+            "abhome.light.wy0a01" | "zhimi.airpurifier.v6"
+        ) || (o.component_id.starts_with("fan-")
+            && matches!(
+                o.action.as_str(),
+                "set"
+                    | "set_level"
+                    | "set_mode"
+                    | "set_horizontal_swing"
+                    | "set_horizontal_angle"
+                    | "set_horizontal_swing_included_angle_6"
+                    | "set_vertical_swing_7"
+                    | "set_vertical_swing_included_angle_8"
+                    | "set_anion_9"
+            ))));
         assert!(
             ModelMapping::pinned(
                 &format!("{}.other", profile.model),
@@ -446,4 +444,114 @@ fn reference_fan_controls_preserve_fields_and_accept_only_exact_source_domains()
         serde_json::to_value(old.capabilities()).unwrap(),
         serde_json::to_value(current.capabilities()).unwrap()
     );
+}
+
+#[test]
+fn reference_settings_keep_old_mappings_and_require_exact_source() {
+    for model in ["abhome.light.wy0a01", "zhimi.airpurifier.v6"] {
+        let current = ModelMapping::pinned(model, None).unwrap().unwrap();
+        assert_eq!(current.control_options().len(), 7);
+        assert!(
+            current
+                .controlled_capabilities(true, false)
+                .iter()
+                .all(|c| c.actions.is_empty())
+        );
+        assert_eq!(
+            current
+                .controlled_capabilities(false, true)
+                .iter()
+                .map(|c| c.actions.len())
+                .sum::<usize>(),
+            7
+        );
+        let mut old = current.clone();
+        for property in &mut old.properties {
+            property.write_domain = None;
+        }
+        old.validate_saved().unwrap();
+        assert_eq!(old.upgraded().unwrap(), current);
+        assert_eq!(
+            serde_json::to_value(old.capabilities()).unwrap(),
+            serde_json::to_value(current.capabilities()).unwrap()
+        );
+        for target in current
+            .properties
+            .iter()
+            .filter(|p| p.write_domain.is_some())
+        {
+            let option = target.control_option().unwrap();
+            for mutation in [
+                "model", "type", "service", "property", "unit", "format", "read", "write", "domain",
+            ] {
+                let mut source = current.source.clone();
+                let service = source["services"]
+                    .as_array_mut()
+                    .unwrap()
+                    .iter_mut()
+                    .find(|s| s["iid"] == target.siid)
+                    .unwrap();
+                let property = service["properties"]
+                    .as_array_mut()
+                    .unwrap()
+                    .iter_mut()
+                    .find(|p| p["iid"] == target.piid)
+                    .unwrap();
+                match mutation {
+                    "unit" => property["unit"] = json!("fictional-unit"),
+                    "format" => property["format"] = json!("int32"),
+                    "read" => property["access"] = json!(["write"]),
+                    "write" => property["access"] = json!(["read"]),
+                    "property" => {
+                        property["type"] =
+                            json!("urn:miot-spec-v2:property:other:00000001:fictional:1")
+                    }
+                    "domain" => {
+                        property.as_object_mut().unwrap().remove("value-range");
+                        property["value-list"] = json!([{"value":99999}]);
+                    }
+                    "service" => {
+                        service["type"] =
+                            json!("urn:miot-spec-v2:service:other:00000001:fictional:1")
+                    }
+                    "type" => {
+                        source["type"] = json!("urn:miot-spec-v2:device:other:00000001:fictional:1")
+                    }
+                    _ => (),
+                }
+                let mapped = ModelMapping::decode(
+                    if mutation == "model" {
+                        "fictional.other.model"
+                    } else {
+                        model
+                    },
+                    if mutation == "type" {
+                        source["type"].as_str().unwrap()
+                    } else {
+                        &current.spec_type
+                    },
+                    &serde_json::to_vec(&source).unwrap(),
+                );
+                if let Ok(mapped) = mapped {
+                    assert!(
+                        !mapped
+                            .control_options()
+                            .iter()
+                            .any(|o| o.component_id == option.component_id
+                                && o.action == option.action),
+                        "{model} {} {mutation}",
+                        option.action
+                    );
+                }
+            }
+            let mut forged = old.clone();
+            forged
+                .properties
+                .iter_mut()
+                .find(|p| p.siid == target.siid && p.piid == target.piid)
+                .unwrap()
+                .write_domain = Some(json!({"type":"integer","enum":[99999]}));
+            assert!(forged.validate_saved().is_err());
+        }
+    }
 }

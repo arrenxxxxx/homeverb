@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "data_dir": "/fictional/private/reference-settings",
+  "adapter": "xiaomi.mijia",
+  "allow_mock_writes": false,
+  "mijia_setting_grants": [
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "light-2",
+      "property": "state",
+      "value": true
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "light-2",
+      "property": "brightness_2",
+      "value": 1
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "light-2",
+      "property": "color_temperature_3",
+      "value": 2700
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "light-2",
+      "property": "mode_7",
+      "value": 0
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "light-2",
+      "property": "default_power_on_state_9",
+      "value": 0
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "light-2",
+      "property": "flex_switch_12",
+      "value": true
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "light-2",
+      "property": "night_light_switch_13",
+      "value": true
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "air_purifier-2",
+      "property": "state",
+      "value": true
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "air_purifier-2",
+      "property": "fan_level_2",
+      "value": 0
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "air_purifier-2",
+      "property": "mode_3",
+      "value": 0
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "indicator_light-5",
+      "property": "on_1",
+      "value": true
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "alarm-6",
+      "property": "alarm_1",
+      "value": true
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "physical_controls_locked-7",
+      "property": "physical_controls_locked_1",
+      "value": true
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "air_purifier_favorite-8",
+      "property": "favorite_fan_level_1",
+      "value": 0
+    }
+  ]
+}

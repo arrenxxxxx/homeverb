@@ -30,6 +30,16 @@ def exclusion(service, prop):
     return None
 
 
+def admitted_write(model, siid, piid):
+    if model == 'jdjz.fan.2072fc':
+        return siid == 2 and piid in {1, 3, 4, 5, 6, 7, 8, 9}
+    if model == 'abhome.light.wy0a01':
+        return siid == 2 and piid in {1, 2, 3, 7, 9, 12, 13}
+    if model == 'zhimi.airpurifier.v6':
+        return (siid == 2 and piid in {1, 2, 3}) or (siid in {5, 6, 7, 8} and piid == 1)
+    return False
+
+
 def project():
     if hashlib.sha256(ARCHIVE.read_bytes()).hexdigest() != DIGEST:
         raise ValueError('The reviewed Mijia archive changed.')
@@ -47,9 +57,7 @@ def project():
                                 'name': prop['type'].split(':')[3],
                                 'read_status': reason or 'implemented_exact_scalar_mapping',
                                 'write_status': ('implemented_exact_granted_legacy_property_set'
-                                                 if model['model'] == 'jdjz.fan.2072fc'
-                                                 and service['iid'] == 2
-                                                 and prop['iid'] in {1, 3, 4, 5, 6, 7, 8, 9}
+                                                 if admitted_write(model['model'], service['iid'], prop['iid'])
                                                  and 'write' in prop.get('access', [])
                                                  else 'not_admitted_by_reference'),
                                 'reference_successful_instances': len(prop.get('analysis_verification', {}).get('successful_instances', []))})
@@ -72,6 +80,8 @@ def project():
         ledger.append({'model': model['model'], 'spec_type': model['spec_urn'],
                        'status': ('exact_scalar_reads_and_granted_fan_settings'
                                   if model['model'] == 'jdjz.fan.2072fc'
+                                  else 'exact_scalar_reads_and_granted_reference_settings'
+                                  if model['model'] in {'abhome.light.wy0a01', 'zhimi.airpurifier.v6'}
                                   else 'exact_scalar_reads_only' if services
                                   else 'placeholder_no_reviewed_readable_spec'),
                        'reference_read_summary': model['independent_read_summary'], 'entries': entries})

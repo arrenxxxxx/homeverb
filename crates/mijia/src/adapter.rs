@@ -52,6 +52,7 @@ pub struct MijiaAdapter {
     transport: Arc<dyn CloudTransport>,
     clock: Arc<dyn Clock>,
     fan_controls: bool,
+    reference_controls: bool,
 }
 impl MijiaAdapter {
     pub fn new(
@@ -65,12 +66,20 @@ impl MijiaAdapter {
             transport,
             clock,
             fan_controls: false,
+            reference_controls: false,
         }
     }
 
     /// Trusted composition only. Core must independently grant exact arguments.
     pub fn with_fan_controls(mut self) -> Self {
         self.fan_controls = true;
+        self
+    }
+
+    /// Trusted opt-in for the exact reference light and purifier settings.
+    /// Fan controls and Core argument grants remain independent.
+    pub fn with_reference_controls(mut self) -> Self {
+        self.reference_controls = true;
         self
     }
 
@@ -500,6 +509,7 @@ impl MijiaAdapter {
                     &account.payload.bindings[i],
                     account.lease.record().id,
                     self.fan_controls,
+                    self.reference_controls,
                 )
             })
             .collect();
@@ -550,17 +560,11 @@ fn unsupported() -> Error {
     )
 }
 
-fn descriptor(binding: &Binding, account: Uuid, controls: bool) -> Descriptor {
+fn descriptor(binding: &Binding, account: Uuid, fan: bool, settings: bool) -> Descriptor {
     let mut capabilities = binding
         .mapping
         .as_ref()
-        .map(|m| {
-            if controls {
-                m.controlled_capabilities()
-            } else {
-                m.capabilities()
-            }
-        })
+        .map(|m| m.controlled_capabilities(fan, settings))
         .unwrap_or_default();
     let supported = !capabilities.is_empty();
     if capabilities.is_empty() {
@@ -638,7 +642,7 @@ fn validate_device(
     device: &Device,
     connection: &Connection,
 ) -> Result<()> {
-    let expected = descriptor(binding, id, false);
+    let expected = descriptor(binding, id, false, false);
     if device.model != expected.device.model
         || device.support_status != expected.device.support_status
         || serde_json::to_value(&device.components).map_err(|_| conflict())?
@@ -761,7 +765,7 @@ impl Adapter for MijiaAdapter {
         progress: WriteProgress,
         operation: &Operation,
     ) -> Result<AdapterOutcome> {
-        if !self.fan_controls {
+        if !self.fan_controls && !self.reference_controls {
             return Err(unsupported());
         }
         operation
@@ -781,7 +785,12 @@ impl Adapter for MijiaAdapter {
                     .iter()
                     .find(|b| b.device_id.to_string() == command.device_id)
                     .ok_or_else(conflict)?;
-                if descriptor(binding, id, false).device.connections.first() != Some(connection) {
+                if descriptor(binding, id, false, false)
+                    .device
+                    .connections
+                    .first()
+                    != Some(connection)
+                {
                     return Err(conflict());
                 }
                 if !binding.listed {
@@ -800,6 +809,9 @@ impl Adapter for MijiaAdapter {
                             && o.action == command.action
                     })
                     .ok_or_else(unsupported)?;
+                if !field.control_family_enabled(self.fan_controls, self.reference_controls) {
+                    return Err(unsupported());
+                }
                 option.definition.validate_arguments(&command.arguments)?;
                 account
                     .payload

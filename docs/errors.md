@@ -570,3 +570,15 @@ return `POLICY_DENIED`; unadmitted protected specifications or actions remain
 Possibly-sent failures retain `unknown` and are never automatically retried.
 The App returns `API_UPGRADE_REQUIRED` before reopening with new grants on a
 pre-1.29 library. Existing fan grants keep their previous API compatibility.
+
+## Exact light and purifier setting admission
+
+API 1.30 uses existing errors for [ADR-0084](adr/0084-exact-light-and-purifier-controls.md).
+Unknown setting/component pairs, invalid values, duplicate numeric spellings or
+more than 4,096 startup entries return `INVALID_ARGUMENT` before profile creation.
+Other provider modes refuse these grants. Missing exact Core authority is
+`POLICY_DENIED`; missing independent adapter opt-in or protected mapping remains
+`CAPABILITY_UNSUPPORTED`. Identity/connection mismatch stays
+`DEVICE_IDENTITY_CONFLICT`. Possibly-sent failures preserve unknown receipts.
+The App reports `API_UPGRADE_REQUIRED` on pre-1.30 hosts before new grants are
+submitted. No new error code or automatic sign-in/retry path is introduced.

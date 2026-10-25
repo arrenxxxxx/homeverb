@@ -357,7 +357,11 @@ class NativeClient
         'This host cannot configure real controls.',
       );
     }
-    if (permissions.any((p) => p.requiresReferenceFanApi)) {
+    final minimumReferenceApi =
+        permissions.any((p) => p.requiresReferenceSettingApi) ? 30 : 29;
+    if (permissions.any(
+      (p) => p.requiresReferenceFanApi || p.requiresReferenceSettingApi,
+    )) {
       // Negotiate with a read-only host before passing additive startup fields.
       final probe = await open(
         dataDir: dataDir,
@@ -367,10 +371,10 @@ class NativeClient
         scenario: scenario,
       );
       try {
-        if (!probe.apiAtLeast(29)) {
+        if (!probe.apiAtLeast(minimumReferenceApi)) {
           throw NativeFailure(
             'API_UPGRADE_REQUIRED',
-            'Reference fan settings require native API 1.29.',
+            'Reference settings require a newer native API.',
           );
         }
       } finally {
@@ -410,6 +414,13 @@ class NativeClient
         throw NativeFailure(
           'API_UPGRADE_REQUIRED',
           'Mijia requires native API 1.27 or later.',
+        );
+      }
+      if (permissions.any((p) => p.requiresReferenceSettingApi) &&
+          !client.apiAtLeast(30)) {
+        throw NativeFailure(
+          'API_UPGRADE_REQUIRED',
+          'Reference light and purifier settings require native API 1.30.',
         );
       }
       if (permissions.any((p) => p.requiresReferenceFanApi) &&

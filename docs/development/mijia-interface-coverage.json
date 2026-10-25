@@ -50,7 +50,7 @@
     {
       "model": "abhome.light.wy0a01",
       "spec_type": "urn:miot-spec-v2:device:light:0000A001:abhome-wy0a01:1:0000C802",
-      "status": "exact_scalar_reads_only",
+      "status": "exact_scalar_reads_and_granted_reference_settings",
       "reference_read_summary": {
         "requested": 31,
         "successful_items": 0,
@@ -102,7 +102,7 @@
           "iid": 1,
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_property_set",
           "reference_successful_instances": 0
         },
         {
@@ -111,7 +111,7 @@
           "iid": 2,
           "name": "brightness",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_property_set",
           "reference_successful_instances": 0
         },
         {
@@ -120,7 +120,7 @@
           "iid": 3,
           "name": "color-temperature",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_property_set",
           "reference_successful_instances": 0
         },
         {
@@ -129,7 +129,7 @@
           "iid": 7,
           "name": "mode",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_property_set",
           "reference_successful_instances": 0
         },
         {
@@ -138,7 +138,7 @@
           "iid": 9,
           "name": "default-power-on-state",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_property_set",
           "reference_successful_instances": 0
         },
         {
@@ -147,7 +147,7 @@
           "iid": 12,
           "name": "flex-switch",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_property_set",
           "reference_successful_instances": 0
         },
         {
@@ -156,7 +156,7 @@
           "iid": 13,
           "name": "night-light-switch",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_property_set",
           "reference_successful_instances": 0
         },
         {
@@ -5217,7 +5217,7 @@
     {
       "model": "zhimi.airpurifier.v6",
       "spec_type": "urn:miot-spec-v2:device:air-purifier:0000A007:zhimi-v6:1",
-      "status": "exact_scalar_reads_only",
+      "status": "exact_scalar_reads_and_granted_reference_settings",
       "reference_read_summary": {
         "requested": 12,
         "successful_items": 12,
@@ -5278,7 +5278,7 @@
           "iid": 1,
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_property_set",
           "reference_successful_instances": 1
         },
         {
@@ -5287,7 +5287,7 @@
           "iid": 2,
           "name": "fan-level",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_property_set",
           "reference_successful_instances": 1
         },
         {
@@ -5296,7 +5296,7 @@
           "iid": 3,
           "name": "mode",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_property_set",
           "reference_successful_instances": 1
         },
         {
@@ -5350,7 +5350,7 @@
           "iid": 1,
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_property_set",
           "reference_successful_instances": 1
         },
         {
@@ -5359,7 +5359,7 @@
           "iid": 1,
           "name": "alarm",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_property_set",
           "reference_successful_instances": 1
         },
         {
@@ -5368,7 +5368,7 @@
           "iid": 1,
           "name": "physical-controls-locked",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_property_set",
           "reference_successful_instances": 1
         },
         {
@@ -5377,7 +5377,7 @@
           "iid": 1,
           "name": "favorite-fan-level",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_property_set",
           "reference_successful_instances": 1
         }
       ]

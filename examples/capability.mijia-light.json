@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0",
+  "id": "vendor.xiaomi.mijia.light",
+  "component_id": "light-2",
+  "revision": 1,
+  "properties": {
+    "color_temperature_3": {
+      "type": "integer",
+      "minimum": 2700,
+      "maximum": 6500,
+      "multipleOf": 1,
+      "readable": true,
+      "writable": true,
+      "unit": "kelvin"
+    }
+  },
+  "actions": {
+    "set_color_temperature_3": {
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "color_temperature_3": {
+            "type": "integer",
+            "minimum": 2700,
+            "maximum": 6500,
+            "multipleOf": 1
+          }
+        },
+        "required": [
+          "color_temperature_3"
+        ],
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "risk": "low",
+      "idempotency": "set_value",
+      "atomic": false,
+      "independent_fields": false,
+      "verification": "unavailable"
+    }
+  },
+  "events": {}
+}

@@ -22,6 +22,8 @@ class SessionPermission {
         'vertical_swing_included_angle_8',
         'anion_9',
       }.contains(parameter);
+  bool get requiresReferenceSettingApi =>
+      startupField == "mijia_setting_grants";
   String get identity =>
       jsonEncode([device, component, capability, action, value]);
 
@@ -32,7 +34,8 @@ class SessionPermission {
   Map<String, dynamic> get startupEntry => {
     'device_id': device,
     if (startupField == 'meiju_dishwasher_cycle_grants') 'action': action,
-    if (startupField == 'mijia_fan_grants') ...{
+    if (startupField == 'mijia_fan_grants' ||
+        startupField == 'mijia_setting_grants') ...{
       'component_id': component,
       'property': parameter,
       'value': value,
@@ -50,6 +53,39 @@ class SessionPermission {
     ('climate', 'set'): ('meiju_temperature_grants', 'target_temperature'),
     ('vendor.midea.ac', 'set_fan_speed'): ('meiju_fan_grants', 'wind_speed'),
     ('vendor.midea.ac', 'activate_mode'): ('meiju_mode_grants', 'mode'),
+  };
+
+  static const _referenceSettings = {
+    ('light-2', 'power', 'set'): 'state',
+    ('light-2', 'vendor.xiaomi.mijia.light', 'set_brightness_2'):
+        'brightness_2',
+    ('light-2', 'vendor.xiaomi.mijia.light', 'set_color_temperature_3'):
+        'color_temperature_3',
+    ('light-2', 'vendor.xiaomi.mijia.light', 'set_mode_7'): 'mode_7',
+    ('light-2', 'vendor.xiaomi.mijia.light', 'set_default_power_on_state_9'):
+        'default_power_on_state_9',
+    ('light-2', 'vendor.xiaomi.mijia.light', 'set_flex_switch_12'):
+        'flex_switch_12',
+    ('light-2', 'vendor.xiaomi.mijia.light', 'set_night_light_switch_13'):
+        'night_light_switch_13',
+    ('air_purifier-2', 'power', 'set'): 'state',
+    ('air_purifier-2', 'vendor.xiaomi.mijia.air_purifier', 'set_fan_level_2'):
+        'fan_level_2',
+    ('air_purifier-2', 'vendor.xiaomi.mijia.air_purifier', 'set_mode_3'):
+        'mode_3',
+    ('indicator_light-5', 'vendor.xiaomi.mijia.indicator_light', 'set_on_1'):
+        'on_1',
+    ('alarm-6', 'vendor.xiaomi.mijia.alarm', 'set_alarm_1'): 'alarm_1',
+    (
+      'physical_controls_locked-7',
+      'vendor.xiaomi.mijia.physical_controls_locked',
+      'set_physical_controls_locked_1',
+    ): 'physical_controls_locked_1',
+    (
+      'air_purifier_favorite-8',
+      'vendor.xiaomi.mijia.air_purifier_favorite',
+      'set_favorite_fan_level_1',
+    ): 'favorite_fan_level_1',
   };
 
   static List<SessionPermission> choices(
@@ -94,7 +130,15 @@ class SessionPermission {
                 option['action'] == 'set_$featureParameter')
           ? featureParameter as String
           : null;
-      final mapping = fanComponent
+      final settingParameter =
+          _referenceSettings[(
+            component,
+            option['capability'],
+            option['action'],
+          )];
+      final mapping = settingParameter != null
+          ? ('mijia_setting_grants', settingParameter)
+          : fanComponent
           ? (fanParameter == null ? null : ('mijia_fan_grants', fanParameter))
           : _startup[(option['capability'], option['action'])] ??
                 (option['capability'] == 'vendor.midea.ac' &&
@@ -104,7 +148,7 @@ class SessionPermission {
                     : null);
       final definition = option['definition'] as Map?;
       if (mapping == null ||
-          (component != 'main' && !fanComponent) ||
+          (component != 'main' && !fanComponent && settingParameter == null) ||
           definition?['risk'] != 'low' ||
           definition?['idempotency'] != 'set_value' ||
           !(definition?['transports'] as List? ?? []).contains('cloud'))
@@ -196,7 +240,7 @@ class SessionPermission {
             !step.isFinite ||
             step <= 0 ||
             max < min ||
-            (max - min) / step > 255)
+            (max - min) / step > (settingParameter != null ? 4095 : 255))
           continue;
         for (var i = 0; i <= ((max - min) / step).floor(); i++) {
           final value = min + i * step;
@@ -206,9 +250,11 @@ class SessionPermission {
         }
       }
       if (values.length >
-          (mapping.$1 == 'meiju_temperature_grants' ||
-                  mapping.$1 == 'meiju_ac_feature_grants' ||
-                  mapping.$1 == 'mijia_fan_grants'
+          (mapping.$1 == 'mijia_setting_grants'
+              ? 4096
+              : mapping.$1 == 'meiju_temperature_grants' ||
+                    mapping.$1 == 'meiju_ac_feature_grants' ||
+                    mapping.$1 == 'mijia_fan_grants'
               ? 256
               : 64))
         continue;
@@ -338,7 +384,9 @@ class SessionPermission {
               )
               as List;
       entries.add(permission.startupEntry);
-      final limit = permission.startupField == 'meiju_temperature_grants'
+      final limit = permission.startupField == 'mijia_setting_grants'
+          ? 4096
+          : permission.startupField == 'meiju_temperature_grants'
           ? 256
           : permission.startupField == 'meiju_ac_feature_grants' ||
                 permission.startupField == 'mijia_fan_grants'

@@ -161,8 +161,8 @@ impl CloudTransport for Cloud {
             assert_eq!(data["params"].as_array().unwrap().len(), 1);
             let field = &data["params"][0];
             *self.last_write.lock().unwrap() = Some(field.clone());
-            assert_eq!(field["did"], "PRIVATE-FAN-IDENTITY");
-            assert_eq!(field["siid"],2);
+            assert!(self.devices.lock().unwrap().iter().any(|d| d["did"] == field["did"]));
+            assert!(field["siid"].as_u64().is_some_and(|v| v > 0));
             self.calls.lock().unwrap().push(CloudEndpoint::SetProperty);
             progress.mark_sent();
             let mode = self.write_mode.load(Ordering::SeqCst);

@@ -1,6 +1,6 @@
 # Native UI contract
 
-The October 25 exact reference fan settings use native API **1.29.0**, following
+The October 25 exact light and purifier settings use native API **1.30.0**, following
 the October 24 linear mainline update. Earlier Mijia phase versions are historical. See
 [contract reconciliation](adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
 remain available alongside Mijia; identity restoration remains Meiju-only.
@@ -43,7 +43,7 @@ The 22 C functions in [homeverb.h](../crates/ffi/include/homeverb.h) form the na
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects Meiju, `xiaomi.mijia` selects Mijia, and `homeverb.platforms` selects both. `scenario` defaults to `normal`. All platform modes require `allow_mock_writes: false` and reject any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms the selected mode. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.29.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.30.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -1630,3 +1630,34 @@ The API has 34 ordinary JSON methods and 22 C exports (23 on Android including
 the existing initializer). No new method, export, SQLite schema or protected
 payload version is introduced. New saved derivations require a new reader;
 old read-only derivations remain valid and upgrade during explicit refresh.
+
+## Exact light and purifier settings (API 1.30)
+
+`mijia_setting_grants` is a trusted startup-only array with a 4,096-entry maximum.
+Each closed entry contains `device_id`, `component_id`, `property` and exact
+Boolean/integer `value`. Duplicate numeric spellings are rejected. The
+[native-open schema](../schemas/native-open.schema.json) enumerates all 14
+component/property pairs and their pinned domains; the
+[startup fixture](../examples/native-open.mijia-settings.json) demonstrates each.
+
+Protected option inspection supplies light-2, air_purifier-2, indicator_light-5,
+alarm-6, physical_controls_locked-7 and air_purifier_favorite-8 scopes.
+Only exact equivalent on-state uses `power.set`; other actions use the existing
+vendor property ID with a `set_` prefix. Neither public options nor startup grants
+provide protected model, identity or route evidence. Acknowledgements remain
+accepted, without physical completion evidence. Fan and setting adapter opt-ins
+are independent, as are their exact Core grants.
+
+Flutter negotiates 1.30 before sending this field and rejects old hosts before
+reopening. It prepares 3,930 exact light targets, including all 3,801 color
+temperatures, and 31 purifier targets from the protected domains. These remain
+within the existing native 1 MiB startup input bound; no unrestricted range
+grant is introduced. Forms retain exact typed values; companion mode/power
+changes are never inferred. App background/session replacement still invalidates
+operation ownership and uncertain writes are not replayed.
+
+The API has 34 ordinary JSON methods, 22 C exports and the existing Android
+initializer. SQLite schema 5 and protected payload versions are unchanged. Old
+complete derivations remain readable; explicit inventory refresh adds options.
+An older reader rejects unsupported new derivations. Historical APK records do
+not become API 1.30 artifacts without a separate clean-source build.

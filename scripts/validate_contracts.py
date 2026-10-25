@@ -21,6 +21,8 @@ def checked_formats() -> FormatChecker:
 def main() -> int:
     formats = checked_formats()
     pairs = [
+        ("capability", "capability.mijia-light"), ("command", "command.mijia-light"),
+        ("native-open", "native-open.mijia-settings"),
         ("native-open", "native-open.mijia-reference-fan"),
         ("capability", "capability.mijia-reference-fan"),
         ("command", "command.mijia-reference-fan"),
@@ -150,6 +152,21 @@ def main() -> int:
     mijia_fan_validator = Draft202012Validator(load("examples/capability.mijia-fan.json")["actions"]["set_level"]["parameters"])
     mijia_fan_validator.validate(load("examples/command.mijia-fan.json")["arguments"])
     negative = []
+    settings_startup = load("examples/native-open.mijia-settings.json")
+    for entry in settings_startup["mijia_setting_grants"]:
+        for value in [None, "true", {}, [], -1, 99999, 1.5]:
+            bad = copy.deepcopy(settings_startup)
+            bad["mijia_setting_grants"] = [{**entry, "value": value}]
+            negative.append((f"invalid reference setting {entry['property']}/{value}", validators["native-open"], bad))
+        for field, value in [("component_id", "fan-2"), ("property", "unreviewed"), ("extra", True)]:
+            bad = copy.deepcopy(settings_startup)
+            bad["mijia_setting_grants"] = [{**entry, field: value}]
+            negative.append((f"invalid reference setting scope {field}", validators["native-open"], bad))
+    for adapter in ["homeverb.mock", "midea.meiju"]:
+        bad = copy.deepcopy(settings_startup)
+        bad["adapter"] = adapter
+        negative.append((f"reference settings on wrong adapter {adapter}", validators["native-open"], bad))
+
     reference_startup = load("examples/native-open.mijia-reference-fan.json")
     for entry in reference_startup["mijia_fan_grants"]:
         domain = load("examples/capability.mijia-reference-fan.json")["actions"]["set_"+entry["property"]]["parameters"]

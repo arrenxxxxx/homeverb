@@ -342,6 +342,12 @@ impl ModelMapping {
         let bytes = serde_json::to_vec(&self.source).map_err(|_| invalid())?;
         let expected = Self::decode(&self.model, &self.spec_type, &bytes)?;
         let mut previous_reference = expected.clone();
+        for property in &mut previous_reference.properties {
+            if reference_setting(&self.model, property.siid, property.piid) {
+                property.write_domain = None;
+            }
+        }
+        let previous_settings = previous_reference.clone();
         if self.model == REFERENCE_FAN_MODEL && self.spec_type == REFERENCE_FAN_TYPE {
             for property in &mut previous_reference.properties {
                 if property.siid == 2 && matches!(property.piid, 6..=9) {
@@ -351,6 +357,7 @@ impl ModelMapping {
         }
         if expected != *self
             && previous_reference != *self
+            && previous_settings != *self
             && Self::decode_inner(&self.model, &self.spec_type, &bytes, false)
                 .ok()
                 .as_ref()
@@ -421,27 +428,17 @@ pub struct ControlOption {
 }
 
 impl MappedProperty {
+    pub(crate) fn control_family_enabled(&self, fan: bool, settings: bool) -> bool {
+        if self.component.starts_with("fan-") {
+            fan
+        } else {
+            settings
+        }
+    }
     pub(crate) fn control_option(&self) -> Option<ControlOption> {
         use homeverb_domain::{Action, Idempotency, Risk, Transport, VerificationMethod};
-        if !self.component.starts_with("fan-")
-            || !matches!(
-                (self.capability.as_str(), self.property.as_str()),
-                ("power", "state")
-                    | (
-                        "vendor.xiaomi.mijia.fan",
-                        "level"
-                            | "mode"
-                            | "horizontal_swing"
-                            | "horizontal_angle"
-                            | "horizontal_swing_included_angle_6"
-                            | "vertical_swing_7"
-                            | "vertical_swing_included_angle_8"
-                            | "anion_9"
-                    )
-            )
-        {
-            return None;
-        }
+        // Only independently reviewed derivations have a write domain. Protected
+        // payload validation re-derives the complete mapping before this is used.
         let domain = self.write_domain.as_ref()?;
         Some(ControlOption {
             component_id: self.component.clone(),
@@ -471,9 +468,12 @@ impl ModelMapping {
             .filter_map(MappedProperty::control_option)
             .collect()
     }
-    pub(crate) fn controlled_capabilities(&self) -> Vec<Capability> {
+    pub(crate) fn controlled_capabilities(&self, fan: bool, settings: bool) -> Vec<Capability> {
         let mut capabilities = self.capabilities();
         for property in &self.properties {
+            if !property.control_family_enabled(fan, settings) {
+                continue;
+            }
             if let Some(option) = property.control_option() {
                 let capability = capabilities
                     .iter_mut()
@@ -697,8 +697,11 @@ fn append_reference(
                 && property.kind.split(':').nth(4) == Some("00000006")
                 && name == "on"
                 && property.format == "bool";
-            let write_domain =
-                reference_fan_domain(model, kind, service.iid, &service.kind, &property, known)?;
+            let write_domain = if reference_setting(model, service.iid, property.iid) {
+                exact_reference_domain(&property, known)?
+            } else {
+                reference_fan_domain(model, kind, service.iid, &service.kind, &property, known)?
+            };
             properties.push(MappedProperty {
                 siid: service.iid,
                 piid: property.iid,
@@ -741,8 +744,15 @@ fn reference_fan_domain(
     {
         return Ok(None);
     }
-    // append_reference already correlates property URN, format and unit. Require
-    // the reviewed domain too; a changed specification does not widen authority.
+    exact_reference_domain(property, known)
+}
+
+fn exact_reference_domain(property: &Property, known: &Value) -> Result<Option<Value>> {
+    // append_reference correlates model, device/service/property URNs, format,
+    // unit and readable access. Require the exact reviewed write domain too.
+    if !property.access.iter().any(|a| a == "write") {
+        return Ok(None);
+    }
     let reviewed: Property = serde_json::from_value(known.clone()).map_err(|_| invalid())?;
     let Ok(domain) = property.write_domain() else {
         return Ok(None);
@@ -751,4 +761,37 @@ fn reference_fan_domain(
         return Ok(None);
     }
     Ok(domain)
+}
+
+fn reference_setting(model: &str, siid: u32, piid: u32) -> bool {
+    match model {
+        "abhome.light.wy0a01" => siid == 2 && matches!(piid, 1 | 2 | 3 | 7 | 9 | 12 | 13),
+        "zhimi.airpurifier.v6" => matches!((siid, piid), (2, 1..=3) | (5..=8, 1)),
+        _ => false,
+    }
+}
+
+/// Public pinned startup shape, not saved-device evidence or execution authority.
+/// No account, network access or model inference occurs here.
+pub fn reference_setting_option(component: &str, property: &str) -> Option<&'static ControlOption> {
+    static OPTIONS: std::sync::OnceLock<Vec<ControlOption>> = std::sync::OnceLock::new();
+    OPTIONS
+        .get_or_init(|| {
+            ["abhome.light.wy0a01", "zhimi.airpurifier.v6"]
+                .into_iter()
+                .flat_map(|model| {
+                    ModelMapping::pinned(model, None)
+                        .expect("reviewed reference")
+                        .expect("pinned model")
+                        .control_options()
+                })
+                .collect()
+        })
+        .iter()
+        .find(|o| {
+            o.component_id == component
+                && o.definition.parameters["properties"]
+                    .get(property)
+                    .is_some()
+        })
 }

@@ -1805,4 +1805,16 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get vendorXiaomiMijiaFanSetVerticalSwing7 => '\u8bbe\u7f6e\u4e0a\u4e0b\u6447\u5934';
 	@override String get vendorXiaomiMijiaFanSetVerticalSwingIncludedAngle8 => '\u8bbe\u7f6e\u4e0a\u4e0b\u6447\u5934\u5e45\u5ea6';
 	@override String get vendorXiaomiMijiaFanSetAnion9 => '\u8bbe\u7f6e\u8d1f\u79bb\u5b50';
+	@override String get vendorXiaomiMijiaLightSetBrightness2 => '\u8bbe\u7f6e\u4eae\u5ea6';
+	@override String get vendorXiaomiMijiaLightSetColorTemperature3 => '\u8bbe\u7f6e\u8272\u6e29';
+	@override String get vendorXiaomiMijiaLightSetMode7 => '\u8bbe\u7f6e\u706f\u5149\u6a21\u5f0f';
+	@override String get vendorXiaomiMijiaLightSetDefaultPowerOnState9 => '\u8bbe\u7f6e\u901a\u7535\u72b6\u6001';
+	@override String get vendorXiaomiMijiaLightSetFlexSwitch12 => '\u8bbe\u7f6e\u7075\u52a8\u5f00\u5173';
+	@override String get vendorXiaomiMijiaLightSetNightLightSwitch13 => '\u8bbe\u7f6e\u591c\u706f';
+	@override String get vendorXiaomiMijiaAirPurifierSetFanLevel2 => '\u8bbe\u7f6e\u51c0\u5316\u5668\u98ce\u901f';
+	@override String get vendorXiaomiMijiaAirPurifierSetMode3 => '\u8bbe\u7f6e\u51c0\u5316\u5668\u6a21\u5f0f';
+	@override String get vendorXiaomiMijiaIndicatorLightSetOn1 => '\u8bbe\u7f6e\u6307\u793a\u706f';
+	@override String get vendorXiaomiMijiaAlarmSetAlarm1 => '\u8bbe\u7f6e\u63d0\u793a\u97f3';
+	@override String get vendorXiaomiMijiaPhysicalControlsLockedSetPhysicalControlsLocked1 => '\u8bbe\u7f6e\u6309\u952e\u9501';
+	@override String get vendorXiaomiMijiaAirPurifierFavoriteSetFavoriteFanLevel1 => '\u8bbe\u7f6e\u559c\u7231\u98ce\u901f';
 }

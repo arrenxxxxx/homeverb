@@ -1,11 +1,14 @@
 # 14. Mijia reference integration and remaining coverage
 
-The October 25 worktree uses API 1.29 and the owner-supplied October 22 Xiaomi Home
+The October 25 worktree uses API 1.30 and the owner-supplied October 22 Xiaomi Home
 11.7.709 analysis. The full official-App feature request remains **incomplete**.
 The source archive explicitly does not supply all authentication, protocol or
 runtime control contracts. An implemented decoder is not physical acceptance.
 
 ## Implemented software
+
+API 1.30 adds 14 independently granted settings for the exact reference light
+and purifier under ADR-0084; the full-domain native/App path is recorded below.
 
 - Eight-part MIoT URNs retain their exact extension; malformed/foreign URNs refuse.
 - Seventeen exact model/specification catalogs project 264 reviewed scalar read
@@ -488,3 +491,52 @@ real-account, appliance-write, physical-device or iOS acceptance. No upload,
 push or publication occurred. A fresh `git fetch origin` still resolved main
 to `ccf2975df836f8e81ccf24fa26c8b2035390c978`; main is an ancestor of this branch
 and `git rev-list --count --merges origin/main..HEAD` returned zero.
+
+## Exact light and purifier controls -- October 25, 2026
+
+[ADR-0084](../adr/0084-exact-light-and-purifier-controls.md) is implemented for
+`abhome.light.wy0a01` (seven settings) and `zhimi.airpurifier.v6` (seven settings).
+The protected mapping requires pinned model/device/service/property identity,
+wire format, unit, readable/writable access and exact domain. Existing observation
+IDs remain stable; old complete mappings validate and upgrade on explicit refresh.
+
+`with_reference_controls` and trusted `mijia_setting_grants` are independent of
+fan admission and grants. Core requires an exact local target; the adapter
+rechecks protected evidence before its one property-set send. There are no
+companion mode/power changes or automatic uncertain-write retries. A correlated
+acknowledgement is accepted without physical verification. Other reference
+controls, modern SID authentication, events/history and media/health remain open.
+
+API 1.30 adds the closed setting-grant field and exact control-option component
+scopes without changing 34 JSON methods or 22 C exports (23 with the Android
+initializer). SQLite schema 5 and protected payload versions are unchanged.
+Flutter checks 1.30 before reopening with the new field. It retains 3,930 exact
+light targets and 31 purifier targets, including every one of the 3,801 values
+from 2700 through 6500 K; no preset-only substitute or range grant is used.
+
+Executed verification:
+
+- `cargo +1.96.0 test -p homeverb-mijia -p homeverb-host --offline --locked`: both
+  package suites passed, including 78 Mijia unit tests, five Mijia compile-fail
+  doc tests and the Host test of all 3,801 exact color temperatures.
+- `cargo +1.96.0 clippy -p homeverb-mijia -p homeverb-host -p homeverb-ffi --all-targets --offline --locked -- -D warnings`: passed.
+- `cargo +1.96.0 build -p homeverb-ffi --offline --locked`: passed.
+- `python scripts/verify_native_contract.py`: all 34 methods and 55 runtime
+  examples passed, including both platform modes with all 14 settings and
+  invalid-value refusal before profile creation.
+- `fvm flutter test test/mijia_settings_test.dart test/mijia_controls_test.dart
+  test/session_permissions_test.dart test/mijia_reference_test.dart`: 30 passed.
+  New cases cover both native modes with all 3,961 targets, API 1.29 refusal,
+  English/Chinese 320-pixel double-text-scale controls, no send on opening and
+  exact 4321 K input with out-of-range refusal. An initial form-test lookup used
+  a nonexistent key; the corrected test finds the real submit button.
+- `fvm flutter analyze`: passed.
+- Contracts: 22 schemas, 62 positive and 626 negative fixtures passed. Docs and
+  repository hygiene passed, along with all seven shared presentation tests,
+  reference regeneration and `git diff --check`. The pinned public profile
+  catalog is unchanged.
+
+No provider/account/appliance requests or physical writes were used. Earlier
+full-suite macOS glyph and Meiju LAN alias limitations remain outside this
+passing scope. The iOS version assertion is synchronized but no iOS build was
+run. The prior API 1.29 APK does not contain this phase until separately rebuilt.

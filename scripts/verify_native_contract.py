@@ -469,6 +469,27 @@ def main():
                 assert decode(library.homeverb_open(json.dumps(config).encode()))['error']['code'] == 'INVALID_ARGUMENT'
                 assert not private.exists()
 
+    settings_startup = load('examples/native-open.mijia-settings.json')
+    for adapter in ['xiaomi.mijia', 'homeverb.platforms']:
+        with tempfile.TemporaryDirectory(prefix='homeverb-reference-settings-') as directory:
+            config = {**settings_startup, 'data_dir': directory, 'adapter': adapter}
+            open_schema.validate(config)
+            opened = decode(library.homeverb_open(json.dumps(config).encode()))
+            assert opened['error'] is None, opened
+            try:
+                assert raw(opened['data']['handle'], envelope('list_devices'))['data'] == []
+            finally:
+                library.homeverb_close(opened['data']['handle'])
+    for entry in settings_startup['mijia_setting_grants']:
+        for value in [None, 'true', {}, -1, 99999, 1.5]:
+            with tempfile.TemporaryDirectory(prefix='homeverb-setting-refused-') as directory:
+                private = Path(directory) / 'must-not-create'
+                config = {**settings_startup, 'data_dir': str(private),
+                          'mijia_setting_grants': [{**entry, 'value': value}]}
+                assert not open_schema.is_valid(config)
+                assert decode(library.homeverb_open(json.dumps(config).encode()))['error']['code'] == 'INVALID_ARGUMENT'
+                assert not private.exists()
+
     # Local account metadata remains usable without creating any protected session.
     with tempfile.TemporaryDirectory(prefix='homeverb-ui-local-accounts-') as directory:
         account_id = '40000000-0000-4000-8000-000000000001'

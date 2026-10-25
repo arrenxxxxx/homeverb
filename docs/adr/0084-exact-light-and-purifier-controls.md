@@ -1,6 +1,6 @@
 # ADR-0084: Exact Mijia light and purifier controls
 
-Status: accepted for implementation; validation and physical acceptance pending.
+Status: implemented and synthetic-tested through Core, native and App; physical acceptance pending.
 Date: October 25, 2026.
 
 ## Decision

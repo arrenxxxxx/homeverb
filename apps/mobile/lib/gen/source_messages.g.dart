@@ -2201,6 +2201,20 @@ String? translateSource(
   "Set vertical swing range" =>
     t.vendorXiaomiMijiaFanSetVerticalSwingIncludedAngle8,
   "Set ionizer" => t.vendorXiaomiMijiaFanSetAnion9,
+  "Set brightness" => t.vendorXiaomiMijiaLightSetBrightness2,
+  "Set color temperature" => t.vendorXiaomiMijiaLightSetColorTemperature3,
+  "Set light mode" => t.vendorXiaomiMijiaLightSetMode7,
+  "Set power-on state" => t.vendorXiaomiMijiaLightSetDefaultPowerOnState9,
+  "Set flex switch" => t.vendorXiaomiMijiaLightSetFlexSwitch12,
+  "Set night light" => t.vendorXiaomiMijiaLightSetNightLightSwitch13,
+  "Set purifier fan level" => t.vendorXiaomiMijiaAirPurifierSetFanLevel2,
+  "Set purifier mode" => t.vendorXiaomiMijiaAirPurifierSetMode3,
+  "Set indicator light" => t.vendorXiaomiMijiaIndicatorLightSetOn1,
+  "Set buzzer" => t.vendorXiaomiMijiaAlarmSetAlarm1,
+  "Set physical-control lock" =>
+    t.vendorXiaomiMijiaPhysicalControlsLockedSetPhysicalControlsLocked1,
+  "Set favorite fan level" =>
+    t.vendorXiaomiMijiaAirPurifierFavoriteSetFavoriteFanLevel1,
   _ => null,
 };
 
@@ -4457,5 +4471,22 @@ String? sourceForKey(String key) => switch (key) {
   "vendor.xiaomi.mijia.fan.set_vertical_swing_included_angle_8" =>
     "Set vertical swing range",
   "vendor.xiaomi.mijia.fan.set_anion_9" => "Set ionizer",
+  "vendor.xiaomi.mijia.light.set_brightness_2" => "Set brightness",
+  "vendor.xiaomi.mijia.light.set_color_temperature_3" =>
+    "Set color temperature",
+  "vendor.xiaomi.mijia.light.set_mode_7" => "Set light mode",
+  "vendor.xiaomi.mijia.light.set_default_power_on_state_9" =>
+    "Set power-on state",
+  "vendor.xiaomi.mijia.light.set_flex_switch_12" => "Set flex switch",
+  "vendor.xiaomi.mijia.light.set_night_light_switch_13" => "Set night light",
+  "vendor.xiaomi.mijia.air_purifier.set_fan_level_2" =>
+    "Set purifier fan level",
+  "vendor.xiaomi.mijia.air_purifier.set_mode_3" => "Set purifier mode",
+  "vendor.xiaomi.mijia.indicator_light.set_on_1" => "Set indicator light",
+  "vendor.xiaomi.mijia.alarm.set_alarm_1" => "Set buzzer",
+  "vendor.xiaomi.mijia.physical_controls_locked.set_physical_controls_locked_1" =>
+    "Set physical-control lock",
+  "vendor.xiaomi.mijia.air_purifier_favorite.set_favorite_fan_level_1" =>
+    "Set favorite fan level",
   _ => null,
 };

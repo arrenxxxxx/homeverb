@@ -345,3 +345,266 @@ async fn reference_fan_settings_keep_exact_grants_wire_ids_and_uncertain_receipt
         }
     }
 }
+
+#[tokio::test]
+async fn exact_light_and_purifier_settings_require_independent_admission_and_keep_wire_values() {
+    let cases = [
+        (
+            "abhome.light.wy0a01",
+            "light-2",
+            "power",
+            "state",
+            2,
+            1,
+            vec![json!(false), json!(true)],
+        ),
+        (
+            "abhome.light.wy0a01",
+            "light-2",
+            "vendor.xiaomi.mijia.light",
+            "brightness_2",
+            2,
+            2,
+            vec![json!(1), json!(50), json!(100)],
+        ),
+        (
+            "abhome.light.wy0a01",
+            "light-2",
+            "vendor.xiaomi.mijia.light",
+            "color_temperature_3",
+            2,
+            3,
+            vec![json!(2700), json!(4321), json!(6500)],
+        ),
+        (
+            "abhome.light.wy0a01",
+            "light-2",
+            "vendor.xiaomi.mijia.light",
+            "mode_7",
+            2,
+            7,
+            vec![json!(0), json!(4), json!(23)],
+        ),
+        (
+            "abhome.light.wy0a01",
+            "light-2",
+            "vendor.xiaomi.mijia.light",
+            "default_power_on_state_9",
+            2,
+            9,
+            vec![json!(0), json!(1), json!(2)],
+        ),
+        (
+            "abhome.light.wy0a01",
+            "light-2",
+            "vendor.xiaomi.mijia.light",
+            "flex_switch_12",
+            2,
+            12,
+            vec![json!(false), json!(true)],
+        ),
+        (
+            "abhome.light.wy0a01",
+            "light-2",
+            "vendor.xiaomi.mijia.light",
+            "night_light_switch_13",
+            2,
+            13,
+            vec![json!(false), json!(true)],
+        ),
+        (
+            "zhimi.airpurifier.v6",
+            "air_purifier-2",
+            "power",
+            "state",
+            2,
+            1,
+            vec![json!(false), json!(true)],
+        ),
+        (
+            "zhimi.airpurifier.v6",
+            "air_purifier-2",
+            "vendor.xiaomi.mijia.air_purifier",
+            "fan_level_2",
+            2,
+            2,
+            vec![json!(0), json!(1), json!(2)],
+        ),
+        (
+            "zhimi.airpurifier.v6",
+            "air_purifier-2",
+            "vendor.xiaomi.mijia.air_purifier",
+            "mode_3",
+            2,
+            3,
+            vec![json!(0), json!(1), json!(2)],
+        ),
+        (
+            "zhimi.airpurifier.v6",
+            "indicator_light-5",
+            "vendor.xiaomi.mijia.indicator_light",
+            "on_1",
+            5,
+            1,
+            vec![json!(false), json!(true)],
+        ),
+        (
+            "zhimi.airpurifier.v6",
+            "alarm-6",
+            "vendor.xiaomi.mijia.alarm",
+            "alarm_1",
+            6,
+            1,
+            vec![json!(false), json!(true)],
+        ),
+        (
+            "zhimi.airpurifier.v6",
+            "physical_controls_locked-7",
+            "vendor.xiaomi.mijia.physical_controls_locked",
+            "physical_controls_locked_1",
+            7,
+            1,
+            vec![json!(false), json!(true)],
+        ),
+        (
+            "zhimi.airpurifier.v6",
+            "air_purifier_favorite-8",
+            "vendor.xiaomi.mijia.air_purifier_favorite",
+            "favorite_fan_level_1",
+            8,
+            1,
+            vec![json!(0), json!(7), json!(16)],
+        ),
+    ];
+    for (model, component, capability, property, siid, piid, values) in cases {
+        let f = Fixture::new();
+        *f.cloud.devices.lock().unwrap() = vec![
+            json!({"did":"FICTIONAL-REFERENCE-DEVICE","name":"Reference appliance","model":model}),
+        ];
+        let report = f.connect().await;
+        f.publish(&report).await;
+        let device = f.core.list().unwrap().into_iter().next().unwrap();
+        let adapter = Arc::new(
+            MijiaAdapter::new(f.vault.clone(), f.cloud.clone(), Arc::new(SystemClock))
+                .with_reference_controls(),
+        );
+        let refresh = adapter
+            .refresh_devices(report.account.id, &operation())
+            .await
+            .unwrap();
+        f.publish(&refresh).await;
+        for (index, value) in values.iter().enumerate() {
+            let mut request = command(&device);
+            request.request_id = format!("setting-{index}");
+            request.component_id = component.into();
+            request.capability = capability.into();
+            request.action = if capability == "power" {
+                "set".into()
+            } else {
+                format!("set_{property}")
+            };
+            request.arguments = json!({property:value});
+            let policy = Policy {
+                grants: vec![Grant {
+                    device_id: device.id.clone(),
+                    component_id: component.into(),
+                    capability: capability.into(),
+                    action: request.action.clone(),
+                    transports: vec![Transport::Cloud],
+                    argument_schema: json!({"const":request.arguments}),
+                }],
+            };
+            for (admitted, grants) in [
+                (f.adapter.clone(), policy.clone()),
+                (
+                    Arc::new(
+                        MijiaAdapter::new(f.vault.clone(), f.cloud.clone(), Arc::new(SystemClock))
+                            .with_fan_controls(),
+                    ),
+                    policy.clone(),
+                ),
+                (adapter.clone(), Policy::default()),
+            ] {
+                let denied = Core::new(
+                    f.store.clone(),
+                    vec![admitted],
+                    Arc::new(SystemClock),
+                    grants,
+                );
+                assert_eq!(
+                    denied
+                        .execute(request.clone(), CancellationToken::new())
+                        .await
+                        .status,
+                    Status::Failed
+                );
+            }
+            let before = f.cloud.count(CloudEndpoint::SetProperty);
+            let core = Core::new(
+                f.store.clone(),
+                vec![adapter.clone()],
+                Arc::new(SystemClock),
+                policy,
+            );
+            let mut wrong = request.clone();
+            wrong.request_id = format!("invalid-{index}");
+            wrong.arguments = json!({property:"invalid"});
+            assert_eq!(
+                core.execute(wrong, CancellationToken::new()).await.status,
+                Status::Failed
+            );
+            assert_eq!(f.cloud.count(CloudEndpoint::SetProperty), before);
+            request.request_id = format!("accepted-{index}");
+            assert_eq!(
+                core.execute(request.clone(), CancellationToken::new())
+                    .await
+                    .status,
+                Status::Accepted
+            );
+            assert_eq!(
+                f.cloud.last_write.lock().unwrap().as_ref().unwrap(),
+                &json!({"did":"FICTIONAL-REFERENCE-DEVICE","siid":siid,"piid":piid,"value":value})
+            );
+            core.execute(request.clone(), CancellationToken::new())
+                .await;
+            assert_eq!(f.cloud.count(CloudEndpoint::SetProperty), before + 1);
+            request.request_id = format!("lost-{index}");
+            f.cloud.write_mode.store(1, Ordering::SeqCst);
+            assert_eq!(
+                core.execute(request.clone(), CancellationToken::new())
+                    .await
+                    .status,
+                Status::Unknown
+            );
+            core.execute(request, CancellationToken::new()).await;
+            assert_eq!(f.cloud.count(CloudEndpoint::SetProperty), before + 2);
+            f.cloud.write_mode.store(0, Ordering::SeqCst);
+        }
+    }
+}
+
+#[tokio::test]
+async fn reference_admission_cannot_enable_fan_writes() {
+    let f = Fixture::new();
+    let report = f.connect().await;
+    f.publish(&report).await;
+    controlled(&f, report.account.id).await;
+    let fan = f.fan();
+    let adapter = Arc::new(
+        MijiaAdapter::new(f.vault.clone(), f.cloud.clone(), Arc::new(SystemClock))
+            .with_reference_controls(),
+    );
+    let core = Core::new(
+        f.store.clone(),
+        vec![adapter],
+        Arc::new(SystemClock),
+        policy(&fan),
+    );
+    assert_eq!(
+        core.execute(command(&fan), CancellationToken::new())
+            .await
+            .status,
+        Status::Failed
+    );
+    assert_eq!(f.cloud.count(CloudEndpoint::SetProperty), 0);
+}

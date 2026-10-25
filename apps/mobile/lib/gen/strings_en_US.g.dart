@@ -5351,4 +5351,40 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Set ionizer'
 	String get vendorXiaomiMijiaFanSetAnion9 => 'Set ionizer';
+
+	/// en-US: 'Set brightness'
+	String get vendorXiaomiMijiaLightSetBrightness2 => 'Set brightness';
+
+	/// en-US: 'Set color temperature'
+	String get vendorXiaomiMijiaLightSetColorTemperature3 => 'Set color temperature';
+
+	/// en-US: 'Set light mode'
+	String get vendorXiaomiMijiaLightSetMode7 => 'Set light mode';
+
+	/// en-US: 'Set power-on state'
+	String get vendorXiaomiMijiaLightSetDefaultPowerOnState9 => 'Set power-on state';
+
+	/// en-US: 'Set flex switch'
+	String get vendorXiaomiMijiaLightSetFlexSwitch12 => 'Set flex switch';
+
+	/// en-US: 'Set night light'
+	String get vendorXiaomiMijiaLightSetNightLightSwitch13 => 'Set night light';
+
+	/// en-US: 'Set purifier fan level'
+	String get vendorXiaomiMijiaAirPurifierSetFanLevel2 => 'Set purifier fan level';
+
+	/// en-US: 'Set purifier mode'
+	String get vendorXiaomiMijiaAirPurifierSetMode3 => 'Set purifier mode';
+
+	/// en-US: 'Set indicator light'
+	String get vendorXiaomiMijiaIndicatorLightSetOn1 => 'Set indicator light';
+
+	/// en-US: 'Set buzzer'
+	String get vendorXiaomiMijiaAlarmSetAlarm1 => 'Set buzzer';
+
+	/// en-US: 'Set physical-control lock'
+	String get vendorXiaomiMijiaPhysicalControlsLockedSetPhysicalControlsLocked1 => 'Set physical-control lock';
+
+	/// en-US: 'Set favorite fan level'
+	String get vendorXiaomiMijiaAirPurifierFavoriteSetFavoriteFanLevel1 => 'Set favorite fan level';
 }

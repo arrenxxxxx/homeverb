@@ -16,6 +16,8 @@ pub use session::{
 };
 mod accounts;
 pub use accounts::{AccountConnection, AccountProvider, AccountSummary, ConnectRequest};
+mod mijia_setting_grants;
+pub use mijia_setting_grants::{MijiaSettingGrant, mijia_setting_policy};
 mod mijia_fan_grants;
 pub use mijia_fan_grants::{MijiaFanGrant, mijia_fan_policy};
 mod power_grants;
@@ -161,7 +163,7 @@ fn meiju_parts(
     directory: &Path,
     grants: MeijuControlGrants<'_>,
 ) -> Result<(Core, Arc<homeverb_midea::MeijuAdapter>)> {
-    platform_parts(directory, grants, false, &[]).map(|(core, meiju, _)| (core, meiju))
+    platform_parts(directory, grants, false, &[], &[]).map(|(core, meiju, _)| (core, meiju))
 }
 
 fn platform_parts(
@@ -169,6 +171,7 @@ fn platform_parts(
     grants: MeijuControlGrants<'_>,
     include_mijia: bool,
     mijia_grants: &[MijiaFanGrant],
+    setting_grants: &[MijiaSettingGrant],
 ) -> Result<(
     Core,
     Arc<homeverb_midea::MeijuAdapter>,
@@ -176,6 +179,9 @@ fn platform_parts(
 )> {
     let mut policy = meiju_power_policy(grants.power)?;
     policy.grants.extend(mijia_fan_policy(mijia_grants)?.grants);
+    policy
+        .grants
+        .extend(mijia_setting_policy(setting_grants)?.grants);
     policy.grants.extend(meiju_fan_policy(grants.fan)?.grants);
     policy
         .grants
@@ -228,10 +234,15 @@ fn platform_parts(
             Arc::new(homeverb_mijia::MijiaHttps),
             clock.clone(),
         );
-        Arc::new(if mijia_grants.is_empty() {
+        let adapter = if mijia_grants.is_empty() {
             adapter
         } else {
             adapter.with_fan_controls()
+        };
+        Arc::new(if setting_grants.is_empty() {
+            adapter
+        } else {
+            adapter.with_reference_controls()
         })
     });
     let mut adapters: Vec<Arc<dyn homeverb_core::Adapter>> = vec![adapter.clone()];
@@ -286,7 +297,16 @@ pub fn open_mijia_session_with_grants(
     directory: &Path,
     grants: &[MijiaFanGrant],
 ) -> Result<Session> {
-    let policy = mijia_fan_policy(grants)?;
+    open_mijia_session_with_settings(directory, grants, &[])
+}
+
+pub fn open_mijia_session_with_settings(
+    directory: &Path,
+    grants: &[MijiaFanGrant],
+    settings: &[MijiaSettingGrant],
+) -> Result<Session> {
+    let mut policy = mijia_fan_policy(grants)?;
+    policy.grants.extend(mijia_setting_policy(settings)?.grants);
     let store = Arc::new(SqliteStore::open(directory)?);
     let vault = Arc::new(open_accounts(directory)?);
     let clock = Arc::new(SystemClock);
@@ -295,10 +315,15 @@ pub fn open_mijia_session_with_grants(
         Arc::new(homeverb_mijia::MijiaHttps),
         clock.clone(),
     );
-    let adapter = Arc::new(if grants.is_empty() {
+    let adapter = if grants.is_empty() {
         adapter
     } else {
         adapter.with_fan_controls()
+    };
+    let adapter = Arc::new(if settings.is_empty() {
+        adapter
+    } else {
+        adapter.with_reference_controls()
     });
     let core = Core::new(store, vec![adapter.clone()], clock, policy);
     Ok(Session::with_platform_accounts(core, None, Some(adapter)))
@@ -314,6 +339,15 @@ pub fn open_platform_session_with_grants(
     grants: MeijuControlGrants<'_>,
     mijia_grants: &[MijiaFanGrant],
 ) -> Result<Session> {
-    let (core, meiju, mijia) = platform_parts(directory, grants, true, mijia_grants)?;
+    open_platform_session_with_settings(directory, grants, mijia_grants, &[])
+}
+
+pub fn open_platform_session_with_settings(
+    directory: &Path,
+    grants: MeijuControlGrants<'_>,
+    mijia_grants: &[MijiaFanGrant],
+    settings: &[MijiaSettingGrant],
+) -> Result<Session> {
+    let (core, meiju, mijia) = platform_parts(directory, grants, true, mijia_grants, settings)?;
     Ok(Session::with_platform_accounts(core, Some(meiju), mijia))
 }

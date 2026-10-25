@@ -1770,5 +1770,17 @@
   "vendor.xiaomi.mijia.fan.set_horizontal_swing_included_angle_6": "设置左右摇头幅度",
   "vendor.xiaomi.mijia.fan.set_vertical_swing_7": "设置上下摇头",
   "vendor.xiaomi.mijia.fan.set_vertical_swing_included_angle_8": "设置上下摇头幅度",
-  "vendor.xiaomi.mijia.fan.set_anion_9": "设置负离子"
+  "vendor.xiaomi.mijia.fan.set_anion_9": "设置负离子",
+  "vendor.xiaomi.mijia.light.set_brightness_2": "设置亮度",
+  "vendor.xiaomi.mijia.light.set_color_temperature_3": "设置色温",
+  "vendor.xiaomi.mijia.light.set_mode_7": "设置灯光模式",
+  "vendor.xiaomi.mijia.light.set_default_power_on_state_9": "设置通电状态",
+  "vendor.xiaomi.mijia.light.set_flex_switch_12": "设置灵动开关",
+  "vendor.xiaomi.mijia.light.set_night_light_switch_13": "设置夜灯",
+  "vendor.xiaomi.mijia.air_purifier.set_fan_level_2": "设置净化器风速",
+  "vendor.xiaomi.mijia.air_purifier.set_mode_3": "设置净化器模式",
+  "vendor.xiaomi.mijia.indicator_light.set_on_1": "设置指示灯",
+  "vendor.xiaomi.mijia.alarm.set_alarm_1": "设置提示音",
+  "vendor.xiaomi.mijia.physical_controls_locked.set_physical_controls_locked_1": "设置按键锁",
+  "vendor.xiaomi.mijia.air_purifier_favorite.set_favorite_fan_level_1": "设置喜爱风速"
 }

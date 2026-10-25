@@ -1,5 +1,18 @@
 # Implementation status and next tasks
 
+## Exact light and purifier controls -- October 25, 2026
+
+API 1.30 implements 14 low-risk scalar controls for `abhome.light.wy0a01` and
+`zhimi.airpurifier.v6` through protected Core mapping, native startup and the
+foreground App. Independent `mijia_setting_grants` retain exact device, component,
+property and value; existing fan permissions cannot authorize these settings.
+The light's 2700–6500 K domain retains every 1 K target. This is synthetic
+implementation evidence, not physical support. See
+[ADR-0084](adr/0084-exact-light-and-purifier-controls.md) and the
+[phase record](development/14-mijia-reference-integration.md#exact-light-and-purifier-controls--october-25-2026).
+The full reference request remains incomplete, including modern authentication,
+history/events, other controls and media/health.
+
 ## Exact reference fan settings — October 25, 2026
 
 API 1.29 implements [ADR-0083](adr/0083-exact-reference-fan-settings.md):
@@ -20,7 +33,7 @@ October 25: 17 exact Mijia reference specifications now supply 264 scalar read
 mappings and localized App labels. Additional writes and modern authentication
 remain incomplete; see the [full coverage and blockers](development/14-mijia-reference-integration.md).
 
-The October 25 exact reference fan settings use native API **1.29.0**, following
+The October 25 exact light and purifier settings use native API **1.30.0**, following
 the October 24 linear mainline update. Earlier Mijia phase versions are historical. See
 [contract reconciliation](adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
 remain available alongside Mijia; identity restoration remains Meiju-only.
