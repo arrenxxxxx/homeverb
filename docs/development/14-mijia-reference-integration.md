@@ -462,3 +462,29 @@ do not send when opened. No account, appliance, real write or physical
 acceptance was used. The previously delivered API 1.28 APK does not contain
 these changes. Existing full-suite macOS glyph tests and Meiju LAN alias
 limitations remain outside this phase's passing scope.
+
+## Reference fan APK delivery — October 25, 2026
+
+Clean source `71d7ad17dcf31a14072e23cc369b6b96e9a6897f` built the combined-platform API 1.29
+release-mode development APK at
+`apps/mobile/build/delivery/mijia/71d7ad1/homeverb-mijia-0.2.0-71d7ad1.apk`.
+Size: 75,135,482 bytes. SHA-256:
+`7e383f87ee1469dfce38c1857f997b9e6b159445671a3fa5bca66cdc9d5efc22`.
+The adjacent `verification.json` records the exact source revision, clean status,
+AAR and per-ABI library digests and the actual archive checks.
+
+Executed `scripts/build_android_native.py` with installed stable Rust 1.99.1,
+NDK 28.2.13676358 and JDK 21 for arm64-v8a and x86_64; both ABIs passed 23 native
+exports and 16 KiB ELF alignment. Executed
+`fvm flutter build apk --release --target-platform android-arm64,android-x64
+--dart-define=HOMEVERB_ADAPTER=homeverb.platforms` with the existing SDK/JDK
+configuration and development signing identity. `scripts/verify_flutter_apk.py`
+passed signature, ZIP/ELF alignment, API 28 minimum, disabled backup, no test
+plugin, and byte matching against the current AAR after normal NDK stripping.
+
+The artifact contains the four new exact reference fan settings and supersedes
+the API 1.28 `ea2c6cc` package for local evaluation. It is not installation,
+real-account, appliance-write, physical-device or iOS acceptance. No upload,
+push or publication occurred. A fresh `git fetch origin` still resolved main
+to `ccf2975df836f8e81ccf24fa26c8b2035390c978`; main is an ancestor of this branch
+and `git rev-list --count --merges origin/main..HEAD` returned zero.
