@@ -2192,3 +2192,11 @@ intrinsic chip layout and enlarged text. Existing component IDs, observations,
 API 1.27, SQLite 5, protected payloads and grants are unchanged. English/Chinese
 synthetic selection checks do not establish physical battery identity or new
 model acceptance.
+
+## Community Mijia captcha protocol -- October 25, 2026
+
+Typed Rust clients can explicitly begin and answer a bounded captcha under
+[ADR-0081](adr/0081-mijia-interactive-community-login.md). Existing one-shot login,
+API 1.27, ordinary JSON/CLI/MCP, SQLite 5 and protected payloads are unchanged.
+Injected transports default to refusing captcha retrieval unless implemented.
+Native App completion and real-account acceptance are pending.

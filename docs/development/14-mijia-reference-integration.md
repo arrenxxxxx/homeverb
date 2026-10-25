@@ -248,3 +248,29 @@ points before becoming callable. Official HA event push, legacy history reads an
 modern App event history must remain separate contracts. Full coverage is still
 incomplete, but further community-source investigation can proceed without another
 private archive or account access.
+
+## Community captcha protocol phase -- October 25, 2026
+
+[ADR-0081](../adr/0081-mijia-interactive-community-login.md) adds typed Rust
+`begin_login` and single-use `CaptchaChallenge::answer`. The original `login`
+continues to return `MIJIA_AUTH_CHALLENGE_REQUIRED` without fetching an image.
+The new explicit flow retains zeroizing login context, replaces the `ick` cookie
+on a rejected answer, and requires a validated STS result before a session exists.
+It expires after three minutes, permits at most three answers and retains original
+cancellation. No sockets or leases stay open while waiting for input.
+
+Dedicated HTTPS captcha retrieval rejects foreign URLs, redirects, oversized
+images, excessive dimensions, wrong content types and missing/duplicate cookies.
+Only bounded PNG/JPEG image data can reach a trusted native view. Secrets and
+provider URLs are not serializable. The existing native C/App flow has not yet
+adopted this typed API; SMS/email verification and history are still pending.
+API 1.27, SQLite 5 and existing protected payloads are unchanged in this phase.
+
+Executed Rust 1.96 Mijia tests: 69 unit tests and four compile-fail tests passed.
+Strict all-target Mijia Clippy and all three native Mijia account regression tests
+passed. Tests cover actual fictional TLS image
+responses, request context/cookie continuity, cancellation/drop, lifetime and
+attempt limits, hostile URLs/cookies/images, and legacy challenge behavior.
+[Community attribution](../../third-party/hass-xiaomi-miot/NOTICE.md) records the
+pinned Apache-2.0 evidence. No provider request, real account/device, package build,
+remote push or publication was performed.

@@ -8,7 +8,6 @@ use homeverb_core::{Operation, SecretBytes};
 use homeverb_domain::{Error, Result};
 use serde::Deserialize;
 use std::fmt;
-use zeroize::Zeroizing;
 
 /// Protected native inputs cannot be serialized into general host requests.
 /// ```compile_fail
@@ -160,48 +159,19 @@ struct LoginStatus {
     captcha: Option<PrivateString>,
 }
 
+mod challenge;
+pub use challenge::{CaptchaChallenge, LoginOutcome, begin_login};
+
 pub async fn login(
     transport: &dyn CloudTransport,
     credentials: LoginCredentials,
     region: Region,
     operation: &Operation,
 ) -> Result<MijiaSession> {
-    operation.run(async {
-        let device = uuid::Uuid::new_v4().simple().to_string();
-        let cookie = PrivateString::new(format!("sdkVersion=3.8.6; deviceId={device}"));
-        let sign_request = CloudRequest { endpoint: CloudEndpoint::LoginSign, region, cookie: cookie.clone(), location: None, body: SecretBytes::new(vec![]) };
-        let response = transport.send(&sign_request, operation).await?;
-        let sign: Sign = decode(response.body.expose())?;
-        if !crate::bounded_text(sign.sign.as_str(), 4096) { return Err(invalid()); }
-        use md5::Digest;
-        let hash = Zeroizing::new(md5::Md5::digest(credentials.password.expose()).iter().map(|byte| format!("{byte:02X}")).collect::<String>());
-        let account = std::str::from_utf8(credentials.account.expose()).map_err(|_| Error::invalid())?;
-        let request = CloudRequest {
-            endpoint: CloudEndpoint::LoginPassword, region, cookie: cookie.clone(), location: None,
-            body: codec::form(&[("sid", "xiaomiio"), ("hash", &hash), ("callback", "https://sts.api.io.mi.com/sts"),
-                ("qs", "%3Fsid%3Dxiaomiio%26_json%3Dtrue"), ("user", account), ("_json", "true"), ("_sign", sign.sign.as_str())]),
-        };
-        let response = transport.send(&request, operation).await?;
-        drop(credentials);
-        let status: LoginStatus = decode(response.body.expose())?;
-        if status.notification.is_some() || status.captcha.is_some() {
-            return Err(Error::new("MIJIA_AUTH_CHALLENGE_REQUIRED", "Mijia requires interactive account verification; this login has not completed."));
-        }
-        check_code(status.code)?;
-        let result: LoginResult = decode(response.body.expose())?;
-        crate::transport::exchange_url(result.location.as_str())?;
-        let user_id = match result.user_id { Subject::Text(s) => s, Subject::Number(n) => PrivateString::new(n.to_string()) };
-        if user_id.as_str().len() > 32 || user_id.as_str().is_empty()
-            || !user_id.as_str().bytes().all(|b| b.is_ascii_digit())
-            || user_id.as_str().bytes().all(|b| b == b'0')
-            || codec::unbase64(result.ssecurity.as_str())?.len() != 16 { return Err(invalid()); }
-        let exchange = CloudRequest { endpoint: CloudEndpoint::LoginExchange, region, location: Some(result.location), cookie, body: SecretBytes::new(vec![]) };
-        let response = transport.send(&exchange, operation).await?;
-        let token = response.service_token.ok_or_else(auth_required)?;
-        let token = std::str::from_utf8(token.expose()).map_err(|_| invalid())?;
-        if !cookie_value(token) { return Err(invalid()); }
-        Ok(MijiaSession { region, user_id, security: result.ssecurity, token: PrivateString::new(token.to_owned()) })
-    }).await
+    match challenge::start(transport, credentials, region, operation, false).await? {
+        LoginOutcome::Connected(session) => Ok(session),
+        LoginOutcome::Captcha(_) => Err(challenge::required()),
+    }
 }
 
 #[cfg(test)]

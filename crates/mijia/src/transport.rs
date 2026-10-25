@@ -10,6 +10,9 @@ use reqwest::{
 };
 use std::{fmt, time::Duration};
 
+mod captcha;
+pub use captcha::{CaptchaRequest, CaptchaResponse};
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CloudEndpoint {
     LoginSign,
@@ -126,6 +129,14 @@ pub trait CloudTransport: Send + Sync {
     /// Send once, with no logging, retry, redirects or deadline extension.
     async fn send(&self, request: &CloudRequest, operation: &Operation) -> Result<CloudResponse>;
 
+    /// Optional protected captcha retrieval; no generic endpoint or account export.
+    async fn fetch_captcha(&self, _: &CaptchaRequest, _: &Operation) -> Result<CaptchaResponse> {
+        Err(homeverb_domain::Error::new(
+            "CAPABILITY_UNSUPPORTED",
+            "The transport does not support interactive login.",
+        ))
+    }
+
     /// Separate, fail-closed write path. Never delegate to the read transport.
     async fn send_control(
         &self,
@@ -160,6 +171,20 @@ fn client_builder() -> reqwest::ClientBuilder {
 
 #[async_trait]
 impl CloudTransport for MijiaHttps {
+    async fn fetch_captcha(
+        &self,
+        request: &CaptchaRequest,
+        operation: &Operation,
+    ) -> Result<CaptchaResponse> {
+        operation
+            .run(async {
+                let url = captcha::captcha_url(request.location.as_str())?;
+                let client = client_builder().build().map_err(|_| failed())?;
+                captcha::transmit_captcha(client, url, request, operation).await
+            })
+            .await
+    }
+
     async fn send(&self, request: &CloudRequest, operation: &Operation) -> Result<CloudResponse> {
         if request.endpoint == CloudEndpoint::SetProperty {
             return Err(control_unsupported());

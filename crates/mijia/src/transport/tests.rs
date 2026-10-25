@@ -329,10 +329,13 @@ impl Server {
             "https://localhost:{}/test",
             listener.local_addr().unwrap().port()
         );
-        let response = String::from_utf8(response)
-            .unwrap()
-            .replace("SERVER_URL", &url)
-            .into_bytes();
+        let mut response = response;
+        if let Some(index) = response
+            .windows(10)
+            .position(|value| value == b"SERVER_URL")
+        {
+            response.splice(index..index + 10, url.bytes());
+        }
         let requests = Arc::new(Mutex::new(Vec::new()));
         let connections = Arc::new(AtomicUsize::new(0));
         let closed = Arc::new(AtomicUsize::new(0));
@@ -392,5 +395,167 @@ impl Server {
             closed,
             task,
         }
+    }
+}
+
+#[test]
+fn captcha_origin_and_image_allocation_limits_are_closed() {
+    assert!(captcha::captcha_url("/pass/getCode?token=fictional").is_ok());
+    assert!(captcha::captcha_url("https://account.xiaomi.com/captcha.png").is_ok());
+    for value in [
+        "//foreign.invalid/img",
+        "http://account.xiaomi.com/img",
+        "https://account.xiaomi.com.evil.invalid/img",
+        "https://user@account.xiaomi.com/img",
+        "https://account.xiaomi.com:8443/img",
+        "https://account.xiaomi.com/img#private",
+        "https://127.0.0.1/img",
+        " /pass/getCode",
+        "/pass/\\evil",
+    ] {
+        assert!(captcha::captcha_url(value).is_err(), "{value}");
+    }
+    let image = captcha_png();
+    assert_eq!(
+        CaptchaResponse::new(
+            SecretBytes::new(image.clone()),
+            SecretBytes::new(b"fictional-ick".to_vec())
+        )
+        .unwrap()
+        .media_type(),
+        "image/png"
+    );
+    for body in [
+        b"<html>private</html>".to_vec(),
+        vec![0; captcha::MAX_IMAGE_BYTES + 1],
+        {
+            let mut image = image.clone();
+            image[16..20].copy_from_slice(&u32::MAX.to_be_bytes());
+            image
+        },
+        image[..20].to_vec(),
+    ] {
+        assert!(
+            CaptchaResponse::new(
+                SecretBytes::new(body),
+                SecretBytes::new(b"fictional-ick".to_vec())
+            )
+            .is_err()
+        );
+    }
+    assert!(
+        CaptchaResponse::new(
+            SecretBytes::new(image),
+            SecretBytes::new(b"injected;cookie".to_vec())
+        )
+        .is_err()
+    );
+    let jpeg = vec![0xff, 0xd8, 0xff, 0xc0, 0, 11, 8, 0, 1, 0, 1, 1, 1, 0x11, 0];
+    assert_eq!(
+        CaptchaResponse::new(
+            SecretBytes::new(jpeg),
+            SecretBytes::new(b"fictional-ick".to_vec())
+        )
+        .unwrap()
+        .media_type(),
+        "image/jpeg"
+    );
+}
+
+fn captcha_png() -> Vec<u8> {
+    use base64::Engine;
+    base64::engine::general_purpose::STANDARD.decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jP1sAAAAASUVORK5CYII=").unwrap()
+}
+fn captcha_request() -> CaptchaRequest {
+    CaptchaRequest::new(
+        PrivateString::new("/pass/getCode?token=fictional".into()),
+        PrivateString::new("sdkVersion=3.8.6; deviceId=fictional".into()),
+    )
+    .unwrap()
+}
+
+#[tokio::test]
+async fn captcha_tls_checks_cookie_type_size_and_redirect_without_cloud_credentials() {
+    for mode in 0..6 {
+        let body = captcha_png();
+        let headers = match mode {
+            1 => "Content-Type: image/png\r\n",
+            2 => "Content-Type: image/png\r\nSet-Cookie: ick=one\r\nSet-Cookie: ick=two\r\n",
+            3 => "Content-Type: text/html\r\nSet-Cookie: ick=fictional\r\n",
+            _ => "Content-Type: image/png\r\nSet-Cookie: ick=fictional\r\n",
+        };
+        let status = if mode == 4 {
+            "302 Found\r\nLocation: SERVER_URL"
+        } else {
+            "200 OK"
+        };
+        let length = if mode == 5 {
+            captcha::MAX_IMAGE_BYTES + 1
+        } else {
+            body.len()
+        };
+        let mut reply = format!(
+            "HTTP/1.1 {status}\r\n{headers}Content-Length: {length}\r\nConnection: close\r\n\r\n"
+        )
+        .into_bytes();
+        reply.extend_from_slice(&body);
+        let server = Server::start(reply, false).await;
+        let result = captcha::transmit_captcha(
+            server.client.clone(),
+            Url::parse(&server.url).unwrap(),
+            &captcha_request(),
+            &operation(),
+        )
+        .await;
+        assert_eq!(result.is_ok(), mode == 0);
+        assert_eq!(server.connections.load(Ordering::SeqCst), 1);
+        let requests = server.requests.lock().unwrap();
+        let wire = String::from_utf8_lossy(&requests[0]);
+        assert!(wire.starts_with("GET "));
+        assert!(!wire.contains("serviceToken"));
+        assert!(!wire.contains("miot-encrypt-algorithm"));
+    }
+}
+
+#[tokio::test]
+async fn captcha_cancellation_and_drop_close_waiting_socket() {
+    for mode in 0..3 {
+        let server = Server::start(vec![], true).await;
+        let op = operation();
+        if mode == 0 {
+            op.cancellation.cancel();
+        }
+        let request = captcha_request();
+        let mut pending = Box::pin(captcha::transmit_captcha(
+            server.client.clone(),
+            Url::parse(&server.url).unwrap(),
+            &request,
+            &op,
+        ));
+        if mode == 0 {
+            assert_eq!(pending.await.unwrap_err().code, "CANCELLED");
+            assert_eq!(server.connections.load(Ordering::SeqCst), 0);
+            continue;
+        }
+        loop {
+            tokio::select! {
+                result = &mut pending => panic!("Unexpected result: {result:?}"),
+                _ = tokio::time::sleep(Duration::from_millis(1)) => { if !server.requests.lock().unwrap().is_empty() { break; } }
+            }
+        }
+        if mode == 1 {
+            op.cancellation.cancel();
+            assert_eq!(pending.await.unwrap_err().code, "CANCELLED");
+        } else {
+            drop(pending);
+        }
+        tokio::time::timeout(Duration::from_secs(2), async {
+            while server.closed.load(Ordering::SeqCst) == 0 {
+                tokio::time::sleep(Duration::from_millis(1)).await;
+            }
+        })
+        .await
+        .unwrap();
+        assert_eq!(server.connections.load(Ordering::SeqCst), 1);
     }
 }

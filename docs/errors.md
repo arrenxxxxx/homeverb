@@ -541,3 +541,10 @@ Malformed values fail Core observation validation before replacing cache; provid
 property errors remain absent values, never false/zero defaults. No reference
 write can bypass protected fan admission. See
 [ADR-0080](adr/0080-mijia-exact-reference-readings.md).
+
+Interactive Mijia Rust login retains `MIJIA_AUTH_CHALLENGE_REQUIRED` for unsupported
+verification or exhausted attempts. Malformed images/cookies/URLs return
+`MIJIA_INVALID_RESPONSE`; cancelled/expired continuations return `CANCELLED` or
+`DEADLINE_EXCEEDED` without new requests. Invalid answers consume the continuation
+and return `INVALID_ARGUMENT`. No new error codes or ordinary JSON methods are
+introduced by the typed protocol phase.

@@ -4,10 +4,10 @@ use async_trait::async_trait;
 use std::sync::Mutex;
 use tokio_util::sync::CancellationToken;
 
-fn operation() -> Operation {
+pub(super) fn operation() -> Operation {
     Operation::new(10_000, CancellationToken::new()).unwrap()
 }
-fn credentials() -> LoginCredentials {
+pub(super) fn credentials() -> LoginCredentials {
     LoginCredentials::new(
         SecretBytes::new(b"fictional@example.invalid".to_vec()),
         SecretBytes::new(b"fictional-password".to_vec()),

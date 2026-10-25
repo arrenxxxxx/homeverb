@@ -9,11 +9,16 @@ mod protected;
 mod spec;
 mod transport;
 pub use adapter::{AccountDiscovery, AccountInventory, DeviceInventoryMembership, MijiaAdapter};
-pub use auth::{LoginCredentials, MijiaSession, login};
+pub use auth::{
+    CaptchaChallenge, LoginCredentials, LoginOutcome, MijiaSession, begin_login, login,
+};
 pub use control::PropertyWrite;
 pub use inventory::{CloudDevice, Inventory, PropertyQuery, PropertyReading};
 pub use spec::{ControlOption, MappedProperty, ModelMapping, SpecIndex};
-pub use transport::{CloudEndpoint, CloudRequest, CloudResponse, CloudTransport, MijiaHttps};
+pub use transport::{
+    CaptchaRequest, CaptchaResponse, CloudEndpoint, CloudRequest, CloudResponse, CloudTransport,
+    MijiaHttps,
+};
 
 use homeverb_domain::{Error, Result};
 use serde::{Deserialize, Serialize};
