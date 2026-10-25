@@ -4,8 +4,8 @@ October 25: 17 exact Mijia reference specifications now supply 264 scalar read
 mappings and localized App labels. Additional writes and modern authentication
 remain incomplete; see the [full coverage and blockers](14-mijia-reference-integration.md).
 
-The October 24 integration uses native API **1.27.0** after the linear mainline
-update. Earlier Mijia phase versions are historical. See
+The October 25 integration uses native API **1.28.0**, following the linear
+mainline update and dedicated interactive-login bridge. Earlier Mijia phase versions are historical. See
 [contract reconciliation](../adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
 remain available alongside Mijia; identity restoration remains Meiju-only.
 
@@ -13,9 +13,9 @@ The experimental integration is implemented under [ADR-0070](../adr/0070-mijia-n
 The owner will perform real-account and device acceptance. Do not access saved
 pilot credentials or contact appliances as part of development tests.
 
-Current callable scope includes trusted Rust account/read APIs and native API 1.25
-Mijia-only/combined sessions with exact fan startup grants and Flutter
-platform/account/read/control views. Live acceptance remains pending. The Rust adapter
+Current callable scope includes trusted Rust account/read APIs and native API 1.28
+Mijia-only/combined sessions with exact fan startup grants, protected user-driven
+captcha continuation and Flutter platform/account/read/control views. Live acceptance remains pending. The Rust adapter
 can explicitly admit protected fan setters under ADR-0078. Historical phase records below distinguish earlier
 protocol-only work from the [protected Core phase](../adr/0076-mijia-protected-core-reads.md).
 

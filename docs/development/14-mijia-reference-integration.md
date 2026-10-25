@@ -343,3 +343,32 @@ captcha subset passed all 38 tests. Final analysis and formatting passed after
 reviewing native-client background invalidation. Seven shared presentation tests and source hygiene passed.
 The prior full-suite macOS pixel/click failures remain unverified by this subset.
 New native/mobile packaging and real-account acceptance are separate delivery gates.
+
+## Captcha-enabled Android delivery -- October 25, 2026
+
+Clean source `ea2c6ccf7b024d76cd14e588f11f8e8831700ef2` produced the combined
+`homeverb.platforms` release-mode development APK with native API 1.28. Its Mijia
+flow includes the protected captcha protocol, account/Host registry, dedicated C
+bridge and bilingual App prompt. It does not add SMS/email verification, modern
+SID authentication, event history or additional appliance writes.
+
+Artifact: `apps/mobile/build/delivery/mijia/ea2c6cc/homeverb-mijia-0.2.0-ea2c6cc.apk`.
+Size: 75,095,050 bytes. SHA-256:
+`6fb043337f72ca351019d54c8768fb28a0bfeb722b3d8ef6986e49a35794abf0`.
+The adjacent ignored `verification.json` records clean source provenance and hashes.
+
+Executed `scripts/build_android_native.py` for arm64-v8a and x86_64 using installed
+Rust 1.99.1, NDK 28.2.13676358 and JDK 21: 23 exports per ABI, valid AAR contents
+and 16 KiB ELF alignment passed. An initial Rust 1.96 packaging attempt failed
+because that toolchain lacks Android targets; the already-installed stable targets
+were then used without downloading a toolchain or changing host interfaces.
+Executed `fvm flutter build apk --release --target-platform android-arm64,android-x64
+--dart-define=HOMEVERB_ADAPTER=homeverb.platforms` with existing SDK/JDK settings and
+the existing development signing identity. `scripts/verify_flutter_apk.py` passed
+signature, archive, manifest, minimum API 28, disabled backup, absence of the
+integration-test plugin, both ABIs, current AAR byte matching after NDK stripping
+and 16 KiB alignment checks.
+
+This supersedes the API 1.27 `28cf192` artifact for local evaluation. No installation,
+real-account login, appliance request, physical-device acceptance, iOS package,
+upload, push or publication was performed. This is not a store release.
