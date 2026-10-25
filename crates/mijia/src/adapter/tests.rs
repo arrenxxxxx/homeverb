@@ -100,6 +100,7 @@ struct Cloud {
     read_gate: tokio::sync::Notify,
     stall_read: AtomicU8,
     write_mode: AtomicU8,
+    captcha: AtomicU8,
 }
 impl Cloud {
     fn new() -> Self {
@@ -116,6 +117,7 @@ impl Cloud {
             read_gate: tokio::sync::Notify::new(),
             stall_read: AtomicU8::new(0),
             write_mode: AtomicU8::new(0),
+            captcha: AtomicU8::new(0),
         }
     }
     fn count(&self, endpoint: CloudEndpoint) -> usize {
@@ -129,6 +131,19 @@ impl Cloud {
 }
 #[async_trait]
 impl CloudTransport for Cloud {
+    async fn fetch_captcha(
+        &self,
+        _: &crate::CaptchaRequest,
+        _: &Operation,
+    ) -> Result<crate::CaptchaResponse> {
+        use base64::Engine;
+        let image = base64::engine::general_purpose::STANDARD.decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jP1sAAAAASUVORK5CYII=").unwrap();
+        crate::CaptchaResponse::new(
+            SecretBytes::new(image),
+            SecretBytes::new(b"fictional-ick".to_vec()),
+        )
+    }
+
     async fn send_control(
         &self,
         request: &CloudRequest,
@@ -160,6 +175,7 @@ impl CloudTransport for Cloud {
             self.calls.lock().unwrap().push(request.endpoint());
             let raw=match request.endpoint() {
                 CloudEndpoint::LoginSign=>Some(json!({"_sign":"fictional-sign"})),
+                CloudEndpoint::LoginPassword if self.captcha.load(Ordering::SeqCst) != 0 && !request.body().windows(16).any(|b| b == b"captCode=correct") => Some(json!({"code":87001,"captchaUrl":"/pass/getCode?fictional"})),
                 CloudEndpoint::LoginPassword=>Some(json!({"code":0,"userId":self.subject.lock().unwrap().clone(),"ssecurity":"AAECAwQFBgcICQoLDA0ODw==","location":"https://sts.api.io.mi.com/sts?ticket=fictional"})),
                 CloudEndpoint::LoginExchange=>return Ok(CloudResponse{body:SecretBytes::new(vec![]),service_token:Some(SecretBytes::new(b"PRIVATE-SERVICE-TOKEN".to_vec()))}),
                 CloudEndpoint::SpecIndex=>{
@@ -928,4 +944,163 @@ async fn every_reference_model_publishes_and_reads_scalar_components_through_cor
     assert_eq!(readings, 264);
     assert_eq!(f.cloud.count(CloudEndpoint::SetProperty), 0);
     assert_eq!(f.cloud.count(CloudEndpoint::SpecIndex), 0);
+}
+
+#[tokio::test]
+async fn interactive_login_holds_no_account_lease_and_publishes_only_after_answer() {
+    let f = Fixture::new();
+    f.cloud.captcha.store(1, Ordering::SeqCst);
+    let AccountLogin::Captcha(pending) = f
+        .adapter
+        .begin_connection(credentials(), None, "Home", &operation())
+        .await
+        .unwrap()
+    else {
+        panic!("Expected captcha")
+    };
+    assert!(f.adapter.accounts(&operation()).await.unwrap().is_empty());
+    assert_eq!(f.secrets.puts.load(Ordering::SeqCst), 0);
+    assert_eq!(f.cloud.count(CloudEndpoint::Devices), 0);
+    // An unrelated registration lock remains available while the user answers.
+    drop(f.vault.lock_registration(&operation()).await.unwrap());
+    let AccountLogin::Connected(report) = f
+        .adapter
+        .continue_connection(pending, SecretBytes::new(b"correct".to_vec()), &operation())
+        .await
+        .unwrap()
+    else {
+        panic!("Expected connected")
+    };
+    f.publish(&report).await;
+    let fan = f.fan();
+    let AccountLogin::Captcha(pending) = f
+        .adapter
+        .begin_connection(credentials(), Some(report.account.id), "Home", &operation())
+        .await
+        .unwrap()
+    else {
+        panic!()
+    };
+    drop(
+        f.vault
+            .lease(report.account.id, &operation())
+            .await
+            .unwrap(),
+    );
+    let AccountLogin::Connected(reconnected) = f
+        .adapter
+        .continue_connection(pending, SecretBytes::new(b"correct".to_vec()), &operation())
+        .await
+        .unwrap()
+    else {
+        panic!()
+    };
+    assert_eq!(reconnected.account.id, report.account.id);
+    f.publish(&reconnected).await;
+    assert_eq!(f.fan().id, fan.id);
+}
+
+#[tokio::test]
+async fn interactive_login_rejects_changed_target_or_other_adapter_before_answer_send() {
+    for mode in 0..3 {
+        let f = Fixture::new();
+        let report = f.connect().await;
+        f.cloud.captcha.store(1, Ordering::SeqCst);
+        let AccountLogin::Captcha(pending) = f
+            .adapter
+            .begin_connection(credentials(), Some(report.account.id), "Home", &operation())
+            .await
+            .unwrap()
+        else {
+            panic!()
+        };
+        let calls = f.cloud.count(CloudEndpoint::LoginPassword);
+        let answer = SecretBytes::new(b"correct".to_vec());
+        let result = if mode == 0 {
+            let other = MijiaAdapter::new(f.vault.clone(), f.cloud.clone(), Arc::new(SystemClock));
+            other
+                .continue_connection(pending, answer, &operation())
+                .await
+        } else {
+            if mode == 1 {
+                let mut lease = f
+                    .vault
+                    .lease(report.account.id, &operation())
+                    .await
+                    .unwrap();
+                let bytes = lease.inspect_session(&operation()).await.unwrap().unwrap();
+                let mut data: Value = serde_json::from_slice(bytes.expose()).unwrap();
+                data["session"]["token"] = json!("CHANGED-FICTIONAL-TOKEN");
+                lease
+                    .store_session(
+                        &SecretBytes::new(serde_json::to_vec(&data).unwrap()),
+                        &operation(),
+                    )
+                    .await
+                    .unwrap();
+            } else {
+                f.adapter
+                    .remove_account(report.account.id, &[], &operation())
+                    .await
+                    .unwrap();
+            }
+            f.adapter
+                .continue_connection(pending, answer, &operation())
+                .await
+        };
+        assert!(result.is_err());
+        assert_eq!(f.cloud.count(CloudEndpoint::LoginPassword), calls);
+    }
+}
+
+#[tokio::test]
+async fn answered_captcha_cannot_replace_a_different_protected_subject() {
+    let f = Fixture::new();
+    let report = f.connect().await;
+    let puts = f.secrets.puts.load(Ordering::SeqCst);
+    f.cloud.captcha.store(1, Ordering::SeqCst);
+    let AccountLogin::Captcha(pending) = f
+        .adapter
+        .begin_connection(credentials(), Some(report.account.id), "Home", &operation())
+        .await
+        .unwrap()
+    else {
+        panic!()
+    };
+    *f.cloud.subject.lock().unwrap() = "999002".into();
+    let error = f
+        .adapter
+        .continue_connection(pending, SecretBytes::new(b"correct".to_vec()), &operation())
+        .await
+        .unwrap_err();
+    assert_eq!(error.code, "ACCOUNT_IDENTITY_CONFLICT");
+    assert_eq!(f.secrets.puts.load(Ordering::SeqCst), puts);
+}
+
+#[tokio::test]
+async fn unselected_interactive_login_cannot_restore_an_account_removed_while_waiting() {
+    let f = Fixture::new();
+    let report = f.connect().await;
+    f.cloud.captcha.store(1, Ordering::SeqCst);
+    let AccountLogin::Captcha(pending) = f
+        .adapter
+        .begin_connection(credentials(), None, "Home", &operation())
+        .await
+        .unwrap()
+    else {
+        panic!()
+    };
+    f.adapter
+        .remove_account(report.account.id, &[], &operation())
+        .await
+        .unwrap();
+    let calls = f.cloud.count(CloudEndpoint::LoginPassword);
+    let error = f
+        .adapter
+        .continue_connection(pending, SecretBytes::new(b"correct".to_vec()), &operation())
+        .await
+        .unwrap_err();
+    assert_eq!(error.code, "ACCOUNT_SESSION_UNCONFIRMED");
+    assert_eq!(f.cloud.count(CloudEndpoint::LoginPassword), calls);
+    assert!(f.adapter.accounts(&operation()).await.unwrap().is_empty());
 }

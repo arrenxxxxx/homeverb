@@ -2200,3 +2200,9 @@ Typed Rust clients can explicitly begin and answer a bounded captcha under
 API 1.27, ordinary JSON/CLI/MCP, SQLite 5 and protected payloads are unchanged.
 Injected transports default to refusing captcha retrieval unless implemented.
 Native App completion and real-account acceptance are pending.
+
+The subsequent typed Rust account/Host phase binds pending captcha attempts to
+protected account snapshots and a four-entry session registry. It retains native
+API 1.27 and exposes no additional C functions or ordinary methods yet. Existing
+account/Card identity and saved payload formats are preserved; background, cancel
+and close drop pending login material.

@@ -43,7 +43,11 @@ pub struct AccountInventory {
     pub devices: Vec<DeviceInventoryMembership>,
 }
 
+mod login;
+pub use login::{AccountLogin, PendingMijiaLogin};
+
 pub struct MijiaAdapter {
+    login_owner: Uuid,
     vault: Arc<AccountVault>,
     transport: Arc<dyn CloudTransport>,
     clock: Arc<dyn Clock>,
@@ -56,6 +60,7 @@ impl MijiaAdapter {
         clock: Arc<dyn Clock>,
     ) -> Self {
         Self {
+            login_owner: Uuid::new_v4(),
             vault,
             transport,
             clock,
@@ -208,9 +213,21 @@ impl MijiaAdapter {
         if let Some(id) = existing {
             self.account(id, operation).await?;
         }
-        let mut accounts = self.load_accounts(existing, operation).await?;
+        let accounts = self.load_accounts(existing, operation).await?;
         let session =
             crate::login(self.transport.as_ref(), credentials, Region::Cn, operation).await?;
+        self.save_authenticated(session, existing, &label, accounts, operation)
+            .await
+    }
+
+    async fn save_authenticated(
+        &self,
+        session: crate::MijiaSession,
+        existing: Option<Uuid>,
+        label: &str,
+        mut accounts: Vec<LoadedAccount>,
+        operation: &Operation,
+    ) -> Result<AccountDiscovery> {
         let matches: Vec<_> = accounts
             .iter()
             .enumerate()
@@ -262,10 +279,7 @@ impl MijiaAdapter {
             if accounts.len() >= 64 {
                 return Err(unconfirmed());
             }
-            let mut lease = self
-                .vault
-                .prepare(PROVIDER, "CN", &label, operation)
-                .await?;
+            let mut lease = self.vault.prepare(PROVIDER, "CN", label, operation).await?;
             if lease.inspect_session(operation).await?.is_some() {
                 return Err(unconfirmed());
             }

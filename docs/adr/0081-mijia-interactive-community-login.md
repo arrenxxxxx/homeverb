@@ -1,6 +1,6 @@
 # ADR-0081: Bounded interactive Mijia community login
 
-Status: accepted for staged implementation; native bridge and App work follow the protocol phase.
+Status: typed Rust protocol, protected account and Host phases implemented; C bridge and App pending.
 Date: October 25, 2026.
 
 ## Context

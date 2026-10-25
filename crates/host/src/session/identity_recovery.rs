@@ -157,6 +157,7 @@ impl Session {
                 state.lan_scans.clear();
                 state.connection_links.clear();
                 state.identity_recoveries.clear();
+                state.account_logins.clear();
             }
             Stage::HostSealed.emit();
             self.core.invalidate_user_approvals();

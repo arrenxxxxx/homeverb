@@ -8,7 +8,10 @@ mod inventory;
 mod protected;
 mod spec;
 mod transport;
-pub use adapter::{AccountDiscovery, AccountInventory, DeviceInventoryMembership, MijiaAdapter};
+pub use adapter::{
+    AccountDiscovery, AccountInventory, AccountLogin, DeviceInventoryMembership, MijiaAdapter,
+    PendingMijiaLogin,
+};
 pub use auth::{
     CaptchaChallenge, LoginCredentials, LoginOutcome, MijiaSession, begin_login, login,
 };

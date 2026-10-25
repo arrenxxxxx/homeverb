@@ -11,8 +11,8 @@ pub use native_approval::{ExecuteApprovalRequest, PrepareApprovalRequest};
 mod session;
 pub use session::{
     ConfirmConnectionLinkRequest, ConfirmIdentityRecoveryRequest, ConfirmLanScanRequest,
-    HostRequest, PendingMeijuLanScan, PrepareConnectionLinkRequest, PrepareLanScanRequest, Request,
-    Session,
+    ContinueAccountLoginRequest, HostRequest, NativeAccountLogin, PendingMeijuLanScan,
+    PrepareConnectionLinkRequest, PrepareLanScanRequest, Request, Session,
 };
 mod accounts;
 pub use accounts::{AccountConnection, AccountProvider, AccountSummary, ConnectRequest};

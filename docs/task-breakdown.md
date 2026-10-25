@@ -1,7 +1,7 @@
 # Implementation status and next tasks
 
-October 25: community-derived typed Rust captcha continuation is implemented
-and synthetic-tested. Native C/App challenge entry points, SMS/email verification
+October 25: community-derived typed Rust captcha continuation and protected
+account/Host registries are implemented and synthetic-tested. Native C/App challenge entry points, SMS/email verification
 and historical readings remain pending; see the [phase record](development/14-mijia-reference-integration.md#community-captcha-protocol-phase--october-25-2026).
 
 October 25: 17 exact Mijia reference specifications now supply 264 scalar read

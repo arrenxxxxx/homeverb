@@ -274,3 +274,29 @@ attempt limits, hostile URLs/cookies/images, and legacy challenge behavior.
 [Community attribution](../../third-party/hass-xiaomi-miot/NOTICE.md) records the
 pinned Apache-2.0 evidence. No provider request, real account/device, package build,
 remote push or publication was performed.
+
+## Protected interactive account phase -- October 25, 2026
+
+Typed Rust adapter and Host entry points now carry the captcha through protected
+account registration. `begin_connection`/`continue_connection` hold no account
+lease or registration lock while waiting for an answer. A continuation is bound
+to its adapter, immutable label/selected account and the complete saved-account
+session fingerprint set. Removal or changed protected sessions invalidate it,
+including when the initial login did not select an existing account. Final STS
+subject matching and secure-store checks precede persistence and publication.
+
+The Host provides `begin_account_login`, `continue_account_login` and
+`discard_account_login` only as trusted Rust methods. Four pending challenges
+are allowed; answer consumes the old handle, rejection rotates it, and
+background/cancel/close clears the registry. Invalid continuation metadata also
+consumes the handle. The result is typed, not generally serializable. Ordinary
+JSON, CLI and MCP cannot invoke these methods. The C bridge and Flutter entry
+remain the next phase; API 1.27 and the previous APK are unchanged.
+
+Executed `cargo +1.96.0 test -p homeverb-mijia -p homeverb-host --offline --locked`:
+339 tests/doc tests passed. Strict all-target Clippy for both crates and Rust
+formatting passed. Added checks cover protected identity, account removal during
+input, registration/lease release, cross-adapter and cross-host refusal, registry
+capacity, expiry, invalid metadata consumption, foreground/cancellation races,
+provider isolation and refusal through ordinary JSON. No real account/device,
+remote push or package publication was performed.

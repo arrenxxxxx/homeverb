@@ -89,10 +89,21 @@ struct Cloud {
     calls: AtomicUsize,
     empty: AtomicBool,
     stall: AtomicBool,
+    captcha: AtomicBool,
     started: tokio::sync::Notify,
 }
 #[async_trait]
 impl CloudTransport for Cloud {
+    async fn fetch_captcha(
+        &self,
+        _: &homeverb_mijia::CaptchaRequest,
+        _: &Operation,
+    ) -> Result<homeverb_mijia::CaptchaResponse> {
+        self.calls.fetch_add(1, Ordering::SeqCst);
+        let image = STANDARD.decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jP1sAAAAASUVORK5CYII=").unwrap();
+        homeverb_mijia::CaptchaResponse::new(SecretBytes::new(image), secret(b"fictional-ick"))
+    }
+
     async fn send(&self, request: &CloudRequest, op: &Operation) -> Result<CloudResponse> {
         op.run(async {
             self.calls.fetch_add(1, Ordering::SeqCst);
@@ -101,6 +112,7 @@ impl CloudTransport for Cloud {
             }
             let raw = match request.endpoint() {
                 CloudEndpoint::LoginSign => Some(json!({"_sign":"fictional"})),
+                CloudEndpoint::LoginPassword if self.captcha.load(Ordering::SeqCst) && !request.body().windows(16).any(|b| b == b"captCode=correct") => Some(json!({"code":87001,"captchaUrl":"/pass/getCode?fictional"})),
                 CloudEndpoint::LoginPassword => Some(json!({"code":0,"userId":"999001","ssecurity":"AAECAwQFBgcICQoLDA0ODw==","location":"https://sts.api.io.mi.com/sts?ticket=fictional"})),
                 CloudEndpoint::LoginExchange => return Ok(CloudResponse { body: secret(b""), service_token: Some(secret(b"PRIVATE-NATIVE-TOKEN")) }),
                 CloudEndpoint::SpecIndex => Some(json!({"instances":[{"model":"fiction.fan.native","type":KIND,"status":"released","version":1}]})),
@@ -389,4 +401,231 @@ async fn provider_admission_and_lifecycle_cancel_without_replaying_login() {
     f.session.set_foreground(true);
     f.cloud.stall.store(false, Ordering::SeqCst);
     assert!(f.connect(None, None).await["error"].is_null());
+}
+
+fn begin_metadata() -> ConnectRequest {
+    serde_json::from_value(json!({"schema_version":"1.0","operation_id":"begin-captcha","timeout_ms":10000,"provider":"xiaomi.mijia","label":"Mijia Home"})).unwrap()
+}
+fn answer_metadata(id: u64) -> homeverb_host::ContinueAccountLoginRequest {
+    serde_json::from_value(json!({"schema_version":"1.0","operation_id":"answer-captcha","timeout_ms":10000,"challenge_id":id})).unwrap()
+}
+async fn pending_login(f: &Fixture) -> u64 {
+    let result = f
+        .session
+        .begin_account_login(
+            begin_metadata(),
+            secret(b"fiction@example.invalid"),
+            secret(b"fictional-password"),
+        )
+        .await
+        .unwrap();
+    assert_eq!(format!("{result:?}"), "NativeAccountLogin([REDACTED])");
+    let homeverb_host::NativeAccountLogin::Captcha {
+        challenge_id,
+        image,
+        media_type,
+        expires_in_ms,
+    } = result
+    else {
+        panic!("Expected captcha")
+    };
+    assert_eq!(media_type, "image/png");
+    assert!(image.expose().starts_with(b"\x89PNG"));
+    assert!((1..=180000).contains(&expires_in_ms));
+    challenge_id
+}
+
+#[tokio::test]
+async fn interactive_host_replaces_challenges_and_publishes_partial_cards_after_success() {
+    let f = Fixture::new(true);
+    f.cloud.captcha.store(true, Ordering::SeqCst);
+    let first = pending_login(&f).await;
+    assert!(
+        f.call(json!({"method":"list_accounts"})).await["data"]
+            .as_array()
+            .unwrap()
+            .is_empty()
+    );
+    let homeverb_host::NativeAccountLogin::Captcha {
+        challenge_id: second,
+        ..
+    } = f
+        .session
+        .continue_account_login(answer_metadata(first), secret(b"wrong"))
+        .await
+        .unwrap()
+    else {
+        panic!("Expected new captcha")
+    };
+    assert_ne!(first, second);
+    let calls = f.cloud.calls.load(Ordering::SeqCst);
+    assert!(
+        f.session
+            .continue_account_login(answer_metadata(first), secret(b"correct"))
+            .await
+            .is_err()
+    );
+    assert_eq!(f.cloud.calls.load(Ordering::SeqCst), calls);
+    let homeverb_host::NativeAccountLogin::Connected(report) = f
+        .session
+        .continue_account_login(answer_metadata(second), secret(b"correct"))
+        .await
+        .unwrap()
+    else {
+        panic!("Expected connection")
+    };
+    let report = serde_json::to_value(report).unwrap();
+    assert_eq!(report["retrieval"]["status"], "partial");
+    assert_eq!(
+        report["retrieval"]["device_ids"].as_array().unwrap().len(),
+        2
+    );
+    assert!(!serde_json::to_string(&report).unwrap().contains("PRIVATE"));
+    assert!(!f.session.discard_account_login(second));
+}
+
+#[tokio::test]
+async fn native_challenges_are_owned_bounded_and_cleared_by_lifecycle() {
+    for mode in 0..4 {
+        let f = Fixture::new(false);
+        f.cloud.captcha.store(true, Ordering::SeqCst);
+        let id = pending_login(&f).await;
+        let other = Fixture::new(false);
+        assert!(
+            other
+                .session
+                .continue_account_login(answer_metadata(id), secret(b"correct"))
+                .await
+                .is_err()
+        );
+        let calls = f.cloud.calls.load(Ordering::SeqCst);
+        match mode {
+            0 => {
+                f.session.set_foreground(false);
+                f.session.set_foreground(true);
+            }
+            1 => {
+                f.session.cancel("begin-captcha");
+            }
+            2 => f.session.close(),
+            _ => {
+                assert!(f.session.discard_account_login(id));
+            }
+        }
+        assert!(
+            f.session
+                .continue_account_login(answer_metadata(id), secret(b"correct"))
+                .await
+                .is_err()
+        );
+        assert_eq!(f.cloud.calls.load(Ordering::SeqCst), calls);
+    }
+    let f = Fixture::new(false);
+    f.cloud.captcha.store(true, Ordering::SeqCst);
+    let mut ids = vec![];
+    for _ in 0..4 {
+        ids.push(pending_login(&f).await);
+    }
+    let calls = f.cloud.calls.load(Ordering::SeqCst);
+    assert_eq!(
+        f.session
+            .begin_account_login(
+                begin_metadata(),
+                secret(b"fiction@example.invalid"),
+                secret(b"fictional-password")
+            )
+            .await
+            .unwrap_err()
+            .code,
+        "RESOURCE_BUSY"
+    );
+    assert_eq!(f.cloud.calls.load(Ordering::SeqCst), calls);
+    assert!(f.session.discard_account_login(ids[0]));
+    pending_login(&f).await;
+}
+
+#[tokio::test]
+async fn late_captcha_cannot_restore_cancelled_or_backgrounded_host_state() {
+    for background in [false, true] {
+        let f = Fixture::new(false);
+        f.cloud.captcha.store(true, Ordering::SeqCst);
+        f.cloud.stall.store(true, Ordering::SeqCst);
+        let started = f.cloud.started.notified();
+        let begin = f.session.begin_account_login(
+            begin_metadata(),
+            secret(b"fiction@example.invalid"),
+            secret(b"fictional-password"),
+        );
+        tokio::pin!(begin);
+        tokio::select! { _ = started => {}, value = &mut begin => panic!("Unexpected result: {value:?}") }
+        if background {
+            f.session.set_foreground(false);
+        } else {
+            f.session.cancel("begin-captcha");
+        }
+        assert_eq!(begin.await.unwrap_err().code, "CANCELLED");
+        f.session.set_foreground(true);
+        assert!(
+            f.call(json!({"method":"list_accounts"})).await["data"]
+                .as_array()
+                .unwrap()
+                .is_empty()
+        );
+    }
+}
+
+#[tokio::test(start_paused = true)]
+async fn expired_challenge_and_invalid_continuation_metadata_never_replay() {
+    for expired in [true, false] {
+        let f = Fixture::new(false);
+        f.cloud.captcha.store(true, Ordering::SeqCst);
+        let id = pending_login(&f).await;
+        let calls = f.cloud.calls.load(Ordering::SeqCst);
+        let mut metadata = answer_metadata(id);
+        if expired {
+            tokio::time::advance(std::time::Duration::from_secs(181)).await;
+        } else {
+            metadata.schema_version = "invalid".into();
+        }
+        assert!(
+            f.session
+                .continue_account_login(metadata, secret(b"correct"))
+                .await
+                .is_err()
+        );
+        assert!(
+            f.session
+                .continue_account_login(answer_metadata(id), secret(b"correct"))
+                .await
+                .is_err()
+        );
+        assert_eq!(f.cloud.calls.load(Ordering::SeqCst), calls);
+    }
+}
+
+#[tokio::test]
+async fn protected_login_requires_registered_provider_and_cannot_enter_json_dispatch() {
+    let f = Fixture::new(true);
+    let mut input = begin_metadata();
+    input.provider = Some(homeverb_host::AccountProvider::Meiju);
+    assert_eq!(
+        f.session
+            .begin_account_login(
+                input,
+                secret(b"fiction@example.invalid"),
+                secret(b"fictional-password")
+            )
+            .await
+            .unwrap_err()
+            .code,
+        "AUTH_FLOW_UNSUPPORTED"
+    );
+    assert_eq!(f.cloud.calls.load(Ordering::SeqCst), 0);
+    for method in [
+        "begin_account_login",
+        "continue_account_login",
+        "discard_account_login",
+    ] {
+        assert!(serde_json::from_value::<HostRequest>(json!({"schema_version":"1.0","operation_id":"test","timeout_ms":1000,"request":{"method":method}})).is_err());
+    }
 }
