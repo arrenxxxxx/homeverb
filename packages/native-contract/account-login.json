@@ -1,0 +1,34 @@
+{
+  "api_version": "1.28.0",
+  "functions": {
+    "homeverb_begin_account_login": {
+      "request": "native-account-login#/$defs/begin",
+      "protected_inputs": [
+        "login",
+        "password"
+      ],
+      "response": "native-account-login#/$defs/result"
+    },
+    "homeverb_continue_account_login": {
+      "request": "native-account-login#/$defs/continue",
+      "protected_inputs": [
+        "answer"
+      ],
+      "response": "native-account-login#/$defs/result"
+    },
+    "homeverb_discard_account_login": {
+      "parameters": [
+        "uint64 handle",
+        "uint64 challenge_id"
+      ],
+      "response": "bool"
+    }
+  },
+  "limits": {
+    "max_pending_logins": 4,
+    "lifetime_ms": 180000,
+    "max_answers": 3,
+    "max_image_bytes": 131072
+  },
+  "scope": "Trusted foreground Mijia UI only; never ordinary JSON/CLI/MCP. No password retention, background relogin or automatic answer."
+}

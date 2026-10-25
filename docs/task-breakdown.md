@@ -1,15 +1,15 @@
 # Implementation status and next tasks
 
 October 25: community-derived typed Rust captcha continuation and protected
-account/Host registries are implemented and synthetic-tested. Native C/App challenge entry points, SMS/email verification
+account/Host registries and dedicated C entry points are implemented. App challenge UI, SMS/email verification
 and historical readings remain pending; see the [phase record](development/14-mijia-reference-integration.md#community-captcha-protocol-phase--october-25-2026).
 
 October 25: 17 exact Mijia reference specifications now supply 264 scalar read
 mappings and localized App labels. Additional writes and modern authentication
 remain incomplete; see the [full coverage and blockers](development/14-mijia-reference-integration.md).
 
-The October 24 integration uses native API **1.27.0** after the linear mainline
-update. Earlier Mijia phase versions are historical. See
+The October 25 interactive login bridge uses native API **1.28.0**, following
+the October 24 linear mainline update. Earlier Mijia phase versions are historical. See
 [contract reconciliation](adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
 remain available alongside Mijia; identity restoration remains Meiju-only.
 

@@ -300,3 +300,21 @@ input, registration/lease release, cross-adapter and cross-host refusal, registr
 capacity, expiry, invalid metadata consumption, foreground/cancellation races,
 provider isolation and refusal through ordinary JSON. No real account/device,
 remote push or package publication was performed.
+
+## Dedicated C login bridge -- October 25, 2026
+
+API 1.28 implements begin/continue/discard through three dedicated C exports under
+[ADR-0082](../adr/0082-native-interactive-account-login.md). All 34 ordinary methods
+and the 19 prior C functions retain their contracts. Protected input buffers clear
+on failure; captcha output carries only bounded UI image data and local metadata.
+Android export checks and header-derived iOS checks include the added functions.
+No mobile package rebuild or iOS acceptance is established by those list updates.
+
+Executed: offline locked FFI build, FFI projection unit test, strict all-target
+FFI Clippy, Rust formatting, complete C ABI verifier (34 methods and 55 generated
+runtime examples plus approval, scan, link and identity recovery checks), and the
+new login-buffer/lifecycle/refusal verifier. Contract validation passed 22 schemas,
+56 positive fixtures and 404 negative fixtures. Documentation and repository
+hygiene checks passed. All login material was fictional; no vendor request was
+sent. Flutter captcha UI, SMS/email verification and real-account acceptance are
+still pending.

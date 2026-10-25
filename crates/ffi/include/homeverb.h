@@ -17,6 +17,17 @@ char *homeverb_connect_account(uint64_t handle, const char *metadata_json,
 /* API 1.25+: trusted legacy-account recovery; preparation is not confirmation. */
 /* Use the same protected buffer rules as connect. Show account/count and obtain */
 /* actual same-account consent. Confirm closes this host; reopen read-only. */
+/* API 1.28: protected Mijia interactive sign-in; never ordinary JSON tools.
+ * Input buffers follow homeverb_connect_account ownership/clearing rules.
+ * Answer buffers must be writable, nonoverlapping and 1..256 bytes; valid
+ * answers are 1..32 ASCII alphanumeric bytes. Results use homeverb_string_free.
+ * Captcha image data is for the trusted UI only; do not log or persist it. */
+char *homeverb_begin_account_login(uint64_t handle, const char *metadata_json,
+    uint8_t *login, size_t login_length, uint8_t *password, size_t password_length);
+char *homeverb_continue_account_login(uint64_t handle, const char *metadata_json,
+    uint8_t *answer, size_t answer_length);
+bool homeverb_discard_account_login(uint64_t handle, uint64_t challenge_id);
+
 char *homeverb_prepare_identity_recovery(uint64_t handle, const char *metadata_json,
                                        uint8_t *login, size_t login_length,
                                        uint8_t *password, size_t password_length);

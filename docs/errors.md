@@ -548,3 +548,14 @@ verification or exhausted attempts. Malformed images/cookies/URLs return
 `DEADLINE_EXCEEDED` without new requests. Invalid answers consume the continuation
 and return `INVALID_ARGUMENT`. No new error codes or ordinary JSON methods are
 introduced by the typed protocol phase.
+
+## Dedicated Mijia interactive login admission
+
+API 1.28's trusted C path returns a typed captcha result when supported instead of
+an error. `MIJIA_AUTH_CHALLENGE_REQUIRED` still covers unavailable, consumed,
+expired or unsupported continuations; restart explicitly. It remains the one-shot
+login result when human verification is required. `RESOURCE_BUSY` requires the UI
+to finish or discard pending sign-in before starting another. Invalid C metadata
+returns `INVALID_ARGUMENT` without returning private input. Valid protected buffers
+are erased on these failures and `HOST_CLOSED`/`HOST_BACKGROUND` admission failures.
+The caller must always erase its own buffers, including invalid-length inputs.

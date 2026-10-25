@@ -930,6 +930,7 @@ dependencies = [
 name = "homeverb-ffi"
 version = "0.2.0"
 dependencies = [
+ "base64 0.22.1",
  "homeverb-core",
  "homeverb-domain",
  "homeverb-host",

@@ -1,7 +1,7 @@
 # Native UI contract
 
-The October 24 integration uses native API **1.27.0** after the linear mainline
-update. Earlier Mijia phase versions are historical. See
+The October 25 interactive login bridge uses native API **1.28.0**, following
+the October 24 linear mainline update. Earlier Mijia phase versions are historical. See
 [contract reconciliation](adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
 remain available alongside Mijia; identity restoration remains Meiju-only.
 
@@ -39,11 +39,11 @@ Startup explicitly selects Mock, Meiju, Mijia or combined platforms; Meiju remai
 
 ## Startup, ownership, and version negotiation
 
-The 19 C functions in [homeverb.h](../crates/ffi/include/homeverb.h) form the native boundary. There is no project HTTP endpoint, CLI subprocess, or daemon.
+The 22 C functions in [homeverb.h](../crates/ffi/include/homeverb.h) form the native boundary. There is no project HTTP endpoint, CLI subprocess, or daemon.
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects Meiju, `xiaomi.mijia` selects Mijia, and `homeverb.platforms` selects both. `scenario` defaults to `normal`. All platform modes require `allow_mock_writes: false` and reject any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms the selected mode. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.27.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.28.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -1564,3 +1564,35 @@ bounds at execution. Saved descriptors and UI booleans cannot supply authority.
 A default session remains read-only. Meiju grants, 34 JSON methods, C exports,
 SQLite 5, protected Mijia payload 1 and Meiju payload 3 are unchanged. Lock and
 doorbell writes remain unavailable. Physical fan control remains owner acceptance.
+
+## API 1.28 dedicated interactive account login
+
+[ADR-0082](adr/0082-native-interactive-account-login.md) adds three C functions
+without changing the 34 ordinary methods or existing C signatures. Call them on
+a worker after API minor-version negotiation; old hosts retain one-shot login.
+See [metadata, output and limits](../packages/native-contract/account-login.json)
+and [fictional examples](../packages/native-contract/account-login-examples.json).
+
+`homeverb_begin_account_login` accepts explicit Mijia connection metadata and
+separate writable account/password buffers. `homeverb_continue_account_login`
+accepts operation metadata, the local challenge ID and a separate answer buffer.
+Valid 1..256-byte protected buffers are cleared even on metadata/handle failure;
+the caller clears and frees every input on every path, including invalid lengths.
+Answers must be 1..32 ASCII letters/digits. `homeverb_discard_account_login`
+returns whether a session-owned pending challenge was removed.
+
+Both request functions return a query envelope. `data.kind=connected` carries the
+existing account connection report; inspect its retrieval status independently.
+`data.kind=captcha` carries only a local opaque ID, bounded PNG/JPEG base64 image,
+media type and remaining lifetime. Do not log, persist, export or treat this image
+as ordinary device data. Image decoding can fail; offer restart and discard the
+challenge. No URL, provider cookie, password digest or protected subject is exposed.
+
+The UI must collect an explicit answer, consume the current challenge once, and
+replace it only with a returned challenge. Three answers, three minutes from the
+initial challenge and four pending attempts per session are maximum bounds.
+Cancel, navigation away, background and close clear images, input and pending
+state. A late response cannot restore a dismissed flow. Never solve, renew,
+retry login, or replay appliance commands automatically. Unknown challenge kinds
+require a fresh explicit sign-in. Native C synthetic verification does not prove
+Flutter integration, mobile packaging or real-account acceptance.

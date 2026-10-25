@@ -4,8 +4,8 @@ October 25: 17 exact Mijia reference specifications now supply 264 scalar read
 mappings and localized App labels. Additional writes and modern authentication
 remain incomplete; see the [full coverage and blockers](development/14-mijia-reference-integration.md).
 
-The October 24 integration uses native API **1.27.0** after the linear mainline
-update. Earlier Mijia phase versions are historical. See
+The October 25 interactive login bridge uses native API **1.28.0**, following
+the October 24 linear mainline update. Earlier Mijia phase versions are historical. See
 [contract reconciliation](adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
 remain available alongside Mijia; identity restoration remains Meiju-only.
 
@@ -2206,3 +2206,13 @@ protected account snapshots and a four-entry session registry. It retains native
 API 1.27 and exposes no additional C functions or ordinary methods yet. Existing
 account/Card identity and saved payload formats are preserved; background, cancel
 and close drop pending login material.
+
+## Native interactive login bridge -- October 25, 2026
+
+API 1.28 adds three dedicated C functions under
+[ADR-0082](adr/0082-native-interactive-account-login.md). The existing 19 functions,
+34 ordinary JSON methods, SQLite schema 5 and protected payloads remain unchanged.
+New UI callers must negotiate API 1.28 before resolving symbols. Existing one-shot
+clients retain their original behavior. The iOS verifier derives exports from the
+header; Android's explicit list now includes the three functions. Edited package
+checks do not establish a rebuilt package or mobile runtime acceptance.

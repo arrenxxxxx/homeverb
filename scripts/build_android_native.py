@@ -14,7 +14,8 @@ ABIS = {
     'arm64-v8a': ('aarch64-linux-android', 'AArch64', 'arm64'),
     'x86_64': ('x86_64-linux-android', 'Advanced Micro Devices X86-64', 'x86_64'),
 }
-SYMBOLS = ['homeverb_open', 'homeverb_call', 'homeverb_connect_account',
+SYMBOLS = ['homeverb_begin_account_login', 'homeverb_continue_account_login',
+           'homeverb_discard_account_login', 'homeverb_open', 'homeverb_call', 'homeverb_connect_account',
            'homeverb_prepare_identity_recovery', 'homeverb_confirm_identity_recovery',
            'homeverb_discard_identity_recovery',
            'homeverb_cancel', 'homeverb_set_foreground', 'homeverb_close',

@@ -421,6 +421,23 @@ def main() -> int:
         bad = dict(recovery["confirm"]); bad["recovery_id"] = value
         negative.append(("invalid recovery ID", native_validator("native-identity-recovery", "confirm"), bad))
 
+    login = load("packages/native-contract/account-login-examples.json")
+    assert login["api_version"] == load("packages/native-contract/api.json")["api_version"]
+    for name, definition in [("begin", "begin"), ("continue", "continue"), ("captcha_result", "result"), ("connected_result", "result")]:
+        shape = native_validator("native-account-login", definition)
+        shape.validate(login[name])
+        for field in ["login", "password", "answer", "token", "principal", "url", "cookie"]:
+            bad = copy.deepcopy(login[name]); bad[field] = "FORBIDDEN"
+            negative.append((f"protected login {name} rejects {field}", shape, bad))
+    for value in [0, -1, 18446744073709551616, "1", True]:
+        bad = copy.deepcopy(login["continue"]); bad["challenge_id"] = value
+        negative.append(("invalid login challenge ID", native_validator("native-account-login", "continue"), bad))
+    for field, value in [("expires_in_ms", 180001), ("expires_in_ms", 0), ("media_type", "image/svg+xml"), ("image_base64", "https://foreign.invalid/image"), ("cookie", "FORBIDDEN")]:
+        bad = copy.deepcopy(login["captcha_result"]); bad["data"][field] = value
+        negative.append((f"invalid captcha {field}", native_validator("native-account-login", "result"), bad))
+    bad = copy.deepcopy(login["begin"]); bad["provider"] = "midea.meiju"
+    negative.append(("interactive login provider refusal", native_validator("native-account-login", "begin"), bad))
+
     mijia_connect = {"schema_version":"1.0", "operation_id":"fictional-connect", "timeout_ms":1000, "label":"Mijia", "provider":"xiaomi.mijia"}
     validators["native-connect"].validate(mijia_connect)
     for provider in ["other.provider", True, {}, "CN"]:

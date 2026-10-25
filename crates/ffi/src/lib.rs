@@ -26,6 +26,8 @@ use zeroize::Zeroize;
 #[cfg(target_os = "android")]
 mod android;
 
+mod account_login;
+
 struct Host {
     session: Session,
     runtime: tokio::runtime::Runtime,
