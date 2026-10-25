@@ -1766,5 +1766,9 @@
   "mobile.captcha.imageFailure": "The verification image could not load. Cancel and sign in again.",
   "mobile.captcha.code": "Verification Code",
   "mobile.captcha.invalid": "Use only the letters and numbers shown.",
-  "mobile.captcha.continue": "Verify and Continue"
+  "mobile.captcha.continue": "Verify and Continue",
+  "vendor.xiaomi.mijia.fan.set_horizontal_swing_included_angle_6": "Set horizontal swing range",
+  "vendor.xiaomi.mijia.fan.set_vertical_swing_7": "Set vertical oscillation",
+  "vendor.xiaomi.mijia.fan.set_vertical_swing_included_angle_8": "Set vertical swing range",
+  "vendor.xiaomi.mijia.fan.set_anion_9": "Set ionizer"
 }

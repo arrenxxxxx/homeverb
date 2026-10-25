@@ -1766,5 +1766,9 @@
   "mobile.captcha.imageFailure": "验证码图片加载失败，请取消后重新登录。",
   "mobile.captcha.code": "验证码",
   "mobile.captcha.invalid": "请仅输入图片中显示的字母和数字。",
-  "mobile.captcha.continue": "验证并继续"
+  "mobile.captcha.continue": "验证并继续",
+  "vendor.xiaomi.mijia.fan.set_horizontal_swing_included_angle_6": "设置左右摇头幅度",
+  "vendor.xiaomi.mijia.fan.set_vertical_swing_7": "设置上下摇头",
+  "vendor.xiaomi.mijia.fan.set_vertical_swing_included_angle_8": "设置上下摇头幅度",
+  "vendor.xiaomi.mijia.fan.set_anion_9": "设置负离子"
 }

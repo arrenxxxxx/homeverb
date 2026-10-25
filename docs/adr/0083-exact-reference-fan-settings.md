@@ -1,6 +1,6 @@
 # ADR-0083: Exact reference fan settings
 
-Status: accepted for implementation; runtime and physical verification pending.
+Status: implemented with synthetic Core, native and App verification; physical verification pending.
 Date: October 25, 2026.
 
 ## Context

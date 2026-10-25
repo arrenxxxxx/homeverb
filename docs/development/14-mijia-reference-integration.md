@@ -1,6 +1,6 @@
 # 14. Mijia reference integration and remaining coverage
 
-The October 25 worktree uses API 1.28 and the owner-supplied October 22 Xiaomi Home
+The October 25 worktree uses API 1.29 and the owner-supplied October 22 Xiaomi Home
 11.7.709 analysis. The full official-App feature request remains **incomplete**.
 The source archive explicitly does not supply all authentication, protocol or
 runtime control contracts. An implemented decoder is not physical acceptance.
@@ -19,8 +19,9 @@ runtime control contracts. An implemented decoder is not physical acceptance.
 - Only equivalent fan/purifier/switch/light on-state uses `power.state`. Indicator,
   camera and lock-adjacent switches retain vendor scope. No online flag becomes
   power, lock state or physical connectivity.
-- Additional fields, including fan vertical swing/angle/anion/timing/quiet, remain
-  read-only. Existing exact-granted fan setters retain their protected checks.
+- API 1.29 adds exact-granted included swing angles, vertical swing and ionizer
+  settings for `jdjz.fan.2072fc`, preserving the four existing reference fan
+  setters. Timing/quiet and other additional fields remain read-only.
   Source write access alone cannot create any new action.
 - Public pinned specifications can supply exact mappings during explicit account
   retrieval without public-spec networking. Conflicting reported URNs do not use
@@ -418,3 +419,46 @@ model by family name. A bounded query is possible with exact evidence; complete
 pagination, retention guarantees and the modern `/miotspec/event/get` contract
 are not established by these helpers. No upstream source, account identifiers,
 webpage execution or provider traffic was copied into this research record.
+
+## Exact reference fan settings — October 25, 2026
+
+[ADR-0083](../adr/0083-exact-reference-fan-settings.md) is implemented through
+protected mapping, Core policy, native API 1.29 startup grants and the App. The
+exact reference fan has eight property-set options: its four existing options
+and four new included-angle, vertical-swing and ionizer settings. The coverage
+ledger records these as legacy-route implementation, not modern SID support.
+Other timers, reservations, custom service writes and MIoT actions remain open.
+
+The new settings have ten permitted values in total. Fictional Core tests
+check every value's SIID/PIID and scalar wire encoding, reject missing grants,
+wrong values and default read-only composition, and retain an unknown receipt
+without replay when a reply is lost. Mapping tests reject changed model, service,
+property, format, unit, access and domains; old read-only derivations still
+validate and upgrade without changing observation definitions.
+
+Executed on macOS:
+
+- `cargo +1.96.0 test -p homeverb-mijia --offline --locked`: 75 unit tests and
+  5 compile-fail doc tests passed.
+- `cargo +1.96.0 clippy -p homeverb-mijia -p homeverb-host -p homeverb-ffi --all-targets --offline --locked -- -D warnings`: passed.
+- `cargo +1.96.0 build -p homeverb-ffi --offline --locked`: passed.
+- `python scripts/verify_native_contract.py`: passed all 34 methods and 55
+  runtime examples, including all ten new startup values and invalid-value
+  refusal before profile creation.
+- `fvm flutter analyze`: passed. The four-file subset (`mijia_controls_test`,
+  `mijia_test`, `session_permissions_test`, `account_native_test`) passed 33
+  tests; the updated 11-test controls suite then passed against the rebuilt
+  library, including read-only version probing and granted reopen for both
+  Mijia-only and combined sessions.
+
+Repository gates also passed: 22 schemas, 59 positive and 484 negative fixtures;
+161 Markdown files and 1,729 local links; 666 maintained text files; 250 existing
+Conventional Commits; all seven shared presentation checks; reference regeneration
+and `git diff --check`. The public reference profile catalog did not change.
+
+Flutter verifies exact permission choices, API 1.28 refusal before reopening,
+English/Chinese controls at 320 pixels with double text scale, and forms that
+do not send when opened. No account, appliance, real write or physical
+acceptance was used. The previously delivered API 1.28 APK does not contain
+these changes. Existing full-suite macOS glyph tests and Meiju LAN alias
+limitations remain outside this phase's passing scope.

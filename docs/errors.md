@@ -559,3 +559,14 @@ to finish or discard pending sign-in before starting another. Invalid C metadata
 returns `INVALID_ARGUMENT` without returning private input. Valid protected buffers
 are erased on these failures and `HOST_CLOSED`/`HOST_BACKGROUND` admission failures.
 The caller must always erase its own buffers, including invalid-length inputs.
+
+## Exact reference fan grant admission
+
+API 1.29 keeps existing errors for the four settings in
+[ADR-0083](adr/0083-exact-reference-fan-settings.md). Invalid startup property/value
+pairs return `INVALID_ARGUMENT` before creating a profile. Missing exact grants
+return `POLICY_DENIED`; unadmitted protected specifications or actions remain
+`CAPABILITY_UNSUPPORTED`. A modified write domain cannot admit a setter.
+Possibly-sent failures retain `unknown` and are never automatically retried.
+The App returns `API_UPGRADE_REQUIRED` before reopening with new grants on a
+pre-1.29 library. Existing fan grants keep their previous API compatibility.

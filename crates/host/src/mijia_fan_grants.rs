@@ -39,8 +39,26 @@ pub fn mijia_fan_policy(grants: &[MijiaFanGrant]) -> Result<Policy> {
         }
         let capability = match grant.property.as_str() {
             "state" if grant.value.is_boolean() => "power",
-            "horizontal_swing" if grant.value.is_boolean() => "vendor.xiaomi.mijia.fan",
+            "horizontal_swing" | "vertical_swing_7" | "anion_9" if grant.value.is_boolean() => {
+                "vendor.xiaomi.mijia.fan"
+            }
             "level" | "mode" | "horizontal_angle" if grant.value.is_number() => {
+                "vendor.xiaomi.mijia.fan"
+            }
+            "horizontal_swing_included_angle_6"
+                if grant
+                    .value
+                    .as_f64()
+                    .is_some_and(|v| [60.0, 90.0, 120.0].contains(&v)) =>
+            {
+                "vendor.xiaomi.mijia.fan"
+            }
+            "vertical_swing_included_angle_8"
+                if grant
+                    .value
+                    .as_f64()
+                    .is_some_and(|v| [60.0, 105.0, 120.0].contains(&v)) =>
+            {
                 "vendor.xiaomi.mijia.fan"
             }
             _ => return Err(Error::invalid()),

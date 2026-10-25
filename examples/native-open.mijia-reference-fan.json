@@ -1,0 +1,68 @@
+{
+  "schema_version": "1.0",
+  "data_dir": "/fictional/private/reference-fan",
+  "adapter": "xiaomi.mijia",
+  "allow_mock_writes": false,
+  "mijia_fan_grants": [
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "fan-2",
+      "property": "horizontal_swing_included_angle_6",
+      "value": 60
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "fan-2",
+      "property": "horizontal_swing_included_angle_6",
+      "value": 90
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "fan-2",
+      "property": "horizontal_swing_included_angle_6",
+      "value": 120
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "fan-2",
+      "property": "vertical_swing_7",
+      "value": false
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "fan-2",
+      "property": "vertical_swing_7",
+      "value": true
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "fan-2",
+      "property": "vertical_swing_included_angle_8",
+      "value": 60
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "fan-2",
+      "property": "vertical_swing_included_angle_8",
+      "value": 105
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "fan-2",
+      "property": "vertical_swing_included_angle_8",
+      "value": 120
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "fan-2",
+      "property": "anion_9",
+      "value": false
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "fan-2",
+      "property": "anion_9",
+      "value": true
+    }
+  ]
+}

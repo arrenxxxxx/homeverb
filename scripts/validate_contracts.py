@@ -21,6 +21,9 @@ def checked_formats() -> FormatChecker:
 def main() -> int:
     formats = checked_formats()
     pairs = [
+        ("native-open", "native-open.mijia-reference-fan"),
+        ("capability", "capability.mijia-reference-fan"),
+        ("command", "command.mijia-reference-fan"),
         ("capability", "capability.mijia-reference"), ("state", "state.mijia-reference"),
         ("capability", "capability.mijia-fan"), ("command", "command.mijia-fan"),
         ("cli-meiju-grants", "cli-meiju-grants"),
@@ -147,6 +150,15 @@ def main() -> int:
     mijia_fan_validator = Draft202012Validator(load("examples/capability.mijia-fan.json")["actions"]["set_level"]["parameters"])
     mijia_fan_validator.validate(load("examples/command.mijia-fan.json")["arguments"])
     negative = []
+    reference_startup = load("examples/native-open.mijia-reference-fan.json")
+    for entry in reference_startup["mijia_fan_grants"]:
+        domain = load("examples/capability.mijia-reference-fan.json")["actions"]["set_"+entry["property"]]["parameters"]
+        Draft202012Validator(domain).validate({entry["property"]:entry["value"]})
+        for value in [None, "true", {}, 1, 0, 61, 60.5, 180]:
+            bad = copy.deepcopy(reference_startup)
+            bad["mijia_fan_grants"] = [{**entry, "value":value}]
+            negative.append((f"invalid reference fan setting {entry['property']}/{value}", validators["native-open"], bad))
+
     for feature in ("cool_energy_saving", "strong_cooling", "light_sensing"):
         for value in (0, 1, "on", "true", None, {}, []):
             bad = load("examples/native-open.meiju-reference-features.json")

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:homeverb_mobile/localization.dart';
 import 'package:flutter/material.dart';
 import 'package:homeverb_mobile/controls.dart';
 import 'package:homeverb_mobile/device_detail_controls.dart';
@@ -10,7 +11,7 @@ import 'package:homeverb_mobile/session_permissions.dart';
 import 'accounts_test.dart' show AccountPreferences, firstAccount;
 import 'session_permissions_test.dart' show PermissionCore, inspection;
 
-Json fanInspection() {
+Json fanInspection({bool reference = false}) {
   final result = inspection();
   Json option(String property, Json domain) => {
     'component_id': 'fan-2',
@@ -32,6 +33,18 @@ Json fanInspection() {
     },
   };
   result['options'] = [
+    if (reference) ...[
+      option('horizontal_swing_included_angle_6', {
+        'type': 'integer',
+        'enum': [60, 90, 120],
+      }),
+      option('vertical_swing_7', {'type': 'boolean'}),
+      option('vertical_swing_included_angle_8', {
+        'type': 'integer',
+        'enum': [60, 105, 120],
+      }),
+      option('anion_9', {'type': 'boolean'}),
+    ],
     option('state', {'type': 'boolean'}),
     option('level', {
       'type': 'integer',
@@ -114,7 +127,141 @@ class FanPermissionCore extends PermissionCore {
   }
 }
 
+class VersionedFanCore extends FanPermissionCore
+    implements NativeSessionClient {
+  VersionedFanCore(super.inspected);
+  @override
+  Set<String> get methods => {'inspect_control_options'};
+  @override
+  bool apiAtLeast(int minor) => minor <= 28;
+}
+
 void main() {
+  tearDown(() => LocaleSettings.setLocale(AppLocale.enUs));
+  test(
+    'reference settings grant each exact value without merging angle meanings',
+    () {
+      final choices = SessionPermission.choices(fanInspection(reference: true));
+      final added = choices.where((p) => p.requiresReferenceFanApi).toList();
+      expect(added.length, 10);
+      expect(
+        added
+            .where((p) => p.parameter == 'vertical_swing_included_angle_8')
+            .map((p) => p.value),
+        [60, 105, 120],
+      );
+      expect(
+        added
+            .where((p) => p.parameter == 'horizontal_swing_included_angle_6')
+            .map((p) => p.value),
+        [60, 90, 120],
+      );
+      expect(added.where((p) => p.parameter == 'anion_9').map((p) => p.value), [
+        false,
+        true,
+      ]);
+      expect(
+        SessionPermission.startup(added)['mijia_fan_grants'],
+        hasLength(10),
+      );
+      expect(
+        choices
+            .where((p) => p.parameter == 'horizontal_angle')
+            .every((p) => !p.requiresReferenceFanApi),
+        true,
+      );
+    },
+  );
+  test(
+    'older native API refuses new options before reopening a session',
+    () async {
+      final inspected = fanInspection(reference: true);
+      final core = VersionedFanCore(inspected);
+      var reopened = false;
+      final c = HomeController(
+        core,
+        AccountPreferences(),
+        reopen: (_) async {
+          reopened = true;
+          return core;
+        },
+      );
+      expect(await c.initialize(), true);
+      expect(await c.selectDevice(inspected['device_id']), false);
+      expect(
+        c.error,
+        isA<NativeFailure>().having(
+          (e) => e.code,
+          'code',
+          'API_UPGRADE_REQUIRED',
+        ),
+      );
+      expect(reopened, false);
+      expect(
+        core.requests.where(
+          (r) => ['execute', 'refresh_account'].contains(r['method']),
+        ),
+        isEmpty,
+      );
+      c.dispose();
+    },
+  );
+  for (final locale in [AppLocale.enUs, AppLocale.zhCn]) {
+    testWidgets(
+      'reference fan control labels fit 320px double text in ${locale.languageCode}',
+      (tester) async {
+        LocaleSettings.setLocale(locale);
+        tester.view.physicalSize = const Size(640, 1600);
+        tester.view.devicePixelRatio = 2;
+        tester.platformDispatcher.textScaleFactorTestValue = 2;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+        final inspected = fanInspection(reference: true);
+        final old = FanPermissionCore(inspected),
+            next = FanPermissionCore(inspected);
+        final c = HomeController(
+          old,
+          AccountPreferences(),
+          reopen: (_) async => next,
+        );
+        expect(await c.initialize(), true);
+        expect(await c.selectDevice(inspected['device_id']), true);
+        String? selected;
+        await tester.pumpWidget(
+          TranslationProvider(
+            child: MaterialApp(
+              theme: windowTheme(),
+              home: Scaffold(
+                body: SingleChildScrollView(
+                  child: DeviceDetailControls(
+                    controller: c,
+                    onAction: (a) => selected = a,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final button = find.byKey(
+          const ValueKey('control:0:set_vertical_swing_7'),
+        );
+        await tester.ensureVisible(button);
+        await tester.tap(button);
+        await tester.pumpAndSettle();
+        expect(selected, 'control:0:set_vertical_swing_7');
+        expect(
+          next.requests.where((r) => ['plan', 'execute'].contains(r['method'])),
+          isEmpty,
+        );
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox());
+        c.dispose();
+      },
+    );
+  }
+
   test(
     'fan permissions preserve exact component and actual values without Meiju grants',
     () {
@@ -311,9 +458,11 @@ void main() {
             dataDir: directory.path,
             adapter: adapter,
             libraryPath: '../../target/debug/${NativeClient.defaultLibrary()}',
-            permissions: SessionPermission.choices(fanInspection()),
+            permissions: SessionPermission.choices(
+              fanInspection(reference: true),
+            ),
           );
-          expect(client.apiAtLeast(25), true);
+          expect(client.apiAtLeast(29), true);
           expect(await client.call('list_devices'), isEmpty);
         } finally {
           await client?.close();

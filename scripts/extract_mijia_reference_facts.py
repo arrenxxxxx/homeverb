@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Project public, exact-model read facts and exhaustive coverage without networking."""
+"""Project public exact-model facts and exhaustive coverage without networking."""
 import argparse
 import hashlib
 import json
@@ -46,7 +46,12 @@ def project():
                 entries.append({'kind': 'property', 'siid': service['iid'], 'iid': prop['iid'],
                                 'name': prop['type'].split(':')[3],
                                 'read_status': reason or 'implemented_exact_scalar_mapping',
-                                'write_status': 'not_admitted_by_reference',
+                                'write_status': ('implemented_exact_granted_legacy_property_set'
+                                                 if model['model'] == 'jdjz.fan.2072fc'
+                                                 and service['iid'] == 2
+                                                 and prop['iid'] in {1, 3, 4, 5, 6, 7, 8, 9}
+                                                 and 'write' in prop.get('access', [])
+                                                 else 'not_admitted_by_reference'),
                                 'reference_successful_instances': len(prop.get('analysis_verification', {}).get('successful_instances', []))})
                 if reason:
                     continue
@@ -65,7 +70,10 @@ def project():
             profiles.append({'model': model['model'], 'spec_type': model['spec_urn'],
                              'source': {'type': model['spec_urn'], 'services': services}})
         ledger.append({'model': model['model'], 'spec_type': model['spec_urn'],
-                       'status': 'exact_scalar_reads_only' if services else 'placeholder_no_reviewed_readable_spec',
+                       'status': ('exact_scalar_reads_and_granted_fan_settings'
+                                  if model['model'] == 'jdjz.fan.2072fc'
+                                  else 'exact_scalar_reads_only' if services
+                                  else 'placeholder_no_reviewed_readable_spec'),
                        'reference_read_summary': model['independent_read_summary'], 'entries': entries})
     operations = [{'id': o['id'], 'route': o['route'],
                    'status': 'legacy_session_path_only' if o['id'] in ('directory', 'homes', 'properties') else 'not_admitted_by_reference',

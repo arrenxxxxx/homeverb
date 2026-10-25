@@ -357,6 +357,26 @@ class NativeClient
         'This host cannot configure real controls.',
       );
     }
+    if (permissions.any((p) => p.requiresReferenceFanApi)) {
+      // Negotiate with a read-only host before passing additive startup fields.
+      final probe = await open(
+        dataDir: dataDir,
+        libraryPath: libraryPath,
+        adapter: adapter,
+        allowMockWrites: allowMockWrites,
+        scenario: scenario,
+      );
+      try {
+        if (!probe.apiAtLeast(29)) {
+          throw NativeFailure(
+            'API_UPGRADE_REQUIRED',
+            'Reference fan settings require native API 1.29.',
+          );
+        }
+      } finally {
+        await probe.close();
+      }
+    }
     final grants = SessionPermission.startup(permissions);
     final path = libraryPath ?? defaultLibrary();
     final response = await Isolate.run(
@@ -390,6 +410,13 @@ class NativeClient
         throw NativeFailure(
           'API_UPGRADE_REQUIRED',
           'Mijia requires native API 1.27 or later.',
+        );
+      }
+      if (permissions.any((p) => p.requiresReferenceFanApi) &&
+          !client.apiAtLeast(29)) {
+        throw NativeFailure(
+          'API_UPGRADE_REQUIRED',
+          'Reference fan settings require native API 1.29.',
         );
       }
       if (grants.containsKey('mijia_fan_grants') && !client.apiAtLeast(27)) {

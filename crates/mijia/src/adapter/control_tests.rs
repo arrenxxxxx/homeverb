@@ -238,3 +238,110 @@ async fn background_cancellation_after_send_keeps_unknown_and_releases_account_l
     assert!(f.vault.lease(report.account.id, &operation()).await.is_ok());
     assert_eq!(f.cloud.count(CloudEndpoint::SetProperty), 1);
 }
+
+#[tokio::test]
+async fn reference_fan_settings_keep_exact_grants_wire_ids_and_uncertain_receipts() {
+    let settings = [
+        (
+            "horizontal_swing_included_angle_6",
+            6,
+            vec![json!(60), json!(90), json!(120)],
+        ),
+        ("vertical_swing_7", 7, vec![json!(false), json!(true)]),
+        (
+            "vertical_swing_included_angle_8",
+            8,
+            vec![json!(60), json!(105), json!(120)],
+        ),
+        ("anion_9", 9, vec![json!(false), json!(true)]),
+    ];
+    for (name, piid, values) in settings {
+        for value in values {
+            let f = Fixture::new();
+            *f.cloud.devices.lock().unwrap() = vec![
+                json!({"did":"PRIVATE-FAN-IDENTITY","name":"Reference fan","model":"jdjz.fan.2072fc"}),
+            ];
+            let report = f.connect().await;
+            f.publish(&report).await;
+            let fan = f.core.list().unwrap().into_iter().next().unwrap();
+            let mut request = command(&fan);
+            request.action = format!("set_{name}");
+            request.arguments = json!({name:value});
+            let policy = Policy {
+                grants: vec![Grant {
+                    device_id: fan.id.clone(),
+                    component_id: "fan-2".into(),
+                    capability: request.capability.clone(),
+                    action: request.action.clone(),
+                    transports: vec![Transport::Cloud],
+                    argument_schema: json!({"const":request.arguments}),
+                }],
+            };
+            let default = Core::new(
+                f.store.clone(),
+                vec![f.adapter.clone()],
+                Arc::new(SystemClock),
+                policy.clone(),
+            );
+            assert_eq!(
+                default
+                    .execute(request.clone(), CancellationToken::new())
+                    .await
+                    .status,
+                Status::Failed
+            );
+            assert_eq!(f.cloud.count(CloudEndpoint::SetProperty), 0);
+            let adapter = controlled(&f, report.account.id).await;
+            let denied = Core::new(
+                f.store.clone(),
+                vec![adapter.clone()],
+                Arc::new(SystemClock),
+                Policy::default(),
+            );
+            request.request_id = "no-grant".into();
+            assert_eq!(
+                denied
+                    .execute(request.clone(), CancellationToken::new())
+                    .await
+                    .status,
+                Status::Failed
+            );
+            let core = Core::new(
+                f.store.clone(),
+                vec![adapter],
+                Arc::new(SystemClock),
+                policy,
+            );
+            let mut wrong = request.clone();
+            wrong.request_id = "wrong-domain".into();
+            wrong.arguments = json!({name:180});
+            assert_eq!(
+                core.execute(wrong, CancellationToken::new()).await.status,
+                Status::Failed
+            );
+            assert_eq!(f.cloud.count(CloudEndpoint::SetProperty), 0);
+            request.request_id = "admitted-reference".into();
+            let receipt = core
+                .execute(request.clone(), CancellationToken::new())
+                .await;
+            assert_eq!(receipt.status, Status::Accepted);
+            assert_eq!(
+                f.cloud.last_write.lock().unwrap().as_ref().unwrap(),
+                &json!({"did":"PRIVATE-FAN-IDENTITY","siid":2,"piid":piid,"value":value})
+            );
+            core.execute(request.clone(), CancellationToken::new())
+                .await;
+            assert_eq!(f.cloud.count(CloudEndpoint::SetProperty), 1);
+            request.request_id = "reference-lost-reply".into();
+            f.cloud.write_mode.store(1, Ordering::SeqCst);
+            assert_eq!(
+                core.execute(request.clone(), CancellationToken::new())
+                    .await
+                    .status,
+                Status::Unknown
+            );
+            core.execute(request, CancellationToken::new()).await;
+            assert_eq!(f.cloud.count(CloudEndpoint::SetProperty), 2);
+        }
+    }
+}

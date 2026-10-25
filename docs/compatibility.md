@@ -1,10 +1,21 @@
 # Platform and device compatibility matrix
 
+## Exact reference fan settings — October 25, 2026
+
+API 1.29 implements [ADR-0083](adr/0083-exact-reference-fan-settings.md):
+`jdjz.fan.2072fc` gains horizontal/vertical included swing angles, vertical swing
+and ionizer controls, each with independent exact-value startup grants. Core,
+the protected adapter and the foreground App retain all identity, route, argument
+and uncertainty checks. Old reference mappings remain readable; explicit refresh
+derives the additional options. This is synthetic implementation evidence, not
+physical-device verification. Other reference controls, modern authentication,
+history/events and health/media remain incomplete.
+
 October 25: 17 exact Mijia reference specifications now supply 264 scalar read
 mappings and localized App labels. Additional writes and modern authentication
 remain incomplete; see the [full coverage and blockers](development/14-mijia-reference-integration.md).
 
-The October 25 interactive login bridge uses native API **1.28.0**, following
+The October 25 exact reference fan settings use native API **1.29.0**, following
 the October 24 linear mainline update. Earlier Mijia phase versions are historical. See
 [contract reconciliation](adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
 remain available alongside Mijia; identity restoration remains Meiju-only.

@@ -646,7 +646,11 @@
               "level",
               "mode",
               "horizontal_swing",
-              "horizontal_angle"
+              "horizontal_angle",
+              "horizontal_swing_included_angle_6",
+              "vertical_swing_7",
+              "vertical_swing_included_angle_8",
+              "anion_9"
             ]
           },
           "value": {
@@ -670,7 +674,9 @@
                 "property": {
                   "enum": [
                     "state",
-                    "horizontal_swing"
+                    "horizontal_swing",
+                    "vertical_swing_7",
+                    "anion_9"
                   ]
                 }
               }
@@ -689,6 +695,48 @@
                 }
               }
             }
+          },
+          {
+            "if": {
+              "properties": {
+                "property": {
+                  "const": "horizontal_swing_included_angle_6"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "value": {
+                  "type": "integer",
+                  "enum": [
+                    60,
+                    90,
+                    120
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "property": {
+                  "const": "vertical_swing_included_angle_8"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "value": {
+                  "type": "integer",
+                  "enum": [
+                    60,
+                    105,
+                    120
+                  ]
+                }
+              }
+            }
           }
         ]
       }
@@ -700,7 +748,7 @@
     "allow_mock_writes"
   ],
   "additionalProperties": false,
-  "description": "Trusted native startup. data_dir must be an absolute private OS path. adapter defaults to homeverb.mock; scenario defaults to normal. Meiju defaults to read-only; optional meiju_power_grants, meiju_fan_grants, meiju_mode_grants and meiju_temperature_grants separately admit exact-device power, fan, explicit power-on/mode activation and profile-scoped temperature targets over cloud. Meiju rejects Mock grants or fault scenarios. Opening never authenticates, discovers or controls. Optional meiju_dishwasher_grants admit reviewed elevated starts only through separate trusted confirmation. Optional meiju_dishwasher_cycle_grants independently admit reviewed pause, resume, cancel, power-on and power-off requests through trusted confirmation. Optional meiju_ac_feature_grants independently admit reviewed profile-scoped scalar settings; missing reported prerequisites refuse before send. API 1.24 admits Mijia-only and combined platform sessions. Mijia is read-only; combined sessions retain independent Meiju grants. API 1.25 adds exact mijia_fan_grants in Mijia-only and combined sessions. Protected model/spec domains are independently rechecked; startup schema acceptance is not device support.",
+  "description": "Trusted native startup. data_dir must be an absolute private OS path. adapter defaults to homeverb.mock; scenario defaults to normal. Meiju defaults to read-only; optional meiju_power_grants, meiju_fan_grants, meiju_mode_grants and meiju_temperature_grants separately admit exact-device power, fan, explicit power-on/mode activation and profile-scoped temperature targets over cloud. Meiju rejects Mock grants or fault scenarios. Opening never authenticates, discovers or controls. Optional meiju_dishwasher_grants admit reviewed elevated starts only through separate trusted confirmation. Optional meiju_dishwasher_cycle_grants independently admit reviewed pause, resume, cancel, power-on and power-off requests through trusted confirmation. Optional meiju_ac_feature_grants independently admit reviewed profile-scoped scalar settings; missing reported prerequisites refuse before send. API 1.24 admits Mijia-only and combined platform sessions. Mijia is read-only; combined sessions retain independent Meiju grants. API 1.25 adds exact mijia_fan_grants in Mijia-only and combined sessions. Protected model/spec domains are independently rechecked; startup schema acceptance is not device support. API 1.29 adds four independently granted exact-reference fan settings under ADR-0083; protected model/spec evidence remains required.",
   "allOf": [
     {
       "if": {

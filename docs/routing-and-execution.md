@@ -574,6 +574,23 @@ scalar reads through the existing protected account lease and cloud operation.
 Pinned public facts avoid optional public-spec requests on explicit account
 retrieval; they are neither current firmware evidence nor account authority.
 Reference properties retain device/SIID/PIID correlation, local receipt time,
-unknown physical observation time and stale flags. New fields have no setters.
+unknown physical observation time and stale flags. ADR-0083 separately admits
+four exact reference fan setters; other new fields have no setters.
 Existing fan grants, one-send outcomes, replay protection and lifecycle rules are
 unchanged. No credential is forwarded from the legacy SID to the modern origin.
+
+## Exact reference fan settings
+
+[ADR-0083](adr/0083-exact-reference-fan-settings.md) extends the existing fan path
+only for the pinned `jdjz.fan.2072fc` device/service/property specification.
+Horizontal included angle (60/90/120), vertical swing, vertical included angle
+(60/105/120) and ionizer retain their existing property identifiers. Each exact
+value requires its own trusted startup grant and protected adapter admission.
+Included angle never selects the separate absolute-orientation command.
+
+A command sends one correlated MIoT property over the existing legacy session
+route. Its acknowledgement is `accepted`; no physical verification is inferred.
+Possibly-sent failures remain `unknown` with no automatic replay or route fallback.
+Old reference mappings remain readable and gain options only after explicit
+inventory refresh. Foreground cancellation and independent Core policy checks
+apply unchanged; no timer, reservation, MIoT action or modern-origin route is added.

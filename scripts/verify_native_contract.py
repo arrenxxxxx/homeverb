@@ -448,6 +448,27 @@ def main():
             assert decode(library.homeverb_open(json.dumps(config).encode()))['error']['code'] == 'INVALID_ARGUMENT'
             assert not private.exists()
 
+    # API 1.29 adds exact reference settings, never discovery or control at open.
+    reference_startup = load('examples/native-open.mijia-reference-fan.json')
+    with tempfile.TemporaryDirectory(prefix='homeverb-reference-fan-') as directory:
+        config = {**reference_startup, 'data_dir':directory}
+        open_schema.validate(config)
+        opened = decode(library.homeverb_open(json.dumps(config).encode()))
+        assert opened['error'] is None, opened
+        try:
+            assert raw(opened['data']['handle'], envelope('list_devices'))['data'] == []
+        finally:
+            library.homeverb_close(opened['data']['handle'])
+    for entry in reference_startup['mijia_fan_grants']:
+        for value in [None, 'true', 1, 60.5, 180]:
+            with tempfile.TemporaryDirectory(prefix='homeverb-reference-fan-refused-') as directory:
+                private = Path(directory) / 'must-not-create'
+                config = {**reference_startup, 'data_dir':str(private),
+                          'mijia_fan_grants':[{**entry, 'value':value}]}
+                assert not open_schema.is_valid(config)
+                assert decode(library.homeverb_open(json.dumps(config).encode()))['error']['code'] == 'INVALID_ARGUMENT'
+                assert not private.exists()
+
     # Local account metadata remains usable without creating any protected session.
     with tempfile.TemporaryDirectory(prefix='homeverb-ui-local-accounts-') as directory:
         account_id = '40000000-0000-4000-8000-000000000001'

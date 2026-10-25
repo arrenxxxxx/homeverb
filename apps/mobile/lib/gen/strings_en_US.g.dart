@@ -5339,4 +5339,16 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Verify and Continue'
 	String get mobileCaptchaContinue => 'Verify and Continue';
+
+	/// en-US: 'Set horizontal swing range'
+	String get vendorXiaomiMijiaFanSetHorizontalSwingIncludedAngle6 => 'Set horizontal swing range';
+
+	/// en-US: 'Set vertical oscillation'
+	String get vendorXiaomiMijiaFanSetVerticalSwing7 => 'Set vertical oscillation';
+
+	/// en-US: 'Set vertical swing range'
+	String get vendorXiaomiMijiaFanSetVerticalSwingIncludedAngle8 => 'Set vertical swing range';
+
+	/// en-US: 'Set ionizer'
+	String get vendorXiaomiMijiaFanSetAnion9 => 'Set ionizer';
 }

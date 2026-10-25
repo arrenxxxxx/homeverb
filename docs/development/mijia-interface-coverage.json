@@ -922,7 +922,7 @@
     {
       "model": "jdjz.fan.2072fc",
       "spec_type": "urn:miot-spec-v2:device:fan:0000A005:jdjz-2072fc:1:0000D062",
-      "status": "exact_scalar_reads_only",
+      "status": "exact_scalar_reads_and_granted_fan_settings",
       "reference_read_summary": {
         "requested": 12,
         "successful_items": 12,
@@ -983,7 +983,7 @@
           "iid": 1,
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_property_set",
           "reference_successful_instances": 1
         },
         {
@@ -992,7 +992,7 @@
           "iid": 3,
           "name": "mode",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_property_set",
           "reference_successful_instances": 1
         },
         {
@@ -1001,7 +1001,7 @@
           "iid": 4,
           "name": "fan-level",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_property_set",
           "reference_successful_instances": 1
         },
         {
@@ -1019,7 +1019,7 @@
           "iid": 5,
           "name": "horizontal-swing",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_property_set",
           "reference_successful_instances": 1
         },
         {
@@ -1028,7 +1028,7 @@
           "iid": 6,
           "name": "horizontal-swing-included-angle",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_property_set",
           "reference_successful_instances": 1
         },
         {
@@ -1037,7 +1037,7 @@
           "iid": 7,
           "name": "vertical-swing",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_property_set",
           "reference_successful_instances": 1
         },
         {
@@ -1046,7 +1046,7 @@
           "iid": 8,
           "name": "vertical-swing-included-angle",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_property_set",
           "reference_successful_instances": 1
         },
         {
@@ -1055,7 +1055,7 @@
           "iid": 9,
           "name": "anion",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_property_set",
           "reference_successful_instances": 1
         },
         {

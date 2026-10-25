@@ -341,7 +341,16 @@ impl ModelMapping {
         }
         let bytes = serde_json::to_vec(&self.source).map_err(|_| invalid())?;
         let expected = Self::decode(&self.model, &self.spec_type, &bytes)?;
+        let mut previous_reference = expected.clone();
+        if self.model == REFERENCE_FAN_MODEL && self.spec_type == REFERENCE_FAN_TYPE {
+            for property in &mut previous_reference.properties {
+                if property.siid == 2 && matches!(property.piid, 6..=9) {
+                    property.write_domain = None;
+                }
+            }
+        }
         if expected != *self
+            && previous_reference != *self
             && Self::decode_inner(&self.model, &self.spec_type, &bytes, false)
                 .ok()
                 .as_ref()
@@ -420,7 +429,14 @@ impl MappedProperty {
                 ("power", "state")
                     | (
                         "vendor.xiaomi.mijia.fan",
-                        "level" | "mode" | "horizontal_swing" | "horizontal_angle"
+                        "level"
+                            | "mode"
+                            | "horizontal_swing"
+                            | "horizontal_angle"
+                            | "horizontal_swing_included_angle_6"
+                            | "vertical_swing_7"
+                            | "vertical_swing_included_angle_8"
+                            | "anion_9"
                     )
             )
         {
@@ -681,6 +697,8 @@ fn append_reference(
                 && property.kind.split(':').nth(4) == Some("00000006")
                 && name == "on"
                 && property.format == "bool";
+            let write_domain =
+                reference_fan_domain(model, kind, service.iid, &service.kind, &property, known)?;
             properties.push(MappedProperty {
                 siid: service.iid,
                 piid: property.iid,
@@ -696,9 +714,41 @@ fn append_reference(
                     format!("{name}_{}", property.iid)
                 },
                 definition,
-                write_domain: None,
+                write_domain,
             });
         }
     }
     Ok(())
+}
+
+const REFERENCE_FAN_MODEL: &str = "jdjz.fan.2072fc";
+const REFERENCE_FAN_TYPE: &str = "urn:miot-spec-v2:device:fan:0000A005:jdjz-2072fc:1:0000D062";
+
+fn reference_fan_domain(
+    model: &str,
+    kind: &str,
+    siid: u32,
+    service: &str,
+    property: &Property,
+    known: &Value,
+) -> Result<Option<Value>> {
+    if model != REFERENCE_FAN_MODEL
+        || kind != REFERENCE_FAN_TYPE
+        || siid != 2
+        || service != "urn:miot-spec-v2:service:fan:00007808:jdjz-2072fc:1:0000D062"
+        || !matches!(property.iid, 6..=9)
+        || !property.access.iter().any(|a| a == "write")
+    {
+        return Ok(None);
+    }
+    // append_reference already correlates property URN, format and unit. Require
+    // the reviewed domain too; a changed specification does not widen authority.
+    let reviewed: Property = serde_json::from_value(known.clone()).map_err(|_| invalid())?;
+    let Ok(domain) = property.write_domain() else {
+        return Ok(None);
+    };
+    if domain != reviewed.write_domain()? {
+        return Ok(None);
+    }
+    Ok(domain)
 }

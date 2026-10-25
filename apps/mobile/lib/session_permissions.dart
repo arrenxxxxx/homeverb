@@ -14,6 +14,14 @@ class SessionPermission {
   );
   final String device, component, capability, action, parameter, startupField;
   final Object value;
+  bool get requiresReferenceFanApi =>
+      startupField == 'mijia_fan_grants' &&
+      const {
+        'horizontal_swing_included_angle_6',
+        'vertical_swing_7',
+        'vertical_swing_included_angle_8',
+        'anion_9',
+      }.contains(parameter);
   String get identity =>
       jsonEncode([device, component, capability, action, value]);
 
@@ -78,6 +86,10 @@ class SessionPermission {
                   'mode',
                   'horizontal_swing',
                   'horizontal_angle',
+                  'horizontal_swing_included_angle_6',
+                  'vertical_swing_7',
+                  'vertical_swing_included_angle_8',
+                  'anion_9',
                 }.contains(featureParameter) &&
                 option['action'] == 'set_$featureParameter')
           ? featureParameter as String
@@ -106,7 +118,12 @@ class SessionPermission {
         continue;
       final schema = properties![mapping.$2] as Map;
       if (fanComponent &&
-          (const {'state', 'horizontal_swing'}.contains(mapping.$2)
+          (const {
+                'state',
+                'horizontal_swing',
+                'vertical_swing_7',
+                'anion_9',
+              }.contains(mapping.$2)
               ? schema['type'] != 'boolean'
               : !const {'integer', 'number'}.contains(schema['type'])))
         continue;

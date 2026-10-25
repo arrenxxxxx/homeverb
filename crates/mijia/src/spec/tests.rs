@@ -265,6 +265,10 @@ fn exact_reference_catalog_maps_only_reviewed_scalar_reads() {
                             | "set_mode"
                             | "set_horizontal_swing"
                             | "set_horizontal_angle"
+                            | "set_horizontal_swing_included_angle_6"
+                            | "set_vertical_swing_7"
+                            | "set_vertical_swing_included_angle_8"
+                            | "set_anion_9"
                     ))
         );
         assert!(
@@ -292,7 +296,8 @@ fn exact_reference_catalog_maps_only_reviewed_scalar_reads() {
     assert!(
         fan.properties
             .iter()
-            .any(|p| p.property == "vertical_swing_7" && p.write_domain.is_none())
+            .any(|p| p.property == "vertical_swing_7"
+                && p.write_domain == Some(json!({"type":"boolean"})))
     );
     let hub = ModelMapping::pinned("xiaomi.gateway.hub1", None)
         .unwrap()
@@ -351,4 +356,94 @@ fn extended_urns_and_reference_fields_keep_exact_identity_and_types() {
     assert!(legacy.properties.len() < original.properties.len());
     legacy.validate_saved().unwrap();
     assert_eq!(legacy.upgraded().unwrap(), original);
+}
+
+#[test]
+fn reference_fan_controls_preserve_fields_and_accept_only_exact_source_domains() {
+    let profile = reference(REFERENCE_FAN_MODEL, REFERENCE_FAN_TYPE).unwrap();
+    let current = ModelMapping::pinned(REFERENCE_FAN_MODEL, None)
+        .unwrap()
+        .unwrap();
+    let options = current.control_options();
+    for (name, domain) in [
+        (
+            "horizontal_swing_included_angle_6",
+            json!({"type":"integer","minimum":0,"maximum":255,"enum":[60,90,120]}),
+        ),
+        ("vertical_swing_7", json!({"type":"boolean"})),
+        (
+            "vertical_swing_included_angle_8",
+            json!({"type":"integer","minimum":0,"maximum":255,"enum":[60,105,120]}),
+        ),
+        ("anion_9", json!({"type":"boolean"})),
+    ] {
+        let option = options
+            .iter()
+            .find(|o| o.action == format!("set_{name}"))
+            .unwrap();
+        assert_eq!(option.component_id, "fan-2");
+        assert_eq!(option.definition.parameters["properties"][name], domain);
+    }
+    assert_eq!(options.len(), 8);
+    for change in [
+        "model", "service", "property", "unit", "format", "read", "write", "domain",
+    ] {
+        let mut source = profile.source.clone();
+        let field = &mut source["services"][0]["properties"][5];
+        assert_eq!(field["iid"], 6);
+        match change {
+            "service" => {
+                source["services"][0]["type"] =
+                    json!("urn:miot-spec-v2:service:fan:00007808:other:1")
+            }
+            "property" => {
+                field["type"] = json!("urn:miot-spec-v2:property:horizontal-angle:00000019:other:1")
+            }
+            "unit" => field["unit"] = json!("percentage"),
+            "format" => field["format"] = json!("uint16"),
+            "read" => field["access"] = json!(["write"]),
+            "write" => field["access"] = json!(["read"]),
+            "domain" => field["value-list"] = json!([{"value":60},{"value":180}]),
+            _ => {}
+        }
+        let mapped = ModelMapping::decode(
+            if change == "model" {
+                "fiction.fan.other"
+            } else {
+                REFERENCE_FAN_MODEL
+            },
+            REFERENCE_FAN_TYPE,
+            &serde_json::to_vec(&source).unwrap(),
+        )
+        .unwrap();
+        assert!(
+            !mapped
+                .control_options()
+                .iter()
+                .any(|o| o.action == "set_horizontal_swing_included_angle_6"),
+            "{change}"
+        );
+    }
+    // The entire previous derivation remains accepted; edited partial derivations do not.
+    let mut old = current.clone();
+    for property in &mut old.properties {
+        if property.siid == 2 && matches!(property.piid, 6..=9) {
+            property.write_domain = None;
+        }
+    }
+    old.validate_saved().unwrap();
+    assert_eq!(old.upgraded().unwrap(), current);
+    assert_eq!(old.control_options().len(), 4);
+    let mut forged = old.clone();
+    forged
+        .properties
+        .iter_mut()
+        .find(|p| p.piid == 6 && p.siid == 2)
+        .unwrap()
+        .write_domain = Some(json!({"type":"integer","enum":[180]}));
+    assert!(forged.validate_saved().is_err());
+    assert_eq!(
+        serde_json::to_value(old.capabilities()).unwrap(),
+        serde_json::to_value(current.capabilities()).unwrap()
+    );
 }

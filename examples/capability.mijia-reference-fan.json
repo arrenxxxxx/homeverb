@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "id": "vendor.xiaomi.mijia.fan",
+  "component_id": "fan-2",
+  "revision": 2,
+  "properties": {
+    "horizontal_swing_included_angle_6": {
+      "type": "integer",
+      "enum": [
+        60,
+        90,
+        120
+      ],
+      "readable": true,
+      "writable": true
+    },
+    "vertical_swing_7": {
+      "type": "boolean",
+      "readable": true,
+      "writable": true
+    },
+    "vertical_swing_included_angle_8": {
+      "type": "integer",
+      "enum": [
+        60,
+        105,
+        120
+      ],
+      "readable": true,
+      "writable": true
+    },
+    "anion_9": {
+      "type": "boolean",
+      "readable": true,
+      "writable": true
+    }
+  },
+  "actions": {
+    "set_horizontal_swing_included_angle_6": {
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "horizontal_swing_included_angle_6": {
+            "type": "integer",
+            "enum": [
+              60,
+              90,
+              120
+            ]
+          }
+        },
+        "required": [
+          "horizontal_swing_included_angle_6"
+        ],
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "set_value",
+      "risk": "low",
+      "atomic": false,
+      "independent_fields": false,
+      "verification": "unavailable"
+    },
+    "set_vertical_swing_7": {
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "vertical_swing_7": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "vertical_swing_7"
+        ],
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "set_value",
+      "risk": "low",
+      "atomic": false,
+      "independent_fields": false,
+      "verification": "unavailable"
+    },
+    "set_vertical_swing_included_angle_8": {
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "vertical_swing_included_angle_8": {
+            "type": "integer",
+            "enum": [
+              60,
+              105,
+              120
+            ]
+          }
+        },
+        "required": [
+          "vertical_swing_included_angle_8"
+        ],
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "set_value",
+      "risk": "low",
+      "atomic": false,
+      "independent_fields": false,
+      "verification": "unavailable"
+    },
+    "set_anion_9": {
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "anion_9": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "anion_9"
+        ],
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "set_value",
+      "risk": "low",
+      "atomic": false,
+      "independent_fields": false,
+      "verification": "unavailable"
+    }
+  },
+  "events": {}
+}

@@ -1801,4 +1801,8 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get mobileCaptchaCode => '\u9a8c\u8bc1\u7801';
 	@override String get mobileCaptchaInvalid => '\u8bf7\u4ec5\u8f93\u5165\u56fe\u7247\u4e2d\u663e\u793a\u7684\u5b57\u6bcd\u548c\u6570\u5b57\u3002';
 	@override String get mobileCaptchaContinue => '\u9a8c\u8bc1\u5e76\u7ee7\u7eed';
+	@override String get vendorXiaomiMijiaFanSetHorizontalSwingIncludedAngle6 => '\u8bbe\u7f6e\u5de6\u53f3\u6447\u5934\u5e45\u5ea6';
+	@override String get vendorXiaomiMijiaFanSetVerticalSwing7 => '\u8bbe\u7f6e\u4e0a\u4e0b\u6447\u5934';
+	@override String get vendorXiaomiMijiaFanSetVerticalSwingIncludedAngle8 => '\u8bbe\u7f6e\u4e0a\u4e0b\u6447\u5934\u5e45\u5ea6';
+	@override String get vendorXiaomiMijiaFanSetAnion9 => '\u8bbe\u7f6e\u8d1f\u79bb\u5b50';
 }

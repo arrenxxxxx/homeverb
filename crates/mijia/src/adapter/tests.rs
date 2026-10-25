@@ -100,6 +100,7 @@ struct Cloud {
     read_gate: tokio::sync::Notify,
     stall_read: AtomicU8,
     write_mode: AtomicU8,
+    last_write: Mutex<Option<Value>>,
     captcha: AtomicU8,
 }
 impl Cloud {
@@ -117,6 +118,7 @@ impl Cloud {
             read_gate: tokio::sync::Notify::new(),
             stall_read: AtomicU8::new(0),
             write_mode: AtomicU8::new(0),
+            last_write: Mutex::new(None),
             captcha: AtomicU8::new(0),
         }
     }
@@ -158,6 +160,7 @@ impl CloudTransport for Cloud {
             let data: Value = serde_json::from_slice(codec::decrypt(&key,fields["data"].as_bytes())?.expose()).unwrap();
             assert_eq!(data["params"].as_array().unwrap().len(), 1);
             let field = &data["params"][0];
+            *self.last_write.lock().unwrap() = Some(field.clone());
             assert_eq!(field["did"], "PRIVATE-FAN-IDENTITY");
             assert_eq!(field["siid"],2);
             self.calls.lock().unwrap().push(CloudEndpoint::SetProperty);

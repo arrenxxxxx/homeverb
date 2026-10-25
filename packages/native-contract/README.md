@@ -1,6 +1,6 @@
 # HomeVerb native contract
 
-Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.28.0 has 34 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions three trusted connection-link functions and three trusted account-identity recovery functions and three dedicated interactive login functions; the JSON envelope schema is 1.0.
+Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.29.0 has 34 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions three trusted connection-link functions and three trusted account-identity recovery functions and three dedicated interactive login functions; the JSON envelope schema is 1.0.
 
 API 1.19 adds nullable `last_complete_inventory_at` to account summaries. It is
 historical local retrieval metadata, not authorization or online status. SQLite
@@ -116,3 +116,9 @@ Interactive foreground login uses [account-login.json](account-login.json), its
 [closed schema](../../schemas/native-account-login.schema.json). Resolve these
 symbols only after API 1.28 negotiation. Existing one-shot connection remains
 available. No interactive method belongs to the ordinary JSON dispatcher.
+
+API 1.29 adds four exact reference fan grant properties and their control options,
+without changing the 34 JSON methods or 22 C exports. Negotiate 1.29 before passing
+these fields to `homeverb_open`; see the
+[fan contract](../../docs/native-ui-contract.md#exact-reference-fan-settings-api-129)
+and [startup example](../../examples/native-open.mijia-reference-fan.json).

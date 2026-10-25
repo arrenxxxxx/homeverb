@@ -3823,3 +3823,22 @@ and 16 KiB alignment checks.
 This supersedes the API 1.27 `28cf192` artifact for local evaluation. No installation,
 real-account login, appliance request, physical-device acceptance, iOS package,
 upload, push or publication was performed. This is not a store release.
+
+## Exact reference fan settings — October 25, 2026
+
+API 1.29 adds four settings for the protected `jdjz.fan.2072fc` reference: swing
+ranges, vertical swing and ionizer. Stable property IDs feed generic permission
+preparation and action forms. Included swing angle never uses the absolute-angle
+control. Native startup probes the API read-only before sending new fields; the
+controller rejects API 1.28 before reopening.
+
+`fvm flutter analyze` passed. `fvm flutter test test/mijia_controls_test.dart
+test/mijia_test.dart test/session_permissions_test.dart test/account_native_test.dart`
+passed 33 tests. After extending the native startup case to use the new settings,
+`fvm flutter test test/mijia_controls_test.dart` passed all 11 tests, including
+Mijia-only and combined native opening with exact grants. English/Chinese
+320-pixel double-text-scale forms and no-send-on-open behavior are covered.
+The [native phase record](../../docs/development/14-mijia-reference-integration.md#exact-reference-fan-settings--october-25-2026)
+records Rust/ABI evidence and scope. No real account, write, phone or iOS
+acceptance was performed. Previously delivered API 1.28 artifacts remain older
+than this change until a separate clean-source build is recorded.

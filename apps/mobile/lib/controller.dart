@@ -478,6 +478,14 @@ class HomeController extends ChangeNotifier {
       trustedApproval: supportsTrustedApproval,
     );
     if (next.isEmpty) return;
+    if (next.any((p) => p.requiresReferenceFanApi) &&
+        core is NativeSessionClient &&
+        !(core as NativeSessionClient).apiAtLeast(29)) {
+      throw NativeFailure(
+        'API_UPGRADE_REQUIRED',
+        'Reference fan settings require native API 1.29.',
+      );
+    }
     final previousIds = _controlPermissions.map((p) => p.identity).toSet();
     final nextIds = next.map((p) => p.identity).toSet();
     if (setEquals(previousIds, nextIds)) return;

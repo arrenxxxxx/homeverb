@@ -2195,6 +2195,12 @@ String? translateSource(
   "Verification Code" => t.mobileCaptchaCode,
   "Use only the letters and numbers shown." => t.mobileCaptchaInvalid,
   "Verify and Continue" => t.mobileCaptchaContinue,
+  "Set horizontal swing range" =>
+    t.vendorXiaomiMijiaFanSetHorizontalSwingIncludedAngle6,
+  "Set vertical oscillation" => t.vendorXiaomiMijiaFanSetVerticalSwing7,
+  "Set vertical swing range" =>
+    t.vendorXiaomiMijiaFanSetVerticalSwingIncludedAngle8,
+  "Set ionizer" => t.vendorXiaomiMijiaFanSetAnion9,
   _ => null,
 };
 
@@ -4445,5 +4451,11 @@ String? sourceForKey(String key) => switch (key) {
   "mobile.captcha.code" => "Verification Code",
   "mobile.captcha.invalid" => "Use only the letters and numbers shown.",
   "mobile.captcha.continue" => "Verify and Continue",
+  "vendor.xiaomi.mijia.fan.set_horizontal_swing_included_angle_6" =>
+    "Set horizontal swing range",
+  "vendor.xiaomi.mijia.fan.set_vertical_swing_7" => "Set vertical oscillation",
+  "vendor.xiaomi.mijia.fan.set_vertical_swing_included_angle_8" =>
+    "Set vertical swing range",
+  "vendor.xiaomi.mijia.fan.set_anion_9" => "Set ionizer",
   _ => null,
 };
