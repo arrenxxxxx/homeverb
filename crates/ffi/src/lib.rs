@@ -27,6 +27,7 @@ use zeroize::Zeroize;
 mod android;
 
 mod account_login;
+mod account_verification;
 
 struct Host {
     session: Session,

@@ -4,7 +4,7 @@ October 25: 17 exact Mijia reference specifications now supply 264 scalar read
 mappings and localized App labels. Additional writes and modern authentication
 remain incomplete; see the [full coverage and blockers](14-mijia-reference-integration.md).
 
-The October 25 integration uses native API **1.30.0**, following the linear
+The October 26 integration uses native API **1.31.0**, following the linear
 mainline update and dedicated interactive-login bridge. Earlier Mijia phase versions are historical. See
 [contract reconciliation](../adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
 remain available alongside Mijia; identity restoration remains Meiju-only.
@@ -13,7 +13,7 @@ The experimental integration is implemented under [ADR-0070](../adr/0070-mijia-n
 The owner will perform real-account and device acceptance. Do not access saved
 pilot credentials or contact appliances as part of development tests.
 
-Current callable scope includes trusted Rust account/read APIs and native API 1.30
+Current callable scope includes trusted Rust account/read APIs and native API 1.31
 Mijia-only/combined sessions with exact fan startup grants, protected user-driven
 captcha continuation and Flutter platform/account/read/control views. Live acceptance remains pending. The Rust adapter
 can explicitly admit protected fan setters under ADR-0078. Historical phase records below distinguish earlier
@@ -23,7 +23,8 @@ The opt-in typed Rust `begin_verification_login` protocol also supports bounded
 phone/email provider-ticket continuation under
 [ADR-0085](../adr/0085-mijia-protected-verification-tickets.md). Opt-in typed account/Host entry points bind its pending state to protected account
 snapshots and a bounded session registry. Existing C/App entry points retain
-captcha-only behavior. No SMS
+captcha-only behavior; API 1.31 also supplies a separate protected prompt C bridge
+under [ADR-0086](../adr/0086-native-protected-verification-prompt.md), pending App/browser integration. No SMS
 sending endpoint or modern SID `mijia` login is claimed. See the
 [protocol evidence](14-mijia-reference-integration.md#protected-phone-and-email-ticket-protocol--october-26-2026).
 

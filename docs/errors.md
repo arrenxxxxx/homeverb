@@ -603,3 +603,11 @@ subject mismatch remains `ACCOUNT_IDENTITY_CONFLICT`. Wrong answer kinds return
 `INVALID_ARGUMENT` without sending. The Host uses `MIJIA_AUTH_CHALLENGE_REQUIRED`
 for unavailable/consumed handles and `RESOURCE_BUSY` for the shared four-entry
 captcha/verification capacity. No new public error code is introduced.
+
+
+API 1.31's dedicated verification C bridge uses `INVALID_ARGUMENT` for malformed
+metadata, invalid protected buffer bounds/capacity or answer-kind metadata.
+Valid input/output buffers are cleared on admission failures. Invalid buffers
+are never dereferenced; caller cleanup is mandatory. `HOST_CLOSED`,
+`HOST_BACKGROUND`, `AUTH_FLOW_UNSUPPORTED` and existing challenge errors retain
+their meanings. Provider page and ticket bytes never enter error JSON.

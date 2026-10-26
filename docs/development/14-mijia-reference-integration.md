@@ -1,6 +1,6 @@
 # 14. Mijia reference integration and remaining coverage
 
-The October 25 worktree uses API 1.30 and the owner-supplied October 22 Xiaomi Home
+The October 26 worktree uses API 1.31 and the owner-supplied October 22 Xiaomi Home
 11.7.709 analysis. The full official-App feature request remains **incomplete**.
 The source archive explicitly does not supply all authentication, protocol or
 runtime control contracts. An implemented decoder is not physical acceptance.
@@ -637,3 +637,34 @@ and the existing native login verifier. Documentation links, 22 schemas with
 62 positive and 626 negative fixtures, source hygiene and exact-reference
 coverage passed. This is affected-package evidence, not a full-workspace or
 mobile/browser acceptance claim.
+
+
+## Native protected verification bridge -- October 26, 2026
+
+[ADR-0086](../adr/0086-native-protected-verification-prompt.md) adds three dedicated
+C functions in API 1.31. Login/password and answer input remain separately
+zeroed; a caller-owned output buffer of exactly 131072 bytes carries protected
+captcha/provider-page bytes. Returned JSON contains only closed local metadata.
+The old captcha result remains unchanged. A decoded answer selects captcha, phone
+or email; the protected adapter still checks the actual kind and offered method.
+No C request can inject a provider URL, cookie or alternate account.
+
+The total is 25 C exports plus the Android initializer, with 34 ordinary methods.
+Schemas, examples, Android export expectations and the iOS version assertion are
+synchronized. No Android/iOS package was rebuilt in this bridge phase, and the
+existing API 1.30 APK remains the latest packaged artifact. Flutter/browser
+integration, real account acceptance and modern SID `mijia` remain pending.
+
+
+Executed local checks passed: three FFI unit tests; Rust 1.96 formatting and strict
+Host/FFI Clippy; the FFI build; the new C verification verifier including maximum
+256-byte login/password and 2048-byte ticket buffers; the unchanged captcha
+verifier; and the full native contract suite (34 methods, 55 examples and existing
+trusted bridge checks). The new verifier is included in future standard native
+contract runs. Flutter `native_test`, `current_contract_test`,
+`platform_accounts_test` and `account_captcha_test` passed all 36 tests against
+the current host library. Seventeen Android/iOS package-tool unit tests passed;
+these are not package builds. Documentation links, 23 schemas with 62 primary
+positive fixtures plus dedicated bridge examples and 711 negative fixtures,
+repository hygiene and exact-reference coverage passed. No remote publication,
+installation, vendor account access or appliance write occurred.

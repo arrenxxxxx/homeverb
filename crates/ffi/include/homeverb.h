@@ -28,6 +28,23 @@ char *homeverb_continue_account_login(uint64_t handle, const char *metadata_json
     uint8_t *answer, size_t answer_length);
 bool homeverb_discard_account_login(uint64_t handle, uint64_t challenge_id);
 
+/* API 1.31+: protected native verification; never ordinary JSON/model tools.
+ * Login/password follow the existing 1..256 byte ownership/clearing rules.
+ * Answers are 1..2048 bytes, with captcha/phone/email selected in closed metadata.
+ * Prompt must be exclusively owned writable memory of exactly 131072 bytes and
+ * must not overlap inputs. Valid buffers are cleared even on admission failure;
+ * invalid lengths are not dereferenced. Caller clears/frees everything on all paths.
+ * JSON contains prompt_length and nonsecret metadata only. The binary output is
+ * a captcha or sensitive UTF-8 provider page: never log/cache/serialize it.
+ * No implicit SMS sending or browser persistence is provided. */
+char *homeverb_begin_account_verification(uint64_t handle, const char *metadata_json,
+    uint8_t *login, size_t login_length, uint8_t *password, size_t password_length,
+    uint8_t *prompt, size_t prompt_capacity);
+char *homeverb_continue_account_verification(uint64_t handle, const char *metadata_json,
+    uint8_t *answer, size_t answer_length, uint8_t *prompt, size_t prompt_capacity);
+bool homeverb_discard_account_verification(uint64_t handle, uint64_t challenge_id);
+
+
 char *homeverb_prepare_identity_recovery(uint64_t handle, const char *metadata_json,
                                        uint8_t *login, size_t login_length,
                                        uint8_t *password, size_t password_length);

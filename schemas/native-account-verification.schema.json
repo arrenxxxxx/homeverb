@@ -1,0 +1,240 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:homeverb:schema:native-account-verification",
+  "title": "Protected native Mijia verification metadata",
+  "$defs": {
+    "begin": {
+      "description": "Protected metadata for the dedicated interactive Mijia login entry point.",
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "operation_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 180000
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "account_id": {
+          "description": "Explicit local account for same-subject reauthorization. API 1.8 permits pending credentials only with intact protected identity and unchanged saved bindings. Null never opts into pending-account recovery.",
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "provider": {
+          "const": "xiaomi.mijia"
+        }
+      },
+      "required": [
+        "schema_version",
+        "operation_id",
+        "timeout_ms",
+        "label",
+        "provider"
+      ],
+      "additionalProperties": false
+    },
+    "continue": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "operation_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 180000
+        },
+        "challenge_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 18446744073709551615
+        },
+        "answer_kind": {
+          "enum": [
+            "captcha",
+            "phone",
+            "email"
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "operation_id",
+        "timeout_ms",
+        "challenge_id",
+        "answer_kind"
+      ],
+      "additionalProperties": false
+    },
+    "result": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "const": "connected"
+                    },
+                    "report": {
+                      "type": "object",
+                      "properties": {
+                        "account": {
+                          "$ref": "urn:homeverb:schema:native-response#/$defs/account_summary"
+                        },
+                        "authentication": {
+                          "const": "succeeded"
+                        },
+                        "retrieval": {
+                          "$ref": "urn:homeverb:schema:native-response#/$defs/account_retrieval"
+                        }
+                      },
+                      "required": [
+                        "account",
+                        "authentication",
+                        "retrieval"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "report"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "const": "captcha"
+                    },
+                    "challenge_id": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 18446744073709551615
+                    },
+                    "media_type": {
+                      "enum": [
+                        "image/png",
+                        "image/jpeg"
+                      ]
+                    },
+                    "expires_in_ms": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 180000
+                    },
+                    "prompt_length": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 131072
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "challenge_id",
+                    "media_type",
+                    "expires_in_ms",
+                    "prompt_length"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "const": "verification"
+                    },
+                    "challenge_id": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 18446744073709551615
+                    },
+                    "expires_in_ms": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 180000
+                    },
+                    "prompt_length": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 8192
+                    },
+                    "methods": {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 2,
+                      "uniqueItems": true,
+                      "items": {
+                        "enum": [
+                          "phone",
+                          "email"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "challenge_id",
+                    "expires_in_ms",
+                    "prompt_length",
+                    "methods"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "urn:homeverb:schema:native-response#/$defs/query_error"
+        }
+      ]
+    }
+  }
+}

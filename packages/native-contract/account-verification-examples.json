@@ -1,0 +1,73 @@
+{
+  "api_version": "1.31.0",
+  "begin": {
+    "schema_version": "1.0",
+    "operation_id": "fictional-begin",
+    "timeout_ms": 10000,
+    "provider": "xiaomi.mijia",
+    "label": "Example account"
+  },
+  "continue": {
+    "schema_version": "1.0",
+    "operation_id": "fictional-answer",
+    "timeout_ms": 10000,
+    "challenge_id": 1,
+    "answer_kind": "phone"
+  },
+  "captcha_result": {
+    "schema_version": "1.0",
+    "data": {
+      "kind": "captcha",
+      "challenge_id": 1,
+      "media_type": "image/png",
+      "expires_in_ms": 179000,
+      "prompt_length": 68
+    },
+    "warnings": [],
+    "error": null
+  },
+  "connected_result": {
+    "schema_version": "1.0",
+    "data": {
+      "kind": "connected",
+      "report": {
+        "account": {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "provider": "xiaomi.mijia",
+          "region": "CN",
+          "label": "Example account",
+          "credential_state": "stored",
+          "authorization": "not_checked",
+          "last_complete_inventory_at": null
+        },
+        "authentication": "succeeded",
+        "retrieval": {
+          "status": "partial",
+          "device_ids": [],
+          "error": {
+            "code": "MIJIA_INVENTORY_PARTIAL",
+            "message": "Fictional partial inventory.",
+            "retryable": false
+          }
+        }
+      }
+    },
+    "warnings": [],
+    "error": null
+  },
+  "verification_result": {
+    "schema_version": "1.0",
+    "data": {
+      "kind": "verification",
+      "challenge_id": 1,
+      "expires_in_ms": 179000,
+      "prompt_length": 84,
+      "methods": [
+        "phone",
+        "email"
+      ]
+    },
+    "warnings": [],
+    "error": null
+  }
+}

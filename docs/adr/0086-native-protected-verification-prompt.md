@@ -1,6 +1,6 @@
 # ADR-0086: Native protected account verification prompts
 
-Status: accepted for implementation; foreground browser integration pending.
+Status: C bridge implemented and synthetic-tested; foreground browser integration pending.
 Date: October 26, 2026.
 
 ## Context

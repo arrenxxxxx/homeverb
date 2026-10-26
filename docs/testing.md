@@ -487,3 +487,13 @@ combined old/new registry capacity, wrong answer kind, invalid metadata, expiry,
 lifecycle cancellation, no replay and ordinary JSON refusal. Use
 `cargo test -p homeverb-mijia -p homeverb-host --offline --locked`; native login
 verification continues checking the unchanged captcha-only C bridge.
+
+
+For API 1.31, build `homeverb-ffi`, run its Rust projection tests and run
+`python3 scripts/verify_native_account_verification.py`. The native verifier
+checks actual C input/output clearing, invalid output capacity, null inputs,
+closed metadata, unknown/closed/background host admission and ordinary JSON
+refusal. Rust projection tests verify protected bytes are separate from JSON and
+cannot be silently truncated. Retain the old account-login and full native
+contract verifiers. No browser, vendor or mobile package is exercised by these
+host checks.

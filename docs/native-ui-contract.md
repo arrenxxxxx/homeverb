@@ -1,6 +1,6 @@
 # Native UI contract
 
-The October 25 exact light and purifier settings use native API **1.30.0**, following
+The October 26 protected verification bridge uses native API **1.31.0**, following
 the October 24 linear mainline update. Earlier Mijia phase versions are historical. See
 [contract reconciliation](adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
 remain available alongside Mijia; identity restoration remains Meiju-only.
@@ -43,7 +43,7 @@ The 22 C functions in [homeverb.h](../crates/ffi/include/homeverb.h) form the na
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects Meiju, `xiaomi.mijia` selects Mijia, and `homeverb.platforms` selects both. `scenario` defaults to `normal`. All platform modes require `allow_mock_writes: false` and reject any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms the selected mode. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.30.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.31.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -1661,3 +1661,40 @@ initializer. SQLite schema 5 and protected payload versions are unchanged. Old
 complete derivations remain readable; explicit inventory refresh adds options.
 An older reader rejects unsupported new derivations. Historical APK records do
 not become API 1.30 artifacts without a separate clean-source build.
+
+
+## Protected account verification prompts (API 1.31)
+
+[ADR-0086](adr/0086-native-protected-verification-prompt.md) adds three trusted C
+functions without changing ordinary JSON, old login results or saved payloads.
+Negotiate 1.31 before resolving `homeverb_begin_account_verification`,
+`homeverb_continue_account_verification` and `homeverb_discard_account_verification`.
+The [manifest](../packages/native-contract/account-verification.json),
+[examples](../packages/native-contract/account-verification-examples.json) and
+[schema](../schemas/native-account-verification.schema.json) are normative metadata.
+
+Begin uses existing Mijia ConnectRequest metadata plus separate writable 1..256
+byte login/password buffers. Continue uses operation metadata, local challenge ID
+and `answer_kind` (`captcha`, `phone`, `email`) plus separate writable 1..2048-byte
+answer memory. The actual captcha limit remains 32 alphanumeric bytes; tickets
+are bounded text, not necessarily numeric. Only offered methods are admitted.
+One decoded continuation consumes the pending state before Host admission.
+
+Both calls require a separate exclusively owned writable prompt buffer of exactly
+131072 bytes. It must not overlap metadata or input buffers. The bridge clears
+valid inputs and the entire valid output before admission, even on failure.
+Invalid lengths/null pointers are not dereferenced. Caller cleanup must clear and
+free all input/output buffers on every return path. On errors and connected
+results, output is empty/zero. Pending results copy only `prompt_length` bytes:
+PNG/JPEG bytes for `kind=captcha`, or UTF-8 provider-page bytes for
+`kind=verification`. JSON exposes the local ID, remaining lifetime, byte length
+and media type or offered methods; it never contains URLs, cookies or tickets.
+JSON strings still use `homeverb_string_free`. Never log/cache/serialize protected
+output, and clear it immediately after its bounded trusted presentation lifetime.
+
+The old and new registries share four pending entries. They cannot consume one
+another's handles. The original three-minute lifetime and background/cancel/close
+invalidation apply. Discard unused challenges explicitly. Only Mijia is admitted;
+Meiju/Mock refuse. This supplies a native bridge, not an implemented browser or
+SMS sender. Flutter still uses the old captcha-only path; package/browser/phone
+acceptance requires separate evidence.

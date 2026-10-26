@@ -1,5 +1,18 @@
 # Platform and device compatibility matrix
 
+## Native protected verification bridge -- October 26, 2026
+
+API 1.31 adds three dedicated C verification functions under
+[ADR-0086](adr/0086-native-protected-verification-prompt.md). Captcha/provider-page
+bytes use a separately cleared caller-owned buffer, never ordinary JSON. Existing
+22 C functions, 34 ordinary methods, account/device identities, SQLite 5 and
+protected payloads are unchanged. The current total is 25 C exports plus Android's
+initializer. New callers must negotiate 1.31; existing App captcha login remains
+unchanged. Foreground browser integration, mobile package rebuild and real-account
+acceptance remain pending. See the
+[phase record](development/14-mijia-reference-integration.md#native-protected-verification-bridge--october-26-2026).
+
+
 ## Account-bound verification continuation -- October 26, 2026
 
 Opt-in typed Rust adapter and Host entry points now bind phone/email verification

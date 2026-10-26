@@ -352,3 +352,5 @@ pub fn open_platform_session_with_settings(
     let (core, meiju, mijia) = platform_parts(directory, grants, true, mijia_grants, settings)?;
     Ok(Session::with_platform_accounts(core, Some(meiju), mijia))
 }
+
+pub use homeverb_mijia::{VerificationAnswer, VerificationMethod};

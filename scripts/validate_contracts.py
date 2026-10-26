@@ -467,6 +467,26 @@ def main() -> int:
     bad = copy.deepcopy(login["begin"]); bad["provider"] = "midea.meiju"
     negative.append(("interactive login provider refusal", native_validator("native-account-login", "begin"), bad))
 
+    verification = load("packages/native-contract/account-verification-examples.json")
+    assert verification["api_version"] == load("packages/native-contract/api.json")["api_version"]
+    for name, definition in [("begin", "begin"), ("continue", "continue"), ("captcha_result", "result"), ("verification_result", "result"), ("connected_result", "result")]:
+        shape = native_validator("native-account-verification", definition)
+        shape.validate(verification[name])
+        for field in ["login", "password", "answer", "ticket", "token", "principal", "url", "provider_page", "cookie"]:
+            bad = copy.deepcopy(verification[name]); bad[field] = "FORBIDDEN"
+            negative.append((f"verification {name} rejects {field}", shape, bad))
+            if definition == "result":
+                bad = copy.deepcopy(verification[name]); bad["data"][field] = "FORBIDDEN"
+                negative.append((f"verification data {name} rejects {field}", shape, bad))
+    for field, value in [("methods", []), ("methods", ["phone", "phone"]), ("methods", ["other"]), ("prompt_length", 0), ("prompt_length", 8193), ("expires_in_ms", 0), ("expires_in_ms", 180001), ("challenge_id", 0)]:
+        bad = copy.deepcopy(verification["verification_result"]); bad["data"][field] = value
+        negative.append((f"invalid verification prompt {field}", native_validator("native-account-verification", "result"), bad))
+    for field, value in [("answer_kind", "other"), ("answer_kind", True), ("challenge_id", 0), ("challenge_id", 18446744073709551616)]:
+        bad = copy.deepcopy(verification["continue"]); bad[field] = value
+        negative.append((f"invalid verification continuation {field}", native_validator("native-account-verification", "continue"), bad))
+    bad = copy.deepcopy(verification["continue"]); del bad["answer_kind"]
+    negative.append(("verification requires answer kind", native_validator("native-account-verification", "continue"), bad))
+
     mijia_connect = {"schema_version":"1.0", "operation_id":"fictional-connect", "timeout_ms":1000, "label":"Mijia", "provider":"xiaomi.mijia"}
     validators["native-connect"].validate(mijia_connect)
     for provider in ["other.provider", True, {}, "CN"]:
