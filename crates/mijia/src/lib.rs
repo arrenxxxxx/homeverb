@@ -9,8 +9,9 @@ mod protected;
 mod spec;
 mod transport;
 pub use adapter::{
-    AccountDiscovery, AccountInventory, AccountLogin, DeviceInventoryMembership, MijiaAdapter,
-    PendingMijiaLogin,
+    AccountDiscovery, AccountInventory, AccountLogin, AccountLoginChallenge,
+    DeviceInventoryMembership, MijiaAdapter, PendingMijiaLogin, PendingVerificationConnection,
+    VerificationAccountLogin, VerificationAnswer,
 };
 pub use auth::{
     CaptchaChallenge, LoginCredentials, LoginOutcome, MijiaSession, VerificationChallenge,

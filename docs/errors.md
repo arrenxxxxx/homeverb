@@ -595,3 +595,11 @@ Invalid ticket/method input consumes the challenge with `INVALID_ARGUMENT`.
 Cancellation and original lifetime expiry remain `CANCELLED` and
 `DEADLINE_EXCEEDED`. No automatic method fallback or password replay follows.
 Existing C/App login still exposes only captcha continuation.
+
+
+The typed account verification path returns `ACCOUNT_SESSION_UNCONFIRMED` for
+foreign adapter ownership, expiry or changed protected snapshots; final provider
+subject mismatch remains `ACCOUNT_IDENTITY_CONFLICT`. Wrong answer kinds return
+`INVALID_ARGUMENT` without sending. The Host uses `MIJIA_AUTH_CHALLENGE_REQUIRED`
+for unavailable/consumed handles and `RESOURCE_BUSY` for the shared four-entry
+captcha/verification capacity. No new public error code is introduced.

@@ -1,6 +1,6 @@
 # ADR-0085: Protected Mijia phone and email verification tickets
 
-Status: typed protocol implemented and synthetic-tested; account/Host/native UI integration pending.
+Status: typed protocol and account/Host binding implemented and synthetic-tested; native UI integration pending.
 Date: October 25, 2026.
 
 ## Evidence and scope
@@ -60,3 +60,20 @@ correlation, the no-location signing-key path, bounded redirects, rejected ticke
 no password replay, cancellation/expiry/drop, buffer bounds and redacted debug.
 Additional provider confirmation, modern SID login and physical acceptance remain
 separately tracked until concrete evidence and implementation cover them.
+
+
+## Protected account and Host binding
+
+The opt-in typed adapter now snapshots the selected account's protected payload,
+or all candidate accounts for an initially unselected login. The owner adapter,
+immutable label/target and payload digests survive captcha-to-verification
+transitions. Continuation rechecks before sending; completion reuses the locked
+snapshot and same-subject save path. Waiting holds no registration/account lease.
+Removal, relogin or changed payloads cannot be undone by an old challenge.
+
+Typed Host methods keep these challenges in a distinct session-owned registry,
+sharing the existing aggregate four-pending-login limit with captcha-only clients.
+One-use handles and protected buffers remain absent from ordinary JSON and C.
+Background, cancel and close invalidate both registries. Prompts are redacted and
+non-serializable. The old C/App shape remains unchanged; foreground browser/ticket
+presentation still needs its dedicated contract and implementation.

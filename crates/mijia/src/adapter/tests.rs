@@ -102,6 +102,10 @@ struct Cloud {
     write_mode: AtomicU8,
     last_write: Mutex<Option<Value>>,
     captcha: AtomicU8,
+    verification_calls: Mutex<Vec<crate::VerificationEndpoint>>,
+    verification_gate: AtomicU8,
+    verification_started: tokio::sync::Notify,
+    verification_resume: tokio::sync::Notify,
 }
 impl Cloud {
     fn new() -> Self {
@@ -120,6 +124,10 @@ impl Cloud {
             write_mode: AtomicU8::new(0),
             last_write: Mutex::new(None),
             captcha: AtomicU8::new(0),
+            verification_calls: Mutex::new(vec![]),
+            verification_gate: AtomicU8::new(0),
+            verification_started: tokio::sync::Notify::new(),
+            verification_resume: tokio::sync::Notify::new(),
         }
     }
     fn count(&self, endpoint: CloudEndpoint) -> usize {
@@ -133,6 +141,32 @@ impl Cloud {
 }
 #[async_trait]
 impl CloudTransport for Cloud {
+    async fn send_verification(
+        &self,
+        request: &crate::VerificationRequest,
+        operation: &Operation,
+    ) -> Result<crate::VerificationResponse> {
+        operation.run(async {
+            use crate::VerificationEndpoint as E;
+            self.verification_calls.lock().unwrap().push(request.endpoint());
+            if matches!(request.endpoint(), E::Phone | E::Email) && self.verification_gate.load(Ordering::SeqCst) != 0 {
+                self.verification_started.notify_one();
+                self.verification_resume.notified().await;
+            }
+            let (body, cookies) = match request.endpoint() {
+                E::SigningKey if !request.cookie().contains("passToken=") => (json!({"_sign":"fictional"}), vec![]),
+                E::Password if self.captcha.load(Ordering::SeqCst) != 0 && !request.body().windows(16).any(|b| b == b"captCode=correct") => (json!({"code":87001,"captchaUrl":"/pass/getCode?fictional"}), vec![]),
+                E::Password => (json!({"code":0,"notificationUrl":"https://account.xiaomi.com/fe/service/identity/authStart?context=fictional"}), vec![]),
+                E::Options => (json!({"code":0,"options":[4,8]}), vec!["identity_session=fictional-identity; Path=/identity".to_owned()]),
+                E::Phone | E::Email => (json!({"code":0,"location":"/identity/result/check?context=fictional"}), vec![]),
+                E::Completion => (json!({}), vec!["passToken=PRIVATE-VERIFICATION-PASS; Path=/".to_owned(), "serviceToken=PRIVATE-VERIFICATION-TOKEN; Path=/".to_owned(), format!("userId={}; Path=/", self.subject.lock().unwrap())]),
+                E::SigningKey => (json!({"code":0,"userId":*self.subject.lock().unwrap(),"ssecurity":"AAECAwQFBgcICQoLDA0ODw=="}), vec![]),
+                _ => panic!("Unexpected verification endpoint"),
+            };
+            crate::VerificationResponse::new(200, SecretBytes::new(serde_json::to_vec(&body).unwrap()), None, cookies.into_iter().map(|v| SecretBytes::new(v.into_bytes())).collect())
+        }).await
+    }
+
     async fn fetch_captcha(
         &self,
         _: &crate::CaptchaRequest,
@@ -1107,3 +1141,5 @@ async fn unselected_interactive_login_cannot_restore_an_account_removed_while_wa
     assert_eq!(f.cloud.count(CloudEndpoint::LoginPassword), calls);
     assert!(f.adapter.accounts(&operation()).await.unwrap().is_empty());
 }
+
+mod verification_login;

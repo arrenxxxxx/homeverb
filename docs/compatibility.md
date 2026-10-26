@@ -1,5 +1,18 @@
 # Platform and device compatibility matrix
 
+## Account-bound verification continuation -- October 26, 2026
+
+Opt-in typed Rust adapter and Host entry points now bind phone/email verification
+to protected account snapshots under
+[ADR-0085](adr/0085-mijia-protected-verification-tickets.md). Waiting holds no lease;
+changed or removed accounts invalidate continuation, and final persistence checks
+the snapshot again. The session registry shares the four-pending-login limit with
+the old captcha path and is cleared on background/cancel/close. Native API 1.30,
+ordinary methods, C exports and storage formats remain unchanged. C/App browser
+and ticket interaction remains pending; this phase supplies synthetic tests only.
+See the [phase record](development/14-mijia-reference-integration.md#account-bound-verification-continuation--october-26-2026).
+
+
 ## Protected phone and email ticket protocol -- October 26, 2026
 
 The opt-in Rust protocol in [ADR-0085](adr/0085-mijia-protected-verification-tickets.md)

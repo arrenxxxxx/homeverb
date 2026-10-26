@@ -44,7 +44,10 @@ pub struct AccountInventory {
 }
 
 mod login;
-pub use login::{AccountLogin, PendingMijiaLogin};
+pub use login::{
+    AccountLogin, AccountLoginChallenge, PendingMijiaLogin, PendingVerificationConnection,
+    VerificationAccountLogin, VerificationAnswer,
+};
 
 pub struct MijiaAdapter {
     login_owner: Uuid,

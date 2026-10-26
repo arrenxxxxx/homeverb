@@ -94,6 +94,29 @@ struct Cloud {
 }
 #[async_trait]
 impl CloudTransport for Cloud {
+    async fn send_verification(
+        &self,
+        request: &homeverb_mijia::VerificationRequest,
+        op: &Operation,
+    ) -> Result<homeverb_mijia::VerificationResponse> {
+        op.run(async {
+            use homeverb_mijia::VerificationEndpoint as E;
+            self.calls.fetch_add(1, Ordering::SeqCst);
+            if self.stall.load(Ordering::SeqCst) { self.started.notify_one(); std::future::pending::<()>().await; }
+            let (body, cookies): (Value, Vec<&str>) = match request.endpoint() {
+                E::SigningKey if !request.cookie().contains("passToken=") => (json!({"_sign":"fictional"}), vec![]),
+                E::Password if self.captcha.load(Ordering::SeqCst) && !request.body().windows(16).any(|b| b == b"captCode=correct") => (json!({"code":87001,"captchaUrl":"/pass/getCode?fictional"}), vec![]),
+                E::Password => (json!({"code":0,"notificationUrl":"https://account.xiaomi.com/fe/service/identity/authStart?context=PRIVATE-FICTIONAL-CONTEXT"}), vec![]),
+                E::Options => (json!({"code":0,"options":[4,8]}), vec!["identity_session=PRIVATE-FICTIONAL-SESSION; Path=/identity"]),
+                E::Phone | E::Email => (json!({"code":0,"location":"/identity/result/check?fictional"}), vec![]),
+                E::Completion => (json!({}), vec!["passToken=PRIVATE-FICTIONAL-PASS; Path=/", "serviceToken=PRIVATE-VERIFICATION-TOKEN; Path=/", "userId=999001; Path=/"]),
+                E::SigningKey => (json!({"code":0,"userId":"999001","ssecurity":"AAECAwQFBgcICQoLDA0ODw=="}), vec![]),
+                _ => panic!("Unexpected verification request"),
+            };
+            homeverb_mijia::VerificationResponse::new(200, SecretBytes::new(serde_json::to_vec(&body).unwrap()), None, cookies.into_iter().map(|v| secret(v.as_bytes())).collect())
+        }).await
+    }
+
     async fn fetch_captcha(
         &self,
         _: &homeverb_mijia::CaptchaRequest,
@@ -629,3 +652,6 @@ async fn protected_login_requires_registered_provider_and_cannot_enter_json_disp
         assert!(serde_json::from_value::<HostRequest>(json!({"schema_version":"1.0","operation_id":"test","timeout_ms":1000,"request":{"method":method}})).is_err());
     }
 }
+
+#[path = "mijia_accounts/mijia_verification.rs"]
+mod mijia_verification;

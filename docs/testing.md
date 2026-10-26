@@ -477,3 +477,13 @@ prevent serializing challenges. Existing Host account tests and
 `python3 scripts/verify_native_account_login.py` retain captcha-only compatibility.
 These checks neither exercise a trusted browser nor establish real-account or
 modern SID authentication acceptance.
+
+
+Typed account/Host verification regressions additionally cover lease-free waiting,
+captcha transition, selected and initially unselected account removal, changed
+protected payloads, foreign adapter/subject, changes during the ticket request,
+unchanged device identity, secret exclusion from SQLite, session ownership,
+combined old/new registry capacity, wrong answer kind, invalid metadata, expiry,
+lifecycle cancellation, no replay and ordinary JSON refusal. Use
+`cargo test -p homeverb-mijia -p homeverb-host --offline --locked`; native login
+verification continues checking the unchanged captcha-only C bridge.

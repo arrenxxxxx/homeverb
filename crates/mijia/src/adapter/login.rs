@@ -5,6 +5,12 @@ use homeverb_core::SecretBytes;
 use sha2::{Digest, Sha256};
 use std::fmt;
 
+mod verification;
+pub use verification::{
+    AccountLoginChallenge, PendingVerificationConnection, VerificationAccountLogin,
+    VerificationAnswer,
+};
+
 pub enum AccountLogin {
     Connected(AccountDiscovery),
     Captcha(PendingMijiaLogin),

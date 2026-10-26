@@ -603,3 +603,37 @@ the FFI build and the existing native login verifier passed. Documentation,
 256 existing commit messages and the exact-reference coverage check passed.
 No mobile rebuild or full-workspace green result is claimed. Modern
 SID `mijia`, native verification interaction and full reference parity remain open.
+
+
+## Account-bound verification continuation -- October 26, 2026
+
+The opt-in `begin_verification_connection` and `continue_verification_connection`
+methods bind the typed protocol to immutable target/label, adapter ownership and
+protected payload digests. The account snapshot is checked before sending and
+again under the registration lock before saving. Existing same-subject identity,
+device mappings and preferences remain authoritative. Waiting retains no account
+lease, and a captcha-to-verification transition retains the original lifetime.
+Wrong answer kinds consume the attempt without sending. New pending values and
+presentation data are non-serializable and have redacted debug output.
+
+The typed Host `begin_account_verification`, `continue_account_verification` and
+`discard_account_verification` methods manage single-use session-owned handles.
+The new registry and old captcha registry share a four-entry bound. They cannot
+consume one another's handles. Expired entries are pruned before new admission;
+background/cancel/close clear both, cancel active operations and prevent late
+results from reinstating pending state. Connected results use the existing
+sanitized account/card publication path. No account is published while waiting.
+
+These methods are not exposed in C, ordinary JSON, CLI, MCP or Flutter. API 1.30,
+34 ordinary methods, export counts, SQLite 5 and protected payloads remain
+unchanged. Foreground trusted browser/ticket interaction and real account/phone
+acceptance remain pending. This phase adds no SMS/email sending or modern SID
+`mijia` route and performs no vendor/account/appliance traffic.
+
+Executed checks passed: Mijia's 98 unit and seven compile-fail documentation tests;
+the full Host suite including six new verification scenarios and the additional
+compile-fail constraint; strict Rust 1.96 Clippy for Mijia/Host/FFI; the FFI build;
+and the existing native login verifier. Documentation links, 22 schemas with
+62 positive and 626 negative fixtures, source hygiene and exact-reference
+coverage passed. This is affected-package evidence, not a full-workspace or
+mobile/browser acceptance claim.

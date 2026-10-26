@@ -27,7 +27,7 @@ pub struct ContinueAccountLoginRequest {
     pub timeout_ms: u64,
     pub challenge_id: u64,
 }
-fn unavailable() -> Error {
+pub(super) fn unavailable() -> Error {
     Error::new(
         "MIJIA_AUTH_CHALLENGE_REQUIRED",
         "The login challenge is unavailable; start sign-in again.",
@@ -93,13 +93,16 @@ impl Session {
             .is_some_and(|mut state| state.account_logins.remove(&id).is_some())
     }
 
-    fn login_generation(&self) -> Result<u64> {
+    pub(super) fn login_generation(&self) -> Result<u64> {
         let mut state = self.state.lock().map_err(|_| unavailable())?;
         let now = tokio::time::Instant::now();
         state
             .account_logins
             .retain(|_, pending| pending.expires_at() > now);
-        if state.account_logins.len() >= 4 {
+        state
+            .verification_logins
+            .retain(|_, pending| pending.expires_at() > now);
+        if state.account_logins.len() + state.verification_logins.len() >= 4 {
             return Err(Error::new(
                 "RESOURCE_BUSY",
                 "Finish or dismiss pending sign-in first.",
@@ -125,7 +128,7 @@ impl Session {
                 if state.closed
                     || !state.foreground
                     || state.approval_generation != generation
-                    || state.account_logins.len() >= 4
+                    || state.account_logins.len() + state.verification_logins.len() >= 4
                     || pending.expires_at() <= now
                 {
                     return Err(unavailable());

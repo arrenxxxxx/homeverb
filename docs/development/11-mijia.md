@@ -21,8 +21,9 @@ protocol-only work from the [protected Core phase](../adr/0076-mijia-protected-c
 
 The opt-in typed Rust `begin_verification_login` protocol also supports bounded
 phone/email provider-ticket continuation under
-[ADR-0085](../adr/0085-mijia-protected-verification-tickets.md). It is not yet bound
-to account/Host/C/App entry points; those retain captcha-only behavior. No SMS
+[ADR-0085](../adr/0085-mijia-protected-verification-tickets.md). Opt-in typed account/Host entry points bind its pending state to protected account
+snapshots and a bounded session registry. Existing C/App entry points retain
+captcha-only behavior. No SMS
 sending endpoint or modern SID `mijia` login is claimed. See the
 [protocol evidence](14-mijia-reference-integration.md#protected-phone-and-email-ticket-protocol--october-26-2026).
 

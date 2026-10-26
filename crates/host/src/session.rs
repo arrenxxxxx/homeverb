@@ -17,6 +17,8 @@ mod account_login;
 mod connection_link;
 mod identity_recovery;
 pub use account_login::{ContinueAccountLoginRequest, NativeAccountLogin};
+mod account_verification;
+pub use account_verification::{NativeVerificationLogin, NativeVerificationPrompt};
 pub use connection_link::{ConfirmConnectionLinkRequest, PrepareConnectionLinkRequest};
 pub use identity_recovery::ConfirmIdentityRecoveryRequest;
 
@@ -137,6 +139,7 @@ struct State {
     connection_links: HashMap<u64, PendingConnectionLink>,
     identity_recoveries: HashMap<u64, homeverb_midea::PendingIdentityRecovery>,
     account_logins: HashMap<u64, homeverb_mijia::PendingMijiaLogin>,
+    verification_logins: HashMap<u64, homeverb_mijia::PendingVerificationConnection>,
     approval_generation: u64,
 }
 
@@ -174,6 +177,7 @@ impl Session {
                 connection_links: HashMap::new(),
                 identity_recoveries: HashMap::new(),
                 account_logins: HashMap::new(),
+                verification_logins: HashMap::new(),
                 approval_generation: 0,
             })),
         }
@@ -283,6 +287,7 @@ impl Session {
                 state.connection_links.clear();
                 state.identity_recoveries.clear();
                 state.account_logins.clear();
+                state.verification_logins.clear();
                 state.approval_generation += 1;
                 for token in state.operations.values() {
                     token.cancel();
@@ -295,6 +300,7 @@ impl Session {
         if let Ok(mut state) = self.state.lock() {
             state.identity_recoveries.clear();
             state.account_logins.clear();
+            state.verification_logins.clear();
             state.approval_generation += 1;
         }
         self.state
@@ -316,6 +322,7 @@ impl Session {
             state.connection_links.clear();
             state.identity_recoveries.clear();
             state.account_logins.clear();
+            state.verification_logins.clear();
             state.approval_generation += 1;
             for token in state.operations.values() {
                 token.cancel();
