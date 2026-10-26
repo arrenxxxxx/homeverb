@@ -4,6 +4,7 @@ use crate::transport::verification::account_url;
 use crate::{VerificationEndpoint as Endpoint, VerificationRequest, VerificationResponse};
 use serde::Deserialize;
 mod cookies;
+mod delivery;
 pub(super) use cookies::Cookies;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -44,6 +45,7 @@ pub struct VerificationChallenge {
     cookies: Cookies,
     region: Region,
     lifetime: Operation,
+    delivery: delivery::Delivery,
 }
 impl fmt::Debug for VerificationChallenge {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -129,6 +131,7 @@ impl VerificationChallenge {
                     cookies,
                     region,
                     lifetime: lifetime.clone(),
+                    delivery: delivery::Delivery::default(),
                 })
             }))
             .await

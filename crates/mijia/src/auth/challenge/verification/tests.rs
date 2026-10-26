@@ -34,6 +34,7 @@ struct Peer {
     calls: Mutex<Vec<(Endpoint, String, String, String)>>,
     replies: Mutex<VecDeque<(Endpoint, VerificationResponse)>>,
     stall: bool,
+    stall_endpoint: Option<Endpoint>,
     page: String,
     captcha_first: bool,
     direct: bool,
@@ -45,6 +46,7 @@ impl Peer {
             calls: Mutex::new(vec![]),
             replies: Mutex::new(replies.into()),
             stall: false,
+            stall_endpoint: None,
             page: "https://account.xiaomi.com/fe/service/identity/authStart?context=fictional"
                 .into(),
             captcha_first: false,
@@ -127,7 +129,7 @@ impl CloudTransport for Peer {
             std::str::from_utf8(request.body()).unwrap().into(),
             request.cookie().into(),
         ));
-        if self.stall {
+        if self.stall || self.stall_endpoint == Some(request.endpoint()) {
             std::future::pending::<()>().await;
         }
         let (endpoint, response) = self
@@ -772,3 +774,5 @@ async fn extended_direct_and_captcha_success_validate_exchange_identity_without_
         }
     }
 }
+
+mod delivery;

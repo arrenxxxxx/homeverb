@@ -1,5 +1,17 @@
 # Implementation status and next tasks
 
+## Explicit verification code requests -- October 26, 2026
+
+New public verification-page evidence supports typed native SMS/email code
+requests under [ADR-0087](adr/0087-native-mijia-verification-code-delivery.md).
+User-selected method inspection and quota checks precede one send, with original
+lifetime, bounded attempts, cooldown and account/Host lifecycle checks. Human
+risk challenges remain unsupported; there is no automatic resend. Native API
+1.31 and existing C/App behavior remain unchanged pending dedicated entry-point
+and UI integration. No real messages were sent. See the
+[protocol evidence](development/14-mijia-reference-integration.md#public-verification-page-protocol-evidence--october-26-2026).
+
+
 ## Native protected verification bridge -- October 26, 2026
 
 API 1.31 adds three dedicated C verification functions under

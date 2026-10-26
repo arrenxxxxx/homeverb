@@ -7,6 +7,11 @@ pub(crate) const MAX_VERIFICATION_BYTES: usize = 65_536;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum VerificationEndpoint {
     Password,
+    PhoneInfo,
+    EmailInfo,
+    Quota,
+    SendPhone,
+    SendEmail,
     Options,
     Phone,
     Email,
@@ -47,9 +52,16 @@ impl VerificationRequest {
         };
         let expected = match self.endpoint {
             VerificationEndpoint::Password => "/pass/serviceLoginAuth2",
+            VerificationEndpoint::PhoneInfo | VerificationEndpoint::Phone => {
+                "/identity/auth/verifyPhone"
+            }
+            VerificationEndpoint::EmailInfo | VerificationEndpoint::Email => {
+                "/identity/auth/verifyEmail"
+            }
+            VerificationEndpoint::Quota => "/identity/pass/sms/userQuota",
+            VerificationEndpoint::SendPhone => "/identity/auth/sendPhoneTicket",
+            VerificationEndpoint::SendEmail => "/identity/auth/sendEmailTicket",
             VerificationEndpoint::Options => "/identity/list",
-            VerificationEndpoint::Phone => "/identity/auth/verifyPhone",
-            VerificationEndpoint::Email => "/identity/auth/verifyEmail",
             VerificationEndpoint::Completion => "/identity/result/check",
             VerificationEndpoint::SigningKey => "/pass/serviceLogin",
             VerificationEndpoint::Exchange => "/sts",
@@ -63,6 +75,20 @@ impl VerificationRequest {
         if self.endpoint == VerificationEndpoint::SigningKey
             && url.query() != Some("sid=xiaomiio&_json=true")
         {
+            return Err(invalid());
+        }
+        let query_valid = match self.endpoint {
+            VerificationEndpoint::PhoneInfo => url.query() == Some("_flag=4&_json=true"),
+            VerificationEndpoint::EmailInfo => url.query() == Some("_flag=8&_json=true"),
+            VerificationEndpoint::Quota | VerificationEndpoint::SendPhone => url.query().is_none(),
+            VerificationEndpoint::SendEmail => url.query().is_some_and(|query| {
+                query.strip_prefix("_dc=").is_some_and(|v| {
+                    !v.is_empty() && v.len() <= 16 && v.bytes().all(|b| b.is_ascii_digit())
+                })
+            }),
+            _ => true,
+        };
+        if !query_valid {
             return Err(invalid());
         }
         if self.endpoint == VerificationEndpoint::Exchange && !self.cookie.as_str().is_empty() {
@@ -153,7 +179,7 @@ pub(super) async fn transmit_verification(
     operation.run(async {
         let mut cookie = HeaderValue::from_str(request.cookie()).map_err(|_| invalid())?;
         cookie.set_sensitive(true);
-        let method = if matches!(request.endpoint, VerificationEndpoint::Password | VerificationEndpoint::Phone | VerificationEndpoint::Email) { Method::POST } else { Method::GET };
+        let method = if matches!(request.endpoint, VerificationEndpoint::Password | VerificationEndpoint::Phone | VerificationEndpoint::Email | VerificationEndpoint::Quota | VerificationEndpoint::SendPhone | VerificationEndpoint::SendEmail) { Method::POST } else { Method::GET };
         let mut outgoing = client.request(method, url)
             .header("accept-encoding", "identity")
             .header("content-type", "application/x-www-form-urlencoded")

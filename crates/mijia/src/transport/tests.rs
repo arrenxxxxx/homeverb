@@ -563,6 +563,19 @@ async fn captcha_cancellation_and_drop_close_waiting_socket() {
 fn verification_request(endpoint: VerificationEndpoint) -> VerificationRequest {
     let location = match endpoint {
         VerificationEndpoint::Password => "https://account.xiaomi.com/pass/serviceLoginAuth2",
+        VerificationEndpoint::PhoneInfo => {
+            "https://account.xiaomi.com/identity/auth/verifyPhone?_flag=4&_json=true"
+        }
+        VerificationEndpoint::EmailInfo => {
+            "https://account.xiaomi.com/identity/auth/verifyEmail?_flag=8&_json=true"
+        }
+        VerificationEndpoint::Quota => "https://account.xiaomi.com/identity/pass/sms/userQuota",
+        VerificationEndpoint::SendPhone => {
+            "https://account.xiaomi.com/identity/auth/sendPhoneTicket"
+        }
+        VerificationEndpoint::SendEmail => {
+            "https://account.xiaomi.com/identity/auth/sendEmailTicket?_dc=1234567890000"
+        }
         VerificationEndpoint::Options => {
             "https://account.xiaomi.com/identity/list?context=fictional"
         }
@@ -605,6 +618,11 @@ fn verification_requests_and_responses_keep_closed_origins_paths_and_bounds() {
     for endpoint in [
         VerificationEndpoint::Password,
         VerificationEndpoint::Options,
+        VerificationEndpoint::PhoneInfo,
+        VerificationEndpoint::EmailInfo,
+        VerificationEndpoint::Quota,
+        VerificationEndpoint::SendPhone,
+        VerificationEndpoint::SendEmail,
         VerificationEndpoint::Phone,
         VerificationEndpoint::Email,
         VerificationEndpoint::Completion,
@@ -666,6 +684,11 @@ fn verification_requests_and_responses_keep_closed_origins_paths_and_bounds() {
 async fn verification_tls_is_one_send_without_automatic_redirect_or_cookie_jar() {
     for endpoint in [
         VerificationEndpoint::Options,
+        VerificationEndpoint::PhoneInfo,
+        VerificationEndpoint::EmailInfo,
+        VerificationEndpoint::Quota,
+        VerificationEndpoint::SendPhone,
+        VerificationEndpoint::SendEmail,
         VerificationEndpoint::Phone,
         VerificationEndpoint::Exchange,
     ] {
@@ -694,7 +717,13 @@ async fn verification_tls_is_one_send_without_automatic_redirect_or_cookie_jar()
             let wire = String::from_utf8_lossy(&requests[0]);
             assert_eq!(
                 wire.starts_with("POST "),
-                endpoint == VerificationEndpoint::Phone
+                matches!(
+                    endpoint,
+                    VerificationEndpoint::Phone
+                        | VerificationEndpoint::Quota
+                        | VerificationEndpoint::SendPhone
+                        | VerificationEndpoint::SendEmail
+                )
             );
             assert_eq!(
                 wire.contains("cookie: identity_session=fictional"),

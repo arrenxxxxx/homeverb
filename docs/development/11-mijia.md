@@ -24,8 +24,9 @@ phone/email provider-ticket continuation under
 [ADR-0085](../adr/0085-mijia-protected-verification-tickets.md). Opt-in typed account/Host entry points bind its pending state to protected account
 snapshots and a bounded session registry. Existing C/App entry points retain
 captcha-only behavior; API 1.31 also supplies a separate protected prompt C bridge
-under [ADR-0086](../adr/0086-native-protected-verification-prompt.md), pending App/browser integration. No SMS
-sending endpoint or modern SID `mijia` login is claimed. See the
+under [ADR-0086](../adr/0086-native-protected-verification-prompt.md), pending App/browser integration. The later [ADR-0087](../adr/0087-native-mijia-verification-code-delivery.md)
+typed code-request path uses newly inspected public-page protocol facts; C/App
+code requests, human risk challenges and modern SID `mijia` login remain pending. See the
 [protocol evidence](14-mijia-reference-integration.md#protected-phone-and-email-ticket-protocol--october-26-2026).
 
 ## Protocol evidence

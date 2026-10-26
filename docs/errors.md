@@ -611,3 +611,12 @@ Valid input/output buffers are cleared on admission failures. Invalid buffers
 are never dereferenced; caller cleanup is mandatory. `HOST_CLOSED`,
 `HOST_BACKGROUND`, `AUTH_FLOW_UNSUPPORTED` and existing challenge errors retain
 their meanings. Provider page and ticket bytes never enter error JSON.
+
+
+Typed code requests under ADR-0087 retain `MIJIA_AUTH_CHALLENGE_REQUIRED` for
+unavailable methods, quota refusal, human risk challenges, provider rejection,
+active cooldown or exhausted local attempts. Malformed method/quota/wait responses
+are `MIJIA_INVALID_RESPONSE`. Original cancellation/expiry and account snapshot
+errors remain unchanged. A send timeout does not prove no message was sent; the
+continuation is consumed and never automatically replayed. No new error code or
+ordinary method is added by this typed phase.

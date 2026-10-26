@@ -18,7 +18,9 @@ mod connection_link;
 mod identity_recovery;
 pub use account_login::{ContinueAccountLoginRequest, NativeAccountLogin};
 mod account_verification;
-pub use account_verification::{NativeVerificationLogin, NativeVerificationPrompt};
+pub use account_verification::{
+    NativeVerificationCodeRequest, NativeVerificationLogin, NativeVerificationPrompt,
+};
 pub use connection_link::{ConfirmConnectionLinkRequest, PrepareConnectionLinkRequest};
 pub use identity_recovery::ConfirmIdentityRecoveryRequest;
 

@@ -43,7 +43,54 @@ impl fmt::Debug for NativeVerificationLogin {
     }
 }
 
+/// A code-zero request acknowledgement, never proof of message delivery.
+#[derive(Debug)]
+pub struct NativeVerificationCodeRequest {
+    pub login: NativeVerificationLogin,
+    pub requests: u8,
+    pub cooldown_ms: u64,
+}
+
 impl Session {
+    /// Explicit trusted UI request; no ordinary JSON equivalent and no automatic resend.
+    pub async fn request_account_verification_code(
+        &self,
+        input: ContinueAccountLoginRequest,
+        method: VerificationMethod,
+    ) -> Result<NativeVerificationCodeRequest> {
+        let pending = self
+            .state
+            .lock()
+            .map_err(|_| unavailable())?
+            .verification_logins
+            .remove(&input.challenge_id)
+            .ok_or_else(unavailable)?;
+        let (operation, _registration) =
+            self.register(&input.schema_version, input.operation_id, input.timeout_ms)?;
+        let adapter = self
+            .mijia_accounts
+            .as_ref()
+            .ok_or_else(crate::accounts::unsupported)?;
+        let generation = self.login_generation()?;
+        let pending = adapter
+            .request_verification_code(pending, method, &operation)
+            .await?;
+        let requests = pending.code_requests();
+        let cooldown_ms = pending.code_request_cooldown().as_millis() as u64;
+        let login = self
+            .finish_account_verification(
+                VerificationAccountLogin::Pending(pending),
+                generation,
+                &operation,
+            )
+            .await?;
+        Ok(NativeVerificationCodeRequest {
+            login,
+            requests,
+            cooldown_ms,
+        })
+    }
+
     pub async fn begin_account_verification(
         &self,
         input: crate::ConnectRequest,

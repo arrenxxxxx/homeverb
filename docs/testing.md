@@ -497,3 +497,11 @@ refusal. Rust projection tests verify protected bytes are separate from JSON and
 cannot be silently truncated. Retain the old account-login and full native
 contract verifiers. No browser, vendor or mobile package is exercised by these
 host checks.
+
+
+ADR-0087 typed code-request checks use fictional method info, quotas, send replies
+and local TLS only. They cover exact phone/email forms and GET/POST separation,
+quota/method refusal, human-risk rejection, monotonic cooldown and original
+lifetime, per-method ordinals, total bounds, cancellation/timeout/drop, account
+snapshot changes, new one-use handles and ordinary JSON refusal. They do not
+send real SMS/email or test a browser. Run the affected Mijia and Host suites.

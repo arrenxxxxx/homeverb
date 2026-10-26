@@ -668,3 +668,66 @@ these are not package builds. Documentation links, 23 schemas with 62 primary
 positive fixtures plus dedicated bridge examples and 711 negative fixtures,
 repository hygiene and exact-reference coverage passed. No remote publication,
 installation, vendor account access or appliance write occurred.
+
+
+## Public verification page protocol evidence -- October 26, 2026
+
+Anonymous GETs to the public [identity entry page](https://account.xiaomi.com/fe/service/identity/authStart)
+and its static assets provide code-delivery facts absent from the pinned community
+client. No notification query, account, credential, cookie, SMS or email request was
+used. Static JavaScript was inspected as text only; it is not vendored, executed,
+or used as HomeVerb application identity. HomeVerb independently implements the
+wire facts. This does not change third-party licensing or claim provider support.
+
+The asset base is
+`https://cdn.web-global.fds.api.mi-img.com/mcfe--mi-account/static/static/js/`.
+Observed assets and SHA-256 values:
+
+| Asset | SHA-256 | Relevant facts |
+|---|---|---|
+| `main.f09071d0.js` | `db79e6a9040f2d07c4a67891d590503c83c61ee94681406da3571018ed282f2c` | Mobile entry chunk selection |
+| `runtime-main.18cf6897.js` | `bb1ed64a8f1dc638d8e8f67fed51e70d4fb6096697fc97f7265e9f825d811da9` | Named, hashed static chunk mapping |
+| `mobile.7172b162.chunk.js` | `74cd1a467808584b7b7de45f3db30bc50b5b2115fc2789892c37a6712d43ca23` | Selected-method GET, flag and masked-address/content-type metadata |
+| `9500.5c2bceac.chunk.js` | `38e104c0c3539144a556f9afad7052029c7e811fda7e1f26cdc16513455f52f4` | Empty `icode` initial attempt; human risk errors 87001/20031; quota result checks |
+| `8467.4534a166.chunk.js` | `1a07a34398305123c033bea8c05d6570e34d47393a064f4910c15c40ae497757` | Phone send POST, quota POST, 60-second UI cooldown |
+| `IVPh.b3e6be45.chunk.js` | `7279616944d3cd225b8df111609be54de0561502c6da4bd2270a59a1337772d5` | Phone `retry` ordinal, PH quota, default content type 160010 and optional `data.wt` delay |
+| `IVE.9e774d2d.chunk.js` | `272f289c97476ff5ab795654692681f6a1fae5a9e1870acbbf9761abd042c79e` | Email send POST with `_dc` cache-buster, retry ordinal and EM quota |
+
+One referenced shared chunk (`9723.31b42442.chunk.js`) returned HTTP 404. No
+missing human-risk implementation is inferred from other chunks. The observed
+frontend may run interactive risk checks and repeat; HomeVerb does not emulate
+that automatic behavior. Account-settings confirmation, additional identity
+stages and real provider acceptance remain incomplete.
+
+## Explicit verification code request protocol -- October 26, 2026
+
+[ADR-0087](../adr/0087-native-mijia-verification-code-delivery.md) implements the
+ordinary explicit code-request path as typed Rust. Method inspection and positive
+quota precede one selected phone/email send. Initial login/prompt presentation
+never sends a code. Acknowledgement means the provider accepted the request, not
+that the user received a message. Masked addresses remain discarded provider data.
+Existing cookie scope, subject consistency, protected material and original
+three-minute lifetime remain mandatory. There is no new secret or developer key.
+
+The challenge retains per-method ordinals, at most three successful requests,
+and a monotonic cooldown of at least 60 seconds, extended by a valid provider wait.
+No timer sends traffic. Any failure consumes the attempt; no alternate-method
+fallback, risk-token generation, implicit retry or password replay occurs.
+Typed adapter/Host continuation rechecks account snapshots before/after code
+requests, returns a new session-owned handle, and uses existing foreground
+cancellation and aggregate pending limits. Native API 1.31 and old C results are
+unchanged: a dedicated code-request C operation and App interaction remain next.
+No real SMS/email delivery, mobile packaging or account acceptance is claimed.
+
+
+Executed checks passed: 105 Mijia unit tests and seven compile-fail documentation
+tests, the complete Host package suite (including both new code-request cases),
+strict Rust 1.96 Clippy for Mijia/Host/FFI, the FFI build and both dedicated native
+login verifiers. A separate adapter race test confirms a protected payload change
+during the send rejects the new prompt without saving or replaying. Documentation,
+23 schemas with 62 primary positive and 711 negative fixtures, source hygiene and
+exact-reference coverage passed. Static asset GETs were the only external traffic;
+no authenticated API, SMS/email send, device operation or publication occurred.
+The unreleased typed `VerificationEndpoint` enum gains five cases; injected
+transports with exhaustive matches must handle these for the opt-in code flow.
+Existing C/App API 1.31 is unchanged and no package was rebuilt.

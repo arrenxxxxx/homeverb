@@ -293,3 +293,97 @@ async fn verification_requires_mijia_and_is_absent_from_ordinary_json() {
         assert!(serde_json::from_value::<HostRequest>(json!({"schema_version":"1.0","operation_id":"test","timeout_ms":1000,"request":{"method":method}})).is_err());
     }
 }
+
+#[tokio::test]
+async fn explicit_code_request_replaces_handle_and_preserves_account_waiting_state() {
+    let f = Fixture::new(false);
+    let old = id(begin(&f).await);
+    let calls = f.cloud.calls.load(Ordering::SeqCst);
+    let sent = f
+        .session
+        .request_account_verification_code(answer_metadata(old), Method::Email)
+        .await
+        .unwrap();
+    assert_eq!(sent.requests, 1);
+    assert!((59000..=60000).contains(&sent.cooldown_ms));
+    assert_eq!(f.cloud.calls.load(Ordering::SeqCst), calls + 3);
+    let next = id(sent.login);
+    assert_ne!(old, next);
+    assert!(
+        f.session
+            .request_account_verification_code(answer_metadata(old), Method::Email)
+            .await
+            .is_err()
+    );
+    assert!(
+        f.call(json!({"method":"list_accounts"})).await["data"]
+            .as_array()
+            .unwrap()
+            .is_empty()
+    );
+    let Login::Connected(_) = f
+        .session
+        .continue_account_verification(answer_metadata(next), ticket())
+        .await
+        .unwrap()
+    else {
+        panic!("Expected connection");
+    };
+}
+
+#[tokio::test]
+async fn code_request_refuses_foreign_captcha_cancelled_and_removed_account_contexts() {
+    for mode in 0..4 {
+        let f = Fixture::new(false);
+        if mode == 0 {
+            f.cloud.captcha.store(true, Ordering::SeqCst);
+        }
+        let challenge = id(begin(&f).await);
+        let calls = f.cloud.calls.load(Ordering::SeqCst);
+        if mode == 1 {
+            f.session.set_foreground(false);
+            f.session.set_foreground(true);
+        }
+        if mode == 2 {
+            let other = Fixture::new(false);
+            assert!(
+                other
+                    .session
+                    .request_account_verification_code(answer_metadata(challenge), Method::Phone)
+                    .await
+                    .is_err()
+            );
+            assert!(f.session.discard_account_verification(challenge));
+        } else {
+            let mut metadata = answer_metadata(challenge);
+            if mode == 3 {
+                metadata.schema_version = "invalid".into();
+            }
+            assert!(
+                f.session
+                    .request_account_verification_code(metadata, Method::Phone)
+                    .await
+                    .is_err()
+            );
+            assert!(!f.session.discard_account_verification(challenge));
+        }
+        assert_eq!(f.cloud.calls.load(Ordering::SeqCst), calls);
+    }
+    let f = Fixture::new(false);
+    let connected = f.connect(Some("xiaomi.mijia"), None).await;
+    let challenge = id(begin(&f).await);
+    let account = f.call(json!({"method":"list_accounts"})).await["data"][0]["id"].clone();
+    let removed = f
+        .call(json!({"method":"remove_account","account_id":account,"expected_device_ids":connected["data"]["retrieval"]["device_ids"]}))
+        .await;
+    assert!(removed["error"].is_null());
+    let calls = f.cloud.calls.load(Ordering::SeqCst);
+    assert!(
+        f.session
+            .request_account_verification_code(answer_metadata(challenge), Method::Phone)
+            .await
+            .is_err()
+    );
+    assert_eq!(f.cloud.calls.load(Ordering::SeqCst), calls);
+    assert!(serde_json::from_value::<HostRequest>(json!({"schema_version":"1.0","operation_id":"test","timeout_ms":1000,"request":{"method":"request_account_verification_code"}})).is_err());
+}

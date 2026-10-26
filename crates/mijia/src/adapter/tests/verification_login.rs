@@ -225,3 +225,48 @@ async fn account_changed_during_ticket_request_is_rechecked_before_persistence()
     assert_eq!(work.await.unwrap_err().code, "ACCOUNT_SESSION_UNCONFIRMED");
     assert_eq!(f.secrets.puts.load(Ordering::SeqCst), puts);
 }
+
+#[tokio::test]
+async fn code_request_rechecks_concurrent_account_changes_without_saving_or_returning_a_prompt() {
+    let f = Fixture::new();
+    let original = f.connect().await;
+    let p = pending(&f, Some(original.account.id)).await;
+    f.cloud.verification_gate.store(1, Ordering::SeqCst);
+    let started = f.cloud.verification_started.notified();
+    let operation = operation();
+    let work = f
+        .adapter
+        .request_verification_code(p, VerificationMethod::Phone, &operation);
+    tokio::pin!(work);
+    tokio::select! { _ = started => (), result = &mut work => panic!("Unexpected result: {result:?}") }
+    let mut lease = f
+        .vault
+        .lease(original.account.id, &operation)
+        .await
+        .unwrap();
+    let bytes = lease.inspect_session(&operation).await.unwrap().unwrap();
+    let mut value: Value = serde_json::from_slice(bytes.expose()).unwrap();
+    value["session"]["token"] = json!("CONCURRENT-FICTIONAL-TOKEN");
+    lease
+        .store_session(
+            &SecretBytes::new(serde_json::to_vec(&value).unwrap()),
+            &operation,
+        )
+        .await
+        .unwrap();
+    drop(lease);
+    let puts = f.secrets.puts.load(Ordering::SeqCst);
+    f.cloud.verification_resume.notify_one();
+    assert_eq!(work.await.unwrap_err().code, "ACCOUNT_SESSION_UNCONFIRMED");
+    assert_eq!(f.secrets.puts.load(Ordering::SeqCst), puts);
+    assert_eq!(
+        f.cloud
+            .verification_calls
+            .lock()
+            .unwrap()
+            .iter()
+            .filter(|e| **e == crate::VerificationEndpoint::SendPhone)
+            .count(),
+        1
+    );
+}

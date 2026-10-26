@@ -66,6 +66,18 @@ impl fmt::Debug for PendingVerificationConnection {
     }
 }
 impl PendingVerificationConnection {
+    pub fn code_requests(&self) -> u8 {
+        match &self.challenge {
+            Challenge::Captcha(_) => 0,
+            Challenge::Verification(c) => c.code_requests(),
+        }
+    }
+    pub fn code_request_cooldown(&self) -> std::time::Duration {
+        match &self.challenge {
+            Challenge::Captcha(_) => std::time::Duration::ZERO,
+            Challenge::Verification(c) => c.code_request_cooldown(),
+        }
+    }
     pub fn expires_at(&self) -> tokio::time::Instant {
         match &self.challenge {
             Challenge::Captcha(c) => c.expires_at(),
@@ -87,6 +99,35 @@ impl PendingVerificationConnection {
 }
 
 impl MijiaAdapter {
+    /// Explicit selected-method send, bound to the unchanged protected account snapshot.
+    pub async fn request_verification_code(
+        &self,
+        pending: PendingVerificationConnection,
+        method: VerificationMethod,
+        operation: &Operation,
+    ) -> Result<PendingVerificationConnection> {
+        if pending.owner != self.login_owner || pending.expires_at() <= tokio::time::Instant::now()
+        {
+            return Err(unconfirmed());
+        }
+        if self.login_preflight(pending.existing, operation).await? != pending.expected {
+            return Err(unconfirmed());
+        }
+        let Challenge::Verification(challenge) = pending.challenge else {
+            return Err(Error::invalid());
+        };
+        let challenge = challenge
+            .request_code(self.transport.as_ref(), method, operation)
+            .await?;
+        if self.login_preflight(pending.existing, operation).await? != pending.expected {
+            return Err(unconfirmed());
+        }
+        Ok(PendingVerificationConnection {
+            challenge: Challenge::Verification(challenge),
+            ..pending
+        })
+    }
+
     /// Opt-in protected account path; legacy connection methods stay captcha-only.
     pub async fn begin_verification_connection(
         &self,
