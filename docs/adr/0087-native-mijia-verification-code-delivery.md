@@ -58,3 +58,21 @@ forms, explicit methods, quota failure, provider risk refusal, expired cookies,
 subject/lifetime preservation, monotonic cooldown, capacity, cancellation and
 no retry. Keep contract/version, lifecycle and compatibility evidence synchronized
 when later exposing the typed implementation through C and Flutter.
+
+## Native code-request bridge (API 1.32)
+
+Add `homeverb_request_account_verification_code(handle, metadata, prompt,
+131072)` as one dedicated trusted C operation. Closed metadata contains only
+schema/operation/deadline, the session-owned challenge ID and `method` (`phone`
+or `email`). No ticket buffer, provider address, cookie or URL is accepted.
+The existing protected prompt buffer rules apply, including clearing on admission
+failure. The result retains the verification-prompt metadata and additionally
+reports `code_requests` (1..3) and `cooldown_ms` (0..86400000). A new local handle
+replaces the consumed old handle. These fields describe acknowledgement and local
+bounds, not message arrival. Existing begin/answer result shapes stay unchanged.
+
+Require API 1.32 before resolving the new symbol. The total becomes 26 C functions
+plus Android's initializer; all 34 ordinary methods and saved formats remain
+unchanged. Synthetic ABI tests must cover buffer clearing, metadata/method
+refusal, closed/background hosts and ordinary JSON isolation. App adoption and
+mobile packages remain separately verified phases.
