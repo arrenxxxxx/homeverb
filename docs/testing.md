@@ -464,3 +464,16 @@ through Core with fictional identities and values. URN/profile conflicts, unsafe
 field exclusion, old mapping upgrade, unchanged authority and cloud staleness are
 covered. Flutter `test/mijia_reference_test.dart` checks localized read-only
 readings at 320 pixels and double text scale. This is not physical acceptance.
+
+
+## Protected Mijia phone and email protocol
+
+`cargo test -p homeverb-mijia --offline --locked` includes ADR-0085's fictional
+phone/email challenges and local TLS one-send transport tests. Coverage includes
+initial-cookie continuity, direct/captcha success, subject correlation, cookie
+scope/monotonic expiry, signing-key/token requirements, bounded redirects,
+provider-confirmation refusal and cancellation/deadline/drop. Compile-fail tests
+prevent serializing challenges. Existing Host account tests and
+`python3 scripts/verify_native_account_login.py` retain captcha-only compatibility.
+These checks neither exercise a trusted browser nor establish real-account or
+modern SID authentication acceptance.

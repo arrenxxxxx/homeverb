@@ -4,7 +4,7 @@ use crate::auth::tests::{credentials, operation};
 use async_trait::async_trait;
 use std::sync::Mutex;
 
-fn image() -> SecretBytes {
+pub(super) fn image() -> SecretBytes {
     use base64::Engine;
     SecretBytes::new(base64::engine::general_purpose::STANDARD.decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jP1sAAAAASUVORK5CYII=").unwrap())
 }

@@ -559,3 +559,218 @@ async fn captcha_cancellation_and_drop_close_waiting_socket() {
         assert_eq!(server.connections.load(Ordering::SeqCst), 1);
     }
 }
+
+fn verification_request(endpoint: VerificationEndpoint) -> VerificationRequest {
+    let location = match endpoint {
+        VerificationEndpoint::Password => "https://account.xiaomi.com/pass/serviceLoginAuth2",
+        VerificationEndpoint::Options => {
+            "https://account.xiaomi.com/identity/list?context=fictional"
+        }
+        VerificationEndpoint::Phone => "https://account.xiaomi.com/identity/auth/verifyPhone",
+        VerificationEndpoint::Email => "https://account.xiaomi.com/identity/auth/verifyEmail",
+        VerificationEndpoint::Completion => {
+            "https://account.xiaomi.com/identity/result/check?id=fictional"
+        }
+        VerificationEndpoint::SigningKey => {
+            "https://account.xiaomi.com/pass/serviceLogin?sid=xiaomiio&_json=true"
+        }
+        VerificationEndpoint::Exchange => "https://sts.api.io.mi.com/sts?ticket=fictional",
+    };
+    VerificationRequest {
+        endpoint,
+        location: PrivateString::new(location.into()),
+        cookie: PrivateString::new(
+            if endpoint == VerificationEndpoint::Exchange {
+                ""
+            } else {
+                "identity_session=fictional"
+            }
+            .into(),
+        ),
+        body: SecretBytes::new(
+            if matches!(
+                endpoint,
+                VerificationEndpoint::Phone | VerificationEndpoint::Email
+            ) {
+                b"_flag=4&ticket=fictional&trust=false&_json=true".to_vec()
+            } else {
+                vec![]
+            },
+        ),
+    }
+}
+
+#[test]
+fn verification_requests_and_responses_keep_closed_origins_paths_and_bounds() {
+    for endpoint in [
+        VerificationEndpoint::Password,
+        VerificationEndpoint::Options,
+        VerificationEndpoint::Phone,
+        VerificationEndpoint::Email,
+        VerificationEndpoint::Completion,
+        VerificationEndpoint::SigningKey,
+        VerificationEndpoint::Exchange,
+    ] {
+        assert!(verification_request(endpoint).url().is_ok());
+        let mut r = verification_request(endpoint);
+        r.location = PrivateString::new("https://foreign.invalid/identity/list".into());
+        assert!(r.url().is_err());
+    }
+    for location in [
+        "http://account.xiaomi.com/identity/list",
+        "https://account.xiaomi.com:444/identity/list",
+        "https://account.xiaomi.com/identity/list#fragment",
+        "https://user@account.xiaomi.com/identity/list",
+        "https://account.xiaomi.com/identity/../identity/list",
+        "https://account.xiaomi.com/identity%2flist",
+        "https://account.xiaomi.com/other",
+    ] {
+        let mut r = verification_request(VerificationEndpoint::Options);
+        r.location = PrivateString::new(location.into());
+        assert!(r.url().is_err());
+    }
+    let mut r = verification_request(VerificationEndpoint::SigningKey);
+    r.location = PrivateString::new(
+        "https://account.xiaomi.com/pass/serviceLogin?sid=mijia&_json=true".into(),
+    );
+    assert!(r.url().is_err());
+    let mut r = verification_request(VerificationEndpoint::Exchange);
+    r.cookie = PrivateString::new("passToken=fictional".into());
+    assert!(r.url().is_err());
+    assert!(
+        VerificationResponse::new(200, SecretBytes::new(vec![0; 65_537]), None, vec![]).is_err()
+    );
+    assert!(
+        VerificationResponse::new(
+            200,
+            SecretBytes::new(vec![]),
+            None,
+            (0..17)
+                .map(|_| SecretBytes::new(b"fictional=x".to_vec()))
+                .collect()
+        )
+        .is_err()
+    );
+    assert!(
+        VerificationResponse::new(
+            200,
+            SecretBytes::new(vec![]),
+            Some(SecretBytes::new(vec![b'x'; 8193])),
+            vec![]
+        )
+        .is_err()
+    );
+}
+
+#[tokio::test]
+async fn verification_tls_is_one_send_without_automatic_redirect_or_cookie_jar() {
+    for endpoint in [
+        VerificationEndpoint::Options,
+        VerificationEndpoint::Phone,
+        VerificationEndpoint::Exchange,
+    ] {
+        for redirected in [false, true] {
+            let reply = if redirected {
+                "HTTP/1.1 302 Found\r\nLocation: SERVER_URL\r\nSet-Cookie: identity_session=fictional; Path=/\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"
+            } else {
+                "HTTP/1.1 200 OK\r\nSet-Cookie: identity_session=fictional; Path=/\r\nContent-Length: 2\r\nConnection: close\r\n\r\n{}"
+            };
+            let server = Server::start(reply.as_bytes().to_vec(), false).await;
+            let r = verification_request(endpoint);
+            let response = verification::transmit_verification(
+                server.client.clone(),
+                Url::parse(&server.url).unwrap(),
+                &r,
+                &operation(),
+            )
+            .await
+            .unwrap();
+            assert_eq!(response.status, if redirected { 302 } else { 200 });
+            assert_eq!(response.location.is_some(), redirected);
+            assert_eq!(response.cookies.len(), 1);
+            assert_eq!(server.connections.load(Ordering::SeqCst), 1);
+            let requests = server.requests.lock().unwrap();
+            assert_eq!(requests.len(), 1);
+            let wire = String::from_utf8_lossy(&requests[0]);
+            assert_eq!(
+                wire.starts_with("POST "),
+                endpoint == VerificationEndpoint::Phone
+            );
+            assert_eq!(
+                wire.contains("cookie: identity_session=fictional"),
+                endpoint != VerificationEndpoint::Exchange
+            );
+            assert!(!wire.contains("miot-encrypt-algorithm"));
+        }
+    }
+}
+
+#[tokio::test]
+async fn verification_tls_refuses_status_duplicate_locations_and_oversize_responses() {
+    for reply in [
+        "HTTP/1.1 401 Unauthorized\r\nContent-Length: 0\r\nConnection: close\r\n\r\n",
+        "HTTP/1.1 500 Error\r\nContent-Length: 0\r\nConnection: close\r\n\r\n",
+        "HTTP/1.1 200 OK\r\nContent-Length: 65537\r\nConnection: close\r\n\r\n",
+        "HTTP/1.1 302 Found\r\nLocation: /one\r\nLocation: /two\r\nContent-Length: 0\r\nConnection: close\r\n\r\n",
+    ] {
+        let server = Server::start(reply.as_bytes().to_vec(), false).await;
+        let r = verification_request(VerificationEndpoint::Options);
+        assert!(
+            verification::transmit_verification(
+                server.client.clone(),
+                Url::parse(&server.url).unwrap(),
+                &r,
+                &operation()
+            )
+            .await
+            .is_err()
+        );
+        assert_eq!(server.connections.load(Ordering::SeqCst), 1);
+    }
+}
+
+#[tokio::test]
+async fn verification_tls_cancel_timeout_and_drop_close_without_replay() {
+    for mode in 0..4 {
+        let server = Server::start(vec![], true).await;
+        let op =
+            Operation::new(if mode == 2 { 150 } else { 5000 }, CancellationToken::new()).unwrap();
+        if mode == 0 {
+            op.cancellation.cancel();
+        }
+        let r = verification_request(VerificationEndpoint::Phone);
+        let mut work = Box::pin(verification::transmit_verification(
+            server.client.clone(),
+            Url::parse(&server.url).unwrap(),
+            &r,
+            &op,
+        ));
+        if mode == 0 {
+            assert_eq!(work.await.unwrap_err().code, "CANCELLED");
+            assert_eq!(server.connections.load(Ordering::SeqCst), 0);
+            continue;
+        }
+        loop {
+            tokio::select! {result=&mut work=>panic!("Unexpected completion {result:?}"),_=tokio::time::sleep(Duration::from_millis(2))=>()}
+            if !server.requests.lock().unwrap().is_empty() {
+                break;
+            }
+        }
+        if mode == 1 {
+            op.cancellation.cancel();
+            assert_eq!(work.await.unwrap_err().code, "CANCELLED");
+        } else if mode == 2 {
+            assert_eq!(work.await.unwrap_err().code, "DEADLINE_EXCEEDED");
+        } else {
+            drop(work);
+        }
+        tokio::time::timeout(Duration::from_secs(1), async {
+            while server.closed.load(Ordering::SeqCst) == 0 {
+                tokio::time::sleep(Duration::from_millis(2)).await;
+            }
+        })
+        .await
+        .unwrap();
+        assert_eq!(server.connections.load(Ordering::SeqCst), 1);
+    }
+}

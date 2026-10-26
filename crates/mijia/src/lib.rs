@@ -13,14 +13,15 @@ pub use adapter::{
     PendingMijiaLogin,
 };
 pub use auth::{
-    CaptchaChallenge, LoginCredentials, LoginOutcome, MijiaSession, begin_login, login,
+    CaptchaChallenge, LoginCredentials, LoginOutcome, MijiaSession, VerificationChallenge,
+    VerificationLoginOutcome, VerificationMethod, begin_login, begin_verification_login, login,
 };
 pub use control::PropertyWrite;
 pub use inventory::{CloudDevice, Inventory, PropertyQuery, PropertyReading};
 pub use spec::{ControlOption, MappedProperty, ModelMapping, SpecIndex, reference_setting_option};
 pub use transport::{
     CaptchaRequest, CaptchaResponse, CloudEndpoint, CloudRequest, CloudResponse, CloudTransport,
-    MijiaHttps,
+    MijiaHttps, VerificationEndpoint, VerificationRequest, VerificationResponse,
 };
 
 use homeverb_domain::{Error, Result};

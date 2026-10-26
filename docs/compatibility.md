@@ -1,5 +1,19 @@
 # Platform and device compatibility matrix
 
+## Protected phone and email ticket protocol -- October 26, 2026
+
+The opt-in Rust protocol in [ADR-0085](adr/0085-mijia-protected-verification-tickets.md)
+implements explicit phone/email method discovery, one-use ticket submission and
+bounded session completion with signing-key and subject checks. It preserves
+initial login cookies and the original three-minute challenge lifetime. Existing
+account/Host/C/App paths remain captcha-only: protected account binding and a
+foreground trusted browser/ticket bridge are still pending. No native API 1.30,
+ordinary method, export or persisted-schema change is introduced. This is
+fictional protocol and local TLS evidence, not real-account acceptance or modern
+SID `mijia` authentication. See the
+[phase record](development/14-mijia-reference-integration.md#protected-phone-and-email-ticket-protocol--october-26-2026).
+
+
 ## Exact light and purifier controls -- October 25, 2026
 
 API 1.30 implements 14 low-risk scalar controls for `abhome.light.wy0a01` and

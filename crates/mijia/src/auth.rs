@@ -160,7 +160,10 @@ struct LoginStatus {
 }
 
 mod challenge;
-pub use challenge::{CaptchaChallenge, LoginOutcome, begin_login};
+pub use challenge::{
+    CaptchaChallenge, LoginOutcome, VerificationChallenge, VerificationLoginOutcome,
+    VerificationMethod, begin_login, begin_verification_login,
+};
 
 pub async fn login(
     transport: &dyn CloudTransport,

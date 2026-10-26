@@ -10,6 +10,8 @@ use reqwest::{
 };
 use std::{fmt, time::Duration};
 
+pub(crate) mod verification;
+pub use verification::{VerificationEndpoint, VerificationRequest, VerificationResponse};
 mod captcha;
 pub use captcha::{CaptchaRequest, CaptchaResponse};
 
@@ -137,6 +139,18 @@ pub trait CloudTransport: Send + Sync {
         ))
     }
 
+    /// Optional one-hop account verification; the caller validates every continuation.
+    async fn send_verification(
+        &self,
+        _: &VerificationRequest,
+        _: &Operation,
+    ) -> Result<VerificationResponse> {
+        Err(homeverb_domain::Error::new(
+            "CAPABILITY_UNSUPPORTED",
+            "The transport does not support account verification.",
+        ))
+    }
+
     /// Separate, fail-closed write path. Never delegate to the read transport.
     async fn send_control(
         &self,
@@ -171,6 +185,20 @@ fn client_builder() -> reqwest::ClientBuilder {
 
 #[async_trait]
 impl CloudTransport for MijiaHttps {
+    async fn send_verification(
+        &self,
+        request: &VerificationRequest,
+        operation: &Operation,
+    ) -> Result<VerificationResponse> {
+        operation
+            .run(async {
+                let url = request.url()?;
+                let client = client_builder().build().map_err(|_| failed())?;
+                verification::transmit_verification(client, url, request, operation).await
+            })
+            .await
+    }
+
     async fn fetch_captcha(
         &self,
         request: &CaptchaRequest,

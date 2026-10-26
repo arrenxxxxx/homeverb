@@ -19,6 +19,13 @@ captcha continuation and Flutter platform/account/read/control views. Live accep
 can explicitly admit protected fan setters under ADR-0078. Historical phase records below distinguish earlier
 protocol-only work from the [protected Core phase](../adr/0076-mijia-protected-core-reads.md).
 
+The opt-in typed Rust `begin_verification_login` protocol also supports bounded
+phone/email provider-ticket continuation under
+[ADR-0085](../adr/0085-mijia-protected-verification-tickets.md). It is not yet bound
+to account/Host/C/App entry points; those retain captcha-only behavior. No SMS
+sending endpoint or modern SID `mijia` login is claimed. See the
+[protocol evidence](14-mijia-reference-integration.md#protected-phone-and-email-ticket-protocol--october-26-2026).
+
 ## Protocol evidence
 
 - MIT `Squachen/micloud`, commit `dc002b87fc09ef36199715cfa10f1eaa2d2d4210`:

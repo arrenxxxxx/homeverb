@@ -13,6 +13,26 @@ pub enum LoginOutcome {
     Captcha(CaptchaChallenge),
 }
 
+mod verification;
+pub use verification::{VerificationChallenge, VerificationMethod};
+
+/// Opt-in native protocol outcome. Existing account/native entry points remain captcha-only.
+#[derive(Debug)]
+pub enum VerificationLoginOutcome {
+    Connected(MijiaSession),
+    Captcha(CaptchaChallenge),
+    Verification(VerificationChallenge),
+}
+impl VerificationLoginOutcome {
+    fn captcha_only(self) -> Result<LoginOutcome> {
+        match self {
+            Self::Connected(v) => Ok(LoginOutcome::Connected(v)),
+            Self::Captcha(v) => Ok(LoginOutcome::Captcha(v)),
+            Self::Verification(_) => Err(required()),
+        }
+    }
+}
+
 struct Context {
     account: SecretBytes,
     hash: PrivateString,
@@ -21,6 +41,7 @@ struct Context {
     region: Region,
     lifetime: Operation,
     remaining: u8,
+    verification_cookies: Option<Box<verification::Cookies>>,
 }
 impl Context {
     fn password_request(&self, answer: Option<(&str, &str)>) -> Result<CloudRequest> {
@@ -83,6 +104,28 @@ impl CaptchaChallenge {
         answer: SecretBytes,
         operation: &Operation,
     ) -> Result<LoginOutcome> {
+        self.answer_extended(transport, answer, operation, false)
+            .await?
+            .captcha_only()
+    }
+
+    pub async fn answer_with_verification(
+        self,
+        transport: &dyn CloudTransport,
+        answer: SecretBytes,
+        operation: &Operation,
+    ) -> Result<VerificationLoginOutcome> {
+        self.answer_extended(transport, answer, operation, true)
+            .await
+    }
+
+    async fn answer_extended(
+        self,
+        transport: &dyn CloudTransport,
+        answer: SecretBytes,
+        operation: &Operation,
+        verification: bool,
+    ) -> Result<VerificationLoginOutcome> {
         let lifetime = self.context.lifetime.clone();
         lifetime
             .run(operation.run(async {
@@ -101,8 +144,14 @@ impl CaptchaChallenge {
                 let request =
                     context.password_request(Some((text, self.response.cookie.as_str())))?;
                 drop(answer);
-                let response = transport.send(&request, operation).await?;
-                finish(transport, context, response, operation, true).await
+                let response = verification::send_login(
+                    transport,
+                    &request,
+                    &mut context.verification_cookies,
+                    operation,
+                )
+                .await?;
+                finish(transport, context, response, operation, true, verification).await
             }))
             .await
     }
@@ -124,6 +173,16 @@ pub async fn begin_login(
     start(transport, credentials, region, operation, true).await
 }
 
+/// Opt-in protocol entry point. Only trusted callers may handle provider-page material.
+pub async fn begin_verification_login(
+    transport: &dyn CloudTransport,
+    credentials: LoginCredentials,
+    region: Region,
+    operation: &Operation,
+) -> Result<VerificationLoginOutcome> {
+    start_extended(transport, credentials, region, operation, true, true).await
+}
+
 pub(super) async fn start(
     transport: &dyn CloudTransport,
     credentials: LoginCredentials,
@@ -131,6 +190,26 @@ pub(super) async fn start(
     operation: &Operation,
     interactive: bool,
 ) -> Result<LoginOutcome> {
+    start_extended(
+        transport,
+        credentials,
+        region,
+        operation,
+        interactive,
+        false,
+    )
+    .await?
+    .captcha_only()
+}
+
+async fn start_extended(
+    transport: &dyn CloudTransport,
+    credentials: LoginCredentials,
+    region: Region,
+    operation: &Operation,
+    interactive: bool,
+    verification: bool,
+) -> Result<VerificationLoginOutcome> {
     operation
         .run(async {
             let device = uuid::Uuid::new_v4().simple().to_string();
@@ -142,7 +221,17 @@ pub(super) async fn start(
                 location: None,
                 body: SecretBytes::new(vec![]),
             };
-            let response = transport.send(&sign_request, operation).await?;
+            let mut verification_cookies = verification
+                .then(|| verification::Cookies::new(cookie.as_str()))
+                .transpose()?
+                .map(Box::new);
+            let response = verification::send_login(
+                transport,
+                &sign_request,
+                &mut verification_cookies,
+                operation,
+            )
+            .await?;
             let sign: Sign = decode(response.body.expose())?;
             if !crate::bounded_text(sign.sign.as_str(), 4096) {
                 return Err(invalid());
@@ -158,7 +247,7 @@ pub(super) async fn start(
             drop(password);
             let mut lifetime = operation.clone();
             lifetime.deadline = tokio::time::Instant::now() + Duration::from_secs(180);
-            let context = Context {
+            let mut context = Context {
                 account,
                 hash: PrivateString(hash),
                 sign: sign.sign,
@@ -166,11 +255,25 @@ pub(super) async fn start(
                 region,
                 lifetime,
                 remaining: MAX_ANSWERS,
+                verification_cookies,
             };
-            let response = transport
-                .send(&context.password_request(None)?, operation)
-                .await?;
-            finish(transport, context, response, operation, interactive).await
+            let request = context.password_request(None)?;
+            let response = verification::send_login(
+                transport,
+                &request,
+                &mut context.verification_cookies,
+                operation,
+            )
+            .await?;
+            finish(
+                transport,
+                context,
+                response,
+                operation,
+                interactive,
+                verification,
+            )
+            .await
         })
         .await
 }
@@ -181,18 +284,31 @@ async fn finish(
     response: crate::CloudResponse,
     operation: &Operation,
     interactive: bool,
-) -> Result<LoginOutcome> {
+    verification: bool,
+) -> Result<VerificationLoginOutcome> {
     let status: LoginStatus = decode(response.body.expose())?;
-    if status.notification.is_some() {
-        return Err(required());
+    if let Some(page) = status.notification {
+        if !interactive || !verification {
+            return Err(required());
+        }
+        return VerificationChallenge::begin(transport, context, page, operation)
+            .await
+            .map(VerificationLoginOutcome::Verification);
     }
     if let Some(location) = status.captcha {
         if !interactive || context.remaining == 0 {
             return Err(required());
         }
-        let request = CaptchaRequest::new(location, context.cookie.clone())?;
+        let cookie = if let Some(jar) = &context.verification_cookies {
+            jar.header(&crate::transport::verification::account_url(
+                location.as_str(),
+            )?)
+        } else {
+            context.cookie.clone()
+        };
+        let request = CaptchaRequest::new(location, cookie)?;
         let response = transport.fetch_captcha(&request, operation).await?;
-        return Ok(LoginOutcome::Captcha(CaptchaChallenge {
+        return Ok(VerificationLoginOutcome::Captcha(CaptchaChallenge {
             context,
             response,
         }));
@@ -212,6 +328,33 @@ async fn finish(
     {
         return Err(invalid());
     }
+    if let Some(mut cookies) = context.verification_cookies {
+        if cookies.subject().is_some_and(|v| v != user_id.as_str()) {
+            return Err(invalid());
+        }
+        let request = crate::VerificationRequest {
+            endpoint: crate::VerificationEndpoint::Exchange,
+            location: result.location,
+            cookie: PrivateString::new(String::new()),
+            body: SecretBytes::new(vec![]),
+        };
+        let url = request.url()?;
+        let response = transport.send_verification(&request, operation).await?;
+        if response.status != 200 || response.location.is_some() {
+            return Err(invalid());
+        }
+        cookies.absorb(&url, response.cookies)?;
+        if cookies.subject().is_some_and(|v| v != user_id.as_str()) {
+            return Err(invalid());
+        }
+        let token = cookies.token().ok_or_else(auth_required)?;
+        return Ok(VerificationLoginOutcome::Connected(MijiaSession {
+            region: context.region,
+            user_id,
+            security: result.ssecurity,
+            token: PrivateString::new(token.to_owned()),
+        }));
+    }
     let exchange = CloudRequest {
         endpoint: CloudEndpoint::LoginExchange,
         region: context.region,
@@ -225,7 +368,7 @@ async fn finish(
     if !cookie_value(token) {
         return Err(invalid());
     }
-    Ok(LoginOutcome::Connected(MijiaSession {
+    Ok(VerificationLoginOutcome::Connected(MijiaSession {
         region: context.region,
         user_id,
         security: result.ssecurity,

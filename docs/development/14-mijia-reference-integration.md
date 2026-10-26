@@ -565,3 +565,41 @@ the new light/purifier controls. No installation, account/appliance operation,
 real write, physical-phone/iOS acceptance, push, upload or publication occurred.
 `git rev-list --count --merges origin/main..HEAD` still returned zero. This is
 a verified local build, not completion of the remaining Mijia reference scope.
+
+## Protected phone and email ticket protocol -- October 26, 2026
+
+[ADR-0085](../adr/0085-mijia-protected-verification-tickets.md) now has an opt-in
+typed Rust implementation. `begin_verification_login` returns a connected session,
+a captcha or a non-serializable verification challenge. Captcha answers may
+explicitly transition to verification while preserving their original lifetime.
+Existing one-shot and captcha-only entry points retain their previous behavior.
+
+The dedicated one-send transport retains bounded initial account cookies, obtains
+explicit methods from `identity/list`, submits one protected ticket and follows
+at most four validated continuations per completion sequence. Both phone and
+email require a fresh legacy SID `xiaomiio` signing key and a consistent numeric
+subject. Account cookies never go to STS; captured service tokens are never sent
+in verification requests. Cookie expiry uses a monotonic clock after converting
+provider expiry once. The challenge consumes one answer, expires after three
+minutes and retains no socket, password, account lease or background worker while
+waiting. Direct success and captcha success also check exchange-cookie identity.
+
+The provider page is protected protocol material for a future trusted foreground
+browser. Tickets need not be numeric codes. There is no SMS/email sending endpoint,
+automatic alternate-method attempt, password replay, HTML parsing or implicit
+`skipUrl` account-setting confirmation. Extra provider confirmation pages remain
+unsupported. Account/Host snapshot binding, native bridge and App browser/ticket
+interaction remain pending. API 1.30, 34 ordinary methods, C exports, SQLite 5 and
+protected payloads are unchanged; the existing APK does not expose this protocol.
+
+Executed checks use fictional peers and local TLS only. The Mijia suite passed
+94 unit tests and six compile-fail documentation tests, including both methods,
+direct/captcha success, missing options, malformed/expired cookies, conflicting
+subjects, missing signing key/token, rejected tickets, bounded redirects, provider
+confirmation refusal, cancellation, expiry and drop. No real account, appliance,
+secure-store credential or vendor request was used. Strict Rust 1.96 Clippy for Mijia/Host/FFI, the complete Host package suite,
+the FFI build and the existing native login verifier passed. Documentation,
+22 schemas with 62 positive and 626 negative fixtures, repository hygiene,
+256 existing commit messages and the exact-reference coverage check passed.
+No mobile rebuild or full-workspace green result is claimed. Modern
+SID `mijia`, native verification interaction and full reference parity remain open.

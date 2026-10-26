@@ -1,6 +1,6 @@
 # ADR-0085: Protected Mijia phone and email verification tickets
 
-Status: accepted for typed protocol implementation; native UI integration pending.
+Status: typed protocol implemented and synthetic-tested; account/Host/native UI integration pending.
 Date: October 25, 2026.
 
 ## Evidence and scope

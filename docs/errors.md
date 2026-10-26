@@ -582,3 +582,16 @@ Other provider modes refuse these grants. Missing exact Core authority is
 `DEVICE_IDENTITY_CONFLICT`. Possibly-sent failures preserve unknown receipts.
 The App reports `API_UPGRADE_REQUIRED` on pre-1.30 hosts before new grants are
 submitted. No new error code or automatic sign-in/retry path is introduced.
+
+
+## Protected Mijia verification protocol
+
+[ADR-0085](adr/0085-mijia-protected-verification-tickets.md) retains existing errors.
+Unavailable methods, rejected tickets, expired identity cookies and additional
+provider confirmation return `MIJIA_AUTH_CHALLENGE_REQUIRED`. Malformed cookies,
+foreign/ambiguous identity, invalid signing keys and unsafe continuations fail
+with `MIJIA_INVALID_RESPONSE`; a missing service token returns `AUTH_REQUIRED`.
+Invalid ticket/method input consumes the challenge with `INVALID_ARGUMENT`.
+Cancellation and original lifetime expiry remain `CANCELLED` and
+`DEADLINE_EXCEEDED`. No automatic method fallback or password replay follows.
+Existing C/App login still exposes only captcha continuation.
