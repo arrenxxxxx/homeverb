@@ -913,3 +913,10 @@ passed all included suites and documentation tests, including eight Core history
 cases and 118 Mijia unit tests. This is not a full-workspace pass. Documentation,
 24 schemas with 65 primary positive and 792 negative fixtures and repository
 hygiene passed. No Flutter or mobile package was changed in this layer.
+
+
+The subsequent timestamp admission correction aligns typed DTO deserialization
+with the canonical schema (`...:ssZ`) and refuses offset, fractional and leap-second
+forms before normalization. Typed Core also rejects leap-second values constructed
+in process. Eight Core history tests, the six-case Mijia history subset and strict
+Domain/Core/Mijia/Host Clippy passed after this correction.

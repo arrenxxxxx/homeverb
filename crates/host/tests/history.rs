@@ -507,6 +507,15 @@ fn typed_history_fixtures_round_trip_and_reject_authority_fields() {
     let mut value = serde_json::to_value(&request).unwrap();
     value["principal"] = json!("admin");
     assert!(serde_json::from_value::<HistoryRequest>(value).is_err());
+    for timestamp in [
+        "2026-10-01T00:00:00+00:00",
+        "2026-10-01T00:00:00.000Z",
+        "2016-12-31T23:59:60Z",
+    ] {
+        let mut value = serde_json::to_value(&request).unwrap();
+        value["start"] = json!(timestamp);
+        assert!(serde_json::from_value::<HistoryRequest>(value).is_err());
+    }
     let mut value = serde_json::to_value(request).unwrap();
     value["aggregation"] = Value::String("event".into());
     assert!(serde_json::from_value::<HistoryRequest>(value).is_err());

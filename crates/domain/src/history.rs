@@ -3,6 +3,17 @@ use crate::Transport;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
+fn whole_utc<'de, D: serde::Deserializer<'de>>(d: D) -> Result<DateTime<Utc>, D::Error> {
+    let text = String::deserialize(d)?;
+    let value = DateTime::parse_from_rfc3339(&text).map_err(serde::de::Error::custom)?;
+    if text.len() != 20 || !text.ends_with('Z') || value.timestamp_subsec_nanos() != 0 {
+        return Err(serde::de::Error::custom(
+            "A whole-second UTC timestamp is required.",
+        ));
+    }
+    Ok(value.with_timezone(&Utc))
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct HistoryTarget {
@@ -48,12 +59,15 @@ pub struct HistoryRequest {
     pub connection_id: String,
     pub target: HistoryTarget,
     pub aggregation: HistoryAggregation,
+    #[serde(deserialize_with = "whole_utc")]
     pub start: DateTime<Utc>,
+    #[serde(deserialize_with = "whole_utc")]
     pub end: DateTime<Utc>,
 }
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct HistoryRecord {
+    #[serde(deserialize_with = "whole_utc")]
     pub reported_at: DateTime<Utc>,
     pub value: f64,
 }
@@ -65,7 +79,9 @@ pub struct HistoryResult {
     pub connection_id: String,
     pub target: HistoryTarget,
     pub aggregation: HistoryAggregation,
+    #[serde(deserialize_with = "whole_utc")]
     pub start: DateTime<Utc>,
+    #[serde(deserialize_with = "whole_utc")]
     pub end: DateTime<Utc>,
     pub unit: String,
     pub source: Transport,

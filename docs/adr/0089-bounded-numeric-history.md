@@ -23,7 +23,8 @@ maximum records and an explicitly unknown bucket timezone (`null`). This unit an
 aggregate describe the historical series, not the property's current wire value.
 
 Requests use an exact local device and connection ID, the inspected target and
-aggregation, and whole-second UTC `start`/`end` timestamps. No URL, key, remote
+aggregation, and canonical whole-second UTC `start`/`end` timestamps (`...:ssZ`). Offset,
+fractional and leap-second representations are rejected on deserialization. No URL, key, remote
 device ID, provider, user identity, limit or conversion is caller selectable.
 Core resolves and validates the complete descriptor and connection, checks the
 option against an existing readable number/integer property, and rejects missing,

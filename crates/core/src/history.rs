@@ -84,7 +84,8 @@ fn validate_result(
     }
     let mut previous = None;
     for record in &result.records {
-        if !record.value.is_finite()
+        if record.reported_at.timestamp_subsec_nanos() != 0
+            || !record.value.is_finite()
             || record.value < 0.0
             || record.reported_at < request.start
             || record.reported_at >= request.end
@@ -155,6 +156,8 @@ impl Core {
             .run(async {
                 let started = self.clock.now();
                 if !shape(request)
+                    || request.start.timestamp_subsec_nanos() != 0
+                    || request.end.timestamp_subsec_nanos() != 0
                     || request.start.timestamp() <= 0
                     || request.end <= request.start
                     || request.end > started
