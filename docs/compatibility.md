@@ -1,5 +1,13 @@
 # Platform and device compatibility matrix
 
+## Verification APK availability -- October 27, 2026
+
+API 1.32 is now packaged from clean source `01a115b` for arm64-v8a and x86_64.
+Local signature, AAR matching, 27 exports per ABI and 16 KiB alignment passed.
+This does not establish runtime or real-account/message acceptance. See the
+[artifact record](../apps/mobile/verification.md#verification-api-132-android-package--october-27-2026).
+
+
 ## Foreground App verification -- October 27, 2026
 
 The App negotiates native API 1.32 and handles image challenges followed by

@@ -795,3 +795,29 @@ controller/widget/refusal cases. Documentation, 23 schemas with 62 positive and
 743 negative fixtures, repository hygiene and commit conventions passed. No
 Rust source or C ABI changed in this App phase. No package build, installation,
 provider request, real message delivery or physical-device acceptance is implied.
+
+
+## Verification API 1.32 Android package -- October 27, 2026
+
+Clean source `01a115b68f8441581e211c47e00c0d4a1df5270d` produced the combined-platform
+release-mode development APK at
+`apps/mobile/build/delivery/mijia/01a115b/homeverb-mijia-0.2.0-01a115b.apk`.
+Size: 76,100,350 bytes. SHA-256:
+`e4de2f3e8f80f0347eb86ed020a37da7be2d4746280ecebee9675f9f190f6c90`.
+The adjacent `verification.json` records the clean source, current AAR/native
+hashes and exact stripped AAR matching for arm64-v8a and x86_64.
+
+Executed `scripts/build_android_native.py` using installed stable Rust 1.99.1,
+NDK 28.2.13676358 and JDK 21. Both ABIs passed 27 exports and 16 KiB ELF alignment.
+Executed `fvm flutter build apk --release --target-platform
+android-arm64,android-x64 --dart-define=HOMEVERB_ADAPTER=homeverb.platforms`
+with FVM Flutter 3.47.7 and the existing development signing identity.
+`scripts/verify_flutter_apk.py` passed signature, ZIP/Core ELF alignment, API 28
+minimum, disabled backup, absence of the integration-test plugin, both complete
+ABIs and current AAR matching. No SDK installation, APK installation, real
+account/message request, appliance write, upload, push or publication occurred.
+
+This package supersedes API 1.30 for local evaluation of the verification UI.
+Archive checks do not establish phone, provider or physical-device acceptance;
+the eight previously recorded full-suite macOS failures remain unresolved.
+Modern SID `mijia`, event/history and remaining functional coverage stay open.
