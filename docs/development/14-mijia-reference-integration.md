@@ -821,3 +821,25 @@ This package supersedes API 1.30 for local evaluation of the verification UI.
 Archive checks do not establish phone, provider or physical-device acceptance;
 the eight previously recorded full-suite macOS failures remain unresolved.
 Modern SID `mijia`, event/history and remaining functional coverage stay open.
+
+
+## Exact daily energy source evidence -- October 27, 2026
+
+Further read-only inspection of the pinned Apache-2.0 community revision identifies
+an exact statistics path for reference `cuco.plug.v3`. Its
+[customizations](https://github.com/al-one/hass-xiaomi-miot/blob/f78158257e19a21902adaf6bcc8440c3ba172a91/custom_components/xiaomi_miot/core/device_customizes.py)
+select key `11.1`, ratio 0.01 and the matching kWh attribute unit. Its
+[device implementation](https://github.com/al-one/hass-xiaomi-miot/blob/f78158257e19a21902adaf6bcc8440c3ba172a91/custom_components/xiaomi_miot/core/device.py)
+sends `v2/user/statistics` with `stat_day_v3`, a time window and bounded limit.
+The [utility decoder](https://github.com/al-one/hass-xiaomi-miot/blob/f78158257e19a21902adaf6bcc8440c3ba172a91/custom_components/xiaomi_miot/core/utils.py),
+[templates](https://github.com/al-one/hass-xiaomi-miot/blob/f78158257e19a21902adaf6bcc8440c3ba172a91/custom_components/xiaomi_miot/core/templates.py)
+and [statistics tests](https://github.com/al-one/hass-xiaomi-miot/blob/f78158257e19a21902adaf6bcc8440c3ba172a91/tests/test_power_cost_statistics.py)
+read record timestamps and JSON-string value arrays. They distinguish invalid or
+missing values from zero. This corrects the earlier lack of an exact reference
+energy candidate; it does not establish the legacy event/history keys previously
+discussed, complete paging, modern SID authentication or cloud calendar boundaries.
+
+[ADR-0088](../adr/0088-mijia-exact-daily-energy-history.md) defines a bounded exact
+native implementation. A native protocol, Core historical-read contract and App
+presentation are separate implementation stages. The sources were fetched as text
+only; no upstream executable, HA runtime, account or provider request was used.
