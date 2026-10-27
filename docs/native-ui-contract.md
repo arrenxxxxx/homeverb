@@ -1757,3 +1757,18 @@ promised after process termination and no operation is replayed. Existing public
 methods, C export count, saved formats and grants retain their prior behavior.
 This native phase does not add Flutter screens or CLI/MCP commands. The latest
 packaged APK remains API 1.32 until a separately recorded rebuild.
+
+
+### App history presentation
+
+The Flutter device-detail entry negotiates API 1.33 and both historical methods.
+It inspects one selected connection locally, then sends a historical read only
+on an explicit click. Users can edit the complete supported UTC interval rather
+than being limited to presets. Target admission comes from inspected options and
+the exact readable numeric descriptor, without provider/model branching.
+The dialog validates and owns the response, displays reported records and all
+partial-data evidence, and clears an older result when its inputs change.
+Foreground state polling pauses while this modal view is visible and resumes
+on return to an eligible device view. Closing, navigation, background and client
+replacement cancel pending reads and discard late completions. History remains
+ephemeral and is never added to state snapshots or execution receipts.

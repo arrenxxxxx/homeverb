@@ -5408,4 +5408,49 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Select a method and enter a valid verification code without spaces.'
 	String get mobileVerificationInvalid => 'Select a method and enter a valid verification code without spaces.';
+
+	/// en-US: 'Historical readings'
+	String get historyTitle => 'Historical readings';
+
+	/// en-US: 'Choose a series and a UTC time range, then read once. The end time is excluded.'
+	String get historyInstructions => 'Choose a series and a UTC time range, then read once. The end time is excluded.';
+
+	/// en-US: 'Connection {number}: {transport}'
+	String historyConnection({required Object number, required Object transport}) => 'Connection ${number}: ${transport}';
+
+	/// en-US: '{component}: {property} ({unit})'
+	String historyOption({required Object component, required Object property, required Object unit}) => '${component}: ${property} (${unit})';
+
+	/// en-US: 'No historical series is available on this connection.'
+	String get historyUnavailable => 'No historical series is available on this connection.';
+
+	/// en-US: 'Maximum range: {seconds} seconds. Maximum records: {count}.'
+	String historyBounds({required Object seconds, required Object count}) => 'Maximum range: ${seconds} seconds. Maximum records: ${count}.';
+
+	/// en-US: 'UTC format: YYYY-MM-DDTHH:MM:SSZ'
+	String get historyFormat => 'UTC format: YYYY-MM-DDTHH:MM:SSZ';
+
+	/// en-US: 'Start time (UTC)'
+	String get historyStart => 'Start time (UTC)';
+
+	/// en-US: 'End time (UTC, excluded)'
+	String get historyEnd => 'End time (UTC, excluded)';
+
+	/// en-US: 'Read history'
+	String get historyRead => 'Read history';
+
+	/// en-US: 'Completeness is unproven. Missing records are not zero. The provider calendar-day timezone is unknown.'
+	String get historyIncomplete => 'Completeness is unproven. Missing records are not zero. The provider calendar-day timezone is unknown.';
+
+	/// en-US: 'Rejected records: {count}'
+	String historyRejected({required Object count}) => 'Rejected records: ${count}';
+
+	/// en-US: 'The record limit was reached. More records may exist.'
+	String get historyLimit => 'The record limit was reached. More records may exist.';
+
+	/// en-US: 'No valid records were returned for this range.'
+	String get historyEmpty => 'No valid records were returned for this range.';
+
+	/// en-US: 'Source: {source}'
+	String historySource({required Object source}) => 'Source: ${source}';
 }

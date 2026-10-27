@@ -3988,3 +3988,39 @@ This package supersedes API 1.30 for local evaluation of the verification UI.
 Archive checks do not establish phone, provider or physical-device acceptance;
 the eight previously recorded full-suite macOS failures remain unresolved.
 Modern SID `mijia`, event/history and remaining functional coverage stay open.
+
+## Foreground historical readings -- October 27, 2026
+
+Device details now offer an API 1.33-gated historical-reading dialog. It inspects
+one local connection at a time and sends one read only after an explicit click.
+Editable whole-second UTC bounds retain the entire inspected range; the initial
+seven-day default does not limit queries to presets. Offered targets must match
+readable numeric descriptor properties. Historical units are independent of live
+units. Results retain provider timestamps, zero/fractional values, source, receipt
+time, rejected counts, limit status and unproven completeness. No gap filling,
+calendar total, cache write, persistence, implicit retry or historical polling is
+introduced. Background/navigation/close/session changes cancel reads and discard
+late results. Visible-device polling pauses while the modal is open.
+
+Changed implementation: `lib/numeric_history.dart`, `lib/history_view.dart`,
+`lib/main.dart`, canonical locales/generated catalogs and
+`test/numeric_history_test.dart`. Native API 1.33, C exports, schemas, grants and
+saved formats are unchanged. Older hosts retain their previous device pages.
+
+Executed from `apps/mobile` with the pinned FVM SDK:
+
+- `fvm flutter test --no-pub test/numeric_history_test.dart`: 49 tests passed.
+- `fvm flutter test --no-pub test/numeric_history_test.dart test/state_refresh_test.dart test/device_detail_controls_test.dart test/component_test.dart test/appliance_controls_test.dart test/localization_test.dart test/current_contract_test.dart test/native_test.dart test/account_verification_test.dart test/account_verification_bridge_test.dart`: all 114 tests passed, including English/Chinese 360-pixel, 200-percent text fixtures and current native-library compatibility.
+- `fvm flutter analyze --no-pub`: no issues.
+- Shared presentation tests: seven passed. Documentation, contract validation
+  (24 schemas, 65 primary positive and 792 negative fixtures), repository hygiene
+  and `git diff --check` passed.
+
+An initial integration-test failure came from the fixture not enabling the
+production automatic-refresh scheduler. After enabling it explicitly, the test
+proves pause and resumption. No full Flutter-suite pass is claimed; the previously
+recorded macOS font/pixel and legacy-click failures were not reclassified.
+No provider account/statistics query, message send, appliance write, installation,
+remote CI or publication was performed. This source phase has not rebuilt Android;
+the last recorded APK remains API 1.32. Real history/model/mobile acceptance and
+CLI/MCP presentation remain pending.

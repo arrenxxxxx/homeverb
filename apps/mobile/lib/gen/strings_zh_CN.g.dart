@@ -1824,4 +1824,19 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get mobileVerificationLimit => '\u5df2\u8fbe\u5230\u53d1\u9001\u6b21\u6570\u4e0a\u9650\u3002\u8bf7\u8f93\u5165\u9a8c\u8bc1\u7801\u6216\u91cd\u65b0\u767b\u5f55\u3002';
 	@override String mobileVerificationCooldown({required Object seconds}) => '${seconds} \u79d2\u540e\u53ef\u518d\u6b21\u53d1\u9001\u9a8c\u8bc1\u7801\u3002';
 	@override String get mobileVerificationInvalid => '\u8bf7\u9009\u62e9\u9a8c\u8bc1\u65b9\u5f0f\u5e76\u8f93\u5165\u4e0d\u542b\u7a7a\u683c\u7684\u6709\u6548\u9a8c\u8bc1\u7801\u3002';
+	@override String get historyTitle => '\u5386\u53f2\u8bfb\u6570';
+	@override String get historyInstructions => '\u9009\u62e9\u7edf\u8ba1\u9879\u548c UTC \u65f6\u95f4\u8303\u56f4\uff0c\u7136\u540e\u624b\u52a8\u8bfb\u53d6\u4e00\u6b21\u3002\u4e0d\u5305\u542b\u7ed3\u675f\u65f6\u95f4\u3002';
+	@override String historyConnection({required Object number, required Object transport}) => '\u8fde\u63a5 ${number}\uff1a${transport}';
+	@override String historyOption({required Object component, required Object property, required Object unit}) => '${component}\uff1a${property}\uff08${unit}\uff09';
+	@override String get historyUnavailable => '\u6b64\u8fde\u63a5\u6ca1\u6709\u53ef\u7528\u7684\u5386\u53f2\u7edf\u8ba1\u9879\u3002';
+	@override String historyBounds({required Object seconds, required Object count}) => '\u6700\u5927\u65f6\u95f4\u8de8\u5ea6\uff1a${seconds} \u79d2\u3002\u6700\u591a\u8bb0\u5f55\uff1a${count} \u6761\u3002';
+	@override String get historyFormat => 'UTC \u683c\u5f0f\uff1aYYYY-MM-DDTHH:MM:SSZ';
+	@override String get historyStart => '\u5f00\u59cb\u65f6\u95f4\uff08UTC\uff09';
+	@override String get historyEnd => '\u7ed3\u675f\u65f6\u95f4\uff08UTC\uff0c\u4e0d\u5305\u542b\uff09';
+	@override String get historyRead => '\u8bfb\u53d6\u5386\u53f2';
+	@override String get historyIncomplete => '\u65e0\u6cd5\u786e\u8ba4\u8bb0\u5f55\u662f\u5426\u5b8c\u6574\u3002\u7f3a\u5931\u8bb0\u5f55\u4e0d\u7b49\u4e8e\u96f6\uff0c\u670d\u52a1\u5546\u7edf\u8ba1\u65e5\u91c7\u7528\u7684\u65f6\u533a\u672a\u77e5\u3002';
+	@override String historyRejected({required Object count}) => '\u5df2\u5254\u9664\u7684\u5f02\u5e38\u8bb0\u5f55\uff1a${count}';
+	@override String get historyLimit => '\u5df2\u8fbe\u5230\u8bb0\u5f55\u6570\u91cf\u4e0a\u9650\uff0c\u53ef\u80fd\u8fd8\u6709\u5176\u4ed6\u8bb0\u5f55\u3002';
+	@override String get historyEmpty => '\u6b64\u65f6\u95f4\u8303\u56f4\u672a\u8fd4\u56de\u6709\u6548\u8bb0\u5f55\u3002';
+	@override String historySource({required Object source}) => '\u6765\u6e90\uff1a${source}';
 }

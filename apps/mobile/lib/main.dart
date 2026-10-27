@@ -21,6 +21,7 @@ import 'diagnostics_export.dart';
 import 'diagnostics_view.dart';
 import 'device_presentation.dart';
 import 'device_detail_controls.dart';
+import 'history_view.dart';
 import 'controls.dart';
 import 'native_client.dart';
 import 'preferences.dart';
@@ -242,6 +243,40 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     if (target == 'S05') await c.loadHistory(deviceOnly: deviceHistory);
     if (target == 'S07') await c.loadDiagnostics();
     if (target == 'S04' && c.cleanupNeedsReload) await c.initialize();
+  }
+
+  Widget withHistory(Widget controls) => !supportsNumericHistory(c.core)
+      ? controls
+      : Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            controls,
+            ActionButton(
+              'Historical readings',
+              style: 'secondary',
+              onPressed: c.busy || !c.isForeground ? null : openNumericHistory,
+            ),
+          ],
+        );
+
+  Future<void> openNumericHistory() async {
+    if (c.busy ||
+        !c.isForeground ||
+        c.description == null ||
+        !supportsNumericHistory(c.core))
+      return;
+    final epoch = navigation;
+    c.setAutomaticRefreshView(StateRefreshView.none);
+    try {
+      await showDialog<void>(
+        context: navigator.currentContext!,
+        builder: (_) => NumericHistoryDialog(controller: c),
+      );
+    } finally {
+      if (mounted && epoch == navigation) {
+        c.setAutomaticRefreshView(refreshView(id));
+      }
+    }
   }
 
   Future<void> finish(Future<bool> work, String destination) async {
@@ -1889,33 +1924,37 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         c.capability('climate') != null &&
         c.capability('power') != null &&
         c.currentCard?['device']['support_status'] != 'unsupported') {
-      return ClimateControls(
-        key: ValueKey('climate:${c.selectedDevice}:${c.component}'),
-        controller: c,
-        onAction: action,
-        onExecute: executeOnDevice,
+      return withHistory(
+        ClimateControls(
+          key: ValueKey('climate:${c.selectedDevice}:${c.component}'),
+          controller: c,
+          onAction: action,
+          onExecute: executeOnDevice,
+        ),
       );
     }
     if (id == 'C01' && applianceFamily(c) != null) {
       final epoch = navigation;
-      return ApplianceControls(
-        key: ValueKey(
-          '${c.selectedDevice}:${c.component}:${applianceFamily(c)}',
+      return withHistory(
+        ApplianceControls(
+          key: ValueKey(
+            '${c.selectedDevice}:${c.component}:${applianceFamily(c)}',
+          ),
+          controller: c,
+          family: applianceFamily(c)!,
+          onAction: action,
+          onExecute: (capability, action, arguments) async {
+            final success = await c.execute(capability, action, arguments);
+            if (success && mounted && epoch == navigation) await go('S06');
+            return success;
+          },
         ),
-        controller: c,
-        family: applianceFamily(c)!,
-        onAction: action,
-        onExecute: (capability, action, arguments) async {
-          final success = await c.execute(capability, action, arguments);
-          if (success && mounted && epoch == navigation) await go('S06');
-          return success;
-        },
       );
     }
     if (id == 'C01' &&
         c.capability('climate') == null &&
         c.currentCard?['device']['support_status'] != 'unsupported') {
-      return DeviceDetailControls(controller: c, onAction: action);
+      return withHistory(DeviceDetailControls(controller: c, onAction: action));
     }
     if (id == 'C10' && actionCapability != null && actionName != null) {
       final epoch = navigation;

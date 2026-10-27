@@ -1,5 +1,19 @@
 # Implementation status and next tasks
 
+## App historical readings -- October 27, 2026
+
+The App negotiates API 1.33 and provides a generic device-detail history dialog.
+Opening and connection selection inspect local protected options only. Explicit
+reads use an offered numeric series and editable bounded whole-second UTC range.
+The view retains zero values, individual timestamps, units, source, receipt time,
+rejected counts, limit status and unproven completeness; it never fills gaps or
+calculates a complete calendar total. Navigation, background, session replacement
+and cancellation discard pending results. Device state polling pauses while the
+dialog is open. CLI/MCP commands, updated packaging and real-provider acceptance
+remain pending. Native contracts, storage, authority and adapter admission are
+unchanged. See the [App verification record](../apps/mobile/verification.md#foreground-historical-readings--october-27-2026).
+
+
 ## Native historical reads -- October 27, 2026
 
 API 1.33 adds `inspect_history_options` and `read_history` through the existing C

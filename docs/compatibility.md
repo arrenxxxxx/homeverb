@@ -2379,3 +2379,14 @@ The App now uses the API 1.28 bridge for foreground Mijia captcha continuation,
 with explicit input and cancellation. Older supported hosts retain one-shot
 connection. No ordinary JSON/CLI/MCP method or saved record format changes.
 English/Chinese synthetic App flows do not establish provider or phone acceptance.
+
+
+## App historical readings -- October 27, 2026
+
+The App now uses existing API 1.33 historical inspection/read methods. Older
+native versions retain their previous device views without a history entry.
+Default Mock/Meiju connections expose empty options; the existing exact protected
+Mijia daily-energy profile remains the only admitted real-platform series.
+No native exports, schemas, saved formats, authority or physical compatibility
+change. English/Chinese fixtures cover explicit reads and cancellation; provider
+acceptance and a matching updated Android package remain pending.

@@ -1789,5 +1789,20 @@
   "mobile.verification.send": "发送验证码",
   "mobile.verification.limit": "已达到发送次数上限。请输入验证码或重新登录。",
   "mobile.verification.cooldown": "{seconds} 秒后可再次发送验证码。",
-  "mobile.verification.invalid": "请选择验证方式并输入不含空格的有效验证码。"
+  "mobile.verification.invalid": "请选择验证方式并输入不含空格的有效验证码。",
+  "history.title": "历史读数",
+  "history.instructions": "选择统计项和 UTC 时间范围，然后手动读取一次。不包含结束时间。",
+  "history.connection": "连接 {number}：{transport}",
+  "history.option": "{component}：{property}（{unit}）",
+  "history.unavailable": "此连接没有可用的历史统计项。",
+  "history.bounds": "最大时间跨度：{seconds} 秒。最多记录：{count} 条。",
+  "history.format": "UTC 格式：YYYY-MM-DDTHH:MM:SSZ",
+  "history.start": "开始时间（UTC）",
+  "history.end": "结束时间（UTC，不包含）",
+  "history.read": "读取历史",
+  "history.incomplete": "无法确认记录是否完整。缺失记录不等于零，服务商统计日采用的时区未知。",
+  "history.rejected": "已剔除的异常记录：{count}",
+  "history.limit": "已达到记录数量上限，可能还有其他记录。",
+  "history.empty": "此时间范围未返回有效记录。",
+  "history.source": "来源：{source}"
 }

@@ -2226,6 +2226,37 @@ String? translateSource(
     t.mobileVerificationCooldown(seconds: args["seconds"] ?? "{seconds}"),
   "Select a method and enter a valid verification code without spaces." =>
     t.mobileVerificationInvalid,
+  "Historical readings" => t.historyTitle,
+  "Choose a series and a UTC time range, then read once. The end time is excluded." =>
+    t.historyInstructions,
+  "Connection {number}: {transport}" => t.historyConnection(
+    number: args["number"] ?? "{number}",
+    transport: args["transport"] ?? "{transport}",
+  ),
+  "{component}: {property} ({unit})" => t.historyOption(
+    component: args["component"] ?? "{component}",
+    property: args["property"] ?? "{property}",
+    unit: args["unit"] ?? "{unit}",
+  ),
+  "No historical series is available on this connection." =>
+    t.historyUnavailable,
+  "Maximum range: {seconds} seconds. Maximum records: {count}." =>
+    t.historyBounds(
+      count: args["count"] ?? "{count}",
+      seconds: args["seconds"] ?? "{seconds}",
+    ),
+  "UTC format: YYYY-MM-DDTHH:MM:SSZ" => t.historyFormat,
+  "Start time (UTC)" => t.historyStart,
+  "End time (UTC, excluded)" => t.historyEnd,
+  "Read history" => t.historyRead,
+  "Completeness is unproven. Missing records are not zero. The provider calendar-day timezone is unknown." =>
+    t.historyIncomplete,
+  "Rejected records: {count}" => t.historyRejected(
+    count: args["count"] ?? "{count}",
+  ),
+  "The record limit was reached. More records may exist." => t.historyLimit,
+  "No valid records were returned for this range." => t.historyEmpty,
+  "Source: {source}" => t.historySource(source: args["source"] ?? "{source}"),
   _ => null,
 };
 
@@ -4510,5 +4541,24 @@ String? sourceForKey(String key) => switch (key) {
     "You can request another code in {seconds} seconds.",
   "mobile.verification.invalid" =>
     "Select a method and enter a valid verification code without spaces.",
+  "history.title" => "Historical readings",
+  "history.instructions" =>
+    "Choose a series and a UTC time range, then read once. The end time is excluded.",
+  "history.connection" => "Connection {number}: {transport}",
+  "history.option" => "{component}: {property} ({unit})",
+  "history.unavailable" =>
+    "No historical series is available on this connection.",
+  "history.bounds" =>
+    "Maximum range: {seconds} seconds. Maximum records: {count}.",
+  "history.format" => "UTC format: YYYY-MM-DDTHH:MM:SSZ",
+  "history.start" => "Start time (UTC)",
+  "history.end" => "End time (UTC, excluded)",
+  "history.read" => "Read history",
+  "history.incomplete" =>
+    "Completeness is unproven. Missing records are not zero. The provider calendar-day timezone is unknown.",
+  "history.rejected" => "Rejected records: {count}",
+  "history.limit" => "The record limit was reached. More records may exist.",
+  "history.empty" => "No valid records were returned for this range.",
+  "history.source" => "Source: {source}",
   _ => null,
 };

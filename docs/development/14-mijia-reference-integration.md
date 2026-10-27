@@ -950,3 +950,20 @@ compatibility cases against the rebuilt library; documentation, 24 schemas with
 65 primary positive and 792 negative fixtures, and repository hygiene. The earlier
 full-workspace Meiju loopback limitation remains recorded; no full-workspace or
 mobile/physical acceptance is inferred. The current APK is still API 1.32.
+
+
+## Foreground App historical readings -- October 27, 2026
+
+The Flutter device-detail dialog now consumes API 1.33 without platform/model
+branches. Local connection/series inspection precedes a separate explicit bounded
+UTC query. Response validation preserves historical units independently from live
+property units, sorted timestamps, zeros, rejected counts, limit status, source,
+receipt time and unproven completeness. Missing records remain missing and the
+unknown provider calendar timezone prevents complete daily/monthly-total claims.
+
+The dialog cancels on navigation/background/close and discards late results after
+identity or session changes. It pauses visible-device state polling for its lifetime;
+it introduces no history polling, retries or persistence. CLI/MCP historical tools,
+new Android packaging and owner-run provider acceptance remain pending. Modern SID
+login, event coverage, additional controls and media/health remain separate open
+items. No real account, cloud query, device write or publication was performed.

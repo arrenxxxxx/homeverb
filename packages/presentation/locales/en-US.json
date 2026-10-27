@@ -1789,5 +1789,20 @@
   "mobile.verification.send": "Send Verification Code",
   "mobile.verification.limit": "Code request limit reached. Enter your code or sign in again.",
   "mobile.verification.cooldown": "You can request another code in {seconds} seconds.",
-  "mobile.verification.invalid": "Select a method and enter a valid verification code without spaces."
+  "mobile.verification.invalid": "Select a method and enter a valid verification code without spaces.",
+  "history.title": "Historical readings",
+  "history.instructions": "Choose a series and a UTC time range, then read once. The end time is excluded.",
+  "history.connection": "Connection {number}: {transport}",
+  "history.option": "{component}: {property} ({unit})",
+  "history.unavailable": "No historical series is available on this connection.",
+  "history.bounds": "Maximum range: {seconds} seconds. Maximum records: {count}.",
+  "history.format": "UTC format: YYYY-MM-DDTHH:MM:SSZ",
+  "history.start": "Start time (UTC)",
+  "history.end": "End time (UTC, excluded)",
+  "history.read": "Read history",
+  "history.incomplete": "Completeness is unproven. Missing records are not zero. The provider calendar-day timezone is unknown.",
+  "history.rejected": "Rejected records: {count}",
+  "history.limit": "The record limit was reached. More records may exist.",
+  "history.empty": "No valid records were returned for this range.",
+  "history.source": "Source: {source}"
 }

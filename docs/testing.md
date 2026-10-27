@@ -542,3 +542,15 @@ unknown DTO fields, lock/lifecycle cleanup and no cache/receipt changes. Run
 exact-model path through Core, encrypted query parameters, reference fallback,
 public identity mismatch, unlisted membership and account/device lease cleanup.
 These use fictional local accounts and transports, not provider credentials.
+
+
+### App historical reading checks
+
+From `apps/mobile`, run `fvm flutter test test/numeric_history_test.dart`.
+Fictional fixtures exercise immutable option admission, historical/live unit
+separation, canonical UTC intervals, sorted finite records, partial-data evidence,
+identity/source/receipt mismatch refusal, explicit connection selection, no implicit
+read/polling, cancellation with late replies, English/Chinese narrow enlarged text
+and device-view automatic-refresh suspension/resumption. No provider session or
+appliance is used. These tests do not establish real history retention/completeness,
+physical model support or mobile packaging.
