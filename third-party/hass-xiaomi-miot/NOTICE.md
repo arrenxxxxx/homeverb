@@ -17,3 +17,13 @@ state, dedicated TLS origin validation, image size/dimension checks and explicit
 user-driven continuation. It does not adopt HA plaintext storage, background
 relogin, arbitrary redirects or automatic request replay. This is community
 compatibility work, not Xiaomi endorsement or physical-device acceptance.
+
+
+The independently authored exact `cuco.plug.v3` daily statistics protocol also
+uses model/key/ratio facts from the same revision's `core/device_customizes.py`,
+request facts from `core/device.py`, and decoder evidence from `core/utils.py`,
+`core/templates.py` and `tests/test_power_cost_statistics.py`, inspected October 27,
+2026. No Python/template code is bundled. HomeVerb keeps bounded foreground
+operations, explicit historical scope and unproven completeness, rather than HA
+scheduling, calendar totals or restored state. See
+[ADR-0088](../../docs/adr/0088-mijia-exact-daily-energy-history.md).

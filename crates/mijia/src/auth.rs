@@ -70,6 +70,7 @@ impl MijiaSession {
                     endpoint,
                     CloudEndpoint::Devices
                         | CloudEndpoint::Properties
+                        | CloudEndpoint::Statistics
                         | CloudEndpoint::Homes
                         | CloudEndpoint::HomeDevices
                 ) {

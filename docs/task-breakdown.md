@@ -1,5 +1,18 @@
 # Implementation status and next tasks
 
+## Exact daily energy protocol -- October 27, 2026
+
+Typed Rust now implements one bounded `v2/user/statistics` read for exact
+`cuco.plug.v3` specification 2 and mainland legacy sessions under
+[ADR-0088](adr/0088-mijia-exact-daily-energy-history.md). The fixed key/type/limit
+are not caller-editable RPC parameters. Sanitized timestamped kWh records retain
+missing/invalid/duplicate/limit information and unproven completeness. No current
+observation, calendar total, implicit retry or background polling is introduced.
+Core historical-read admission, native/App integration and real-device acceptance
+remain pending. API 1.32, ordinary methods, saved formats and grants are unchanged.
+The packaged APK from `01a115b` predates this protocol and has no energy-history UI.
+
+
 ## Verification APK availability -- October 27, 2026
 
 API 1.32 is now packaged from clean source `01a115b` for arm64-v8a and x86_64.

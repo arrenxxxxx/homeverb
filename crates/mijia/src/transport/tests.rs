@@ -803,3 +803,46 @@ async fn verification_tls_cancel_timeout_and_drop_close_without_replay() {
         assert_eq!(server.connections.load(Ordering::SeqCst), 1);
     }
 }
+
+#[tokio::test]
+async fn statistics_tls_uses_fixed_legacy_route_and_encryption_headers_once() {
+    assert_eq!(
+        request(CloudEndpoint::Statistics).url().unwrap().as_str(),
+        "https://api.io.mi.com/app/v2/user/statistics"
+    );
+    let server = Server::start(
+        b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\n{}".to_vec(),
+        false,
+    )
+    .await;
+    transmit(
+        server.client.clone(),
+        Url::parse(&server.url).unwrap(),
+        &request(CloudEndpoint::Statistics),
+        None,
+        &operation(),
+    )
+    .await
+    .unwrap();
+    {
+        let requests = server.requests.lock().unwrap();
+        assert_eq!(requests.len(), 1);
+        let wire = String::from_utf8_lossy(&requests[0]);
+        assert!(wire.starts_with("POST "));
+        assert!(wire.contains("miot-encrypt-algorithm: ENCRYPT-RC4"));
+        assert!(wire.contains("x-xiaomi-protocal-flag-cli: PROTOCAL-HTTP2"));
+        assert!(wire.ends_with("data=fictional"));
+    }
+    assert_eq!(
+        MijiaHttps
+            .send_control(
+                &request(CloudEndpoint::Statistics),
+                &WriteProgress::default(),
+                &operation()
+            )
+            .await
+            .unwrap_err()
+            .code,
+        "CAPABILITY_UNSUPPORTED"
+    );
+}

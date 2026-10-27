@@ -634,3 +634,11 @@ expired prompts and cooldown/count violations before dispatch. Native failures
 retain their existing codes; the App never shows raw provider messages or pages.
 Navigation/lifecycle invalidation reports cancellation and discards late handles,
 without claiming that an already-sent SMS/email request was undone.
+
+
+Exact daily energy reads retain `CAPABILITY_UNSUPPORTED` for unreviewed
+model/specification/region, `INVALID_ARGUMENT` for invalid/future windows,
+`MIJIA_INVALID_RESPONSE` for malformed envelopes/foreign correlation/record overflow,
+and existing authentication, provider, cancellation and deadline errors. Invalid
+individual statistics contribute a sanitized rejected count; they never become
+zero or current state. No raw provider text or identifier enters an error.

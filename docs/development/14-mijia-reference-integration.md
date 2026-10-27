@@ -843,3 +843,37 @@ discussed, complete paging, modern SID authentication or cloud calendar boundari
 native implementation. A native protocol, Core historical-read contract and App
 presentation are separate implementation stages. The sources were fetched as text
 only; no upstream executable, HA runtime, account or provider request was used.
+
+
+## Exact daily energy typed protocol -- October 27, 2026
+
+`MijiaSession::daily_energy_history` implements ADR-0088 with fixed legacy
+statistics endpoint, key 11.1, type `stat_day_v3` and limit 31. Its immutable window
+is a half-open positive epoch-second interval of at most 32 days, with no future
+end admitted at request time. The exact reference model/specification and mainland
+session are mandatory; unrelated model statistics cannot reuse this conversion.
+
+The decoder returns sorted, sanitized provider timestamps and kWh records, receipt
+time, requested interval, rejected-record count and limit status. Completeness is
+always unproven. Invalid numbers, nonnumeric/boolean/multichannel payloads,
+underflow to zero, invalid/out-of-window timestamps and all duplicate-timestamp
+records are excluded without erasing valid neighbors. Foreign optional device/key
+correlation, malformed envelopes and over-limit responses refuse completely.
+Zero remains a valid observation only when the provider actually reported zero.
+No calendar timezone, complete month sum or missing-day value is inferred.
+
+The operation sends once, preserves encrypted legacy request/response checks, and
+honors cancellation/deadline/drop. The unreleased typed `CloudEndpoint` gains
+`Statistics`; exhaustive injected transports need to recognize the new variant.
+Ordinary C/native API 1.32, JSON/CLI/MCP methods, grants, schemas and saved payloads
+are unchanged. Core/adapter admission, host presentation and real acceptance are
+next stages; the current APK does not expose this protocol. No provider account,
+statistics request, device write or remote publication occurred.
+
+
+Executed checks passed: all 114 Mijia unit tests and seven compile-fail doc tests,
+the complete Host package suite, and strict Rust 1.96 all-target Mijia/Host/FFI
+Clippy. The added local TLS case checks the exact statistics route and encryption
+headers without contacting Xiaomi. Documentation, 23 schemas with 62 positive
+and 743 negative fixtures, repository hygiene and exact-reference regeneration
+passed. No native API/export or Flutter change was made in this protocol phase.

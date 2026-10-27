@@ -1,6 +1,6 @@
 # ADR-0088: Exact Mijia daily energy history
 
-Status: accepted for implementation; no runtime completion claim.
+Status: typed protocol implemented with synthetic tests; Core/native/App adoption pending.
 Date: October 27, 2026.
 
 ## Evidence
@@ -28,7 +28,8 @@ The endpoint/key/type/limit are internal constants, not generic RPC parameters.
 Use existing protected identity, signing, encrypted response checking and the
 operation's cancellation/deadline. No saved token crosses service origins.
 
-A caller selects a positive epoch-second interval of at most 32 days ending no
+A caller selects a positive, half-open epoch-second interval `[start, end)` of
+at most 32 days ending no
 later than request admission. Send at most one request with limit 31, without
 retry, relogin, pagination, polling or background work. Reject invalid windows
 before transport. Keep every admitted finite, nonnegative numeric record and its

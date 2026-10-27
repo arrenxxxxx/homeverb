@@ -7,6 +7,7 @@ mod control;
 mod inventory;
 mod protected;
 mod spec;
+mod statistics;
 mod transport;
 pub use adapter::{
     AccountDiscovery, AccountInventory, AccountLogin, AccountLoginChallenge,
@@ -20,6 +21,9 @@ pub use auth::{
 pub use control::PropertyWrite;
 pub use inventory::{CloudDevice, Inventory, PropertyQuery, PropertyReading};
 pub use spec::{ControlOption, MappedProperty, ModelMapping, SpecIndex, reference_setting_option};
+pub use statistics::{
+    DailyEnergyHistory, DailyEnergyRecord, DailyEnergyWindow, StatisticsCompleteness,
+};
 pub use transport::{
     CaptchaRequest, CaptchaResponse, CloudEndpoint, CloudRequest, CloudResponse, CloudTransport,
     MijiaHttps, VerificationEndpoint, VerificationRequest, VerificationResponse,
