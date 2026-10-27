@@ -2215,6 +2215,17 @@ String? translateSource(
     t.vendorXiaomiMijiaPhysicalControlsLockedSetPhysicalControlsLocked1,
   "Set favorite fan level" =>
     t.vendorXiaomiMijiaAirPurifierFavoriteSetFavoriteFanLevel1,
+  "Choose an available method and request a code, then enter it here. Verification expires shortly." =>
+    t.mobileVerificationInstructions,
+  "Text Message" => t.mobileVerificationPhone,
+  "Email Code" => t.mobileVerificationEmail,
+  "Send Verification Code" => t.mobileVerificationSend,
+  "Code request limit reached. Enter your code or sign in again." =>
+    t.mobileVerificationLimit,
+  "You can request another code in {seconds} seconds." =>
+    t.mobileVerificationCooldown(seconds: args["seconds"] ?? "{seconds}"),
+  "Select a method and enter a valid verification code without spaces." =>
+    t.mobileVerificationInvalid,
   _ => null,
 };
 
@@ -4488,5 +4499,16 @@ String? sourceForKey(String key) => switch (key) {
     "Set physical-control lock",
   "vendor.xiaomi.mijia.air_purifier_favorite.set_favorite_fan_level_1" =>
     "Set favorite fan level",
+  "mobile.verification.instructions" =>
+    "Choose an available method and request a code, then enter it here. Verification expires shortly.",
+  "mobile.verification.phone" => "Text Message",
+  "mobile.verification.email" => "Email Code",
+  "mobile.verification.send" => "Send Verification Code",
+  "mobile.verification.limit" =>
+    "Code request limit reached. Enter your code or sign in again.",
+  "mobile.verification.cooldown" =>
+    "You can request another code in {seconds} seconds.",
+  "mobile.verification.invalid" =>
+    "Select a method and enter a valid verification code without spaces.",
   _ => null,
 };

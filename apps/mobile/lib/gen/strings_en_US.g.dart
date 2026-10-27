@@ -5387,4 +5387,25 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Set favorite fan level'
 	String get vendorXiaomiMijiaAirPurifierFavoriteSetFavoriteFanLevel1 => 'Set favorite fan level';
+
+	/// en-US: 'Choose an available method and request a code, then enter it here. Verification expires shortly.'
+	String get mobileVerificationInstructions => 'Choose an available method and request a code, then enter it here. Verification expires shortly.';
+
+	/// en-US: 'Text Message'
+	String get mobileVerificationPhone => 'Text Message';
+
+	/// en-US: 'Email Code'
+	String get mobileVerificationEmail => 'Email Code';
+
+	/// en-US: 'Send Verification Code'
+	String get mobileVerificationSend => 'Send Verification Code';
+
+	/// en-US: 'Code request limit reached. Enter your code or sign in again.'
+	String get mobileVerificationLimit => 'Code request limit reached. Enter your code or sign in again.';
+
+	/// en-US: 'You can request another code in {seconds} seconds.'
+	String mobileVerificationCooldown({required Object seconds}) => 'You can request another code in ${seconds} seconds.';
+
+	/// en-US: 'Select a method and enter a valid verification code without spaces.'
+	String get mobileVerificationInvalid => 'Select a method and enter a valid verification code without spaces.';
 }

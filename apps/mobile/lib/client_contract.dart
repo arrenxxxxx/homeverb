@@ -126,3 +126,48 @@ abstract interface class InteractiveAccountClient {
   );
   Future<void> discardAccountLogin(AccountLoginCaptcha challenge);
 }
+
+enum AccountVerificationKind { captcha, verification }
+
+enum AccountVerificationMethod { phone, email }
+
+/// Trusted prompt state; never log, serialize or persist its owned image or answers.
+abstract class AccountVerificationPending extends AccountLoginProgress {
+  AccountVerificationKind get kind;
+  Uint8List get image;
+  List<AccountVerificationMethod> get methods;
+  AccountVerificationMethod? get selectedMethod;
+  Duration get remaining;
+  Duration get cooldown;
+  int get codeRequests;
+  void clearImage();
+}
+
+class AccountVerificationReply {
+  AccountVerificationReply.send(this.method) : answer = null;
+  AccountVerificationReply.answer(this.answer, {this.method});
+  final AccountVerificationMethod? method;
+  final Uint8List? answer;
+  bool get requestsCode => answer == null;
+  void clear() => answer?.fillRange(0, answer!.length, 0);
+}
+
+abstract interface class AccountVerificationClient {
+  bool get supportsAccountVerification;
+  Future<AccountLoginProgress> beginAccountVerification({
+    required Uint8List login,
+    required Uint8List password,
+    required String label,
+    String? accountId,
+  });
+  Future<AccountLoginProgress> answerAccountVerification(
+    AccountVerificationPending challenge,
+    Uint8List answer, {
+    AccountVerificationMethod? method,
+  });
+  Future<AccountLoginProgress> requestAccountVerificationCode(
+    AccountVerificationPending challenge,
+    AccountVerificationMethod method,
+  );
+  Future<void> discardAccountVerification(AccountVerificationPending challenge);
+}

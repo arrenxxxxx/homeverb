@@ -3942,3 +3942,23 @@ the new light/purifier controls. No installation, account/appliance operation,
 real write, physical-phone/iOS acceptance, push, upload or publication occurred.
 `git rev-list --count --merges origin/main..HEAD` still returned zero. This is
 a verified local build, not completion of the remaining Mijia reference scope.
+
+
+## Foreground verification App integration -- October 27, 2026
+
+The App uses the API 1.32 protected verification bridge for explicit captcha,
+phone/email method selection, code requests and ticket submission. Native
+provider-page bytes are discarded without becoming Dart strings. Timers only
+update cooldown/expiry, and lifecycle/navigation cancellation clears pending
+handles, inputs and images. Older APIs preserve their prior paths.
+
+
+Executed checks: Flutter analysis passed. The full suite passed 249 tests and
+failed the same eight previously recorded macOS font/pixel and legacy
+app/outcome-click tests; it is not a full-suite pass. After the final Unicode
+control-character and cooldown case, the seven-file affected regression subset
+passed all 66 tests, including six fictional C ABI cases and 19 new verification
+controller/widget/refusal cases. Documentation, 23 schemas with 62 positive and
+743 negative fixtures, repository hygiene and commit conventions passed. No
+Rust source or C ABI changed in this App phase. No package build, installation,
+provider request, real message delivery or physical-device acceptance is implied.

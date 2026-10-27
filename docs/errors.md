@@ -627,3 +627,10 @@ Unknown method/recipient/URL metadata or invalid prompt capacity returns
 `INVALID_ARGUMENT`. The original handle is consumed by a decoded Host request.
 Provider risk/quota/cooldown refusal never causes another send automatically;
 a timeout cannot prove that no message was sent.
+
+
+The API 1.32 App verification path rejects unavailable methods, invalid input,
+expired prompts and cooldown/count violations before dispatch. Native failures
+retain their existing codes; the App never shows raw provider messages or pages.
+Navigation/lifecycle invalidation reports cancellation and discards late handles,
+without claiming that an already-sent SMS/email request was undone.

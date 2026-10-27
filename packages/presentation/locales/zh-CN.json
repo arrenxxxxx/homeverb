@@ -1782,5 +1782,12 @@
   "vendor.xiaomi.mijia.indicator_light.set_on_1": "设置指示灯",
   "vendor.xiaomi.mijia.alarm.set_alarm_1": "设置提示音",
   "vendor.xiaomi.mijia.physical_controls_locked.set_physical_controls_locked_1": "设置按键锁",
-  "vendor.xiaomi.mijia.air_purifier_favorite.set_favorite_fan_level_1": "设置喜爱风速"
+  "vendor.xiaomi.mijia.air_purifier_favorite.set_favorite_fan_level_1": "设置喜爱风速",
+  "mobile.verification.instructions": "选择可用的验证方式并发送验证码，然后在下方输入。验证将在短时间后过期。",
+  "mobile.verification.phone": "短信",
+  "mobile.verification.email": "邮箱验证码",
+  "mobile.verification.send": "发送验证码",
+  "mobile.verification.limit": "已达到发送次数上限。请输入验证码或重新登录。",
+  "mobile.verification.cooldown": "{seconds} 秒后可再次发送验证码。",
+  "mobile.verification.invalid": "请选择验证方式并输入不含空格的有效验证码。"
 }

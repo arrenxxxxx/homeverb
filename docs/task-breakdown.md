@@ -1,5 +1,23 @@
 # Implementation status and next tasks
 
+## Foreground App verification -- October 27, 2026
+
+The App negotiates native API 1.32 and handles image challenges followed by
+explicit phone/email code requests and protected ticket submission. Only offered
+methods appear; a user action is required for every send. Cooldown and expiry
+are local UI timers, with no polling or automatic resend. Sensitive provider-page
+bytes stay in the C output allocation and are cleared without becoming Dart
+strings. Input, captcha images and pending handles are cleared on completion,
+cancellation, navigation, background or expiry. Older hosts retain captcha-only
+or one-shot login. Ordinary methods, exports, grants and storage are unchanged.
+
+English/Chinese widget flows, controller races and a fictional C ABI fixture
+cover this integration; real account/message delivery and mobile packaging
+remain separate acceptance. The last packaged APK still uses API 1.30. Human-risk
+challenges, account-settings confirmation and modern SID `mijia` authentication
+remain unsupported. See the [phase record](development/14-mijia-reference-integration.md#foreground-app-verification--october-27-2026).
+
+
 ## Native explicit code-request bridge -- October 27, 2026
 
 API 1.32 exposes one dedicated trusted code-request C function under

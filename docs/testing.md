@@ -513,3 +513,13 @@ all four exports, output clearing, invalid method and buffer capacity, forbidden
 recipient/URL fields, unknown/closed handles and ordinary JSON refusal. Synthetic
 Host/protocol tests cover success and actual quota/cooldown behavior; the ABI
 admission tests do not send real messages.
+
+
+### App verification continuation
+
+From `apps/mobile`, run `fvm flutter test test/account_verification_test.dart
+test/account_verification_bridge_test.dart test/account_captcha_test.dart`.
+The ABI test compiles a fictional C shared library with the host `cc` compiler
+(macOS/Linux); it performs no networking or platform-store access. The actual
+native refusal cases use the built host FFI library and do not send credentials.
+These checks do not establish SMS/email delivery or provider acceptance.

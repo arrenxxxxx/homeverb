@@ -1249,6 +1249,8 @@ class HomeController extends ChangeNotifier {
     Uint8List password,
     String label, {
     Future<Uint8List?> Function(AccountLoginCaptcha)? onChallenge,
+    Future<AccountVerificationReply?> Function(AccountVerificationPending)?
+    onVerification,
   }) async {
     try {
       final loginLabel = maskedAccountLogin(login);
@@ -1281,7 +1283,65 @@ class HomeController extends ChangeNotifier {
         final interactive = client is InteractiveAccountClient
             ? client as InteractiveAccountClient
             : null;
+        final verification = client is AccountVerificationClient
+            ? client as AccountVerificationClient
+            : null;
         if (provider == 'xiaomi.mijia' &&
+            onVerification != null &&
+            verification != null &&
+            verification.supportsAccountVerification) {
+          var progress = await verification.beginAccountVerification(
+            login: login,
+            password: password,
+            label: accountLabel,
+            accountId: chosenAccount,
+          );
+          while (progress is AccountVerificationPending) {
+            final challenge = progress;
+            AccountVerificationReply? reply;
+            try {
+              requireCurrent();
+              reply = await onVerification(challenge);
+              requireCurrent();
+              if (reply == null || challenge.remaining == Duration.zero) {
+                throw NativeFailure('CANCELLED', 'Sign-in was cancelled.');
+              }
+              if (reply.requestsCode) {
+                if (reply.method == null ||
+                    challenge.kind != AccountVerificationKind.verification ||
+                    !challenge.methods.contains(reply.method) ||
+                    challenge.cooldown > Duration.zero ||
+                    challenge.codeRequests >= 3) {
+                  throw NativeFailure(
+                    'INVALID_ARGUMENT',
+                    'Choose an available verification method.',
+                  );
+                }
+                progress = await verification.requestAccountVerificationCode(
+                  challenge,
+                  reply.method!,
+                );
+              } else {
+                progress = await verification.answerAccountVerification(
+                  challenge,
+                  reply.answer!,
+                  method: reply.method,
+                );
+              }
+            } finally {
+              reply?.clear();
+              challenge.clearImage();
+              await verification.discardAccountVerification(challenge);
+            }
+          }
+          if (progress is! AccountLoginConnected) {
+            throw NativeFailure(
+              'UNSUPPORTED_OUTCOME',
+              'Unsupported sign-in response.',
+            );
+          }
+          report = progress.report;
+        } else if (provider == 'xiaomi.mijia' &&
             onChallenge != null &&
             interactive != null &&
             interactive.supportsInteractiveLogin) {

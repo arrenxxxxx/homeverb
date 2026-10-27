@@ -13,6 +13,7 @@ import 'appliance_controls.dart';
 import 'climate_controls.dart';
 import 'account_views.dart';
 import 'account_captcha.dart';
+import 'account_verification.dart';
 import 'approval_review.dart';
 import 'compartment_controls.dart';
 import 'controller.dart';
@@ -1796,6 +1797,18 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             login,
             password,
             connectionLabel,
+            onVerification: (challenge) async {
+              if (!mounted || epoch != navigation || !c.isForeground)
+                return null;
+              return showDialog<AccountVerificationReply>(
+                context: navigator.currentContext!,
+                barrierDismissible: false,
+                builder: (_) => AccountVerificationPrompt(
+                  challenge: challenge,
+                  cancellation: c.accountLoginCancellation,
+                ),
+              );
+            },
             onChallenge: (challenge) async {
               if (!mounted || epoch != navigation || !c.isForeground)
                 return null;

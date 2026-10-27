@@ -1717,4 +1717,10 @@ and provider acknowledgement, never proof that SMS/email arrived. Existing
 begin/answer shapes stay unchanged. Cancellation/failure consumes the attempt;
 no automatic resend or fallback is allowed. Additional human-risk challenges
 remain unsupported. Ordinary JSON/CLI/MCP gain no method, and saved formats stay
-unchanged. Flutter adoption and package delivery are separate phases.
+unchanged. The App now negotiates API 1.32 and resolves all four verification
+symbols only on the new path. It renders captcha bytes or offered code methods,
+never the protected provider-page URL. It discards that URL in the zeroed native
+output allocation. Explicit sends replace the owned challenge; cooldown, count
+and expiry prevent unavailable actions. UI lifecycle changes invalidate the flow
+and late results are discarded. Older hosts preserve their prior login path.
+Rebuilt mobile package and real-account acceptance are separate phases.

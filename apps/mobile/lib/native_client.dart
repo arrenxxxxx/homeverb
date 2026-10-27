@@ -9,6 +9,7 @@ import 'client_contract.dart';
 import 'session_permissions.dart';
 export 'client_contract.dart';
 part 'native_account_login.dart';
+part 'native_account_verification.dart';
 
 enum _RecoveryStage {
   previewReady,
@@ -290,13 +291,14 @@ class NativeBindings {
 }
 
 class NativeClient
-    with _InteractiveNativeLogin
+    with _InteractiveNativeLogin, _NativeAccountVerification
     implements
         NativeSessionClient,
         AccountClient,
         ApprovalClient,
         IdentityRecoveryClient,
-        InteractiveAccountClient {
+        InteractiveAccountClient,
+        AccountVerificationClient {
   NativeClient._(this.path, this.handle, this.adapter)
     : bindings = NativeBindings(path);
   final String path;
@@ -774,6 +776,7 @@ class NativeClient
     } finally {
       _traceRecovery(_RecoveryStage.nativeConfirmReturned);
       _clearLoginChallenges();
+      _clearVerificationChallenges();
       _identityRecoveries.clear();
       endOperation(id);
     }
@@ -793,6 +796,7 @@ class NativeClient
     if (_closed) return;
     if (!value) {
       _clearLoginChallenges();
+      _clearVerificationChallenges();
       _identityRecoveries.clear();
       _approvalGeneration++;
       _approvals.clear();
@@ -806,8 +810,10 @@ class NativeClient
 
   @override
   void cancelAll() {
-    final hadLogins = _loginChallenges.isNotEmpty;
+    final hadLogins =
+        _loginChallenges.isNotEmpty || _verificationChallenges.isNotEmpty;
     _clearLoginChallenges();
+    _clearVerificationChallenges();
     final hadRecoveries = _identityRecoveries.isNotEmpty;
     _identityRecoveries.clear();
     _approvalGeneration++;

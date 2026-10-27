@@ -1817,4 +1817,11 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get vendorXiaomiMijiaAlarmSetAlarm1 => '\u8bbe\u7f6e\u63d0\u793a\u97f3';
 	@override String get vendorXiaomiMijiaPhysicalControlsLockedSetPhysicalControlsLocked1 => '\u8bbe\u7f6e\u6309\u952e\u9501';
 	@override String get vendorXiaomiMijiaAirPurifierFavoriteSetFavoriteFanLevel1 => '\u8bbe\u7f6e\u559c\u7231\u98ce\u901f';
+	@override String get mobileVerificationInstructions => '\u9009\u62e9\u53ef\u7528\u7684\u9a8c\u8bc1\u65b9\u5f0f\u5e76\u53d1\u9001\u9a8c\u8bc1\u7801\uff0c\u7136\u540e\u5728\u4e0b\u65b9\u8f93\u5165\u3002\u9a8c\u8bc1\u5c06\u5728\u77ed\u65f6\u95f4\u540e\u8fc7\u671f\u3002';
+	@override String get mobileVerificationPhone => '\u77ed\u4fe1';
+	@override String get mobileVerificationEmail => '\u90ae\u7bb1\u9a8c\u8bc1\u7801';
+	@override String get mobileVerificationSend => '\u53d1\u9001\u9a8c\u8bc1\u7801';
+	@override String get mobileVerificationLimit => '\u5df2\u8fbe\u5230\u53d1\u9001\u6b21\u6570\u4e0a\u9650\u3002\u8bf7\u8f93\u5165\u9a8c\u8bc1\u7801\u6216\u91cd\u65b0\u767b\u5f55\u3002';
+	@override String mobileVerificationCooldown({required Object seconds}) => '${seconds} \u79d2\u540e\u53ef\u518d\u6b21\u53d1\u9001\u9a8c\u8bc1\u7801\u3002';
+	@override String get mobileVerificationInvalid => '\u8bf7\u9009\u62e9\u9a8c\u8bc1\u65b9\u5f0f\u5e76\u8f93\u5165\u4e0d\u542b\u7a7a\u683c\u7684\u6709\u6548\u9a8c\u8bc1\u7801\u3002';
 }

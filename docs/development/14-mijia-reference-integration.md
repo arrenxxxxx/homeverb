@@ -756,3 +756,42 @@ fixtures, repository hygiene and 17 Android/iOS package-tool unit tests passed.
 These are host/source checks, not rebuilt mobile packages or provider acceptance.
 An approval-service quota interruption was resolved before the final checks;
 no alternate write path bypassed that service.
+
+
+## Foreground App verification -- October 27, 2026
+
+The Dart bridge negotiates API 1.32 before resolving the four dedicated C exports.
+Caller-owned allocations carry credential/ticket inputs and protected prompts;
+all are cleared in finally paths. Only captcha bytes are copied into Dart. The
+provider-page buffer is never decoded into a Dart string, persisted or rendered.
+Pending objects belong to one client generation and are consumed on answer/send;
+malformed or late results discard the returned handle. Waiting holds no operation.
+
+The controller selects the new path for Mijia, preserving exact reauthorization,
+partial inventory and older captcha/one-shot fallbacks. The foreground dialog
+shows only offered methods and requires an explicit send. Local timers display
+cooldown and expire the dialog; they do not generate network work. At most three
+requests are offered, while native enforcement remains authoritative. Cancel,
+back, navigation, background and expiry clear input and images. UTF-8 input is
+bounded by bytes, and unavailable methods/control characters are rejected.
+
+The synthetic C fixture has no network or secret-store code. It exercises
+successful captcha, method selection, send and ticket ABI exchange, deliberately
+invalid UTF-8 page bytes, malformed metadata, foreign-session refusal and a
+controlled late response after cancellation. App tests cover both methods,
+partial inventory, old-API fallback, English/Chinese narrow enlarged layouts,
+request limits and lifecycle cleanup. Real account access, code delivery,
+additional human-risk stages and modern SID `mijia` authentication remain
+unverified or unavailable. No account, message send, device write or publication
+is part of this phase. Package delivery is recorded separately.
+
+
+Executed checks: Flutter analysis passed. The full suite passed 249 tests and
+failed the same eight previously recorded macOS font/pixel and legacy
+app/outcome-click tests; it is not a full-suite pass. After the final Unicode
+control-character and cooldown case, the seven-file affected regression subset
+passed all 66 tests, including six fictional C ABI cases and 19 new verification
+controller/widget/refusal cases. Documentation, 23 schemas with 62 positive and
+743 negative fixtures, repository hygiene and commit conventions passed. No
+Rust source or C ABI changed in this App phase. No package build, installation,
+provider request, real message delivery or physical-device acceptance is implied.

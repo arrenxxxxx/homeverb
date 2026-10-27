@@ -1782,5 +1782,12 @@
   "vendor.xiaomi.mijia.indicator_light.set_on_1": "Set indicator light",
   "vendor.xiaomi.mijia.alarm.set_alarm_1": "Set buzzer",
   "vendor.xiaomi.mijia.physical_controls_locked.set_physical_controls_locked_1": "Set physical-control lock",
-  "vendor.xiaomi.mijia.air_purifier_favorite.set_favorite_fan_level_1": "Set favorite fan level"
+  "vendor.xiaomi.mijia.air_purifier_favorite.set_favorite_fan_level_1": "Set favorite fan level",
+  "mobile.verification.instructions": "Choose an available method and request a code, then enter it here. Verification expires shortly.",
+  "mobile.verification.phone": "Text Message",
+  "mobile.verification.email": "Email Code",
+  "mobile.verification.send": "Send Verification Code",
+  "mobile.verification.limit": "Code request limit reached. Enter your code or sign in again.",
+  "mobile.verification.cooldown": "You can request another code in {seconds} seconds.",
+  "mobile.verification.invalid": "Select a method and enter a valid verification code without spaces."
 }
