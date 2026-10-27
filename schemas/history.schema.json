@@ -1,0 +1,263 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Bounded numeric history",
+  "description": "ADR-0089. Core additionally validates target/descriptor/connection admission, half-open nonfuture ranges, inspected bounds, record order/uniqueness and receipt/count consistency. History never verifies writes or populates state cache.",
+  "$defs": {
+    "target": {
+      "type": "object",
+      "properties": {
+        "component_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "capability": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "property": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      },
+      "required": [
+        "component_id",
+        "capability",
+        "property"
+      ],
+      "additionalProperties": false
+    },
+    "option": {
+      "type": "object",
+      "properties": {
+        "target": {
+          "$ref": "#/$defs/target"
+        },
+        "aggregation": {
+          "const": "reported_daily"
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32
+        },
+        "max_window_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2764800
+        },
+        "max_records": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 31
+        },
+        "bucket_timezone": {
+          "type": "null"
+        }
+      },
+      "required": [
+        "target",
+        "aggregation",
+        "unit",
+        "max_window_seconds",
+        "max_records",
+        "bucket_timezone"
+      ],
+      "additionalProperties": false
+    },
+    "options": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "device_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "connection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/option"
+          },
+          "maxItems": 64,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "schema_version",
+        "device_id",
+        "connection_id",
+        "options"
+      ],
+      "additionalProperties": false
+    },
+    "request": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "device_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "connection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "target": {
+          "$ref": "#/$defs/target"
+        },
+        "aggregation": {
+          "const": "reported_daily"
+        },
+        "start": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+        }
+      },
+      "required": [
+        "schema_version",
+        "device_id",
+        "connection_id",
+        "target",
+        "aggregation",
+        "start",
+        "end"
+      ],
+      "additionalProperties": false
+    },
+    "result": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "device_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "connection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "target": {
+          "$ref": "#/$defs/target"
+        },
+        "aggregation": {
+          "const": "reported_daily"
+        },
+        "start": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32
+        },
+        "source": {
+          "enum": [
+            "lan",
+            "cloud"
+          ]
+        },
+        "received_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "records": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "reported_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+              },
+              "value": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "reported_at",
+              "value"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 31
+        },
+        "rejected_records": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 31
+        },
+        "limit_reached": {
+          "type": "boolean"
+        },
+        "completeness": {
+          "const": "unproven"
+        },
+        "bucket_timezone": {
+          "type": "null"
+        }
+      },
+      "required": [
+        "schema_version",
+        "device_id",
+        "connection_id",
+        "target",
+        "aggregation",
+        "start",
+        "end",
+        "unit",
+        "source",
+        "received_at",
+        "records",
+        "rejected_records",
+        "limit_reached",
+        "completeness",
+        "bucket_timezone"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/options"
+    },
+    {
+      "$ref": "#/$defs/request"
+    },
+    {
+      "$ref": "#/$defs/result"
+    }
+  ]
+}

@@ -67,3 +67,15 @@ Version one uses compile-time registration and explicit feature switches. Mobile
 Authentication feasibility evidence -> fictional/redacted fixtures -> contract tests -> one physical device in read-only mode -> owner-authorized safe writes -> verification and fault cases -> compatibility matrix update. Without a real device, use `experimental` or `mock-tested`, not `verified`.
 
 Libraries such as `midea-local` can inform protocol work. Citing one does not establish a port, mobile compatibility, or support for every model. [R5](references.md)
+
+
+## Historical numeric inspection and read contract
+
+ADR-0089 specifies additive typed adapter hooks, not yet implemented. Adapters
+will default to no options and unsupported reads. Local option inspection must
+avoid networking and derive target, unit and bounds from protected exact-profile
+bindings. Reads independently repeat identity/model/connection admission and
+retain account leases for the bounded request. A single explicit connection is
+used without fallback or paging. Returned historical aggregates require Core
+validation; public metadata alone cannot admit another model or protocol key.
+The first exact protocol candidate is [daily energy](adr/0088-mijia-exact-daily-energy-history.md).

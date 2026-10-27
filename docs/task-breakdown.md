@@ -1,5 +1,14 @@
 # Implementation status and next tasks
 
+## Core historical-read contract -- October 27, 2026
+
+[ADR-0089](adr/0089-bounded-numeric-history.md) defines local typed options,
+bounded queries and sanitized numeric history results. The schema and fixtures
+are implemented; Core/adapter/native/App runtime integration is pending. This
+contract keeps historical daily aggregates separate from current state and write
+verification. Native API 1.32, ordinary methods, storage and grants are unchanged.
+
+
 ## Exact daily energy protocol -- October 27, 2026
 
 Typed Rust now implements one bounded `v2/user/statistics` read for exact

@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "device_id": "fictional-outlet",
+  "connection_id": "fictional-cloud",
+  "target": {
+    "component_id": "power-consumption-11",
+    "capability": "vendor.example.energy",
+    "property": "consumption"
+  },
+  "aggregation": "reported_daily",
+  "start": "2026-10-01T00:00:00Z",
+  "end": "2026-10-03T00:00:00Z"
+}

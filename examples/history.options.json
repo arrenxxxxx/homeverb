@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "device_id": "fictional-outlet",
+  "connection_id": "fictional-cloud",
+  "options": [
+    {
+      "target": {
+        "component_id": "power-consumption-11",
+        "capability": "vendor.example.energy",
+        "property": "consumption"
+      },
+      "aggregation": "reported_daily",
+      "unit": "kWh",
+      "max_window_seconds": 2764800,
+      "max_records": 31,
+      "bucket_timezone": null
+    }
+  ]
+}

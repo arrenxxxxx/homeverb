@@ -610,3 +610,15 @@ malformed response and cancellation after possible transmission remain unknown
 with no replay or fallback. Nothing schedules HomeVerb work or uses the modern
 origin. Socket/wall-switch power and custom composite fields are not admitted
 by this opt-in. Saved older derivations stay readable until explicit refresh.
+
+
+## Planned historical numeric reads
+
+[ADR-0089](adr/0089-bounded-numeric-history.md) separates explicit historical
+queries from current reads and all execution outcomes. Its schema/fixture phase
+adds no callable method yet. The Core implementation must validate one local
+connection, one inspected numeric target and a bounded half-open UTC interval,
+then hold the device lock while the adapter rechecks protected bindings. It must
+validate the complete returned history before publication and reject late results.
+No route fallback, retry, cache write, execution receipt, write verification or
+new write authority follows from a historical query. Missing dates remain absent.

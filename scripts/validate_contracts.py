@@ -66,6 +66,7 @@ def main() -> int:
         ("capability", "capability.approved-cycle"), ("command", "command.approved-cycle"),
         ("command-result", "command-result.approval-expired"),
     ]
+    pairs.extend(("history", "history." + name) for name in ["options", "request", "result"])
     validators = {}
     for path in (ROOT / "schemas").glob("*.schema.json"):
         sch = json.loads(path.read_text(encoding="utf-8"))
@@ -508,6 +509,27 @@ def main() -> int:
     negative.append(("failed inventory cannot publish device IDs", shape, {**retrieval,"status":"failed"}))
     negative.append(("partial inventory requires an error", shape, {**retrieval,"error":None}))
     negative.append(("partial inventory forbids duplicate IDs", shape, {**retrieval,"device_ids":retrieval["device_ids"]*2}))
+    history = {name: load(f"examples/history.{name}.json") for name in ["options", "request", "result"]}
+    for name, fixture in history.items():
+        for field in ["provider", "did", "key", "token", "principal", "limit", "endpoint", "confirmed"]:
+            bad = copy.deepcopy(fixture); bad[field] = "FORBIDDEN"
+            negative.append((f"history {name} rejects {field}", validators["history"], bad))
+    for name in ["request", "result"]:
+        for field, value in [("start", "invalid"), ("end", "2026-10-03T00:00:00.1Z"), ("aggregation", "event"), ("target", {})]:
+            bad = copy.deepcopy(history[name]); bad[field] = value
+            negative.append((f"history {name} invalid {field}", validators["history"], bad))
+    for field, value in [("completeness", "complete"), ("bucket_timezone", "UTC"), ("rejected_records", 32), ("limit_reached", 1), ("received_at", "not-a-date"), ("records", [{}] * 32)]:
+        bad = copy.deepcopy(history["result"]); bad[field] = value
+        negative.append((f"history result invalid {field}", validators["history"], bad))
+    for value in [True, None, "1.0", -1]:
+        bad = copy.deepcopy(history["result"]); bad["records"][0]["value"] = value
+        negative.append(("history rejects nonnumeric/negative record", validators["history"], bad))
+    for field, value in [("max_records", 0), ("max_records", 32), ("max_window_seconds", 2764801), ("max_window_seconds", True), ("unit", ""), ("target", {})]:
+        bad = copy.deepcopy(history["options"]); bad["options"][0][field] = value
+        negative.append((f"history option invalid {field}", validators["history"], bad))
+    bad = copy.deepcopy(history["options"]); bad["options"] *= 2
+    negative.append(("history duplicate options", validators["history"], bad))
+
     for name, validator, data in negative:
         if validator.is_valid(data):
             raise AssertionError(f"Counterexample was not rejected: {name}")

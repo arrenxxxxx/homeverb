@@ -523,3 +523,13 @@ The ABI test compiles a fictional C shared library with the host `cc` compiler
 (macOS/Linux); it performs no networking or platform-store access. The actual
 native refusal cases use the built host FFI library and do not send credentials.
 These checks do not establish SMS/email delivery or provider acceptance.
+
+
+### Bounded numeric history fixtures
+
+`python3 scripts/validate_contracts.py` includes the ADR-0089 history options,
+request and partial-result examples, plus negative authority/remote-identity,
+timestamp, numeric type, bounds and completeness cases. This checks shape only;
+Core descriptor/identity, interval ordering, result correlation and lifecycle
+invariants require runtime tests when the Core implementation is added. Passing
+schema fixtures does not establish a callable history feature.

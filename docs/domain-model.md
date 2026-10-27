@@ -75,3 +75,16 @@ The implemented MVP checks complete snapshot identity, version, source, timestam
 `schema_version` versions the overall contract; `capability.revision` versions a device capability description. Optional additive fields can be compatible. Removing fields, changing units, or redefining enum meanings is breaking. Old clients may display unknown capability metadata but must not execute unfamiliar high-risk actions.
 
 The Property / Action / Event model takes inspiration from W3C WoT. This project is not a complete WoT Thing Description implementation and claims no certification. [R2](references.md)
+
+
+## Bounded numeric history contract
+
+[ADR-0089](adr/0089-bounded-numeric-history.md) and the
+[history schema](../schemas/history.schema.json) define a separate historical
+result, options and request. Runtime integration is pending. History references
+an existing local device, connection, component, capability and numeric property.
+Its `reported_daily` aggregation and unit describe the historical series; they
+do not reinterpret live values or establish a provider calendar timezone.
+Requested UTC bounds, provider timestamps, receipt time, rejected count and
+unproven completeness stay explicit. Records never become snapshots or write
+verification evidence. See the [partial result example](../examples/history.result.json).

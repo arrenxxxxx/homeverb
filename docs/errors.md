@@ -642,3 +642,10 @@ model/specification/region, `INVALID_ARGUMENT` for invalid/future windows,
 and existing authentication, provider, cancellation and deadline errors. Invalid
 individual statistics contribute a sanitized rejected count; they never become
 zero or current state. No raw provider text or identifier enters an error.
+
+
+The planned ADR-0089 Core history layer will use `CAPABILITY_UNSUPPORTED` for
+unadmitted targets/options and existing identity, invalid-argument, unavailable
+route, cancellation and deadline errors. `INVALID_HISTORY` is reserved for a
+history result that violates target, unit, time, ordering or count invariants.
+This schema phase does not add a callable method or emit that reserved code yet.
