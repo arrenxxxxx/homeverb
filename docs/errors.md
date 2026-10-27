@@ -644,8 +644,8 @@ individual statistics contribute a sanitized rejected count; they never become
 zero or current state. No raw provider text or identifier enters an error.
 
 
-The planned ADR-0089 Core history layer will use `CAPABILITY_UNSUPPORTED` for
+The ADR-0089 Core history layer uses `CAPABILITY_UNSUPPORTED` for
 unadmitted targets/options and existing identity, invalid-argument, unavailable
-route, cancellation and deadline errors. `INVALID_HISTORY` is reserved for a
+route, cancellation and deadline errors. `INVALID_HISTORY` rejects a
 history result that violates target, unit, time, ordering or count invariants.
-This schema phase does not add a callable method or emit that reserved code yet.
+Typed Core emits this code; no ordinary native/CLI/MCP method is added yet.

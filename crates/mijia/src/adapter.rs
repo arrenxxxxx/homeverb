@@ -1,5 +1,7 @@
 //! Account-bound Core reads and local card identity. Construction performs no I/O.
 
+mod history;
+
 use crate::{
     CloudTransport, Inventory, LoginCredentials, ModelMapping, PROVIDER, PropertyQuery, Region,
     SpecIndex,
@@ -660,6 +662,25 @@ fn validate_device(
 
 #[async_trait]
 impl Adapter for MijiaAdapter {
+    async fn history_options(
+        &self,
+        device: &Device,
+        connection: &Connection,
+        operation: &Operation,
+    ) -> Result<Vec<homeverb_domain::HistoryOption>> {
+        self.numeric_history_options(device, connection, operation)
+            .await
+    }
+    async fn read_history(
+        &self,
+        device: &Device,
+        connection: &Connection,
+        request: &homeverb_domain::HistoryRequest,
+        operation: &Operation,
+    ) -> Result<homeverb_domain::HistoryResult> {
+        self.numeric_history_read(device, connection, request, operation)
+            .await
+    }
     fn id(&self) -> &str {
         PROVIDER
     }

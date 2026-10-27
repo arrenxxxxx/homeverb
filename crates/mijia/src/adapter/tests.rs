@@ -239,6 +239,13 @@ impl CloudTransport for Cloud {
             let result=match request.endpoint() {
                 CloudEndpoint::Devices=>json!({"list":self.devices.lock().unwrap().clone()}),
                 CloudEndpoint::Homes=>json!({"homelist":[],"has_more":false}),
+                CloudEndpoint::Statistics=>{
+                    assert_eq!(data["key"],"11.1"); assert_eq!(data["data_type"],"stat_day_v3"); assert_eq!(data["limit"],31);
+                    assert_eq!(data["did"],"FICTIONAL-ENERGY-DEVICE");
+                    if self.stall_read.load(Ordering::SeqCst)!=0 {self.read_gate.notify_one();std::future::pending::<()>().await;}
+                    let time=data["time_start"].as_i64().unwrap();
+                    json!([{"time":time,"value":"[0]"},{"time":time+1,"value":"[125]"},{"time":time+2,"value":"invalid"}])
+                },
                 CloudEndpoint::Properties=>{
                     if self.stall_read.load(Ordering::SeqCst)!=0 {self.read_gate.notify_one();std::future::pending::<()>().await;}
                     let values:Vec<_>=data["params"].as_array().unwrap().iter().map(|p| {
@@ -1146,3 +1153,6 @@ async fn unselected_interactive_login_cannot_restore_an_account_removed_while_wa
 }
 
 mod verification_login;
+
+#[path = "tests/history.rs"]
+mod history;

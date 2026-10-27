@@ -533,3 +533,12 @@ timestamp, numeric type, bounds and completeness cases. This checks shape only;
 Core descriptor/identity, interval ordering, result correlation and lifecycle
 invariants require runtime tests when the Core implementation is added. Passing
 schema fixtures does not establish a callable history feature.
+
+
+Run `cargo +1.96.0 test -p homeverb-host --test history --offline --locked` for
+Core historical-read admission, explicit connection selection, output invariants,
+unknown DTO fields, lock/lifecycle cleanup and no cache/receipt changes. Run
+`cargo +1.96.0 test -p homeverb-mijia history --offline --locked` for the protected
+exact-model path through Core, encrypted query parameters, reference fallback,
+public identity mismatch, unlisted membership and account/device lease cleanup.
+These use fictional local accounts and transports, not provider credentials.

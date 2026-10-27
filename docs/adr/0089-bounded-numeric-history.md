@@ -1,6 +1,6 @@
 # ADR-0089: Bounded numeric history through Core
 
-Status: contract accepted; Core, adapter and entry-point implementation pending.
+Status: typed Core and exact Mijia adapter implemented with synthetic tests; entry-point/App integration pending.
 Date: October 27, 2026.
 
 ## Context
@@ -61,7 +61,7 @@ lower values; there is no hidden monotonic-value restoration.
 The domain schema and fixtures are introduced first. Existing capability/device
 schemas, 34 ordinary methods, native API 1.32, C exports, SQLite 5 and protected
 payloads remain unchanged at the contract phase. Core default adapter methods
-will be additive. Host/native/CLI/MCP/App entry points require their own versioned
+are additive. Host/native/CLI/MCP/App entry points require their own versioned
 integration, fixtures and tests before being declared available. Existing adapters
 without opt-in keep their current behavior. The exact Mijia energy option must
 use the pinned property mapping and ADR-0088 protocol independently of public

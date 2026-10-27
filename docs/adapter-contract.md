@@ -71,8 +71,8 @@ Libraries such as `midea-local` can inform protocol work. Citing one does not es
 
 ## Historical numeric inspection and read contract
 
-ADR-0089 specifies additive typed adapter hooks, not yet implemented. Adapters
-will default to no options and unsupported reads. Local option inspection must
+ADR-0089 supplies additive typed `history_options` and `read_history` hooks.
+Adapters default to no options and unsupported reads. Local option inspection must
 avoid networking and derive target, unit and bounds from protected exact-profile
 bindings. Reads independently repeat identity/model/connection admission and
 retain account leases for the bounded request. A single explicit connection is

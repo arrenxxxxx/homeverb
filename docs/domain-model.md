@@ -81,7 +81,8 @@ The Property / Action / Event model takes inspiration from W3C WoT. This project
 
 [ADR-0089](adr/0089-bounded-numeric-history.md) and the
 [history schema](../schemas/history.schema.json) define a separate historical
-result, options and request. Runtime integration is pending. History references
+result, options and request. Typed Core integration is implemented; public native
+and App adoption remains pending. History references
 an existing local device, connection, component, capability and numeric property.
 Its `reported_daily` aggregation and unit describe the historical series; they
 do not reinterpret live values or establish a provider calendar timezone.

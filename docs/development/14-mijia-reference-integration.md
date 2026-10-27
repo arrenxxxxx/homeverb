@@ -877,3 +877,39 @@ Clippy. The added local TLS case checks the exact statistics route and encryptio
 headers without contacting Xiaomi. Documentation, 23 schemas with 62 positive
 and 743 negative fixtures, repository hygiene and exact-reference regeneration
 passed. No native API/export or Flutter change was made in this protocol phase.
+
+
+## Typed Core and protected daily history -- October 27, 2026
+
+Core `inspect_history_options` and `read_history` implement ADR-0089. Closed
+historical DTOs reference existing local device, connection, component, capability
+and numeric property. The adapter defaults return no options and refuse reads.
+Core validates options against current metadata, bounds the query before traffic,
+locks the selected device, admits exactly one connection and validates the entire
+returned result including target/unit/source, timestamps, order, counts and limits.
+It repeats descriptor admission after I/O and rejects late results. Nothing is
+saved to the current-state cache or execution journal.
+
+Mijia implements both hooks using protected account leases and exact profile
+admission. Local inspection does not network or write credentials. The read
+independently repeats model, mapping, membership, identity and request admission
+before the statistics request. A protected reference mapping can supply the exact
+URN when inventory omitted it; an unknown or conflicting profile cannot. The
+account lease and device lock remain held only during the bounded read and are
+released on completion, cancellation, deadline or future drop.
+
+This is a typed library implementation, not an App feature or physical acceptance.
+The native API remains 1.32 with 34 ordinary methods and unchanged exports/storage.
+Host/CLI/MCP/App integration is still required. No provider account, real history
+request, appliance operation or remote publication occurred.
+
+
+Executed strict Rust 1.96 workspace/all-target Clippy passed. The full workspace
+test attempt stopped at 14 previously recorded Meiju LAN fixtures with macOS
+`AddrNotAvailable` (56 Meiju library cases passed); required synthetic loopback
+aliases are not assigned and host networking was not changed. A complete
+`cargo +1.96.0 test --workspace --exclude homeverb-midea --offline --locked` run
+passed all included suites and documentation tests, including eight Core history
+cases and 118 Mijia unit tests. This is not a full-workspace pass. Documentation,
+24 schemas with 65 primary positive and 792 negative fixtures and repository
+hygiene passed. No Flutter or mobile package was changed in this layer.

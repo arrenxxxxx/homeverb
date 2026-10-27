@@ -10,6 +10,7 @@ pub use connection_link::{PendingConnectionLink, ValidatedConnectionLink};
 mod descriptors;
 mod diagnostics;
 mod execution;
+mod history;
 mod observations;
 mod organization;
 mod policy;
@@ -142,6 +143,28 @@ pub trait Adapter: Send + Sync {
         _: &Operation,
     ) -> Result<()> {
         Err(connection_link::unsupported())
+    }
+    /// Local protected historical-series admission only; never network during inspection.
+    async fn history_options(
+        &self,
+        _: &Device,
+        _: &Connection,
+        _: &Operation,
+    ) -> Result<Vec<HistoryOption>> {
+        Ok(vec![])
+    }
+    /// One explicit historical read; never populate current state or execution evidence.
+    async fn read_history(
+        &self,
+        _: &Device,
+        _: &Connection,
+        _: &HistoryRequest,
+        _: &Operation,
+    ) -> Result<HistoryResult> {
+        Err(Error::new(
+            "CAPABILITY_UNSUPPORTED",
+            "This historical series is unavailable.",
+        ))
     }
     async fn discover(&self, operation: &Operation) -> Result<Vec<Descriptor>>;
     async fn read(

@@ -612,13 +612,14 @@ origin. Socket/wall-switch power and custom composite fields are not admitted
 by this opt-in. Saved older derivations stay readable until explicit refresh.
 
 
-## Planned historical numeric reads
+## Historical numeric reads
 
 [ADR-0089](adr/0089-bounded-numeric-history.md) separates explicit historical
-queries from current reads and all execution outcomes. Its schema/fixture phase
-adds no callable method yet. The Core implementation must validate one local
-connection, one inspected numeric target and a bounded half-open UTC interval,
-then hold the device lock while the adapter rechecks protected bindings. It must
-validate the complete returned history before publication and reject late results.
+queries from current reads and all execution outcomes. Typed Core now validates
+one local connection, one inspected numeric target and a bounded half-open UTC
+interval, then holds the device lock while the adapter rechecks protected bindings.
+It validates the complete returned history before publication, repeats descriptor
+admission after I/O and rejects late results. Public native/App integration is
+pending; no ordinary Host method is added by the typed Core phase.
 No route fallback, retry, cache write, execution receipt, write verification or
 new write authority follows from a historical query. Missing dates remain absent.

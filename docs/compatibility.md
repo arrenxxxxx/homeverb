@@ -1,5 +1,17 @@
 # Platform and device compatibility matrix
 
+## Core and protected historical reads -- October 27, 2026
+
+Typed Core now inspects and reads bounded numeric history under
+[ADR-0089](adr/0089-bounded-numeric-history.md), with closed DTOs, exact local
+connection/property admission, device locking, result validation and lifecycle
+cleanup. Adapters default to refusal. The Mijia adapter independently admits the
+protected exact `cuco.plug.v3` daily energy profile, including a reviewed reference
+mapping when inventory omitted the URN. History never writes the snapshot cache,
+execution receipts or grants. Native/CLI/MCP/App entry points remain pending;
+API 1.32, ordinary methods, C exports, SQLite and protected formats are unchanged.
+
+
 ## Core historical-read contract -- October 27, 2026
 
 [ADR-0089](adr/0089-bounded-numeric-history.md) defines local typed options,
