@@ -17,6 +17,7 @@ def verify():
         'homeverb_set_foreground': ([ctypes.c_uint64, ctypes.c_bool], None),
         'homeverb_begin_account_verification': ([ctypes.c_uint64, ctypes.c_char_p, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t], ctypes.c_void_p),
         'homeverb_continue_account_verification': ([ctypes.c_uint64, ctypes.c_char_p, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t], ctypes.c_void_p),
+        'homeverb_request_account_verification_code': ([ctypes.c_uint64, ctypes.c_char_p, ctypes.c_void_p, ctypes.c_size_t], ctypes.c_void_p),
         'homeverb_discard_account_verification': ([ctypes.c_uint64, ctypes.c_uint64], ctypes.c_bool),
     }
     for name, (arguments, result) in signatures.items():
@@ -61,6 +62,13 @@ def verify():
         shape.validate(result)
         return result['error']['code']
 
+    def request_code(handle, metadata, capacity=131072):
+        output=(ctypes.c_uint8 * 131072)(*([0x41]*131072))
+        result=decode(lib.homeverb_request_account_verification_code(handle,json.dumps(metadata).encode() if metadata is not None else None,output,capacity))
+        assert all(value == (0 if capacity == 131072 else 0x41) for value in output)
+        validator('native-account-verification','code_result').validate(result)
+        return result['error']['code']
+
     with tempfile.TemporaryDirectory(prefix='homeverb-verification-abi-') as directory:
         handle = decode(lib.homeverb_open(json.dumps({'schema_version':'1.0', 'data_dir':directory,
             'adapter':'homeverb.mock', 'allow_mock_writes':False}).encode()))['data']['handle']
@@ -82,9 +90,15 @@ def verify():
                 assert invoke(handle, examples['continue'], False, [length]) == 'MIJIA_AUTH_CHALLENGE_REQUIRED'
             for length in [0, 2049]:
                 assert invoke(handle, examples['continue'], False, [length]) == 'INVALID_ARGUMENT'
-            for method in ['begin_account_verification', 'continue_account_verification', 'discard_account_verification']:
+            for method in ['begin_account_verification', 'continue_account_verification', 'discard_account_verification', 'request_account_verification_code']:
                 request = {'schema_version':'1.0','operation_id':'ordinary','timeout_ms':1000,'request':{'method':method}}
                 assert decode(lib.homeverb_call(handle,json.dumps(request).encode()))['error']['code'] == 'INVALID_ARGUMENT'
+            code_metadata=examples['request_code']
+            for metadata in [None, {}, {**code_metadata,'method':'other'}, *[{**code_metadata,key:'PRIVATE'} for key in ['ticket','phone','email','url','principal']]]:
+                assert request_code(handle,metadata) == 'INVALID_ARGUMENT'
+            for capacity in [0,1,131071,131073]:
+                assert request_code(handle,code_metadata,capacity) == 'INVALID_ARGUMENT'
+            assert request_code(handle,code_metadata) == 'MIJIA_AUTH_CHALLENGE_REQUIRED'
             assert not lib.homeverb_discard_account_verification(handle, 1)
             lib.homeverb_set_foreground(handle, False)
             assert invoke(handle, examples['begin']) == 'HOST_BACKGROUND'
@@ -94,7 +108,8 @@ def verify():
         assert invoke(handle, examples['begin']) == 'HOST_CLOSED'
         assert invoke(handle, examples['continue'], False) == 'HOST_CLOSED'
         assert not lib.homeverb_discard_account_verification(handle, 1)
-    print('PASS: three verification exports, input/output clearing, invalid capacity/metadata refusal, closed/background admission and ordinary JSON refusal; no account traffic.')
+        assert request_code(handle,examples['request_code']) == 'HOST_CLOSED'
+    print('PASS: four verification exports, input/output clearing, invalid capacity/metadata refusal, closed/background admission and ordinary JSON refusal; no account traffic.')
 
 
 if __name__ == '__main__':

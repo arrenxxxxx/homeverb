@@ -505,3 +505,11 @@ quota/method refusal, human-risk rejection, monotonic cooldown and original
 lifetime, per-method ordinals, total bounds, cancellation/timeout/drop, account
 snapshot changes, new one-use handles and ordinary JSON refusal. They do not
 send real SMS/email or test a browser. Run the affected Mijia and Host suites.
+
+
+API 1.32 adds explicit code-request metadata/output checks to
+`verify_native_account_verification.py` and the full native verifier. It verifies
+all four exports, output clearing, invalid method and buffer capacity, forbidden
+recipient/URL fields, unknown/closed handles and ordinary JSON refusal. Synthetic
+Host/protocol tests cover success and actual quota/cooldown behavior; the ABI
+admission tests do not send real messages.

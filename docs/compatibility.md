@@ -1,5 +1,16 @@
 # Platform and device compatibility matrix
 
+## Native explicit code-request bridge -- October 27, 2026
+
+API 1.32 exposes one dedicated trusted code-request C function under
+[ADR-0087](adr/0087-native-mijia-verification-code-delivery.md). Closed metadata
+selects phone/email for an existing session-owned challenge. Successful requests
+return a new handle and nonsecret cooldown/count metadata; protected prompt bytes
+stay outside JSON. The total is 26 C exports plus Android's initializer, with
+34 ordinary methods and unchanged saved formats. Flutter adoption and new mobile
+packages remain pending. No real SMS/email, account or appliance was accessed.
+
+
 ## Explicit verification code requests -- October 26, 2026
 
 New public verification-page evidence supports typed native SMS/email code

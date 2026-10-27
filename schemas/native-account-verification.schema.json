@@ -235,6 +235,129 @@
           "$ref": "urn:homeverb:schema:native-response#/$defs/query_error"
         }
       ]
+    },
+    "request_code": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "operation_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 180000
+        },
+        "challenge_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 18446744073709551615
+        },
+        "method": {
+          "enum": [
+            "phone",
+            "email"
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "operation_id",
+        "timeout_ms",
+        "challenge_id",
+        "method"
+      ],
+      "additionalProperties": false
+    },
+    "code_result": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "verification"
+                },
+                "challenge_id": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 18446744073709551615
+                },
+                "expires_in_ms": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 180000
+                },
+                "prompt_length": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 8192
+                },
+                "methods": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 2,
+                  "uniqueItems": true,
+                  "items": {
+                    "enum": [
+                      "phone",
+                      "email"
+                    ]
+                  }
+                },
+                "code_requests": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 3
+                },
+                "cooldown_ms": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 86400000
+                }
+              },
+              "required": [
+                "kind",
+                "challenge_id",
+                "expires_in_ms",
+                "prompt_length",
+                "methods",
+                "code_requests",
+                "cooldown_ms"
+              ],
+              "additionalProperties": false
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "urn:homeverb:schema:native-response#/$defs/query_error"
+        }
+      ]
     }
   }
 }

@@ -620,3 +620,10 @@ are `MIJIA_INVALID_RESPONSE`. Original cancellation/expiry and account snapshot
 errors remain unchanged. A send timeout does not prove no message was sent; the
 continuation is consumed and never automatically replayed. No new error code or
 ordinary method is added by this typed phase.
+
+
+API 1.32's code-request bridge retains existing admission and challenge errors.
+Unknown method/recipient/URL metadata or invalid prompt capacity returns
+`INVALID_ARGUMENT`. The original handle is consumed by a decoded Host request.
+Provider risk/quota/cooldown refusal never causes another send automatically;
+a timeout cannot prove that no message was sent.

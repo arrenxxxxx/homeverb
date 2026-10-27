@@ -43,6 +43,10 @@ char *homeverb_begin_account_verification(uint64_t handle, const char *metadata_
 char *homeverb_continue_account_verification(uint64_t handle, const char *metadata_json,
     uint8_t *answer, size_t answer_length, uint8_t *prompt, size_t prompt_capacity);
 bool homeverb_discard_account_verification(uint64_t handle, uint64_t challenge_id);
+/* API 1.32+: explicit user-selected phone/email code request; same protected
+ * prompt ownership rules. No automatic send/retry, ordinary tool or SMS receipt claim. */
+char *homeverb_request_account_verification_code(uint64_t handle, const char *metadata_json,
+    uint8_t *prompt, size_t prompt_capacity);
 
 
 char *homeverb_prepare_identity_recovery(uint64_t handle, const char *metadata_json,

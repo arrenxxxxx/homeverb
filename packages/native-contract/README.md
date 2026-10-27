@@ -1,6 +1,6 @@
 # HomeVerb native contract
 
-Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.31.0 has 34 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions three trusted connection-link functions and three trusted account-identity recovery functions and three dedicated interactive login functions and three protected verification functions; the JSON envelope schema is 1.0.
+Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.32.0 has 34 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions three trusted connection-link functions and three trusted account-identity recovery functions and three dedicated interactive login functions and four protected verification functions; the JSON envelope schema is 1.0.
 
 API 1.19 adds nullable `last_complete_inventory_at` to account summaries. It is
 historical local retrieval metadata, not authorization or online status. SQLite
@@ -135,3 +135,8 @@ Negotiate 1.30 before passing the new field; method/export counts are unchanged.
 trusted bridge. A caller-owned 131072-byte output buffer carries protected
 captcha/provider-page bytes; metadata JSON never contains the page or ticket.
 The existing captcha-only bridge remains available. Browser integration is pending.
+
+API 1.32 additionally exposes the explicit selected-method code request described
+by `request_code` and `code_result` in the verification schema. No code is sent
+by opening a prompt. Its output reuses the protected prompt buffer and adds only
+request-count/cooldown metadata. Existing begin/answer JSON stays unchanged.

@@ -469,13 +469,13 @@ def main() -> int:
 
     verification = load("packages/native-contract/account-verification-examples.json")
     assert verification["api_version"] == load("packages/native-contract/api.json")["api_version"]
-    for name, definition in [("begin", "begin"), ("continue", "continue"), ("captcha_result", "result"), ("verification_result", "result"), ("connected_result", "result")]:
+    for name, definition in [("begin", "begin"), ("continue", "continue"), ("captcha_result", "result"), ("verification_result", "result"), ("connected_result", "result"), ("request_code", "request_code"), ("code_result", "code_result")]:
         shape = native_validator("native-account-verification", definition)
         shape.validate(verification[name])
         for field in ["login", "password", "answer", "ticket", "token", "principal", "url", "provider_page", "cookie"]:
             bad = copy.deepcopy(verification[name]); bad[field] = "FORBIDDEN"
             negative.append((f"verification {name} rejects {field}", shape, bad))
-            if definition == "result":
+            if definition in ["result", "code_result"]:
                 bad = copy.deepcopy(verification[name]); bad["data"][field] = "FORBIDDEN"
                 negative.append((f"verification data {name} rejects {field}", shape, bad))
     for field, value in [("methods", []), ("methods", ["phone", "phone"]), ("methods", ["other"]), ("prompt_length", 0), ("prompt_length", 8193), ("expires_in_ms", 0), ("expires_in_ms", 180001), ("challenge_id", 0)]:
@@ -486,6 +486,12 @@ def main() -> int:
         negative.append((f"invalid verification continuation {field}", native_validator("native-account-verification", "continue"), bad))
     bad = copy.deepcopy(verification["continue"]); del bad["answer_kind"]
     negative.append(("verification requires answer kind", native_validator("native-account-verification", "continue"), bad))
+
+    for field, value in [("code_requests",0),("code_requests",4),("cooldown_ms",-1),("cooldown_ms",86400001)]:
+        bad=copy.deepcopy(verification["code_result"]);bad["data"][field]=value
+        negative.append((f"invalid code request result {field}", native_validator("native-account-verification","code_result"),bad))
+    bad=copy.deepcopy(verification["request_code"]);bad["method"]="other"
+    negative.append(("invalid code method",native_validator("native-account-verification","request_code"),bad))
 
     mijia_connect = {"schema_version":"1.0", "operation_id":"fictional-connect", "timeout_ms":1000, "label":"Mijia", "provider":"xiaomi.mijia"}
     validators["native-connect"].validate(mijia_connect)

@@ -4,7 +4,7 @@ October 25: 17 exact Mijia reference specifications now supply 264 scalar read
 mappings and localized App labels. Additional writes and modern authentication
 remain incomplete; see the [full coverage and blockers](14-mijia-reference-integration.md).
 
-The October 26 integration uses native API **1.31.0**, following the linear
+The October 27 integration uses native API **1.32.0**, following the linear
 mainline update and dedicated interactive-login bridge. Earlier Mijia phase versions are historical. See
 [contract reconciliation](../adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
 remain available alongside Mijia; identity restoration remains Meiju-only.
@@ -13,7 +13,7 @@ The experimental integration is implemented under [ADR-0070](../adr/0070-mijia-n
 The owner will perform real-account and device acceptance. Do not access saved
 pilot credentials or contact appliances as part of development tests.
 
-Current callable scope includes trusted Rust account/read APIs and native API 1.31
+Current callable scope includes trusted Rust account/read APIs and native API 1.32
 Mijia-only/combined sessions with exact fan startup grants, protected user-driven
 captcha continuation and Flutter platform/account/read/control views. Live acceptance remains pending. The Rust adapter
 can explicitly admit protected fan setters under ADR-0078. Historical phase records below distinguish earlier
@@ -25,8 +25,9 @@ phone/email provider-ticket continuation under
 snapshots and a bounded session registry. Existing C/App entry points retain
 captcha-only behavior; API 1.31 also supplies a separate protected prompt C bridge
 under [ADR-0086](../adr/0086-native-protected-verification-prompt.md), pending App/browser integration. The later [ADR-0087](../adr/0087-native-mijia-verification-code-delivery.md)
-typed code-request path uses newly inspected public-page protocol facts; C/App
-code requests, human risk challenges and modern SID `mijia` login remain pending. See the
+typed code-request path uses newly inspected public-page protocol facts and has
+a dedicated C entry point in API 1.32. App adoption, human risk challenges and
+modern SID `mijia` login remain pending. See the
 [protocol evidence](14-mijia-reference-integration.md#protected-phone-and-email-ticket-protocol--october-26-2026).
 
 ## Protocol evidence

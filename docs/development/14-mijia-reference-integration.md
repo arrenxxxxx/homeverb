@@ -1,6 +1,6 @@
 # 14. Mijia reference integration and remaining coverage
 
-The October 26 worktree uses API 1.31 and the owner-supplied October 22 Xiaomi Home
+The October 27 worktree uses API 1.32 and the owner-supplied October 22 Xiaomi Home
 11.7.709 analysis. The full official-App feature request remains **incomplete**.
 The source archive explicitly does not supply all authentication, protocol or
 runtime control contracts. An implemented decoder is not physical acceptance.
@@ -731,3 +731,28 @@ no authenticated API, SMS/email send, device operation or publication occurred.
 The unreleased typed `VerificationEndpoint` enum gains five cases; injected
 transports with exhaustive matches must handle these for the opt-in code flow.
 Existing C/App API 1.31 is unchanged and no package was rebuilt.
+
+
+## Native explicit code-request bridge -- October 27, 2026
+
+API 1.32 exposes the existing typed code-request operation through one dedicated
+trusted C function. Closed metadata admits only the operation, session-owned
+challenge and phone/email choice. The output buffer rules are unchanged, and the
+result adds count/cooldown metadata to a new verification prompt handle. Existing
+API 1.31 begin/answer results keep their shapes; ordinary methods and storage
+formats are unchanged. There are 26 C exports plus Android's initializer.
+
+Schemas, examples, Android export expectations and the iOS version assertion are
+synchronized. No mobile package or Flutter UI is implied by these source changes;
+the latest packaged APK remains API 1.30. No actual SMS/email, account traffic,
+installation, device operation or publication occurred.
+
+
+Executed checks passed: FFI unit tests/build, strict Rust 1.96 Mijia/Host/FFI
+Clippy, the dedicated four-export verification ABI verifier and the full native
+contract suite (34 methods, 55 examples and existing trusted bridge checks).
+Documentation links, 23 schemas with 62 primary positive and 743 negative
+fixtures, repository hygiene and 17 Android/iOS package-tool unit tests passed.
+These are host/source checks, not rebuilt mobile packages or provider acceptance.
+An approval-service quota interruption was resolved before the final checks;
+no alternate write path bypassed that service.

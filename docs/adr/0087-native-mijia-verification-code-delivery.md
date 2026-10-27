@@ -1,6 +1,6 @@
 # ADR-0087: Explicit native Mijia verification code delivery
 
-Status: typed protocol and account/Host implementation synthetic-tested; native C/App integration pending.
+Status: typed protocol, account/Host and native C implementation synthetic-tested; App integration pending.
 Date: October 26, 2026.
 
 ## Evidence

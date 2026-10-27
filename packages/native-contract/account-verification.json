@@ -1,5 +1,5 @@
 {
-  "api_version": "1.31.0",
+  "api_version": "1.32.0",
   "functions": {
     "homeverb_begin_account_verification": {
       "request": "native-account-verification#/$defs/begin",
@@ -24,6 +24,11 @@
         "uint64 challenge_id"
       ],
       "response": "bool"
+    },
+    "homeverb_request_account_verification_code": {
+      "request": "native-account-verification#/$defs/request_code",
+      "protected_output": "caller-owned prompt buffer of exactly 131072 bytes; clear/free on every path",
+      "response": "native-account-verification#/$defs/code_result"
     }
   },
   "limits": {

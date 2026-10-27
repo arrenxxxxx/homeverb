@@ -1,6 +1,6 @@
 # Native UI contract
 
-The October 26 protected verification bridge uses native API **1.31.0**, following
+The October 27 explicit verification code bridge uses native API **1.32.0**, following
 the October 24 linear mainline update. Earlier Mijia phase versions are historical. See
 [contract reconciliation](adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
 remain available alongside Mijia; identity restoration remains Meiju-only.
@@ -43,7 +43,7 @@ The 22 C functions in [homeverb.h](../crates/ffi/include/homeverb.h) form the na
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects Meiju, `xiaomi.mijia` selects Mijia, and `homeverb.platforms` selects both. `scenario` defaults to `normal`. All platform modes require `allow_mock_writes: false` and reject any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms the selected mode. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.31.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.32.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -1698,3 +1698,23 @@ invalidation apply. Discard unused challenges explicitly. Only Mijia is admitted
 Meiju/Mock refuse. This supplies a native bridge, not an implemented browser or
 SMS sender. Flutter still uses the old captcha-only path; package/browser/phone
 acceptance requires separate evidence.
+
+
+## Explicit verification code request (API 1.32)
+
+`homeverb_request_account_verification_code` adds one trusted operation under
+[ADR-0087](adr/0087-native-mijia-verification-code-delivery.md). Its metadata is
+`schema_version`, `operation_id`, `timeout_ms`, `challenge_id` and `method` (`phone`
+or `email`). The caller must supply the same separately cleared 131072-byte
+protected output buffer used by API 1.31. No recipient, URL, ticket or credential
+is accepted. Negotiate 1.32 before resolving this symbol.
+
+One explicit user action consumes the old handle, checks the original account
+snapshot, selected method, quota, lifetime and cooldown, and sends at most once.
+Successful acknowledgement returns a new verification handle and protected prompt
+with `code_requests` (1..3) and `cooldown_ms` (0..86400000). These are local bounds
+and provider acknowledgement, never proof that SMS/email arrived. Existing
+begin/answer shapes stay unchanged. Cancellation/failure consumes the attempt;
+no automatic resend or fallback is allowed. Additional human-risk challenges
+remain unsupported. Ordinary JSON/CLI/MCP gain no method, and saved formats stay
+unchanged. Flutter adoption and package delivery are separate phases.

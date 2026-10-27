@@ -209,6 +209,81 @@ pub extern "C" fn homeverb_discard_account_verification(handle: u64, challenge_i
     host(handle).is_some_and(|host| host.session.discard_account_verification(challenge_id))
 }
 
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+enum CodeMethod {
+    Phone,
+    Email,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct CodeRequest {
+    schema_version: String,
+    operation_id: String,
+    timeout_ms: u64,
+    challenge_id: u64,
+    method: CodeMethod,
+}
+
+/// Explicitly request one verification code. No ordinary JSON tool equivalent.
+/// # Safety
+/// Metadata is NULL or valid NUL-terminated UTF-8. Prompt is NULL or exclusively
+/// owned writable memory of exactly 131072 bytes, nonoverlapping with metadata.
+/// Valid output is cleared before admission; invalid lengths are not dereferenced.
+/// The caller clears/frees all output on every path, and frees nonsecret JSON with
+/// homeverb_string_free. Never log/cache/serialize the protected prompt.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn homeverb_request_account_verification_code(
+    handle: u64,
+    metadata: *const c_char,
+    prompt: *mut u8,
+    prompt_capacity: usize,
+) -> *mut c_char {
+    output(|| {
+        let Some(prompt) = (unsafe { protected_prompt(prompt, prompt_capacity) }) else {
+            return error(
+                "INVALID_ARGUMENT",
+                "Provide the protected prompt output buffer.",
+            );
+        };
+        let Some(host) = host(handle) else {
+            return error("HOST_CLOSED", "The native host handle is closed.");
+        };
+        let Some(input) = (unsafe { input_json::<CodeRequest>(metadata) }) else {
+            return error(
+                "INVALID_ARGUMENT",
+                "Invalid verification code request metadata.",
+            );
+        };
+        let method = match input.method {
+            CodeMethod::Phone => VerificationMethod::Phone,
+            CodeMethod::Email => VerificationMethod::Email,
+        };
+        let input = ContinueAccountLoginRequest {
+            schema_version: input.schema_version,
+            operation_id: input.operation_id,
+            timeout_ms: input.timeout_ms,
+            challenge_id: input.challenge_id,
+        };
+        match host.runtime.block_on(
+            host.session
+                .request_account_verification_code(input, method),
+        ) {
+            Err(error) => verification_output(Err(error), prompt, |_| {}),
+            Ok(result) => {
+                let mut output = verification_output(Ok(result.login), prompt, |id| {
+                    host.session.discard_account_verification(id);
+                });
+                if output["error"].is_null() {
+                    output["data"]["code_requests"] = json!(result.requests);
+                    output["data"]["cooldown_ms"] = json!(result.cooldown_ms);
+                }
+                output
+            }
+        }
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
