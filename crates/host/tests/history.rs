@@ -549,3 +549,84 @@ async fn locked_devices_and_nonreadable_or_malformed_descriptors_prevent_dispatc
     assert!(f.core.read_history(&f.request, &op()).await.is_err());
     assert_eq!(f.adapter.calls.load(Ordering::SeqCst), 0);
 }
+
+fn host_request(id: &str, request: Value) -> homeverb_host::HostRequest {
+    serde_json::from_value(
+        json!({"schema_version":"1.0","operation_id":id,"timeout_ms":10000,"request":request}),
+    )
+    .unwrap()
+}
+fn session(f: &Fixture) -> homeverb_host::Session {
+    homeverb_host::Session::new(Core::new(
+        f.store.clone(),
+        vec![f.adapter.clone()],
+        Arc::new(SystemClock),
+        Policy::default(),
+    ))
+}
+#[tokio::test]
+async fn ordinary_native_history_returns_closed_data_and_honors_session_gates() {
+    let f = Fixture::new().await;
+    let session = session(&f);
+    let inspect = json!({"method":"inspect_history_options","device_id":DEVICE_ID,"connection_id":f.request.connection_id});
+    let result = session.call(host_request("options", inspect.clone())).await;
+    assert!(result["error"].is_null());
+    assert_eq!(result["data"]["options"].as_array().unwrap().len(), 1);
+    assert_eq!(f.adapter.calls.load(Ordering::SeqCst), 0);
+    let read = json!({"method":"read_history","history":f.request});
+    let result = session.call(host_request("read", read.clone())).await;
+    assert!(result["error"].is_null());
+    assert_eq!(result["data"]["records"][1]["value"], 1.25);
+    assert!(f.store.snapshot(DEVICE_ID, "main").unwrap().is_none());
+    assert!(f.core.recent_executions().unwrap().is_empty());
+    session.set_foreground(false);
+    for request in [inspect.clone(), read.clone()] {
+        assert_eq!(
+            session.call(host_request("background", request)).await["error"]["code"],
+            "HOST_BACKGROUND"
+        );
+    }
+    session.set_foreground(true);
+    session.close();
+    assert_eq!(
+        session.call(host_request("closed", inspect)).await["error"]["code"],
+        "HOST_CLOSED"
+    );
+    assert_eq!(f.adapter.calls.load(Ordering::SeqCst), 1);
+    for field in [
+        "principal",
+        "provider",
+        "did",
+        "key",
+        "limit",
+        "unit",
+        "confirmed",
+    ] {
+        let mut bad = read.clone();
+        bad["history"][field] = json!("FORBIDDEN");
+        assert!(serde_json::from_value::<homeverb_host::HostRequest>(json!({"schema_version":"1.0","operation_id":"bad","timeout_ms":10000,"request":bad})).is_err());
+    }
+}
+#[tokio::test]
+async fn native_history_cancellation_releases_pending_operation_and_device_lock() {
+    for mode in ["background", "cancel", "close"] {
+        let f = Fixture::new().await;
+        let session = session(&f);
+        *f.adapter.fault.lock().unwrap() = "hang".into();
+        let work = session.call(host_request(
+            "pending",
+            json!({"method":"read_history","history":f.request}),
+        ));
+        tokio::pin!(work);
+        tokio::select! {value=&mut work=>panic!("Unexpected result: {value:?}"),_=f.adapter.entered.notified()=>{}}
+        match mode {
+            "background" => session.set_foreground(false),
+            "cancel" => assert!(session.cancel("pending")),
+            _ => session.close(),
+        }
+        assert_eq!(work.await["error"]["code"], "CANCELLED");
+        assert!(f.store.lock_device(DEVICE_ID).is_ok());
+        assert!(!session.cancel("pending"));
+        assert_eq!(f.adapter.calls.load(Ordering::SeqCst), 1);
+    }
+}

@@ -1,6 +1,6 @@
 # Native UI contract
 
-The October 27 explicit verification code bridge uses native API **1.32.0**, following
+The October 27 bounded historical-read bridge uses native API **1.33.0**, following
 the October 24 linear mainline update. Earlier Mijia phase versions are historical. See
 [contract reconciliation](adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
 remain available alongside Mijia; identity restoration remains Meiju-only.
@@ -1724,3 +1724,36 @@ output allocation. Explicit sends replace the owned challenge; cooldown, count
 and expiry prevent unavailable actions. UI lifecycle changes invalidate the flow
 and late results are discarded. Older hosts preserve their prior login path.
 Rebuilt mobile package and real-account acceptance are separate phases.
+
+
+## Bounded numeric history (API 1.33)
+
+Negotiate API 1.33 and method availability before requesting
+`inspect_history_options` with an exact local `device_id` and `connection_id`.
+It returns the local IDs and protected `options` without provider traffic, metadata
+changes or authority changes. Empty options mean this connection has no admitted
+historical series. Do not infer options from brand, displayed model or writable
+properties. The inspected target references an existing component/capability/
+property; its unit and aggregation apply specifically to history.
+
+`read_history` accepts a single `history` object conforming to
+[the domain schema](../schemas/history.schema.json): `schema_version`, exact
+`device_id`, `connection_id`, `target`, `aggregation`, `start`, `end`. Times use
+canonical whole-second UTC `...:ssZ`. The half-open range must be nonfuture and
+within the option's bounds. No provider key/URL/device identifier, recipient,
+principal, pagination limit or override is accepted. Each explicit call reads one
+series from one selected connection. The initial exact Mijia daily-energy option
+uses a maximum 32-day window and 31 records.
+
+The query response follows the history-result schema. Preserve provider timestamps,
+receipt time, historical unit, rejected count, limit status and unproven
+completeness. `bucket_timezone=null` means unknown; do not silently label records
+as authoritative local calendar days or compute a complete monthly total. Missing
+records are not zero. Results are never state snapshots or execution receipts and
+cannot verify device controls. No history is persisted in this version.
+
+Session background, close, cancellation and timeout end the read. No callback is
+promised after process termination and no operation is replayed. Existing public
+methods, C export count, saved formats and grants retain their prior behavior.
+This native phase does not add Flutter screens or CLI/MCP commands. The latest
+packaged APK remains API 1.32 until a separately recorded rebuild.

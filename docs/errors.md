@@ -648,4 +648,4 @@ The ADR-0089 Core history layer uses `CAPABILITY_UNSUPPORTED` for
 unadmitted targets/options and existing identity, invalid-argument, unavailable
 route, cancellation and deadline errors. `INVALID_HISTORY` rejects a
 history result that violates target, unit, time, ordering or count invariants.
-Typed Core emits this code; no ordinary native/CLI/MCP method is added yet.
+Typed Core and native API 1.33 emit this code. CLI/MCP history commands remain pending.

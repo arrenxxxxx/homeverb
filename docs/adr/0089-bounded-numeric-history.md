@@ -1,6 +1,6 @@
 # ADR-0089: Bounded numeric history through Core
 
-Status: typed Core and exact Mijia adapter implemented with synthetic tests; entry-point/App integration pending.
+Status: typed Core, exact Mijia adapter and native API 1.33 implemented with synthetic tests; App/CLI/MCP integration pending.
 Date: October 27, 2026.
 
 ## Context

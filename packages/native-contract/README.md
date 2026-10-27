@@ -1,6 +1,6 @@
 # HomeVerb native contract
 
-Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.32.0 has 34 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions three trusted connection-link functions and three trusted account-identity recovery functions and three dedicated interactive login functions and four protected verification functions; the JSON envelope schema is 1.0.
+Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.33.0 has 36 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions three trusted connection-link functions and three trusted account-identity recovery functions and three dedicated interactive login functions and four protected verification functions; the JSON envelope schema is 1.0.
 
 API 1.19 adds nullable `last_complete_inventory_at` to account summaries. It is
 historical local retrieval metadata, not authorization or online status. SQLite
@@ -140,3 +140,13 @@ API 1.32 additionally exposes the explicit selected-method code request describe
 by `request_code` and `code_result` in the verification schema. No code is sent
 by opening a prompt. Its output reuses the protected prompt buffer and adds only
 request-count/cooldown metadata. Existing begin/answer JSON stays unchanged.
+
+
+API 1.33 adds `inspect_history_options` and `read_history` under ADR-0089. The
+first method performs local protected option inspection for an exact device and
+connection. The second accepts one closed `history` object matching the domain
+history request schema. It reads one explicit historical series without route
+fallback, cache writes or execution receipts. Only admitted exact-profile adapters
+supply options; Mock and Meiju default to empty options and unsupported reads.
+The 26 C exports plus Android initializer and all storage/grants are unchanged.
+App, CLI and MCP presentation remain separate integration work.

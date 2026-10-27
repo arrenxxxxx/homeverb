@@ -120,6 +120,18 @@ def main():
             devices = call(handle, 'discover')['data']
             assert len(devices) == 1
             call(handle, 'describe_device', device=devices[0]['id'])
+            history_connection = 'conn-example-cloud'
+            assert call(handle, 'inspect_history_options', device_id=devices[0]['id'], connection_id=history_connection)['data']['options'] == []
+            history = load('examples/history.request.json')
+            history.update(device_id=devices[0]['id'], connection_id=history_connection)
+            history['target'] = {'component_id':'main', 'capability':'climate', 'property':'target_temperature'}
+            assert call(handle, 'read_history', history=history)['error']['code'] == 'CAPABILITY_UNSUPPORTED'
+            for field in ['principal', 'provider', 'did', 'key', 'limit', 'unit', 'confirmed']:
+                bad = copy.deepcopy(history); bad[field] = 'FORBIDDEN'
+                request = envelope('read_history', history=bad)
+                assert not request_schema.is_valid(request)
+                assert raw(handle, request)['error']['code'] == 'INVALID_ARGUMENT'
+
             for transport in ['lan', 'cloud']:
                 grants = call(handle, 'inspect_session_grants', device_id=devices[0]['id'],
                               connection_id='conn-example-' + transport)

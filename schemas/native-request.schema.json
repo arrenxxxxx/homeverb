@@ -626,6 +626,46 @@
             "device_id"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "inspect_history_options"
+            },
+            "device_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "connection_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            }
+          },
+          "required": [
+            "method",
+            "device_id",
+            "connection_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "const": "read_history"
+            },
+            "history": {
+              "$ref": "urn:homeverb:schema:history#/$defs/request"
+            }
+          },
+          "required": [
+            "method",
+            "history"
+          ],
+          "additionalProperties": false
         }
       ]
     }

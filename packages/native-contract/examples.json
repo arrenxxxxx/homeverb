@@ -1,5 +1,5 @@
 {
-  "api_version": "1.32.0",
+  "api_version": "1.33.0",
   "cases": [
     {
       "request": {
@@ -12,7 +12,7 @@
       },
       "response": {
         "data": {
-          "api_version": "1.32.0",
+          "api_version": "1.33.0",
           "limits": {
             "max_active_operations": 8,
             "max_request_bytes": 1048576,
@@ -70,6 +70,9 @@
             "inspect_device_conflicts": {
               "response_kind": "query"
             },
+            "inspect_history_options": {
+              "response_kind": "query"
+            },
             "inspect_session_grants": {
               "response_kind": "query"
             },
@@ -89,6 +92,9 @@
               "response_kind": "query"
             },
             "plan_batch": {
+              "response_kind": "query"
+            },
+            "read_history": {
               "response_kind": "query"
             },
             "read_state": {
@@ -575,6 +581,62 @@
         "operation_id": "ui-16",
         "timeout_ms": 10000,
         "request": {
+          "method": "inspect_history_options",
+          "device_id": "dev-mock-ac",
+          "connection_id": "conn-example-cloud"
+        }
+      },
+      "response": {
+        "data": {
+          "connection_id": "conn-example-cloud",
+          "device_id": "dev-mock-ac",
+          "options": [],
+          "schema_version": "1.0"
+        },
+        "error": null,
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-17",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "read_history",
+          "history": {
+            "schema_version": "1.0",
+            "device_id": "dev-mock-ac",
+            "connection_id": "conn-example-cloud",
+            "target": {
+              "component_id": "main",
+              "capability": "climate",
+              "property": "target_temperature"
+            },
+            "aggregation": "reported_daily",
+            "start": "2026-10-01T00:00:00Z",
+            "end": "2026-10-03T00:00:00Z"
+          }
+        }
+      },
+      "response": {
+        "data": null,
+        "error": {
+          "code": "CAPABILITY_UNSUPPORTED",
+          "message": "This historical series is unavailable.",
+          "retryable": false
+        },
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-25",
+        "timeout_ms": 10000,
+        "request": {
           "method": "inspect_session_grants",
           "device_id": "dev-mock-ac",
           "connection_id": "conn-example-lan"
@@ -614,7 +676,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-17",
+        "operation_id": "ui-26",
         "timeout_ms": 10000,
         "request": {
           "method": "inspect_session_grants",
@@ -656,7 +718,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-21",
+        "operation_id": "ui-30",
         "timeout_ms": 10000,
         "request": {
           "method": "read_state",
@@ -674,21 +736,21 @@
           "observations": {
             "climate.mode": {
               "observed_at": null,
-              "received_at": "2026-10-16T10:13:35.012000078Z",
+              "received_at": "2026-10-27T13:24:46.606415Z",
               "source": "lan",
               "stale": false,
               "value": "cool"
             },
             "climate.target_temperature": {
               "observed_at": null,
-              "received_at": "2026-10-16T10:13:35.012000078Z",
+              "received_at": "2026-10-27T13:24:46.606415Z",
               "source": "lan",
               "stale": false,
               "value": 26.0
             },
             "power.state": {
               "observed_at": null,
-              "received_at": "2026-10-16T10:13:35.012000078Z",
+              "received_at": "2026-10-27T13:24:46.606415Z",
               "source": "lan",
               "stale": false,
               "value": false
@@ -707,7 +769,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-22",
+        "operation_id": "ui-31",
         "timeout_ms": 10000,
         "request": {
           "method": "read_state",
@@ -725,21 +787,21 @@
           "observations": {
             "climate.mode": {
               "observed_at": null,
-              "received_at": "2026-10-16T10:13:35.012000078Z",
+              "received_at": "2026-10-27T13:24:46.606415Z",
               "source": "lan",
               "stale": false,
               "value": "cool"
             },
             "climate.target_temperature": {
               "observed_at": null,
-              "received_at": "2026-10-16T10:13:35.012000078Z",
+              "received_at": "2026-10-27T13:24:46.606415Z",
               "source": "lan",
               "stale": false,
               "value": 26.0
             },
             "power.state": {
               "observed_at": null,
-              "received_at": "2026-10-16T10:13:35.012000078Z",
+              "received_at": "2026-10-27T13:24:46.606415Z",
               "source": "lan",
               "stale": false,
               "value": false
@@ -759,7 +821,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-23",
+        "operation_id": "ui-32",
         "timeout_ms": 10000,
         "request": {
           "method": "create_room",
@@ -768,7 +830,7 @@
       },
       "response": {
         "data": {
-          "id": "681c47db-27ab-4fdd-ba6c-e1db2e3f87c0",
+          "id": "5c41b8af-0d4d-4abe-a568-46e5347f57bb",
           "name": "Bedroom",
           "position": 0
         },
@@ -780,17 +842,17 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-24",
+        "operation_id": "ui-33",
         "timeout_ms": 10000,
         "request": {
           "method": "rename_room",
-          "room_id": "681c47db-27ab-4fdd-ba6c-e1db2e3f87c0",
+          "room_id": "5c41b8af-0d4d-4abe-a568-46e5347f57bb",
           "name": "Primary Bedroom"
         }
       },
       "response": {
         "data": {
-          "id": "681c47db-27ab-4fdd-ba6c-e1db2e3f87c0",
+          "id": "5c41b8af-0d4d-4abe-a568-46e5347f57bb",
           "name": "Primary Bedroom",
           "position": 0
         },
@@ -802,19 +864,19 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-25",
+        "operation_id": "ui-34",
         "timeout_ms": 10000,
         "request": {
           "method": "reorder_rooms",
           "room_ids": [
-            "681c47db-27ab-4fdd-ba6c-e1db2e3f87c0"
+            "5c41b8af-0d4d-4abe-a568-46e5347f57bb"
           ]
         }
       },
       "response": {
         "data": [
           {
-            "id": "681c47db-27ab-4fdd-ba6c-e1db2e3f87c0",
+            "id": "5c41b8af-0d4d-4abe-a568-46e5347f57bb",
             "name": "Primary Bedroom",
             "position": 0
           }
@@ -827,14 +889,14 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-26",
+        "operation_id": "ui-35",
         "timeout_ms": 10000,
         "request": {
           "method": "set_device_preferences",
           "device_id": "dev-mock-ac",
           "preferences": {
             "alias": "Quiet AC",
-            "room_id": "681c47db-27ab-4fdd-ba6c-e1db2e3f87c0",
+            "room_id": "5c41b8af-0d4d-4abe-a568-46e5347f57bb",
             "favorite": true
           }
         }
@@ -845,7 +907,7 @@
           "device_id": "dev-mock-ac",
           "favorite": true,
           "position": 0,
-          "room_id": "681c47db-27ab-4fdd-ba6c-e1db2e3f87c0"
+          "room_id": "5c41b8af-0d4d-4abe-a568-46e5347f57bb"
         },
         "error": null,
         "schema_version": "1.0",
@@ -855,7 +917,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-27",
+        "operation_id": "ui-36",
         "timeout_ms": 10000,
         "request": {
           "method": "assign_devices_to_room",
@@ -885,7 +947,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-28",
+        "operation_id": "ui-37",
         "timeout_ms": 10000,
         "request": {
           "method": "reorder_devices",
@@ -912,7 +974,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-29",
+        "operation_id": "ui-38",
         "timeout_ms": 10000,
         "request": {
           "method": "list_device_cards"
@@ -971,11 +1033,11 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-30",
+        "operation_id": "ui-39",
         "timeout_ms": 10000,
         "request": {
           "method": "delete_room",
-          "room_id": "681c47db-27ab-4fdd-ba6c-e1db2e3f87c0"
+          "room_id": "5c41b8af-0d4d-4abe-a568-46e5347f57bb"
         }
       },
       "response": {
@@ -988,7 +1050,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-31",
+        "operation_id": "ui-40",
         "timeout_ms": 10000,
         "request": {
           "method": "plan",
@@ -1040,7 +1102,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-32",
+        "operation_id": "ui-41",
         "timeout_ms": 10000,
         "request": {
           "method": "plan",
@@ -1136,7 +1198,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-33",
+        "operation_id": "ui-42",
         "timeout_ms": 10000,
         "request": {
           "method": "execute",
@@ -1159,7 +1221,7 @@
       },
       "response": {
         "attempts": [],
-        "completed_at": "2026-10-16T10:13:35.041852837Z",
+        "completed_at": "2026-10-27T13:24:46.628807Z",
         "data": {
           "mode": "heat",
           "target_temperature": 25
@@ -1170,12 +1232,12 @@
           {
             "attempts": [
               {
-                "duration_ms": 2,
+                "duration_ms": 1,
                 "phase": "accepted",
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-16T10:13:35.037309569Z",
+            "completed_at": "2026-10-27T13:24:46.625944Z",
             "data": {
               "mode": "heat"
             },
@@ -1183,13 +1245,13 @@
             "error": null,
             "request_id": "compound-example:0",
             "schema_version": "1.0",
-            "started_at": "2026-10-16T10:13:35.032672356Z",
+            "started_at": "2026-10-27T13:24:46.623733Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-16T10:13:35.036395987Z",
+              "received_at": "2026-10-27T13:24:46.625445Z",
               "source": "lan"
             }
           },
@@ -1201,7 +1263,7 @@
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-16T10:13:35.041213324Z",
+            "completed_at": "2026-10-27T13:24:46.628433Z",
             "data": {
               "target_temperature": 25
             },
@@ -1209,26 +1271,26 @@
             "error": null,
             "request_id": "compound-example:1",
             "schema_version": "1.0",
-            "started_at": "2026-10-16T10:13:35.038015090Z",
+            "started_at": "2026-10-27T13:24:46.626186Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-16T10:13:35.040368964Z",
+              "received_at": "2026-10-27T13:24:46.627934Z",
               "source": "lan"
             }
           }
         ],
         "request_id": "compound-example",
         "schema_version": "1.0",
-        "started_at": "2026-10-16T10:13:35.030467983Z",
+        "started_at": "2026-10-27T13:24:46.621827Z",
         "status": "verified",
         "verification": {
           "kind": "state_match",
           "matches_target": true,
           "note": "Each sub-operation has separate verification evidence; inspect items. This is not an atomic or exactly-once guarantee.",
-          "received_at": "2026-10-16T10:13:35.036395987Z",
+          "received_at": "2026-10-27T13:24:46.625445Z",
           "source": "lan"
         }
       }
@@ -1236,7 +1298,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-34",
+        "operation_id": "ui-43",
         "timeout_ms": 10000,
         "request": {
           "method": "plan_batch",
@@ -1301,7 +1363,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-35",
+        "operation_id": "ui-44",
         "timeout_ms": 10000,
         "request": {
           "method": "execute_batch",
@@ -1327,17 +1389,17 @@
         }
       },
       "response": {
-        "completed_at": "2026-10-16T10:13:35.049839792Z",
+        "completed_at": "2026-10-27T13:24:46.634993Z",
         "items": [
           {
             "attempts": [
               {
-                "duration_ms": 1,
+                "duration_ms": 0,
                 "phase": "accepted",
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-16T10:13:35.049186686Z",
+            "completed_at": "2026-10-27T13:24:46.634547Z",
             "data": {
               "state": true
             },
@@ -1345,26 +1407,26 @@
             "error": null,
             "request_id": "batch-example",
             "schema_version": "1.0",
-            "started_at": "2026-10-16T10:13:35.045414742Z",
+            "started_at": "2026-10-27T13:24:46.632403Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-16T10:13:35.048307848Z",
+              "received_at": "2026-10-27T13:24:46.634133Z",
               "source": "lan"
             }
           }
         ],
         "schema_version": "1.0",
-        "started_at": "2026-10-16T10:13:35.044953305Z",
+        "started_at": "2026-10-27T13:24:46.631990Z",
         "status": "verified"
       }
     },
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-36",
+        "operation_id": "ui-45",
         "timeout_ms": 10000,
         "request": {
           "method": "get_execution",
@@ -1374,7 +1436,7 @@
       "response": {
         "data": {
           "attempts": [],
-          "completed_at": "2026-10-16T10:13:35.041852837Z",
+          "completed_at": "2026-10-27T13:24:46.628807Z",
           "data": {
             "mode": "heat",
             "target_temperature": 25
@@ -1385,12 +1447,12 @@
             {
               "attempts": [
                 {
-                  "duration_ms": 2,
+                  "duration_ms": 1,
                   "phase": "accepted",
                   "transport": "lan"
                 }
               ],
-              "completed_at": "2026-10-16T10:13:35.037309569Z",
+              "completed_at": "2026-10-27T13:24:46.625944Z",
               "data": {
                 "mode": "heat"
               },
@@ -1398,13 +1460,13 @@
               "error": null,
               "request_id": "compound-example:0",
               "schema_version": "1.0",
-              "started_at": "2026-10-16T10:13:35.032672356Z",
+              "started_at": "2026-10-27T13:24:46.623733Z",
               "status": "verified",
               "verification": {
                 "kind": "state_match",
                 "matches_target": true,
                 "note": "Fresh state matches the target; this does not prove request causality.",
-                "received_at": "2026-10-16T10:13:35.036395987Z",
+                "received_at": "2026-10-27T13:24:46.625445Z",
                 "source": "lan"
               }
             },
@@ -1416,7 +1478,7 @@
                   "transport": "lan"
                 }
               ],
-              "completed_at": "2026-10-16T10:13:35.041213324Z",
+              "completed_at": "2026-10-27T13:24:46.628433Z",
               "data": {
                 "target_temperature": 25
               },
@@ -1424,26 +1486,26 @@
               "error": null,
               "request_id": "compound-example:1",
               "schema_version": "1.0",
-              "started_at": "2026-10-16T10:13:35.038015090Z",
+              "started_at": "2026-10-27T13:24:46.626186Z",
               "status": "verified",
               "verification": {
                 "kind": "state_match",
                 "matches_target": true,
                 "note": "Fresh state matches the target; this does not prove request causality.",
-                "received_at": "2026-10-16T10:13:35.040368964Z",
+                "received_at": "2026-10-27T13:24:46.627934Z",
                 "source": "lan"
               }
             }
           ],
           "request_id": "compound-example",
           "schema_version": "1.0",
-          "started_at": "2026-10-16T10:13:35.030467983Z",
+          "started_at": "2026-10-27T13:24:46.621827Z",
           "status": "verified",
           "verification": {
             "kind": "state_match",
             "matches_target": true,
             "note": "Each sub-operation has separate verification evidence; inspect items. This is not an atomic or exactly-once guarantee.",
-            "received_at": "2026-10-16T10:13:35.036395987Z",
+            "received_at": "2026-10-27T13:24:46.625445Z",
             "source": "lan"
           }
         },
@@ -1455,7 +1517,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-37",
+        "operation_id": "ui-46",
         "timeout_ms": 10000,
         "request": {
           "method": "recent_executions"
@@ -1466,12 +1528,12 @@
           {
             "attempts": [
               {
-                "duration_ms": 1,
+                "duration_ms": 0,
                 "phase": "accepted",
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-16T10:13:35.049186686Z",
+            "completed_at": "2026-10-27T13:24:46.634547Z",
             "data": {
               "state": true
             },
@@ -1479,13 +1541,13 @@
             "error": null,
             "request_id": "batch-example",
             "schema_version": "1.0",
-            "started_at": "2026-10-16T10:13:35.045414742Z",
+            "started_at": "2026-10-27T13:24:46.632403Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-16T10:13:35.048307848Z",
+              "received_at": "2026-10-27T13:24:46.634133Z",
               "source": "lan"
             }
           },
@@ -1497,7 +1559,7 @@
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-16T10:13:35.041213324Z",
+            "completed_at": "2026-10-27T13:24:46.628433Z",
             "data": {
               "target_temperature": 25
             },
@@ -1505,25 +1567,25 @@
             "error": null,
             "request_id": "compound-example:1",
             "schema_version": "1.0",
-            "started_at": "2026-10-16T10:13:35.038015090Z",
+            "started_at": "2026-10-27T13:24:46.626186Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-16T10:13:35.040368964Z",
+              "received_at": "2026-10-27T13:24:46.627934Z",
               "source": "lan"
             }
           },
           {
             "attempts": [
               {
-                "duration_ms": 2,
+                "duration_ms": 1,
                 "phase": "accepted",
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-16T10:13:35.037309569Z",
+            "completed_at": "2026-10-27T13:24:46.625944Z",
             "data": {
               "mode": "heat"
             },
@@ -1531,19 +1593,19 @@
             "error": null,
             "request_id": "compound-example:0",
             "schema_version": "1.0",
-            "started_at": "2026-10-16T10:13:35.032672356Z",
+            "started_at": "2026-10-27T13:24:46.623733Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-16T10:13:35.036395987Z",
+              "received_at": "2026-10-27T13:24:46.625445Z",
               "source": "lan"
             }
           },
           {
             "attempts": [],
-            "completed_at": "2026-10-16T10:13:35.041852837Z",
+            "completed_at": "2026-10-27T13:24:46.628807Z",
             "data": {
               "mode": "heat",
               "target_temperature": 25
@@ -1554,12 +1616,12 @@
               {
                 "attempts": [
                   {
-                    "duration_ms": 2,
+                    "duration_ms": 1,
                     "phase": "accepted",
                     "transport": "lan"
                   }
                 ],
-                "completed_at": "2026-10-16T10:13:35.037309569Z",
+                "completed_at": "2026-10-27T13:24:46.625944Z",
                 "data": {
                   "mode": "heat"
                 },
@@ -1567,13 +1629,13 @@
                 "error": null,
                 "request_id": "compound-example:0",
                 "schema_version": "1.0",
-                "started_at": "2026-10-16T10:13:35.032672356Z",
+                "started_at": "2026-10-27T13:24:46.623733Z",
                 "status": "verified",
                 "verification": {
                   "kind": "state_match",
                   "matches_target": true,
                   "note": "Fresh state matches the target; this does not prove request causality.",
-                  "received_at": "2026-10-16T10:13:35.036395987Z",
+                  "received_at": "2026-10-27T13:24:46.625445Z",
                   "source": "lan"
                 }
               },
@@ -1585,7 +1647,7 @@
                     "transport": "lan"
                   }
                 ],
-                "completed_at": "2026-10-16T10:13:35.041213324Z",
+                "completed_at": "2026-10-27T13:24:46.628433Z",
                 "data": {
                   "target_temperature": 25
                 },
@@ -1593,26 +1655,26 @@
                 "error": null,
                 "request_id": "compound-example:1",
                 "schema_version": "1.0",
-                "started_at": "2026-10-16T10:13:35.038015090Z",
+                "started_at": "2026-10-27T13:24:46.626186Z",
                 "status": "verified",
                 "verification": {
                   "kind": "state_match",
                   "matches_target": true,
                   "note": "Fresh state matches the target; this does not prove request causality.",
-                  "received_at": "2026-10-16T10:13:35.040368964Z",
+                  "received_at": "2026-10-27T13:24:46.627934Z",
                   "source": "lan"
                 }
               }
             ],
             "request_id": "compound-example",
             "schema_version": "1.0",
-            "started_at": "2026-10-16T10:13:35.030467983Z",
+            "started_at": "2026-10-27T13:24:46.621827Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Each sub-operation has separate verification evidence; inspect items. This is not an atomic or exactly-once guarantee.",
-              "received_at": "2026-10-16T10:13:35.036395987Z",
+              "received_at": "2026-10-27T13:24:46.625445Z",
               "source": "lan"
             }
           }
@@ -1625,7 +1687,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-38",
+        "operation_id": "ui-47",
         "timeout_ms": 10000,
         "request": {
           "method": "device_executions",
@@ -1637,12 +1699,12 @@
           {
             "attempts": [
               {
-                "duration_ms": 1,
+                "duration_ms": 0,
                 "phase": "accepted",
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-16T10:13:35.049186686Z",
+            "completed_at": "2026-10-27T13:24:46.634547Z",
             "data": {
               "state": true
             },
@@ -1650,13 +1712,13 @@
             "error": null,
             "request_id": "batch-example",
             "schema_version": "1.0",
-            "started_at": "2026-10-16T10:13:35.045414742Z",
+            "started_at": "2026-10-27T13:24:46.632403Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-16T10:13:35.048307848Z",
+              "received_at": "2026-10-27T13:24:46.634133Z",
               "source": "lan"
             }
           },
@@ -1668,7 +1730,7 @@
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-16T10:13:35.041213324Z",
+            "completed_at": "2026-10-27T13:24:46.628433Z",
             "data": {
               "target_temperature": 25
             },
@@ -1676,25 +1738,25 @@
             "error": null,
             "request_id": "compound-example:1",
             "schema_version": "1.0",
-            "started_at": "2026-10-16T10:13:35.038015090Z",
+            "started_at": "2026-10-27T13:24:46.626186Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-16T10:13:35.040368964Z",
+              "received_at": "2026-10-27T13:24:46.627934Z",
               "source": "lan"
             }
           },
           {
             "attempts": [
               {
-                "duration_ms": 2,
+                "duration_ms": 1,
                 "phase": "accepted",
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-16T10:13:35.037309569Z",
+            "completed_at": "2026-10-27T13:24:46.625944Z",
             "data": {
               "mode": "heat"
             },
@@ -1702,19 +1764,19 @@
             "error": null,
             "request_id": "compound-example:0",
             "schema_version": "1.0",
-            "started_at": "2026-10-16T10:13:35.032672356Z",
+            "started_at": "2026-10-27T13:24:46.623733Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-16T10:13:35.036395987Z",
+              "received_at": "2026-10-27T13:24:46.625445Z",
               "source": "lan"
             }
           },
           {
             "attempts": [],
-            "completed_at": "2026-10-16T10:13:35.041852837Z",
+            "completed_at": "2026-10-27T13:24:46.628807Z",
             "data": {
               "mode": "heat",
               "target_temperature": 25
@@ -1725,12 +1787,12 @@
               {
                 "attempts": [
                   {
-                    "duration_ms": 2,
+                    "duration_ms": 1,
                     "phase": "accepted",
                     "transport": "lan"
                   }
                 ],
-                "completed_at": "2026-10-16T10:13:35.037309569Z",
+                "completed_at": "2026-10-27T13:24:46.625944Z",
                 "data": {
                   "mode": "heat"
                 },
@@ -1738,13 +1800,13 @@
                 "error": null,
                 "request_id": "compound-example:0",
                 "schema_version": "1.0",
-                "started_at": "2026-10-16T10:13:35.032672356Z",
+                "started_at": "2026-10-27T13:24:46.623733Z",
                 "status": "verified",
                 "verification": {
                   "kind": "state_match",
                   "matches_target": true,
                   "note": "Fresh state matches the target; this does not prove request causality.",
-                  "received_at": "2026-10-16T10:13:35.036395987Z",
+                  "received_at": "2026-10-27T13:24:46.625445Z",
                   "source": "lan"
                 }
               },
@@ -1756,7 +1818,7 @@
                     "transport": "lan"
                   }
                 ],
-                "completed_at": "2026-10-16T10:13:35.041213324Z",
+                "completed_at": "2026-10-27T13:24:46.628433Z",
                 "data": {
                   "target_temperature": 25
                 },
@@ -1764,26 +1826,26 @@
                 "error": null,
                 "request_id": "compound-example:1",
                 "schema_version": "1.0",
-                "started_at": "2026-10-16T10:13:35.038015090Z",
+                "started_at": "2026-10-27T13:24:46.626186Z",
                 "status": "verified",
                 "verification": {
                   "kind": "state_match",
                   "matches_target": true,
                   "note": "Fresh state matches the target; this does not prove request causality.",
-                  "received_at": "2026-10-16T10:13:35.040368964Z",
+                  "received_at": "2026-10-27T13:24:46.627934Z",
                   "source": "lan"
                 }
               }
             ],
             "request_id": "compound-example",
             "schema_version": "1.0",
-            "started_at": "2026-10-16T10:13:35.030467983Z",
+            "started_at": "2026-10-27T13:24:46.621827Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Each sub-operation has separate verification evidence; inspect items. This is not an atomic or exactly-once guarantee.",
-              "received_at": "2026-10-16T10:13:35.036395987Z",
+              "received_at": "2026-10-27T13:24:46.625445Z",
               "source": "lan"
             }
           }
@@ -1796,7 +1858,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-39",
+        "operation_id": "ui-48",
         "timeout_ms": 10000,
         "request": {
           "method": "diagnostics"
@@ -1811,13 +1873,13 @@
             "lan": 1
           },
           "device_count": 1,
-          "generated_at": "2026-10-16T10:13:35.055846988Z",
+          "generated_at": "2026-10-27T13:24:46.642967Z",
           "receipt_limit": 100,
           "recent_receipts": [
             {
               "attempts": [
                 {
-                  "duration_ms": 1,
+                  "duration_ms": 0,
                   "phase": "accepted",
                   "transport": "lan"
                 }
@@ -1859,7 +1921,7 @@
             {
               "attempts": [
                 {
-                  "duration_ms": 2,
+                  "duration_ms": 1,
                   "phase": "accepted",
                   "transport": "lan"
                 }
@@ -1905,7 +1967,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-40",
+        "operation_id": "ui-49",
         "timeout_ms": 10000,
         "request": {
           "method": "get_execution",
@@ -1926,7 +1988,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-41",
+        "operation_id": "ui-50",
         "timeout_ms": 10000,
         "request": {
           "method": "execute",
@@ -1960,7 +2022,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-42",
+        "operation_id": "ui-51",
         "timeout_ms": 10000,
         "request": {
           "method": "execute",
@@ -1982,7 +2044,7 @@
       },
       "response": {
         "attempts": [],
-        "completed_at": "2026-10-16T10:13:35.058353784Z",
+        "completed_at": "2026-10-27T13:24:46.646279Z",
         "data": null,
         "device_id": "dev-mock-ac",
         "error": {
@@ -1992,7 +2054,7 @@
         },
         "request_id": "unsupported-example",
         "schema_version": "1.0",
-        "started_at": "2026-10-16T10:13:35.057986632Z",
+        "started_at": "2026-10-27T13:24:46.645641Z",
         "status": "failed",
         "verification": null
       }
@@ -2000,7 +2062,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-43",
+        "operation_id": "ui-52",
         "timeout_ms": 10000,
         "request": {
           "method": "execute_batch",
@@ -2039,7 +2101,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-44",
+        "operation_id": "ui-53",
         "timeout_ms": 10000,
         "request": {
           "method": "clear_cached_state"
@@ -2057,7 +2119,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-46",
+        "operation_id": "ui-55",
         "timeout_ms": 10000,
         "request": {
           "method": "clear_execution_history"
@@ -2075,7 +2137,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-60",
+        "operation_id": "ui-69",
         "timeout_ms": 10000,
         "request": {
           "method": "get_api_info"
@@ -2095,7 +2157,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-64",
+        "operation_id": "ui-73",
         "timeout_ms": 10000,
         "request": {
           "method": "get_api_info"
@@ -2103,7 +2165,7 @@
       },
       "response": {
         "data": {
-          "api_version": "1.32.0",
+          "api_version": "1.33.0",
           "limits": {
             "max_active_operations": 8,
             "max_request_bytes": 1048576,
@@ -2161,6 +2223,9 @@
             "inspect_device_conflicts": {
               "response_kind": "query"
             },
+            "inspect_history_options": {
+              "response_kind": "query"
+            },
             "inspect_session_grants": {
               "response_kind": "query"
             },
@@ -2180,6 +2245,9 @@
               "response_kind": "query"
             },
             "plan_batch": {
+              "response_kind": "query"
+            },
+            "read_history": {
               "response_kind": "query"
             },
             "read_state": {
@@ -2222,7 +2290,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-65",
+        "operation_id": "ui-74",
         "timeout_ms": 10000,
         "request": {
           "method": "list_devices"
@@ -2242,7 +2310,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-76",
+        "operation_id": "ui-85",
         "timeout_ms": 10000,
         "request": {
           "method": "discover"
@@ -2292,7 +2360,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-77",
+        "operation_id": "ui-86",
         "timeout_ms": 10000,
         "request": {
           "method": "execute",
@@ -2320,7 +2388,7 @@
             "transport": "lan"
           }
         ],
-        "completed_at": "2026-10-16T10:13:35.129242812Z",
+        "completed_at": "2026-10-27T13:24:46.723249Z",
         "data": null,
         "device_id": "dev-mock-ac",
         "error": {
@@ -2330,7 +2398,7 @@
         },
         "request_id": "scenario-accept-only",
         "schema_version": "1.0",
-        "started_at": "2026-10-16T10:13:35.127177934Z",
+        "started_at": "2026-10-27T13:24:46.722064Z",
         "status": "accepted",
         "verification": null
       }
@@ -2338,7 +2406,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-78",
+        "operation_id": "ui-87",
         "timeout_ms": 10000,
         "request": {
           "method": "discover"
@@ -2388,7 +2456,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-79",
+        "operation_id": "ui-88",
         "timeout_ms": 10000,
         "request": {
           "method": "execute",
@@ -2416,7 +2484,7 @@
             "transport": "lan"
           }
         ],
-        "completed_at": "2026-10-16T10:13:35.143094973Z",
+        "completed_at": "2026-10-27T13:24:46.735394Z",
         "data": null,
         "device_id": "dev-mock-ac",
         "error": {
@@ -2426,7 +2494,7 @@
         },
         "request_id": "scenario-lost-ack",
         "schema_version": "1.0",
-        "started_at": "2026-10-16T10:13:35.140880394Z",
+        "started_at": "2026-10-27T13:24:46.733549Z",
         "status": "unknown",
         "verification": null
       }
@@ -2434,7 +2502,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-80",
+        "operation_id": "ui-89",
         "timeout_ms": 10000,
         "request": {
           "method": "discover"
@@ -2484,7 +2552,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-81",
+        "operation_id": "ui-90",
         "timeout_ms": 10000,
         "request": {
           "method": "execute",
@@ -2512,7 +2580,7 @@
             "transport": "lan"
           }
         ],
-        "completed_at": "2026-10-16T10:13:35.157715246Z",
+        "completed_at": "2026-10-27T13:24:46.745956Z",
         "data": null,
         "device_id": "dev-mock-ac",
         "error": {
@@ -2522,7 +2590,7 @@
         },
         "request_id": "scenario-reject",
         "schema_version": "1.0",
-        "started_at": "2026-10-16T10:13:35.156600655Z",
+        "started_at": "2026-10-27T13:24:46.745051Z",
         "status": "failed",
         "verification": null
       }
@@ -2530,7 +2598,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-82",
+        "operation_id": "ui-91",
         "timeout_ms": 10000,
         "request": {
           "method": "discover"
@@ -2580,7 +2648,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-83",
+        "operation_id": "ui-92",
         "timeout_ms": 10000,
         "request": {
           "method": "execute",
@@ -2603,7 +2671,7 @@
       },
       "response": {
         "attempts": [],
-        "completed_at": "2026-10-16T10:13:35.180205069Z",
+        "completed_at": "2026-10-27T13:24:46.760574Z",
         "data": null,
         "device_id": "dev-mock-ac",
         "error": {
@@ -2615,12 +2683,12 @@
           {
             "attempts": [
               {
-                "duration_ms": 2,
+                "duration_ms": 1,
                 "phase": "accepted",
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-16T10:13:35.178314210Z",
+            "completed_at": "2026-10-27T13:24:46.759965Z",
             "data": {
               "mode": "heat"
             },
@@ -2628,13 +2696,13 @@
             "error": null,
             "request_id": "scenario-partial:0",
             "schema_version": "1.0",
-            "started_at": "2026-10-16T10:13:35.174018425Z",
+            "started_at": "2026-10-27T13:24:46.757908Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-16T10:13:35.177497768Z",
+              "received_at": "2026-10-27T13:24:46.759273Z",
               "source": "lan"
             }
           },
@@ -2646,7 +2714,7 @@
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-16T10:13:35.179453417Z",
+            "completed_at": "2026-10-27T13:24:46.760390Z",
             "data": null,
             "device_id": "dev-mock-ac",
             "error": {
@@ -2656,14 +2724,14 @@
             },
             "request_id": "scenario-partial:1",
             "schema_version": "1.0",
-            "started_at": "2026-10-16T10:13:35.178906026Z",
+            "started_at": "2026-10-27T13:24:46.760158Z",
             "status": "failed",
             "verification": null
           }
         ],
         "request_id": "scenario-partial",
         "schema_version": "1.0",
-        "started_at": "2026-10-16T10:13:35.171044531Z",
+        "started_at": "2026-10-27T13:24:46.755904Z",
         "status": "partial",
         "verification": null
       }
@@ -2671,7 +2739,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-84",
+        "operation_id": "ui-93",
         "timeout_ms": 10000,
         "request": {
           "method": "discover"
@@ -2721,7 +2789,7 @@
     {
       "request": {
         "schema_version": "1.0",
-        "operation_id": "ui-85",
+        "operation_id": "ui-94",
         "timeout_ms": 10000,
         "request": {
           "method": "execute",
@@ -2744,12 +2812,12 @@
       "response": {
         "attempts": [
           {
-            "duration_ms": 3,
+            "duration_ms": 5,
             "phase": "not_sent",
             "transport": "lan"
           }
         ],
-        "completed_at": "2026-10-16T10:13:35.201452102Z",
+        "completed_at": "2026-10-27T13:24:46.777441Z",
         "data": null,
         "device_id": "dev-mock-ac",
         "error": {
@@ -2759,7 +2827,7 @@
         },
         "request_id": "cancel-before-send",
         "schema_version": "1.0",
-        "started_at": "2026-10-16T10:13:35.196446874Z",
+        "started_at": "2026-10-27T13:24:46.771118Z",
         "status": "failed",
         "verification": null
       }

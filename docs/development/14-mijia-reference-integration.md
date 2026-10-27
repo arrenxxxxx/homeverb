@@ -1,6 +1,6 @@
 # 14. Mijia reference integration and remaining coverage
 
-The October 27 worktree uses API 1.32 and the owner-supplied October 22 Xiaomi Home
+The October 27 worktree uses API 1.33 and the owner-supplied October 22 Xiaomi Home
 11.7.709 analysis. The full official-App feature request remains **incomplete**.
 The source archive explicitly does not supply all authentication, protocol or
 runtime control contracts. An implemented decoder is not physical acceptance.
@@ -920,3 +920,33 @@ with the canonical schema (`...:ssZ`) and refuses offset, fractional and leap-se
 forms before normalization. Typed Core also rejects leap-second values constructed
 in process. Eight Core history tests, the six-case Mijia history subset and strict
 Domain/Core/Mijia/Host Clippy passed after this correction.
+
+
+## Native bounded historical reads -- October 27, 2026
+
+API 1.33 exposes existing Core history inspection and reading through two closed
+ordinary methods. Generic dispatch introduces no brand semantics or privileged
+identity parameters. The protected Mijia adapter remains the exact daily-energy
+opt-in; default adapters expose no options. There are 36 ordinary methods, with
+unchanged C exports, saved formats, write grants and existing method behavior.
+
+The C verifier exercises both new methods against Mock (empty option list and
+unsupported read), rejects extra private/authority fields and includes them in
+all-method lifecycle checks. The Host tests additionally inject a fictional
+historical adapter to verify successful structured results and cancellation on
+background, explicit cancel and close, without cache or execution writes.
+Schemas/manifests and the iOS acceptance version assertion match API 1.33; this
+is not a rebuilt iOS or Android artifact. Existing App account paths remain
+compatible; historical UI, CLI/MCP commands and provider acceptance are pending.
+No account access, cloud statistics request, real-device write or publication
+occurred.
+
+
+Executed checks passed: FFI host build; strict workspace/all-target Rust 1.96
+Clippy; complete Host and FFI tests including ten historical Core/Host cases;
+all 36 native methods with 57 regenerated fictional C ABI examples and every
+existing trusted bridge verifier; 61 Flutter native/account/captcha/verification
+compatibility cases against the rebuilt library; documentation, 24 schemas with
+65 primary positive and 792 negative fixtures, and repository hygiene. The earlier
+full-workspace Meiju loopback limitation remains recorded; no full-workspace or
+mobile/physical acceptance is inferred. The current APK is still API 1.32.

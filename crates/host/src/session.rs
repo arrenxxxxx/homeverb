@@ -52,6 +52,13 @@ pub enum Request {
         device_id: String,
         connection_id: String,
     },
+    InspectHistoryOptions {
+        device_id: String,
+        connection_id: String,
+    },
+    ReadHistory {
+        history: HistoryRequest,
+    },
     InspectSessionGrants {
         device_id: String,
         connection_id: String,
@@ -645,6 +652,19 @@ impl Session {
                         "source":"saved_inventory","authorization":"not_checked","options":options}))
                 }).await
             }
+            Request::InspectHistoryOptions {
+                device_id,
+                connection_id,
+            } => self
+                .core
+                .inspect_history_options(&device_id, &connection_id, &operation)
+                .await
+                .map(|value| json!(value)),
+            Request::ReadHistory { history } => self
+                .core
+                .read_history(&history, &operation)
+                .await
+                .map(|value| json!(value)),
             Request::InspectSessionGrants {
                 device_id,
                 connection_id,

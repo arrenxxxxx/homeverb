@@ -1,5 +1,16 @@
 # Platform and device compatibility matrix
 
+## Native historical reads -- October 27, 2026
+
+API 1.33 adds `inspect_history_options` and `read_history` through the existing C
+query bridge, with closed metadata, generic Core dispatch and ordinary session
+lifecycle. There are now 36 JSON methods; C exports, SQLite, protected payloads
+and grants are unchanged. Default Mock/Meiju adapters have no historical options.
+Native schemas, examples and version manifests are synchronized. Flutter, CLI
+and MCP presentation and updated mobile packaging remain pending; the current
+APK is API 1.32. No live provider account or statistics request was used.
+
+
 ## Core and protected historical reads -- October 27, 2026
 
 Typed Core now inspects and reads bounded numeric history under

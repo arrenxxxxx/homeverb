@@ -472,6 +472,30 @@
                         "response_kind"
                       ],
                       "additionalProperties": false
+                    },
+                    "inspect_history_options": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "read_history": {
+                      "type": "object",
+                      "properties": {
+                        "response_kind": {
+                          "const": "query"
+                        }
+                      },
+                      "required": [
+                        "response_kind"
+                      ],
+                      "additionalProperties": true
                     }
                   },
                   "required": [
@@ -508,7 +532,9 @@
                     "inspect_account_inventory",
                     "inspect_control_options",
                     "inspect_session_grants",
-                    "inspect_device_conflicts"
+                    "inspect_device_conflicts",
+                    "inspect_history_options",
+                    "read_history"
                   ],
                   "additionalProperties": {
                     "type": "object",
@@ -2449,6 +2475,74 @@
         },
         {
           "$ref": "urn:homeverb:schema:native-response#/$defs/query_error"
+        }
+      ]
+    },
+    "inspect_history_options": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "$ref": "urn:homeverb:schema:history#/$defs/options"
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "#/$defs/query_error"
+        }
+      ]
+    },
+    "read_history": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "$ref": "urn:homeverb:schema:history#/$defs/result"
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "#/$defs/query_error"
         }
       ]
     }
