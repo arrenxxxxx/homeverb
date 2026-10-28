@@ -1,10 +1,10 @@
 # CLI contract
 
-Status: Mock commands, local organization, diagnostics and the experimental mainland
-Meiju account/read flow and scoped power, fan, mode activation and profile-scoped temperature controls are implemented. Select `--mock` or `--adapter midea.meiju`
-explicitly. Meiju uses the same native Host/Core as the app bridge; no example
-executable, HA or service is required. Real CLI login/read/control acceptance remains
-separate from the earlier [developer probe](development/06-meiju-probe.md).
+Status: Mock commands, local organization, diagnostics, experimental Meiju account
+and scoped controls, and explicit read-only Mijia hosting are implemented. Select
+`--mock`, `--adapter midea.meiju` or `--adapter xiaomi.mijia` explicitly. The CLI
+calls the shared native Host/Core directly without HA or a service. Real CLI
+login/read/control acceptance remains separate from synthetic software evidence.
 
 ## Implemented commands
 
@@ -33,13 +33,13 @@ homeverb --mock diagnostics
 homeverb --mock mcp --stdio
 ```
 
-Global options: `--profile` (default `mock` or `meiju` for the selected adapter),
+Global options: `--profile` (default `mock`, `meiju` or `mijia` for the selected adapter),
 `--data-dir`, `--connection auto|lan|cloud`, `--timeout-ms` (1-180000, default 10000;
 account connect defaults to 180000 after input), `--wait accepted|verified`
 (default verified), `--request-id`, `--dry-run`, `--scenario`, `--meiju-grants`, and `--json`.
 All operation responses are JSON even without `--json`. Help/version output is text.
 `--mock` conflicts with `--adapter`. Explicit `--scenario` remains Mock-only.
-MCP accepts either adapter with the startup policy described in the
+MCP accepts these adapters with the startup policy described in the
 [local MCP contract](mcp.md); command-only global options are restricted there.
 Existing Mock command forms and profile paths are unchanged.
 
@@ -243,3 +243,68 @@ For multi-field writes explicitly declared as independent setters, `--dry-run` i
 `--wait accepted` permits exit 0 for acceptance without physical verification. An identical request ID returns its recorded result; a changed command under that ID is rejected. Once detailed history is retired, any reuse returns `REQUEST_RETIRED` without sending. Refresh state instead of automatically replacing that ID. No daemon, service installer, HTTP server, automation, or scheduled execution command exists.
 
 See [the runnable walkthrough](development/01-run-mock.md) and [execution semantics](routing-and-execution.md).
+
+
+## Mijia account and read commands
+
+[ADR-0090](adr/0090-mijia-cli-and-historical-tools.md) adds explicit read-only
+Mijia hosting with default profile `mijia`. Data-directory/profile resolution is
+identical to Meiju. Use the same OS user, private profile and protected store as
+the intended native account; never copy credentials or protected payloads into
+arguments or configuration. Linux Secret Service is the supported desktop secret
+backend. This workstation's macOS build can exercise local metadata, but refuses
+credential operations because a macOS secure-store backend is not implemented.
+
+```text
+homeverb --adapter xiaomi.mijia account connect --label "Home appliances"
+homeverb --adapter xiaomi.mijia account list
+homeverb --adapter xiaomi.mijia account show <local-account-id>
+homeverb --adapter xiaomi.mijia account inventory <local-account-id>
+homeverb --adapter xiaomi.mijia account refresh <local-account-id>
+homeverb --adapter xiaomi.mijia account recover <local-account-id>
+homeverb --adapter xiaomi.mijia account rename <local-account-id> "Home"
+homeverb --adapter xiaomi.mijia account remove <local-account-id> --expected-device-id <local-device-id>
+homeverb --adapter xiaomi.mijia device list
+homeverb --adapter xiaomi.mijia device describe <local-device-id>
+homeverb --adapter xiaomi.mijia device state <local-device-id> --component <component-id> --fresh
+```
+
+Connect uses hidden terminal input and the existing one-shot native login. No
+password or account login is accepted in argv, stdin JSON or an environment flag.
+`MIJIA_AUTH_CHALLENGE_REQUIRED` exits with code 3; use the trusted App flow for
+captcha/phone/email continuation. The CLI never automatically sends a message,
+retries authentication or opens a provider page. No usable native secret backend
+means an explicit failure, never plaintext fallback.
+
+Account refresh retains positive partial inventory and exit 13 for
+`MIJIA_INVENTORY_PARTIAL`. It does not remove absent devices or assert completeness.
+Use explicit account refresh for saved Mijia inventories; generic discovery cannot
+represent their partial status. Saved cross-account conflict inspection remains
+unsupported by Mijia. Appliance writes, Meiju grant files and Mock scenarios are
+refused before opening the Mijia profile. Existing App grants do not become CLI
+write authority. Local organization, cached state and receipts remain available.
+
+## Bounded historical readings
+
+All host modes expose generic history inspection and reading through Core:
+
+```text
+homeverb --adapter xiaomi.mijia history options <local-device-id> --connection-id <local-connection-id>
+homeverb --adapter xiaomi.mijia history read --file /private/history-request.json
+```
+
+The file contains the exact closed [HistoryRequest example](../examples/history.request.json)
+with local IDs and a target returned by inspection. It must be a regular UTF-8
+JSON file of at most 16 KiB. The half-open UTC range uses whole seconds, must be
+in the past and fit the inspected maximum. Device aliases and implicit connection
+selection are not accepted. Global `--connection`, `--wait`, `--request-id` and
+`--dry-run` overrides are rejected; `--timeout-ms` still bounds the operation.
+Options require no provider traffic; reading performs one explicitly selected
+bounded request. Mock/Meiju currently have empty options and unsupported reads.
+
+Outputs preserve all records and incomplete-data evidence from Core. Historical
+units can differ from live property units. `completeness=unproven`, null calendar
+timezone, rejected counts and limit status must not be discarded or treated as
+complete calendar totals. Missing records are not zero, and historical readings
+cannot verify an appliance command. No retry, fallback, polling or persistence
+is performed; cancellation/timeout releases the read and the CLI exits.

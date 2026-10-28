@@ -57,6 +57,7 @@ pub async fn run(
     timeout_ms: u64,
     cancellation: CancellationToken,
     grants: &super::grants::Grants,
+    mijia: bool,
 ) -> Result<u8> {
     if let AccountCommand::Connect { label, account_id } = &command {
         local_name(label)?;
@@ -65,7 +66,11 @@ pub async fn run(
         }
         super::terminal::require_interactive()?;
     }
-    let session = homeverb_host::open_meiju_session_with_grants(directory, grants.controls())?;
+    let session = if mijia {
+        homeverb_host::open_mijia_session(directory)?
+    } else {
+        homeverb_host::open_meiju_session_with_grants(directory, grants.controls())?
+    };
     let operation_id = Uuid::new_v4().to_string();
     let response = match command {
         AccountCommand::Connect { label, account_id } => {
@@ -73,9 +78,24 @@ pub async fn run(
                 .check_secure_storage(&Operation::new(10_000, cancellation.clone())?)
                 .await?;
             // Human input precedes the bounded native login/inventory operation.
-            let login = super::terminal::input("Meiju account (hidden): ", &cancellation).await?;
-            let password =
-                super::terminal::input("Meiju password (hidden): ", &cancellation).await?;
+            let login = super::terminal::input(
+                if mijia {
+                    "Mijia account (hidden): "
+                } else {
+                    "Meiju account (hidden): "
+                },
+                &cancellation,
+            )
+            .await?;
+            let password = super::terminal::input(
+                if mijia {
+                    "Mijia password (hidden): "
+                } else {
+                    "Meiju password (hidden): "
+                },
+                &cancellation,
+            )
+            .await?;
             complete(
                 &session,
                 session.connect_account(
@@ -256,6 +276,11 @@ mod tests {
             ("/error", "MIDEA_CONFLICT_LIMIT", 7),
             ("/data/retrieval/error", "AUTH_REQUIRED", 3),
             ("/data/retrieval/error", "MIDEA_INVENTORY_PARTIAL", 13),
+            ("/data/retrieval/error", "MIJIA_INVENTORY_PARTIAL", 13),
+            ("/error", "MIJIA_AUTH_CHALLENGE_REQUIRED", 3),
+            ("/error", "MIJIA_DEVICE_NOT_LISTED", 4),
+            ("/error", "MIJIA_SPEC_UNAVAILABLE", 4),
+            ("/error", "MIJIA_REQUEST_FAILED", 5),
             ("/data/error", "SECRET_STORE_WRITE_UNKNOWN", 10),
             ("/data/error", "CANCELLED", 130),
             ("/data/error", "SECRET_STORE_LOCKED", 3),

@@ -649,3 +649,15 @@ unadmitted targets/options and existing identity, invalid-argument, unavailable
 route, cancellation and deadline errors. `INVALID_HISTORY` rejects a
 history result that violates target, unit, time, ordering or count invariants.
 Typed Core and native API 1.33 emit this code. CLI/MCP history commands remain pending.
+
+
+## Mijia CLI classification
+
+Explicit Mijia CLI hosting preserves native error codes. Authentication challenges
+(`MIJIA_AUTH_CHALLENGE_REQUIRED`) exit 3 without automatic continuation. Missing
+protected device membership/specification exits 4, `MIJIA_REQUEST_FAILED` exits 5,
+and partial retrieval (`MIJIA_INVENTORY_PARTIAL`) exits 13 while retaining positive
+inventory and sanitized issues. Historical malformed input exits 2; unsupported
+series exits 4; deadline/cancellation retain exit 5/130. `INVALID_HISTORY` remains
+an error (exit 10), never an empty successful result or implicit retry. CLI/MCP
+queries preserve shared Core errors and introduce no execution outcome changes.

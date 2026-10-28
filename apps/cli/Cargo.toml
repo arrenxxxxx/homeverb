@@ -23,8 +23,12 @@ clap.workspace = true
 uuid.workspace = true
 zeroize.workspace = true
 
-[target.'cfg(target_os = "linux")'.dependencies]
+[target.'cfg(unix)'.dependencies]
 libc = "0.2"
 
 [dev-dependencies]
+async-trait.workspace = true
+chrono.workspace = true
+homeverb-storage.workspace = true
+jsonschema.workspace = true
 tempfile = "3"

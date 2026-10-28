@@ -885,11 +885,15 @@ dependencies = [
 name = "homeverb-cli"
 version = "0.2.0"
 dependencies = [
+ "async-trait",
+ "chrono",
  "clap",
  "homeverb-core",
  "homeverb-domain",
  "homeverb-host",
  "homeverb-mock",
+ "homeverb-storage",
+ "jsonschema",
  "libc",
  "serde",
  "serde_json",

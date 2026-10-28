@@ -30,6 +30,18 @@ struct CommandArguments {
     command: Command,
 }
 
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct HistoryOptionsArguments {
+    device_id: String,
+    connection_id: String,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct HistoryArguments {
+    history: HistoryRequest,
+}
+
 enum ToolOutput {
     Query(Value),
     Execution(Box<Execution>, WaitFor),
@@ -59,6 +71,17 @@ fn tools(allow_controls: bool) -> Value {
         {"name": "execution_get", "description": "Read one saved receipt without refreshing state, changing its outcome, or replaying a command.",
             "inputSchema": {"type": "object", "properties": {"request_id": {"type": "string", "minLength": 1}},
                 "required": ["request_id"], "additionalProperties": false}, "annotations": {"readOnlyHint": true}}
+    ]);
+    let history_schema: Value =
+        serde_json::from_str(include_str!("../../../schemas/history.schema.json"))
+            .expect("compiled history schema");
+    tools.as_array_mut().expect("tool list").extend([
+        json!({"name":"history_options", "description":"Inspect admitted historical numeric series for one exact local device and connection without provider traffic. Empty options mean unsupported; never infer series from a model name.",
+            "inputSchema":{"type":"object", "properties":{"device_id":{"type":"string", "minLength":1, "maxLength":256}, "connection_id":{"type":"string", "minLength":1, "maxLength":256}}, "required":["device_id", "connection_id"], "additionalProperties":false},
+            "annotations":{"readOnlyHint":true, "openWorldHint":false}}),
+        json!({"name":"history_read", "description":"Read one explicitly selected historical numeric series and bounded UTC interval. Preserve rejected counts, record limits and unproven completeness. Missing records are not zero; the calendar timezone is unknown. Never use history as current state, complete totals or command verification. No retry or route fallback.",
+            "inputSchema":{"type":"object", "$defs":history_schema["$defs"], "properties":{"history":{"$ref":"#/$defs/request"}}, "required":["history"], "additionalProperties":false},
+            "annotations":{"readOnlyHint":true, "openWorldHint":true}}),
     ]);
     if allow_controls {
         let schema: Value =
@@ -118,6 +141,20 @@ async fn call(
             )
             .await
             .map(|v| json!(v))
+        }
+        "history_options" => {
+            let args: HistoryOptionsArguments =
+                serde_json::from_value(call.arguments).map_err(|_| Error::invalid())?;
+            core.inspect_history_options(&args.device_id, &args.connection_id, &operation)
+                .await
+                .map(|v| json!(v))
+        }
+        "history_read" => {
+            let args: HistoryArguments =
+                serde_json::from_value(call.arguments).map_err(|_| Error::invalid())?;
+            core.read_history(&args.history, &operation)
+                .await
+                .map(|v| json!(v))
         }
         "execution_get" => {
             let args: ExecutionArguments =

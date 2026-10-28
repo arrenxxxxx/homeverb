@@ -1,6 +1,6 @@
 # 14. Mijia reference integration and remaining coverage
 
-The October 27 worktree uses API 1.33 and the owner-supplied October 22 Xiaomi Home
+The October 29 worktree uses API 1.33 and the owner-supplied October 22 Xiaomi Home
 11.7.709 analysis. The full official-App feature request remains **incomplete**.
 The source archive explicitly does not supply all authentication, protocol or
 runtime control contracts. An implemented decoder is not physical acceptance.
@@ -8,7 +8,10 @@ runtime control contracts. An implemented decoder is not physical acceptance.
 ## Implemented software
 
 API 1.30 adds 14 independently granted settings for the exact reference light
-and purifier under ADR-0084; the full-domain native/App path is recorded below.
+and purifier under ADR-0084. API 1.32 supplies explicit foreground captcha and
+phone/email verification; API 1.33 supplies exact protected daily-energy history
+through Core/native/App and now CLI/MCP. These additions and their bounded evidence
+are recorded below; they do not establish full reference coverage.
 
 - Eight-part MIoT URNs retain their exact extension; malformed/foreign URNs refuse.
 - Seventeen exact model/specification catalogs project 264 reviewed scalar read
@@ -72,11 +75,11 @@ legacy enumerator retains its bounded account/home union and partial status;
 complete inventory, logical-parent reconciliation and missing-device removal are
 not claimed. No private identifiers enter this ledger.
 
-The HA source review below supplies further community authentication and history
-research leads; it does not implement those features. Blocked pending additional
-evidence: modern native authentication/renewal;
-specialized paths for failed cloud properties and BLE devices; history/statistics,
-event pagination and foreground subscriptions; health/media/streams; plugin-specific
+The HA source review below supplies protocol evidence used by the implemented
+legacy verification flow and exact energy-history profile. Still blocked pending
+additional evidence: modern native authentication/renewal; specialized paths for
+failed cloud properties and BLE devices; broader statistics, event pagination and
+foreground subscriptions; health/media/streams; plugin-specific
 composite conversion and additional write constraints. Door unlocking stays denied.
 No background service, arbitrary RPC, remote MCP or scheduled automation is added.
 
@@ -967,3 +970,32 @@ it introduces no history polling, retries or persistence. CLI/MCP historical too
 new Android packaging and owner-run provider acceptance remain pending. Modern SID
 login, event coverage, additional controls and media/health remain separate open
 items. No real account, cloud query, device write or publication was performed.
+
+## Mijia CLI and historical tools -- October 29, 2026
+
+[ADR-0090](../adr/0090-mijia-cli-and-historical-tools.md) adds explicit read-only
+Mijia CLI/MCP hosting and generic bounded history options/reads. CLI account
+commands reuse the existing Session, with hidden one-shot login and no automatic
+challenge sends. Saved cross-account conflicts remain unsupported for Mijia.
+Six read-only MCP tools are available without grants, with eight tools for
+existing admitted Meiju controls. No write grant or modern SID support is added.
+Historical reads preserve Core evidence and cancellation without cache/receipt
+writes, polling or retries. Native API 1.33, schemas and protected storage formats
+are unchanged. MacOS credential operations remain blocked by its unimplemented
+secure-store backend; Linux Secret Service and real-provider acceptance require
+the appropriate owner environment. The API 1.33 App APK remains valid because
+this phase changes only the CLI host, tests and documentation.
+
+
+Executed CLI/MCP checks: `cargo +1.96.0 test -p homeverb-cli --offline --locked`
+passed 11 tests, including a successful fictional historical adapter, immutable
+closed input, partial output, cache/receipt isolation, FIFO/size refusal and
+notification/EOF/host/deadline cancellation without replay. Strict workspace
+all-target Clippy and the CLI build passed. `scripts/verify_mvp.py` ran 37 process
+cases: 30 passed and seven retained documented macOS/Linux-only skips. It verifies
+actual empty Mijia CLI/MCP startup, no Internet sockets while idle, hidden-input
+refusal without a terminal, presend grant/write refusal, schemas and exact history
+inputs. No real provider credentials, cloud query or appliance was used.
+Documentation, 24 schemas (65 primary positive and 792 negative fixtures), source
+hygiene and diff checks passed. Linux account/secret-store, real-provider history,
+physical support and remote CI are not established by these local checks.

@@ -554,3 +554,19 @@ read/polling, cancellation with late replies, English/Chinese narrow enlarged te
 and device-view automatic-refresh suspension/resumption. No provider session or
 appliance is used. These tests do not establish real history retention/completeness,
 physical model support or mobile packaging.
+
+
+### Mijia CLI and historical MCP checks
+
+Run `cargo +1.96.0 test -p homeverb-cli --offline --locked`, build the CLI, then
+run `python3 scripts/verify_mvp.py`. Rust fixtures exercise complete historical
+output through CLI dispatch/MCP, canonical closed requests, zero/partial records,
+no cache/receipt mutation, bounded file input, actual FIFO refusal and pending-read
+cancellation on deadline, explicit notification, EOF and host shutdown. Real CLI
+process tests exercise Mijia empty-profile startup and default profile selection,
+no account/network work while idle, presend write/grant/mock-option refusal,
+hidden input requiring a terminal, historical options and unsupported reads,
+malformed/oversized request files, query override rejection and MCP tool schemas.
+These are fictional tests and never use provider credentials or appliance traffic.
+Current executed result: 11 Rust tests passed; 37 process cases ran with 30 passed
+and seven preexisting platform skips on macOS. See ADR-0090 for remaining acceptance.

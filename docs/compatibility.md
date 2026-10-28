@@ -1,5 +1,22 @@
 # Platform and device compatibility matrix
 
+
+## Mijia CLI and historical tools -- October 29, 2026
+
+[ADR-0090](adr/0090-mijia-cli-and-historical-tools.md) adds explicit read-only
+Mijia CLI/MCP hosting and generic bounded history options/reads. CLI account
+commands reuse the existing Session, with hidden one-shot login and no automatic
+challenge sends. Saved cross-account conflicts remain unsupported for Mijia.
+Six read-only MCP tools are available without grants, with eight tools for
+existing admitted Meiju controls. No write grant or modern SID support is added.
+Historical reads preserve Core evidence and cancellation without cache/receipt
+writes, polling or retries. Native API 1.33, schemas and protected storage formats
+are unchanged. MacOS credential operations remain blocked by its unimplemented
+secure-store backend; Linux Secret Service and real-provider acceptance require
+the appropriate owner environment. The API 1.33 App APK remains valid because
+this phase changes only the CLI host, tests and documentation.
+
+
 ## Native historical reads -- October 27, 2026
 
 API 1.33 adds `inspect_history_options` and `read_history` through the existing C

@@ -46,7 +46,7 @@ To admit exact reviewed controls, add `--meiju-grants` and an absolute path to a
 [owner-controlled file](cli.md#scoped-meiju-controls) in the trusted host argument
 list. Explicit CLI account refresh/discovery with that file publishes action
 descriptors before MCP starts. Nonempty valid grants expose two additional tools;
-missing/empty grants keep four read tools. Invalid files refuse startup before
+missing/empty grants keep six read tools. Invalid files refuse startup before
 opening the profile. Mock MCP remains read-only.
 
 The policy is read once at startup. Editing/removing the file does **not** revoke
@@ -65,10 +65,12 @@ The host owns the subprocess and its lifetime. No HTTP endpoint, relay, or indep
 | device_describe | device | Cached capability description |
 | device_get_state | device, optional component/cached | Explicit live or cached read |
 | execution_get | request_id | One retained local receipt, without refresh or replay |
+| history_options | device_id, connection_id | Local protected options for one exact connection |
+| history_read | history | One explicit bounded numeric historical query; preserves partial-data evidence |
 | command_plan | command | Granted sessions only: local Core validation, without discovery, refresh, journal or send |
 | command_execute | command | Granted sessions only: Core execution with existing per-device permissions, receipts and conservative outcomes |
 
-The four default tools and `command_plan` have read-only annotations.
+The six default tools and `command_plan` have read-only annotations.
 `command_execute` is explicitly effectful. Annotations and tool visibility never
 grant authority: Core independently checks the device, component, action, arguments,
 risk and route. The closed `command` field embeds the existing
@@ -146,3 +148,34 @@ Shutdown can prevent response delivery, so inspect the durable command ID throug
 `execution_get` or the CLI after restarting. Cancellation is not physical rollback.
 Idle sessions create no appliance requests or Internet listeners. Error messages
 are English and contain no raw vendor responses.
+
+
+## Mijia hosting and historical tools
+
+Under [ADR-0090](adr/0090-mijia-cli-and-historical-tools.md), a trusted host may
+select `--adapter xiaomi.mijia --data-dir /private/homeverb --profile mijia mcp
+--stdio`. It uses the existing read-only native adapter. Same-user protected
+credential storage is required for live reads; startup and idle sessions perform
+no login, discovery, account refresh or credential read. The supported desktop
+secret backend is Linux Secret Service; macOS credential operations fail closed.
+Connect/recover/refresh accounts using the explicit native App or CLI flow outside
+MCP. No account or permission tool is exposed. Mijia appliance writes and Meiju
+grant-file startup are refused; App write grants do not carry over to MCP.
+
+First call `history_options` with exact local `device_id` and `connection_id` from
+the descriptor. This performs protected local inspection only. An empty result
+means unsupported. Then an explicit `history_read` supplies `{"history": ...}`
+using the existing closed [request schema](../schemas/history.schema.json) and
+[example](../examples/history.request.json). Its tool input schema embeds the
+same definitions so UTC formatting and forbidden fields remain visible to hosts.
+No aliases, arbitrary vendor keys/URLs, account identifiers, pagination limits,
+conversion factors, privilege fields or automatic route selection are accepted.
+
+Each read has the existing ten-second deadline and host-owned cancellation.
+Results retain reported timestamps, units, zeros, rejected counts, limit status,
+receipt time and unproven completeness. The provider's calendar timezone is
+unknown; missing records are not zero and no complete daily/monthly total or
+control verification follows. Historical queries never populate state snapshots,
+write receipts, repeat automatically or create a subscription. EOF and host
+cancellation drop pending reads without replay. The initial exact Mijia energy
+series is the only real-platform admission; Mock and Meiju return empty options.

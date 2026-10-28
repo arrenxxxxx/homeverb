@@ -1055,6 +1055,74 @@ class RuntimeAcceptance(unittest.TestCase):
 
         return process, send, response
 
+    def test_mijia_cli_empty_startup_and_presend_refusals(self):
+        def invoke(*args, expected=0, profile='mijia'):
+            process = subprocess.run([str(BINARY), '--adapter', 'xiaomi.mijia',
+                '--data-dir', self.directory.name, '--profile', profile, *args],
+                capture_output=True, text=True, timeout=5)
+            self.assertEqual(process.returncode, expected, process.stdout + process.stderr)
+            self.assertEqual(process.stderr, '')
+            return json.loads(process.stdout)
+        self.assertEqual(invoke('device', 'list')['data'], [])
+        self.assertEqual(invoke('account', 'list')['data'], [])
+        self.assertEqual(invoke('account', 'show', '00000000-0000-4000-8000-000000000001', expected=4)['error']['code'], 'ACCOUNT_NOT_FOUND')
+        self.assertEqual(invoke('account', 'connect', '--label', 'Fictional', expected=3, profile='no-terminal')['error']['code'], 'INPUT_UNAVAILABLE')
+        self.assertFalse((Path(self.directory.name) / 'no-terminal').exists())
+        self.assertEqual(invoke('power', 'set', 'fictional', '--on', expected=6, profile='no-write')['error']['code'], 'POLICY_DENIED')
+        self.assertFalse((Path(self.directory.name) / 'no-write').exists())
+        self.assertEqual(invoke('--meiju-grants', '/unused-grants.json', 'device', 'list', expected=2, profile='no-grants')['error']['code'], 'INVALID_ARGUMENT')
+        self.assertFalse((Path(self.directory.name) / 'no-grants').exists())
+        self.assertEqual(invoke('--scenario', 'normal', 'device', 'list', expected=4)['error']['code'], 'CAPABILITY_UNSUPPORTED')
+        base = [str(BINARY), '--adapter', 'xiaomi.mijia', '--data-dir', self.directory.name]
+        process, send, response = self.start_mcp(base)
+        send({'jsonrpc':'2.0', 'id':1, 'method':'initialize'})
+        self.assertIn('result', response())
+        send({'jsonrpc':'2.0', 'method':'notifications/initialized'})
+        send({'jsonrpc':'2.0', 'id':2, 'method':'tools/list'})
+        tools = response()['result']['tools']
+        self.assertEqual(len(tools), 6)
+        self.assertTrue(all(t['annotations']['readOnlyHint'] for t in tools))
+        send({'jsonrpc':'2.0', 'id':3, 'method':'tools/call', 'params':{'name':'device_list', 'arguments':{}}})
+        self.assertEqual(response()['result']['structuredContent']['data'], [])
+        self.assert_no_internet_sockets(process)
+        process.stdin.close()
+        process.wait(timeout=2)
+        self.assertEqual(process.returncode, 0)
+
+    def test_cli_historical_requests_are_closed_bounded_and_exact(self):
+        self.cli('device', 'discover')
+        device = self.cli('device', 'describe', 'mock-ac')['data']['device']
+        route = device['connections'][0]['id']
+        options = self.cli('history', 'options', device['id'], '--connection-id', route)
+        self.schema('history', options['data'])
+        self.assertEqual(options['data']['options'], [])
+        self.assertEqual(self.cli('history', 'options', 'mock-ac', '--connection-id', route, expected=2)['error']['code'], 'INVALID_ARGUMENT')
+        query = json.loads((ROOT / 'examples/history.request.json').read_text())
+        query.update(device_id=device['id'], connection_id=route,
+            target={'component_id':'main', 'capability':'climate', 'property':'target_temperature'})
+        path = Path(self.directory.name) / 'history.json'
+        path.write_text(json.dumps(query))
+        self.assertEqual(self.cli('history', 'read', '--file', str(path), expected=4)['error']['code'], 'CAPABILITY_UNSUPPORTED')
+        for prefix in [('--connection','cloud'), ('--request-id','forged'), ('--wait','accepted'), ('--dry-run',)]:
+            self.assertEqual(self.cli(*prefix, 'history', 'read', '--file', str(path), expected=2)['error']['code'], 'INVALID_ARGUMENT')
+        for content in [json.dumps({**query, 'principal':'admin'}), ' ' * 16385, '{']:
+            path.write_text(content)
+            self.assertEqual(self.cli('history', 'read', '--file', str(path), expected=2)['error']['code'], 'INVALID_ARGUMENT')
+        process, send, response = self.start_mcp(self.base)
+        send({'jsonrpc':'2.0', 'id':1, 'method':'initialize'})
+        response()
+        send({'jsonrpc':'2.0', 'method':'notifications/initialized'})
+        send({'jsonrpc':'2.0', 'id':2, 'method':'tools/call', 'params':{'name':'history_options', 'arguments':{'device_id':device['id'], 'connection_id':route}}})
+        result = response()['result']
+        self.assertFalse(result['isError'])
+        self.schema('history', result['structuredContent']['data'])
+        send({'jsonrpc':'2.0', 'id':3, 'method':'tools/call', 'params':{'name':'history_read', 'arguments':{'history':query}}})
+        self.assertEqual(response()['result']['structuredContent']['error']['code'], 'CAPABILITY_UNSUPPORTED')
+        self.assert_no_internet_sockets(process)
+        process.stdin.close()
+        process.wait(timeout=2)
+        self.assertEqual(process.returncode, 0)
+
     def test_mcp_protocol_read_tools_policy_and_eof_exit(self):
         self.cli('device', 'discover')
         receipt = self.cli('--scenario', 'lost-ack', '--request-id', 'mcp-receipt',
@@ -1068,7 +1136,7 @@ class RuntimeAcceptance(unittest.TestCase):
         send({'jsonrpc': '2.0', 'id': 2, 'method': 'tools/list'})
         tools = response()['result']['tools']
         self.assertEqual({tool['name'] for tool in tools},
-                         {'device_list', 'device_describe', 'device_get_state', 'execution_get'})
+                         {'device_list', 'device_describe', 'device_get_state', 'execution_get', 'history_options', 'history_read'})
         self.assertTrue(all(tool['annotations']['readOnlyHint'] for tool in tools))
         send({'jsonrpc': '2.0', 'id': 3, 'method': 'tools/call', 'params': {'name': 'device_list', 'arguments': {}}})
         listed = response()['result']
@@ -1121,7 +1189,7 @@ class RuntimeAcceptance(unittest.TestCase):
                 send({'jsonrpc':'2.0', 'method':'notifications/initialized'})
                 send({'jsonrpc':'2.0', 'id':2, 'method':'tools/list'})
                 catalog = response()['result']['tools']
-                expected = {'device_list', 'device_describe', 'device_get_state', 'execution_get'}
+                expected = {'device_list', 'device_describe', 'device_get_state', 'execution_get', 'history_options', 'history_read'}
                 if enabled:
                     expected.update(['command_plan', 'command_execute'])
                 self.assertEqual({tool['name'] for tool in catalog}, expected)

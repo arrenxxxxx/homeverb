@@ -55,7 +55,8 @@ This exits with code 11. Refresh state to inspect the result; do not blindly res
   history. Synthetic evidence and Android archive checks do not establish real
   provider/device acceptance. Modern SID authentication and broader event/control
   coverage remain incomplete; door-lock writes are unavailable. Startup performs
-  no account refresh or network operation.
+  no account refresh or network operation. Explicit `--adapter xiaomi.mijia`
+  also provides read-only CLI/local MCP hosting and bounded historical queries.
 
 - Capability-driven validation, device/component/argument/route-scoped low-risk grants, shared deadlines, cancellation, and timestamped verification.
 - SQLite metadata/cache/execution journal, cross-process device locks, and request-ID replay protection.

@@ -1,5 +1,6 @@
 mod accounts;
 mod grants;
+mod history;
 mod mcp;
 mod terminal;
 
@@ -24,7 +25,7 @@ struct Cli {
         help = "Use the fictional appliance; no real devices are contacted"
     )]
     mock: bool,
-    #[arg(long, global = true, conflicts_with = "mock", value_parser = ["midea.meiju"])]
+    #[arg(long, global = true, conflicts_with = "mock", value_parser = ["midea.meiju", "xiaomi.mijia"])]
     adapter: Option<String>,
     #[arg(
         long,
@@ -39,7 +40,7 @@ struct Cli {
     #[arg(
         long,
         global = true,
-        help = "Local profile; defaults to mock or meiju for the selected adapter"
+        help = "Local profile; defaults to mock, meiju or mijia for the selected adapter"
     )]
     profile: Option<String>,
     #[arg(long, global = true, help = "Fictional fault scenario; Mock only")]
@@ -66,6 +67,11 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
+    /// Inspect or read an exact bounded historical series.
+    History {
+        #[command(subcommand)]
+        command: history::HistoryCommand,
+    },
     Account {
         #[command(subcommand)]
         command: accounts::AccountCommand,
@@ -254,14 +260,19 @@ async fn async_main() -> ExitCode {
 }
 
 async fn run(cli: Cli, cancellation: CancellationToken) -> Result<u8> {
-    let meiju = cli.adapter.is_some();
-    if !cli.mock && !meiju {
+    let meiju = cli.adapter.as_deref() == Some("midea.meiju");
+    let mijia = cli.adapter.as_deref() == Some("xiaomi.mijia");
+    let real = meiju || mijia;
+    if cli.meiju_grants.is_some() && !meiju {
+        return Err(Error::invalid());
+    }
+    if !cli.mock && !real {
         return Err(Error::new(
             "CAPABILITY_UNSUPPORTED",
-            "Select --mock or --adapter midea.meiju explicitly.",
+            "Select --mock, --adapter midea.meiju or --adapter xiaomi.mijia explicitly.",
         ));
     }
-    if meiju && cli.scenario.is_some() {
+    if real && cli.scenario.is_some() {
         return Err(Error::new(
             "CAPABILITY_UNSUPPORTED",
             "Mock scenarios require --mock.",
@@ -289,6 +300,17 @@ async fn run(cli: Cli, cancellation: CancellationToken) -> Result<u8> {
                 command: DeviceCommand::Execute { .. }
             }
     );
+    if mijia && is_write {
+        return Err(Error::new("POLICY_DENIED", "The Mijia CLI is read-only."));
+    }
+    if matches!(cli.command, Commands::History { .. })
+        && (cli.dry_run
+            || cli.connection != "auto"
+            || cli.wait != "verified"
+            || cli.request_id.is_some())
+    {
+        return Err(Error::invalid());
+    }
     let grants = grants::Grants::load(cli.meiju_grants.as_deref())?;
     if meiju && is_write && grants.is_empty() {
         return Err(Error::new(
@@ -307,7 +329,7 @@ async fn run(cli: Cli, cancellation: CancellationToken) -> Result<u8> {
         ));
     }
     if matches!(cli.command, Commands::Account { .. })
-        && (!meiju
+        && (!real
             || cli.dry_run
             || cli.connection != "auto"
             || cli.wait != "verified"
@@ -315,10 +337,13 @@ async fn run(cli: Cli, cancellation: CancellationToken) -> Result<u8> {
     {
         return Err(Error::invalid());
     }
-    let profile = cli
-        .profile
-        .as_deref()
-        .unwrap_or(if meiju { "meiju" } else { "mock" });
+    let profile = cli.profile.as_deref().unwrap_or(if meiju {
+        "meiju"
+    } else if mijia {
+        "mijia"
+    } else {
+        "mock"
+    });
     if profile.is_empty()
         || profile.len() > 64
         || !profile
@@ -362,9 +387,19 @@ async fn run(cli: Cli, cancellation: CancellationToken) -> Result<u8> {
     }
     .join(profile);
     if let Commands::Account { command } = cli.command {
-        return accounts::run(&directory, command, timeout_ms, cancellation, &grants).await;
+        return accounts::run(
+            &directory,
+            command,
+            timeout_ms,
+            cancellation,
+            &grants,
+            mijia,
+        )
+        .await;
     }
-    let core = if meiju {
+    let core = if mijia {
+        homeverb_host::open_mijia_read_only(&directory)?
+    } else if meiju {
         homeverb_host::open_meiju_with_grants(&directory, grants.controls())?
     } else {
         homeverb_host::open_mock(&directory, scenario, !is_mcp)?
@@ -499,6 +534,7 @@ async fn run(cli: Cli, cancellation: CancellationToken) -> Result<u8> {
         ));
     }
     let query: Result<Value> = match cli.command {
+        Commands::History { command } => history::run(&core, command, &operation).await,
         Commands::Device { command } => match command {
             DeviceCommand::List => core.list().map(|v| json!(v)),
             DeviceCommand::Cards => core.list_device_cards().map(|v| json!(v)),
@@ -578,7 +614,8 @@ fn error_exit(error: &Error) -> u8 {
         | "SECRET_STORE_LOCKED"
         | "INPUT_UNAVAILABLE"
         | "ACCOUNT_SESSION_UNCONFIRMED"
-        | "MIDEA_INVENTORY_REQUIRED" => 3,
+        | "MIDEA_INVENTORY_REQUIRED"
+        | "MIJIA_AUTH_CHALLENGE_REQUIRED" => 3,
         "DEVICE_NOT_FOUND"
         | "REQUEST_NOT_FOUND"
         | "DEVICE_IDENTITY_CONFLICT"
@@ -589,8 +626,10 @@ fn error_exit(error: &Error) -> u8 {
         | "ACCOUNT_IDENTITY_CONFLICT"
         | "ACCOUNT_REMOVAL_UNSUPPORTED"
         | "AUTH_FLOW_UNSUPPORTED"
-        | "MIDEA_DEVICE_NOT_LISTED" => 4,
-        "LAN_UNREACHABLE" | "CLOUD_UNREACHABLE" | "DEADLINE_EXCEEDED" => 5,
+        | "MIDEA_DEVICE_NOT_LISTED"
+        | "MIJIA_DEVICE_NOT_LISTED"
+        | "MIJIA_SPEC_UNAVAILABLE" => 4,
+        "LAN_UNREACHABLE" | "CLOUD_UNREACHABLE" | "DEADLINE_EXCEEDED" | "MIJIA_REQUEST_FAILED" => 5,
         "POLICY_DENIED" => 6,
         "RESOURCE_BUSY"
         | "MIDEA_CONFLICT_LIMIT"
@@ -599,7 +638,7 @@ fn error_exit(error: &Error) -> u8 {
         | "SECRET_STORE_CONFLICT"
         | "ACCOUNT_SCOPE_CHANGED"
         | "ACCOUNT_REMOVAL_PENDING" => 7,
-        "MIDEA_INVENTORY_PARTIAL" => 13,
+        "MIDEA_INVENTORY_PARTIAL" | "MIJIA_INVENTORY_PARTIAL" => 13,
         "CANCELLED" => 130,
         _ => 10,
     }
