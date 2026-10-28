@@ -47,13 +47,15 @@ This exits with code 11. Refresh state to inspect the result; do not blindly res
 ## What is implemented
 
 - Experimental [Mijia integration](docs/development/11-mijia.md): protected
-  mainland account login/recovery, bounded account/home enumeration, stable named
-  device cards including unsupported placeholders, and exact MIoT fan/doorbell/
-  lock/battery reads through Core. Native API 1.24 supports Mijia-only and combined
-  account sessions. Flutter supports protected platform sign-in, named partial
-  inventory cards and read-only details. Synthetic evidence only; fan controls
-  and owner-run real-device acceptance remain pending.
-  Door-lock writes are unavailable. No account or network work occurs at startup.
+  mainland login/recovery with explicit captcha and phone/email continuation,
+  partial named inventory and 264 scalar mappings from 17 exact reference specs.
+  Native API 1.33 supports Mijia-only and combined sessions. Flutter exposes
+  reviewed fan/light/purifier controls and an explicit bounded historical-read
+  dialog; only the protected `cuco.plug.v3` daily-energy profile is admitted for
+  history. Synthetic evidence and Android archive checks do not establish real
+  provider/device acceptance. Modern SID authentication and broader event/control
+  coverage remain incomplete; door-lock writes are unavailable. Startup performs
+  no account refresh or network operation.
 
 - Capability-driven validation, device/component/argument/route-scoped low-risk grants, shared deadlines, cancellation, and timestamped verification.
 - SQLite metadata/cache/execution journal, cross-process device locks, and request-ID replay protection.

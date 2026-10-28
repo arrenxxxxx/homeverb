@@ -13,22 +13,22 @@ The experimental integration is implemented under [ADR-0070](../adr/0070-mijia-n
 The owner will perform real-account and device acceptance. Do not access saved
 pilot credentials or contact appliances as part of development tests.
 
-Current callable scope includes trusted Rust account/read APIs and native API 1.33
-Mijia-only/combined sessions with exact fan startup grants, protected user-driven
-captcha continuation and Flutter platform/account/read/control views. Live acceptance remains pending. The Rust adapter
-can explicitly admit protected fan setters under ADR-0078. Historical phase records below distinguish earlier
-protocol-only work from the [protected Core phase](../adr/0076-mijia-protected-core-reads.md).
+Current callable scope includes native API 1.33 Mijia-only/combined sessions,
+protected partial inventory and 264 scalar mappings from 17 pinned reference
+specifications. Exact fan, light and purifier settings have independent protected
+admission and trusted startup grants. Flutter provides account/read/control views,
+explicit captcha and phone/email code continuation, and bounded historical reads
+for the exact `cuco.plug.v3` daily-energy profile. Historical units and incomplete
+record evidence stay separate from live state and execution verification.
 
-The opt-in typed Rust `begin_verification_login` protocol also supports bounded
-phone/email provider-ticket continuation under
-[ADR-0085](../adr/0085-mijia-protected-verification-tickets.md). Opt-in typed account/Host entry points bind its pending state to protected account
-snapshots and a bounded session registry. Existing C/App entry points retain
-captcha-only behavior; API 1.31 also supplies a separate protected prompt C bridge
-under [ADR-0086](../adr/0086-native-protected-verification-prompt.md), pending App/browser integration. The later [ADR-0087](../adr/0087-native-mijia-verification-code-delivery.md)
-typed code-request path uses newly inspected public-page protocol facts and has
-a dedicated C entry point in API 1.32. App adoption, human risk challenges and
-modern SID `mijia` login remain pending. See the
-[protocol evidence](14-mijia-reference-integration.md#protected-phone-and-email-ticket-protocol--october-26-2026).
+Native API 1.32 supplies the user-triggered code-request bridge under
+[ADR-0087](../adr/0087-native-mijia-verification-code-delivery.md); Flutter now
+consumes it without automatic message sends or retries. The API 1.33
+[Android package](../../apps/mobile/verification.md#historical-api-133-android-package--october-28-2026)
+includes this account flow and historical UI. Human risk challenges,
+account-settings confirmation, modern SID `mijia` login, broader event/control
+coverage and owner-run real-provider/device acceptance remain open. Earlier
+phase records below retain their original implementation and evidence scope.
 
 ## Protocol evidence
 

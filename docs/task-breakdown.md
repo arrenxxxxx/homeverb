@@ -1,5 +1,16 @@
 # Implementation status and next tasks
 
+## Historical API 1.33 APK availability -- October 28, 2026
+
+The combined-platform APK from clean source `cdb25bf` includes native historical
+reads and the explicit App dialog. Both ABIs, signature, 27 exports per ABI,
+16 KiB alignment and exact current-AAR matching passed. See the
+[delivery record](../apps/mobile/verification.md#historical-api-133-android-package--october-28-2026).
+No installation, real account/statistics request or appliance write was performed.
+CLI/MCP history presentation, modern SID login, event breadth and remaining
+reference feature coverage are still incomplete.
+
+
 ## App historical readings -- October 27, 2026
 
 The App negotiates API 1.33 and provides a generic device-detail history dialog.

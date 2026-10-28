@@ -4024,3 +4024,31 @@ No provider account/statistics query, message send, appliance write, installatio
 remote CI or publication was performed. This source phase has not rebuilt Android;
 the last recorded APK remains API 1.32. Real history/model/mobile acceptance and
 CLI/MCP presentation remain pending.
+
+
+## Historical API 1.33 Android package -- October 28, 2026
+
+Clean source `cdb25bfbb8e52c4110ba72de0dce713c11b84bcf` produced the combined-platform
+release-mode development APK at
+`apps/mobile/build/delivery/mijia/cdb25bf/homeverb-mijia-0.2.0-cdb25bf.apk`.
+Size: 76,730,854 bytes. SHA-256:
+`792af4fb81e140be47bcc4936c5bd3be88264de32cebf92c6824a7a87b407526`.
+The adjacent `verification.json` records clean source and both native hashes;
+both packaged libraries exactly match the current AAR after normal NDK stripping.
+
+Executed `scripts/build_android_native.py` for arm64-v8a and x86_64 with the
+existing NDK 28.2.13676358 and JDK. Both ABIs passed 27 exports and 16 KiB ELF
+alignment. The initial APK command was not executed because automatic approval
+review exhausted its quota. After its stated retry time, the same authorized
+`fvm flutter build apk --release --target-platform android-arm64,android-x64
+--dart-define=HOMEVERB_ADAPTER=homeverb.platforms` completed successfully.
+`scripts/verify_flutter_apk.py` passed signature, ZIP/Core ELF alignment, API 28
+minimum, disabled backup, absence of the integration-test plugin, complete ABIs
+and exact current-AAR matching. No SDK installation or SDK upgrade was performed.
+
+This package supersedes the API 1.32 artifact for local evaluation of bounded
+historical readings. The 114-test source regression evidence above remains its
+software validation scope; archive verification is not runtime or real-provider
+acceptance. No APK installation, provider/account/statistics request, message send,
+appliance write, upload, push or publication occurred. CLI/MCP history commands,
+modern SID authentication, event breadth and remaining reference coverage stay open.
