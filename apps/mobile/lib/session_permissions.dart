@@ -24,6 +24,7 @@ class SessionPermission {
       }.contains(parameter);
   bool get requiresReferenceSettingApi =>
       startupField == "mijia_setting_grants";
+  bool get requiresOutletApi => startupField == "mijia_outlet_grants";
   String get identity =>
       jsonEncode([device, component, capability, action, value]);
 
@@ -35,7 +36,8 @@ class SessionPermission {
     'device_id': device,
     if (startupField == 'meiju_dishwasher_cycle_grants') 'action': action,
     if (startupField == 'mijia_fan_grants' ||
-        startupField == 'mijia_setting_grants') ...{
+        startupField == 'mijia_setting_grants' ||
+        startupField == 'mijia_outlet_grants') ...{
       'component_id': component,
       'property': parameter,
       'value': value,
@@ -88,6 +90,24 @@ class SessionPermission {
     ): 'favorite_fan_level_1',
   };
 
+  static const _outletSettings = {
+    ('switch-2', 'power', 'set'): ('state', 'elevated'),
+    ('switch-2', 'vendor.xiaomi.mijia.switch', 'set_default_power_on_state_2'):
+        ('default_power_on_state_2', 'elevated'),
+    (
+      'physical_controls_locked-7',
+      'vendor.xiaomi.mijia.physical_controls_locked',
+      'set_physical_controls_locked_1',
+    ): (
+      'physical_controls_locked_1',
+      'elevated',
+    ),
+    ('indicator_light-13', 'vendor.xiaomi.mijia.indicator_light', 'set_on_1'): (
+      'on_1',
+      'low',
+    ),
+  };
+
   static List<SessionPermission> choices(
     Map<String, dynamic> inspection, {
     bool trustedApproval = false,
@@ -136,7 +156,15 @@ class SessionPermission {
             option['capability'],
             option['action'],
           )];
-      final mapping = settingParameter != null
+      final outlet =
+          _outletSettings[(component, option['capability'], option['action'])];
+      // The shared physical-lock identifier uses separate risk and startup families.
+      final isOutlet =
+          outlet != null &&
+          !(settingParameter != null && option['definition']?['risk'] == 'low');
+      final mapping = isOutlet
+          ? ('mijia_outlet_grants', outlet.$1)
+          : settingParameter != null
           ? ('mijia_setting_grants', settingParameter)
           : fanComponent
           ? (fanParameter == null ? null : ('mijia_fan_grants', fanParameter))
@@ -147,11 +175,25 @@ class SessionPermission {
                     ? ('meiju_ac_feature_grants', featureParameter)
                     : null);
       final definition = option['definition'] as Map?;
+      final risk = definition?['risk'];
       if (mapping == null ||
-          (component != 'main' && !fanComponent && settingParameter == null) ||
-          definition?['risk'] != 'low' ||
+          (component != 'main' &&
+              !fanComponent &&
+              settingParameter == null &&
+              !isOutlet) ||
+          (isOutlet
+              ? risk != outlet.$2 ||
+                    (outlet.$2 == 'elevated' && !trustedApproval)
+              : risk != 'low') ||
           definition?['idempotency'] != 'set_value' ||
           !(definition?['transports'] as List? ?? []).contains('cloud'))
+        continue;
+      if (isOutlet &&
+          (definition?['transports'] is! List ||
+              (definition!['transports'] as List).length != 1 ||
+              definition['atomic'] != false ||
+              definition['independent_fields'] != false ||
+              definition['verification'] != 'unavailable'))
         continue;
       final parameters = definition?['parameters'] as Map?;
       final properties = parameters?['properties'] as Map?;
@@ -161,6 +203,12 @@ class SessionPermission {
           (parameters?['required'] as List? ?? []).any((p) => p != mapping.$2))
         continue;
       final schema = properties![mapping.$2] as Map;
+      if (isOutlet &&
+          schema['type'] !=
+              (mapping.$2 == 'default_power_on_state_2'
+                  ? 'integer'
+                  : 'boolean'))
+        continue;
       if (fanComponent &&
           (const {
                 'state',
@@ -196,6 +244,10 @@ class SessionPermission {
           ))
         continue;
       bool valid(Object value) {
+        if (isOutlet &&
+            mapping.$2 == 'default_power_on_state_2' &&
+            !const [0, 1, 2].contains(value))
+          return false;
         if (!(switch (schema['type']) {
           'boolean' => value is bool,
           'string' => value is String,

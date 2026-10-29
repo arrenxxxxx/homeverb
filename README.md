@@ -49,8 +49,8 @@ This exits with code 11. Refresh state to inspect the result; do not blindly res
 - Experimental [Mijia integration](docs/development/11-mijia.md): protected
   mainland login/recovery with explicit captcha and phone/email continuation,
   partial named inventory and 264 scalar mappings from 17 exact reference specs.
-  Native API 1.33 supports Mijia-only and combined sessions. Flutter exposes
-  reviewed fan/light/purifier controls and an explicit bounded historical-read
+  Native API 1.34 adds independently granted exact outlet controls and supports Mijia-only and combined sessions. Flutter exposes
+  reviewed fan/light/purifier/outlet controls and an explicit bounded historical-read
   dialog; only the protected `cuco.plug.v3` daily-energy profile is admitted for
   history. Synthetic evidence and Android archive checks do not establish real
   provider/device acceptance. Modern SID authentication and broader event/control

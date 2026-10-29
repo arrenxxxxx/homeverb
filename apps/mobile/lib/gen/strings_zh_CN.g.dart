@@ -1839,4 +1839,12 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get historyLimit => '\u5df2\u8fbe\u5230\u8bb0\u5f55\u6570\u91cf\u4e0a\u9650\uff0c\u53ef\u80fd\u8fd8\u6709\u5176\u4ed6\u8bb0\u5f55\u3002';
 	@override String get historyEmpty => '\u6b64\u65f6\u95f4\u8303\u56f4\u672a\u8fd4\u56de\u6709\u6548\u8bb0\u5f55\u3002';
 	@override String historySource({required Object source}) => '\u6765\u6e90\uff1a${source}';
+	@override String componentSwitch2PowerSetConfirm({required Object device, required Object state}) => '\u5c06 ${device} \u7684\u7535\u6e90\u8bbe\u4e3a${state}\uff1f\u8fd9\u53ef\u80fd\u542f\u52a8\u6216\u505c\u6b62\u63d2\u5ea7\u8fde\u63a5\u7684\u7535\u5668\u3002';
+	@override String vendorXiaomiMijiaSwitchSetDefaultPowerOnState2Confirm({required Object device, required Object target}) => '\u5c06 ${device} \u7684\u65ad\u7535\u6062\u590d\u4ee3\u7801\u8bbe\u4e3a ${target}\uff1f\u8fd9\u53ef\u80fd\u5f71\u54cd\u6765\u7535\u540e\u6240\u8fde\u63a5\u7684\u7535\u5668\u662f\u5426\u91cd\u65b0\u542f\u52a8\u3002';
+	@override String vendorXiaomiMijiaPhysicalControlsLockedSetPhysicalControlsLocked1Confirm({required Object device, required Object target}) => '\u5c06 ${device} \u7684\u5b9e\u4f53\u6309\u952e\u9501\u5b9a\u8bbe\u4e3a${target}\uff1f\u9501\u5b9a\u540e\u53ef\u80fd\u65e0\u6cd5\u901a\u8fc7\u672c\u673a\u6309\u952e\u64cd\u4f5c\u3002';
+	@override String get mobileOutletSettingsRequireNativeApi134 => '\u63d2\u5ea7\u8bbe\u7f6e\u9700\u8981\u539f\u751f\u63a5\u53e3 1.34\u3002';
+	@override String get powerStateTrue => '\u5f00\u542f';
+	@override String get powerStateFalse => '\u5173\u95ed';
+	@override String get vendorXiaomiMijiaPhysicalControlsLockedPhysicalControlsLocked1True => '\u5df2\u9501\u5b9a';
+	@override String get vendorXiaomiMijiaPhysicalControlsLockedPhysicalControlsLocked1False => '\u672a\u9501\u5b9a';
 }

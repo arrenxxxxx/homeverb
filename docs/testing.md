@@ -592,3 +592,16 @@ targets, duplicate/wrong-family/invalid-scope refusal before profile creation,
 local inspection before grants and trusted preview lifecycle, one-use execution
 and unknown outcomes. Mijia adapter tests also check both directions of overlapping
 purifier/outlet grant isolation. All accounts and transports are fictional.
+
+
+### App exact outlet checks
+
+From `apps/mobile`, run `fvm flutter test test/mijia_outlet_test.dart`. Fixtures
+cover all nine exact targets, separate purifier/outlet startup fields, unexpected
+risk/schema/route refusal, API 1.33 refusal before session replacement, and actual
+FFI negotiation with a fictional old C library before transmitting the additive
+startup field. Both current native platform modes open with fictional grants.
+Bilingual narrow enlarged-text reviews name the consequential effects, while
+forms require explicit target and cloud selection before preparation. Opening a
+device sends no control or approval. Existing `approval_test.dart` covers actual
+preview ownership, lifecycle invalidation and lost-reply receipt lookup.

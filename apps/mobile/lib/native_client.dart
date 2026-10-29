@@ -359,10 +359,16 @@ class NativeClient
         'This host cannot configure real controls.',
       );
     }
-    final minimumReferenceApi =
-        permissions.any((p) => p.requiresReferenceSettingApi) ? 30 : 29;
+    final minimumReferenceApi = permissions.any((p) => p.requiresOutletApi)
+        ? 34
+        : permissions.any((p) => p.requiresReferenceSettingApi)
+        ? 30
+        : 29;
     if (permissions.any(
-      (p) => p.requiresReferenceFanApi || p.requiresReferenceSettingApi,
+      (p) =>
+          p.requiresOutletApi ||
+          p.requiresReferenceFanApi ||
+          p.requiresReferenceSettingApi,
     )) {
       // Negotiate with a read-only host before passing additive startup fields.
       final probe = await open(
@@ -416,6 +422,13 @@ class NativeClient
         throw NativeFailure(
           'API_UPGRADE_REQUIRED',
           'Mijia requires native API 1.27 or later.',
+        );
+      }
+      if (permissions.any((p) => p.requiresOutletApi) &&
+          !client.apiAtLeast(34)) {
+        throw NativeFailure(
+          'API_UPGRADE_REQUIRED',
+          'Outlet settings require native API 1.34.',
         );
       }
       if (permissions.any((p) => p.requiresReferenceSettingApi) &&

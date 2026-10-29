@@ -22,8 +22,8 @@ String? translateSource(
   "Requested: {value}" => t.statePendingTarget(
     value: args["value"] ?? "{value}",
   ),
-  "On" => t.powerOn,
-  "Off" => t.vendorMideaAcBreezeless0,
+  "On" => t.powerStateTrue,
+  "Off" => t.powerStateFalse,
   "Target temperature" => t.climateTargetTemperature,
   "Mode" => t.vendorMideaAcMode,
   "Apply" => t.actionApply,
@@ -2257,6 +2257,27 @@ String? translateSource(
   "The record limit was reached. More records may exist." => t.historyLimit,
   "No valid records were returned for this range." => t.historyEmpty,
   "Source: {source}" => t.historySource(source: args["source"] ?? "{source}"),
+  "Set {device} power to {state}? This can start or stop the appliance connected to the outlet." =>
+    t.componentSwitch2PowerSetConfirm(
+      device: args["device"] ?? "{device}",
+      state: args["state"] ?? "{state}",
+    ),
+  "Set {device} power-loss recovery code to {target}? This can affect whether the connected appliance restarts after power returns." =>
+    t.vendorXiaomiMijiaSwitchSetDefaultPowerOnState2Confirm(
+      device: args["device"] ?? "{device}",
+      target: args["target"] ?? "{target}",
+    ),
+  "Set {device} physical-control lock to {target}? Locking can prevent operation using the local buttons." =>
+    t.vendorXiaomiMijiaPhysicalControlsLockedSetPhysicalControlsLocked1Confirm(
+      device: args["device"] ?? "{device}",
+      target: args["target"] ?? "{target}",
+    ),
+  "Outlet settings require native API 1.34." =>
+    t.mobileOutletSettingsRequireNativeApi134,
+  "Locked" =>
+    t.vendorXiaomiMijiaPhysicalControlsLockedPhysicalControlsLocked1True,
+  "Unlocked" =>
+    t.vendorXiaomiMijiaPhysicalControlsLockedPhysicalControlsLocked1False,
   _ => null,
 };
 
@@ -4560,5 +4581,19 @@ String? sourceForKey(String key) => switch (key) {
   "history.limit" => "The record limit was reached. More records may exist.",
   "history.empty" => "No valid records were returned for this range.",
   "history.source" => "Source: {source}",
+  "component.switch_2.power.set.confirm" =>
+    "Set {device} power to {state}? This can start or stop the appliance connected to the outlet.",
+  "vendor.xiaomi.mijia.switch.set_default_power_on_state_2.confirm" =>
+    "Set {device} power-loss recovery code to {target}? This can affect whether the connected appliance restarts after power returns.",
+  "vendor.xiaomi.mijia.physical_controls_locked.set_physical_controls_locked_1.confirm" =>
+    "Set {device} physical-control lock to {target}? Locking can prevent operation using the local buttons.",
+  "mobile.outletSettingsRequireNativeApi134" =>
+    "Outlet settings require native API 1.34.",
+  "power.state.true" => "On",
+  "power.state.false" => "Off",
+  "vendor.xiaomi.mijia.physical_controls_locked.physical_controls_locked_1.true" =>
+    "Locked",
+  "vendor.xiaomi.mijia.physical_controls_locked.physical_controls_locked_1.false" =>
+    "Unlocked",
   _ => null,
 };

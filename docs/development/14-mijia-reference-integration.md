@@ -1078,3 +1078,32 @@ and trusted approval fixtures. The built C ABI verifier passed 36 methods and
 57 examples, including all nine outlet startup targets and presend refusal.
 Contract validation passed 24 schemas, 68 positive and 881 negative fixtures.
 Documentation/repository checks passed. No live account or appliance was used.
+
+
+## App exact outlet controls -- October 29, 2026
+
+The foreground App now negotiates API 1.34 before sending the new independent
+`mijia_outlet_grants` field. All nine exact targets for power, power-loss recovery,
+physical-control locking and indicator settings are retained. The shared purifier
+lock identifier continues to use its separate low-risk reference-setting family.
+Opening a device inspects protected options and refreshes only its account to
+publish eligible actions; it does not prepare or execute a command.
+
+Elevated outlet forms require explicit target and cloud-route selection, then
+the existing immutable trusted review and actual confirmation. English/Chinese
+copy describes connected-load start/stop, later power restoration and loss of
+local-button operation. Component-scoped presentation labels distinguish switch
+power without model/brand branching in the UI. Recovery codes remain numeric.
+The indicator uses the ordinary low-risk flow. Existing navigation/background/
+session replacement and unknown-receipt handling remain active. The API 1.33 APK
+does not include this phase; new packaging and exact physical acceptance remain
+pending. Modern SID authentication, event breadth and remaining feature gaps
+are unchanged.
+
+Executed App verification: the 12-file affected regression passed 119 tests.
+After the final label and old-library negotiation additions, the three affected
+files passed 25 tests (including 14 outlet cases); Flutter analysis found no
+issues. Seven presentation tests passed. Documentation/repository hygiene and
+diff checks passed. The complete Flutter suite was not claimed: previously
+recorded macOS font/pixel/legacy-click failures remain separate. No real account,
+message, appliance write or phone acceptance was performed.

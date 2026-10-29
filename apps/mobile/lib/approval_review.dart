@@ -32,9 +32,16 @@ class ApprovalReview extends StatelessWidget {
             labels['$capability.${entry.key}.${entry.value}'] ??
             '${entry.value}',
     };
+    if (arguments.length == 1)
+      values['target'] = values[arguments.keys.single]!;
+    final scope = '${command['component_id']}'.replaceAll('-', '_');
+    final scopedAction = 'component.$scope.$action';
     final template = arguments.containsKey('additional')
-        ? labels['$action.confirmAdditional'] ?? labels['$action.confirm']
-        : labels['$action.confirm'];
+        ? labels['$scopedAction.confirmAdditional'] ??
+              labels['$action.confirmAdditional'] ??
+              labels['$scopedAction.confirm'] ??
+              labels['$action.confirm']
+        : labels['$scopedAction.confirm'] ?? labels['$action.confirm'];
     final effects = template == null
         ? null
         : UiMessage(template, {

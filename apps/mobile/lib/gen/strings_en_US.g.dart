@@ -5453,4 +5453,28 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Source: {source}'
 	String historySource({required Object source}) => 'Source: ${source}';
+
+	/// en-US: 'Set {device} power to {state}? This can start or stop the appliance connected to the outlet.'
+	String componentSwitch2PowerSetConfirm({required Object device, required Object state}) => 'Set ${device} power to ${state}? This can start or stop the appliance connected to the outlet.';
+
+	/// en-US: 'Set {device} power-loss recovery code to {target}? This can affect whether the connected appliance restarts after power returns.'
+	String vendorXiaomiMijiaSwitchSetDefaultPowerOnState2Confirm({required Object device, required Object target}) => 'Set ${device} power-loss recovery code to ${target}? This can affect whether the connected appliance restarts after power returns.';
+
+	/// en-US: 'Set {device} physical-control lock to {target}? Locking can prevent operation using the local buttons.'
+	String vendorXiaomiMijiaPhysicalControlsLockedSetPhysicalControlsLocked1Confirm({required Object device, required Object target}) => 'Set ${device} physical-control lock to ${target}? Locking can prevent operation using the local buttons.';
+
+	/// en-US: 'Outlet settings require native API 1.34.'
+	String get mobileOutletSettingsRequireNativeApi134 => 'Outlet settings require native API 1.34.';
+
+	/// en-US: 'On'
+	String get powerStateTrue => 'On';
+
+	/// en-US: 'Off'
+	String get powerStateFalse => 'Off';
+
+	/// en-US: 'Locked'
+	String get vendorXiaomiMijiaPhysicalControlsLockedPhysicalControlsLocked1True => 'Locked';
+
+	/// en-US: 'Unlocked'
+	String get vendorXiaomiMijiaPhysicalControlsLockedPhysicalControlsLocked1False => 'Unlocked';
 }

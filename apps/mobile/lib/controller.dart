@@ -478,6 +478,14 @@ class HomeController extends ChangeNotifier {
       trustedApproval: supportsTrustedApproval,
     );
     if (next.isEmpty) return;
+    if (next.any((p) => p.requiresOutletApi) &&
+        core is NativeSessionClient &&
+        !(core as NativeSessionClient).apiAtLeast(34)) {
+      throw NativeFailure(
+        'API_UPGRADE_REQUIRED',
+        'Outlet settings require native API 1.34.',
+      );
+    }
     if (next.any((p) => p.requiresReferenceSettingApi) &&
         core is NativeSessionClient &&
         !(core as NativeSessionClient).apiAtLeast(30)) {

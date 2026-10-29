@@ -1804,5 +1804,13 @@
   "history.rejected": "已剔除的异常记录：{count}",
   "history.limit": "已达到记录数量上限，可能还有其他记录。",
   "history.empty": "此时间范围未返回有效记录。",
-  "history.source": "来源：{source}"
+  "history.source": "来源：{source}",
+  "component.switch_2.power.set.confirm": "将 {device} 的电源设为{state}？这可能启动或停止插座连接的电器。",
+  "vendor.xiaomi.mijia.switch.set_default_power_on_state_2.confirm": "将 {device} 的断电恢复代码设为 {target}？这可能影响来电后所连接的电器是否重新启动。",
+  "vendor.xiaomi.mijia.physical_controls_locked.set_physical_controls_locked_1.confirm": "将 {device} 的实体按键锁定设为{target}？锁定后可能无法通过本机按键操作。",
+  "mobile.outletSettingsRequireNativeApi134": "插座设置需要原生接口 1.34。",
+  "power.state.true": "开启",
+  "power.state.false": "关闭",
+  "vendor.xiaomi.mijia.physical_controls_locked.physical_controls_locked_1.true": "已锁定",
+  "vendor.xiaomi.mijia.physical_controls_locked.physical_controls_locked_1.false": "未锁定"
 }
