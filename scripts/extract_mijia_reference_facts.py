@@ -35,6 +35,8 @@ def admitted_write(model, siid, piid):
         return siid == 2 and piid in {1, 3, 4, 5, 6, 7, 8, 9}
     if model == 'abhome.light.wy0a01':
         return siid == 2 and piid in {1, 2, 3, 7, 9, 12, 13}
+    if model == 'cuco.plug.v3':
+        return (siid == 2 and piid in {1, 2}) or (siid in {7, 13} and piid == 1)
     if model == 'zhimi.airpurifier.v6':
         return (siid == 2 and piid in {1, 2, 3}) or (siid in {5, 6, 7, 8} and piid == 1)
     return False
@@ -56,7 +58,9 @@ def project():
                 entries.append({'kind': 'property', 'siid': service['iid'], 'iid': prop['iid'],
                                 'name': prop['type'].split(':')[3],
                                 'read_status': reason or 'implemented_exact_scalar_mapping',
-                                'write_status': ('implemented_exact_granted_legacy_property_set'
+                                'write_status': ('implemented_typed_outlet_control'
+                                                 if model['model'] == 'cuco.plug.v3' and admitted_write(model['model'], service['iid'], prop['iid'])
+                                                 else 'implemented_exact_granted_legacy_property_set'
                                                  if admitted_write(model['model'], service['iid'], prop['iid'])
                                                  and 'write' in prop.get('access', [])
                                                  else 'not_admitted_by_reference'),
@@ -78,7 +82,9 @@ def project():
             profiles.append({'model': model['model'], 'spec_type': model['spec_urn'],
                              'source': {'type': model['spec_urn'], 'services': services}})
         ledger.append({'model': model['model'], 'spec_type': model['spec_urn'],
-                       'status': ('exact_scalar_reads_and_granted_fan_settings'
+                       'status': ('exact_scalar_reads_and_typed_outlet_controls'
+                                  if model['model'] == 'cuco.plug.v3'
+                                  else 'exact_scalar_reads_and_granted_fan_settings'
                                   if model['model'] == 'jdjz.fan.2072fc'
                                   else 'exact_scalar_reads_and_granted_reference_settings'
                                   if model['model'] in {'abhome.light.wy0a01', 'zhimi.airpurifier.v6'}

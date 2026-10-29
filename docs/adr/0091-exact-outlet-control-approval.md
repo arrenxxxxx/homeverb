@@ -1,6 +1,6 @@
 # ADR-0091: Exact Mijia outlet control with trusted approval
 
-Status: accepted design; runtime integration pending.
+Status: typed adapter/Core implementation with synthetic tests; native/API/App integration pending.
 Date: October 29, 2026.
 
 ## Evidence and scope

@@ -20,7 +20,10 @@ pub use auth::{
 };
 pub use control::PropertyWrite;
 pub use inventory::{CloudDevice, Inventory, PropertyQuery, PropertyReading};
-pub use spec::{ControlOption, MappedProperty, ModelMapping, SpecIndex, reference_setting_option};
+pub use spec::{
+    ControlOption, MappedProperty, ModelMapping, SpecIndex, outlet_control_option,
+    reference_setting_option,
+};
 pub use statistics::{
     DailyEnergyHistory, DailyEnergyRecord, DailyEnergyWindow, StatisticsCompleteness,
 };

@@ -570,3 +570,14 @@ malformed/oversized request files, query override rejection and MCP tool schemas
 These are fictional tests and never use provider credentials or appliance traffic.
 Current executed result: 11 Rust tests passed; 37 process cases ran with 30 passed
 and seven preexisting platform skips on macOS. See ADR-0090 for remaining acceptance.
+
+
+### Typed exact outlet checks
+
+Run `cargo +1.96.0 test -p homeverb-mijia --offline --locked`. The outlet fixtures
+cover all nine exact targets, separate adapter families, independent grants and
+trusted approval, forged public risk metadata, protected mapping/identity/route
+refusal, invalidated previews, correlated rejection and unknown outcomes without
+replay. Inspection is local and leaves default saved mappings read-only. These
+checks use fictional accounts and transports; native/App rollout and physical
+acceptance are separate gates under ADR-0091.

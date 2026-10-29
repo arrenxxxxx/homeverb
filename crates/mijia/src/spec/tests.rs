@@ -255,7 +255,7 @@ fn exact_reference_catalog_maps_only_reviewed_scalar_reads() {
         );
         assert!(mapping.control_options().iter().all(|o| matches!(
             profile.model.as_str(),
-            "abhome.light.wy0a01" | "zhimi.airpurifier.v6"
+            "abhome.light.wy0a01" | "zhimi.airpurifier.v6" | "cuco.plug.v3"
         ) || (o.component_id.starts_with("fan-")
             && matches!(
                 o.action.as_str(),
@@ -448,22 +448,28 @@ fn reference_fan_controls_preserve_fields_and_accept_only_exact_source_domains()
 
 #[test]
 fn reference_settings_keep_old_mappings_and_require_exact_source() {
-    for model in ["abhome.light.wy0a01", "zhimi.airpurifier.v6"] {
+    for model in [
+        "abhome.light.wy0a01",
+        "zhimi.airpurifier.v6",
+        "cuco.plug.v3",
+    ] {
         let current = ModelMapping::pinned(model, None).unwrap().unwrap();
-        assert_eq!(current.control_options().len(), 7);
+        let outlet = model == "cuco.plug.v3";
+        let count = if outlet { 4 } else { 7 };
+        assert_eq!(current.control_options().len(), count);
         assert!(
             current
-                .controlled_capabilities(true, false)
+                .controlled_capabilities(true, false, false)
                 .iter()
                 .all(|c| c.actions.is_empty())
         );
         assert_eq!(
             current
-                .controlled_capabilities(false, true)
+                .controlled_capabilities(false, !outlet, outlet)
                 .iter()
                 .map(|c| c.actions.len())
                 .sum::<usize>(),
-            7
+            count
         );
         let mut old = current.clone();
         for property in &mut old.properties {
@@ -480,7 +486,7 @@ fn reference_settings_keep_old_mappings_and_require_exact_source() {
             .iter()
             .filter(|p| p.write_domain.is_some())
         {
-            let option = target.control_option().unwrap();
+            let option = current.control_option(target).unwrap();
             for mutation in [
                 "model", "type", "service", "property", "unit", "format", "read", "write", "domain",
             ] {
@@ -554,4 +560,50 @@ fn reference_settings_keep_old_mappings_and_require_exact_source() {
             assert!(forged.validate_saved().is_err());
         }
     }
+}
+
+#[test]
+fn outlet_admission_does_not_publish_other_families() {
+    for model in [
+        "jdjz.fan.2072fc",
+        "abhome.light.wy0a01",
+        "zhimi.airpurifier.v6",
+        "yutai.plug.jdls1",
+    ] {
+        let mapping = ModelMapping::pinned(model, None).unwrap().unwrap();
+        assert!(
+            mapping
+                .controlled_capabilities(false, false, true)
+                .iter()
+                .all(|c| c.actions.is_empty())
+        );
+    }
+    let mapping = ModelMapping::pinned("cuco.plug.v3", None).unwrap().unwrap();
+    assert!(
+        mapping
+            .controlled_capabilities(true, true, false)
+            .iter()
+            .all(|c| c.actions.is_empty())
+    );
+    for (component, property) in [
+        ("switch-2", "state"),
+        ("switch-2", "default_power_on_state_2"),
+        ("physical_controls_locked-7", "physical_controls_locked_1"),
+    ] {
+        assert_eq!(
+            outlet_control_option(component, property)
+                .unwrap()
+                .definition
+                .risk,
+            homeverb_domain::Risk::Elevated
+        );
+    }
+    assert_eq!(
+        outlet_control_option("indicator_light-13", "on_1")
+            .unwrap()
+            .definition
+            .risk,
+        homeverb_domain::Risk::Low
+    );
+    assert!(outlet_control_option("charging_protection-4", "power_2").is_none());
 }

@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "id": "power",
+  "component_id": "switch-2",
+  "revision": 1,
+  "properties": {
+    "state": {
+      "type": "boolean",
+      "readable": true,
+      "writable": true
+    }
+  },
+  "actions": {
+    "set": {
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "state"
+        ],
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "idempotency": "set_value",
+      "risk": "elevated",
+      "atomic": false,
+      "independent_fields": false,
+      "verification": "unavailable"
+    }
+  },
+  "events": {}
+}

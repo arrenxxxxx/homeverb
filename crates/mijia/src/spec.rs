@@ -343,7 +343,9 @@ impl ModelMapping {
         let expected = Self::decode(&self.model, &self.spec_type, &bytes)?;
         let mut previous_reference = expected.clone();
         for property in &mut previous_reference.properties {
-            if reference_setting(&self.model, property.siid, property.piid) {
+            if reference_setting(&self.model, property.siid, property.piid)
+                || outlet_setting(&self.model, property.siid, property.piid)
+            {
                 property.write_domain = None;
             }
         }
@@ -465,16 +467,44 @@ impl ModelMapping {
     pub(crate) fn control_options(&self) -> Vec<ControlOption> {
         self.properties
             .iter()
-            .filter_map(MappedProperty::control_option)
+            .filter_map(|property| self.control_option(property))
             .collect()
     }
-    pub(crate) fn controlled_capabilities(&self, fan: bool, settings: bool) -> Vec<Capability> {
+    pub(crate) fn control_option(&self, property: &MappedProperty) -> Option<ControlOption> {
+        let mut option = property.control_option()?;
+        if outlet_setting(&self.model, property.siid, property.piid) && property.siid != 13 {
+            option.definition.risk = homeverb_domain::Risk::Elevated;
+        }
+        Some(option)
+    }
+    pub(crate) fn is_outlet(&self) -> bool {
+        self.model == OUTLET_MODEL
+    }
+    pub(crate) fn control_family_enabled(
+        &self,
+        property: &MappedProperty,
+        fan: bool,
+        settings: bool,
+        outlet: bool,
+    ) -> bool {
+        if self.is_outlet() {
+            outlet
+        } else {
+            property.control_family_enabled(fan, settings)
+        }
+    }
+    pub(crate) fn controlled_capabilities(
+        &self,
+        fan: bool,
+        settings: bool,
+        outlet: bool,
+    ) -> Vec<Capability> {
         let mut capabilities = self.capabilities();
         for property in &self.properties {
-            if !property.control_family_enabled(fan, settings) {
+            if !self.control_family_enabled(property, fan, settings, outlet) {
                 continue;
             }
-            if let Some(option) = property.control_option() {
+            if let Some(option) = self.control_option(property) {
                 let capability = capabilities
                     .iter_mut()
                     .find(|c| {
@@ -697,7 +727,9 @@ fn append_reference(
                 && property.kind.split(':').nth(4) == Some("00000006")
                 && name == "on"
                 && property.format == "bool";
-            let write_domain = if reference_setting(model, service.iid, property.iid) {
+            let write_domain = if reference_setting(model, service.iid, property.iid)
+                || outlet_setting(model, service.iid, property.iid)
+            {
                 exact_reference_domain(&property, known)?
             } else {
                 reference_fan_domain(model, kind, service.iid, &service.kind, &property, known)?
@@ -791,6 +823,30 @@ pub fn reference_setting_option(component: &str, property: &str) -> Option<&'sta
         .find(|o| {
             o.component_id == component
                 && o.definition.parameters["properties"]
+                    .get(property)
+                    .is_some()
+        })
+}
+
+pub(crate) const OUTLET_MODEL: &str = "cuco.plug.v3";
+fn outlet_setting(model: &str, siid: u32, piid: u32) -> bool {
+    model == OUTLET_MODEL && matches!((siid, piid), (2, 1 | 2) | (7 | 13, 1))
+}
+
+/// Pinned shape for separately reviewed outlet grants. Not runtime authorization.
+pub fn outlet_control_option(component: &str, property: &str) -> Option<&'static ControlOption> {
+    static OPTIONS: std::sync::OnceLock<Vec<ControlOption>> = std::sync::OnceLock::new();
+    OPTIONS
+        .get_or_init(|| {
+            ModelMapping::pinned(OUTLET_MODEL, None)
+                .expect("reviewed outlet")
+                .expect("pinned outlet")
+                .control_options()
+        })
+        .iter()
+        .find(|option| {
+            option.component_id == component
+                && option.definition.parameters["properties"]
                     .get(property)
                     .is_some()
         })

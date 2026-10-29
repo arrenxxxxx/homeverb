@@ -1020,3 +1020,30 @@ This is an accepted implementation design, not a callable control feature. Nativ
 API remains 1.33 until the new grants, protected runtime, schemas and inspection
 scope are implemented. No physical result, event support or complete parity is
 claimed. The current ledger deliberately retains the pending outlet disposition.
+
+
+## Typed exact outlet controls -- October 29, 2026
+
+[ADR-0091](../adr/0091-exact-outlet-control-approval.md) now has a separate typed Rust
+adapter opt-in for four exact `cuco.plug.v3` settings. Power, power-loss recovery
+and physical-control locking require Core grants plus actual trusted approval;
+indicator control is low-risk. The adapter re-derives risk from protected evidence
+and refuses forged low-risk metadata independently of Core. Single-property
+requests retain exact values, accepted/unknown outcomes and no automatic replay.
+
+Existing API 1.33 inspection/default account retrieval retain their prior scopes
+and read-only outlet derivations. An explicit typed inspection can derive outlet
+options locally without enabling execution. Only the typed outlet-enabled refresh
+persists new control derivations; older implementations may reject those newer
+protected contents, so keep the originating implementation with that profile.
+SQLite 5 and payload envelope 1 remain unchanged. Native outlet startup grants,
+API 1.34/schema rollout, App confirmation, APK and real-device acceptance are
+still pending; the API 1.33 APK does not acquire outlet controls from this phase.
+
+Executed verification: 124 Mijia unit tests and seven documentation tests passed
+as part of `cargo +1.96.0 test --workspace --exclude homeverb-midea --offline
+--locked` (474 passed, one ignored). The excluded Meiju package has 14 previously
+recorded macOS LAN failures from unassigned loopback aliases; this is not a full
+workspace pass. Workspace/all-target Clippy with warnings denied passed. Reference
+facts, documentation, repository hygiene and contract validation passed (24 schemas,
+67 positive fixtures, 798 negative fixtures). No real account or appliance was used.

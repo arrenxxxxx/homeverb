@@ -1156,3 +1156,6 @@ mod verification_login;
 
 #[path = "tests/history.rs"]
 mod history;
+
+#[path = "tests/outlet.rs"]
+mod outlet;

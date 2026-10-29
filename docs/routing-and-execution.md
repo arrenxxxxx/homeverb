@@ -623,3 +623,16 @@ admission after I/O and rejects late results. Public native/App integration is
 pending; no ordinary Host method is added by the typed Core phase.
 No route fallback, retry, cache write, execution receipt, write verification or
 new write authority follows from a historical query. Missing dates remain absent.
+
+
+## Exact outlet approval enforcement
+
+Under ADR-0091, typed Rust hosts may independently opt into the four reviewed
+`cuco.plug.v3` settings. Protected mapping re-derivation determines risk and wire
+identity. Power, recovery state and physical controls require Core's trusted
+approval marker even when public action metadata claims low risk. Exact grants
+alone cannot send those operations. The indicator is independently low-risk.
+Ordinary execution never consumes an approval from JSON; callers use ADR-0042's
+immutable typed preview after actual user consent. Cancelling after send leaves
+an unknown result and the original request ID; no automatic retry or route fallback.
+Current native API 1.33 and CLI/MCP keep their previous read-only outlet behavior.

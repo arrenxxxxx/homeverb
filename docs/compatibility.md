@@ -1,6 +1,26 @@
 # Platform and device compatibility matrix
 
 
+
+## Typed exact outlet controls -- October 29, 2026
+
+[ADR-0091](adr/0091-exact-outlet-control-approval.md) now has a separate typed Rust
+adapter opt-in for four exact `cuco.plug.v3` settings. Power, power-loss recovery
+and physical-control locking require Core grants plus actual trusted approval;
+indicator control is low-risk. The adapter re-derives risk from protected evidence
+and refuses forged low-risk metadata independently of Core. Single-property
+requests retain exact values, accepted/unknown outcomes and no automatic replay.
+
+Existing API 1.33 inspection/default account retrieval retain their prior scopes
+and read-only outlet derivations. An explicit typed inspection can derive outlet
+options locally without enabling execution. Only the typed outlet-enabled refresh
+persists new control derivations; older implementations may reject those newer
+protected contents, so keep the originating implementation with that profile.
+SQLite 5 and payload envelope 1 remain unchanged. Native outlet startup grants,
+API 1.34/schema rollout, App confirmation, APK and real-device acceptance are
+still pending; the API 1.33 APK does not acquire outlet controls from this phase.
+
+
 ## Mijia CLI and historical tools -- October 29, 2026
 
 [ADR-0090](adr/0090-mijia-cli-and-historical-tools.md) adds explicit read-only

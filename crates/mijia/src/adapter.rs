@@ -58,6 +58,7 @@ pub struct MijiaAdapter {
     clock: Arc<dyn Clock>,
     fan_controls: bool,
     reference_controls: bool,
+    outlet_controls: bool,
 }
 impl MijiaAdapter {
     pub fn new(
@@ -72,6 +73,7 @@ impl MijiaAdapter {
             clock,
             fan_controls: false,
             reference_controls: false,
+            outlet_controls: false,
         }
     }
 
@@ -88,12 +90,42 @@ impl MijiaAdapter {
         self
     }
 
+    /// Separate trusted composition for the exact outlet. Core grants and actual
+    /// trusted approval for elevated targets remain mandatory at every execution.
+    pub fn with_outlet_controls(mut self) -> Self {
+        self.outlet_controls = true;
+        self
+    }
+
     /// Inspect protected model evidence locally; this never enables a control.
     pub async fn inspect_control_options(
         &self,
         device: &Device,
         connection: &Connection,
         operation: &Operation,
+    ) -> Result<Vec<crate::ControlOption>> {
+        self.inspect_options(device, connection, operation, false)
+            .await
+    }
+
+    /// Typed opt-in inspection for the forthcoming outlet host contract. Existing
+    /// native API 1.33 inspection deliberately retains its previous scopes.
+    pub async fn inspect_control_options_with_outlets(
+        &self,
+        device: &Device,
+        connection: &Connection,
+        operation: &Operation,
+    ) -> Result<Vec<crate::ControlOption>> {
+        self.inspect_options(device, connection, operation, true)
+            .await
+    }
+
+    async fn inspect_options(
+        &self,
+        device: &Device,
+        connection: &Connection,
+        operation: &Operation,
+        include_outlets: bool,
     ) -> Result<Vec<crate::ControlOption>> {
         let id = connection
             .account_id
@@ -112,11 +144,14 @@ impl MijiaAdapter {
         if !binding.listed {
             return Err(unsupported());
         }
-        Ok(binding
-            .mapping
-            .as_ref()
-            .map(|m| m.control_options())
-            .unwrap_or_default())
+        match binding.mapping.as_ref() {
+            Some(mapping) if mapping.is_outlet() && include_outlets => {
+                Ok(mapping.upgraded()?.control_options())
+            }
+            Some(mapping) if mapping.is_outlet() => Ok(Vec::new()),
+            Some(mapping) => Ok(mapping.control_options()),
+            None => Ok(Vec::new()),
+        }
     }
 
     pub async fn accounts(&self, operation: &Operation) -> Result<Vec<AccountRecord>> {
@@ -499,6 +534,16 @@ impl MijiaAdapter {
                     binding.mapping = mapping;
                 }
             }
+            // Default/native API 1.33 retrieval preserves the previous read-only
+            // outlet derivation. Only the explicit typed outlet opt-in upgrades it.
+            if !self.outlet_controls
+                && let Some(mapping) = &mut binding.mapping
+                && mapping.is_outlet()
+            {
+                for field in &mut mapping.properties {
+                    field.write_domain = None;
+                }
+            }
             selected.push(position);
         }
         // This provider's current enumerator never proves complete membership. Missing
@@ -515,6 +560,7 @@ impl MijiaAdapter {
                     account.lease.record().id,
                     self.fan_controls,
                     self.reference_controls,
+                    self.outlet_controls,
                 )
             })
             .collect();
@@ -565,11 +611,17 @@ fn unsupported() -> Error {
     )
 }
 
-fn descriptor(binding: &Binding, account: Uuid, fan: bool, settings: bool) -> Descriptor {
+fn descriptor(
+    binding: &Binding,
+    account: Uuid,
+    fan: bool,
+    settings: bool,
+    outlet: bool,
+) -> Descriptor {
     let mut capabilities = binding
         .mapping
         .as_ref()
-        .map(|m| m.controlled_capabilities(fan, settings))
+        .map(|m| m.controlled_capabilities(fan, settings, outlet))
         .unwrap_or_default();
     let supported = !capabilities.is_empty();
     if capabilities.is_empty() {
@@ -647,7 +699,7 @@ fn validate_device(
     device: &Device,
     connection: &Connection,
 ) -> Result<()> {
-    let expected = descriptor(binding, id, false, false);
+    let expected = descriptor(binding, id, false, false, false);
     if device.model != expected.device.model
         || device.support_status != expected.device.support_status
         || serde_json::to_value(&device.components).map_err(|_| conflict())?
@@ -789,7 +841,7 @@ impl Adapter for MijiaAdapter {
         progress: WriteProgress,
         operation: &Operation,
     ) -> Result<AdapterOutcome> {
-        if !self.fan_controls && !self.reference_controls {
+        if !self.fan_controls && !self.reference_controls && !self.outlet_controls {
             return Err(unsupported());
         }
         operation
@@ -809,7 +861,7 @@ impl Adapter for MijiaAdapter {
                     .iter()
                     .find(|b| b.device_id.to_string() == command.device_id)
                     .ok_or_else(conflict)?;
-                if descriptor(binding, id, false, false)
+                if descriptor(binding, id, false, false, false)
                     .device
                     .connections
                     .first()
@@ -826,15 +878,28 @@ impl Adapter for MijiaAdapter {
                 let (field, option) = mapping
                     .properties
                     .iter()
-                    .filter_map(|p| p.control_option().map(|o| (p, o)))
+                    .filter_map(|p| mapping.control_option(p).map(|o| (p, o)))
                     .find(|(_, o)| {
                         o.component_id == command.component_id
                             && o.capability == command.capability
                             && o.action == command.action
                     })
                     .ok_or_else(unsupported)?;
-                if !field.control_family_enabled(self.fan_controls, self.reference_controls) {
+                if !mapping.control_family_enabled(
+                    field,
+                    self.fan_controls,
+                    self.reference_controls,
+                    self.outlet_controls,
+                ) {
                     return Err(unsupported());
+                }
+                if option.definition.risk != homeverb_domain::Risk::Low
+                    && !validated.has_user_approval()
+                {
+                    return Err(Error::new(
+                        "POLICY_DENIED",
+                        "This outlet setting requires trusted user approval.",
+                    ));
                 }
                 option.definition.validate_arguments(&command.arguments)?;
                 account

@@ -661,3 +661,11 @@ inventory and sanitized issues. Historical malformed input exits 2; unsupported
 series exits 4; deadline/cancellation retain exit 5/130. `INVALID_HISTORY` remains
 an error (exit 10), never an empty successful result or implicit retry. CLI/MCP
 queries preserve shared Core errors and introduce no execution outcome changes.
+
+
+The ADR-0091 typed outlet adapter returns `POLICY_DENIED` before any send when
+protected elevated semantics lack Core's trusted approval marker. A forged public
+low-risk action does not change this result. Missing exact mapping/opt-in returns
+unsupported; tampered protected derivations retain account-confirmation refusal.
+Existing `accepted`, `failed` and `unknown` receipts retain their meaning, and
+approved execution cannot turn an uncertain provider reply into verification.

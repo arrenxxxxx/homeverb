@@ -21,6 +21,7 @@ def checked_formats() -> FormatChecker:
 def main() -> int:
     formats = checked_formats()
     pairs = [
+        ("capability", "capability.mijia-outlet-power"), ("command", "command.mijia-outlet-power"),
         ("capability", "capability.mijia-light"), ("command", "command.mijia-light"),
         ("native-open", "native-open.mijia-settings"),
         ("native-open", "native-open.mijia-reference-fan"),
@@ -153,6 +154,15 @@ def main() -> int:
     mijia_fan_validator = Draft202012Validator(load("examples/capability.mijia-fan.json")["actions"]["set_level"]["parameters"])
     mijia_fan_validator.validate(load("examples/command.mijia-fan.json")["arguments"])
     negative = []
+    outlet_capability = load("examples/capability.mijia-outlet-power.json")
+    outlet_action = outlet_capability["actions"]["set"]
+    assert outlet_action["risk"] == "elevated"
+    outlet_parameters = Draft202012Validator(outlet_action["parameters"])
+    outlet_command = load("examples/command.mijia-outlet-power.json")
+    outlet_parameters.validate(outlet_command["arguments"])
+    for args in [{"state":1}, {"state":"true"}, {"state":None}, {}, {"state":True,"confirmed":True}, {"state":True,"piid":1}]:
+        negative.append(("closed outlet arguments", outlet_parameters, args))
+
     settings_startup = load("examples/native-open.mijia-settings.json")
     for entry in settings_startup["mijia_setting_grants"]:
         for value in [None, "true", {}, [], -1, 99999, 1.5]:
