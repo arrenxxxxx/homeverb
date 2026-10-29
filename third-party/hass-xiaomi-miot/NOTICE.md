@@ -27,3 +27,9 @@ request facts from `core/device.py`, and decoder evidence from `core/utils.py`,
 operations, explicit historical scope and unproven completeness, rather than HA
 scheduling, calendar totals or restored state. See
 [ADR-0088](../../docs/adr/0088-mijia-exact-daily-energy-history.md).
+
+On October 29, 2026, the same pinned revision's `switch.py`, `core/device.py` and
+`core/device_customizes.py` were inspected for exact outlet single-property
+control behavior. BLE/event examples in `binary_sensor.py` and `sensor.py` were
+also reviewed without transferring their keys to unrelated models. These are
+protocol/design inputs for ADR-0091, not copied source or physical acceptance.

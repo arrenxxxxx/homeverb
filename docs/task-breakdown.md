@@ -1,6 +1,16 @@
 # Implementation status and next tasks
 
 
+## Exact outlet control design -- October 29, 2026
+
+[ADR-0091](adr/0091-exact-outlet-control-approval.md) defines the next implementation
+phase for `cuco.plug.v3`: independent startup grants, three elevated settings with
+actual trusted confirmation, and low-risk indicator control. Runtime/native/App
+work is pending; API 1.33 and the current APK do not yet provide these controls.
+The event audit found no exact current-reference lock/cateye history keys in the
+reviewed community examples. Those gaps remain open, without cross-model inference.
+
+
 ## Mijia CLI and historical tools -- October 29, 2026
 
 [ADR-0090](adr/0090-mijia-cli-and-historical-tools.md) adds explicit read-only

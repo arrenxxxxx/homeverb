@@ -999,3 +999,24 @@ inputs. No real provider credentials, cloud query or appliance was used.
 Documentation, 24 schemas (65 primary positive and 792 negative fixtures), source
 hygiene and diff checks passed. Linux account/secret-store, real-provider history,
 physical support and remote CI are not established by these local checks.
+
+## Event-key audit and exact outlet control decision -- October 29, 2026
+
+Further inspection of the pinned community `binary_sensor.py`, `sensor.py` and
+customizations confirms that BLE object queries and generic
+`user/get_user_device_data` history are distinct from modern event-history RPCs.
+The motion/door-magnet examples use their own BLE keys; the lock display fallback
+references `event.11`, and `mxiang.cateye` has a separate visit-details key. None
+establishes a complete key/payload contract for this reference's
+`loock.lock.h01myk` or `madv.cateye.mi3iot`. No cross-model event mapping or new
+provider request has been introduced on this evidence.
+
+The same reference supplies four independent settings for exact `cuco.plug.v3`.
+The pinned community switch writer confirms single-property dispatch; the existing
+native legacy transport can carry it. [ADR-0091](../adr/0091-exact-outlet-control-approval.md)
+defines separate outlet grants, elevated trusted confirmation for load power,
+power-loss recovery and physical-control locking, and low-risk indicator control.
+This is an accepted implementation design, not a callable control feature. Native
+API remains 1.33 until the new grants, protected runtime, schemas and inspection
+scope are implemented. No physical result, event support or complete parity is
+claimed. The current ledger deliberately retains the pending outlet disposition.
