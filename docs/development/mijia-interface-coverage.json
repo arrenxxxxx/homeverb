@@ -569,7 +569,7 @@
     {
       "model": "cuco.plug.v3",
       "spec_type": "urn:miot-spec-v2:device:outlet:0000A002:cuco-v3:2",
-      "status": "exact_scalar_reads_and_typed_outlet_controls",
+      "status": "exact_scalar_reads_and_native_outlet_controls",
       "reference_read_summary": {
         "requested": 28,
         "successful_items": 4,
@@ -631,7 +631,7 @@
           "iid": 1,
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_typed_outlet_control",
+          "write_status": "implemented_native_outlet_control",
           "reference_successful_instances": 1
         },
         {
@@ -640,7 +640,7 @@
           "iid": 2,
           "name": "default-power-on-state",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_typed_outlet_control",
+          "write_status": "implemented_native_outlet_control",
           "reference_successful_instances": 1
         },
         {
@@ -665,7 +665,7 @@
           "iid": 1,
           "name": "physical-controls-locked",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_typed_outlet_control",
+          "write_status": "implemented_native_outlet_control",
           "reference_successful_instances": 0
         },
         {
@@ -692,7 +692,7 @@
           "iid": 1,
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_typed_outlet_control",
+          "write_status": "implemented_native_outlet_control",
           "reference_successful_instances": 0
         },
         {

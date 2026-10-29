@@ -502,6 +502,32 @@ def main():
                 assert decode(library.homeverb_open(json.dumps(config).encode()))['error']['code'] == 'INVALID_ARGUMENT'
                 assert not private.exists()
 
+    # API 1.34 outlet grants are separate, closed and validated before profile creation.
+    outlet_startup = load('examples/native-open.mijia-outlet.json')
+    for adapter in ['xiaomi.mijia', 'homeverb.platforms']:
+        with tempfile.TemporaryDirectory(prefix='homeverb-outlet-') as directory:
+            config = {**outlet_startup, 'data_dir': directory, 'adapter': adapter}
+            open_schema.validate(config)
+            opened = decode(library.homeverb_open(json.dumps(config).encode()))
+            assert opened['error'] is None, opened
+            try:
+                assert raw(opened['data']['handle'], envelope('list_devices'))['data'] == []
+                assert raw(opened['data']['handle'], envelope('get_api_info'))['data']['api_version'] == '1.34.0'
+            finally:
+                library.homeverb_close(opened['data']['handle'])
+    cases = []
+    for entry in outlet_startup['mijia_outlet_grants']:
+        for field, value in [('value', None), ('value', 'true'), ('value', {}), ('value', -1), ('value', 3), ('value', 1.5), ('component_id', 'fan-2'), ('property', 'unreviewed'), ('confirmed', True)]:
+            cases.append({**outlet_startup, 'mijia_outlet_grants': [{**entry, field: value}]})
+    cases.extend({**outlet_startup, 'adapter': adapter} for adapter in ['homeverb.mock', 'midea.meiju'])
+    for config in cases:
+        with tempfile.TemporaryDirectory(prefix='homeverb-outlet-refused-') as directory:
+            private = Path(directory) / 'must-not-create'
+            config = {**config, 'data_dir': str(private)}
+            assert not open_schema.is_valid(config)
+            assert decode(library.homeverb_open(json.dumps(config).encode()))['error']['code'] == 'INVALID_ARGUMENT'
+            assert not private.exists()
+
     # Local account metadata remains usable without creating any protected session.
     with tempfile.TemporaryDirectory(prefix='homeverb-ui-local-accounts-') as directory:
         account_id = '40000000-0000-4000-8000-000000000001'

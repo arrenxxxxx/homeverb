@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0",
+  "data_dir": "/fictional/private/outlet",
+  "adapter": "xiaomi.mijia",
+  "allow_mock_writes": false,
+  "mijia_outlet_grants": [
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "switch-2",
+      "property": "state",
+      "value": false
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "switch-2",
+      "property": "state",
+      "value": true
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "switch-2",
+      "property": "default_power_on_state_2",
+      "value": 0
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "switch-2",
+      "property": "default_power_on_state_2",
+      "value": 1
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "switch-2",
+      "property": "default_power_on_state_2",
+      "value": 2
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "physical_controls_locked-7",
+      "property": "physical_controls_locked_1",
+      "value": false
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "physical_controls_locked-7",
+      "property": "physical_controls_locked_1",
+      "value": true
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "indicator_light-13",
+      "property": "on_1",
+      "value": false
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "indicator_light-13",
+      "property": "on_1",
+      "value": true
+    }
+  ]
+}

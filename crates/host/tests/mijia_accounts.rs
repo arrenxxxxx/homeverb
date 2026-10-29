@@ -88,12 +88,67 @@ const KIND: &str = "urn:miot-spec-v2:device:fan:0000A005:fiction-native:1";
 struct Cloud {
     calls: AtomicUsize,
     empty: AtomicBool,
+    outlet: AtomicBool,
+    writes: AtomicUsize,
+    lose_write: AtomicBool,
     stall: AtomicBool,
     captcha: AtomicBool,
     started: tokio::sync::Notify,
 }
 #[async_trait]
 impl CloudTransport for Cloud {
+    async fn send_control(
+        &self,
+        request: &CloudRequest,
+        progress: &WriteProgress,
+        operation: &Operation,
+    ) -> Result<CloudResponse> {
+        operation
+            .run(async {
+                assert_eq!(request.endpoint(), CloudEndpoint::SetProperty);
+                let fields: HashMap<_, _> = url::form_urlencoded::parse(request.body())
+                    .into_owned()
+                    .collect();
+                let key = Sha256::digest(
+                    [
+                        STANDARD.decode(&fields["ssecurity"]).unwrap(),
+                        STANDARD.decode(&fields["_nonce"]).unwrap(),
+                    ]
+                    .concat(),
+                );
+                let data: Value = serde_json::from_slice(&stream(
+                    &key,
+                    &STANDARD.decode(&fields["data"]).unwrap(),
+                ))
+                .unwrap();
+                assert_eq!(data["params"].as_array().unwrap().len(), 1);
+                let field = &data["params"][0];
+                assert_eq!(
+                    field,
+                    &json!({"did":"PRIVATE-FICTIONAL-OUTLET","siid":2,"piid":1,"value":true})
+                );
+                self.writes.fetch_add(1, Ordering::SeqCst);
+                progress.mark_sent();
+                if self.lose_write.load(Ordering::SeqCst) {
+                    return Err(homeverb_domain::Error::new(
+                        "NETWORK_ERROR",
+                        "Fictional lost acknowledgement.",
+                    ));
+                }
+                let reply =
+                    json!({"code":0,"result":[{"did":field["did"],"siid":2,"piid":1,"code":0}]});
+                Ok(CloudResponse {
+                    body: secret(
+                        STANDARD
+                            .encode(stream(&key, &serde_json::to_vec(&reply).unwrap()))
+                            .as_bytes(),
+                    ),
+                    service_token: None,
+                })
+            })
+            .await
+    }
+
     async fn send_verification(
         &self,
         request: &homeverb_mijia::VerificationRequest,
@@ -150,6 +205,7 @@ impl CloudTransport for Cloud {
             let key = Sha256::digest([STANDARD.decode(&fields["ssecurity"]).unwrap(), STANDARD.decode(&fields["_nonce"]).unwrap()].concat());
             let data: Value = serde_json::from_slice(&stream(&key, &STANDARD.decode(&fields["data"]).unwrap())).unwrap();
             let result = match request.endpoint() {
+                CloudEndpoint::Devices if self.outlet.load(Ordering::SeqCst) => json!({"list":[{"did":"PRIVATE-FICTIONAL-OUTLET","name":"Fictional outlet","model":"cuco.plug.v3"}]}),
                 CloudEndpoint::Devices => json!({"list":if self.empty.load(Ordering::SeqCst) {vec![]} else {vec![json!({"did":"PRIVATE-FAN-ID","name":"Desk Fan","model":"fiction.fan.native","spec_type":KIND,"isOnline":true}), json!({"did":"PRIVATE-OTHER-ID","name":"Hall Appliance","model":"fiction.unknown.native","isOnline":true})]}}),
                 CloudEndpoint::Homes => json!({"homelist":[],"has_more":false}),
                 CloudEndpoint::Properties => json!(data["params"].as_array().unwrap().iter().map(|p| json!({"did":p["did"],"siid":p["siid"],"piid":p["piid"],"code":0,"value":false})).collect::<Vec<_>>()),
@@ -658,3 +714,110 @@ async fn protected_login_requires_registered_provider_and_cannot_enter_json_disp
 
 #[path = "mijia_accounts/mijia_verification.rs"]
 mod mijia_verification;
+
+#[tokio::test]
+async fn outlet_inspection_before_grants_is_local_and_contract_valid() {
+    for combined in [false, true] {
+        let f = Fixture::new(combined);
+        f.cloud.outlet.store(true, Ordering::SeqCst);
+        let connected = f.connect(Some("xiaomi.mijia"), None).await;
+        assert!(connected["error"].is_null(), "{connected}");
+        let devices = f.call(json!({"method":"list_devices"})).await;
+        let device = &devices["data"][0];
+        let before = f.cloud.calls.load(Ordering::SeqCst);
+        let options = f.call(json!({"method":"inspect_control_options","device_id":device["id"],"connection_id":device["connections"][0]["id"]})).await;
+        assert!(options["error"].is_null(), "{options}");
+        let options = options["data"]["options"].as_array().unwrap();
+        assert_eq!(options.len(), 4);
+        assert_eq!(
+            options
+                .iter()
+                .filter(|o| o["definition"]["risk"] == "elevated")
+                .count(),
+            3
+        );
+        let grants = f.call(json!({"method":"inspect_session_grants","device_id":device["id"],"connection_id":device["connections"][0]["id"]})).await;
+        assert_eq!(grants["data"]["grants"], json!([]));
+        assert_eq!(f.cloud.calls.load(Ordering::SeqCst), before);
+    }
+}
+
+#[tokio::test]
+async fn native_outlet_approval_is_foreground_single_use_and_preserves_uncertainty() {
+    for lost in [false, true] {
+        let f = Fixture::new(false);
+        f.cloud.outlet.store(true, Ordering::SeqCst);
+        let connected = f.connect(Some("xiaomi.mijia"), None).await;
+        let devices = f.call(json!({"method":"list_devices"})).await;
+        let device = devices["data"][0]["id"].as_str().unwrap();
+        let policy = homeverb_host::mijia_outlet_policy(&[homeverb_host::MijiaOutletGrant {
+            device_id: device.into(),
+            component_id: "switch-2".into(),
+            property: "state".into(),
+            value: json!(true),
+        }])
+        .unwrap();
+        let store = Arc::new(SqliteStore::open(&f.dir).unwrap());
+        let adapter = Arc::new(
+            MijiaAdapter::new(f.vault.clone(), f.cloud.clone(), Arc::new(SystemClock))
+                .with_outlet_controls()
+                .with_control_policies(Policy::default(), policy.clone()),
+        );
+        let core = Core::new(store, vec![adapter.clone()], Arc::new(SystemClock), policy);
+        let account: Uuid =
+            serde_json::from_value(connected["data"]["account"]["id"].clone()).unwrap();
+        let report = adapter.refresh_devices(account, &op()).await.unwrap();
+        core.publish_discovery(
+            homeverb_mijia::PROVIDER,
+            &report.descriptors.unwrap(),
+            &op(),
+        )
+        .await
+        .unwrap();
+        let session = Session::with_platform_accounts(core, None, Some(adapter));
+        let mut command = json!({"schema_version":"1.0","request_id":"outlet-native","device_id":device,"component_id":"switch-2","capability":"power","action":"set","arguments":{"state":true},"connection":"cloud","timeout_ms":5000,"wait_for":"accepted"});
+        let prepare = |command: Value| {
+            serde_json::from_value(
+                json!({"schema_version":"1.0","operation_id":"preview","command":command}),
+            )
+            .unwrap()
+        };
+        let execute = |id: Value| {
+            serde_json::from_value(
+                json!({"schema_version":"1.0","operation_id":"consent","approval_id":id}),
+            )
+            .unwrap()
+        };
+        let preview = session
+            .prepare_native_approval(prepare(command.clone()))
+            .await;
+        assert!(preview["error"].is_null(), "{preview}");
+        assert_eq!(preview["data"]["action"]["risk"], "elevated");
+        assert_eq!(f.cloud.writes.load(Ordering::SeqCst), 0);
+        session.set_foreground(false);
+        session.set_foreground(true);
+        let stale = session
+            .execute_native_approved(execute(preview["data"]["approval_id"].clone()))
+            .await;
+        assert_eq!(stale["error"]["code"], "APPROVAL_INVALID");
+        assert_eq!(f.cloud.writes.load(Ordering::SeqCst), 0);
+        command["request_id"] = json!("outlet-confirmed");
+        let preview = session.prepare_native_approval(prepare(command)).await;
+        assert!(preview["error"].is_null(), "{preview}");
+        f.cloud.lose_write.store(lost, Ordering::SeqCst);
+        let result = session
+            .execute_native_approved(execute(preview["data"]["approval_id"].clone()))
+            .await;
+        assert_eq!(
+            result["status"],
+            if lost { "unknown" } else { "accepted" },
+            "{result}"
+        );
+        assert_eq!(result["request_id"], "outlet-confirmed");
+        let repeated = session
+            .execute_native_approved(execute(preview["data"]["approval_id"].clone()))
+            .await;
+        assert_eq!(repeated["error"]["code"], "APPROVAL_INVALID");
+        assert_eq!(f.cloud.writes.load(Ordering::SeqCst), 1);
+    }
+}

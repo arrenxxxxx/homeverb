@@ -343,3 +343,121 @@ async fn outlet_argument_and_protected_binding_changes_refuse_before_send() {
         assert_eq!(f.cloud.count(CloudEndpoint::SetProperty), 0);
     }
 }
+
+#[tokio::test]
+async fn overlapping_reference_grants_cannot_authorize_outlet_targets() {
+    for mismatch in ["family", "device", "target", "component", "empty", "match"] {
+        let (f, _, device) = outlet().await;
+        let c = command(
+            &device,
+            "physical_controls_locked-7",
+            "physical_controls_locked_1",
+            json!(true),
+            mismatch,
+        );
+        let grant = Grant {
+            device_id: c.device_id.clone(),
+            component_id: c.component_id.clone(),
+            capability: c.capability.clone(),
+            action: c.action.clone(),
+            transports: vec![Transport::Cloud],
+            argument_schema: json!({"const":c.arguments}),
+        };
+        let reference = Policy {
+            grants: vec![grant.clone()],
+        };
+        let mut outlet = Policy {
+            grants: vec![grant],
+        };
+        match mismatch {
+            "family" | "empty" => outlet.grants.clear(),
+            "device" => outlet.grants[0].device_id = Uuid::new_v4().to_string(),
+            "target" => {
+                outlet.grants[0].argument_schema =
+                    json!({"const":{"physical_controls_locked_1":false}})
+            }
+            "component" => outlet.grants[0].component_id = "switch-2".into(),
+            _ => (),
+        }
+        let adapter = Arc::new(
+            MijiaAdapter::new(f.vault.clone(), f.cloud.clone(), Arc::new(SystemClock))
+                .with_reference_controls()
+                .with_outlet_controls()
+                .with_control_policies(reference, outlet),
+        );
+        let core = core(&f, adapter, &c);
+        let preview = core.prepare_user_approval(c).unwrap();
+        let result = core.execute_user_approved(preview, &operation()).await;
+        assert_eq!(
+            result.status,
+            if mismatch == "match" {
+                Status::Accepted
+            } else {
+                Status::Failed
+            }
+        );
+        assert_eq!(
+            f.cloud.count(CloudEndpoint::SetProperty),
+            usize::from(mismatch == "match")
+        );
+    }
+}
+
+#[tokio::test]
+async fn outlet_grants_cannot_authorize_overlapping_purifier_settings() {
+    for admitted in [false, true] {
+        let f = Fixture::new();
+        *f.cloud.devices.lock().unwrap() = vec![
+            json!({"did":"FICTIONAL-PURIFIER","name":"Fictional purifier","model":"zhimi.airpurifier.v6"}),
+        ];
+        let report = f.connect().await;
+        let adapter = MijiaAdapter::new(f.vault.clone(), f.cloud.clone(), Arc::new(SystemClock))
+            .with_reference_controls()
+            .with_outlet_controls();
+        let report = adapter
+            .refresh_devices(report.account.id, &operation())
+            .await
+            .unwrap();
+        f.publish(&report).await;
+        let device = f.core.list().unwrap().pop().unwrap();
+        let c = command(
+            &device,
+            "physical_controls_locked-7",
+            "physical_controls_locked_1",
+            json!(true),
+            "purifier",
+        );
+        let policy = Policy {
+            grants: vec![Grant {
+                device_id: c.device_id.clone(),
+                component_id: c.component_id.clone(),
+                capability: c.capability.clone(),
+                action: c.action.clone(),
+                transports: vec![Transport::Cloud],
+                argument_schema: json!({"const":c.arguments}),
+            }],
+        };
+        let adapter = Arc::new(adapter.with_control_policies(
+            if admitted {
+                policy.clone()
+            } else {
+                Policy::default()
+            },
+            policy,
+        ));
+        let core = core(&f, adapter, &c);
+        let result = core.execute(c, CancellationToken::new()).await;
+        assert_eq!(
+            result.status,
+            if admitted {
+                Status::Accepted
+            } else {
+                Status::Failed
+            }
+        );
+        assert_eq!(
+            f.cloud.count(CloudEndpoint::SetProperty),
+            usize::from(admitted)
+        );
+    }
+}

@@ -59,6 +59,7 @@ pub struct MijiaAdapter {
     fan_controls: bool,
     reference_controls: bool,
     outlet_controls: bool,
+    control_policies: Option<(homeverb_core::Policy, homeverb_core::Policy)>,
 }
 impl MijiaAdapter {
     pub fn new(
@@ -74,6 +75,7 @@ impl MijiaAdapter {
             fan_controls: false,
             reference_controls: false,
             outlet_controls: false,
+            control_policies: None,
         }
     }
 
@@ -94,6 +96,17 @@ impl MijiaAdapter {
     /// trusted approval for elevated targets remain mandatory at every execution.
     pub fn with_outlet_controls(mut self) -> Self {
         self.outlet_controls = true;
+        self
+    }
+
+    /// Keep startup grant families separate even where capability identifiers overlap.
+    /// This narrows adapter admission; it never replaces Core policy or approval.
+    pub fn with_control_policies(
+        mut self,
+        reference: homeverb_core::Policy,
+        outlet: homeverb_core::Policy,
+    ) -> Self {
+        self.control_policies = Some((reference, outlet));
         self
     }
 
@@ -900,6 +913,37 @@ impl Adapter for MijiaAdapter {
                         "POLICY_DENIED",
                         "This outlet setting requires trusted user approval.",
                     ));
+                }
+                if let Some((reference, outlet)) = &self.control_policies {
+                    let family = if mapping.is_outlet() {
+                        Some(outlet)
+                    } else if crate::reference_setting_option(
+                        &option.component_id,
+                        option.definition.parameters["required"][0]
+                            .as_str()
+                            .unwrap_or(""),
+                    )
+                    .is_some()
+                    {
+                        Some(reference)
+                    } else {
+                        None
+                    };
+                    if let Some(policy) = family {
+                        // Risk is independently checked above. This check admits only
+                        // exact targets from the correct trusted startup family.
+                        let mut scope = option.definition.clone();
+                        scope.risk = homeverb_domain::Risk::Low;
+                        if !policy
+                            .authorize(command, &scope)?
+                            .contains(&Transport::Cloud)
+                        {
+                            return Err(Error::new(
+                                "POLICY_DENIED",
+                                "The control family has no exact grant.",
+                            ));
+                        }
+                    }
                 }
                 option.definition.validate_arguments(&command.arguments)?;
                 account

@@ -58,7 +58,7 @@ def project():
                 entries.append({'kind': 'property', 'siid': service['iid'], 'iid': prop['iid'],
                                 'name': prop['type'].split(':')[3],
                                 'read_status': reason or 'implemented_exact_scalar_mapping',
-                                'write_status': ('implemented_typed_outlet_control'
+                                'write_status': ('implemented_native_outlet_control'
                                                  if model['model'] == 'cuco.plug.v3' and admitted_write(model['model'], service['iid'], prop['iid'])
                                                  else 'implemented_exact_granted_legacy_property_set'
                                                  if admitted_write(model['model'], service['iid'], prop['iid'])
@@ -82,7 +82,7 @@ def project():
             profiles.append({'model': model['model'], 'spec_type': model['spec_urn'],
                              'source': {'type': model['spec_urn'], 'services': services}})
         ledger.append({'model': model['model'], 'spec_type': model['spec_urn'],
-                       'status': ('exact_scalar_reads_and_typed_outlet_controls'
+                       'status': ('exact_scalar_reads_and_native_outlet_controls'
                                   if model['model'] == 'cuco.plug.v3'
                                   else 'exact_scalar_reads_and_granted_fan_settings'
                                   if model['model'] == 'jdjz.fan.2072fc'

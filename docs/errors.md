@@ -669,3 +669,9 @@ low-risk action does not change this result. Missing exact mapping/opt-in return
 unsupported; tampered protected derivations retain account-confirmation refusal.
 Existing `accepted`, `failed` and `unknown` receipts retain their meaning, and
 approved execution cannot turn an uncertain provider reply into verification.
+
+API 1.34 validates outlet startup tuples before opening a profile. Invalid or
+wrong-provider grants return `INVALID_ARGUMENT`. Overlapping purifier/outlet
+identifiers remain scoped to their originating adapter policy; missing exact
+family grants return `POLICY_DENIED` before transport, including after trusted
+approval. Local option inspection is not authority or current provider evidence.

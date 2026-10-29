@@ -628,7 +628,11 @@ impl Session {
                         .ok_or_else(crate::accounts::unsupported)?;
                     serde_json::to_value(
                         adapter
-                            .inspect_control_options(&descriptor.device, connection, &operation)
+                            .inspect_control_options_with_outlets(
+                                &descriptor.device,
+                                connection,
+                                &operation,
+                            )
                             .await?,
                     )
                     .map_err(|_| Error::invalid())?

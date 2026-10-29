@@ -1,5 +1,27 @@
 # Platform and device compatibility matrix
 
+## Native exact outlet controls -- October 29, 2026
+
+API 1.34 adds closed `mijia_outlet_grants` with exact local device/component/
+property/value targets and a 64-entry limit. Only Mijia and combined hosts accept
+these startup grants. All four exact outlet options can be inspected locally
+before granting authority. Existing light/purifier and fan fields retain their
+scopes. Separate adapter policies prevent overlapping physical-lock identifiers
+from transferring authority between purifier and outlet grants, even when both
+families are enabled.
+
+Power, power-loss recovery and physical-button locking require the separate
+immutable trusted preview/confirm bridge for every operation; indicator control
+is low-risk. Default startup and CLI/MCP remain read-only for outlets. Ordinary
+JSON cannot confirm elevated commands. Unknown replies preserve the request ID
+without replay, and backgrounding invalidates previews. C exports (26 plus the
+Android initializer), 36 ordinary methods, SQLite 5 and protected payload envelope
+1 are unchanged. Explicit account refresh in an outlet-enabled session upgrades
+old read-only mappings. Older implementations may refuse those upgraded protected
+contents; retain the matching implementation with that profile. App wiring, an
+updated APK and real-provider/physical acceptance remain pending.
+
+
 
 
 ## Typed exact outlet controls -- October 29, 2026

@@ -1,6 +1,6 @@
 # ADR-0091: Exact Mijia outlet control with trusted approval
 
-Status: typed adapter/Core implementation with synthetic tests; native/API/App integration pending.
+Status: typed adapter/Core and native API 1.34 implemented with synthetic tests; App integration pending.
 Date: October 29, 2026.
 
 ## Evidence and scope
@@ -57,7 +57,9 @@ read-back, HTTP success or an optimistic value is never physical verification.
 Use a new closed `mijia_outlet_grants` startup field with exact local device ID,
 component, property and scalar value. Do not widen `mijia_setting_grants`:
 physical-control-lock identifiers overlap the purifier's, so sharing that startup
-admission would obscure the different risk and provider/model policy. Native
+admission would obscure the different risk and provider/model policy. Each family
+also retains its own adapter policy: combining both families never lets a grant
+from one family authorize the same identifier in the other. Native
 configuration validates the exact outlet tuple and value before opening a profile;
 protected binding/model/domain checks remain independent during execution.
 

@@ -17,6 +17,8 @@ pub use session::{
 };
 mod accounts;
 pub use accounts::{AccountConnection, AccountProvider, AccountSummary, ConnectRequest};
+mod mijia_outlet_grants;
+pub use mijia_outlet_grants::{MijiaOutletGrant, mijia_outlet_policy};
 mod mijia_setting_grants;
 pub use mijia_setting_grants::{MijiaSettingGrant, mijia_setting_policy};
 mod mijia_fan_grants;
@@ -164,7 +166,7 @@ fn meiju_parts(
     directory: &Path,
     grants: MeijuControlGrants<'_>,
 ) -> Result<(Core, Arc<homeverb_midea::MeijuAdapter>)> {
-    platform_parts(directory, grants, false, &[], &[]).map(|(core, meiju, _)| (core, meiju))
+    platform_parts(directory, grants, false, &[], &[], &[]).map(|(core, meiju, _)| (core, meiju))
 }
 
 fn platform_parts(
@@ -173,12 +175,16 @@ fn platform_parts(
     include_mijia: bool,
     mijia_grants: &[MijiaFanGrant],
     setting_grants: &[MijiaSettingGrant],
+    outlet_grants: &[MijiaOutletGrant],
 ) -> Result<(
     Core,
     Arc<homeverb_midea::MeijuAdapter>,
     Option<Arc<homeverb_mijia::MijiaAdapter>>,
 )> {
+    let outlet_policy = mijia_outlet_policy(outlet_grants)?;
+    let reference_policy = mijia_setting_policy(setting_grants)?;
     let mut policy = meiju_power_policy(grants.power)?;
+    policy.grants.extend(outlet_policy.grants.clone());
     policy.grants.extend(mijia_fan_policy(mijia_grants)?.grants);
     policy
         .grants
@@ -240,11 +246,17 @@ fn platform_parts(
         } else {
             adapter.with_fan_controls()
         };
-        Arc::new(if setting_grants.is_empty() {
+        let adapter = if setting_grants.is_empty() {
             adapter
         } else {
             adapter.with_reference_controls()
-        })
+        };
+        let adapter = if outlet_grants.is_empty() {
+            adapter
+        } else {
+            adapter.with_outlet_controls()
+        };
+        Arc::new(adapter.with_control_policies(reference_policy, outlet_policy))
     });
     let mut adapters: Vec<Arc<dyn homeverb_core::Adapter>> = vec![adapter.clone()];
     if let Some(mijia) = &mijia {
@@ -306,7 +318,19 @@ pub fn open_mijia_session_with_settings(
     grants: &[MijiaFanGrant],
     settings: &[MijiaSettingGrant],
 ) -> Result<Session> {
+    open_mijia_session_with_outlets(directory, grants, settings, &[])
+}
+
+pub fn open_mijia_session_with_outlets(
+    directory: &Path,
+    grants: &[MijiaFanGrant],
+    settings: &[MijiaSettingGrant],
+    outlets: &[MijiaOutletGrant],
+) -> Result<Session> {
+    let outlet_policy = mijia_outlet_policy(outlets)?;
+    let reference_policy = mijia_setting_policy(settings)?;
     let mut policy = mijia_fan_policy(grants)?;
+    policy.grants.extend(outlet_policy.grants.clone());
     policy.grants.extend(mijia_setting_policy(settings)?.grants);
     let store = Arc::new(SqliteStore::open(directory)?);
     let vault = Arc::new(open_accounts(directory)?);
@@ -321,11 +345,17 @@ pub fn open_mijia_session_with_settings(
     } else {
         adapter.with_fan_controls()
     };
-    let adapter = Arc::new(if settings.is_empty() {
+    let adapter = if settings.is_empty() {
         adapter
     } else {
         adapter.with_reference_controls()
-    });
+    };
+    let adapter = if outlets.is_empty() {
+        adapter
+    } else {
+        adapter.with_outlet_controls()
+    };
+    let adapter = Arc::new(adapter.with_control_policies(reference_policy, outlet_policy));
     let core = Core::new(store, vec![adapter.clone()], clock, policy);
     Ok(Session::with_platform_accounts(core, None, Some(adapter)))
 }
@@ -349,7 +379,18 @@ pub fn open_platform_session_with_settings(
     mijia_grants: &[MijiaFanGrant],
     settings: &[MijiaSettingGrant],
 ) -> Result<Session> {
-    let (core, meiju, mijia) = platform_parts(directory, grants, true, mijia_grants, settings)?;
+    open_platform_session_with_outlets(directory, grants, mijia_grants, settings, &[])
+}
+
+pub fn open_platform_session_with_outlets(
+    directory: &Path,
+    grants: MeijuControlGrants<'_>,
+    mijia_grants: &[MijiaFanGrant],
+    settings: &[MijiaSettingGrant],
+    outlets: &[MijiaOutletGrant],
+) -> Result<Session> {
+    let (core, meiju, mijia) =
+        platform_parts(directory, grants, true, mijia_grants, settings, outlets)?;
     Ok(Session::with_platform_accounts(core, Some(meiju), mijia))
 }
 

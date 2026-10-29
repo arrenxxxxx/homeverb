@@ -6,7 +6,7 @@ use homeverb_host::{
     ConfirmConnectionLinkRequest, ConfirmIdentityRecoveryRequest, ConfirmLanScanRequest,
     ConnectRequest, ExecuteApprovalRequest, HostRequest, MeijuAcFeatureGrant, MeijuControlGrants,
     MeijuDishwasherCycleGrant, MeijuDishwasherGrant, MeijuFanGrant, MeijuModeGrant,
-    MeijuPowerGrant, MeijuTemperatureGrant, MijiaFanGrant, MijiaSettingGrant,
+    MeijuPowerGrant, MeijuTemperatureGrant, MijiaFanGrant, MijiaOutletGrant, MijiaSettingGrant,
     PrepareApprovalRequest, PrepareConnectionLinkRequest, PrepareLanScanRequest, Session,
 };
 use homeverb_mock::Scenario;
@@ -53,6 +53,8 @@ struct Config {
     mijia_fan_grants: Vec<MijiaFanGrant>,
     #[serde(default)]
     mijia_setting_grants: Vec<MijiaSettingGrant>,
+    #[serde(default)]
+    mijia_outlet_grants: Vec<MijiaOutletGrant>,
     #[serde(default)]
     meiju_fan_grants: Vec<MeijuFanGrant>,
     #[serde(default)]
@@ -154,7 +156,9 @@ pub unsafe extern "C" fn homeverb_open(config: *const c_char) -> *mut c_char {
             );
         }
         if !matches!(config.adapter, AdapterMode::Mijia | AdapterMode::Platforms)
-            && (!config.mijia_fan_grants.is_empty() || !config.mijia_setting_grants.is_empty())
+            && (!config.mijia_fan_grants.is_empty()
+                || !config.mijia_setting_grants.is_empty()
+                || !config.mijia_outlet_grants.is_empty())
         {
             return error(
                 "INVALID_ARGUMENT",
@@ -173,10 +177,11 @@ pub unsafe extern "C" fn homeverb_open(config: *const c_char) -> *mut c_char {
             ),
             AdapterMode::Mijia => (
                 "xiaomi.mijia",
-                homeverb_host::open_mijia_session_with_settings(
+                homeverb_host::open_mijia_session_with_outlets(
                     &config.data_dir,
                     &config.mijia_fan_grants,
                     &config.mijia_setting_grants,
+                    &config.mijia_outlet_grants,
                 ),
             ),
             AdapterMode::Meiju | AdapterMode::Platforms => (
@@ -198,11 +203,12 @@ pub unsafe extern "C" fn homeverb_open(config: *const c_char) -> *mut c_char {
                     if config.adapter == AdapterMode::Meiju {
                         homeverb_host::open_meiju_session_with_grants(&config.data_dir, grants)
                     } else {
-                        homeverb_host::open_platform_session_with_settings(
+                        homeverb_host::open_platform_session_with_outlets(
                             &config.data_dir,
                             grants,
                             &config.mijia_fan_grants,
                             &config.mijia_setting_grants,
+                            &config.mijia_outlet_grants,
                         )
                     }
                 },

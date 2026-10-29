@@ -581,3 +581,14 @@ refusal, invalidated previews, correlated rejection and unknown outcomes without
 replay. Inspection is local and leaves default saved mappings read-only. These
 checks use fictional accounts and transports; native/App rollout and physical
 acceptance are separate gates under ADR-0091.
+
+
+### Native exact outlet checks
+
+Run `cargo +1.96.0 test -p homeverb-host --test mijia_outlet_grants --test
+mijia_accounts --offline --locked`, build `homeverb-ffi`, then run
+`python3 scripts/verify_native_contract.py`. Native fixtures cover all nine exact
+targets, duplicate/wrong-family/invalid-scope refusal before profile creation,
+local inspection before grants and trusted preview lifecycle, one-use execution
+and unknown outcomes. Mijia adapter tests also check both directions of overlapping
+purifier/outlet grant isolation. All accounts and transports are fictional.

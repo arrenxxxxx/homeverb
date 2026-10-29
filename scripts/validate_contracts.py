@@ -21,6 +21,7 @@ def checked_formats() -> FormatChecker:
 def main() -> int:
     formats = checked_formats()
     pairs = [
+        ("native-open", "native-open.mijia-outlet"),
         ("capability", "capability.mijia-outlet-power"), ("command", "command.mijia-outlet-power"),
         ("capability", "capability.mijia-light"), ("command", "command.mijia-light"),
         ("native-open", "native-open.mijia-settings"),
@@ -162,6 +163,17 @@ def main() -> int:
     outlet_parameters.validate(outlet_command["arguments"])
     for args in [{"state":1}, {"state":"true"}, {"state":None}, {}, {"state":True,"confirmed":True}, {"state":True,"piid":1}]:
         negative.append(("closed outlet arguments", outlet_parameters, args))
+
+    outlet_startup = load("examples/native-open.mijia-outlet.json")
+    for entry in outlet_startup["mijia_outlet_grants"]:
+        for field, value in [("value", None), ("value", "true"), ("value", {}), ("value", -1), ("value", 3), ("value", 1.5), ("component_id", "fan-2"), ("property", "unreviewed"), ("confirmed", True)]:
+            bad = copy.deepcopy(outlet_startup)
+            bad["mijia_outlet_grants"] = [{**entry, field: value}]
+            negative.append((f"invalid outlet target {field}/{value}", validators["native-open"], bad))
+    for adapter in ["homeverb.mock", "midea.meiju"]:
+        bad = copy.deepcopy(outlet_startup)
+        bad["adapter"] = adapter
+        negative.append((f"outlet grants on wrong adapter {adapter}", validators["native-open"], bad))
 
     settings_startup = load("examples/native-open.mijia-settings.json")
     for entry in settings_startup["mijia_setting_grants"]:
