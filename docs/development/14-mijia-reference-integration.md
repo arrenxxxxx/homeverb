@@ -20,7 +20,9 @@ existing Core/native/App history interface. ADR-0104 adds the 29 reviewed scalar
 controls across five exact modern model mappings through existing Core/native/App
 contracts. The later 9a6c004 APK includes both additions; it predates numeric
 samples. ADR-0105 now exposes 161 exact numeric sample series through Core,
-CLI/MCP and version-negotiated API 1.38/App.
+CLI/MCP and version-negotiated API 1.38/App. The
+[2e776a9 Android package](../../apps/mobile/verification.md#reported-samples-api-138-android-package--october-30-2026)
+includes these samples with clean-source archive evidence.
 
 - Eight-part MIoT URNs retain their exact extension; malformed/foreign URNs refuse.
 - Seventeen exact model/specification catalogs project 264 reviewed scalar read

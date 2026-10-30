@@ -1,5 +1,16 @@
 # Platform and device compatibility matrix
 
+## Reported samples Android delivery -- October 30, 2026
+
+The clean 2e776a9 source now has an archive-checked API 1.38 Android package with
+both arm64-v8a and x86_64. It includes the reported-sample UI and existing modern
+account, state, daily-history and control flows. The verification report records
+exact current AAR matching, 31 exports per ABI, development signature, disabled
+backup and 16 KiB alignment. See the
+[package evidence](../apps/mobile/verification.md#reported-samples-api-138-android-package--october-30-2026).
+Installation and real provider/phone/model acceptance remain pending; no new
+functional scope, grants, saved formats or remote action is claimed by packaging.
+
 ## Reported samples through Core, native and App -- October 30, 2026
 
 ADR-0105 now exposes all 161 pinned numeric history fields through Core on legacy

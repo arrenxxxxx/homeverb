@@ -164,6 +164,7 @@ def project():
                     'values': 'original_signed_numeric_domain_without_daily_scaling',
                     'completeness': 'unproven',
                     'core_native_app': 'implemented_api_1_38_opt_in_and_version_negotiated_flutter',
+                    'android_package': 'archive_checked_2e776a9_no_runtime_acceptance',
                     'provider_acceptance': 'pending'},
                 'modern_history': {
                     'status': 'implemented_exact_daily_energy_through_core_and_native_history',

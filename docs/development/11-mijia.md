@@ -35,6 +35,8 @@ includes this account flow and historical UI. The [API 1.37 package](../../apps/
 also contains modern SID `mijia` QR login, grouped cards and read-only state views.
 ADR-0103 adds exact modern outlet daily-energy history after that APK revision.
 ADR-0104 adds exact modern controls after that APK revision.
+The [API 1.38 package](../../apps/mobile/verification.md#reported-samples-api-138-android-package--october-30-2026)
+from 2e776a9 includes modern controls and reported-sample history with archive checks.
 Human risk challenges, account-settings confirmation, broader controls/history,
 broader event/control coverage and real-provider/device acceptance remain open. Earlier
 phase records below retain their original implementation and evidence scope.

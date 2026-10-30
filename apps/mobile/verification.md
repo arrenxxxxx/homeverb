@@ -1,5 +1,34 @@
 # Flutter implementation verification
 
+## Reported samples API 1.38 Android package -- October 30, 2026
+
+Clean source `2e776a9a3e96ce042d88739ae07cd32b10e99f21` produced the combined
+homeverb.platforms APK at
+`apps/mobile/build/delivery/mijia/2e776a9/homeverb-mijia-0.2.0-2e776a9.apk`.
+Size: 78,833,730 bytes. SHA-256:
+`a9b73d731ed64e55af37daddba50cba3ace0f12ba3804d3e8100f73c074821ec`.
+The adjacent verification.json records source_dirty=false and exact native/AAR
+matching after normal NDK stripping. It supersedes the 9a6c004 package and includes
+API 1.38's version-negotiated reported-sample history UI, in addition to modern
+QR/device publication, exact daily-energy history and the 29 reviewed controls.
+
+Executed scripts/build_android_native.py with installed Rust 1.99.1, NDK
+28.2.13676358, Android 36 stubs and Android Studio JDK for arm64-v8a and x86_64.
+Both libraries passed 31 exports and 16 KiB ELF alignment. FVM-pinned Flutter
+3.47.7 built the release APK for android-arm64,android-x64 with
+HOMEVERB_ADAPTER=homeverb.platforms. scripts/verify_flutter_apk.py passed APK v2
+development signature, exact dual-ABI contents, API 28 minimum, disabled backup,
+no IntegrationTestPlugin, current-AAR matching and 16 KiB ZIP/ELF alignment.
+
+A fresh git fetch origin succeeded; origin/main remained
+ccf2975df836f8e81ccf24fa26c8b2035390c978, an ancestor of the source commit.
+The source branch has zero merge commits relative to main, and all 312 source
+commit messages passed validation. This phase changes no runtime implementation.
+Archive checks do not prove installation, account authorization, phone lifecycle
+or model behavior. Broader controls/actions/events, BLE/LAN, health/media and
+real acceptance remain incomplete. No installation, provider query, real-device
+write, remote push, upload or publication was performed.
+
 ## Modern history and controls Android package -- October 30, 2026
 
 Clean source `9a6c004fc090e208ce40617fd4d0aecc25dae76f` produced the combined
