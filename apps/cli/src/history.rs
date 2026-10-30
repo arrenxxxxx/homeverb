@@ -21,6 +21,10 @@ pub enum HistoryCommand {
 }
 
 fn request(path: &std::path::Path) -> Result<HistoryRequest> {
+    read_request(path)
+}
+
+pub(super) fn read_request<T: serde::de::DeserializeOwned>(path: &std::path::Path) -> Result<T> {
     if !std::fs::metadata(path)
         .map_err(|_| Error::invalid())?
         .is_file()

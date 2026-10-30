@@ -905,3 +905,13 @@ return empty options and CAPABILITY_UNSUPPORTED for reads; stale or invalid
 protected bindings fail closed. HOST_BACKGROUND/HOST_CLOSED deny admission;
 CANCELLED/DEADLINE_EXCEEDED stop admitted reads without retry or late publication.
 No history error causes login renewal, protocol fallback or an appliance write.
+
+## CLI/MCP event-history errors (ADR-0118)
+
+Event queries reuse Core INVALID_ARGUMENT/CAPABILITY_UNSUPPORTED and protected
+binding errors. CLI rejects nonregular or oversized request files and unrelated
+command flags before adapter dispatch. Mock/Meiju event reads remain unsupported.
+MCP reports query failures with isError=true and the unchanged query envelope;
+read-only annotations never suppress errors or grant a principal. CANCELLED and
+DEADLINE_EXCEEDED end work without retries or receipt writes. Empty options/rows
+never establish device state or event absence. Native error contracts are unchanged.

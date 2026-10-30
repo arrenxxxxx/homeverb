@@ -1,5 +1,28 @@
 # Platform and device compatibility matrix
 
+## CLI and MCP event occurrence history -- October 30, 2026
+
+[ADR-0118](adr/0118-cli-mcp-event-history.md) adds event-history options/read to the CLI and
+event_history_options/event_history_read to host-managed local stdio MCP. Both
+reuse the closed ADR-0116 Core contract; regular request files are bounded to
+16 KiB and MCP input schemas embed the shared definitions. Default MCP exposes
+eight read tools, or ten tools with separately admitted Meiju controls. Mijia
+retains no appliance-write grants. No remote listener or background work is added.
+
+The new explicit Mijia read-only composition includes modern transports and
+reviewed event history. Protected saved session evidence selects legacy or modern
+protocol; no read renews login or falls back. CLI account connect/refresh opts into
+event metadata publication, while startup/idle/inspection never refresh accounts.
+Old scalar-only descriptors require explicit refresh. Existing legacy-only Rust
+construction remains available. Same-second rows and unproven completeness remain
+intact; cancellation/EOF releases pending reads without cache or receipt mutation.
+
+Native API 1.44, C/JNI exports, SQLite 5 and protected payload 3 are unchanged.
+The verified Android package 93cabfd is unchanged. Payload interpretation, paging,
+foreground subscriptions, 185 remaining writable definitions, 25 actions,
+specialized paths and real provider/phone/model acceptance remain incomplete.
+No real account/provider/device operation, installation, push or publication occurred.
+
 ## Event history Android package -- October 30, 2026
 
 Source 93cabfd now has a verified API 1.44 dual-ABI Android package including the

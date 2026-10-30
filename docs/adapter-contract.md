@@ -128,3 +128,13 @@ mijia_event_history default to false; enabling them changes no write policy.
 Only explicit connect/refresh publishes enriched descriptors. Existing constructors
 remain compatible, and disabled hosts preserve ordinary scalar reads for complete
 enriched layouts. Flutter and CLI/MCP entry points remain separate adoption work.
+
+## CLI/MCP event-history composition
+
+ADR-0118's explicit open_mijia_read_only_with_events composition installs reviewed
+event history and both protected legacy/modern transports with default read-only
+policy. Existing open_mijia_read_only preserves its legacy-only behavior. CLI/MCP
+select the new composition; explicit CLI account connect/refresh opts into event
+publication. No constructor reads credentials, logs in, refreshes accounts or
+schedules work. Adapter identity/model/membership/protocol checks and Core
+occurrence-time validation remain the same as native/App event reads.

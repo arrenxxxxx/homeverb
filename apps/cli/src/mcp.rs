@@ -42,6 +42,12 @@ struct HistoryArguments {
     history: HistoryRequest,
 }
 
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct EventHistoryArguments {
+    history: EventHistoryRequest,
+}
+
 enum ToolOutput {
     Query(Value),
     Execution(Box<Execution>, WaitFor),
@@ -82,6 +88,17 @@ fn tools(allow_controls: bool) -> Value {
         json!({"name":"history_read", "description":"Read one explicitly selected historical numeric series and bounded UTC interval. Preserve rejected counts, record limits and unproven completeness. Missing records are not zero; the calendar timezone is unknown. Never use history as current state, complete totals or command verification. No retry or route fallback.",
             "inputSchema":{"type":"object", "$defs":history_schema["$defs"], "properties":{"history":{"$ref":"#/$defs/request"}}, "required":["history"], "additionalProperties":false},
             "annotations":{"readOnlyHint":true, "openWorldHint":true}}),
+    ]);
+    let event_schema: Value =
+        serde_json::from_str(include_str!("../../../schemas/event-history.schema.json"))
+            .expect("compiled event schema");
+    tools.as_array_mut().expect("tool list").extend([
+        json!({"name":"event_history_options", "description":"Inspect exact declared historical event selectors on one local device connection without provider traffic. Never infer events from model names or numeric properties.",
+            "inputSchema":{"type":"object", "properties":{"device_id":{"type":"string","minLength":1,"maxLength":256},"connection_id":{"type":"string","minLength":1,"maxLength":256}}, "required":["device_id","connection_id"],"additionalProperties":false},
+            "annotations":{"readOnlyHint":true,"openWorldHint":false}}),
+        json!({"name":"event_history_read", "description":"Read one explicitly selected event occurrence window. Preserve duplicate timestamps, rejected counts, record limits and unproven completeness. Missing records do not prove absence of an event. No payload, paging, retry, subscription or login renewal. Never treat history as current state or action verification.",
+            "inputSchema":{"type":"object","$defs":event_schema["$defs"],"properties":{"history":{"$ref":"#/$defs/request"}},"required":["history"],"additionalProperties":false},
+            "annotations":{"readOnlyHint":true,"openWorldHint":true}}),
     ]);
     if allow_controls {
         let schema: Value =
@@ -153,6 +170,20 @@ async fn call(
             let args: HistoryArguments =
                 serde_json::from_value(call.arguments).map_err(|_| Error::invalid())?;
             core.read_history(&args.history, &operation)
+                .await
+                .map(|v| json!(v))
+        }
+        "event_history_options" => {
+            let args: HistoryOptionsArguments =
+                serde_json::from_value(call.arguments).map_err(|_| Error::invalid())?;
+            core.inspect_event_history_options(&args.device_id, &args.connection_id, &operation)
+                .await
+                .map(|v| json!(v))
+        }
+        "event_history_read" => {
+            let args: EventHistoryArguments =
+                serde_json::from_value(call.arguments).map_err(|_| Error::invalid())?;
+            core.read_event_history(&args.history, &operation)
                 .await
                 .map(|v| json!(v))
         }

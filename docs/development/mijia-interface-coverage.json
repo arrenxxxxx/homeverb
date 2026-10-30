@@ -5961,6 +5961,7 @@
     "core_native_app": "implemented_api_1_44_and_version_negotiated_flutter",
     "protected_admission": "exact_account_model_root_membership_and_selected_protocol",
     "descriptor_publication": "explicit_typed_or_native_startup_opt_in_and_refresh_with_event_only_components",
+    "cli_mcp": "implemented_closed_explicit_event_occurrence_queries",
     "android_package": "archive_checked_93cabfd_no_runtime_acceptance",
     "payload_semantics_pagination_and_subscriptions": "pending",
     "provider_acceptance": "pending"

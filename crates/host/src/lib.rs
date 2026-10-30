@@ -90,6 +90,30 @@ pub fn open_mijia_read_only(directory: &Path) -> Result<Core> {
     Ok(Core::new(store, vec![adapter], clock, Policy::default()))
 }
 
+/// Explicit CLI/MCP read-only composition for saved legacy or modern accounts.
+/// Startup remains local; only explicit account refresh publishes event metadata.
+pub fn open_mijia_read_only_with_events(directory: &Path) -> Result<Core> {
+    let store = Arc::new(SqliteStore::open(directory)?);
+    let vault = Arc::new(open_accounts(directory)?);
+    let clock = Arc::new(SystemClock);
+    let adapter = homeverb_mijia::MijiaAdapter::new(
+        vault,
+        Arc::new(homeverb_mijia::MijiaHttps),
+        clock.clone(),
+    )
+    .with_modern_protocol(
+        Arc::new(homeverb_mijia::MijiaHttps),
+        Arc::new(homeverb_mijia::MijiaHttps),
+    )
+    .with_event_history();
+    Ok(Core::new(
+        store,
+        vec![Arc::new(adapter)],
+        clock,
+        Policy::default(),
+    ))
+}
+
 /// Compose the real read-only adapter without loading credentials or contacting the provider.
 /// Account connection is a separate trusted native operation; there are no write grants.
 pub fn open_meiju_read_only(directory: &Path) -> Result<Core> {

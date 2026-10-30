@@ -1029,3 +1029,15 @@ publishes event descriptors. Session cancellation, background, close and deadlin
 release pending reads and suppress late output; there is no automatic retry,
 renewal, fallback, subscription, receipt or snapshot write. Occurrence timestamps
 never satisfy action verification. C/JNI signatures and storage formats are unchanged.
+
+## CLI/MCP event-history dispatch (ADR-0118)
+
+CLI event-history commands and local stdio MCP event_history_options/read tools
+call ADR-0116 Core queries directly. Exact selection/window validation, account
+and device locks, one selected-protocol request and late-result suppression remain
+unchanged. Mijia hosts opt into reviewed events and modern saved-session reads;
+legacy/modern selection comes from protected identity, never tool arguments. Reads
+cannot initiate login renewal or fallback. EOF, cancellation and deadlines release
+pending work without replay, state-cache updates or execution receipts. Eight
+read-only MCP tools do not grant any appliance-control authority; the separate
+Meiju startup-grant boundary still controls the two additional planning/execution tools.

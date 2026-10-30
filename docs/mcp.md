@@ -1,6 +1,6 @@
 # Local MCP interface
 
-Status: local stdio supports Mock reads and explicit Meiju startup. Meiju defaults
+Status: local stdio supports Mock reads and explicit Meiju/Mijia startup. Meiju defaults
 to read-only; reviewed startup grants can admit the existing experimental AC power
 and vendor fan controls, explicit power-on with mode selection, and profile-scoped
 temperature targets. Protocol and fictional execution tests cover this path;
@@ -46,7 +46,7 @@ To admit exact reviewed controls, add `--meiju-grants` and an absolute path to a
 [owner-controlled file](cli.md#scoped-meiju-controls) in the trusted host argument
 list. Explicit CLI account refresh/discovery with that file publishes action
 descriptors before MCP starts. Nonempty valid grants expose two additional tools;
-missing/empty grants keep six read tools. Invalid files refuse startup before
+missing/empty grants keep eight read tools. Invalid files refuse startup before
 opening the profile. Mock MCP remains read-only.
 
 The policy is read once at startup. Editing/removing the file does **not** revoke
@@ -67,10 +67,12 @@ The host owns the subprocess and its lifetime. No HTTP endpoint, relay, or indep
 | execution_get | request_id | One retained local receipt, without refresh or replay |
 | history_options | device_id, connection_id | Local protected options for one exact connection |
 | history_read | history | One explicit bounded numeric historical query; preserves partial-data evidence |
+| event_history_options | device_id, connection_id | Exact declared event selectors; local inspection only |
+| event_history_read | history | One explicit occurrence-time window; no event payload, retry or subscription |
 | command_plan | command | Granted sessions only: local Core validation, without discovery, refresh, journal or send |
 | command_execute | command | Granted sessions only: Core execution with existing per-device permissions, receipts and conservative outcomes |
 
-The six default tools and `command_plan` have read-only annotations.
+The eight default tools and `command_plan` have read-only annotations.
 `command_execute` is explicitly effectful. Annotations and tool visibility never
 grant authority: Core independently checks the device, component, action, arguments,
 risk and route. The closed `command` field embeds the existing
@@ -154,7 +156,7 @@ are English and contain no raw vendor responses.
 
 Under [ADR-0090](adr/0090-mijia-cli-and-historical-tools.md), a trusted host may
 select `--adapter xiaomi.mijia --data-dir /private/homeverb --profile mijia mcp
---stdio`. It uses the existing read-only native adapter. Same-user protected
+--stdio`. It uses the explicit read-only legacy/modern adapter composition under ADR-0118. Same-user protected
 credential storage is required for live reads; startup and idle sessions perform
 no login, discovery, account refresh or credential read. The supported desktop
 secret backend is Linux Secret Service; macOS credential operations fail closed.
@@ -181,3 +183,29 @@ cancellation drop pending reads without replay. Mijia admits exact daily energy 
 ADR-0105; Mock and Meiju return empty options. Sample values may be negative
 within their numeric domains and use the exact property unit or null. Preserve
 aggregation and missing units; samples are neither daily totals nor events.
+
+## Event occurrence history
+
+[ADR-0118](adr/0118-cli-mcp-event-history.md) adds event_history_options and
+event_history_read as generic read-only tools. Use exact local device/connection
+IDs and an event selector returned by inspection. The read argument is
+`{"history": <EventHistoryRequest>}` using
+[event-history.schema.json](../schemas/event-history.schema.json); its definitions
+are embedded in the advertised input schema. Requests require a positive bounded
+whole-second UTC window, with an exclusive end. Raw provider IDs/keys, event
+payloads, cursors, principals and startup configuration are not accepted.
+
+One request returns at most 31 occurrence timestamps with receipt/source, rejected
+counts, limit status and unproven completeness. Equal timestamps are separate
+rows. Missing records do not prove absence of events, and history never verifies
+an appliance action or current safety. No numeric values, actor or media payload
+is returned. No retry, login renewal, protocol fallback or subscription occurs.
+The ten-second budget, notification cancellation and EOF/SIGINT/host cleanup apply.
+
+Mijia composition supports protected saved legacy and modern sessions, selecting
+the protocol from protected evidence. An explicit CLI/native account connect or
+refresh publishes event metadata; old scalar-only descriptors need that refresh
+before options appear. Startup, tools/list and inspection never do it implicitly.
+Mock/Meiju have empty options and unsupported reads. The CLI account flow remains
+separate; MCP never authenticates, grants permissions or changes account metadata.
+Real provider and AI-host acceptance remain unverified.

@@ -63,6 +63,10 @@ This exits with code 11. Refresh state to inspect the result; do not blindly res
   Broader history and event/control coverage remain incomplete; door-lock writes are unavailable. Startup performs
   no account refresh or network operation. Explicit `--adapter xiaomi.mijia`
   also provides read-only CLI/local MCP hosting and bounded historical queries.
+  ADR-0115/0116/0117/0118 adds bounded occurrence-time history for 78 exact events
+  through Core, native API 1.44, Flutter, CLI and local MCP. The current 93cabfd
+  Android archive includes the native/App view. Same-second timestamps remain
+  separate; event payload interpretation, paging and real acceptance remain open.
 
   ADR-0109/API 1.40 adds six exact no-argument actions through native/App, with
   independent startup grants and no replay after uncertain execution. API 1.41

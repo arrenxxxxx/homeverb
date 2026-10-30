@@ -314,3 +314,34 @@ see the [sample request](../examples/history.samples.request.json). Preserve sig
 numeric values and the exact property unit, including null for unitless fields.
 Daily aggregates retain their separate units and nonnegative requirement. Never
 convert samples into inferred daily totals, current state or event history.
+
+## Event occurrence history
+
+Under [ADR-0118](adr/0118-cli-mcp-event-history.md), all host modes expose:
+
+```sh
+homeverb --adapter xiaomi.mijia event-history options <local-device-id> --connection-id <local-connection-id>
+homeverb --adapter xiaomi.mijia event-history read --file /private/event-history-request.json
+```
+
+The file contains the closed [EventHistoryRequest](../examples/event-history.request.json),
+not a command or provider payload. Only regular files up to 16 KiB are read;
+directories, FIFOs, malformed JSON, unknown fields and invalid UTC timestamps fail.
+Exact IDs, a declared event selector, occurrence_times projection and a positive
+whole-second UTC interval are required. The end is exclusive, at most 32 days
+from the start, and cannot be in the future. Request-ID/write wait/dry-run and
+nondefault route flags are rejected; the request itself selects its exact route.
+The normal CLI timeout/cancellation controls apply and resources close on exit.
+
+Inspection is local. A read returns one page of at most 31 occurrence timestamps,
+retaining duplicate times, rejected counts, record-limit status, source/receipt
+and unproven completeness. Missing rows do not prove no event occurred. There is
+no raw payload, paging, repeat, cache/receipt write or action verification. Mock
+and Meiju return empty options and unsupported reads; Mijia remains read-only.
+
+The Mijia CLI now uses the explicit legacy/modern read-only event composition.
+Protected saved account evidence chooses the protocol; requests never log in,
+renew or fall back. Explicit account connect/refresh publishes enriched event
+metadata, preserving local identity and other grants; starting a CLI/MCP process
+does not upgrade saved descriptors. The native/App interface and Android package
+93cabfd stay at API 1.44. Provider/phone/model acceptance remains unverified.

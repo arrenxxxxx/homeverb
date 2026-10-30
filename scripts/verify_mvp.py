@@ -1080,7 +1080,7 @@ class RuntimeAcceptance(unittest.TestCase):
         send({'jsonrpc':'2.0', 'method':'notifications/initialized'})
         send({'jsonrpc':'2.0', 'id':2, 'method':'tools/list'})
         tools = response()['result']['tools']
-        self.assertEqual(len(tools), 6)
+        self.assertEqual({t['name'] for t in tools}, {'device_list', 'device_describe', 'device_get_state', 'execution_get', 'history_options', 'history_read', 'event_history_options', 'event_history_read'})
         self.assertTrue(all(t['annotations']['readOnlyHint'] for t in tools))
         send({'jsonrpc':'2.0', 'id':3, 'method':'tools/call', 'params':{'name':'device_list', 'arguments':{}}})
         self.assertEqual(response()['result']['structuredContent']['data'], [])
@@ -1123,6 +1123,40 @@ class RuntimeAcceptance(unittest.TestCase):
         process.wait(timeout=2)
         self.assertEqual(process.returncode, 0)
 
+    def test_cli_event_historical_requests_are_closed_bounded_and_exact(self):
+        self.cli('device', 'discover')
+        device = self.cli('device', 'describe', 'mock-ac')['data']['device']
+        route = device['connections'][0]['id']
+        options = self.cli('event-history', 'options', device['id'], '--connection-id', route)
+        self.schema('event-history', options['data'])
+        self.assertEqual(options['data']['options'], [])
+        self.assertEqual(self.cli('event-history', 'options', 'mock-ac', '--connection-id', route, expected=2)['error']['code'], 'INVALID_ARGUMENT')
+        query = json.loads((ROOT / 'examples/event-history.request.json').read_text())
+        query.update(device_id=device['id'], connection_id=route,
+            target={'component_id':'main', 'capability':'climate', 'event':'reported_activity'})
+        path = Path(self.directory.name) / 'history.json'
+        path.write_text(json.dumps(query))
+        self.assertEqual(self.cli('event-history', 'read', '--file', str(path), expected=4)['error']['code'], 'CAPABILITY_UNSUPPORTED')
+        for prefix in [('--connection','cloud'), ('--request-id','forged'), ('--wait','accepted'), ('--dry-run',)]:
+            self.assertEqual(self.cli(*prefix, 'event-history', 'read', '--file', str(path), expected=2)['error']['code'], 'INVALID_ARGUMENT')
+        for content in [json.dumps({**query, 'principal':'admin'}), ' ' * 16385, '{']:
+            path.write_text(content)
+            self.assertEqual(self.cli('event-history', 'read', '--file', str(path), expected=2)['error']['code'], 'INVALID_ARGUMENT')
+        process, send, response = self.start_mcp(self.base)
+        send({'jsonrpc':'2.0', 'id':1, 'method':'initialize'})
+        response()
+        send({'jsonrpc':'2.0', 'method':'notifications/initialized'})
+        send({'jsonrpc':'2.0', 'id':2, 'method':'tools/call', 'params':{'name':'event_history_options', 'arguments':{'device_id':device['id'], 'connection_id':route}}})
+        result = response()['result']
+        self.assertFalse(result['isError'])
+        self.schema('event-history', result['structuredContent']['data'])
+        send({'jsonrpc':'2.0', 'id':3, 'method':'tools/call', 'params':{'name':'event_history_read', 'arguments':{'history':query}}})
+        self.assertEqual(response()['result']['structuredContent']['error']['code'], 'CAPABILITY_UNSUPPORTED')
+        self.assert_no_internet_sockets(process)
+        process.stdin.close()
+        process.wait(timeout=2)
+        self.assertEqual(process.returncode, 0)
+
     def test_mcp_protocol_read_tools_policy_and_eof_exit(self):
         self.cli('device', 'discover')
         receipt = self.cli('--scenario', 'lost-ack', '--request-id', 'mcp-receipt',
@@ -1136,7 +1170,7 @@ class RuntimeAcceptance(unittest.TestCase):
         send({'jsonrpc': '2.0', 'id': 2, 'method': 'tools/list'})
         tools = response()['result']['tools']
         self.assertEqual({tool['name'] for tool in tools},
-                         {'device_list', 'device_describe', 'device_get_state', 'execution_get', 'history_options', 'history_read'})
+                         {'device_list', 'device_describe', 'device_get_state', 'execution_get', 'history_options', 'history_read', 'event_history_options', 'event_history_read'})
         self.assertTrue(all(tool['annotations']['readOnlyHint'] for tool in tools))
         send({'jsonrpc': '2.0', 'id': 3, 'method': 'tools/call', 'params': {'name': 'device_list', 'arguments': {}}})
         listed = response()['result']
@@ -1189,7 +1223,7 @@ class RuntimeAcceptance(unittest.TestCase):
                 send({'jsonrpc':'2.0', 'method':'notifications/initialized'})
                 send({'jsonrpc':'2.0', 'id':2, 'method':'tools/list'})
                 catalog = response()['result']['tools']
-                expected = {'device_list', 'device_describe', 'device_get_state', 'execution_get', 'history_options', 'history_read'}
+                expected = {'device_list', 'device_describe', 'device_get_state', 'execution_get', 'history_options', 'history_read', 'event_history_options', 'event_history_read'}
                 if enabled:
                     expected.update(['command_plan', 'command_execute'])
                 self.assertEqual({tool['name'] for tool in catalog}, expected)

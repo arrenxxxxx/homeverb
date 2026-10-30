@@ -1,4 +1,5 @@
 mod accounts;
+mod event_history;
 mod grants;
 mod history;
 mod mcp;
@@ -67,6 +68,11 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
+    /// Inspect or read exact bounded event occurrence history.
+    EventHistory {
+        #[command(subcommand)]
+        command: event_history::EventHistoryCommand,
+    },
     /// Inspect or read an exact bounded historical series.
     History {
         #[command(subcommand)]
@@ -303,11 +309,13 @@ async fn run(cli: Cli, cancellation: CancellationToken) -> Result<u8> {
     if mijia && is_write {
         return Err(Error::new("POLICY_DENIED", "The Mijia CLI is read-only."));
     }
-    if matches!(cli.command, Commands::History { .. })
-        && (cli.dry_run
-            || cli.connection != "auto"
-            || cli.wait != "verified"
-            || cli.request_id.is_some())
+    if matches!(
+        cli.command,
+        Commands::History { .. } | Commands::EventHistory { .. }
+    ) && (cli.dry_run
+        || cli.connection != "auto"
+        || cli.wait != "verified"
+        || cli.request_id.is_some())
     {
         return Err(Error::invalid());
     }
@@ -398,7 +406,7 @@ async fn run(cli: Cli, cancellation: CancellationToken) -> Result<u8> {
         .await;
     }
     let core = if mijia {
-        homeverb_host::open_mijia_read_only(&directory)?
+        homeverb_host::open_mijia_read_only_with_events(&directory)?
     } else if meiju {
         homeverb_host::open_meiju_with_grants(&directory, grants.controls())?
     } else {
@@ -535,6 +543,7 @@ async fn run(cli: Cli, cancellation: CancellationToken) -> Result<u8> {
     }
     let query: Result<Value> = match cli.command {
         Commands::History { command } => history::run(&core, command, &operation).await,
+        Commands::EventHistory { command } => event_history::run(&core, command, &operation).await,
         Commands::Device { command } => match command {
             DeviceCommand::List => core.list().map(|v| json!(v)),
             DeviceCommand::Cards => core.list_device_cards().map(|v| json!(v)),

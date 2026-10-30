@@ -36,15 +36,15 @@ async fn invoke(core: &Arc<Core>, allow: bool, name: &str, arguments: Value) -> 
 #[tokio::test]
 async fn controls_need_host_admission_and_core_authority_without_forged_fields() {
     let (directory, core) = fixture(Scenario::Normal).await;
-    assert_eq!(tools(false)["tools"].as_array().unwrap().len(), 6);
+    assert_eq!(tools(false)["tools"].as_array().unwrap().len(), 8);
     let catalog = tools(true);
-    assert_eq!(catalog["tools"].as_array().unwrap().len(), 8);
+    assert_eq!(catalog["tools"].as_array().unwrap().len(), 10);
     let schema: Value =
         serde_json::from_str(include_str!("../../../../schemas/command.schema.json")).unwrap();
-    for tool in &catalog["tools"].as_array().unwrap()[6..] {
+    for tool in &catalog["tools"].as_array().unwrap()[8..] {
         assert_eq!(tool["inputSchema"]["properties"]["command"], schema);
     }
-    assert_eq!(catalog["tools"][7]["annotations"]["readOnlyHint"], false);
+    assert_eq!(catalog["tools"][9]["annotations"]["readOnlyHint"], false);
     for name in ["command_plan", "command_execute"] {
         let args = json!({"command":command()});
         let denied = invoke(&core, false, name, args.clone()).await;
@@ -441,4 +441,131 @@ async fn mcp_sample_history_schema_and_read_preserve_signed_unitless_records() {
     assert!(data["unit"].is_null());
     assert_eq!(data["completeness"], "unproven");
     assert!(f.core.recent_executions().unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn event_history_tools_preserve_partial_evidence_and_reject_untrusted_fields() {
+    use crate::event_history::tests::fixture as history_fixture;
+    use std::sync::atomic::Ordering;
+    let f = history_fixture().await;
+    let catalog = tools(false);
+    let options = json!({"device_id":f.query.device_id,"connection_id":f.query.connection_id});
+    let arguments = json!({"history":f.query});
+    for (name, args) in [
+        ("event_history_options", &options),
+        ("event_history_read", &arguments),
+    ] {
+        let tool = catalog["tools"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|t| t["name"] == name)
+            .unwrap();
+        assert_eq!(tool["annotations"]["readOnlyHint"], true);
+        let validator = jsonschema::validator_for(&tool["inputSchema"]).unwrap();
+        assert!(validator.is_valid(args));
+        for field in [
+            "principal",
+            "confirmed",
+            "provider",
+            "url",
+            "did",
+            "limit",
+            "payload",
+            "cursor",
+            "mijia_event_history",
+        ] {
+            let mut bad = args.clone();
+            bad[field] = json!("forged");
+            assert!(!validator.is_valid(&bad));
+            assert_eq!(
+                invoke(&f.core, false, name, bad).await["structuredContent"]["error"]["code"],
+                "INVALID_ARGUMENT"
+            );
+            if name == "event_history_read" {
+                let mut bad = args.clone();
+                bad["history"][field] = json!("forged");
+                assert!(!validator.is_valid(&bad));
+                assert_eq!(
+                    invoke(&f.core, false, name, bad).await["structuredContent"]["error"]["code"],
+                    "INVALID_ARGUMENT"
+                );
+            }
+        }
+    }
+    assert_eq!(f.adapter.calls.load(Ordering::SeqCst), 0);
+    let inspected = invoke(&f.core, false, "event_history_options", options).await;
+    assert_eq!(inspected["isError"], false);
+    assert_eq!(f.adapter.calls.load(Ordering::SeqCst), 0);
+    let result = invoke(&f.core, false, "event_history_read", arguments).await;
+    assert_eq!(result["isError"], false);
+    let data = &result["structuredContent"]["data"];
+    assert_eq!(data["records"][0], data["records"][1]);
+    assert_eq!(data["records"][0].as_object().unwrap().len(), 1);
+    assert_eq!(data["rejected_records"], 1);
+    assert_eq!(data["completeness"], "unproven");
+    assert_eq!(f.adapter.calls.load(Ordering::SeqCst), 1);
+    assert!(f.core.recent_executions().unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn event_mcp_read_stops_on_notification_eof_and_host_cancel() {
+    use crate::event_history::tests::fixture as history_fixture;
+    use std::sync::atomic::Ordering;
+    for stop in ["notification", "eof", "host"] {
+        let f = history_fixture().await;
+        f.adapter.hang.store(true, Ordering::SeqCst);
+        let token = CancellationToken::new();
+        let (mut input, server_input) = tokio::io::duplex(8192);
+        let (server_output, output) = tokio::io::duplex(8192);
+        let mut output = BufReader::new(output);
+        let server = tokio::spawn(serve_io(
+            f.core.clone(),
+            false,
+            token.clone(),
+            server_input,
+            server_output,
+        ));
+        send(
+            &mut input,
+            json!({"jsonrpc":"2.0","id":1,"method":"initialize"}),
+        )
+        .await;
+        response(&mut output).await;
+        send(
+            &mut input,
+            json!({"jsonrpc":"2.0","method":"notifications/initialized"}),
+        )
+        .await;
+        send(&mut input,json!({"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"event_history_read","arguments":{"history":f.query}}})).await;
+        tokio::time::timeout(Duration::from_secs(2), f.adapter.entered.notified())
+            .await
+            .unwrap();
+        match stop {
+            "notification" => {
+                send(&mut input,json!({"jsonrpc":"2.0","method":"notifications/cancelled","params":{"requestId":2}})).await;
+                let reply = response(&mut output).await;
+                assert_eq!(
+                    reply["result"]["structuredContent"]["error"]["code"],
+                    "CANCELLED"
+                );
+                input.shutdown().await.unwrap();
+            }
+            "eof" => {
+                input.shutdown().await.unwrap();
+            }
+            _ => token.cancel(),
+        }
+        assert_eq!(
+            tokio::time::timeout(Duration::from_secs(2), server)
+                .await
+                .unwrap()
+                .unwrap()
+                .unwrap(),
+            0
+        );
+        assert_eq!(f.adapter.calls.load(Ordering::SeqCst), 1);
+        assert_eq!(f.adapter.active.load(Ordering::SeqCst), 0);
+        assert!(f.core.recent_executions().unwrap().is_empty());
+    }
 }

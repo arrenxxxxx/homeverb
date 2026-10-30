@@ -1090,3 +1090,21 @@ receive no event startup field; the actual 1.44 library validates empty producti
 Mijia/combined compositions without credentials or provider calls. Broader affected
 control/permission tests are recorded in the App verification record. Tests do not
 establish phone/provider/model acceptance or physical effects.
+
+## CLI/MCP event-history checks
+
+ADR-0118 adds generic event adapter fixtures to the CLI and stdio MCP tests. Run:
+
+```sh
+cargo +1.96.0 test -p homeverb-cli --offline --locked -- --test-threads=4
+cargo +1.96.0 test -p homeverb-host --test mijia_startup --offline --locked -- --test-threads=4
+cargo +1.96.0 build --workspace --offline --locked
+python3 scripts/verify_mvp.py
+```
+
+These checks cover exact selectors, closed shared input schemas, repeated times,
+read-only options, regular-file bounds/FIFO refusal, deadline/cancellation cleanup,
+MCP notification/EOF/host shutdown and actual subprocess error/exit behavior.
+Existing protected adapter tests cover all 78 events through both protocols.
+Startup/idle tests use empty real-mode profiles and fictional peers; no real
+credentials, provider traffic or physical actuation is part of this evidence.

@@ -67,7 +67,13 @@ pub async fn run(
         super::terminal::require_interactive()?;
     }
     let session = if mijia {
-        homeverb_host::open_mijia_session(directory)?
+        homeverb_host::open_mijia_session_with_options(
+            directory,
+            homeverb_host::MijiaSessionOptions {
+                event_history: true,
+                ..Default::default()
+            },
+        )?
     } else {
         homeverb_host::open_meiju_session_with_grants(directory, grants.controls())?
     };
