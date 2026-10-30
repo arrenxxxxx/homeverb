@@ -2151,3 +2151,14 @@ or returned. Ordinary requests cannot enable the startup flag. Mock/Meiju return
 empty options and unsupported reads. Event argument interpretation, Flutter
 adoption and a matching Android package remain subsequent work; the verified
 85fefd8 APK remains API 1.43.
+
+### Flutter event history adoption
+
+The App now implements the API 1.44 event dialog and startup negotiation above.
+Production Mijia/combined startup requests the opt-in after an ungranted version/
+method probe; direct NativeClient.open callers default to disabled unless they
+supply mijiaEventHistory. Event-only components need no readable property and
+known such components skip selected-device state reads. Event history remains
+explicit and ephemeral; the visible-state timer is suspended while its dialog is
+open. Shared catalogs cover all 78 selectors. APK adoption and real acceptance
+remain pending; see the [App verification record](../apps/mobile/verification.md).

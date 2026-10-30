@@ -1855,7 +1855,7 @@ String? translateSource(
   "Horizontal angle" => t.vendorXiaomiMijiaFanHorizontalAngle,
   "Door lock" => t.vendorXiaomiMijiaLock,
   "Lock status code" => t.vendorXiaomiMijiaLockStatus,
-  "Doorbell" => t.vendorXiaomiMijiaDoorbell,
+  "Doorbell" => t.componentDoorbell5,
   "Doorbell volume" => t.vendorXiaomiMijiaDoorbellVolume,
   "Battery" => t.vendorXiaomiMijiaBattery,
   "Battery level" => t.vendorXiaomiMijiaBatteryLevel,
@@ -2087,8 +2087,10 @@ String? translateSource(
   "Virtual fence" => t.vendorXiaomiMijiaVirtualFence,
   "Virtual fence 15" => t.componentVirtualFence15,
   "Virtual fence switch" => t.vendorXiaomiMijiaVirtualFenceVirtualFenceSwitch1,
-  "People fence in" => t.vendorXiaomiMijiaVirtualFencePeopleFenceIn3,
-  "People fence out" => t.vendorXiaomiMijiaVirtualFencePeopleFenceOut4,
+  "People fence in" =>
+    t.vendorXiaomiMijiaEventMiotSpecV2VirtualFencePeopleFenceIn1,
+  "People fence out" =>
+    t.vendorXiaomiMijiaEventMiotSpecV2VirtualFencePeopleFenceOut2,
   "Area shape" => t.vendorXiaomiMijiaVirtualFenceAreaShape7,
   "Area support concave" => t.vendorXiaomiMijiaVirtualFenceAreaSupportConcave8,
   "Area display switch" => t.vendorXiaomiMijiaVirtualFenceAreaDisplaySwitch5,
@@ -2351,6 +2353,117 @@ String? translateSource(
       device: args["device"] ?? "{device}",
       target: args["target"] ?? "{target}",
     ),
+  "Event history" => t.eventHistoryTitle,
+  "Choose an event and a UTC time range, then read once. The end time is excluded." =>
+    t.eventHistoryInstructions,
+  "{component}: {event}" => t.eventHistoryOption(
+    component: args["component"] ?? "{component}",
+    event: args["event"] ?? "{event}",
+  ),
+  "No event history is available on this connection." =>
+    t.eventHistoryUnavailable,
+  "Read events" => t.eventHistoryRead,
+  "Reported occurrence times" => t.eventHistoryProjection,
+  "Completeness is unproven. Missing records do not prove that no event occurred. These timestamps are not current state or proof of a device action." =>
+    t.eventHistoryIncomplete,
+  "This component has no readable state." => t.eventHistoryNoState,
+  "The historical response does not match the selected query." =>
+    t.errorINVALIDHISTORY,
+  "Event history requires native API 1.44." =>
+    t.mobileEventHistoryRequiresNativeApi144,
+  "Event history requires a Mijia session." =>
+    t.mobileEventHistoryRequiresMijiaSession,
+  "Open event" => t.vendorXiaomiMijiaEventCucoSpecQuickCountdownOpenEvent1,
+  "Daily electricity limit alert" =>
+    t.vendorXiaomiMijiaEventCucoSpecOverUseEleAlertOverDayPush1,
+  "Monthly electricity limit alert" =>
+    t.vendorXiaomiMijiaEventCucoSpecOverUseEleAlertOverMonthPush2,
+  "Click" => t.vendorXiaomiMijiaEventMiotSpecV2SwitchSensorClick1,
+  "Double click" => t.vendorXiaomiMijiaEventMiotSpecV2SwitchSensorDoubleClick2,
+  "Long press" => t.vendorXiaomiMijiaEventMiotSpecV2SwitchSensorLongPress3,
+  "Lock event" => t.vendorXiaomiMijiaEventMiotSpecV2LockLockEvent1020,
+  "Lock" => t.componentLock2,
+  "Exception occurred" =>
+    t.vendorXiaomiMijiaEventMiotSpecV2LockExceptionOccurred1007,
+  "Doorbell ring" =>
+    t.vendorXiaomiMijiaEventMiotSpecV2VideoDoorbellDoorbellRing2,
+  "Someone passed by" =>
+    t.vendorXiaomiMijiaEventMiotSpecV2VideoDoorbellSomeonePassedBy4,
+  "Someone at the door" =>
+    t.vendorXiaomiMijiaEventMiotSpecV2VideoDoorbellSomeoneAtTheDoor3,
+  "Low battery" => t.vendorXiaomiMijiaEventMadvSpecMadvDoorbellLowBattery16,
+  "Device be reset" =>
+    t.vendorXiaomiMijiaEventMiotSpecV2SubmersionSensorDeviceBeReset1028,
+  "Doorbell forcibly removed" =>
+    t.vendorXiaomiMijiaEventMiotSpecV2VideoDoorbellDoorbellForciblyRemoved1,
+  "Upgrade event" => t.vendorXiaomiMijiaEventMadvSpecMadvDoorbellUpgradeEvent8,
+  "Upgrade success" =>
+    t.vendorXiaomiMijiaEventMadvSpecMadvDoorbellUpgradeSuccess10,
+  "Upgrade fail" => t.vendorXiaomiMijiaEventMadvSpecMadvDoorbellUpgradeFail11,
+  "No battery" => t.vendorXiaomiMijiaEventMadvSpecMadvDoorbellNoBattery12,
+  "New battery" => t.vendorXiaomiMijiaEventMadvSpecMadvDoorbellNewBattery17,
+  "Abnormal temperature" =>
+    t.vendorXiaomiMijiaEventMadvSpecMadvDoorbellTempAbnormal18,
+  "Switch sensor" => t.componentSwitchSensor3,
+  "Infrared turned on" =>
+    t.vendorXiaomiMijiaEventMiotSpecV2CameraControlIrTurnedOn1,
+  "Infrared turned off" =>
+    t.vendorXiaomiMijiaEventMiotSpecV2CameraControlIrTurnedOff2,
+  "Baby crying detected" =>
+    t.vendorXiaomiMijiaEventMiotSpecV2AiDetectionDetectedBabycryEvent7,
+  "Object motion" =>
+    t.vendorXiaomiMijiaEventMiotSpecV2AiDetectionObjectMotion10,
+  "Someone appeared" =>
+    t.vendorXiaomiMijiaEventMiotSpecV2AiDetectionSomeoneAppeared2,
+  "Pet appeared" => t.vendorXiaomiMijiaEventMiotSpecV2AiDetectionPetAppeared6,
+  "Abnormal sound" =>
+    t.vendorXiaomiMijiaEventMiotSpecV2AiDetectionAbnormalSound18,
+  "Entered watched area" =>
+    t.vendorXiaomiMijiaEventMiotSpecV2CameraFavAreaIntoFavArea1,
+  "Left watched area" =>
+    t.vendorXiaomiMijiaEventMiotSpecV2CameraFavAreaOutFavArea2,
+  "Cruise started" => t.vendorXiaomiMijiaEventMiotSpecV2CruiseCruiseStarted1,
+  "Cruise ended" => t.vendorXiaomiMijiaEventMiotSpecV2CruiseCruiseEnded2,
+  "Fire smoke event" =>
+    t.vendorXiaomiMijiaEventMiotSpecV2FireSmokeFireSmokeEvent1,
+  "Self check complete" =>
+    t.vendorXiaomiMijiaEventMiotSpecV2SelfCheckSelfCheckComplete1,
+  "Key call start" => t.vendorXiaomiMijiaEventMiotSpecV2KeyCallKeyCallStart1,
+  "Phone call start" =>
+    t.vendorXiaomiMijiaEventMiotSpecV2KeyCallPhoneCallStart2,
+  "No person for a long time" =>
+    t.vendorXiaomiMijiaEventXiaomiSpecFamilyGuardLongTimeNoHumang1,
+  "Family guard" => t.componentFamilyGuard16,
+  "No person appeared" =>
+    t.vendorXiaomiMijiaEventXiaomiSpecOtherFunctionsNoHuamnAppear1,
+  "Re-identification event" =>
+    t.vendorXiaomiMijiaEventXiaomiSpecOtherFunctionsReidEvent2,
+  "Submersion sensor event" =>
+    t.vendorXiaomiMijiaEventMiotSpecV2SubmersionSensorSubmersionSensorEvent1104,
+  "Customized event 1" =>
+    t.vendorXiaomiMijiaEventMiotSpecV2CustomizedServiceForBleCustomizedEvent11022,
+  "Customized service for ble" => t.componentCustomizedServiceForBle6,
+  "Network changed" => t.vendorXiaomiMijiaEventMiotSpecV2GatewayNetworkChanged2,
+  "Virtual event" =>
+    t.vendorXiaomiMijiaEventMiotSpecV2VirtualServiceVirtualEvent1,
+  "Virtual service" => t.componentVirtualService4,
+  "Clean remind" => t.vendorXiaomiMijiaEventMiotSpecV2HoodCleanRemind1,
+  "Auto ventilation open" =>
+    t.vendorXiaomiMijiaEventMiotSpecV2HoodAutoVentilationOpen9,
+  "Auto ventilation close" =>
+    t.vendorXiaomiMijiaEventMiotSpecV2HoodAutoVentilationClose5,
+  "Auto ventilation invalid" =>
+    t.vendorXiaomiMijiaEventMiotSpecV2HoodAutoVentilationInvalid6,
+  "Oil cup clean remind" =>
+    t.vendorXiaomiMijiaEventMiotSpecV2HoodOilCupCleanRemind8,
+  "Working remind" =>
+    t.vendorXiaomiMijiaEventMiotSpecV2KitchenStoveWorkingRemind1,
+  "Off on time" => t.vendorXiaomiMijiaEventMiotSpecV2KitchenStoveOffOnTime2,
+  "Cooking finished" =>
+    t.vendorXiaomiMijiaEventMiotSpecV2KitchenStoveCookingFinished3,
+  "Dry cleaning timing remind" =>
+    t.vendorXiaomiMijiaEventMiotSpecV2HoodSmartDryWashDryCleaningTimingRemind1,
+  "Particle warning" => t.vendorXiaomiMijiaEventMiotSpecV2EnvironmentPmWarning1,
   _ => null,
 };
 
@@ -2404,6 +2517,7 @@ String translateError(Translations t, String code) => switch (code) {
   "MIJIA_INVENTORY_PARTIAL" => t.errorMIJIAINVENTORYPARTIAL,
   "MIJIA_SPEC_UNAVAILABLE" => t.errorMIJIASPECUNAVAILABLE,
   "MIJIA_DEVICE_NOT_LISTED" => t.errorMIJIADEVICENOTLISTED,
+  "INVALID_HISTORY" => t.errorINVALIDHISTORY,
   _ => t.errorGeneric(code: code),
 };
 
@@ -4733,5 +4847,161 @@ String? sourceForKey(String key) => switch (key) {
   "vendor.xiaomi.mijia.custom.set_child_lock_7" => "Set outlet button lock",
   "vendor.xiaomi.mijia.custom.set_child_lock_7.confirm" =>
     "Set {device} button lock to {target}? This may prevent local button operation. It does not set power, and acceptance does not confirm the button state.",
+  "eventHistory.title" => "Event history",
+  "eventHistory.instructions" =>
+    "Choose an event and a UTC time range, then read once. The end time is excluded.",
+  "eventHistory.option" => "{component}: {event}",
+  "eventHistory.unavailable" =>
+    "No event history is available on this connection.",
+  "eventHistory.read" => "Read events",
+  "eventHistory.projection" => "Reported occurrence times",
+  "eventHistory.incomplete" =>
+    "Completeness is unproven. Missing records do not prove that no event occurred. These timestamps are not current state or proof of a device action.",
+  "eventHistory.noState" => "This component has no readable state.",
+  "error.INVALID_HISTORY" =>
+    "The historical response does not match the selected query.",
+  "mobile.eventHistoryRequiresNativeApi144" =>
+    "Event history requires native API 1.44.",
+  "mobile.eventHistoryRequiresMijiaSession" =>
+    "Event history requires a Mijia session.",
+  "vendor.xiaomi.mijia.event.cuco_spec.quick_countdown.open_event_1" =>
+    "Open event",
+  "vendor.xiaomi.mijia.event.cuco_spec.over_use_ele_alert.over_day_push_1" =>
+    "Daily electricity limit alert",
+  "vendor.xiaomi.mijia.event.cuco_spec.over_use_ele_alert.over_month_push_2" =>
+    "Monthly electricity limit alert",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.switch_sensor_for_ble.click_1012" =>
+    "Click",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.switch_sensor_for_ble.double_click_1013" =>
+    "Double click",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.switch_sensor_for_ble.long_press_1014" =>
+    "Long press",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.lock.lock_event_1020" => "Lock event",
+  "component.lock_2" => "Lock",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.lock.exception_occurred_1007" =>
+    "Exception occurred",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.doorbell.doorbell_ring_1006" =>
+    "Doorbell ring",
+  "component.doorbell_5" => "Doorbell",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.video_doorbell.doorbell_ring_1" =>
+    "Doorbell ring",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.video_doorbell.someone_passed_by_3" =>
+    "Someone passed by",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.video_doorbell.someone_at_the_door_4" =>
+    "Someone at the door",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.battery.low_battery_1" =>
+    "Low battery",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.battery.low_battery_1001" =>
+    "Low battery",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.switch_sensor_for_ble.device_be_reset_1028" =>
+    "Device be reset",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.video_doorbell.doorbell_forcibly_removed_1" =>
+    "Doorbell forcibly removed",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.video_doorbell.doorbell_ring_2" =>
+    "Doorbell ring",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.video_doorbell.someone_at_the_door_3" =>
+    "Someone at the door",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.video_doorbell.someone_passed_by_4" =>
+    "Someone passed by",
+  "vendor.xiaomi.mijia.event.madv_spec.madv_doorbell.upgrade_event_8" =>
+    "Upgrade event",
+  "vendor.xiaomi.mijia.event.madv_spec.madv_doorbell.upgrade_success_10" =>
+    "Upgrade success",
+  "vendor.xiaomi.mijia.event.madv_spec.madv_doorbell.upgrade_fail_11" =>
+    "Upgrade fail",
+  "vendor.xiaomi.mijia.event.madv_spec.madv_doorbell.no_battery_12" =>
+    "No battery",
+  "vendor.xiaomi.mijia.event.madv_spec.madv_doorbell.low_battery_16" =>
+    "Low battery",
+  "vendor.xiaomi.mijia.event.madv_spec.madv_doorbell.new_battery_17" =>
+    "New battery",
+  "vendor.xiaomi.mijia.event.madv_spec.madv_doorbell.temp_abnormal_18" =>
+    "Abnormal temperature",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.switch_sensor.click_1" => "Click",
+  "component.switch_sensor_2" => "Switch sensor",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.switch_sensor.double_click_2" =>
+    "Double click",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.switch_sensor.long_press_3" =>
+    "Long press",
+  "component.switch_sensor_3" => "Switch sensor",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.camera_control.ir_turned_on_1" =>
+    "Infrared turned on",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.camera_control.ir_turned_off_2" =>
+    "Infrared turned off",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.ai_detection.detected_babycry_event_7" =>
+    "Baby crying detected",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.ai_detection.object_motion_10" =>
+    "Object motion",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.ai_detection.someone_appeared_2" =>
+    "Someone appeared",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.ai_detection.pet_appeared_6" =>
+    "Pet appeared",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.ai_detection.abnormal_sound_18" =>
+    "Abnormal sound",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.camera_fav_area.into_fav_area_1" =>
+    "Entered watched area",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.camera_fav_area.out_fav_area_2" =>
+    "Left watched area",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.cruise.cruise_started_1" =>
+    "Cruise started",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.cruise.cruise_ended_2" =>
+    "Cruise ended",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.virtual_fence.people_fence_in_1" =>
+    "People fence in",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.virtual_fence.people_fence_out_2" =>
+    "People fence out",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.fire_smoke.fire_smoke_event_1" =>
+    "Fire smoke event",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.self_check.self_check_complete_1" =>
+    "Self check complete",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.key_call.key_call_start_1" =>
+    "Key call start",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.key_call.phone_call_start_2" =>
+    "Phone call start",
+  "vendor.xiaomi.mijia.event.xiaomi_spec.family_guard.long_time_no_humang_1" =>
+    "No person for a long time",
+  "component.family_guard_16" => "Family guard",
+  "vendor.xiaomi.mijia.event.xiaomi_spec.other_functions.no_huamn_appear_1" =>
+    "No person appeared",
+  "vendor.xiaomi.mijia.event.xiaomi_spec.other_functions.reid_event_2" =>
+    "Re-identification event",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.submersion_sensor.submersion_sensor_event_1104" =>
+    "Submersion sensor event",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.submersion_sensor.device_be_reset_1028" =>
+    "Device be reset",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.customized_service_for_ble.customized_event_1_1022" =>
+    "Customized event 1",
+  "component.customized_service_for_ble_6" => "Customized service for ble",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.gateway.network_changed_1" =>
+    "Network changed",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.gateway.network_changed_2" =>
+    "Network changed",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.virtual_service.virtual_event_1" =>
+    "Virtual event",
+  "component.virtual_service_4" => "Virtual service",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.hood.clean_remind_1" =>
+    "Clean remind",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.hood.auto_ventilation_open_4" =>
+    "Auto ventilation open",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.hood.auto_ventilation_close_5" =>
+    "Auto ventilation close",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.hood.auto_ventilation_invalid_6" =>
+    "Auto ventilation invalid",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.hood.oil_cup_clean_remind_7" =>
+    "Oil cup clean remind",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.hood.oil_cup_clean_remind_8" =>
+    "Oil cup clean remind",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.hood.auto_ventilation_open_9" =>
+    "Auto ventilation open",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.kitchen_stove.working_remind_1" =>
+    "Working remind",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.kitchen_stove.off_on_time_2" =>
+    "Off on time",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.kitchen_stove.cooking_finished_3" =>
+    "Cooking finished",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.hood_smart_dry_wash.dry_cleaning_timing_remind_1" =>
+    "Dry cleaning timing remind",
+  "vendor.xiaomi.mijia.event.miot_spec_v2.environment.pm_warning_1" =>
+    "Particle warning",
   _ => null,
 };

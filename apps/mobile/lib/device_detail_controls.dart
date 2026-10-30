@@ -196,10 +196,15 @@ class DeviceDetailControls extends StatelessWidget {
                   : controlLabel(capability['id'] as String),
               onAction: onAction,
             ),
+        if (!c.componentHasReadableState(c.component))
+          const Copy('This component has no readable state.', control: true),
         ActionButton(
           'Refresh State',
           style: 'secondary',
-          onPressed: c.busy || !c.isForeground
+          onPressed:
+              c.busy ||
+                  !c.isForeground ||
+                  !c.componentHasReadableState(c.component)
               ? null
               : () => onAction('Refresh State'),
         ),

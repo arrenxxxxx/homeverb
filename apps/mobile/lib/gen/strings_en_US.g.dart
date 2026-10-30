@@ -5612,4 +5612,259 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Set {device} button lock to {target}? This may prevent local button operation. It does not set power, and acceptance does not confirm the button state.'
 	String vendorXiaomiMijiaCustomSetChildLock7Confirm({required Object device, required Object target}) => 'Set ${device} button lock to ${target}? This may prevent local button operation. It does not set power, and acceptance does not confirm the button state.';
+
+	/// en-US: 'Event history'
+	String get eventHistoryTitle => 'Event history';
+
+	/// en-US: 'Choose an event and a UTC time range, then read once. The end time is excluded.'
+	String get eventHistoryInstructions => 'Choose an event and a UTC time range, then read once. The end time is excluded.';
+
+	/// en-US: '{component}: {event}'
+	String eventHistoryOption({required Object component, required Object event}) => '${component}: ${event}';
+
+	/// en-US: 'No event history is available on this connection.'
+	String get eventHistoryUnavailable => 'No event history is available on this connection.';
+
+	/// en-US: 'Read events'
+	String get eventHistoryRead => 'Read events';
+
+	/// en-US: 'Reported occurrence times'
+	String get eventHistoryProjection => 'Reported occurrence times';
+
+	/// en-US: 'Completeness is unproven. Missing records do not prove that no event occurred. These timestamps are not current state or proof of a device action.'
+	String get eventHistoryIncomplete => 'Completeness is unproven. Missing records do not prove that no event occurred. These timestamps are not current state or proof of a device action.';
+
+	/// en-US: 'This component has no readable state.'
+	String get eventHistoryNoState => 'This component has no readable state.';
+
+	/// en-US: 'The historical response does not match the selected query.'
+	String get errorINVALIDHISTORY => 'The historical response does not match the selected query.';
+
+	/// en-US: 'Event history requires native API 1.44.'
+	String get mobileEventHistoryRequiresNativeApi144 => 'Event history requires native API 1.44.';
+
+	/// en-US: 'Event history requires a Mijia session.'
+	String get mobileEventHistoryRequiresMijiaSession => 'Event history requires a Mijia session.';
+
+	/// en-US: 'Open event'
+	String get vendorXiaomiMijiaEventCucoSpecQuickCountdownOpenEvent1 => 'Open event';
+
+	/// en-US: 'Daily electricity limit alert'
+	String get vendorXiaomiMijiaEventCucoSpecOverUseEleAlertOverDayPush1 => 'Daily electricity limit alert';
+
+	/// en-US: 'Monthly electricity limit alert'
+	String get vendorXiaomiMijiaEventCucoSpecOverUseEleAlertOverMonthPush2 => 'Monthly electricity limit alert';
+
+	/// en-US: 'Click'
+	String get vendorXiaomiMijiaEventMiotSpecV2SwitchSensorForBleClick1012 => 'Click';
+
+	/// en-US: 'Double click'
+	String get vendorXiaomiMijiaEventMiotSpecV2SwitchSensorForBleDoubleClick1013 => 'Double click';
+
+	/// en-US: 'Long press'
+	String get vendorXiaomiMijiaEventMiotSpecV2SwitchSensorForBleLongPress1014 => 'Long press';
+
+	/// en-US: 'Lock event'
+	String get vendorXiaomiMijiaEventMiotSpecV2LockLockEvent1020 => 'Lock event';
+
+	/// en-US: 'Lock'
+	String get componentLock2 => 'Lock';
+
+	/// en-US: 'Exception occurred'
+	String get vendorXiaomiMijiaEventMiotSpecV2LockExceptionOccurred1007 => 'Exception occurred';
+
+	/// en-US: 'Doorbell ring'
+	String get vendorXiaomiMijiaEventMiotSpecV2DoorbellDoorbellRing1006 => 'Doorbell ring';
+
+	/// en-US: 'Doorbell'
+	String get componentDoorbell5 => 'Doorbell';
+
+	/// en-US: 'Doorbell ring'
+	String get vendorXiaomiMijiaEventMiotSpecV2VideoDoorbellDoorbellRing1 => 'Doorbell ring';
+
+	/// en-US: 'Someone passed by'
+	String get vendorXiaomiMijiaEventMiotSpecV2VideoDoorbellSomeonePassedBy3 => 'Someone passed by';
+
+	/// en-US: 'Someone at the door'
+	String get vendorXiaomiMijiaEventMiotSpecV2VideoDoorbellSomeoneAtTheDoor4 => 'Someone at the door';
+
+	/// en-US: 'Low battery'
+	String get vendorXiaomiMijiaEventMiotSpecV2BatteryLowBattery1 => 'Low battery';
+
+	/// en-US: 'Low battery'
+	String get vendorXiaomiMijiaEventMiotSpecV2BatteryLowBattery1001 => 'Low battery';
+
+	/// en-US: 'Device be reset'
+	String get vendorXiaomiMijiaEventMiotSpecV2SwitchSensorForBleDeviceBeReset1028 => 'Device be reset';
+
+	/// en-US: 'Doorbell forcibly removed'
+	String get vendorXiaomiMijiaEventMiotSpecV2VideoDoorbellDoorbellForciblyRemoved1 => 'Doorbell forcibly removed';
+
+	/// en-US: 'Doorbell ring'
+	String get vendorXiaomiMijiaEventMiotSpecV2VideoDoorbellDoorbellRing2 => 'Doorbell ring';
+
+	/// en-US: 'Someone at the door'
+	String get vendorXiaomiMijiaEventMiotSpecV2VideoDoorbellSomeoneAtTheDoor3 => 'Someone at the door';
+
+	/// en-US: 'Someone passed by'
+	String get vendorXiaomiMijiaEventMiotSpecV2VideoDoorbellSomeonePassedBy4 => 'Someone passed by';
+
+	/// en-US: 'Upgrade event'
+	String get vendorXiaomiMijiaEventMadvSpecMadvDoorbellUpgradeEvent8 => 'Upgrade event';
+
+	/// en-US: 'Upgrade success'
+	String get vendorXiaomiMijiaEventMadvSpecMadvDoorbellUpgradeSuccess10 => 'Upgrade success';
+
+	/// en-US: 'Upgrade fail'
+	String get vendorXiaomiMijiaEventMadvSpecMadvDoorbellUpgradeFail11 => 'Upgrade fail';
+
+	/// en-US: 'No battery'
+	String get vendorXiaomiMijiaEventMadvSpecMadvDoorbellNoBattery12 => 'No battery';
+
+	/// en-US: 'Low battery'
+	String get vendorXiaomiMijiaEventMadvSpecMadvDoorbellLowBattery16 => 'Low battery';
+
+	/// en-US: 'New battery'
+	String get vendorXiaomiMijiaEventMadvSpecMadvDoorbellNewBattery17 => 'New battery';
+
+	/// en-US: 'Abnormal temperature'
+	String get vendorXiaomiMijiaEventMadvSpecMadvDoorbellTempAbnormal18 => 'Abnormal temperature';
+
+	/// en-US: 'Click'
+	String get vendorXiaomiMijiaEventMiotSpecV2SwitchSensorClick1 => 'Click';
+
+	/// en-US: 'Switch sensor'
+	String get componentSwitchSensor2 => 'Switch sensor';
+
+	/// en-US: 'Double click'
+	String get vendorXiaomiMijiaEventMiotSpecV2SwitchSensorDoubleClick2 => 'Double click';
+
+	/// en-US: 'Long press'
+	String get vendorXiaomiMijiaEventMiotSpecV2SwitchSensorLongPress3 => 'Long press';
+
+	/// en-US: 'Switch sensor'
+	String get componentSwitchSensor3 => 'Switch sensor';
+
+	/// en-US: 'Infrared turned on'
+	String get vendorXiaomiMijiaEventMiotSpecV2CameraControlIrTurnedOn1 => 'Infrared turned on';
+
+	/// en-US: 'Infrared turned off'
+	String get vendorXiaomiMijiaEventMiotSpecV2CameraControlIrTurnedOff2 => 'Infrared turned off';
+
+	/// en-US: 'Baby crying detected'
+	String get vendorXiaomiMijiaEventMiotSpecV2AiDetectionDetectedBabycryEvent7 => 'Baby crying detected';
+
+	/// en-US: 'Object motion'
+	String get vendorXiaomiMijiaEventMiotSpecV2AiDetectionObjectMotion10 => 'Object motion';
+
+	/// en-US: 'Someone appeared'
+	String get vendorXiaomiMijiaEventMiotSpecV2AiDetectionSomeoneAppeared2 => 'Someone appeared';
+
+	/// en-US: 'Pet appeared'
+	String get vendorXiaomiMijiaEventMiotSpecV2AiDetectionPetAppeared6 => 'Pet appeared';
+
+	/// en-US: 'Abnormal sound'
+	String get vendorXiaomiMijiaEventMiotSpecV2AiDetectionAbnormalSound18 => 'Abnormal sound';
+
+	/// en-US: 'Entered watched area'
+	String get vendorXiaomiMijiaEventMiotSpecV2CameraFavAreaIntoFavArea1 => 'Entered watched area';
+
+	/// en-US: 'Left watched area'
+	String get vendorXiaomiMijiaEventMiotSpecV2CameraFavAreaOutFavArea2 => 'Left watched area';
+
+	/// en-US: 'Cruise started'
+	String get vendorXiaomiMijiaEventMiotSpecV2CruiseCruiseStarted1 => 'Cruise started';
+
+	/// en-US: 'Cruise ended'
+	String get vendorXiaomiMijiaEventMiotSpecV2CruiseCruiseEnded2 => 'Cruise ended';
+
+	/// en-US: 'People fence in'
+	String get vendorXiaomiMijiaEventMiotSpecV2VirtualFencePeopleFenceIn1 => 'People fence in';
+
+	/// en-US: 'People fence out'
+	String get vendorXiaomiMijiaEventMiotSpecV2VirtualFencePeopleFenceOut2 => 'People fence out';
+
+	/// en-US: 'Fire smoke event'
+	String get vendorXiaomiMijiaEventMiotSpecV2FireSmokeFireSmokeEvent1 => 'Fire smoke event';
+
+	/// en-US: 'Self check complete'
+	String get vendorXiaomiMijiaEventMiotSpecV2SelfCheckSelfCheckComplete1 => 'Self check complete';
+
+	/// en-US: 'Key call start'
+	String get vendorXiaomiMijiaEventMiotSpecV2KeyCallKeyCallStart1 => 'Key call start';
+
+	/// en-US: 'Phone call start'
+	String get vendorXiaomiMijiaEventMiotSpecV2KeyCallPhoneCallStart2 => 'Phone call start';
+
+	/// en-US: 'No person for a long time'
+	String get vendorXiaomiMijiaEventXiaomiSpecFamilyGuardLongTimeNoHumang1 => 'No person for a long time';
+
+	/// en-US: 'Family guard'
+	String get componentFamilyGuard16 => 'Family guard';
+
+	/// en-US: 'No person appeared'
+	String get vendorXiaomiMijiaEventXiaomiSpecOtherFunctionsNoHuamnAppear1 => 'No person appeared';
+
+	/// en-US: 'Re-identification event'
+	String get vendorXiaomiMijiaEventXiaomiSpecOtherFunctionsReidEvent2 => 'Re-identification event';
+
+	/// en-US: 'Submersion sensor event'
+	String get vendorXiaomiMijiaEventMiotSpecV2SubmersionSensorSubmersionSensorEvent1104 => 'Submersion sensor event';
+
+	/// en-US: 'Device be reset'
+	String get vendorXiaomiMijiaEventMiotSpecV2SubmersionSensorDeviceBeReset1028 => 'Device be reset';
+
+	/// en-US: 'Customized event 1'
+	String get vendorXiaomiMijiaEventMiotSpecV2CustomizedServiceForBleCustomizedEvent11022 => 'Customized event 1';
+
+	/// en-US: 'Customized service for ble'
+	String get componentCustomizedServiceForBle6 => 'Customized service for ble';
+
+	/// en-US: 'Network changed'
+	String get vendorXiaomiMijiaEventMiotSpecV2GatewayNetworkChanged1 => 'Network changed';
+
+	/// en-US: 'Network changed'
+	String get vendorXiaomiMijiaEventMiotSpecV2GatewayNetworkChanged2 => 'Network changed';
+
+	/// en-US: 'Virtual event'
+	String get vendorXiaomiMijiaEventMiotSpecV2VirtualServiceVirtualEvent1 => 'Virtual event';
+
+	/// en-US: 'Virtual service'
+	String get componentVirtualService4 => 'Virtual service';
+
+	/// en-US: 'Clean remind'
+	String get vendorXiaomiMijiaEventMiotSpecV2HoodCleanRemind1 => 'Clean remind';
+
+	/// en-US: 'Auto ventilation open'
+	String get vendorXiaomiMijiaEventMiotSpecV2HoodAutoVentilationOpen4 => 'Auto ventilation open';
+
+	/// en-US: 'Auto ventilation close'
+	String get vendorXiaomiMijiaEventMiotSpecV2HoodAutoVentilationClose5 => 'Auto ventilation close';
+
+	/// en-US: 'Auto ventilation invalid'
+	String get vendorXiaomiMijiaEventMiotSpecV2HoodAutoVentilationInvalid6 => 'Auto ventilation invalid';
+
+	/// en-US: 'Oil cup clean remind'
+	String get vendorXiaomiMijiaEventMiotSpecV2HoodOilCupCleanRemind7 => 'Oil cup clean remind';
+
+	/// en-US: 'Oil cup clean remind'
+	String get vendorXiaomiMijiaEventMiotSpecV2HoodOilCupCleanRemind8 => 'Oil cup clean remind';
+
+	/// en-US: 'Auto ventilation open'
+	String get vendorXiaomiMijiaEventMiotSpecV2HoodAutoVentilationOpen9 => 'Auto ventilation open';
+
+	/// en-US: 'Working remind'
+	String get vendorXiaomiMijiaEventMiotSpecV2KitchenStoveWorkingRemind1 => 'Working remind';
+
+	/// en-US: 'Off on time'
+	String get vendorXiaomiMijiaEventMiotSpecV2KitchenStoveOffOnTime2 => 'Off on time';
+
+	/// en-US: 'Cooking finished'
+	String get vendorXiaomiMijiaEventMiotSpecV2KitchenStoveCookingFinished3 => 'Cooking finished';
+
+	/// en-US: 'Dry cleaning timing remind'
+	String get vendorXiaomiMijiaEventMiotSpecV2HoodSmartDryWashDryCleaningTimingRemind1 => 'Dry cleaning timing remind';
+
+	/// en-US: 'Particle warning'
+	String get vendorXiaomiMijiaEventMiotSpecV2EnvironmentPmWarning1 => 'Particle warning';
 }

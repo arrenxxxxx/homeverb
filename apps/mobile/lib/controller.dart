@@ -111,6 +111,9 @@ class HomeController extends ChangeNotifier {
           if (!current()) return;
           if ((part['capabilities'] as List? ?? []).isEmpty) continue;
           final componentId = part['id'] as String;
+          if (description?['device']?['id'] == deviceId &&
+              !componentHasReadableState(componentId))
+            continue;
           try {
             final next =
                 await client.call('read_state', {
@@ -745,6 +748,24 @@ class HomeController extends ChangeNotifier {
         .toList();
   }
 
+  bool _descriptorHasReadableState(Json descriptor, String id) {
+    final part = (descriptor['device']['components'] as List)
+        .where((part) => part['id'] == id)
+        .firstOrNull;
+    return (descriptor['capabilities'] as List).any(
+      (capability) =>
+          (capability['component_id'] == null ||
+              capability['component_id'] == id) &&
+          (part?['capabilities'] as List? ?? []).contains(capability['id']) &&
+          (capability['properties'] as Map? ?? {}).values.any(
+            (property) => property is Map && property['readable'] == true,
+          ),
+    );
+  }
+
+  bool componentHasReadableState(String id) =>
+      description != null && _descriptorHasReadableState(description!, id);
+
   List<Json> get capabilities => capabilitiesFor(component);
   Json? componentCapability(String componentId, String id) => capabilitiesFor(
     componentId,
@@ -803,6 +824,13 @@ class HomeController extends ChangeNotifier {
   Future<void> read({bool cached = false}) =>
       readComponent(component, cached: cached);
   Future<void> readComponent(String componentId, {bool cached = false}) async {
+    if (!components.any((part) => part['id'] == componentId)) {
+      throw NativeFailure('INVALID_ARGUMENT', 'Select an available component.');
+    }
+    if (!componentHasReadableState(componentId)) {
+      if (componentId == component) snapshot = null;
+      return;
+    }
     final device = selectedDevice!, epoch = _readEpoch;
     final next =
         await core.call('read_state', {
@@ -847,6 +875,7 @@ class HomeController extends ChangeNotifier {
     final descriptor =
         await core.call('describe_device', {'device': device}) as Json;
     for (final part in descriptor['device']['components'] as List) {
+      if (!_descriptorHasReadableState(descriptor, part['id'])) continue;
       final result =
           await core.call('read_state', {
                 'device': device,

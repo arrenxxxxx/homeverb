@@ -190,3 +190,15 @@ connection IDs without creating cards or granting control. Query errors have no
 cloud fallback; navigation/cancellation/background clear results and fence late
 replies. Contract fixtures and native missing-account/method gates are tested;
 real-account inspection through Flutter remains unverified.
+
+## Event occurrence history
+
+EventHistoryDialog uses API 1.44 inspection/read methods directly through Core FFI.
+It is independent of numeric-history values and live state. NativeClient negotiates
+the version and both methods before enabling the Mijia/combined startup option;
+opening the dialog only inspects exact local selectors. The explicit request uses
+a positive bounded whole-second UTC interval. Equal timestamps remain separate
+rows, and empty results never prove that no event occurred. Closing, background,
+cancellation and changed device/session/descriptor clear transient data and suppress
+late replies. Known event-only components skip selected-device state reads without
+synthesizing a snapshot. No history timer or credential/account refresh is added.

@@ -1,5 +1,44 @@
 # 14. Mijia reference integration and remaining coverage
 
+## Flutter event occurrence history -- October 30, 2026
+
+The App adopts ADR-0117/API 1.44 through a separate Event history dialog. Production
+Mijia/combined composition negotiates both the version and methods before reopening
+with mijia_event_history; older/missing-method libraries receive no additive field.
+Existing NativeClient callers keep the false default. Opening the dialog only
+inspects local options; an explicit selection/window submits one read. It suspends
+visible-view state refresh while open and never polls events or refreshes accounts.
+
+The generic parser validates exact component-scoped declared events, route/window,
+projection, counts, ordering and receipt times. It preserves equal timestamps and
+returns no value/payload/actor. The view displays unproven completeness, rejected
+rows and the record limit without inventing state or missing records. Close,
+cancel, background, device/session/descriptor changes and disposal discard ephemeral
+results and cancel pending work. Known event-only components skip selected-device
+state reads and disable the state-refresh button. Shared English/Chinese labels
+cover all 78 pinned event selectors, including event-only services.
+
+The API, C/JNI exports, SQLite and protected payload formats do not change in this
+phase. A matching Android package is still pending; 85fefd8 remains API 1.43.
+CLI/MCP event entry points, payload interpretation, pagination, 185 remaining
+writable definitions, 25 actions, specialized paths and real provider/phone/model
+acceptance remain open. No account/provider/device operation, installation, push
+or publication occurred.
+
+Executed on FVM Flutter 3.47.7: the final affected regression run passed all 267
+tests across 22 files, including 27 event-history/parser/bridge tests. Receipt
+refresh also skips event-only services while retaining unknown outcomes. Event cases
+cover all 78 scoped selectors and English/Chinese labels, duplicate times, closed
+response shapes, bounded windows, empty/full rejected pages, no polling, lifecycle
+cancellation and narrow enlarged layouts. Compiled old/missing-method C peers
+prove the new startup field is withheld; current fictional and actual API 1.44
+Mijia/combined startup pass without credentials/provider traffic. Flutter analyze
+reported no issues. Shared presentation tests passed 7 cases; all 3 reference
+projection checks and contracts (26 schemas, 88 positive, 1,966 negative fixtures)
+passed. The previously recorded eight macOS full-suite font/pixel/legacy-click
+failures were not rerun or claimed fixed. No Rust implementation, ABI or storage
+format changed; the previous native phase evidence remains scoped to 2fb7f72.
+
 ## Native event occurrence history -- October 30, 2026
 
 [ADR-0117](../adr/0117-native-event-history.md) adds native API 1.44 foreground methods

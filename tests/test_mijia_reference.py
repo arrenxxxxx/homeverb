@@ -43,12 +43,12 @@ class ReferenceTests(unittest.TestCase):
             self.assertTrue(all(isinstance(argument, int) and argument > 0 for argument in event['arguments']))
         event_coverage = projected[module.LEDGER]['reported_event_history']
         self.assertEqual(event_coverage['event_definitions'], 78)
-        self.assertEqual(event_coverage['core_native_app'], 'core_native_api_1_44_implemented_app_pending')
+        self.assertEqual(event_coverage['core_native_app'], 'implemented_api_1_44_and_version_negotiated_flutter')
         entries = [entry for model in projected[module.LEDGER]['models'] for entry in model['entries']
                    if entry['kind'] == 'event']
         self.assertEqual(len(entries), 78)
         self.assertEqual({entry['status'] for entry in entries},
-                         {'core_native_occurrence_history_app_pending'})
+                         {'core_native_app_occurrence_history'})
 
     def test_every_source_definition_has_one_audit_entry_and_no_private_values(self):
         projected = module.project()

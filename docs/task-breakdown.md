@@ -1,5 +1,30 @@
 # Implementation status and next tasks
 
+## Flutter event occurrence history -- October 30, 2026
+
+The App adopts ADR-0117/API 1.44 through a separate Event history dialog. Production
+Mijia/combined composition negotiates both the version and methods before reopening
+with mijia_event_history; older/missing-method libraries receive no additive field.
+Existing NativeClient callers keep the false default. Opening the dialog only
+inspects local options; an explicit selection/window submits one read. It suspends
+visible-view state refresh while open and never polls events or refreshes accounts.
+
+The generic parser validates exact component-scoped declared events, route/window,
+projection, counts, ordering and receipt times. It preserves equal timestamps and
+returns no value/payload/actor. The view displays unproven completeness, rejected
+rows and the record limit without inventing state or missing records. Close,
+cancel, background, device/session/descriptor changes and disposal discard ephemeral
+results and cancel pending work. Known event-only components skip selected-device
+state reads and disable the state-refresh button. Shared English/Chinese labels
+cover all 78 pinned event selectors, including event-only services.
+
+The API, C/JNI exports, SQLite and protected payload formats do not change in this
+phase. A matching Android package is still pending; 85fefd8 remains API 1.43.
+CLI/MCP event entry points, payload interpretation, pagination, 185 remaining
+writable definitions, 25 actions, specialized paths and real provider/phone/model
+acceptance remain open. No account/provider/device operation, installation, push
+or publication occurred.
+
 ## Native event occurrence history -- October 30, 2026
 
 [ADR-0117](adr/0117-native-event-history.md) adds native API 1.44 foreground methods

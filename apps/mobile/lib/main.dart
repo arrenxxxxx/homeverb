@@ -23,6 +23,7 @@ import 'diagnostics_view.dart';
 import 'device_presentation.dart';
 import 'device_detail_controls.dart';
 import 'history_view.dart';
+import 'event_history_view.dart';
 import 'controls.dart';
 import 'native_client.dart';
 import 'preferences.dart';
@@ -62,6 +63,10 @@ Future<void> main() async {
           libraryPath: library.isEmpty ? null : library,
           allowMockWrites: adapter == 'homeverb.mock',
           permissions: permissions,
+          mijiaEventHistory: [
+            'xiaomi.mijia',
+            'homeverb.platforms',
+          ].contains(adapter),
         );
     runApp(
       TranslationProvider(
@@ -246,17 +251,27 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     if (target == 'S04' && c.cleanupNeedsReload) await c.initialize();
   }
 
-  Widget withHistory(Widget controls) => !supportsNumericHistory(c.core)
+  Widget withHistory(Widget controls) =>
+      !supportsNumericHistory(c.core) && !supportsEventHistory(c.core)
       ? controls
       : Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             controls,
-            ActionButton(
-              'Historical readings',
-              style: 'secondary',
-              onPressed: c.busy || !c.isForeground ? null : openNumericHistory,
-            ),
+            if (supportsNumericHistory(c.core))
+              ActionButton(
+                'Historical readings',
+                style: 'secondary',
+                onPressed: c.busy || !c.isForeground
+                    ? null
+                    : openNumericHistory,
+              ),
+            if (supportsEventHistory(c.core))
+              ActionButton(
+                'Event history',
+                style: 'secondary',
+                onPressed: c.busy || !c.isForeground ? null : openEventHistory,
+              ),
           ],
         );
 
@@ -272,6 +287,26 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       await showDialog<void>(
         context: navigator.currentContext!,
         builder: (_) => NumericHistoryDialog(controller: c),
+      );
+    } finally {
+      if (mounted && epoch == navigation) {
+        c.setAutomaticRefreshView(refreshView(id));
+      }
+    }
+  }
+
+  Future<void> openEventHistory() async {
+    if (c.busy ||
+        !c.isForeground ||
+        c.description == null ||
+        !supportsEventHistory(c.core))
+      return;
+    final epoch = navigation;
+    c.setAutomaticRefreshView(StateRefreshView.none);
+    try {
+      await showDialog<void>(
+        context: navigator.currentContext!,
+        builder: (_) => EventHistoryDialog(controller: c),
       );
     } finally {
       if (mounted && epoch == navigation) {

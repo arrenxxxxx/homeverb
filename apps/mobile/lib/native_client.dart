@@ -352,6 +352,7 @@ class NativeClient
     String scenario = 'normal',
     String adapter = 'homeverb.mock',
     List<SessionPermission> permissions = const [],
+    bool mijiaEventHistory = false,
   }) async {
     if (permissions.isNotEmpty &&
         ![
@@ -362,6 +363,13 @@ class NativeClient
       throw NativeFailure(
         'POLICY_DENIED',
         'This host cannot configure real controls.',
+      );
+    }
+    if (mijiaEventHistory &&
+        !['xiaomi.mijia', 'homeverb.platforms'].contains(adapter)) {
+      throw NativeFailure(
+        'INVALID_ARGUMENT',
+        'Event history requires a Mijia session.',
       );
     }
     final minimumReferenceApi =
@@ -382,13 +390,14 @@ class NativeClient
         : permissions.any((p) => p.requiresReferenceSettingApi)
         ? 30
         : 29;
-    if (permissions.any(
-      (p) =>
-          p.requiresActionApi ||
-          p.requiresOutletApi ||
-          p.requiresReferenceFanApi ||
-          p.requiresReferenceSettingApi,
-    )) {
+    if (mijiaEventHistory ||
+        permissions.any(
+          (p) =>
+              p.requiresActionApi ||
+              p.requiresOutletApi ||
+              p.requiresReferenceFanApi ||
+              p.requiresReferenceSettingApi,
+        )) {
       // Negotiate with a read-only host before passing additive startup fields.
       final probe = await open(
         dataDir: dataDir,
@@ -398,6 +407,17 @@ class NativeClient
         scenario: scenario,
       );
       try {
+        if (mijiaEventHistory &&
+            (!probe.apiAtLeast(44) ||
+                !probe.methods.containsAll({
+                  'inspect_event_history_options',
+                  'read_event_history',
+                }))) {
+          throw NativeFailure(
+            'API_UPGRADE_REQUIRED',
+            'Event history requires native API 1.44.',
+          );
+        }
         if (!probe.apiAtLeast(minimumReferenceApi)) {
           throw NativeFailure(
             'API_UPGRADE_REQUIRED',
@@ -418,6 +438,7 @@ class NativeClient
         'scenario': scenario,
         if (adapter != 'homeverb.mock') 'adapter': adapter,
         ...grants,
+        if (mijiaEventHistory) 'mijia_event_history': true,
       }),
     );
     final data = decodeResponse(response) as Json;
@@ -436,6 +457,17 @@ class NativeClient
       }
       client.apiVersion = info['api_version'] as String;
       client.methods = (info['methods'] as Map).keys.cast<String>().toSet();
+      if (mijiaEventHistory &&
+          (!client.apiAtLeast(44) ||
+              !client.methods.containsAll({
+                'inspect_event_history_options',
+                'read_event_history',
+              }))) {
+        throw NativeFailure(
+          'API_UPGRADE_REQUIRED',
+          'Event history requires native API 1.44.',
+        );
+      }
       if (['xiaomi.mijia', 'homeverb.platforms'].contains(adapter) &&
           !client.apiAtLeast(27)) {
         throw NativeFailure(

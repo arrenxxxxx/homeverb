@@ -1,5 +1,52 @@
 # Flutter implementation verification
 
+## Event occurrence history API 1.44 Flutter adoption -- October 30, 2026
+
+The App now adopts the native 2fb7f72 event-history contract. Mijia/combined
+production startup probes API 1.44 and both methods before opting in; direct
+NativeClient callers retain the disabled default. An explicit connect/refresh is
+still needed to enrich old saved scalar descriptors. Event history has its own
+foreground dialog: local inspection on open, one selected-window read on demand,
+reported occurrence times only, repeated timestamps retained, no invented state.
+The view displays unproven completeness, rejected counts and record limits. It
+suspends automatic state reads while open. Lifecycle/navigation/session/descriptor
+changes cancel and discard transient results. Generic event-only components skip
+selected-device state reads and disable their refresh-state button. All 78 pinned
+event selectors have shared English/Chinese labels.
+
+Executed on FVM Flutter 3.47.7: the final affected regression run passed all 267
+tests across 22 files, including 27 event-history/parser/bridge tests. Receipt
+refresh also skips event-only services while retaining unknown outcomes. Event cases
+cover all 78 scoped selectors and English/Chinese labels, duplicate times, closed
+response shapes, bounded windows, empty/full rejected pages, no polling, lifecycle
+cancellation and narrow enlarged layouts. Compiled old/missing-method C peers
+prove the new startup field is withheld; current fictional and actual API 1.44
+Mijia/combined startup pass without credentials/provider traffic. Flutter analyze
+reported no issues. Shared presentation tests passed 7 cases; all 3 reference
+projection checks and contracts (26 schemas, 88 positive, 1,966 negative fixtures)
+passed. The previously recorded eight macOS full-suite font/pixel/legacy-click
+failures were not rerun or claimed fixed. No Rust implementation, ABI or storage
+format changed; the previous native phase evidence remains scoped to 2fb7f72.
+
+Executed commands from apps/mobile:
+
+```sh
+fvm flutter test test/event_history_test.dart test/event_history_bridge_test.dart test/numeric_history_test.dart test/state_refresh_test.dart test/native_test.dart test/account_native_test.dart test/device_detail_controls_test.dart test/mijia_controls_test.dart test/mijia_settings_test.dart test/mijia_outlet_test.dart test/mijia_auxiliary_test.dart test/mijia_hood_test.dart test/mijia_actions_test.dart test/mijia_power_actions_test.dart test/mijia_maintenance_actions_test.dart test/mijia_switch_outlet_test.dart test/mijia_reference_test.dart test/session_permissions_test.dart test/approval_test.dart test/modern_device_flow_test.dart test/modern_device_bridge_test.dart test/component_test.dart --reporter expanded
+fvm flutter test test/event_history_test.dart test/event_history_bridge_test.dart --reporter expanded
+fvm flutter test test/component_test.dart --reporter expanded
+fvm flutter analyze
+```
+
+From the repository root, generated the shared catalogs with
+`python3 scripts/generate_flutter_i18n.py --generate`, ran
+`node packages/presentation/test/i18n.test.mjs`, the reference projection/unittest
+checks and documentation/contracts/repository checks. Logs are local under
+/private/tmp/homeverb-event-ui-*.log. No provider request, real account, phone
+installation, APK rebuild, push or publication occurred. The verified 85fefd8
+package remains API 1.43; a new package is subsequent work. Event payload semantics,
+pagination, CLI/MCP adoption, 185 remaining writable definitions, 25 actions,
+specialized paths and provider/phone/model acceptance remain incomplete.
+
 ## Exact hood controls API 1.39 Android package -- October 30, 2026
 
 Clean source `503ef1f180367b84c306c363ba52af00110d8e6a` produced the combined

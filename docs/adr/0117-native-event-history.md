@@ -1,6 +1,6 @@
 # ADR-0117: Native event occurrence history
 
-Status: Implemented and synthetic-tested; Flutter and package adoption pending.
+Status: Native and Flutter implemented and synthetic-tested; package adoption pending.
 Date: October 30, 2026.
 
 ## Decision
@@ -69,3 +69,18 @@ startup mode/type guards and 76 modern-account boundary cases. Contracts passed
 all three tests. See the [phase record](../development/14-mijia-reference-integration.md)
 for limits. No Flutter/package change, real account/provider/device operation,
 phone installation, push or publication is part of this phase.
+
+## Flutter adoption
+
+The subsequent App phase negotiates API 1.44 and both methods before supplying
+mijia_event_history in Mijia/combined startup. Other direct NativeClient callers
+retain the false default. The event dialog owns ephemeral occurrence records,
+performs local inspection on open and sends one explicit selected-range request.
+It suspends the visible-state timer and never polls history. Closed typed parsing
+checks exact declared events, source/window/count/receipt consistency and preserves
+equal timestamps. Lifecycle, navigation and session changes cancel and discard
+results. Known event-only components have no state read/refresh affordance. The
+shared catalogs cover all 78 pinned selectors in English and Chinese. ABI/storage
+formats and the current 85fefd8 APK remain unchanged. See the
+[App verification record](../../apps/mobile/verification.md) for executed tests;
+provider/phone/model acceptance and event payload interpretation remain open.

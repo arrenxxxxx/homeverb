@@ -113,7 +113,7 @@ def project():
                                                if kind == 'action' and admitted_power_action(model['model'], service['iid'], item['iid'])
                                                else 'implemented_core_native_app_action'
                                                if kind == 'action' and admitted_action(model['model'], service['iid'], item['iid'])
-                                               else 'core_native_occurrence_history_app_pending'
+                                               else 'core_native_app_occurrence_history'
                                                if kind == 'event'
                                                else 'blocked_runtime_contract_and_separate_admission')})
                     if kind == 'event':
@@ -233,7 +233,7 @@ def project():
                               'specialized_failed_property_read_paths', 'BLE_and_LAN', 'history_and_events',
                               'health_and_media', 'additional_write_runtime_contracts']}
     coverage['reported_event_history'] = {
-        'status': 'implemented_core_native_occurrence_times_only',
+        'status': 'implemented_core_native_app_occurrence_times_only',
         'evidence': 'ADR-0115/0116/0117; pinned public SDK keys, community history envelope and fictional Core/Host/native ABI tests',
         'event_definitions': len(event_profiles), 'route': '/user/get_user_device_data',
         'legacy_origin': 'https://api.io.mi.com/app',
@@ -241,7 +241,7 @@ def project():
         'codec': 'per_field_rc4_drop1024', 'request_type': 'event',
         'key': 'exact_siid_dot_eiid', 'maximum_records': 31, 'maximum_window_days': 32,
         'returned_data': 'reported_timestamps_only_without_payload_or_actor',
-        'completeness': 'unproven', 'core_native_app': 'core_native_api_1_44_implemented_app_pending',
+        'completeness': 'unproven', 'core_native_app': 'implemented_api_1_44_and_version_negotiated_flutter',
         'protected_admission': 'exact_account_model_root_membership_and_selected_protocol',
         'descriptor_publication': 'explicit_typed_or_native_startup_opt_in_and_refresh_with_event_only_components',
         'payload_semantics_pagination_and_subscriptions': 'pending',

@@ -1071,3 +1071,22 @@ result suppression. The actual ABI verifier checks both new methods, startup
 mode/type refusal before profile creation and omitted/false compatibility. No
 provider request, real credentials, phone installation or appliance operation is
 part of this evidence. Flutter adoption and real acceptance remain separate gates.
+
+## Flutter event-history checks
+
+From apps/mobile, run:
+
+```sh
+fvm flutter test test/event_history_test.dart test/event_history_bridge_test.dart test/numeric_history_test.dart test/state_refresh_test.dart test/component_test.dart test/native_test.dart
+fvm flutter analyze
+```
+
+The event suites exercise closed projection/selection,
+all 78 scoped selectors and bilingual labels, equal timestamps, empty/full pages,
+explicit one-shot reads, no state/history polling in the dialog, invalid input,
+late cancellation/navigation results, connection changes and narrow enlarged
+English/Chinese layouts. A compiled fictional C peer proves old/missing methods
+receive no event startup field; the actual 1.44 library validates empty production
+Mijia/combined compositions without credentials or provider calls. Broader affected
+control/permission tests are recorded in the App verification record. Tests do not
+establish phone/provider/model acceptance or physical effects.

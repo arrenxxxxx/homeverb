@@ -565,3 +565,15 @@ automatic screen-off controls. The App negotiates the version before reopening
 with their independent setting grants. It does not translate levels to percentages,
 append a power-on write or admit clock/schedule fields. See
 [ADR-0106](../../docs/adr/0106-exact-hood-manual-controls.md).
+
+## Event history
+
+Native API 1.44 adds an explicit Event history view alongside numeric readings.
+Mijia/combined production startup negotiates both methods before enabling event
+metadata. Existing saved scalar-only devices require an explicit account refresh
+to publish event selectors. Choose a connection, event and UTC range, then read
+once. The view preserves repeated occurrence times and displays incomplete-history
+limits; it never exposes event payloads or interprets them as live state. Closing
+or leaving the foreground clears the transient result. Known event-only components
+have no state refresh. New APK and real provider/phone/model acceptance remain
+pending; current package 85fefd8 is API 1.43.
