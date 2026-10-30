@@ -4,7 +4,7 @@ October 25: 17 exact Mijia reference specifications now supply 264 scalar read
 mappings and localized App labels. Additional writes and modern authentication
 remain incomplete; see the [full coverage and blockers](14-mijia-reference-integration.md).
 
-The October 30 integration uses native API **1.35.0**, following the linear
+The October 30 integration uses native API **1.36.0**, following the linear
 mainline update and dedicated interactive-login bridge. Earlier Mijia phase versions are historical. See
 [contract reconciliation](../adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
 remain available alongside Mijia; identity restoration remains Meiju-only.
@@ -13,7 +13,7 @@ The experimental integration is implemented under [ADR-0070](../adr/0070-mijia-n
 The owner will perform real-account and device acceptance. Do not access saved
 pilot credentials or contact appliances as part of development tests.
 
-Current callable scope includes native API 1.35 Mijia-only/combined sessions,
+Current callable scope includes native API 1.36 Mijia-only/combined sessions,
 protected partial inventory and 264 scalar mappings from 17 pinned reference
 specifications. Exact fan, light and purifier settings have independent protected
 admission and trusted startup grants. Flutter provides account/read/control views,
@@ -26,7 +26,7 @@ Native API 1.32 supplies the user-triggered code-request bridge under
 consumes it without automatic message sends or retries. The API 1.33
 [Android package](../../apps/mobile/verification.md#historical-api-133-android-package--october-28-2026)
 includes this account flow and historical UI. Human risk challenges,
-account-settings confirmation, modern SID `mijia` C/App login, broader event/control
+account-settings confirmation, modern SID `mijia` App login, broader event/control
 coverage and owner-run real-provider/device acceptance remain open. Earlier
 phase records below retain their original implementation and evidence scope.
 
@@ -587,3 +587,47 @@ and 57 fictional examples. Contract validation passed 24 schemas, 69 positive
 and 944 negative fixtures. Both reference-projection tests, regeneration,
 formatting, documentation and repository hygiene passed. No Flutter, new APK,
 real-provider or physical-device acceptance was performed.
+
+
+## Native modern account bridge (API 1.36) -- October 30, 2026
+
+[ADR-0097](../adr/0097-native-modern-mijia-account-bridge.md) adds four dedicated C
+functions for modern QR begin/continue/discard and explicit saved-account refresh,
+recovery or renewal. The trusted UI must negotiate API 1.36 before resolving
+symbols. QR scan bytes use a caller-owned protected buffer of exactly 8192 bytes;
+JSON contains only local challenge metadata, length and remaining lifetime.
+Valid buffers clear before admission; invalid lengths are not dereferenced.
+Empty/oversized projection discards the pending handle without truncation.
+
+Connected/directory reports expose the public account summary and bounded logical
+entry count, with partial/failed status and `complete=false`. They expose no private
+membership, credential references, entry names, device IDs or physical cards.
+Renewal returns only an account summary and performs no inventory read. Existing
+Host cancellation, one-use handles and pending-save recovery remain in force.
+No automatic poll, reauthentication, background networking or write authority is
+added. Ordinary JSON/CLI/MCP cannot call these functions.
+
+Native API 1.36 retains 36 ordinary methods and adds four C exports for a total
+of 30 (31 with the Android initializer). SQLite 5, Mijia payloads 1/2 and Meiju
+payload 3 remain unchanged. Older native libraries lack the new symbols; existing
+App flows retain their prior behavior. Flutter QR rendering, logical-parent/Core
+adoption, mobile packaging and authenticated provider/physical acceptance remain
+pending. The delivered `9870437` APK is still API 1.35. No provider login, message,
+appliance operation, push or publication was performed.
+
+Executed API 1.36 checks: the workspace suite excluding `homeverb-midea` passed
+550 tests with one ignored, including real fictional Host report/schema checks
+and protected QR projection tests. The known 14 macOS Meiju LAN-alias failures
+remain excluded. The complete rebuilt C ABI passed 36 ordinary methods and 57
+fictional examples, including the new four-export verifier's 62 refusal/buffer/
+lifecycle cases. Exact host exports match all 30 header declarations; Android's
+expected policy contains those 30 plus its initializer. Nine Android and eight
+iOS package-unit tests passed using fictional reports, not new mobile archives.
+
+The final sub-millisecond/invalid QR-lifetime refusal passed in all six FFI unit
+tests, followed by strict workspace/all-target Clippy. The final rebuilt library
+then passed all 62 focused modern C verifier cases. Contract validation passed
+25 schemas, 69 primary positive fixtures plus the dedicated modern examples and
+1,092 negative fixtures. Both reference-projection tests, regeneration, formatting,
+documentation and repository hygiene passed. No Flutter build, new mobile package,
+authenticated login, physical-device operation or publication was performed.

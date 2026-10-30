@@ -1,6 +1,6 @@
 # ADR-0097: Native modern Mijia account bridge
 
-Status: accepted for implementation; Flutter integration pending.
+Status: implemented in native API 1.36; Flutter integration pending.
 Date: October 30, 2026.
 
 ## Decision
@@ -57,3 +57,12 @@ ordinary dispatch refusal, lifecycle/cancel forwarding and the existing fictiona
 Host success/race tests. Rebuild and run the full native verifier with API 1.36;
 update Android/iOS export checks and manifests. These checks do not establish a
 rebuilt mobile package, Flutter QR rendering, real login or physical compatibility.
+
+## Executed evidence
+
+The real native library passed 62 focused refusal/buffer/lifecycle cases for all
+four new symbols. Protected QR projection and bound/expiry cleanup have unit
+coverage; successful fictional Host report projections match the same closed
+schemas. Workspace, full ABI, mobile package-unit and static-check evidence is
+recorded in the [Mijia guide](../development/11-mijia.md). These checks establish
+no QR scan, provider authentication, new APK or physical-device acceptance.

@@ -49,6 +49,19 @@ char *homeverb_request_account_verification_code(uint64_t handle, const char *me
     uint8_t *prompt, size_t prompt_capacity);
 
 
+/* API 1.36+: modern Mijia QR login and explicit session work, trusted UI only.
+ * Scan must be exclusively owned writable memory of exactly 8192 bytes, disjoint
+ * from metadata. Valid buffers are cleared before admission; invalid lengths
+ * are not dereferenced. Caller clears/frees on every path. Sensitive UTF-8 scan
+ * bytes are only for local QR rendering: never log/persist/export/navigate them.
+ * JSON contains scan_length, challenge ID and expiry only. Directory results
+ * count logical entries, not physical Devices. No automatic poll/retry/renewal. */
+char *homeverb_begin_modern_account_login(uint64_t handle, const char *metadata_json,
+    uint8_t *scan, size_t scan_capacity);
+char *homeverb_continue_modern_account_login(uint64_t handle, const char *metadata_json);
+bool homeverb_discard_modern_account_login(uint64_t handle, uint64_t challenge_id);
+char *homeverb_modern_account_session(uint64_t handle, const char *metadata_json);
+
 char *homeverb_prepare_identity_recovery(uint64_t handle, const char *metadata_json,
                                        uint8_t *login, size_t login_length,
                                        uint8_t *password, size_t password_length);

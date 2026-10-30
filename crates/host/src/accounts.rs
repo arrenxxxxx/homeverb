@@ -278,3 +278,63 @@ impl AccountAdapter<'_> {
         }
     }
 }
+
+/// Public summary of logical modern membership, never a physical-device inventory.
+#[derive(Serialize)]
+pub struct ModernAccountReport {
+    account: AccountSummary,
+    authentication: &'static str,
+    directory: ModernDirectorySummary,
+}
+#[derive(Serialize)]
+struct ModernDirectorySummary {
+    status: &'static str,
+    logical_entry_count: usize,
+    complete: bool,
+    issues: Vec<Error>,
+    error: Option<Error>,
+}
+impl ModernAccountReport {
+    pub fn connected(discovery: homeverb_mijia::ModernAccountDiscovery) -> Self {
+        Self::project(discovery, "succeeded")
+    }
+    pub fn inspected(discovery: homeverb_mijia::ModernAccountDiscovery) -> Self {
+        Self::project(discovery, "not_attempted")
+    }
+    fn project(
+        discovery: homeverb_mijia::ModernAccountDiscovery,
+        authentication: &'static str,
+    ) -> Self {
+        let entries = discovery.entries.and_then(|entries| {
+            if entries.len() > 4096 {
+                Err(Error::new(
+                    "MIJIA_INVALID_RESPONSE",
+                    "The modern directory exceeds its entry limit.",
+                ))
+            } else {
+                Ok(entries.len())
+            }
+        });
+        let directory = match entries {
+            Ok(count) => ModernDirectorySummary {
+                status: "partial",
+                logical_entry_count: count,
+                complete: false,
+                issues: discovery.issues.into_iter().take(64).collect(),
+                error: None,
+            },
+            Err(error) => ModernDirectorySummary {
+                status: "failed",
+                logical_entry_count: 0,
+                complete: false,
+                issues: vec![],
+                error: Some(error),
+            },
+        };
+        Self {
+            account: discovery.account.into(),
+            authentication,
+            directory,
+        }
+    }
+}

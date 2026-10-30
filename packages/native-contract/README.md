@@ -1,6 +1,6 @@
 # HomeVerb native contract
 
-Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.35.0 has 36 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions three trusted connection-link functions and three trusted account-identity recovery functions and three dedicated interactive login functions and four protected verification functions; the JSON envelope schema is 1.0.
+Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.36.0 has 36 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions three trusted connection-link functions and three trusted account-identity recovery functions and three dedicated interactive login functions and four protected verification functions and four modern account functions; the JSON envelope schema is 1.0.
 
 API 1.19 adds nullable `last_complete_inventory_at` to account summaries. It is
 historical local retrieval metadata, not authorization or online status. SQLite
@@ -191,3 +191,11 @@ derivations. There are still 36 JSON methods and 26 C exports plus the Android
 initializer, with SQLite 5 and protected payload envelope 1 unchanged. Flutter
 API 1.35 negotiation and presentation are pending. The delivered API 1.34 APK
 does not gain these controls. No real provider/account/device acceptance is claimed.
+
+
+API 1.36 adds the protected [modern account bridge](modern-account.json),
+[closed request/result schema](../../schemas/native-modern-account.schema.json)
+and [fictional examples](modern-account-examples.json). QR bytes use the separate
+8192-byte output buffer; public results contain only metadata and conservative
+logical-entry counts. The four new symbols require explicit API negotiation.
+Flutter integration and physical/logical device adoption remain pending.

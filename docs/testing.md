@@ -668,3 +668,14 @@ consumption, pending/in-flight lifecycle invalidation, late synchronous results,
 dropped futures, lease/operation-ID release, uncertain-save recovery without
 reauthentication, ordinary JSON refusal and sanitized account summaries. Existing
 native startup fixtures continue to require no credentials or provider requests.
+
+
+API 1.36 adds `scripts/verify_native_modern_account.py` to the full native verifier.
+It loads the real dynamic library and checks all four exports, closed requests,
+valid-buffer clearing before invalid host/metadata admission, NULL/invalid-size
+refusal without touching memory, ordinary-dispatch refusal and lifecycle forwarding
+using Mock only. QR-success/overflow projection tests use protected fictional
+bytes; Host success reports are validated against the same closed native schema,
+including failed/empty directories and no physical-completeness claim. Android
+and iOS package unit tests use fictional archive/symbol reports; they do not
+establish a newly built AAR/framework/APK or signed-device acceptance.

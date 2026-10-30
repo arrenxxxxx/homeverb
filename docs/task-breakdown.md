@@ -1,5 +1,31 @@
 # Implementation status and next tasks
 
+## Native modern account bridge (API 1.36) -- October 30, 2026
+
+[ADR-0097](adr/0097-native-modern-mijia-account-bridge.md) adds four dedicated C
+functions for modern QR begin/continue/discard and explicit saved-account refresh,
+recovery or renewal. The trusted UI must negotiate API 1.36 before resolving
+symbols. QR scan bytes use a caller-owned protected buffer of exactly 8192 bytes;
+JSON contains only local challenge metadata, length and remaining lifetime.
+Valid buffers clear before admission; invalid lengths are not dereferenced.
+Empty/oversized projection discards the pending handle without truncation.
+
+Connected/directory reports expose the public account summary and bounded logical
+entry count, with partial/failed status and `complete=false`. They expose no private
+membership, credential references, entry names, device IDs or physical cards.
+Renewal returns only an account summary and performs no inventory read. Existing
+Host cancellation, one-use handles and pending-save recovery remain in force.
+No automatic poll, reauthentication, background networking or write authority is
+added. Ordinary JSON/CLI/MCP cannot call these functions.
+
+Native API 1.36 retains 36 ordinary methods and adds four C exports for a total
+of 30 (31 with the Android initializer). SQLite 5, Mijia payloads 1/2 and Meiju
+payload 3 remain unchanged. Older native libraries lack the new symbols; existing
+App flows retain their prior behavior. Flutter QR rendering, logical-parent/Core
+adoption, mobile packaging and authenticated provider/physical acceptance remain
+pending. The delivered `9870437` APK is still API 1.35. No provider login, message,
+appliance operation, push or publication was performed.
+
 ## Modern Host account lifecycle -- October 30, 2026
 
 [ADR-0096](adr/0096-mijia-modern-host-lifecycle.md) adds typed foreground Session

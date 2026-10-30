@@ -1,0 +1,138 @@
+{
+  "api_version": "1.36.0",
+  "provenance": "Fictional metadata and sanitized DTOs; no scan URLs, provider IDs or credentials.",
+  "begin": {
+    "schema_version": "1.0",
+    "operation_id": "modern-begin",
+    "timeout_ms": 180000,
+    "label": "Example modern account",
+    "account_id": null,
+    "provider": "xiaomi.mijia"
+  },
+  "continue": {
+    "schema_version": "1.0",
+    "operation_id": "modern-continue",
+    "timeout_ms": 120000,
+    "challenge_id": 7
+  },
+  "session": {
+    "schema_version": "1.0",
+    "operation_id": "modern-session",
+    "timeout_ms": 30000,
+    "account_id": "00000000-0000-4000-8000-000000000001",
+    "operation": "refresh"
+  },
+  "qr_result": {
+    "schema_version": "1.0",
+    "data": {
+      "kind": "qr",
+      "challenge_id": 7,
+      "scan_length": 128,
+      "expires_in_ms": 179000
+    },
+    "warnings": [],
+    "error": null
+  },
+  "connected_result": {
+    "schema_version": "1.0",
+    "data": {
+      "kind": "connected",
+      "report": {
+        "account": {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "provider": "xiaomi.mijia",
+          "region": "CN",
+          "label": "Example modern account",
+          "credential_state": "stored",
+          "authorization": "not_checked",
+          "last_complete_inventory_at": null
+        },
+        "authentication": "succeeded",
+        "directory": {
+          "status": "partial",
+          "logical_entry_count": 3,
+          "complete": false,
+          "issues": [],
+          "error": null
+        }
+      }
+    },
+    "warnings": [],
+    "error": null
+  },
+  "directory_result": {
+    "schema_version": "1.0",
+    "data": {
+      "kind": "directory",
+      "report": {
+        "account": {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "provider": "xiaomi.mijia",
+          "region": "CN",
+          "label": "Example modern account",
+          "credential_state": "stored",
+          "authorization": "not_checked",
+          "last_complete_inventory_at": null
+        },
+        "authentication": "not_attempted",
+        "directory": {
+          "status": "partial",
+          "logical_entry_count": 3,
+          "complete": false,
+          "issues": [],
+          "error": null
+        }
+      }
+    },
+    "warnings": [],
+    "error": null
+  },
+  "renewed_result": {
+    "schema_version": "1.0",
+    "data": {
+      "kind": "renewed",
+      "account": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "provider": "xiaomi.mijia",
+        "region": "CN",
+        "label": "Example modern account",
+        "credential_state": "stored",
+        "authorization": "not_checked",
+        "last_complete_inventory_at": null
+      }
+    },
+    "warnings": [],
+    "error": null
+  },
+  "failed_directory_result": {
+    "schema_version": "1.0",
+    "data": {
+      "kind": "directory",
+      "report": {
+        "account": {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "provider": "xiaomi.mijia",
+          "region": "CN",
+          "label": "Example modern account",
+          "credential_state": "stored",
+          "authorization": "not_checked",
+          "last_complete_inventory_at": null
+        },
+        "authentication": "not_attempted",
+        "directory": {
+          "status": "failed",
+          "logical_entry_count": 0,
+          "complete": false,
+          "issues": [],
+          "error": {
+            "code": "MIJIA_REQUEST_FAILED",
+            "message": "Fictional directory request failed.",
+            "retryable": false
+          }
+        }
+      }
+    },
+    "warnings": [],
+    "error": null
+  }
+}

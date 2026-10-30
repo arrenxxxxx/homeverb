@@ -28,6 +28,7 @@ mod android;
 
 mod account_login;
 mod account_verification;
+mod modern_account;
 
 struct Host {
     session: Session,

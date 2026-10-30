@@ -17,7 +17,9 @@ pub use session::{
     PrepareLanScanRequest, Request, Session,
 };
 mod accounts;
-pub use accounts::{AccountConnection, AccountProvider, AccountSummary, ConnectRequest};
+pub use accounts::{
+    AccountConnection, AccountProvider, AccountSummary, ConnectRequest, ModernAccountReport,
+};
 mod mijia_outlet_grants;
 pub use mijia_outlet_grants::{MijiaOutletGrant, mijia_outlet_policy};
 mod mijia_setting_grants;

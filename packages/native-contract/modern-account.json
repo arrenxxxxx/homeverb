@@ -1,0 +1,32 @@
+{
+  "api_version": "1.36.0",
+  "functions": {
+    "homeverb_begin_modern_account_login": {
+      "request": "native-modern-account#/$defs/begin",
+      "protected_output": "caller-owned scan buffer of exactly 8192 bytes; clear/free on every path",
+      "response": "native-modern-account#/$defs/begin_result"
+    },
+    "homeverb_continue_modern_account_login": {
+      "request": "native-modern-account#/$defs/continue",
+      "response": "native-modern-account#/$defs/continue_result"
+    },
+    "homeverb_discard_modern_account_login": {
+      "parameters": [
+        "uint64 handle",
+        "uint64 challenge_id"
+      ],
+      "response": "bool"
+    },
+    "homeverb_modern_account_session": {
+      "request": "native-modern-account#/$defs/session",
+      "response": "native-modern-account#/$defs/session_result"
+    }
+  },
+  "limits": {
+    "max_pending_logins": 4,
+    "lifetime_ms": 180000,
+    "scan_capacity": 8192,
+    "max_logical_entries": 4096
+  },
+  "scope": "Trusted foreground UI only. Scan bytes never enter JSON; logical directory counts are not physical Device cards. No ordinary JSON/CLI/MCP method."
+}

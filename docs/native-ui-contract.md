@@ -1,6 +1,6 @@
 # Native UI contract
 
-The October 30 auxiliary-setting bridge uses native API **1.35.0**, following
+The October 30 modern-account bridge uses native API **1.36.0**, following
 the October 24 linear mainline update. Earlier Mijia phase versions are historical. See
 [contract reconciliation](adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
 remain available alongside Mijia; identity restoration remains Meiju-only.
@@ -1851,3 +1851,52 @@ No native exports, ordinary methods or storage formats change in this App phase.
 New Android packaging and provider/physical acceptance remain pending; the API
 1.34 APK is unchanged. Modern authentication, events and other ledger gaps remain
 open.
+
+
+## Modern Mijia QR and session bridge (API 1.36)
+
+[ADR-0097](adr/0097-native-modern-mijia-account-bridge.md), the
+[manifest](../packages/native-contract/modern-account.json),
+[examples](../packages/native-contract/modern-account-examples.json) and
+[closed schema](../schemas/native-modern-account.schema.json) define four trusted
+C functions. Negotiate 1.36 before looking up any new symbol. Do not expose them
+as ordinary JSON, CLI or MCP tools, and do not infer QR support from password-login
+capabilities. The Mijia/combined native Session constructors register the modern
+transports; Mock and Meiju-only hosts refuse without provider requests.
+
+`homeverb_begin_modern_account_login` accepts existing closed connection metadata
+with explicit `provider=xiaomi.mijia`, but no credential input. Allocate exactly
+8192 writable scan bytes, disjoint from metadata and exclusively owned during the
+worker-thread call. Native code clears valid buffers before admission, including
+invalid host/metadata paths. Invalid lengths/NULL are not dereferenced. Clear/free
+all allocations in a `finally` path. On success copy only `scan_length` bytes into
+protected foreground UI memory for local QR rendering. Never log, serialize,
+persist, remotely render, open in a browser or export the sensitive UTF-8 URL.
+Reject malformed lengths rather than interpreting the unused zeroed buffer tail.
+An exhausted/sub-millisecond remaining lifetime is refused and its handle discarded.
+
+Begin metadata's timeout bounds the entire challenge, up to 180 seconds; use an
+explicit 180000-ms request when that scan window is needed. The returned remaining
+milliseconds do not extend the native deadline. `homeverb_continue_modern_account_login`
+performs one user-triggered bounded poll/exchange, consuming the local handle;
+no caller-driven automatic retries or regeneration. Dismissal/navigation must call
+`homeverb_discard_modern_account_login`; if continuation is active, cancel its
+operation ID too. Background/close clears pending challenges and cancels active
+registered work. Drop protected QR memory on every terminal/lifecycle path.
+
+`homeverb_modern_account_session` accepts only local account metadata and one
+operation: `refresh`, `recover` or `renew`. Refresh reads the saved modern slot;
+recover explicitly validates pending saved bytes without another login or rewrite;
+renew performs authentication only. Never silently call renewal after a failed
+read or substitute legacy credentials. No provider origin, codec, token or principal
+is selectable in metadata.
+
+Begin returns `kind=qr` with challenge ID, expiry and byte length only. Continue
+returns `kind=connected`; refresh/recovery return `kind=directory`; their reports
+contain sanitized public account metadata and logical-entry counts. Even zero
+entries remain `partial` with `complete=false`; a failed directory has count zero
+and an error. These counts are not physical devices, discovered card IDs, complete
+membership or live/online evidence. Renewal returns `kind=renewed` and account
+metadata only. Preserve completed account storage when later retrieval fails;
+do not replay login to hide a directory error. Physical/logical reconciliation and
+Flutter integration remain separate tracked work.

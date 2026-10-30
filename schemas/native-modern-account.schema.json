@@ -1,0 +1,491 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:homeverb:schema:native-modern-account",
+  "title": "Protected modern Mijia native account metadata",
+  "$defs": {
+    "begin": {
+      "description": "Protected metadata for the dedicated interactive Mijia login entry point.",
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "operation_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 180000
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "account_id": {
+          "description": "Optional local account for exact-subject modern reauthorization; protected identity must remain intact.",
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "provider": {
+          "const": "xiaomi.mijia"
+        }
+      },
+      "required": [
+        "schema_version",
+        "operation_id",
+        "timeout_ms",
+        "label",
+        "provider"
+      ],
+      "additionalProperties": false
+    },
+    "continue": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "operation_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 180000
+        },
+        "challenge_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 18446744073709551615
+        }
+      },
+      "required": [
+        "schema_version",
+        "operation_id",
+        "timeout_ms",
+        "challenge_id"
+      ],
+      "additionalProperties": false
+    },
+    "session": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "operation_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 180000
+        },
+        "account_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "operation": {
+          "enum": [
+            "refresh",
+            "recover",
+            "renew"
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "operation_id",
+        "timeout_ms",
+        "account_id",
+        "operation"
+      ],
+      "additionalProperties": false
+    },
+    "begin_result": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "qr"
+                },
+                "challenge_id": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 18446744073709551615
+                },
+                "scan_length": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 8192
+                },
+                "expires_in_ms": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 180000
+                }
+              },
+              "required": [
+                "kind",
+                "challenge_id",
+                "scan_length",
+                "expires_in_ms"
+              ],
+              "additionalProperties": false
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "urn:homeverb:schema:native-response#/$defs/query_error"
+        }
+      ]
+    },
+    "continue_result": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "connected"
+                },
+                "report": {
+                  "type": "object",
+                  "properties": {
+                    "account": {
+                      "allOf": [
+                        {
+                          "$ref": "urn:homeverb:schema:native-response#/$defs/account_summary"
+                        },
+                        {
+                          "properties": {
+                            "provider": {
+                              "const": "xiaomi.mijia"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "authentication": {
+                      "const": "succeeded"
+                    },
+                    "directory": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "const": "partial"
+                            },
+                            "logical_entry_count": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 4096
+                            },
+                            "complete": {
+                              "const": false
+                            },
+                            "issues": {
+                              "type": "array",
+                              "maxItems": 64,
+                              "items": {
+                                "$ref": "urn:homeverb:schema:native-response#/$defs/query_error/properties/error"
+                              }
+                            },
+                            "error": {
+                              "type": "null"
+                            }
+                          },
+                          "required": [
+                            "status",
+                            "logical_entry_count",
+                            "complete",
+                            "issues",
+                            "error"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "const": "failed"
+                            },
+                            "logical_entry_count": {
+                              "const": 0
+                            },
+                            "complete": {
+                              "const": false
+                            },
+                            "issues": {
+                              "type": "array",
+                              "maxItems": 0
+                            },
+                            "error": {
+                              "$ref": "urn:homeverb:schema:native-response#/$defs/query_error/properties/error"
+                            }
+                          },
+                          "required": [
+                            "status",
+                            "logical_entry_count",
+                            "complete",
+                            "issues",
+                            "error"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "account",
+                    "authentication",
+                    "directory"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "kind",
+                "report"
+              ],
+              "additionalProperties": false
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "urn:homeverb:schema:native-response#/$defs/query_error"
+        }
+      ]
+    },
+    "session_result": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            },
+            "data": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "const": "directory"
+                    },
+                    "report": {
+                      "type": "object",
+                      "properties": {
+                        "account": {
+                          "allOf": [
+                            {
+                              "$ref": "urn:homeverb:schema:native-response#/$defs/account_summary"
+                            },
+                            {
+                              "properties": {
+                                "provider": {
+                                  "const": "xiaomi.mijia"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "authentication": {
+                          "const": "not_attempted"
+                        },
+                        "directory": {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "status": {
+                                  "const": "partial"
+                                },
+                                "logical_entry_count": {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 4096
+                                },
+                                "complete": {
+                                  "const": false
+                                },
+                                "issues": {
+                                  "type": "array",
+                                  "maxItems": 64,
+                                  "items": {
+                                    "$ref": "urn:homeverb:schema:native-response#/$defs/query_error/properties/error"
+                                  }
+                                },
+                                "error": {
+                                  "type": "null"
+                                }
+                              },
+                              "required": [
+                                "status",
+                                "logical_entry_count",
+                                "complete",
+                                "issues",
+                                "error"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "status": {
+                                  "const": "failed"
+                                },
+                                "logical_entry_count": {
+                                  "const": 0
+                                },
+                                "complete": {
+                                  "const": false
+                                },
+                                "issues": {
+                                  "type": "array",
+                                  "maxItems": 0
+                                },
+                                "error": {
+                                  "$ref": "urn:homeverb:schema:native-response#/$defs/query_error/properties/error"
+                                }
+                              },
+                              "required": [
+                                "status",
+                                "logical_entry_count",
+                                "complete",
+                                "issues",
+                                "error"
+                              ],
+                              "additionalProperties": false
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "account",
+                        "authentication",
+                        "directory"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "report"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "const": "renewed"
+                    },
+                    "account": {
+                      "allOf": [
+                        {
+                          "$ref": "urn:homeverb:schema:native-response#/$defs/account_summary"
+                        },
+                        {
+                          "properties": {
+                            "provider": {
+                              "const": "xiaomi.mijia"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "account"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "error": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "schema_version",
+            "data",
+            "warnings",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "urn:homeverb:schema:native-response#/$defs/query_error"
+        }
+      ]
+    }
+  }
+}

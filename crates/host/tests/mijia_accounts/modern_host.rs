@@ -781,3 +781,87 @@ async fn duplicate_active_operation_consumes_the_second_handle_without_affecting
     f.peer.pause.store(0, Ordering::SeqCst);
     f.connect().await;
 }
+
+fn validate_modern_result(definition: &str, value: &Value) {
+    let mut options = jsonschema::options();
+    let directory = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../schemas");
+    for entry in std::fs::read_dir(directory).unwrap() {
+        let path = entry.unwrap().path();
+        let Some(name) = path
+            .file_name()
+            .and_then(|n| n.to_str())
+            .and_then(|n| n.strip_suffix(".schema.json"))
+        else {
+            continue;
+        };
+        let document = serde_json::from_slice(&std::fs::read(&path).unwrap()).unwrap();
+        options = options.with_resource(
+            format!("urn:homeverb:schema:{name}"),
+            jsonschema::Resource::from_contents(document),
+        );
+    }
+    options.build(&json!({"$ref":format!("urn:homeverb:schema:native-modern-account#/$defs/{definition}")})).unwrap().validate(value).unwrap();
+}
+
+#[tokio::test]
+async fn native_modern_reports_match_closed_contracts_without_private_membership_or_complete_claims()
+ {
+    let f = ModernFixture::new();
+    let mut report = f.connect().await;
+    let account = report.account.id;
+    // Even an internal future completeness flag cannot imply a complete physical inventory.
+    report.complete = true;
+    let report = homeverb_host::ModernAccountReport::connected(report);
+    let result = json!({"schema_version":"1.0","data":{"kind":"connected","report":report},"warnings":[],"error":null});
+    validate_modern_result("continue_result", &result);
+    assert_eq!(
+        result["data"]["report"]["directory"]["logical_entry_count"],
+        1
+    );
+    assert_eq!(result["data"]["report"]["directory"]["complete"], false);
+    for private in [
+        "PRIVATE",
+        "Modern Fan",
+        "jdjz.fan",
+        "credential_ref",
+        "999001",
+        "device_ids",
+        "serviceToken",
+    ] {
+        assert!(!result.to_string().contains(private));
+    }
+    for failed in [false, true] {
+        let mut report = f
+            .session
+            .refresh_modern_account(account_request(account))
+            .await
+            .unwrap();
+        if failed {
+            report.entries = Err(homeverb_domain::Error::new(
+                "MIJIA_REQUEST_FAILED",
+                "Fictional directory failure.",
+            ));
+        } else {
+            report.entries = Ok(vec![]);
+        }
+        let result = json!({"schema_version":"1.0","data":{"kind":"directory","report":homeverb_host::ModernAccountReport::inspected(report)},"warnings":[],"error":null});
+        validate_modern_result("session_result", &result);
+        assert_eq!(
+            result["data"]["report"]["directory"]["logical_entry_count"],
+            0
+        );
+        assert_eq!(
+            result["data"]["report"]["directory"]["status"],
+            if failed { "failed" } else { "partial" }
+        );
+    }
+    let renewed = f
+        .session
+        .renew_modern_account(account_request(account))
+        .await
+        .unwrap();
+    validate_modern_result(
+        "session_result",
+        &json!({"schema_version":"1.0","data":{"kind":"renewed","account":renewed},"warnings":[],"error":null}),
+    );
+}

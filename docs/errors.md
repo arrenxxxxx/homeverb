@@ -722,3 +722,11 @@ for absent/foreign/consumed QR handles or late lifecycle-generation results.
 operation ID; the attempted continuation handle remains consumed. Existing
 `HOST_BACKGROUND`, `HOST_CLOSED`, `CANCELLED` and `DEADLINE_EXCEEDED` keep their
 foreground/operation meanings. No new ordinary error schema or result code is added.
+
+
+API 1.36 uses existing errors at the dedicated modern C boundary. NULL or
+incorrectly sized QR output, invalid UTF-8/JSON, unknown metadata fields or invalid
+operation enums return `INVALID_ARGUMENT`; valid scan buffers are already cleared.
+A missing host returns `HOST_CLOSED`. A failed logical directory remains a saved
+account report with `status=failed` and zero entries, not failed authentication.
+No new error code or ordinary JSON method is added.

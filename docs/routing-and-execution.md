@@ -720,3 +720,11 @@ on completion/drop. Explicit directory/recovery and renewal follow the same Host
 operation boundary. A late lifecycle result is refused without pretending to undo
 already-completed protected storage. No physical Device, fallback route, write
 grant or automatic credential renewal follows from a logical directory entry.
+
+
+ADR-0097's dedicated C bridge forwards explicit modern account work through the
+Host lifecycle. Protected QR data is not an ordinary request/result field. Native
+reports summarize logical entries without publishing physical cards, selecting
+routes or granting controls. Directory failure after successful protected login
+keeps the saved account, while uncertain storage still requires explicit recovery.
+No C caller may turn a transport failure into an automatic renewal or login replay.

@@ -1103,6 +1103,8 @@ def main():
             target = target[field]
         target[path[-1]] = value
         assert not connect_response.is_valid(bad), path
+    from verify_native_modern_account import verify as verify_modern_account
+    verify_modern_account()
     from verify_native_account_verification import verify as verify_account_verification
     verify_account_verification()
     from verify_native_account_login import verify_account_login

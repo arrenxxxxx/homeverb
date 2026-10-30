@@ -524,6 +524,50 @@ def main() -> int:
     bad=copy.deepcopy(verification["request_code"]);bad["method"]="other"
     negative.append(("invalid code method",native_validator("native-account-verification","request_code"),bad))
 
+    modern = load("packages/native-contract/modern-account-examples.json")
+    assert modern["api_version"] == load("packages/native-contract/api.json")["api_version"]
+    for name, definition in [("begin", "begin"), ("continue", "continue"), ("session", "session"),
+                             ("qr_result", "begin_result"), ("connected_result", "continue_result"),
+                             ("directory_result", "session_result"), ("failed_directory_result", "session_result"),
+                             ("renewed_result", "session_result")]:
+        shape = native_validator("native-modern-account", definition)
+        shape.validate(modern[name])
+        for field in ["scan_payload", "url", "service_token", "pass_token", "provider_id", "principal", "origin", "confirmed"]:
+            bad = copy.deepcopy(modern[name]); bad[field] = "FORBIDDEN"
+            negative.append((f"modern {name} rejects {field}", shape, bad))
+            if name.endswith("result"):
+                bad = copy.deepcopy(modern[name]); bad["data"][field] = "FORBIDDEN"
+                negative.append((f"modern result rejects {field}", shape, bad))
+    for field, value in [("scan_length", 0), ("scan_length", 8193), ("expires_in_ms", 0),
+                         ("expires_in_ms", 180001), ("challenge_id", 0), ("challenge_id", 18446744073709551616)]:
+        bad = copy.deepcopy(modern["qr_result"]); bad["data"][field] = value
+        negative.append((f"modern invalid QR {field}", native_validator("native-modern-account", "begin_result"), bad))
+    for value in [0, -1, True, "7", 18446744073709551616]:
+        bad = copy.deepcopy(modern["continue"]); bad["challenge_id"] = value
+        negative.append(("modern invalid challenge", native_validator("native-modern-account", "continue"), bad))
+    for value in ["other", True, None]:
+        bad = copy.deepcopy(modern["session"]); bad["operation"] = value
+        negative.append(("modern invalid operation", native_validator("native-modern-account", "session"), bad))
+    for operation in ["refresh", "recover", "renew"]:
+        native_validator("native-modern-account", "session").validate({**modern["session"], "operation":operation})
+    for name, definition in [("connected_result", "continue_result"), ("directory_result", "session_result")]:
+        for field, value in [("complete", True), ("status", "complete"), ("logical_entry_count", -1),
+                             ("logical_entry_count", 4097), ("logical_entry_count", True), ("device_ids", []),
+                             ("issues", [modern["failed_directory_result"]["data"]["report"]["directory"]["error"]] * 65)]:
+            bad = copy.deepcopy(modern[name]); bad["data"]["report"]["directory"][field] = value
+            negative.append((f"modern invalid directory {field}", native_validator("native-modern-account", definition), bad))
+        for field in ["credential_ref", "provider_id", "modern", "scan_payload"]:
+            bad = copy.deepcopy(modern[name]); bad["data"]["report"]["account"][field] = "FORBIDDEN"
+            negative.append((f"modern private account field {field}", native_validator("native-modern-account", definition), bad))
+        bad = copy.deepcopy(modern[name]); bad["data"]["report"]["account"]["provider"] = "midea.meiju"
+        negative.append(("modern wrong provider", native_validator("native-modern-account", definition), bad))
+    for field, value in [("logical_entry_count", 1), ("error", None), ("issues", [{"code":"X","message":"Fictional","retryable":False}])]:
+        bad = copy.deepcopy(modern["failed_directory_result"]); bad["data"]["report"]["directory"][field] = value
+        negative.append(("modern invalid failed directory", native_validator("native-modern-account", "session_result"), bad))
+    for provider in [None, "midea.meiju", "other"]:
+        bad = copy.deepcopy(modern["begin"]); bad["provider"] = provider
+        negative.append(("modern invalid provider", native_validator("native-modern-account", "begin"), bad))
+
     mijia_connect = {"schema_version":"1.0", "operation_id":"fictional-connect", "timeout_ms":1000, "label":"Mijia", "provider":"xiaomi.mijia"}
     validators["native-connect"].validate(mijia_connect)
     for provider in ["other.provider", True, {}, "CN"]:
