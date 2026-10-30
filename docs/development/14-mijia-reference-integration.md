@@ -1,6 +1,6 @@
 # 14. Mijia reference integration and remaining coverage
 
-The October 30 worktree uses API 1.42 and the owner-supplied October 22 Xiaomi Home
+The October 30 worktree uses API 1.43 and the owner-supplied October 22 Xiaomi Home
 11.7.709 analysis. The full official-App feature request remains **incomplete**.
 The source archive explicitly does not supply all authentication, protocol or
 runtime control contracts. An implemented decoder is not physical acceptance.
@@ -79,7 +79,7 @@ not change the six actions included in the ab34f21 APK.
 
 | Source item | Current disposition |
 |---|---|
-| 225 source writable property definitions | 33 exact controls implemented; 192 need separate semantic, risk and runtime admission. A source write flag is not an implemented control |
+| 225 source writable property definitions | 40 exact Core/native controls implemented, 33 in App; 185 need separate semantic, risk and runtime admission. A source write flag is not an implemented control |
 | 264 scalar readable properties | Exact mapping implemented; synthetic Core reads; provider/physical acceptance remains per property |
 | 97 identity/pairing/media properties | Excluded from ordinary observations; no identity leakage or streaming inference |
 | 78 non-readable properties | No read operation; write/event-only definitions are not state |
@@ -2101,3 +2101,39 @@ maintenance actions with independent startup grants and actual trusted user
 confirmation, alongside 33 scalar controls and bounded history views. The other
 25 actions, 192 writable definitions, 78 events, specialized paths and real
 provider/phone/model acceptance remain incomplete.
+
+
+## Exact switch and outlet settings -- October 30, 2026
+
+ADR-0114/API 1.43 adds seven exact property controls: three Opple switch channels
+and Yutai outlet power, startup-state code, indicator and local-input child lock.
+Protected full model/spec/property/domain evidence and independent outlet grants
+remain mandatory. Power, startup state and local-input locking require actual
+trusted consent; only the indicator is low risk. No timer, protection threshold,
+pairing, opaque payload or companion write is added.
+
+Each absolute target sends one property on the selected legacy or modern protocol.
+Acceptance is unverified; unknown receipts survive reopening without retry or
+protocol fallback. Old read-only protected mappings remain valid and explicit
+refresh upgrades them. API 1.43 adds exact startup tuples without new methods,
+exports, storage or outcome formats. Flutter adoption of the new tuples and an
+updated package follow separately; the 87f3410 APK remains API 1.42.
+
+There are now 40 implemented Core/native scalar controls across eight models;
+33 are in App. Of 225 source writable definitions, 185 remain incomplete, alongside
+25 actions, 78 events, specialized paths and provider/phone/model acceptance.
+No real account/device operation, installation, push or publication occurred.
+
+Executed native verification: Rust 1.96 offline/locked workspace tests passed
+697 tests with one ignored, excluding homeverb-midea's known macOS LAN-alias
+failures and using --test-threads=4. The Mijia suite passed 271 unit and 14
+compile-fail tests; focused Host account/grant suites passed 68 tests. Strict
+all-target workspace Clippy and FFI build passed. Actual C ABI checks passed
+36 methods and 84 live examples, including both startup modes and invalid new
+tuples; modern-account export checks retained 76 boundary cases. Contracts passed
+25 schemas, 83 positive and 1,855 negative fixtures. Documentation, source hygiene,
+reference projection, both projection unit tests and diff whitespace checks passed.
+An initial default-parallel run exposed a stale supported-model assertion, which
+was corrected, and two existing 100 ms deadline tests failed under CPU contention;
+both passed in the bounded-concurrency package and workspace reruns. No physical
+or provider acceptance follows from these fictional tests.

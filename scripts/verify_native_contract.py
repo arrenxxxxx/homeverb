@@ -515,6 +515,7 @@ def main():
 
     # API 1.34 outlet grants are separate, closed and validated before profile creation.
     outlet_startup = load('examples/native-open.mijia-outlet.json')
+    outlet_startup["mijia_outlet_grants"] += load("examples/native-open.mijia-switch-outlet.json")["mijia_outlet_grants"]
     for adapter in ['xiaomi.mijia', 'homeverb.platforms']:
         with tempfile.TemporaryDirectory(prefix='homeverb-outlet-') as directory:
             config = {**outlet_startup, 'data_dir': directory, 'adapter': adapter}

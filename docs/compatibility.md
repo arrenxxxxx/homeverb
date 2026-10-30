@@ -1,5 +1,26 @@
 # Platform and device compatibility matrix
 
+## Exact switch and outlet settings -- October 30, 2026
+
+ADR-0114/API 1.43 adds seven exact property controls: three Opple switch channels
+and Yutai outlet power, startup-state code, indicator and local-input child lock.
+Protected full model/spec/property/domain evidence and independent outlet grants
+remain mandatory. Power, startup state and local-input locking require actual
+trusted consent; only the indicator is low risk. No timer, protection threshold,
+pairing, opaque payload or companion write is added.
+
+Each absolute target sends one property on the selected legacy or modern protocol.
+Acceptance is unverified; unknown receipts survive reopening without retry or
+protocol fallback. Old read-only protected mappings remain valid and explicit
+refresh upgrades them. API 1.43 adds exact startup tuples without new methods,
+exports, storage or outcome formats. Flutter adoption of the new tuples and an
+updated package follow separately; the 87f3410 APK remains API 1.42.
+
+There are now 40 implemented Core/native scalar controls across eight models;
+33 are in App. Of 225 source writable definitions, 185 remain incomplete, alongside
+25 actions, 78 events, specialized paths and provider/phone/model acceptance.
+No real account/device operation, installation, push or publication occurred.
+
 ## Foreground App maintenance actions -- October 30, 2026
 
 Flutter negotiates API 1.42 and requires the trusted approval bridge before

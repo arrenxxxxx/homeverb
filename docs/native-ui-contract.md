@@ -1,6 +1,6 @@
 # Native UI contract
 
-The October 30 exact action control bridge uses native API **1.42.0**, following
+The October 30 exact action control bridge uses native API **1.43.0**, following
 the October 24 linear mainline update. Earlier Mijia phase versions are historical. See
 [contract reconciliation](adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
 remain available alongside Mijia; identity restoration remains Meiju-only.
@@ -43,7 +43,7 @@ The 22 C functions in [homeverb.h](../crates/ffi/include/homeverb.h) form the na
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects Meiju, `xiaomi.mijia` selects Mijia, and `homeverb.platforms` selects both. `scenario` defaults to `normal`. All platform modes require `allow_mock_writes: false` and reject any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms the selected mode. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.42.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.43.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -2099,3 +2099,20 @@ rather than silently downgrading it. The Rust request constructor gains a Boolea
 JSON omission remains compatible. C exports, ordinary methods, SQLite 5, protected
 payload 3 and result shapes remain unchanged. Flutter and package adoption remain
 pending. See [ADR-0113](adr/0113-native-mijia-maintenance-actions.md).
+
+## Exact switch and outlet extension (API 1.43)
+
+Negotiate API 1.43 before supplying switch-3/11/12 state, indicator_light-4 on_1
+or custom-7 child_lock_7 in mijia_outlet_grants. The existing switch-2 state and
+startup-state code tuples also apply to the newly reviewed exact Yutai profile.
+Startup still validates canonical local UUIDs, closed exact tuples/values,
+duplicates and the shared 64-entry limit before creating a profile. The normal
+local inspect_control_options method supplies the protected reviewed options;
+older clients can omit unrecognized tuples. Ordinary methods/C exports, SQLite 5,
+protected payload 3 and receipt semantics are unchanged.
+
+Power, startup-state and input-lock changes remain elevated and require actual
+trusted preview/confirm. The adapter independently enforces outlet-family grants
+and protected risk even if public metadata is altered. Indicator-only changes
+are low risk and cannot set power. No model selector, new background activity,
+implicit toggle, companion write, retry or physical verification is introduced.

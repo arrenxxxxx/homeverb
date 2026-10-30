@@ -86,3 +86,37 @@ fn invalid_targets_do_not_create_a_profile() {
     );
     assert!(!directory.exists());
 }
+
+#[test]
+fn additional_switch_outlet_targets_are_exact_and_independent() {
+    let fixture: Value = serde_json::from_str(include_str!(
+        "../../../examples/native-open.mijia-switch-outlet.json"
+    ))
+    .unwrap();
+    let inputs: Vec<MijiaOutletGrant> =
+        serde_json::from_value(fixture["mijia_outlet_grants"].clone()).unwrap();
+    let policy = mijia_outlet_policy(&inputs).unwrap();
+    assert_eq!(policy.grants.len(), 15);
+    for (input, output) in inputs.iter().zip(&policy.grants) {
+        assert_eq!(output.device_id, input.device_id);
+        assert_eq!(output.component_id, input.component_id);
+        assert_eq!(
+            output.argument_schema,
+            json!({"const":{input.property.clone():input.value}})
+        );
+        assert_eq!(output.transports, vec![homeverb_domain::Transport::Cloud]);
+        for field in ["state", "on_1", "child_lock_7", "default_power_on_state_2"] {
+            if field == input.property {
+                continue;
+            }
+            let mut bad = input.clone();
+            bad.property = field.into();
+            assert!(mijia_outlet_policy(&[bad]).is_err());
+        }
+        let mut bad = input.clone();
+        bad.value = json!("true");
+        assert!(mijia_outlet_policy(&[bad]).is_err());
+        assert!(mijia_outlet_policy(&[input.clone(), input.clone()]).is_err());
+    }
+    assert!(policy.grants.iter().any(|g| g.capability == "vendor.xiaomi.mijia.custom" && g.action == "set_child_lock_7"));
+}

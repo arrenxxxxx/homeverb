@@ -30,6 +30,7 @@ def main() -> int:
         ("native-open", "native-open.mijia-hood"),
         ("native-open", "native-open.mijia-auxiliary"),
         ("native-open", "native-open.mijia-outlet"),
+        ("native-open", "native-open.mijia-switch-outlet"),
         ("capability", "capability.mijia-outlet-power"), ("command", "command.mijia-outlet-power"),
         ("capability", "capability.mijia-action"), ("command", "command.mijia-action"),
         ("capability", "capability.mijia-light"), ("command", "command.mijia-light"),
@@ -205,6 +206,7 @@ def main() -> int:
         negative.append((label, validators["native-open"], bad))
 
     outlet_startup = load("examples/native-open.mijia-outlet.json")
+    outlet_startup["mijia_outlet_grants"] += load("examples/native-open.mijia-switch-outlet.json")["mijia_outlet_grants"]
     for entry in outlet_startup["mijia_outlet_grants"]:
         for field, value in [("value", None), ("value", "true"), ("value", {}), ("value", -1), ("value", 3), ("value", 1.5), ("component_id", "fan-2"), ("property", "unreviewed"), ("confirmed", True)]:
             bad = copy.deepcopy(outlet_startup)

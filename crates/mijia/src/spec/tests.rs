@@ -255,7 +255,13 @@ fn exact_reference_catalog_maps_only_reviewed_scalar_reads() {
         );
         assert!(mapping.control_options().iter().all(|o| matches!(
             profile.model.as_str(),
-            "abhome.light.wy0a01" | "zhimi.airpurifier.v6" | "cuco.plug.v3" | "xiaomi.hood.cyp10"
+            "abhome.light.wy0a01"
+                | "zhimi.airpurifier.v6"
+                | "cuco.plug.v3"
+                | "xiaomi.hood.cyp10"
+                | "yutai.plug.jdls1"
+                | "opple.switch.0010d5"
+                | "opple.switch.0010d6"
         ) || (o.component_id == "function-3"
             && o.action == "set_quiet_5")
             || (o.component_id.starts_with("fan-")
@@ -456,18 +462,19 @@ fn reference_settings_keep_old_mappings_and_require_exact_source() {
         "cuco.plug.v3",
         "xiaomi.hood.cyp10",
         "jdjz.fan.2072fc",
+        "yutai.plug.jdls1",
+        "opple.switch.0010d5",
+        "opple.switch.0010d6",
     ] {
         let current = ModelMapping::pinned(model, None).unwrap().unwrap();
-        let outlet = model == "cuco.plug.v3";
+        let outlet = current.is_outlet();
         let fan = model == "jdjz.fan.2072fc";
-        let count = if outlet {
-            4
-        } else if fan {
-            1
-        } else if model == "xiaomi.hood.cyp10" {
-            6
-        } else {
-            7
+        let count = match model {
+            "cuco.plug.v3" | "yutai.plug.jdls1" => 4,
+            "opple.switch.0010d5" | "jdjz.fan.2072fc" => 1,
+            "opple.switch.0010d6" => 2,
+            "xiaomi.hood.cyp10" => 6,
+            _ => 7,
         };
         assert_eq!(
             current.control_options().len(),
@@ -586,7 +593,6 @@ fn outlet_admission_does_not_publish_other_families() {
         "jdjz.fan.2072fc",
         "abhome.light.wy0a01",
         "zhimi.airpurifier.v6",
-        "yutai.plug.jdls1",
     ] {
         let mapping = ModelMapping::pinned(model, None).unwrap().unwrap();
         assert!(

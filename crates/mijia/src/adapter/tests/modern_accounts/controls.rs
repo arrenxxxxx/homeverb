@@ -197,6 +197,9 @@ async fn every_modern_exact_control_keeps_grants_wire_values_and_outlet_approval
         "zhimi.airpurifier.v6",
         "cuco.plug.v3",
         "xiaomi.hood.cyp10",
+        "yutai.plug.jdls1",
+        "opple.switch.0010d5",
+        "opple.switch.0010d6",
     ] {
         let t = setup(model, false, true, true).await;
         let mapping = ModelMapping::pinned(model, None).unwrap().unwrap();
@@ -269,7 +272,7 @@ async fn every_modern_exact_control_keeps_grants_wire_values_and_outlet_approval
         assert_eq!(t.p.auth.lock().unwrap().len(), auth);
         assert_eq!(puts(&t.f), writes);
     }
-    assert_eq!(fields, 33);
+    assert_eq!(fields, 40);
 }
 #[tokio::test]
 async fn modern_controls_remain_read_only_without_opt_in_and_legacy_selection_stays_legacy() {
@@ -457,4 +460,152 @@ async fn legacy_unknown_receipt_is_not_replayed_after_explicit_modern_adoption()
     );
     assert!(t.w.writes.lock().unwrap().is_empty());
     assert_eq!(t.f.cloud.count(CloudEndpoint::SetProperty), 1);
+}
+
+#[tokio::test]
+async fn additional_modern_outlet_targets_keep_family_and_protected_risk_checks() {
+    for model in [
+        "yutai.plug.jdls1",
+        "opple.switch.0010d5",
+        "opple.switch.0010d6",
+    ] {
+        let mapping = ModelMapping::pinned(model, None).unwrap().unwrap();
+        for field in mapping
+            .properties
+            .iter()
+            .filter(|p| p.write_domain.is_some())
+        {
+            for mutation in ["disabled", "family", "risk"] {
+                let elevated =
+                    mapping.control_option(field).unwrap().definition.risk == Risk::Elevated;
+                if mutation == "risk" && !elevated {
+                    continue;
+                }
+                let t = setup(model, false, true, mutation != "disabled").await;
+                let c = make_command(
+                    &t,
+                    field,
+                    values(field)[0].clone(),
+                    "modern-extended-denial",
+                );
+                let core = if mutation == "family" {
+                    let a = adapter(&t.f, &t.p)
+                        .with_modern_control_transport(t.w.clone())
+                        .with_outlet_controls()
+                        .with_control_policies(
+                            Policy {
+                                grants: vec![grant(&c)],
+                            },
+                            Policy::default(),
+                        );
+                    Core::new(
+                        t.f.store.clone(),
+                        vec![Arc::new(a)],
+                        Arc::new(SystemClock),
+                        Policy {
+                            grants: vec![grant(&c)],
+                        },
+                    )
+                } else {
+                    if mutation == "risk" {
+                        let mut d = t.f.core.describe(&t.device.id).unwrap();
+                        d.capabilities
+                            .iter_mut()
+                            .find(|cap| {
+                                cap.id == c.capability
+                                    && cap.component_id.as_deref() == Some(&c.component_id)
+                            })
+                            .unwrap()
+                            .actions
+                            .get_mut(&c.action)
+                            .unwrap()
+                            .risk = Risk::Low;
+                        t.f.store.save_device(&d).unwrap();
+                    }
+                    admitted(&t, &c)
+                };
+                if elevated && mutation == "family" {
+                    let preview = core.prepare_user_approval(c).unwrap();
+                    assert_eq!(
+                        core.execute_user_approved(preview, &operation())
+                            .await
+                            .status,
+                        Status::Failed
+                    );
+                } else {
+                    assert_eq!(
+                        core.execute(c, CancellationToken::new()).await.status,
+                        Status::Failed
+                    );
+                }
+                assert!(t.w.writes.lock().unwrap().is_empty());
+                assert!(t.f.cloud.calls.lock().unwrap().is_empty());
+            }
+        }
+    }
+}
+
+#[tokio::test]
+async fn added_modern_outlet_uncertainty_never_replays_or_crosses_protocols() {
+    for model in [
+        "yutai.plug.jdls1",
+        "opple.switch.0010d5",
+        "opple.switch.0010d6",
+    ] {
+        let mapping = ModelMapping::pinned(model, None).unwrap().unwrap();
+        for field in mapping
+            .properties
+            .iter()
+            .filter(|p| p.write_domain.is_some())
+        {
+            for mode in [2, 4, 5, 6] {
+                let t = setup(model, true, true, true).await;
+                let c = make_command(
+                    &t,
+                    field,
+                    values(field)[0].clone(),
+                    "modern-extended-unknown",
+                );
+                let core = admitted(&t, &c);
+                let elevated =
+                    mapping.control_option(field).unwrap().definition.risk == Risk::Elevated;
+                let preview = if elevated {
+                    Some(core.prepare_user_approval(c.clone()).unwrap())
+                } else {
+                    None
+                };
+                t.w.mode.store(mode, Ordering::SeqCst);
+                let op = operation();
+                let work = async {
+                    if let Some(preview) = preview {
+                        core.execute_user_approved(preview, &op).await
+                    } else {
+                        core.execute(c.clone(), op.cancellation.clone()).await
+                    }
+                };
+                tokio::pin!(work);
+                if mode == 4 {
+                    tokio::select! {_=t.w.started.notified()=>{},_=&mut work=>panic!("Expected pending outlet write")}
+                    op.cancellation.cancel();
+                }
+                assert_eq!(work.await.status, Status::Unknown);
+                let fresh = admitted(&t, &c);
+                assert!(fresh.prepare_user_approval(c.clone()).is_err());
+                fresh.execute(c.clone(), CancellationToken::new()).await;
+                assert_eq!(
+                    t.f.store
+                        .execution(&c.request_id)
+                        .unwrap()
+                        .unwrap()
+                        .1
+                        .status,
+                    Status::Unknown
+                );
+                assert_eq!(t.w.writes.lock().unwrap().len(), 1);
+                assert!(t.f.cloud.calls.lock().unwrap().is_empty());
+                assert!(t.p.reads.lock().unwrap().is_empty());
+                assert!(t.f.vault.lease(t.account.id, &operation()).await.is_ok());
+            }
+        }
+    }
 }

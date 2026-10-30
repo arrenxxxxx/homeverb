@@ -860,3 +860,9 @@ tuples, forbidden fields and non-Boolean flags before side effects. Ordinary
 execution remains POLICY_DENIED; consumed/dismissed/background-invalidated trusted
 handles remain APPROVAL_INVALID. Accepted is not physical completion or safety;
 unknown receipts cannot trigger another preview, retry or protocol fallback.
+
+ADR-0114 switch/outlet setters use existing errors and write phases. Invalid
+startup tuples or values fail before creating a profile; unsupported exact source,
+missing independent grants or absent trusted approval fail before send. The new
+indicator tuple does not authorize power. Ambiguous or foreign replies after send
+remain unknown, without renewal, fallback, replay or optimistic state.

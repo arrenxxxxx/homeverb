@@ -1,6 +1,6 @@
 # HomeVerb native contract
 
-Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.42.0 has 36 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions three trusted connection-link functions and three trusted account-identity recovery functions and three dedicated interactive login functions and four protected verification functions and four modern account functions; the JSON envelope schema is 1.0.
+Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.43.0 has 36 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions three trusted connection-link functions and three trusted account-identity recovery functions and three dedicated interactive login functions and four protected verification functions and four modern account functions; the JSON envelope schema is 1.0.
 
 API 1.19 adds nullable `last_complete_inventory_at` to account summaries. It is
 historical local retrieval metadata, not authorization or online status. SQLite
@@ -235,3 +235,9 @@ independent default-false include_maintenance_actions inspection flag. Preserve
 the separate low-risk/power flags, version negotiation and actual trusted consent
 for every elevated command. See the [maintenance contract](../../docs/native-ui-contract.md#exact-maintenance-actions-api-142).
 Flutter and new package adoption remain pending; d505ccb stays API 1.41.
+
+API 1.43 extends exact mijia_outlet_grants with switch-3/11/12 state,
+indicator_light-4 on_1 and custom-7 child_lock_7. Negotiate before supplying new
+tuples. The protected reviewed models decide support; power/startup/input-lock
+writes retain trusted confirmation and independent outlet grants. Existing
+methods, exports, storage and outcomes are unchanged. See ADR-0114.

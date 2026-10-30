@@ -968,3 +968,14 @@ write retry, state inference or companion operation changes. Positive startup an
 negative argument/scope fixtures are checked by schemas, fictional Host journeys
 and the rebuilt actual C ABI. Inspection response components add only the three
 exact camera/storage/hood component identifiers; existing flags retain their scopes.
+
+## Exact additional Mijia switch and outlet targets
+
+ADR-0114 adds seven independently granted exact setters across three additional
+models. Power, power-loss behavior and local-input locking are elevated; indicator
+control is low risk. Full protected model/source/root evidence and outlet-family
+authority are checked independently of public risk metadata. One absolute target
+uses one property request on the selected protocol, without toggle, companion
+writes or state inference. Accepted remains unverified and uncertain sends never
+retry, renew credentials or switch protocols. Explicit refresh upgrades old
+read-only derivations; existing receipts and identities remain intact.

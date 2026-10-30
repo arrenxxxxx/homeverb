@@ -49,10 +49,10 @@ class ReferenceTests(unittest.TestCase):
                          'implemented_api_1_40_opt_in_and_version_negotiated_flutter')
         self.assertEqual(len(profiles), 17)
         self.assertEqual(len(ledger['models']), 19)
-        self.assertEqual(sum(ledger['modern_controls']['models'].values()), 33)
+        self.assertEqual(sum(ledger['modern_controls']['models'].values()), 40)
         self.assertEqual(ledger['property_control_coverage']['declared_writable_definitions'], 225)
-        self.assertEqual(ledger['property_control_coverage']['implemented_exact_definitions'], 33)
-        self.assertEqual(ledger['property_control_coverage']['pending_separate_admission'], 192)
+        self.assertEqual(ledger['property_control_coverage']['implemented_exact_definitions'], 40)
+        self.assertEqual(ledger['property_control_coverage']['pending_separate_admission'], 185)
         self.assertEqual(ledger['modern_controls']['models']['xiaomi.hood.cyp10'], 6)
         entries = [entry for model in ledger['models'] for entry in model['entries']]
         self.assertEqual(sum(e['kind'] == 'property' for e in entries), 470)

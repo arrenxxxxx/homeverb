@@ -3,9 +3,12 @@ use homeverb_core::Grant;
 use homeverb_domain::{Command, Risk, Status, Transport, WaitFor};
 
 async fn outlet() -> (Fixture, Arc<MijiaAdapter>, Device) {
+    outlet_for("cuco.plug.v3", 4).await
+}
+async fn outlet_for(model: &str, count: usize) -> (Fixture, Arc<MijiaAdapter>, Device) {
     let f = Fixture::new();
     *f.cloud.devices.lock().unwrap() =
-        vec![json!({"did":"FICTIONAL-OUTLET", "name":"Fictional outlet", "model":"cuco.plug.v3"})];
+        vec![json!({"did":"FICTIONAL-OUTLET", "name":"Fictional outlet", "model":model})];
     let report = f.connect().await;
     f.publish(&report).await;
     {
@@ -25,7 +28,7 @@ async fn outlet() -> (Fixture, Arc<MijiaAdapter>, Device) {
         .inspect_control_options_with_outlets(&first, &first.connections[0], &operation())
         .await
         .unwrap();
-    assert_eq!(local.len(), 4);
+    assert_eq!(local.len(), count);
     let adapter = Arc::new(
         MijiaAdapter::new(f.vault.clone(), f.cloud.clone(), Arc::new(SystemClock))
             .with_outlet_controls(),
@@ -461,3 +464,6 @@ async fn outlet_grants_cannot_authorize_overlapping_purifier_settings() {
         );
     }
 }
+
+#[path = "outlet/extended.rs"]
+mod extended;

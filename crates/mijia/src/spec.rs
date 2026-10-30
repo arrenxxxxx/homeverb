@@ -532,13 +532,15 @@ impl ModelMapping {
     }
     pub(crate) fn control_option(&self, property: &MappedProperty) -> Option<ControlOption> {
         let mut option = property.control_option()?;
-        if outlet_setting(&self.model, property.siid, property.piid) && property.siid != 13 {
+        if outlet_setting(&self.model, property.siid, property.piid)
+            && property.capability != "vendor.xiaomi.mijia.indicator_light"
+        {
             option.definition.risk = homeverb_domain::Risk::Elevated;
         }
         Some(option)
     }
     pub(crate) fn is_outlet(&self) -> bool {
-        self.model == OUTLET_MODEL
+        OUTLET_MODELS.contains(&self.model.as_str())
     }
     pub(crate) fn control_family_enabled(
         &self,
@@ -907,8 +909,20 @@ pub fn reference_setting_option(component: &str, property: &str) -> Option<&'sta
 }
 
 pub(crate) const OUTLET_MODEL: &str = "cuco.plug.v3";
+const OUTLET_MODELS: &[&str] = &[
+    OUTLET_MODEL,
+    "yutai.plug.jdls1",
+    "opple.switch.0010d5",
+    "opple.switch.0010d6",
+];
 fn outlet_setting(model: &str, siid: u32, piid: u32) -> bool {
-    model == OUTLET_MODEL && matches!((siid, piid), (2, 1 | 2) | (7 | 13, 1))
+    match model {
+        OUTLET_MODEL => matches!((siid, piid), (2, 1 | 2) | (7 | 13, 1)),
+        "yutai.plug.jdls1" => matches!((siid, piid), (2, 1 | 2) | (4, 1) | (7, 7)),
+        "opple.switch.0010d5" => (siid, piid) == (3, 1),
+        "opple.switch.0010d6" => matches!((siid, piid), (11 | 12, 1)),
+        _ => false,
+    }
 }
 
 /// Pinned shape for separately reviewed outlet grants. Not runtime authorization.
@@ -916,10 +930,15 @@ pub fn outlet_control_option(component: &str, property: &str) -> Option<&'static
     static OPTIONS: std::sync::OnceLock<Vec<ControlOption>> = std::sync::OnceLock::new();
     OPTIONS
         .get_or_init(|| {
-            ModelMapping::pinned(OUTLET_MODEL, None)
-                .expect("reviewed outlet")
-                .expect("pinned outlet")
-                .control_options()
+            OUTLET_MODELS
+                .iter()
+                .flat_map(|model| {
+                    ModelMapping::pinned(model, None)
+                        .expect("reviewed outlet/switch")
+                        .expect("pinned outlet/switch")
+                        .control_options()
+                })
+                .collect()
         })
         .iter()
         .find(|option| {

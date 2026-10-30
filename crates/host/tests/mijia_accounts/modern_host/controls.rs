@@ -5,6 +5,7 @@ use homeverb_mijia::{ModernControlRequest, ModernControlResponse, ModernControlT
 struct Writer {
     sends: AtomicUsize,
     lost: AtomicBool,
+    expected: Mutex<Option<Value>>,
 }
 #[async_trait]
 impl ModernControlTransport for Writer {
@@ -35,7 +36,9 @@ impl ModernControlTransport for Writer {
                 .unwrap();
         assert_eq!(
             data["params"][0],
-            json!({"did":"PRIVATE-MODERN-DID","siid":2,"piid":1,"value":false})
+            self.expected.lock().unwrap().clone().unwrap_or_else(
+                || json!({"did":"PRIVATE-MODERN-DID","siid":2,"piid":1,"value":false})
+            )
         );
         progress.mark_sent();
         self.sends.fetch_add(1, Ordering::SeqCst);
@@ -45,8 +48,10 @@ impl ModernControlTransport for Writer {
                 "Fictional lost acknowledgement.",
             ));
         }
-        let reply =
-            json!({"code":0,"result":[{"did":"PRIVATE-MODERN-DID","siid":2,"piid":1,"code":0}]});
+        let mut ack = data["params"][0].clone();
+        ack.as_object_mut().unwrap().remove("value");
+        ack["code"] = json!(0);
+        let reply = json!({"code":0,"result":[ack]});
         Ok(ModernControlResponse {
             body: secret(
                 STANDARD
@@ -232,5 +237,165 @@ async fn native_modern_outlet_consumes_actual_preview_and_preserves_unknown_rece
         assert_eq!(f.peer.auth_count(), 4);
         assert_eq!(f.cloud.calls.load(Ordering::SeqCst), 0);
         session.close();
+    }
+}
+
+#[tokio::test]
+async fn additional_native_outlets_keep_inspection_startup_consent_and_unknown_reopen() {
+    for (model, component, property, siid, piid, target, elevated) in [
+        (
+            "opple.switch.0010d5",
+            "switch-3",
+            "state",
+            3,
+            1,
+            json!(true),
+            true,
+        ),
+        (
+            "opple.switch.0010d6",
+            "switch-11",
+            "state",
+            11,
+            1,
+            json!(false),
+            true,
+        ),
+        (
+            "opple.switch.0010d6",
+            "switch-12",
+            "state",
+            12,
+            1,
+            json!(true),
+            true,
+        ),
+        (
+            "yutai.plug.jdls1",
+            "switch-2",
+            "state",
+            2,
+            1,
+            json!(true),
+            true,
+        ),
+        (
+            "yutai.plug.jdls1",
+            "switch-2",
+            "default_power_on_state_2",
+            2,
+            2,
+            json!(2),
+            true,
+        ),
+        (
+            "yutai.plug.jdls1",
+            "indicator_light-4",
+            "on_1",
+            4,
+            1,
+            json!(true),
+            false,
+        ),
+        (
+            "yutai.plug.jdls1",
+            "custom-7",
+            "child_lock_7",
+            7,
+            7,
+            json!(true),
+            true,
+        ),
+    ] {
+        for lost in [false, true] {
+            let (f, account, card) = connected(model).await;
+            let w = Arc::new(Writer::default());
+            *w.expected.lock().unwrap() =
+                Some(json!({"did":"PRIVATE-MODERN-DID","siid":siid,"piid":piid,"value":target}));
+            let ro = reopen(&f, w.clone(), Policy::default(), false, true);
+            let reads = f.peer.reads.load(Ordering::SeqCst);
+            let inspected=call(&ro,json!({"method":"inspect_control_options","device_id":card["id"],"connection_id":card["connections"][0]["id"]})).await;
+            validate(&inspected, "inspect_control_options");
+            let option = inspected["data"]["options"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|o| {
+                    o["component_id"] == component
+                        && o["definition"]["parameters"]["properties"]
+                            .get(property)
+                            .is_some()
+                })
+                .unwrap();
+            assert_eq!(
+                option["definition"]["risk"],
+                if elevated { "elevated" } else { "low" }
+            );
+            let c = json!({"schema_version":"1.0","request_id":"extended-native","device_id":card["id"],"component_id":component,"capability":option["capability"],"action":option["action"],"arguments":{property:target},"connection":"cloud","timeout_ms":5000,"wait_for":"accepted"});
+            assert!(call(&ro, json!({"method":"plan","command":c})).await["error"].is_object());
+            assert_eq!(f.peer.reads.load(Ordering::SeqCst), reads);
+            assert_eq!(w.sends.load(Ordering::SeqCst), 0);
+            ro.close();
+            let policy = homeverb_host::mijia_outlet_policy(&[homeverb_host::MijiaOutletGrant {
+                device_id: card["id"].as_str().unwrap().into(),
+                component_id: component.into(),
+                property: property.into(),
+                value: target.clone(),
+            }])
+            .unwrap();
+            let s = reopen(&f, w.clone(), policy.clone(), true, true);
+            assert!(
+                call(&s, json!({"method":"refresh_account","account_id":account})).await["error"]
+                    .is_null()
+            );
+            w.lost.store(lost, Ordering::SeqCst);
+            let result = if elevated {
+                assert!(call(&s, json!({"method":"plan","command":c})).await["error"].is_object());
+                let prepare = || {
+                    serde_json::from_value(json!({"schema_version":"1.0","operation_id":"extended-preview","command":c})).unwrap()
+                };
+                let confirm = |id: Value| {
+                    serde_json::from_value(json!({"schema_version":"1.0","operation_id":"extended-consent","approval_id":id})).unwrap()
+                };
+                let old = s.prepare_native_approval(prepare()).await;
+                assert_eq!(old["data"]["command"], c);
+                s.set_foreground(false);
+                s.set_foreground(true);
+                assert_eq!(
+                    s.execute_native_approved(confirm(old["data"]["approval_id"].clone()))
+                        .await["error"]["code"],
+                    "APPROVAL_INVALID"
+                );
+                let p = s.prepare_native_approval(prepare()).await;
+                assert_eq!(w.sends.load(Ordering::SeqCst), 0);
+                let result = s
+                    .execute_native_approved(confirm(p["data"]["approval_id"].clone()))
+                    .await;
+                assert_eq!(
+                    s.execute_native_approved(confirm(p["data"]["approval_id"].clone()))
+                        .await["error"]["code"],
+                    "APPROVAL_INVALID"
+                );
+                result
+            } else {
+                call(&s, json!({"method":"execute","command":c})).await
+            };
+            assert_eq!(
+                result["status"],
+                if lost { "unknown" } else { "accepted" },
+                "{result}"
+            );
+            s.close();
+            let fresh = reopen(&f, w.clone(), policy, true, true);
+            call(&fresh, json!({"method":"execute","command":c})).await;
+            let retained = call(
+                &fresh,
+                json!({"method":"get_execution","request_id":c["request_id"]}),
+            )
+            .await;
+            assert_eq!(retained["data"]["status"], result["status"]);
+            assert_eq!(w.sends.load(Ordering::SeqCst), 1);
+            assert_eq!(f.cloud.calls.load(Ordering::SeqCst), 0);
+        }
     }
 }

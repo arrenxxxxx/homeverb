@@ -1,5 +1,5 @@
 {
-  "api_version": "1.42.0",
+  "api_version": "1.43.0",
   "functions": {
     "homeverb_begin_modern_account_login": {
       "request": "native-modern-account#/$defs/begin",

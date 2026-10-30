@@ -981,3 +981,14 @@ immutable bilingual review at 320 logical pixels with double text size, explicit
 single consumption, unknown receipts and background discard. Run the existing
 power/action, permission, native, control and approval suites and Flutter analysis
 as regressions. No provider, account, phone or appliance is used by these tests.
+
+## Exact additional switch and outlet controls
+
+ADR-0114 adds seven-field legacy/modern fixtures and all fifteen possible targets,
+including exact source mutations, old read-only mappings, native inspection,
+independent startup grants, forged public risk, protected identity changes,
+preview/foreground invalidation and uncertain receipts after reopen. Run the
+Mijia tests, Host mijia_accounts/mijia_outlet_grants suites, native C ABI and
+contract checks with rebuilt FFI. On this workstation use --test-threads=4 for
+Rust regression runs to avoid CPU contention in existing 100 ms deadline cases.
+These checks use fictional material and establish no provider/physical support.

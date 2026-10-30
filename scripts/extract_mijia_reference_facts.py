@@ -40,6 +40,12 @@ def admitted_write(model, siid, piid):
         return siid == 2 and piid in {1, 2, 3, 7, 9, 12, 13}
     if model == 'cuco.plug.v3':
         return (siid == 2 and piid in {1, 2}) or (siid in {7, 13} and piid == 1)
+    if model == 'yutai.plug.jdls1':
+        return (siid == 2 and piid in {1, 2}) or (siid, piid) in {(4, 1), (7, 7)}
+    if model == 'opple.switch.0010d5':
+        return (siid, piid) == (3, 1)
+    if model == 'opple.switch.0010d6':
+        return siid in {11, 12} and piid == 1
     if model == 'zhimi.airpurifier.v6':
         return (siid == 2 and piid in {1, 2, 3}) or (siid in {5, 6, 7, 8} and piid == 1)
     return False
@@ -137,7 +143,7 @@ def project():
                               else 'not_admitted_by_reference'),
                    'reason': ('Modern reference-origin typed reads and protected accounts are implemented; native and Flutter device publication and Core reads are implemented; provider acceptance remains pending.'
                               if o['id'] in ('directory', 'homes', 'properties')
-                              else 'ADR-0104/0106 admit 33 reviewed scalar mappings across five exact models with grants and trusted elevated approval; no arbitrary setter or physical acceptance.'
+                              else 'ADR-0104/0106/0114 admit 40 reviewed scalar mappings across eight exact models with grants and trusted elevated approval; 33 are in App and seven await adoption; no arbitrary setter or physical acceptance.'
                               if o['id'] == 'property_write_candidate'
                               else 'ADR-0107/0108/0109 supply six exact actions through Core/native/App. ADR-0110/0111 add five elevated power toggles through Core/native/App with independent grants and trusted approval; ADR-0112/0113 add four Core/native/App maintenance/stop actions with independent trusted confirmation; all real acceptance remains pending.'
                               if o['id'] == 'action_candidate'
@@ -176,16 +182,17 @@ def project():
                     'provider_acceptance': 'pending'},
                 'modern_controls': {
                     'status': 'implemented_exact_granted_native_property_set',
-                    'evidence': 'ADR-0104/0106; fictional protocol, TLS, Core, native Host and App tests',
+                    'evidence': 'ADR-0104/0106/0114; fictional protocol, TLS, Core and native Host tests; App adoption of the seven latest fields pending',
                     'origin': 'https://core.api.mijia.tech/app',
                     'route': '/miotspec/prop/set',
                     'codec': 'continuous_rc4_drop1024_with_bounded_encrypted_gzip',
                     'models': {'jdjz.fan.2072fc': 9, 'abhome.light.wy0a01': 7,
                                'zhimi.airpurifier.v6': 7, 'cuco.plug.v3': 4,
-                               'xiaomi.hood.cyp10': 6},
+                               'xiaomi.hood.cyp10': 6, 'yutai.plug.jdls1': 4,
+                               'opple.switch.0010d5': 1, 'opple.switch.0010d6': 2},
                     'authority': 'exact_startup_grants_and_independent_protected_family_admission',
                     'elevated_outlet': 'immutable_trusted_approval_required',
-                    'native_and_app': 'api_1_39_exact_hood_extension_with_existing_independent_grants',
+                    'native_and_app': 'api_1_43_switch_outlet_extension_flutter_pending',
                     'uncertainty': 'preserve_unknown_without_retry_or_protocol_fallback',
                     'android_package': 'archive_checked_503ef1f_api_1_39_no_runtime_acceptance',
                     'provider_acceptance': 'pending'},
