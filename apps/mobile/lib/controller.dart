@@ -501,6 +501,14 @@ class HomeController extends ChangeNotifier {
       includeMaintenanceActions: _supportsMaintenanceActions,
     );
     if (next.isEmpty) return;
+    if (next.any((p) => p.requiresExtendedOutletApi) &&
+        core is NativeSessionClient &&
+        !(core as NativeSessionClient).apiAtLeast(43)) {
+      throw NativeFailure(
+        'API_UPGRADE_REQUIRED',
+        'Extended switch and outlet settings require native API 1.43.',
+      );
+    }
     if (next.any((p) => p.requiresHoodManualApi) &&
         core is NativeSessionClient &&
         !(core as NativeSessionClient).apiAtLeast(39)) {

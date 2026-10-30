@@ -14,7 +14,7 @@ import 'accounts_test.dart' show AccountPreferences;
 import 'session_permissions_test.dart' show inspection;
 import 'mijia_settings_test.dart' show SettingCore, settingsInspection;
 
-Json outletInspection() {
+Json outletInspection({bool extended = false}) {
   final result = inspection();
   final rules = jsonDecode(
     File('../../schemas/native-open.schema.json').readAsStringSync(),
@@ -22,31 +22,40 @@ Json outletInspection() {
   result['device_id'] = '40000000-0000-4000-8000-000000000001';
   result['options'] = [
     for (final rule in rules)
-      (() {
-        final component = rule['properties']['component_id']['const'] as String;
-        final property = rule['properties']['property']['const'] as String;
-        return {
-          'component_id': component,
-          'capability': property == 'state'
-              ? 'power'
-              : 'vendor.xiaomi.mijia.${component.split('-').first}',
-          'action': property == 'state' ? 'set' : 'set_$property',
-          'definition': {
-            'parameters': {
-              'type': 'object',
-              'properties': {property: rule['properties']['value']},
-              'required': [property],
-              'additionalProperties': false,
+      if (extended ||
+          const {
+            'switch-2',
+            'physical_controls_locked-7',
+            'indicator_light-13',
+          }.contains(rule['properties']['component_id']['const']))
+        (() {
+          final component =
+              rule['properties']['component_id']['const'] as String;
+          final property = rule['properties']['property']['const'] as String;
+          return {
+            'component_id': component,
+            'capability': property == 'state'
+                ? 'power'
+                : 'vendor.xiaomi.mijia.${component.split('-').first}',
+            'action': property == 'state' ? 'set' : 'set_$property',
+            'definition': {
+              'parameters': {
+                'type': 'object',
+                'properties': {property: rule['properties']['value']},
+                'required': [property],
+                'additionalProperties': false,
+              },
+              'transports': ['cloud'],
+              'risk': component.startsWith('indicator_light-')
+                  ? 'low'
+                  : 'elevated',
+              'idempotency': 'set_value',
+              'atomic': false,
+              'independent_fields': false,
+              'verification': 'unavailable',
             },
-            'transports': ['cloud'],
-            'risk': component == 'indicator_light-13' ? 'low' : 'elevated',
-            'idempotency': 'set_value',
-            'atomic': false,
-            'independent_fields': false,
-            'verification': 'unavailable',
-          },
-        };
-      })(),
+          };
+        })(),
   ];
   return result;
 }
@@ -182,7 +191,7 @@ void main() {
 
   test('unexpected outlet risk, routes, scopes and domains are refused', () {
     final mutations = <void Function(Json)>[
-      (v) => v['component_id'] = 'switch-3',
+      (v) => v['component_id'] = 'switch-99',
       (v) => v['definition']['risk'] = 'low',
       (v) => v['definition']['risk'] = 'high',
       (v) => v['definition']['transports'] = ['cloud', 'lan'],

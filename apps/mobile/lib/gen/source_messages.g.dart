@@ -2340,6 +2340,17 @@ String? translateSource(
     t.vendorXiaomiMijiaHoodSmartDryWashStopDryCleaningConfirm(
       device: args["device"] ?? "{device}",
     ),
+  "Set {device} power to {state}? Equipment on this channel may start or stop. Acceptance does not confirm physical power." =>
+    t.componentSwitch12PowerSetConfirm(
+      device: args["device"] ?? "{device}",
+      state: args["state"] ?? "{state}",
+    ),
+  "Set outlet button lock" => t.vendorXiaomiMijiaCustomSetChildLock7,
+  "Set {device} button lock to {target}? This may prevent local button operation. It does not set power, and acceptance does not confirm the button state." =>
+    t.vendorXiaomiMijiaCustomSetChildLock7Confirm(
+      device: args["device"] ?? "{device}",
+      target: args["target"] ?? "{target}",
+    ),
   _ => null,
 };
 
@@ -4713,5 +4724,14 @@ String? sourceForKey(String key) => switch (key) {
     "Stop hood dry cleaning",
   "vendor.xiaomi.mijia.hood_smart_dry_wash.stop_dry_cleaning.confirm" =>
     "Request a dry-cleaning stop for {device}? Acceptance does not confirm that cleaning has stopped or the hood has cooled. Check the device before handling it.",
+  "component.switch_3.power.set.confirm" =>
+    "Set {device} power to {state}? Equipment on this channel may start or stop. Acceptance does not confirm physical power.",
+  "component.switch_11.power.set.confirm" =>
+    "Set {device} power to {state}? Equipment on this channel may start or stop. Acceptance does not confirm physical power.",
+  "component.switch_12.power.set.confirm" =>
+    "Set {device} power to {state}? Equipment on this channel may start or stop. Acceptance does not confirm physical power.",
+  "vendor.xiaomi.mijia.custom.set_child_lock_7" => "Set outlet button lock",
+  "vendor.xiaomi.mijia.custom.set_child_lock_7.confirm" =>
+    "Set {device} button lock to {target}? This may prevent local button operation. It does not set power, and acceptance does not confirm the button state.",
   _ => null,
 };

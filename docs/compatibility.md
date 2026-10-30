@@ -1,5 +1,24 @@
 # Platform and device compatibility matrix
 
+## Foreground App switch and outlet settings -- October 30, 2026
+
+Flutter now adopts ADR-0114's seven additional property controls. New exact
+switch-3/11/12 power, indicator_light-4 and custom-7 input-lock tuples require
+API 1.43 negotiation before granted reopen. The existing switch-2 target schemas
+remain compatible. Independent outlet permissions, complete native model evidence
+and actual trusted confirmation still decide admission; generic UI code does not
+infer device support from a model name.
+
+Device opening sends no command. Exact parameter selection and cloud-route review
+precede elevated power/startup/input-lock execution. Bilingual confirmation copy
+identifies the selected channel or local-button effect. Indicator changes use the
+ordinary low-risk path without a companion power write. Backgrounding invalidates
+pending setup and previews; repeated clicks and unknown outcomes never replay.
+All 40 admitted scalar controls now have Core/native/App integration across eight
+models. A matching package follows separately; 87f3410 remains API 1.42. The 185
+other writable definitions, 25 actions, 78 events, specialized paths and real
+provider/phone/model acceptance remain incomplete.
+
 ## Exact switch and outlet settings -- October 30, 2026
 
 ADR-0114/API 1.43 adds seven exact property controls: three Opple switch channels

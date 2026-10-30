@@ -5597,4 +5597,19 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Request a dry-cleaning stop for {device}? Acceptance does not confirm that cleaning has stopped or the hood has cooled. Check the device before handling it.'
 	String vendorXiaomiMijiaHoodSmartDryWashStopDryCleaningConfirm({required Object device}) => 'Request a dry-cleaning stop for ${device}? Acceptance does not confirm that cleaning has stopped or the hood has cooled. Check the device before handling it.';
+
+	/// en-US: 'Set {device} power to {state}? Equipment on this channel may start or stop. Acceptance does not confirm physical power.'
+	String componentSwitch3PowerSetConfirm({required Object device, required Object state}) => 'Set ${device} power to ${state}? Equipment on this channel may start or stop. Acceptance does not confirm physical power.';
+
+	/// en-US: 'Set {device} power to {state}? Equipment on this channel may start or stop. Acceptance does not confirm physical power.'
+	String componentSwitch11PowerSetConfirm({required Object device, required Object state}) => 'Set ${device} power to ${state}? Equipment on this channel may start or stop. Acceptance does not confirm physical power.';
+
+	/// en-US: 'Set {device} power to {state}? Equipment on this channel may start or stop. Acceptance does not confirm physical power.'
+	String componentSwitch12PowerSetConfirm({required Object device, required Object state}) => 'Set ${device} power to ${state}? Equipment on this channel may start or stop. Acceptance does not confirm physical power.';
+
+	/// en-US: 'Set outlet button lock'
+	String get vendorXiaomiMijiaCustomSetChildLock7 => 'Set outlet button lock';
+
+	/// en-US: 'Set {device} button lock to {target}? This may prevent local button operation. It does not set power, and acceptance does not confirm the button state.'
+	String vendorXiaomiMijiaCustomSetChildLock7Confirm({required Object device, required Object target}) => 'Set ${device} button lock to ${target}? This may prevent local button operation. It does not set power, and acceptance does not confirm the button state.';
 }

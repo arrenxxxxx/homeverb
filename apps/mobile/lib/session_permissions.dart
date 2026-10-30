@@ -41,6 +41,15 @@ class SessionPermission {
         'vendor.xiaomi.mijia.hood_smart_dry_wash',
       }.contains(capability);
   bool get requiresOutletApi => startupField == "mijia_outlet_grants";
+  bool get requiresExtendedOutletApi =>
+      requiresOutletApi &&
+      const {
+        'switch-3',
+        'switch-11',
+        'switch-12',
+        'indicator_light-4',
+        'custom-7',
+      }.contains(component);
   String get identity =>
       jsonEncode([device, component, capability, action, value]);
 
@@ -122,6 +131,17 @@ class SessionPermission {
   };
 
   static const _outletSettings = {
+    ('switch-3', 'power', 'set'): ('state', 'elevated'),
+    ('switch-11', 'power', 'set'): ('state', 'elevated'),
+    ('switch-12', 'power', 'set'): ('state', 'elevated'),
+    ('indicator_light-4', 'vendor.xiaomi.mijia.indicator_light', 'set_on_1'): (
+      'on_1',
+      'low',
+    ),
+    ('custom-7', 'vendor.xiaomi.mijia.custom', 'set_child_lock_7'): (
+      'child_lock_7',
+      'elevated',
+    ),
     ('switch-2', 'power', 'set'): ('state', 'elevated'),
     ('switch-2', 'vendor.xiaomi.mijia.switch', 'set_default_power_on_state_2'):
         ('default_power_on_state_2', 'elevated'),

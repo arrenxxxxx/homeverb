@@ -1,6 +1,6 @@
 # HomeVerb Flutter application
 
-The native application embeds Core using native UI contract 1.42.0. The separate visual preview contains fictional Window Light fixtures and never opens Core. The default build opens an isolated Mock profile. Explicit Meiju builds provide protected account connection, local metadata, retrieval/recovery and scoped local removal; Android startup wiring and Mock process journeys are emulator-tested; actual Keystore and physical acceptance remain pending. Cache and history clearing are connected with separate confirmations. Nearby sharing and full-profile deletion remain unavailable. Their preview states are not live features.
+The native application embeds Core using native UI contract 1.43.0. The separate visual preview contains fictional Window Light fixtures and never opens Core. The default build opens an isolated Mock profile. Explicit Meiju builds provide protected account connection, local metadata, retrieval/recovery and scoped local removal; Android startup wiring and Mock process journeys are emulator-tested; actual Keystore and physical acceptance remain pending. Cache and history clearing are connected with separate confirmations. Nearby sharing and full-profile deletion remain unavailable. Their preview states are not live features.
 
 ## Mijia and combined account builds
 
@@ -38,6 +38,12 @@ API 1.42 adds four camera/storage/hood maintenance actions. Power and maintenanc
 actions require the trusted approval bridge and explicit immutable confirmation.
 The App negotiates each version before requesting its separate inspection flag
 or startup authority. Provider and physical acceptance remain pending.
+
+API 1.43 adds seven exact switch/outlet settings across three additional models:
+absolute channel power, startup-state code, indicator and local-button lock.
+The new startup tuples require version negotiation. Elevated settings use the
+existing explicit parameter/route/confirmation flow; indicator writes remain
+low risk. There are 40 admitted scalar controls across eight exact models.
 
 ## Device controls
 

@@ -143,7 +143,7 @@ def project():
                               else 'not_admitted_by_reference'),
                    'reason': ('Modern reference-origin typed reads and protected accounts are implemented; native and Flutter device publication and Core reads are implemented; provider acceptance remains pending.'
                               if o['id'] in ('directory', 'homes', 'properties')
-                              else 'ADR-0104/0106/0114 admit 40 reviewed scalar mappings across eight exact models with grants and trusted elevated approval; 33 are in App and seven await adoption; no arbitrary setter or physical acceptance.'
+                              else 'ADR-0104/0106/0114 admit 40 reviewed scalar mappings across eight exact models with grants and trusted elevated approval; all 40 have App integration; no arbitrary setter or physical acceptance.'
                               if o['id'] == 'property_write_candidate'
                               else 'ADR-0107/0108/0109 supply six exact actions through Core/native/App. ADR-0110/0111 add five elevated power toggles through Core/native/App with independent grants and trusted approval; ADR-0112/0113 add four Core/native/App maintenance/stop actions with independent trusted confirmation; all real acceptance remains pending.'
                               if o['id'] == 'action_candidate'
@@ -182,7 +182,7 @@ def project():
                     'provider_acceptance': 'pending'},
                 'modern_controls': {
                     'status': 'implemented_exact_granted_native_property_set',
-                    'evidence': 'ADR-0104/0106/0114; fictional protocol, TLS, Core and native Host tests; App adoption of the seven latest fields pending',
+                    'evidence': 'ADR-0104/0106/0114; fictional protocol, TLS, Core, native Host and Flutter tests',
                     'origin': 'https://core.api.mijia.tech/app',
                     'route': '/miotspec/prop/set',
                     'codec': 'continuous_rc4_drop1024_with_bounded_encrypted_gzip',
@@ -192,7 +192,7 @@ def project():
                                'opple.switch.0010d5': 1, 'opple.switch.0010d6': 2},
                     'authority': 'exact_startup_grants_and_independent_protected_family_admission',
                     'elevated_outlet': 'immutable_trusted_approval_required',
-                    'native_and_app': 'api_1_43_switch_outlet_extension_flutter_pending',
+                    'native_and_app': 'api_1_43_exact_switch_outlet_extension_with_trusted_flutter',
                     'uncertainty': 'preserve_unknown_without_retry_or_protocol_fallback',
                     'android_package': 'archive_checked_503ef1f_api_1_39_no_runtime_acceptance',
                     'provider_acceptance': 'pending'},

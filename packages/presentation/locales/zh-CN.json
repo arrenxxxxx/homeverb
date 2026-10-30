@@ -1852,5 +1852,10 @@
   "vendor.xiaomi.mijia.memory_card_management.pop_up": "弹出存储卡",
   "vendor.xiaomi.mijia.memory_card_management.pop_up.confirm": "请求弹出 {device} 的存储卡？录像可能停止。请求被接受不代表可以安全取卡；取卡前请检查设备。",
   "vendor.xiaomi.mijia.hood_smart_dry_wash.stop_dry_cleaning": "停止油烟机干洗",
-  "vendor.xiaomi.mijia.hood_smart_dry_wash.stop_dry_cleaning.confirm": "请求停止 {device} 的干洗？请求被接受不代表干洗已停止或油烟机已冷却。操作设备前请检查设备状态。"
+  "vendor.xiaomi.mijia.hood_smart_dry_wash.stop_dry_cleaning.confirm": "请求停止 {device} 的干洗？请求被接受不代表干洗已停止或油烟机已冷却。操作设备前请检查设备状态。",
+  "component.switch_3.power.set.confirm": "将 {device} 的电源设为 {state}？此通道上的设备可能启动或停止。请求被接受不代表实际电源状态已确认。",
+  "component.switch_11.power.set.confirm": "将 {device} 的电源设为 {state}？此通道上的设备可能启动或停止。请求被接受不代表实际电源状态已确认。",
+  "component.switch_12.power.set.confirm": "将 {device} 的电源设为 {state}？此通道上的设备可能启动或停止。请求被接受不代表实际电源状态已确认。",
+  "vendor.xiaomi.mijia.custom.set_child_lock_7": "设置插座按键锁",
+  "vendor.xiaomi.mijia.custom.set_child_lock_7.confirm": "将 {device} 的按键锁设为 {target}？这可能使本地按键无法操作。此操作不会设置电源，请求被接受不代表按键状态已确认。"
 }

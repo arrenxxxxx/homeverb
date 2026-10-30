@@ -992,3 +992,10 @@ Mijia tests, Host mijia_accounts/mijia_outlet_grants suites, native C ABI and
 contract checks with rebuilt FFI. On this workstation use --test-threads=4 for
 Rust regression runs to avoid CPU contention in existing 100 ms deadline cases.
 These checks use fictional material and establish no provider/physical support.
+
+Run fvm flutter test test/mijia_switch_outlet_test.dart from apps/mobile with
+rebuilt FFI to cover new-tuple startup/version negotiation and all seven exact
+fields through bilingual controls. Include existing outlet/action/maintenance,
+permission, control, native, approval and foreground-refresh regressions, plus
+Flutter analysis. The native fixtures use fictional identities and no provider
+traffic; UI tests do not establish physical-device support.

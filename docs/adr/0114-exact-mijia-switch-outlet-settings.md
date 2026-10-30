@@ -1,6 +1,6 @@
 # ADR-0114: Exact Mijia switch and outlet settings
 
-Status: Native implementation verified; Flutter adoption and physical acceptance pending.
+Status: Native and Flutter implementation verified with fictional evidence; physical acceptance pending.
 Date: October 30, 2026.
 
 ## Decision and evidence
@@ -74,3 +74,23 @@ An initial default-parallel run exposed a stale supported-model assertion, which
 was corrected, and two existing 100 ms deadline tests failed under CPU contention;
 both passed in the bounded-concurrency package and workspace reruns. No physical
 or provider acceptance follows from these fictional tests.
+
+## Flutter adoption
+
+The controller and native client both negotiate API 1.43 before new-tuple startup.
+Existing switch-2 permissions retain their earlier minimum version and do not
+infer a model. The generic control panel and immutable preview present the exact
+selected component and target; scoped power and local-input lock copy are
+localized. Older libraries reject before any granted reopen. The existing outlet
+fixture preserves its original four-option scope, so the new schema does not
+silently widen old test fixtures. No new ordinary method or saved format is added.
+
+Executed Flutter verification: 175 tests across 18 affected control, permission,
+component, native-contract, localization, approval and foreground-refresh files
+passed under Flutter 3.47.7. The new suite has 20 tests, including all seven fields
+in both languages at 320 logical pixels with double text size, actual API 1.42
+refusal, current native startup in both modes, explicit targets/routes,
+single confirmation and background discard. Flutter analysis reported no issues;
+seven shared presentation tests passed. These focused regressions do not resolve
+the eight previously recorded unrelated macOS visual/legacy-click full-suite
+failures. No real account, appliance write, phone acceptance or remote CI is claimed.
