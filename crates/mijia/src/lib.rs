@@ -24,10 +24,11 @@ pub use control::PropertyWrite;
 pub use inventory::{CloudDevice, Inventory, PropertyQuery, PropertyReading};
 pub use modern::{
     ModernAuthEndpoint, ModernAuthRequest, ModernAuthResponse, ModernAuthTransport,
-    ModernContentEncoding, ModernDeviceGroup, ModernDeviceInventory, ModernDirectory,
-    ModernDirectoryEntry, ModernHome, ModernHomes, ModernMijiaSession, ModernQrChallenge,
-    ModernReadEndpoint, ModernReadRequest, ModernReadResponse, ModernReadTransport,
-    ModernUnresolvedEntry, ModernUnresolvedReason, begin_modern_qr_login,
+    ModernContentEncoding, ModernControlRequest, ModernControlResponse, ModernControlTransport,
+    ModernDeviceGroup, ModernDeviceInventory, ModernDirectory, ModernDirectoryEntry, ModernHome,
+    ModernHomes, ModernMijiaSession, ModernQrChallenge, ModernReadEndpoint, ModernReadRequest,
+    ModernReadResponse, ModernReadTransport, ModernUnresolvedEntry, ModernUnresolvedReason,
+    begin_modern_qr_login,
 };
 pub use spec::{
     ControlOption, MappedProperty, ModelMapping, SpecIndex, outlet_control_option,

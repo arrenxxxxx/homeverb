@@ -20,8 +20,11 @@ Legacy Mijia bindings have reviewed exact fan, light, purifier, outlet and auxil
 controls with independent native grants; captcha and phone/email verification have
 explicit foreground flows. API 1.36 adds QR sign-in. With API 1.37, successful QR
 continuation imports grouped device cards and explicit QR refresh/recovery updates
-them; old 1.36 libraries retain logical-directory summaries. Modern bindings are
-read-only, without modern controls. Exact `cuco.plug.v3` daily-energy history
+them; old 1.36 libraries retain logical-directory summaries. ADR-0104 enables the
+29 reviewed scalar controls across five exact modern model mappings through the
+existing option/grant/confirmation flow. Default native sessions remain read-only;
+older libraries expose no modern options. Elevated outlet settings still require
+actual confirmation of the immutable preview. Exact `cuco.plug.v3` daily-energy history
 is available through the existing explicit history dialog on legacy and modern
 bindings; all other historical targets remain unavailable. Partial/failed retrieval stays
 separate from authentication, and local reload failure never repeats login.

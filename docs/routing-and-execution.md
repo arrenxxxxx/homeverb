@@ -779,3 +779,30 @@ No request selects a raw endpoint or key. Failure never tries the other protocol
 renews credentials or changes write receipts. Account/device leases and foreground
 cancellation cover the whole query and result validation; history remains separate
 from current state, execution acceptance and physical verification.
+
+## Modern exact property control selection
+
+ADR-0104 admits only the existing 29 exact scalar mappings across five models.
+The protected binding selects the legacy or modern session before transmission.
+Modern controls use a separately registered fixed-origin transport and the
+reference continuous codec, never the modern history profile or legacy token.
+Transport registration and local option inspection do not grant command authority.
+Exact Core grants, protected family/model/spec/domain checks and independent trusted
+approval for elevated outlet settings remain mandatory. Unknown/removed membership
+or unavailable transport refuses stale public descriptors before any send.
+
+Each command sends one property once with its complete protected root identity.
+A response requires encrypted global success and exactly one matching DID/SIID/PIID
+item: zero is accepted, nonzero explicitly rejected. Neither establishes physical
+verification. HTTP/global failures, invalid/uncorrelated replies, cancellation and
+timeout after the conservative send marker remain possibly sent and produce unknown
+receipts. Changing a saved binding to modern does not invalidate a prior legacy
+unknown receipt or allow its request ID to send again. No automatic fallback,
+renewal, retry, companion property, state read or rollback is added.
+
+Public command/result schemas, outcomes and native API 1.37 are unchanged.
+Positive/negative fixtures are the executable protocol, Core and Host cases in
+crates/mijia/src/modern/reads/tests/writes.rs,
+crates/mijia/src/adapter/tests/modern_accounts/controls.rs and
+crates/host/tests/mijia_accounts/modern_host/controls.rs. Existing ordinary schema
+fixtures and C ABI checks retain their previous shapes and trust boundary.

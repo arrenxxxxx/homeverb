@@ -132,9 +132,13 @@ impl ModernReadTransport for Peer {
                 json!({"list":self.devices.lock().unwrap().clone(),"has_more":false})
             }
             Read::Statistics => {
-                assert_eq!(request.endpoint().url(), "https://api.mijia.tech/app/v2/user/statistics");
-                assert_eq!(data["key"],"11.1"); assert_eq!(data["data_type"],"stat_day_v3");
-                assert_eq!(data["limit"],31);
+                assert_eq!(
+                    request.endpoint().url(),
+                    "https://api.mijia.tech/app/v2/user/statistics"
+                );
+                assert_eq!(data["key"], "11.1");
+                assert_eq!(data["data_type"], "stat_day_v3");
+                assert_eq!(data["limit"], 31);
                 json!([{"did":data["did"],"key":"11.1","time":1700000000,"value":"[125]"}])
             }
             Read::Properties => {
@@ -901,3 +905,6 @@ mod devices;
 
 #[path = "modern_accounts/history.rs"]
 mod history;
+
+#[path = "modern_accounts/controls.rs"]
+mod controls;

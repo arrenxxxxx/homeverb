@@ -31,6 +31,25 @@ cloud value/cache checks, cancellation/drop lease cleanup, removal and independe
 adapter write denial. `cargo test -p homeverb-host --test mijia_startup --offline --locked`
 checks empty production Rust composition without credential or provider access.
 
+## Modern exact control checks
+
+`cargo +1.96.0 test -p homeverb-mijia --offline --locked` includes ADR-0104's
+continuous-codec property setter, local TLS failure/lifecycle checks, every exact
+mapped scalar domain, immutable outlet approval, independent protected admission
+and cross-protocol receipt replay prevention. Host integration is covered by
+`cargo +1.96.0 test -p homeverb-host --test mijia_accounts --offline --locked modern_host::controls`.
+These tests use fictional accounts and no appliance or provider requests.
+
+From apps/mobile, run the affected existing generic UI flows:
+
+```sh
+fvm flutter test test/mijia_controls_test.dart test/mijia_settings_test.dart test/mijia_outlet_test.dart test/mijia_auxiliary_test.dart test/session_permissions_test.dart test/approval_test.dart test/device_detail_controls_test.dart test/numeric_history_test.dart test/modern_device_flow_test.dart
+```
+
+The suite covers permission preparation, ordinary/elevated controls, consumed or
+invalidated approvals, unknown receipts, explicit history and modern card reads.
+Passing UI fixtures does not establish a provider acknowledgement or physical effect.
+
 ## Modern protected device checks
 
 `cargo test -p homeverb-mijia --offline --locked modern_accounts::devices` uses

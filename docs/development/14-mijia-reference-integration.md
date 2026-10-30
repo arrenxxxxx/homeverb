@@ -16,7 +16,9 @@ modern QR login, protected account/device binding, grouped card publication and
 Core reads through Flutter. The [Android package](../../apps/mobile/verification.md#modern-qr-and-device-publication-android-package--october-30-2026)
 has clean-source archive checks, without installation or provider acceptance.
 ADR-0103 subsequently adds exact modern outlet daily-energy history through the
-existing Core/native/App history interface; the package above predates that addition.
+existing Core/native/App history interface. ADR-0104 adds the 29 reviewed scalar
+controls across five exact modern model mappings through existing Core/native/App
+contracts; the package above predates both additions.
 
 - Eight-part MIoT URNs retain their exact extension; malformed/foreign URNs refuse.
 - Seventeen exact model/specification catalogs project 264 reviewed scalar read
@@ -1547,3 +1549,33 @@ record semantics. No ID suffix is stripped and no credential/codec fallback is
 available. Ordinary native/App history queries reuse existing schemas and UI;
 modern controls and broader events/history remain unavailable. The previous APK
 predates this implementation. See the ADR for verification and acceptance scope.
+
+## Modern exact scalar controls -- October 30, 2026
+
+ADR-0104 implements the existing 29 reviewed scalar controls for modern-selected
+bindings: jdjz.fan.2072fc (9), abhome.light.wy0a01 (7), zhimi.airpurifier.v6 (7),
+cuco.plug.v3 (4) and xiaomi.hood.cyp10 (2). A separate fixed modern transport uses
+the reference continuous codec at core.api.mijia.tech/app/miotspec/prop/set.
+Protected binding selection determines credentials and protocol before I/O.
+Legacy bindings keep legacy controls; failures never switch protocols or renew.
+
+Production native hosts register the transport without granting commands. Existing
+option inspection, exact startup grants and explicit retrieval expose the admitted
+actions through the generic App controls. Default native sessions stay read-only.
+Elevated outlet settings independently require Core's trusted immutable approval,
+including when public risk metadata is tampered with. One correlated encrypted
+acknowledgement can establish accepted or rejected, never physical verification.
+Possibly-sent failures retain unknown receipts without replay or companion writes.
+
+Executed evidence: 618 workspace tests passed with one ignored, excluding the
+known unrelated Meiju/macOS LAN-alias suite. Strict workspace/all-target Clippy
+and the native FFI build passed. All 125 affected Flutter control, permission,
+approval, history and modern-device-flow tests passed. The rebuilt native ABI
+passed 36 ordinary methods/57 examples and 76 modern-account boundary cases. Tests use fictional material and local TLS only; no provider account or
+appliance is accessed. Native API 1.37, ordinary schemas/exports, SQLite 5 and
+Mijia payload 3 remain unchanged. Old native libraries expose no modern controls.
+The existing dd51c73 APK predates both modern history and these controls.
+
+Broader controls/actions/events, BLE/LAN, health/media, additional model/runtime
+contracts, updated packaging and real account/phone/device acceptance remain open.
+No remote push, publication, package installation or real-device write occurred.

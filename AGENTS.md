@@ -73,8 +73,10 @@ foreground Host ownership and explicit account operations. ADR-0097 exposes
 protected C entry points in API 1.36; ADR-0098 adds foreground Flutter QR/account
 flows with fictional evidence. ADR-0102 adds API 1.37 native/Flutter grouped-card
 publication and Core reads. ADR-0103 adds exact modern outlet daily-energy history
-through the existing native/App history contract. Modern controls, broader history, events
-and owner-run real-account/device acceptance remain incomplete. No lock
+through the existing native/App history contract. ADR-0104 adds 29 exact modern
+scalar controls across five models using existing native/App grants and trusted
+outlet approval. Broader controls/history/events and owner-run real-account/device
+acceptance remain incomplete. No lock
 write or complete-inventory claim is admitted. Meiju payload 3 and SQLite 5 remain unchanged. Legacy-only Mijia payload 1
 remains unchanged; modern account composition writes payload 2, and explicit typed
 modern device adoption writes payload 3 with selected-protocol provenance under

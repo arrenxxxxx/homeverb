@@ -737,8 +737,9 @@ collisions return `DEVICE_IDENTITY_CONFLICT` without persisting new bindings.
 Unsupported/unknown relationships remain partial and do not become cards. Invalid
 payload-3 provenance, mappings, cycles or downgrade attempts return
 `ACCOUNT_SESSION_UNCONFIRMED` before provider traffic. Missing modern composition
-and modern control/history attempts return `CAPABILITY_UNSUPPORTED`; writes stay
-failed/not-sent without a legacy fallback. Uncertain binding storage retains
+and unadmitted modern control/history attempts return `CAPABILITY_UNSUPPORTED`;
+unsupported writes stay failed/not-sent without a legacy fallback. ADR-0103/0104
+subsequently admit only their exact reviewed history/control targets. Uncertain binding storage retains
 pending metadata and `SECRET_STORE_WRITE_UNKNOWN`; explicit recovery validates
 saved bytes without login or unchanged-secret rewrite. No public error schema or
 ordinary JSON field changes.
@@ -754,3 +755,17 @@ or foreign-correlated statistics fail closed. Malformed individual records retai
 the documented rejected-record count, never fabricated zero values. Cancellation
 and deadline errors retain their existing foreground semantics. These read failures
 do not create or change an execution outcome.
+
+## Modern exact property controls
+
+ADR-0104 retains existing errors and execution schemas. Missing control transport,
+unreviewed model/property or absent opt-in returns CAPABILITY_UNSUPPORTED before
+send; protected identity/session conflicts and invalid domains retain their current
+errors. Missing Core grants and trusted elevated approval refuse independently.
+A correlated encrypted nonzero item returns MIJIA_REQUEST_REJECTED with rejected
+phase. Global/HTTP errors do not prove item rejection. Authentication errors can
+report AUTH_REQUIRED while the receipt remains unknown after possible send;
+they never trigger renewal or replay. Invalid encrypted/plaintext success,
+wrong/duplicate/missing acknowledgements and oversized or malformed gzip replies
+remain uncertain after send. Cancellation and timeout preserve the same boundary.
+A request ID returns its existing receipt even after explicit protocol adoption.

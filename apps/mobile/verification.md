@@ -4294,3 +4294,20 @@ macOS full-suite font/pixel/legacy-click failures are not claimed resolved.
 Controller/widget integration, real QR scans/provider authentication, new mobile
 packaging and physical-phone acceptance remain pending. No account or appliance
 was used. The earlier `9870437` APK remains API 1.35.
+
+## Modern exact control regression -- October 30, 2026
+
+ADR-0104 connects native modern-selected bindings to the existing 29 scalar
+control mappings. Existing Dart option/grant preparation, descriptor-driven panels
+and trusted immutable approval need no new JSON or provider branch. The scoped
+Flutter command recorded in docs/testing.md passed 125 tests across Mijia fan,
+settings, outlet and auxiliary controls, session permissions, approval, generic
+device controls, history and modern device flows. Rust Host fixtures independently
+exercise modern option inspection, grant/reopen/refresh, plan/execute, trusted
+outlet confirmation, lifecycle invalidation and unknown-receipt preservation.
+
+This is synthetic compatibility evidence. The known eight macOS full-suite
+font/pixel/legacy-click failures were not rerun or claimed fixed. The dd51c73 APK
+predates modern history and controls; new packaging, installation and real
+provider/phone/model acceptance remain pending. No real account or appliance was
+accessed, no package was installed and no remote artifact was published.

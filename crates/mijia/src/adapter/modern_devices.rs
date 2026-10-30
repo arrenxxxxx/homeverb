@@ -143,9 +143,9 @@ impl MijiaAdapter {
                 descriptor(
                     &account.payload.bindings[i],
                     account.lease.record().id,
-                    false,
-                    false,
-                    false,
+                    self.fan_controls && self.modern_controls.is_some(),
+                    self.reference_controls && self.modern_controls.is_some(),
+                    self.outlet_controls && self.modern_controls.is_some(),
                 )
             })
             .collect();

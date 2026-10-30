@@ -60,9 +60,9 @@ def project():
                 entries.append({'kind': 'property', 'siid': service['iid'], 'iid': prop['iid'],
                                 'name': prop['type'].split(':')[3],
                                 'read_status': reason or 'implemented_exact_scalar_mapping',
-                                'write_status': ('implemented_native_outlet_control'
+                                'write_status': ('implemented_native_outlet_control_legacy_and_modern'
                                                  if model['model'] == 'cuco.plug.v3' and admitted_write(model['model'], service['iid'], prop['iid'])
-                                                 else 'implemented_exact_granted_legacy_property_set'
+                                                 else 'implemented_exact_granted_legacy_and_modern_property_set'
                                                  if admitted_write(model['model'], service['iid'], prop['iid'])
                                                  and 'write' in prop.get('access', [])
                                                  else 'not_admitted_by_reference'),
@@ -94,9 +94,13 @@ def project():
                                   else 'placeholder_no_reviewed_readable_spec'),
                        'reference_read_summary': model['independent_read_summary'], 'entries': entries})
     operations = [{'id': o['id'], 'route': o['route'],
-                   'status': 'legacy_host_and_modern_typed_read' if o['id'] in ('directory', 'homes', 'properties') else 'not_admitted_by_reference',
+                   'status': ('legacy_host_and_modern_typed_read' if o['id'] in ('directory', 'homes', 'properties')
+                              else 'implemented_exact_granted_legacy_and_modern_property_set'
+                              if o['id'] == 'property_write_candidate' else 'not_admitted_by_reference'),
                    'reason': ('Modern reference-origin typed reads and protected accounts are implemented; native and Flutter device publication and Core reads are implemented; provider acceptance remains pending.'
                               if o['id'] in ('directory', 'homes', 'properties')
+                              else 'ADR-0104 admits only 29 reviewed scalar mappings across five exact models with grants and trusted elevated approval; no arbitrary setter or physical acceptance.'
+                              if o['id'] == 'property_write_candidate'
                               else 'No credential crossover or arbitrary RPC; separate exact control admission is required.')}
                   for o in contract['operations']]
     coverage = {'reference_sha256': DIGEST, 'status': 'partial_implementation',
@@ -129,6 +133,21 @@ def project():
                     'physical_core_and_app': 'implemented_native_flutter_device_publication_and_core_reads',
                     'app_evidence': 'ADR-0102; fictional ABI negotiation, QR-to-card clicks and Core-client state requests',
                     'android_package': 'archive_checked_api_1_37_no_runtime_acceptance',
+                    'provider_acceptance': 'pending'},
+                'modern_controls': {
+                    'status': 'implemented_exact_granted_native_property_set',
+                    'evidence': 'ADR-0104; fictional protocol, TLS, Core and native Host tests',
+                    'origin': 'https://core.api.mijia.tech/app',
+                    'route': '/miotspec/prop/set',
+                    'codec': 'continuous_rc4_drop1024_with_bounded_encrypted_gzip',
+                    'models': {'jdjz.fan.2072fc': 9, 'abhome.light.wy0a01': 7,
+                               'zhimi.airpurifier.v6': 7, 'cuco.plug.v3': 4,
+                               'xiaomi.hood.cyp10': 2},
+                    'authority': 'exact_startup_grants_and_independent_protected_family_admission',
+                    'elevated_outlet': 'immutable_trusted_approval_required',
+                    'native_and_app': 'existing_api_1_37_options_grants_and_confirmation_contracts',
+                    'uncertainty': 'preserve_unknown_without_retry_or_protocol_fallback',
+                    'android_package': 'pending',
                     'provider_acceptance': 'pending'},
                 'modern_history': {
                     'status': 'implemented_exact_daily_energy_through_core_and_native_history',

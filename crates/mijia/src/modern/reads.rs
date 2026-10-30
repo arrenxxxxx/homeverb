@@ -7,6 +7,7 @@ use std::collections::HashSet;
 
 mod reconciliation;
 mod statistics;
+mod writes;
 pub use reconciliation::{
     ModernDeviceGroup, ModernDeviceInventory, ModernUnresolvedEntry, ModernUnresolvedReason,
 };
@@ -336,12 +337,19 @@ fn check_status(code: i64) -> Result<()> {
         2 | 3 | -3 | -6 | -10001 | -10002 | -10003 | -704010000 => Err(auth_required()),
         _ => Err(Error::new(
             "MIJIA_REQUEST_REJECTED",
-            "Mijia rejected the modern read request.",
+            "Mijia rejected the modern request.",
         )),
     }
 }
 fn decode_response(response: ModernReadResponse, key: &[u8]) -> Result<SecretBytes> {
-    if response.body.expose().len() > MAX_READ_BYTES {
+    decode_reference_response(response, key, MAX_READ_BYTES)
+}
+fn decode_reference_response(
+    response: ModernReadResponse,
+    key: &[u8],
+    limit: usize,
+) -> Result<SecretBytes> {
+    if response.body.expose().len() > limit {
         return Err(invalid());
     }
     if response.body.expose().trim_ascii_start().first() == Some(&b'{') {
@@ -358,10 +366,10 @@ fn decode_response(response: ModernReadResponse, key: &[u8]) -> Result<SecretByt
             let mut output = zeroize::Zeroizing::new(Vec::new());
             decoder
                 .by_ref()
-                .take((MAX_READ_BYTES + 1) as u64)
+                .take((limit + 1) as u64)
                 .read_to_end(&mut output)
                 .map_err(|_| invalid())?;
-            if output.len() > MAX_READ_BYTES || !decoder.into_inner().is_empty() {
+            if output.len() > limit || !decoder.into_inner().is_empty() {
                 return Err(invalid());
             }
             SecretBytes::new(std::mem::take(&mut *output))

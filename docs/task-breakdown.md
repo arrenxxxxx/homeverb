@@ -1,5 +1,35 @@
 # Implementation status and next tasks
 
+## Modern exact scalar controls -- October 30, 2026
+
+ADR-0104 implements the existing 29 reviewed scalar controls for modern-selected
+bindings: jdjz.fan.2072fc (9), abhome.light.wy0a01 (7), zhimi.airpurifier.v6 (7),
+cuco.plug.v3 (4) and xiaomi.hood.cyp10 (2). A separate fixed modern transport uses
+the reference continuous codec at core.api.mijia.tech/app/miotspec/prop/set.
+Protected binding selection determines credentials and protocol before I/O.
+Legacy bindings keep legacy controls; failures never switch protocols or renew.
+
+Production native hosts register the transport without granting commands. Existing
+option inspection, exact startup grants and explicit retrieval expose the admitted
+actions through the generic App controls. Default native sessions stay read-only.
+Elevated outlet settings independently require Core's trusted immutable approval,
+including when public risk metadata is tampered with. One correlated encrypted
+acknowledgement can establish accepted or rejected, never physical verification.
+Possibly-sent failures retain unknown receipts without replay or companion writes.
+
+Executed evidence: 618 workspace tests passed with one ignored, excluding the
+known unrelated Meiju/macOS LAN-alias suite. Strict workspace/all-target Clippy
+and the native FFI build passed. All 125 affected Flutter control, permission,
+approval, history and modern-device-flow tests passed. The rebuilt native ABI
+passed 36 ordinary methods/57 examples and 76 modern-account boundary cases. Tests use fictional material and local TLS only; no provider account or
+appliance is accessed. Native API 1.37, ordinary schemas/exports, SQLite 5 and
+Mijia payload 3 remain unchanged. Old native libraries expose no modern controls.
+The existing dd51c73 APK predates both modern history and these controls.
+
+Broader controls/actions/events, BLE/LAN, health/media, additional model/runtime
+contracts, updated packaging and real account/phone/device acceptance remain open.
+No remote push, publication, package installation or real-device write occurred.
+
 ## Modern exact daily-energy history -- October 30, 2026
 
 ADR-0103 implements the exact cuco.plug.v3 daily-energy query for modern-selected

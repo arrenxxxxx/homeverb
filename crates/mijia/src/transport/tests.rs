@@ -974,7 +974,11 @@ async fn modern_reference_tls_has_exact_read_headers_and_refuses_redirect_encodi
     for endpoint in [E::Directory, E::Homes, E::Properties, E::Statistics] {
         assert_eq!(
             Url::parse(endpoint.url()).unwrap().host_str(),
-            Some(if endpoint == E::Statistics {"api.mijia.tech"} else {"core.api.mijia.tech"})
+            Some(if endpoint == E::Statistics {
+                "api.mijia.tech"
+            } else {
+                "core.api.mijia.tech"
+            })
         );
         for mode in 0..11 {
             let reply=match mode {
@@ -1020,7 +1024,10 @@ async fn modern_reference_tls_has_exact_read_headers_and_refuses_redirect_encodi
             assert!(wire.contains("miot-accept-encoding: GZIP"));
             assert!(wire.contains("accept-encoding: identity"));
             assert!(wire.contains("user-agent: Android-13-11.7.709-XiaomiHome"));
-            assert_eq!(wire.contains("x-xiaomi-protocal-flag-cli: PROTOCAL-HTTP2"), endpoint == E::Statistics);
+            assert_eq!(
+                wire.contains("x-xiaomi-protocal-flag-cli: PROTOCAL-HTTP2"),
+                endpoint == E::Statistics
+            );
             assert!(wire.contains("cUserId=fictional-c-user"));
             assert!(!wire.contains("passToken"));
             assert!(!wire.contains("deviceId="));
@@ -1083,6 +1090,120 @@ async fn modern_reference_tls_untrusted_peer_cancellation_deadline_and_drop_are_
         } else {
             drop(pending);
         }
+        tokio::time::timeout(Duration::from_secs(2), async {
+            while server.closed.load(Ordering::SeqCst) == 0 {
+                tokio::time::sleep(Duration::from_millis(1)).await;
+            }
+        })
+        .await
+        .unwrap();
+        assert_eq!(server.connections.load(Ordering::SeqCst), 1);
+    }
+}
+
+#[tokio::test]
+async fn modern_control_tls_tracks_one_send_and_rejects_redirects_headers_and_size() {
+    use crate::modern::control::{fixture_request, transmit};
+    use homeverb_core::WriteProgress;
+    use homeverb_domain::Phase;
+    let request = fixture_request();
+    assert_eq!(
+        request.url(),
+        "https://core.api.mijia.tech/app/miotspec/prop/set"
+    );
+    for mode in 0..8 {
+        let reply=match mode {
+            0=>"HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\n{}".to_owned(),
+            1=>"HTTP/1.1 200 OK\r\nMIOT-CONTENT-ENCODING: GZIP\r\nContent-Length: 2\r\nConnection: close\r\n\r\n{}".to_owned(),
+            2=>"HTTP/1.1 302 Found\r\nLocation: SERVER_URL\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".to_owned(),
+            3=>"HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".to_owned(),
+            4=>"HTTP/1.1 200 OK\r\nContent-Length: 1048577\r\nConnection: close\r\n\r\n".to_owned(),
+            5=>"HTTP/1.1 200 OK\r\nMIOT-CONTENT-ENCODING: GZIP\r\nMIOT-CONTENT-ENCODING: GZIP\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".to_owned(),
+            6=>"HTTP/1.1 200 OK\r\nContent-Encoding: gzip\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".to_owned(),
+            _=>format!("HTTP/1.1 200 OK\r\nConnection: close\r\n\r\n{}","x".repeat(1048577)),
+        };
+        let server = Server::start(reply.into_bytes(), false).await;
+        let progress = WriteProgress::default();
+        let result = transmit(
+            server.client.clone(),
+            Url::parse(&server.url).unwrap(),
+            &request,
+            &progress,
+            &operation(),
+        )
+        .await;
+        assert_eq!(result.is_ok(), mode < 2);
+        assert_eq!(progress.phase(), Phase::PossiblySent);
+        assert_eq!(server.connections.load(Ordering::SeqCst), 1);
+        let requests = server.requests.lock().unwrap();
+        assert_eq!(requests.len(), 1);
+        let wire = String::from_utf8_lossy(&requests[0]);
+        assert!(wire.starts_with("POST "));
+        assert!(wire.ends_with("data=fictional"));
+        assert!(wire.contains("miot-encrypt-algorithm: ENCRYPT-RC4"));
+        assert!(wire.contains("miot-accept-encoding: GZIP"));
+        assert!(wire.contains("accept-encoding: identity"));
+        assert!(wire.contains("cUserId=fictional-user"));
+        assert!(!wire.contains("passToken"));
+    }
+}
+#[tokio::test]
+async fn modern_control_tls_cancellation_deadline_drop_and_certificate_errors_preserve_progress() {
+    use crate::modern::control::{fixture_request, transmit};
+    use homeverb_core::WriteProgress;
+    use homeverb_domain::Phase;
+    for mode in 0..5 {
+        let server = Server::start(vec![], true).await;
+        let mut op = operation();
+        let progress = WriteProgress::default();
+        let request = fixture_request();
+        if mode == 0 {
+            op.cancellation.cancel();
+        }
+        if mode == 2 {
+            op.deadline = tokio::time::Instant::now() + Duration::from_millis(200);
+        }
+        if mode == 4 {
+            assert!(
+                transmit(
+                    client_builder().build().unwrap(),
+                    Url::parse(&server.url).unwrap(),
+                    &request,
+                    &progress,
+                    &op
+                )
+                .await
+                .is_err()
+            );
+            assert_eq!(progress.phase(), Phase::PossiblySent);
+            assert!(server.requests.lock().unwrap().is_empty());
+            continue;
+        }
+        let mut pending = Box::pin(transmit(
+            server.client.clone(),
+            Url::parse(&server.url).unwrap(),
+            &request,
+            &progress,
+            &op,
+        ));
+        if mode == 0 {
+            assert!(pending.await.is_err());
+            assert_eq!(progress.phase(), Phase::NotSent);
+            assert_eq!(server.connections.load(Ordering::SeqCst), 0);
+            continue;
+        }
+        loop {
+            tokio::select! {r=&mut pending=>panic!("Unexpected {r:?}"),_=tokio::time::sleep(Duration::from_millis(1))=>{if !server.requests.lock().unwrap().is_empty(){break;}}}
+        }
+        if mode == 1 {
+            op.cancellation.cancel();
+            assert!(pending.await.is_err());
+        } else if mode == 2 {
+            assert!(pending.await.is_err());
+        } else {
+            drop(pending);
+        }
+        assert_eq!(progress.phase(), Phase::PossiblySent);
         tokio::time::timeout(Duration::from_secs(2), async {
             while server.closed.load(Ordering::SeqCst) == 0 {
                 tokio::time::sleep(Duration::from_millis(1)).await;

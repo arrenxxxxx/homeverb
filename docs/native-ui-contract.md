@@ -1941,7 +1941,25 @@ for the exact protected modern cuco.plug.v3 daily-energy binding. No native vers
 method, export or JSON field changes. Controllers consume inspected local targets,
 UTC range, kWh records and unproven completeness through the existing history UI.
 They cannot select a provider endpoint, raw key, credential slot or codec. A failed
-query never implies reauthentication or permits automatic retry. Modern controls
-and all unreviewed historical targets remain unavailable. Older binaries continue
+query never implies reauthentication or permits automatic retry. All unreviewed
+historical targets remain unavailable; ADR-0104 separately adds exact modern controls. Older binaries continue
 to return no modern history options; the API 1.37 package built from dd51c73 predates
 this additive adapter support.
+
+## Modern exact property controls
+
+ADR-0104 enables the existing 29 reviewed scalar settings across five exact modern
+model mappings through API 1.37's current inspect_control_options, startup grants,
+explicit account retrieval, plan/execute and trusted approval functions. No new
+method, export, schema field, API version or storage format is introduced. Inspect
+options from the running implementation: an older 1.37 library can legitimately
+return no modern options. Never infer modern control support from the version alone.
+
+Registration of the modern transport does not grant commands. The controller uses
+the existing exact option/grant preparation and descriptor refresh flow. Elevated
+outlet power, recovery and physical-button settings still require actual user
+consent to the immutable preview, and lifecycle changes invalidate it. Existing
+ordinary JSON cannot provide that consent. App code does not select a protocol,
+origin, codec or credential slot. Failed or unknown requests do not cause refresh,
+renewal, fallback or replay. The previous dd51c73 APK lacks this adapter addition;
+a new package and real provider/phone/model acceptance are separate evidence.

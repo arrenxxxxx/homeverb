@@ -133,10 +133,16 @@ impl ModernReadTransport for Peer {
             self.directory.lock().unwrap().clone().unwrap_or_else(||
                 json!({"list":[{"did":"PRIVATE-MODERN-DID","name":"Modern Fan","model":"jdjz.fan.2072fc","pid":0}],"has_more":false}))
         } else if request.endpoint() == ModernReadEndpoint::Statistics {
-            let data: Value = serde_json::from_slice(&stream(&key,&STANDARD.decode(&fields["data"]).unwrap())).unwrap();
-            assert_eq!(request.endpoint().url(),"https://api.mijia.tech/app/v2/user/statistics");
-            assert_eq!(data["did"],"PRIVATE-MODERN-DID");
-            assert_eq!(data["key"],"11.1"); assert_eq!(data["data_type"],"stat_day_v3");
+            let data: Value =
+                serde_json::from_slice(&stream(&key, &STANDARD.decode(&fields["data"]).unwrap()))
+                    .unwrap();
+            assert_eq!(
+                request.endpoint().url(),
+                "https://api.mijia.tech/app/v2/user/statistics"
+            );
+            assert_eq!(data["did"], "PRIVATE-MODERN-DID");
+            assert_eq!(data["key"], "11.1");
+            assert_eq!(data["data_type"], "stat_day_v3");
             json!([{"did":data["did"],"key":"11.1","time":1700000000,"value":"[125]"}])
         } else {
             let data: Value =
@@ -920,3 +926,6 @@ async fn native_modern_reports_match_closed_contracts_without_private_membership
         &json!({"schema_version":"1.0","data":{"kind":"renewed","account":renewed},"warnings":[],"error":null}),
     );
 }
+
+#[path = "modern_host/controls.rs"]
+mod controls;

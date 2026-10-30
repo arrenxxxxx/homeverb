@@ -4,7 +4,8 @@ October 30: 17 exact Mijia reference specifications supply 264 scalar read
 mappings and localized App labels. Modern QR authentication, grouped device
 publication and Core reads are integrated through Flutter with fictional evidence.
 Exact modern outlet daily-energy history uses the existing history interface.
-Modern controls, broader history and other reference coverage remain incomplete; see the
+ADR-0104 adds 29 exact modern scalar controls across five models. Broader
+controls/history and other reference coverage remain incomplete; see the
 [coverage ledger and remaining work](14-mijia-reference-integration.md).
 
 The October 30 integration uses native API **1.37.0**, following the linear
@@ -31,7 +32,8 @@ consumes it without automatic message sends or retries. The API 1.33
 includes this account flow and historical UI. The [API 1.37 package](../../apps/mobile/verification.md#modern-qr-and-device-publication-android-package--october-30-2026)
 also contains modern SID `mijia` QR login, grouped cards and read-only state views.
 ADR-0103 adds exact modern outlet daily-energy history after that APK revision.
-Human risk challenges, account-settings confirmation, modern controls/broader history,
+ADR-0104 adds exact modern controls after that APK revision.
+Human risk challenges, account-settings confirmation, broader controls/history,
 broader event/control coverage and real-provider/device acceptance remain open. Earlier
 phase records below retain their original implementation and evidence scope.
 
@@ -840,3 +842,33 @@ provider or appliance. Both shared portrait/landscape reflow tests, Flutter
 analysis and all seven presentation tests also passed. Native API 1.37 and protected storage formats are
 unchanged. New Android packaging and real account/phone/model acceptance remain
 pending; the old API 1.35 APK does not contain these changes.
+
+## Modern exact scalar controls -- October 30, 2026
+
+ADR-0104 implements the existing 29 reviewed scalar controls for modern-selected
+bindings: jdjz.fan.2072fc (9), abhome.light.wy0a01 (7), zhimi.airpurifier.v6 (7),
+cuco.plug.v3 (4) and xiaomi.hood.cyp10 (2). A separate fixed modern transport uses
+the reference continuous codec at core.api.mijia.tech/app/miotspec/prop/set.
+Protected binding selection determines credentials and protocol before I/O.
+Legacy bindings keep legacy controls; failures never switch protocols or renew.
+
+Production native hosts register the transport without granting commands. Existing
+option inspection, exact startup grants and explicit retrieval expose the admitted
+actions through the generic App controls. Default native sessions stay read-only.
+Elevated outlet settings independently require Core's trusted immutable approval,
+including when public risk metadata is tampered with. One correlated encrypted
+acknowledgement can establish accepted or rejected, never physical verification.
+Possibly-sent failures retain unknown receipts without replay or companion writes.
+
+Executed evidence: 618 workspace tests passed with one ignored, excluding the
+known unrelated Meiju/macOS LAN-alias suite. Strict workspace/all-target Clippy
+and the native FFI build passed. All 125 affected Flutter control, permission,
+approval, history and modern-device-flow tests passed. The rebuilt native ABI
+passed 36 ordinary methods/57 examples and 76 modern-account boundary cases. Tests use fictional material and local TLS only; no provider account or
+appliance is accessed. Native API 1.37, ordinary schemas/exports, SQLite 5 and
+Mijia payload 3 remain unchanged. Old native libraries expose no modern controls.
+The existing dd51c73 APK predates both modern history and these controls.
+
+Broader controls/actions/events, BLE/LAN, health/media, additional model/runtime
+contracts, updated packaging and real account/phone/device acceptance remain open.
+No remote push, publication, package installation or real-device write occurred.

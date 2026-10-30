@@ -24,8 +24,8 @@
     {
       "id": "property_write_candidate",
       "route": "/miotspec/prop/set",
-      "status": "not_admitted_by_reference",
-      "reason": "No credential crossover or arbitrary RPC; separate exact control admission is required."
+      "status": "implemented_exact_granted_legacy_and_modern_property_set",
+      "reason": "ADR-0104 admits only 29 reviewed scalar mappings across five exact models with grants and trusted elevated approval; no arbitrary setter or physical acceptance."
     },
     {
       "id": "action_candidate",
@@ -102,7 +102,7 @@
           "iid": 1,
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_exact_granted_legacy_property_set",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "reference_successful_instances": 0
         },
         {
@@ -111,7 +111,7 @@
           "iid": 2,
           "name": "brightness",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_exact_granted_legacy_property_set",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "reference_successful_instances": 0
         },
         {
@@ -120,7 +120,7 @@
           "iid": 3,
           "name": "color-temperature",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_exact_granted_legacy_property_set",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "reference_successful_instances": 0
         },
         {
@@ -129,7 +129,7 @@
           "iid": 7,
           "name": "mode",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_exact_granted_legacy_property_set",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "reference_successful_instances": 0
         },
         {
@@ -138,7 +138,7 @@
           "iid": 9,
           "name": "default-power-on-state",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_exact_granted_legacy_property_set",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "reference_successful_instances": 0
         },
         {
@@ -147,7 +147,7 @@
           "iid": 12,
           "name": "flex-switch",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_exact_granted_legacy_property_set",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "reference_successful_instances": 0
         },
         {
@@ -156,7 +156,7 @@
           "iid": 13,
           "name": "night-light-switch",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_exact_granted_legacy_property_set",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "reference_successful_instances": 0
         },
         {
@@ -631,7 +631,7 @@
           "iid": 1,
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_native_outlet_control",
+          "write_status": "implemented_native_outlet_control_legacy_and_modern",
           "reference_successful_instances": 1
         },
         {
@@ -640,7 +640,7 @@
           "iid": 2,
           "name": "default-power-on-state",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_native_outlet_control",
+          "write_status": "implemented_native_outlet_control_legacy_and_modern",
           "reference_successful_instances": 1
         },
         {
@@ -665,7 +665,7 @@
           "iid": 1,
           "name": "physical-controls-locked",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_native_outlet_control",
+          "write_status": "implemented_native_outlet_control_legacy_and_modern",
           "reference_successful_instances": 0
         },
         {
@@ -692,7 +692,7 @@
           "iid": 1,
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_native_outlet_control",
+          "write_status": "implemented_native_outlet_control_legacy_and_modern",
           "reference_successful_instances": 0
         },
         {
@@ -983,7 +983,7 @@
           "iid": 1,
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_exact_granted_legacy_property_set",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "reference_successful_instances": 1
         },
         {
@@ -992,7 +992,7 @@
           "iid": 3,
           "name": "mode",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_exact_granted_legacy_property_set",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "reference_successful_instances": 1
         },
         {
@@ -1001,7 +1001,7 @@
           "iid": 4,
           "name": "fan-level",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_exact_granted_legacy_property_set",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "reference_successful_instances": 1
         },
         {
@@ -1019,7 +1019,7 @@
           "iid": 5,
           "name": "horizontal-swing",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_exact_granted_legacy_property_set",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "reference_successful_instances": 1
         },
         {
@@ -1028,7 +1028,7 @@
           "iid": 6,
           "name": "horizontal-swing-included-angle",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_exact_granted_legacy_property_set",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "reference_successful_instances": 1
         },
         {
@@ -1037,7 +1037,7 @@
           "iid": 7,
           "name": "vertical-swing",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_exact_granted_legacy_property_set",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "reference_successful_instances": 1
         },
         {
@@ -1046,7 +1046,7 @@
           "iid": 8,
           "name": "vertical-swing-included-angle",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_exact_granted_legacy_property_set",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "reference_successful_instances": 1
         },
         {
@@ -1055,7 +1055,7 @@
           "iid": 9,
           "name": "anion",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_exact_granted_legacy_property_set",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "reference_successful_instances": 1
         },
         {
@@ -1089,7 +1089,7 @@
           "iid": 5,
           "name": "quiet",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_exact_granted_legacy_property_set",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "reference_successful_instances": 1
         }
       ]
@@ -4633,7 +4633,7 @@
           "iid": 1,
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_exact_granted_legacy_property_set",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "reference_successful_instances": 0
         },
         {
@@ -4642,7 +4642,7 @@
           "iid": 2,
           "name": "brightness",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_exact_granted_legacy_property_set",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "reference_successful_instances": 0
         },
         {
@@ -5278,7 +5278,7 @@
           "iid": 1,
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_exact_granted_legacy_property_set",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "reference_successful_instances": 1
         },
         {
@@ -5287,7 +5287,7 @@
           "iid": 2,
           "name": "fan-level",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_exact_granted_legacy_property_set",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "reference_successful_instances": 1
         },
         {
@@ -5296,7 +5296,7 @@
           "iid": 3,
           "name": "mode",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_exact_granted_legacy_property_set",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "reference_successful_instances": 1
         },
         {
@@ -5350,7 +5350,7 @@
           "iid": 1,
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_exact_granted_legacy_property_set",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "reference_successful_instances": 1
         },
         {
@@ -5359,7 +5359,7 @@
           "iid": 1,
           "name": "alarm",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_exact_granted_legacy_property_set",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "reference_successful_instances": 1
         },
         {
@@ -5368,7 +5368,7 @@
           "iid": 1,
           "name": "physical-controls-locked",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_exact_granted_legacy_property_set",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "reference_successful_instances": 1
         },
         {
@@ -5377,7 +5377,7 @@
           "iid": 1,
           "name": "favorite-fan-level",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "implemented_exact_granted_legacy_property_set",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "reference_successful_instances": 1
         }
       ]
@@ -5412,6 +5412,26 @@
     "physical_core_and_app": "implemented_native_flutter_device_publication_and_core_reads",
     "app_evidence": "ADR-0102; fictional ABI negotiation, QR-to-card clicks and Core-client state requests",
     "android_package": "archive_checked_api_1_37_no_runtime_acceptance",
+    "provider_acceptance": "pending"
+  },
+  "modern_controls": {
+    "status": "implemented_exact_granted_native_property_set",
+    "evidence": "ADR-0104; fictional protocol, TLS, Core and native Host tests",
+    "origin": "https://core.api.mijia.tech/app",
+    "route": "/miotspec/prop/set",
+    "codec": "continuous_rc4_drop1024_with_bounded_encrypted_gzip",
+    "models": {
+      "jdjz.fan.2072fc": 9,
+      "abhome.light.wy0a01": 7,
+      "zhimi.airpurifier.v6": 7,
+      "cuco.plug.v3": 4,
+      "xiaomi.hood.cyp10": 2
+    },
+    "authority": "exact_startup_grants_and_independent_protected_family_admission",
+    "elevated_outlet": "immutable_trusted_approval_required",
+    "native_and_app": "existing_api_1_37_options_grants_and_confirmation_contracts",
+    "uncertainty": "preserve_unknown_without_retry_or_protocol_fallback",
+    "android_package": "pending",
     "provider_acceptance": "pending"
   },
   "modern_history": {

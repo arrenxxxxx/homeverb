@@ -6,7 +6,9 @@ use reqwest::Url;
 use serde::Deserialize;
 use std::{collections::BTreeMap, fmt, time::Duration};
 
+pub(crate) mod control;
 pub(crate) mod reads;
+pub use control::{ModernControlRequest, ModernControlResponse, ModernControlTransport};
 mod stored;
 pub(crate) use stored::StoredModernSession;
 pub(crate) mod transport;

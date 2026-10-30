@@ -65,6 +65,7 @@ pub struct MijiaAdapter {
     transport: Arc<dyn CloudTransport>,
     modern_auth: Option<Arc<dyn crate::ModernAuthTransport>>,
     modern_reads: Option<Arc<dyn crate::ModernReadTransport>>,
+    modern_controls: Option<Arc<dyn crate::ModernControlTransport>>,
     clock: Arc<dyn Clock>,
     fan_controls: bool,
     reference_controls: bool,
@@ -83,6 +84,7 @@ impl MijiaAdapter {
             transport,
             modern_auth: None,
             modern_reads: None,
+            modern_controls: None,
             clock,
             fan_controls: false,
             reference_controls: false,
@@ -99,6 +101,15 @@ impl MijiaAdapter {
     ) -> Self {
         self.modern_auth = Some(auth);
         self.modern_reads = Some(reads);
+        self
+    }
+
+    /// Register the exact modern write transport without granting any command.
+    pub fn with_modern_control_transport(
+        mut self,
+        transport: Arc<dyn crate::ModernControlTransport>,
+    ) -> Self {
+        self.modern_controls = Some(transport);
         self
     }
 
@@ -180,7 +191,7 @@ impl MijiaAdapter {
         if !binding.listed {
             return Err(unsupported());
         }
-        if binding.is_modern() {
+        if binding.is_modern() && self.modern_controls.is_none() {
             return Ok(Vec::new());
         }
         match binding.mapping.as_ref() {
@@ -712,13 +723,7 @@ fn descriptor(
     let mut capabilities = binding
         .mapping
         .as_ref()
-        .map(|m| {
-            m.controlled_capabilities(
-                fan && !binding.is_modern(),
-                settings && !binding.is_modern(),
-                outlet && !binding.is_modern(),
-            )
-        })
+        .map(|m| m.controlled_capabilities(fan, settings, outlet))
         .unwrap_or_default();
     let supported = !capabilities.is_empty();
     if capabilities.is_empty() {
@@ -976,7 +981,7 @@ impl Adapter for MijiaAdapter {
                 {
                     return Err(conflict());
                 }
-                if !binding.listed || binding.is_modern() {
+                if !binding.listed || (binding.is_modern() && self.modern_controls.is_none()) {
                     return Err(unsupported());
                 }
                 let mapping = binding.mapping.as_ref().ok_or_else(unsupported)?;
@@ -1040,23 +1045,36 @@ impl Adapter for MijiaAdapter {
                     }
                 }
                 option.definition.validate_arguments(&command.arguments)?;
-                account
-                    .payload
-                    .legacy_session()?
-                    .set_property(
-                        self.transport.as_ref(),
-                        &binding.device(),
-                        &crate::PropertyWrite {
-                            query: PropertyQuery {
-                                siid: field.siid,
-                                piid: field.piid,
-                            },
-                            value: command.arguments[&field.property].clone(),
-                        },
-                        &progress,
-                        operation,
-                    )
-                    .await
+                let write = crate::PropertyWrite {
+                    query: PropertyQuery {
+                        siid: field.siid,
+                        piid: field.piid,
+                    },
+                    value: command.arguments[&field.property].clone(),
+                };
+                if binding.is_modern() {
+                    let transport = self.modern_controls.as_deref().ok_or_else(unsupported)?;
+                    let session = account.payload.modern_session()?;
+                    let mut entry = session.protected_entry(&binding.device())?;
+                    entry.kind = Some(crate::modern::reads::DirectoryKind(
+                        binding.modern.as_ref().ok_or_else(conflict)?.kind,
+                    ));
+                    session
+                        .set_property(transport, &entry, &write, &progress, operation)
+                        .await
+                } else {
+                    account
+                        .payload
+                        .legacy_session()?
+                        .set_property(
+                            self.transport.as_ref(),
+                            &binding.device(),
+                            &write,
+                            &progress,
+                            operation,
+                        )
+                        .await
+                }
             })
             .await
     }

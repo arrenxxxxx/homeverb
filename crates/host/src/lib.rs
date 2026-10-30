@@ -247,7 +247,8 @@ fn platform_parts(
         .with_modern_protocol(
             Arc::new(homeverb_mijia::MijiaHttps),
             Arc::new(homeverb_mijia::MijiaHttps),
-        );
+        )
+        .with_modern_control_transport(Arc::new(homeverb_mijia::MijiaHttps));
         let adapter = if mijia_grants.is_empty() {
             adapter
         } else {
@@ -350,7 +351,8 @@ pub fn open_mijia_session_with_outlets(
     .with_modern_protocol(
         Arc::new(homeverb_mijia::MijiaHttps),
         Arc::new(homeverb_mijia::MijiaHttps),
-    );
+    )
+    .with_modern_control_transport(Arc::new(homeverb_mijia::MijiaHttps));
     let adapter = if grants.is_empty() {
         adapter
     } else {

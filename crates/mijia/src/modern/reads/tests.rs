@@ -603,3 +603,6 @@ mod reconciliation;
 
 #[path = "tests/statistics.rs"]
 mod statistics;
+
+#[path = "tests/writes.rs"]
+mod writes;
