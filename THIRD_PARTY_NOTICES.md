@@ -60,6 +60,11 @@ The implementation contains no shared confidential client secret and does not
 reuse Xiaomi's Home Assistant OAuth application identity. This is experimental
 community compatibility, not vendor endorsement or physical-device verification.
 
+The independent modern SID QR authentication work also uses MIT-licensed
+`ttys026/mit` protocol evidence; preserve its [notice](third-party/mit-mijia/NOTICE.md)
+and [license](third-party/mit-mijia/LICENSE.txt). It is separate from legacy
+`xiaomiio` sessions and does not establish official-App route compatibility.
+
 ## Dependency review before distribution
 
 `Cargo.lock` and `apps/mobile/pubspec.lock` pin dependency resolutions; they do

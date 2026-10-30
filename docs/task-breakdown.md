@@ -1,5 +1,13 @@
 # Implementation status and next tasks
 
+## Independent modern authentication design -- October 30, 2026
+
+[ADR-0093](adr/0093-mijia-independent-qr-authentication.md) records concrete
+community SID=mijia QR/renewal evidence and an anonymous bootstrap/QR URL-shape
+check. Implementation and authenticated acceptance remain pending. Exact modern
+and legacy sessions, callback hosts and API codecs must remain separate.
+
+
 ## Auxiliary settings package availability -- October 30, 2026
 
 The API 1.35 combined-platform APK from clean source `9870437` includes all seven
