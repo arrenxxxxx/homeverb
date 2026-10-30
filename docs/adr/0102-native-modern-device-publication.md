@@ -1,0 +1,59 @@
+# ADR-0102: Native modern Mijia device publication
+
+Status: Accepted design; implementation and verification pending.
+Date: October 30, 2026.
+
+## Decision
+
+Native API 1.37 adds opt-in device publication to the existing dedicated modern
+account exports. Continuation metadata accepts optional Boolean publish_devices,
+default false. True uses ADR-0101 and returns kind connected_devices with the
+existing AccountConnection report. False/absent retains API 1.36 logical connected
+behavior. Saved-session operations add refresh_devices and recover_devices,
+returning kind devices with AccountConnection and authentication not_attempted.
+Existing refresh, recover and renew keep their logical/authentication-only behavior.
+No C symbol or ordinary JSON method is added. The 36 methods, 30 exports (31 with
+the Android initializer), protected QR buffer rules and single-use registry remain.
+
+Device reports contain sanitized local account/device IDs and partial or failed
+retrieval only, with at most 4096 unique IDs. Failed retrieval returns no IDs; it
+never implies completed local storage was rolled back. Logical counts do not become
+card counts. Successful login with failed directory/publication still reports
+successful authentication. Pending authentication storage remains an error; pending
+binding storage reports failed retrieval and requires explicit recovery. Native
+projection uses the same Host lifecycle and original QR deadline as ADR-0101.
+
+Ordinary account refresh/recovery must work for modern-only accounts. Select the
+inventory protocol from protected bytes under the same registration/account leases
+as retrieval: use modern when there is no legacy slot or at least one binding is
+currently modern-selected, otherwise legacy. This selection occurs before I/O and
+never retries/falls back after failure. A mixed account with a modern-selected
+binding refreshes the modern directory; returned roots select modern reads, while
+absent historical bindings retain their protocol and IDs. Modern-selected roots
+have no modern controls/history yet, so their old control options disappear rather
+than retaining unsupported authority. Merely adding a modern authentication slot
+to an otherwise legacy account does not switch its ordinary refresh. Explicit typed
+legacy and modern refresh methods remain available with their exact semantics.
+No preference bit, credential conversion, new payload version or automatic renewal
+is introduced. Local listings and startup perform no secret or network work.
+
+Flutter must negotiate API >=1.37 before requesting device publication, validate
+the distinct closed result shapes, then reload local accounts/cards and route
+ordinary state reads through Core. API 1.36 remains supported with logical-only
+reports. UI adoption, packaging and real-provider acceptance are tracked separately
+until implemented and tested. No App readiness follows from native contracts alone.
+SQLite 5, Mijia payload 3 and Meiju payload 3 are unchanged. Older implementations
+still cannot open protected Mijia version 3. No write authority, background service,
+complete-inventory time, new origin selection or remote action is admitted.
+
+## Required evidence
+
+Positive/negative schemas for optional publication, new operations and distinct
+reports, including wrong types/providers/authority fields, duplicates, limits,
+complete claims and failed results with IDs. Actual C metadata/refusal/buffer/
+lifecycle tests plus injected Host success reports use the same schemas. Generic
+refresh/recovery tests cover modern-only and mixed accounts, stored protocol
+selection, failure without fallback, pending recovery, retained identities, and
+legacy behavior before adoption. Re-run old logical account/native regressions,
+workspace tests, strict Clippy and version-manifest checks. All tests use fictional
+accounts and transports; phone/provider/model acceptance remains pending.
