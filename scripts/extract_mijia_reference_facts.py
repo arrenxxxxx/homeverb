@@ -194,7 +194,7 @@ def project():
                     'elevated_outlet': 'immutable_trusted_approval_required',
                     'native_and_app': 'api_1_43_exact_switch_outlet_extension_with_trusted_flutter',
                     'uncertainty': 'preserve_unknown_without_retry_or_protocol_fallback',
-                    'android_package': 'archive_checked_503ef1f_api_1_39_no_runtime_acceptance',
+                    'android_package': 'archive_checked_85fefd8_api_1_43_no_runtime_acceptance',
                     'provider_acceptance': 'pending'},
                 'numeric_property_history': {
                     'status': 'implemented_core_native_app_reported_samples',

@@ -34,6 +34,8 @@ includes all six actions with clean-source archive checks. The subsequent
 includes the five elevated power toggles as well, without runtime acceptance.
 The later [87f3410 API 1.42 package](../../apps/mobile/verification.md#maintenance-actions-api-142-android-package--october-30-2026)
 adds the four trusted maintenance actions with clean-source archive checks.
+The later [85fefd8 API 1.43 package](../../apps/mobile/verification.md#switch-and-outlet-api-143-android-package--october-30-2026)
+adds seven switch/outlet properties, bringing packaged scalar controls to 40.
 
 - Eight-part MIoT URNs retain their exact extension; malformed/foreign URNs refuse.
 - Seventeen exact model/specification catalogs project 264 reviewed scalar read
@@ -2167,3 +2169,26 @@ single confirmation and background discard. Flutter analysis reported no issues;
 seven shared presentation tests passed. These focused regressions do not resolve
 the eight previously recorded unrelated macOS visual/legacy-click full-suite
 failures. No real account, appliance write, phone acceptance or remote CI is claimed.
+
+
+## Switch and outlet API 1.43 Android package -- October 30, 2026
+
+Clean source 85fefd8b315692902464dc93ae8468c30675fd17 produced the combined-platform
+release APK apps/mobile/build/delivery/mijia/85fefd8/homeverb-mijia-0.2.0-85fefd8.apk.
+Size: 79,205,770 bytes. SHA-256:
+a4c2c107afe9c937e47f3592770987e435d0b132e04a618fe5b9af5a5b9d3ae8.
+The adjacent verification.json records clean source, exact current-AAR code after
+NDK stripping, arm64-v8a/x86_64 composition, 31 exports per ABI, development
+signature and 16 KiB ZIP/Core ELF alignment. This is archive evidence, not runtime
+or distribution acceptance.
+
+Both native cross-builds and the universal AAR passed using the installed Android
+target toolchain, NDK 28.2.13676358, API 35 stubs and JDK. Flutter 3.47.7 assembled
+the APK with temporary SDK/JDK settings; android/local.properties was restored.
+The actual verifier confirmed signature, alignment, exports and exact AAR match.
+No app installation, real account/appliance request, push or publication occurred.
+
+This package contains all 40 admitted scalar controls across eight exact models
+and 15 admitted actions, including trusted power and maintenance confirmation.
+The other 185 writable definitions, 25 actions, 78 events, specialized paths and
+real provider/phone/model acceptance remain incomplete.
