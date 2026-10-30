@@ -449,6 +449,50 @@ List<dynamic> accountBlocks(
         if (c.accountReport?['account']['id'] == c.selectedAccount &&
             c.accountReport != null)
           ...accountRefreshBlocks(c),
+        if (c.modernAccountReport?.account['id'] == c.selectedAccount &&
+            c.modernAccountReport != null) ...[
+          [
+            'note',
+            c.modernAccountReport!.kind == ModernAccountResultKind.renewed
+                ? 'QR authorization renewed.'
+                : c.modernAccountReport!.kind ==
+                      ModernAccountResultKind.connected
+                ? 'QR authorization saved.'
+                : 'QR directory result.',
+          ],
+          if (c.modernAccountReport!.directory case final directory?) ...[
+            [
+              'note',
+              directory.failed
+                  ? 'The QR directory could not be retrieved.'
+                  : UiMessage(
+                      'QR directory entries: {count}. These entries are not yet imported as device cards.',
+                      {'count': directory.count},
+                    ),
+            ],
+            if (directory.error != null)
+              ['note', UiError(directory.error!['code'])],
+            for (final issue in directory.issues)
+              ['note', UiError(issue['code'])],
+          ],
+        ],
+        if (c.canQrSignIn)
+          [
+            'disclosure',
+            'QR connection',
+            [
+              [
+                'note',
+                'These operations require a saved QR authorization. Sign in with a QR code first if this account only uses a password.',
+              ],
+              for (final label in [
+                'Refresh QR Directory',
+                'Recover QR Authorization',
+                'Renew QR Authorization',
+              ])
+                ['button', label, c.busy ? 'disabled' : 'secondary'],
+            ],
+          ],
         if (c.accountDeviceIds.isNotEmpty)
           [
             'card',
@@ -618,6 +662,7 @@ class AccountSignIn extends StatefulWidget {
     required this.busy,
     this.reauthorizing = false,
     this.onRecover,
+    this.onQr,
 
     this.provider = 'midea.meiju',
     this.credentialAccess = const PlatformCredentialAccess(),
@@ -625,6 +670,7 @@ class AccountSignIn extends StatefulWidget {
   });
   final Future<void> Function(Uint8List login, Uint8List password) onSubmit;
   final Future<void> Function(Uint8List login, Uint8List password)? onRecover;
+  final Future<void> Function()? onQr;
   final VoidCallback onCancel, onReload;
   final bool needsReload, busy, reauthorizing;
   final String provider;
@@ -638,7 +684,7 @@ class _AccountSignInState extends State<AccountSignIn>
   final login = TextEditingController(), password = TextEditingController();
   String? error;
   CredentialReadiness? readiness;
-  bool foreground = true, submitting = false;
+  bool foreground = true, submitting = false, qrSubmitting = false;
   int checkEpoch = 0;
   bool get canEnter =>
       readiness == CredentialReadiness.ready ||
@@ -722,6 +768,35 @@ class _AccountSignInState extends State<AccountSignIn>
       loginBytes.fillRange(0, loginBytes.length, 0);
       passwordBytes.fillRange(0, passwordBytes.length, 0);
       if (mounted) setState(() => submitting = false);
+    }
+  }
+
+  Future<void> submitQr() async {
+    if (!foreground ||
+        !canEnter ||
+        submitting ||
+        widget.busy ||
+        widget.needsReload ||
+        widget.onQr == null)
+      return;
+    clear();
+    final epoch = ++checkEpoch;
+    setState(() {
+      error = null;
+      submitting = true;
+      qrSubmitting = true;
+    });
+    try {
+      final result = await widget.credentialAccess.check();
+      if (!mounted || !foreground || epoch != checkEpoch) return;
+      setState(() => readiness = result);
+      if (canEnter && !widget.busy && !widget.needsReload) await widget.onQr!();
+    } finally {
+      if (mounted)
+        setState(() {
+          submitting = false;
+          qrSubmitting = false;
+        });
     }
   }
 
@@ -835,9 +910,21 @@ class _AccountSignInState extends State<AccountSignIn>
             onPressed: checkReadiness,
           ),
       ],
+      if (widget.onQr != null &&
+          canEnter &&
+          !widget.busy &&
+          !widget.needsReload)
+        ActionButton(
+          'Sign In with QR Code',
+          onPressed: submitting ? null : submitQr,
+        ),
       if (error != null) Copy(error!, color: const Color(0xff9e3421)),
       if (widget.busy)
-        const Copy('Connecting and retrieving devices…')
+        Copy(
+          qrSubmitting
+              ? 'Connecting QR account…'
+              : 'Connecting and retrieving devices…',
+        )
       else if (widget.needsReload) ...[
         const Copy(
           'Reload saved accounts before starting another connection. An interrupted sign-in may have saved authorization.',

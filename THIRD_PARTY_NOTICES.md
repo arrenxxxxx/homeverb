@@ -84,3 +84,8 @@ this work but does not establish permission on its own. The [source audit](docs/
 packages and records combined licenses, missing upstream notice files and the
 historical marketing screenshot. Actual target binary notice packaging remains
 separate work; this index does not claim a completed binary-license audit.
+
+## Local QR encoding
+
+The Flutter app uses unmodified `qr` 3.0.2 under BSD-3-Clause. Preserve its
+[notice](third-party/qr/NOTICE.md) and [license](third-party/qr/LICENSE.txt).

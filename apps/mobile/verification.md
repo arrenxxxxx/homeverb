@@ -1,5 +1,45 @@
 # Flutter implementation verification
 
+## Foreground Flutter QR account flow -- October 30, 2026
+
+The API 1.36 client is now connected to the sign-in and saved-account pages under
+ADR-0098. The explicit QR choice rechecks credential-storage readiness before
+requesting a code. The App encodes scan bytes locally with pinned `qr` 3.0.2,
+clears the source array after encoding, and owns a clearable module bitmap with
+a four-module white quiet zone. Dismissal, expiry, navigation and background clear
+owned presentation material. Encoder intermediates have managed lifetimes; no
+whole-heap erasure guarantee is made. No URL string, remote image, browser,
+clipboard, polling, regeneration or automatic renewal is introduced.
+
+Instructions require Xiaomi Home on another device while HomeVerb stays open,
+then one explicit Continue. Controller epochs, foreground state, client ownership
+and selected account guard late results. Interrupted sign-in requires a local
+account reload because completed secret storage cannot be rolled back. Existing
+password/captcha/verification entry points and physical cards remain available.
+
+Saved QR results are separate from legacy inventory: zero entries are displayed
+as zero, failed directory reads retain their error, and no logical entry becomes
+a physical card or complete-inventory claim. QR directory refresh, saved-session
+recovery and renewal each have their own explicit account-page action. Public
+summaries do not expose which protected protocol slots exist; the UI explains that
+these operations require saved QR authorization, and the native layer refuses a
+missing modern slot without fallback.
+
+Executed evidence: 102 affected Flutter account/native tests passed, including
+26 new QR cases; final account-page click coverage passed in all 26 QR tests.
+After the final QR-specific waiting message, all 35 QR/account-page tests and
+Flutter analysis passed. Seven presentation tests, two reference-projection tests,
+documentation, repository hygiene and contract validation (25 schemas, 69 primary
+positives and 1,092 negatives) passed. A fictional 280-point rendered QR image decoded to the
+expected fictional payload using the independent macOS Core Image decoder.
+English/Chinese 320-point layouts with doubled text passed. This proves local
+software behavior, not provider authentication, phone security or physical-device
+support. Native API 1.36, SQLite 5, protected payload versions and grants are
+unchanged. Android packaging, real account/phone acceptance, physical/logical
+reconciliation and the remaining reference ledger remain open. No provider call,
+appliance write, package installation, push or publication was performed.
+
+
 ## Foreground dishwasher command preparation: October 18, 2026
 
 This follow-up implements [ADR-0071](../../docs/adr/0071-app-dishwasher-command-preparation.md)

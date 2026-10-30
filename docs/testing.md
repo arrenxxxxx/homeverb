@@ -31,6 +31,29 @@ cloud value/cache checks, cancellation/drop lease cleanup, removal and independe
 adapter write denial. `cargo test -p homeverb-host --test mijia_startup --offline --locked`
 checks empty production Rust composition without credential or provider access.
 
+## Foreground QR App checks
+
+Run from `apps/mobile` with the installed FVM SDK. Tests use only fictional
+accounts and QR material; no Xiaomi account or appliance is required:
+
+```bash
+fvm flutter test test/account_qr_test.dart test/modern_account_bridge_test.dart test/account_verification_bridge_test.dart test/account_captcha_test.dart test/account_verification_test.dart test/account_native_test.dart test/native_test.dart test/accounts_test.dart
+fvm flutter analyze
+```
+
+On macOS, optionally export the fictional painter output and independently decode
+it with the system Core Image QR decoder:
+
+```bash
+HOMEVERB_QR_FIXTURE_PNG=/private/tmp/homeverb-qr-fixture.png fvm flutter test test/account_qr_test.dart
+swift test/fixtures/verify_qr.swift /private/tmp/homeverb-qr-fixture.png
+```
+
+The decoder checks one known fictional payload without printing decoded content.
+It does not prove real-provider QR acceptance. UI tests cover explicit continuation,
+clearing, expiry, background/navigation, credential readiness, late results and
+separate refresh/recover/renew actions. Encoding capacity errors fail closed.
+
 ## Local verification
 
 For an isolated Python environment, run `python3 -m venv .venv` and `source .venv/bin/activate` first. Install the declared requirements below before running Python tests.

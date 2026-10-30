@@ -1815,5 +1815,19 @@
   "vendor.xiaomi.mijia.physical_controls_locked.physical_controls_locked_1.false": "未锁定",
   "mobile.auxiliarySettingsRequireNativeApi135": "辅助设置需要原生接口 1.35。",
   "mobile.qrSignInRequiresNativeApi136": "扫码登录需要原生接口 1.36。",
-  "mobile.invalidAccountOperation": "账号操作无效。"
+  "mobile.invalidAccountOperation": "账号操作无效。",
+  "mobile.qrSignIn": "扫码登录",
+  "mobile.qrInstructions": "请保持 HomeVerb 在前台。使用另一台设备上的米家扫码并确认，再点击继续。离开 HomeVerb 会取消本次登录。",
+  "mobile.qrDisplayFailed": "无法显示二维码，请取消后重新登录。",
+  "mobile.qrRenewed": "扫码授权已续期。",
+  "mobile.qrSaved": "扫码授权已保存。",
+  "mobile.qrDirectoryFailed": "无法获取扫码连接的目录。",
+  "mobile.qrDirectoryCount": "扫码目录条目：{count}。这些条目尚未导入为设备卡片。",
+  "mobile.qrConnection": "扫码连接",
+  "mobile.qrOperationsNote": "这些操作需要已保存的扫码授权。如果此账号仅通过密码登录，请先扫码登录。",
+  "mobile.qrRefresh": "刷新扫码目录",
+  "mobile.qrRecover": "恢复扫码授权",
+  "mobile.qrRenew": "续期扫码授权",
+  "mobile.qrDirectoryResult": "扫码目录结果。",
+  "mobile.qrConnecting": "正在连接扫码账号…"
 }

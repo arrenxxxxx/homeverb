@@ -7,19 +7,19 @@
       "id": "directory",
       "route": "/v2/home/device_list_page",
       "status": "legacy_host_and_modern_typed_read",
-      "reason": "Modern reference-origin typed reads and protected accounts are implemented; Core adoption and App integration are pending."
+      "reason": "Modern reference-origin typed reads and protected accounts are implemented; App QR/account operations are implemented; physical Core adoption remains pending."
     },
     {
       "id": "homes",
       "route": "/v2/homeroom/gethome_merged",
       "status": "legacy_host_and_modern_typed_read",
-      "reason": "Modern reference-origin typed reads and protected accounts are implemented; Core adoption and App integration are pending."
+      "reason": "Modern reference-origin typed reads and protected accounts are implemented; App QR/account operations are implemented; physical Core adoption remains pending."
     },
     {
       "id": "properties",
       "route": "/miotspec/prop/get",
       "status": "legacy_host_and_modern_typed_read",
-      "reason": "Modern reference-origin typed reads and protected accounts are implemented; Core adoption and App integration are pending."
+      "reason": "Modern reference-origin typed reads and protected accounts are implemented; App QR/account operations are implemented; physical Core adoption remains pending."
     },
     {
       "id": "property_write_candidate",
@@ -5390,7 +5390,9 @@
     "account_evidence": "ADR-0095; fictional SQLite, secret-store and protocol fixtures",
     "host_lifecycle": "implemented_typed_session_qr_and_explicit_account_operations",
     "native_c_bridge": "implemented_api_1_36_protected_qr_and_explicit_session_operations",
-    "app_and_provider_acceptance": "pending",
+    "app_authentication": "implemented_foreground_qr_and_explicit_account_operations",
+    "app_evidence": "ADR-0098; fictional Flutter and C-ABI tests; independent local QR decoding",
+    "provider_and_phone_acceptance": "pending",
     "legacy_session_conversion": "unavailable",
     "modern_api_origin_and_codec": "implemented_reference_continuous_rc4_reads"
   },
@@ -5406,7 +5408,7 @@
     "provider_acceptance": "pending"
   },
   "remaining": [
-    "modern_app_authentication",
+    "modern_app_package_and_provider_acceptance",
     "modern_api_origin_and_codec_acceptance",
     "cloud_cache_inventory_reconciliation",
     "specialized_failed_property_read_paths",

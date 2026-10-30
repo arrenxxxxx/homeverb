@@ -12,6 +12,7 @@ dependencies:
   slang: 4.19.0
   slang_flutter: 4.19.0
   intl: ^0.20.2
+  qr: 3.0.2
   ffi: ^2.1.4
   path_provider: ^2.1.5
   file_selector: ^1.0.3

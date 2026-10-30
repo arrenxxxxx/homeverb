@@ -70,7 +70,8 @@ Read [the Mijia guide](docs/development/11-mijia.md) and
 before changing this integration. Modern QR authentication, protected account persistence and reference reads have
 typed Rust synthetic evidence under ADR-0093 through ADR-0095. ADR-0096 adds
 foreground Host ownership and explicit account operations. ADR-0097 exposes
-protected C entry points in API 1.36; App integration,
+protected C entry points in API 1.36; ADR-0098 adds foreground Flutter QR/account
+flows with fictional evidence. Physical-card reconciliation,
 additional controls, events and owner-run real-account/device acceptance remain incomplete. No lock
 write or complete-inventory claim is admitted. Meiju payload 3 and SQLite 5 remain unchanged. Legacy-only Mijia payload 1
 remains unchanged; explicit modern composition writes payload 2, which older

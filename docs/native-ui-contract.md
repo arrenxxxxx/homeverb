@@ -1899,4 +1899,5 @@ and an error. These counts are not physical devices, discovered card IDs, comple
 membership or live/online evidence. Renewal returns `kind=renewed` and account
 metadata only. Preserve completed account storage when later retrieval fails;
 do not replay login to hide a directory error. Physical/logical reconciliation and
-Flutter integration remain separate tracked work.
+provider/phone acceptance remain separate tracked work. The Flutter QR/account
+flow is implemented under ADR-0098 with fictional evidence.

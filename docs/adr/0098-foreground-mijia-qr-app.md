@@ -1,6 +1,6 @@
 # ADR-0098: Foreground Mijia QR sign-in in the App
 
-Status: Flutter FFI client implemented; foreground QR UI integration pending.
+Status: Implemented with fictional Flutter and C-ABI tests; provider/phone acceptance pending.
 Date: October 30, 2026.
 
 ## Decision
@@ -24,6 +24,8 @@ its credential-storage readiness check. Render locally with pinned BSD-3-Clause
 `qr` 3.0.2 from byte input, not a URL/string widget, remote image service or browser.
 Retain only a disposable module bitmap for painting; clear source bytes after
 encoding and clear the bitmap on dismissal, expiry, navigation or background.
+The encoder may allocate transient managed intermediates; this is bounded lifetime
+and explicit clearing of owned buffers, not a guarantee of whole-heap erasure.
 Use a white quiet zone, dark modules and bounded layout with accessible instruction
 text, without exposing the URL in semantics or clipboard/export actions.
 

@@ -5486,4 +5486,46 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Invalid account operation.'
 	String get mobileInvalidAccountOperation => 'Invalid account operation.';
+
+	/// en-US: 'Sign In with QR Code'
+	String get mobileQrSignIn => 'Sign In with QR Code';
+
+	/// en-US: 'Keep HomeVerb open. Scan with Xiaomi Home on another device and approve there, then select Continue. Leaving HomeVerb cancels this attempt.'
+	String get mobileQrInstructions => 'Keep HomeVerb open. Scan with Xiaomi Home on another device and approve there, then select Continue. Leaving HomeVerb cancels this attempt.';
+
+	/// en-US: 'The QR code could not be displayed. Cancel and sign in again.'
+	String get mobileQrDisplayFailed => 'The QR code could not be displayed. Cancel and sign in again.';
+
+	/// en-US: 'QR authorization renewed.'
+	String get mobileQrRenewed => 'QR authorization renewed.';
+
+	/// en-US: 'QR authorization saved.'
+	String get mobileQrSaved => 'QR authorization saved.';
+
+	/// en-US: 'The QR directory could not be retrieved.'
+	String get mobileQrDirectoryFailed => 'The QR directory could not be retrieved.';
+
+	/// en-US: 'QR directory entries: {count}. These entries are not yet imported as device cards.'
+	String mobileQrDirectoryCount({required Object count}) => 'QR directory entries: ${count}. These entries are not yet imported as device cards.';
+
+	/// en-US: 'QR connection'
+	String get mobileQrConnection => 'QR connection';
+
+	/// en-US: 'These operations require a saved QR authorization. Sign in with a QR code first if this account only uses a password.'
+	String get mobileQrOperationsNote => 'These operations require a saved QR authorization. Sign in with a QR code first if this account only uses a password.';
+
+	/// en-US: 'Refresh QR Directory'
+	String get mobileQrRefresh => 'Refresh QR Directory';
+
+	/// en-US: 'Recover QR Authorization'
+	String get mobileQrRecover => 'Recover QR Authorization';
+
+	/// en-US: 'Renew QR Authorization'
+	String get mobileQrRenew => 'Renew QR Authorization';
+
+	/// en-US: 'QR directory result.'
+	String get mobileQrDirectoryResult => 'QR directory result.';
+
+	/// en-US: 'Connecting QR account\u2026'
+	String get mobileQrConnecting => 'Connecting QR account\u2026';
 }

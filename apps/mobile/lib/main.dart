@@ -13,6 +13,7 @@ import 'appliance_controls.dart';
 import 'climate_controls.dart';
 import 'account_views.dart';
 import 'account_captcha.dart';
+import 'account_qr.dart';
 import 'account_verification.dart';
 import 'approval_review.dart';
 import 'compartment_controls.dart';
@@ -460,6 +461,16 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     }
     if (label == 'Inspect Saved Inventory') {
       await c.inspectAccountInventory();
+      return;
+    }
+    final modernOperation = switch (label) {
+      'Refresh QR Directory' => ModernAccountOperation.refresh,
+      'Recover QR Authorization' => ModernAccountOperation.recover,
+      'Renew QR Authorization' => ModernAccountOperation.renew,
+      _ => null,
+    };
+    if (modernOperation != null) {
+      if (!c.busy) await c.modernAccountSession(modernOperation);
       return;
     }
     if (label == 'Refresh Devices' ||
@@ -1825,6 +1836,38 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                     epoch == navigation &&
                     c.isForeground) {
                   setAccountEditor(null);
+                }
+              },
+        onQr: !c.canQrSignIn
+            ? null
+            : () async {
+                final success = await c.connectModernAccount(connectionLabel, (
+                  challenge,
+                ) async {
+                  if (!mounted || epoch != navigation || !c.isForeground)
+                    return false;
+                  return await showDialog<bool>(
+                        context: navigator.currentContext!,
+                        barrierDismissible: false,
+                        builder: (_) => AccountQrPrompt(
+                          challenge: challenge,
+                          cancellation: c.accountLoginCancellation,
+                        ),
+                      ) ??
+                      false;
+                });
+                if (success &&
+                    mounted &&
+                    epoch == navigation &&
+                    c.isForeground) {
+                  if (inline) {
+                    setAccountEditor(null);
+                  } else {
+                    history
+                      ..clear()
+                      ..add('P01');
+                    await go('P09', back: true);
+                  }
                 }
               },
         onSubmit: (login, password) async {

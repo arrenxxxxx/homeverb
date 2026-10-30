@@ -1054,6 +1054,7 @@ class HomeController extends ChangeNotifier {
   });
   List<Json> accounts = [];
   Json? accountDetails, accountReport, accountRemoval, accountInventory;
+  ModernAccountResult? modernAccountReport;
   String? selectedAccount;
   List<String>? removalScope;
   bool accountNeedsReload = false;
@@ -1140,6 +1141,7 @@ class HomeController extends ChangeNotifier {
     routeInspection = null;
     accountDetails = null;
     accountReport = null;
+    modernAccountReport = null;
     accountRemoval = null;
     removalScope = null;
     accountDetails = await core.call('get_account', {'account_id': id}) as Json;
@@ -1251,6 +1253,7 @@ class HomeController extends ChangeNotifier {
     routeInspection = null;
     accountNeedsReload = true;
     accountReport = null;
+    modernAccountReport = null;
     accountReport =
         await core.call(recover ? 'recover_account' : 'refresh_account', {
               'account_id': selectedAccount,
@@ -1259,6 +1262,106 @@ class HomeController extends ChangeNotifier {
     validateAccountReport(accountReport!);
     await reloadAccountViews();
   });
+
+  bool get canQrSignIn =>
+      core is ModernAccountClient &&
+      (core as ModernAccountClient).supportsModernAccountLogin &&
+      connectionProvider == 'xiaomi.mijia' &&
+      account?['credential_state'] != 'removing';
+
+  Future<bool> connectModernAccount(
+    String label,
+    Future<bool> Function(ModernAccountQr) prompt,
+  ) => perform(() async {
+    if (!canQrSignIn || !_foreground) {
+      throw NativeFailure(
+        'AUTH_FLOW_UNSUPPORTED',
+        'This account flow is unavailable.',
+      );
+    }
+    final client = core as ModernAccountClient;
+    final epoch = _readEpoch, chosenAccount = selectedAccount;
+    void requireCurrent() {
+      if (!_foreground ||
+          epoch != _readEpoch ||
+          core != client ||
+          selectedAccount != chosenAccount ||
+          connectionProvider != 'xiaomi.mijia') {
+        throw NativeFailure('CANCELLED', 'Sign-in was cancelled.');
+      }
+    }
+
+    accountNeedsReload = true;
+    accountReport = null;
+    modernAccountReport = null;
+    final challenge = await client.beginModernAccountLogin(
+      label: label.trim().isEmpty
+          ? accountDefaultLabel('xiaomi.mijia')
+          : label.trim(),
+      accountId: chosenAccount,
+    );
+    late ModernAccountResult result;
+    try {
+      requireCurrent();
+      final approved = await prompt(challenge);
+      requireCurrent();
+      if (!approved || challenge.remaining <= Duration.zero) {
+        throw NativeFailure('CANCELLED', 'Sign-in was cancelled.');
+      }
+      result = await client.continueModernAccountLogin(challenge);
+      requireCurrent();
+    } finally {
+      challenge.clearScan();
+      await client.discardModernAccountLogin(challenge);
+    }
+    requireCurrent();
+    modernAccountReport = result;
+    selectedAccount = result.account['id'] as String;
+    await reloadAccountViews();
+    if (!_foreground ||
+        epoch != _readEpoch ||
+        core != client ||
+        selectedAccount != result.account['id']) {
+      accountNeedsReload = true;
+      modernAccountReport = null;
+      throw NativeFailure('CANCELLED', 'Sign-in was cancelled.');
+    }
+  });
+
+  Future<bool> modernAccountSession(ModernAccountOperation operation) =>
+      perform(() async {
+        if (!canQrSignIn || !_foreground || selectedAccount == null) {
+          throw NativeFailure(
+            'AUTH_FLOW_UNSUPPORTED',
+            'This account flow is unavailable.',
+          );
+        }
+        final client = core as ModernAccountClient;
+        final epoch = _readEpoch, id = selectedAccount!;
+        void requireCurrent() {
+          if (!_foreground ||
+              epoch != _readEpoch ||
+              core != client ||
+              selectedAccount != id) {
+            throw NativeFailure('CANCELLED', 'Sign-in was cancelled.');
+          }
+        }
+
+        accountNeedsReload = true;
+        accountReport = null;
+        modernAccountReport = null;
+        final result = await client.modernAccountSession(id, operation);
+        requireCurrent();
+        modernAccountReport = result;
+        await reloadAccountViews();
+        try {
+          requireCurrent();
+        } catch (_) {
+          accountNeedsReload = true;
+          modernAccountReport = null;
+          rethrow;
+        }
+      });
 
   Future<bool> connectAccount(
     Uint8List login,
@@ -1278,6 +1381,7 @@ class HomeController extends ChangeNotifier {
           );
         accountNeedsReload = true;
         accountReport = null;
+        modernAccountReport = null;
         final epoch = _readEpoch;
         final client = core;
         final chosenAccount = selectedAccount;

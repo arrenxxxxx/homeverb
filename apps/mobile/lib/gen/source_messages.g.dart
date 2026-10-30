@@ -2283,6 +2283,24 @@ String? translateSource(
   "QR sign-in requires native API 1.36." =>
     t.mobileQrSignInRequiresNativeApi136,
   "Invalid account operation." => t.mobileInvalidAccountOperation,
+  "Sign In with QR Code" => t.mobileQrSignIn,
+  "Keep HomeVerb open. Scan with Xiaomi Home on another device and approve there, then select Continue. Leaving HomeVerb cancels this attempt." =>
+    t.mobileQrInstructions,
+  "The QR code could not be displayed. Cancel and sign in again." =>
+    t.mobileQrDisplayFailed,
+  "QR authorization renewed." => t.mobileQrRenewed,
+  "QR authorization saved." => t.mobileQrSaved,
+  "The QR directory could not be retrieved." => t.mobileQrDirectoryFailed,
+  "QR directory entries: {count}. These entries are not yet imported as device cards." =>
+    t.mobileQrDirectoryCount(count: args["count"] ?? "{count}"),
+  "QR connection" => t.mobileQrConnection,
+  "These operations require a saved QR authorization. Sign in with a QR code first if this account only uses a password." =>
+    t.mobileQrOperationsNote,
+  "Refresh QR Directory" => t.mobileQrRefresh,
+  "Recover QR Authorization" => t.mobileQrRecover,
+  "Renew QR Authorization" => t.mobileQrRenew,
+  "QR directory result." => t.mobileQrDirectoryResult,
+  "Connecting QR account\u2026" => t.mobileQrConnecting,
   _ => null,
 };
 
@@ -4605,5 +4623,23 @@ String? sourceForKey(String key) => switch (key) {
   "mobile.qrSignInRequiresNativeApi136" =>
     "QR sign-in requires native API 1.36.",
   "mobile.invalidAccountOperation" => "Invalid account operation.",
+  "mobile.qrSignIn" => "Sign In with QR Code",
+  "mobile.qrInstructions" =>
+    "Keep HomeVerb open. Scan with Xiaomi Home on another device and approve there, then select Continue. Leaving HomeVerb cancels this attempt.",
+  "mobile.qrDisplayFailed" =>
+    "The QR code could not be displayed. Cancel and sign in again.",
+  "mobile.qrRenewed" => "QR authorization renewed.",
+  "mobile.qrSaved" => "QR authorization saved.",
+  "mobile.qrDirectoryFailed" => "The QR directory could not be retrieved.",
+  "mobile.qrDirectoryCount" =>
+    "QR directory entries: {count}. These entries are not yet imported as device cards.",
+  "mobile.qrConnection" => "QR connection",
+  "mobile.qrOperationsNote" =>
+    "These operations require a saved QR authorization. Sign in with a QR code first if this account only uses a password.",
+  "mobile.qrRefresh" => "Refresh QR Directory",
+  "mobile.qrRecover" => "Recover QR Authorization",
+  "mobile.qrRenew" => "Renew QR Authorization",
+  "mobile.qrDirectoryResult" => "QR directory result.",
+  "mobile.qrConnecting" => "Connecting QR account\u2026",
   _ => null,
 };

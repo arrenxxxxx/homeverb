@@ -1815,5 +1815,19 @@
   "vendor.xiaomi.mijia.physical_controls_locked.physical_controls_locked_1.false": "Unlocked",
   "mobile.auxiliarySettingsRequireNativeApi135": "Auxiliary settings require native API 1.35.",
   "mobile.qrSignInRequiresNativeApi136": "QR sign-in requires native API 1.36.",
-  "mobile.invalidAccountOperation": "Invalid account operation."
+  "mobile.invalidAccountOperation": "Invalid account operation.",
+  "mobile.qrSignIn": "Sign In with QR Code",
+  "mobile.qrInstructions": "Keep HomeVerb open. Scan with Xiaomi Home on another device and approve there, then select Continue. Leaving HomeVerb cancels this attempt.",
+  "mobile.qrDisplayFailed": "The QR code could not be displayed. Cancel and sign in again.",
+  "mobile.qrRenewed": "QR authorization renewed.",
+  "mobile.qrSaved": "QR authorization saved.",
+  "mobile.qrDirectoryFailed": "The QR directory could not be retrieved.",
+  "mobile.qrDirectoryCount": "QR directory entries: {count}. These entries are not yet imported as device cards.",
+  "mobile.qrConnection": "QR connection",
+  "mobile.qrOperationsNote": "These operations require a saved QR authorization. Sign in with a QR code first if this account only uses a password.",
+  "mobile.qrRefresh": "Refresh QR Directory",
+  "mobile.qrRecover": "Recover QR Authorization",
+  "mobile.qrRenew": "Renew QR Authorization",
+  "mobile.qrDirectoryResult": "QR directory result.",
+  "mobile.qrConnecting": "Connecting QR account…"
 }

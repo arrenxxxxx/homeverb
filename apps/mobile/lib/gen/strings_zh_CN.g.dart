@@ -1850,4 +1850,18 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get mobileAuxiliarySettingsRequireNativeApi135 => '\u8f85\u52a9\u8bbe\u7f6e\u9700\u8981\u539f\u751f\u63a5\u53e3 1.35\u3002';
 	@override String get mobileQrSignInRequiresNativeApi136 => '\u626b\u7801\u767b\u5f55\u9700\u8981\u539f\u751f\u63a5\u53e3 1.36\u3002';
 	@override String get mobileInvalidAccountOperation => '\u8d26\u53f7\u64cd\u4f5c\u65e0\u6548\u3002';
+	@override String get mobileQrSignIn => '\u626b\u7801\u767b\u5f55';
+	@override String get mobileQrInstructions => '\u8bf7\u4fdd\u6301 HomeVerb \u5728\u524d\u53f0\u3002\u4f7f\u7528\u53e6\u4e00\u53f0\u8bbe\u5907\u4e0a\u7684\u7c73\u5bb6\u626b\u7801\u5e76\u786e\u8ba4\uff0c\u518d\u70b9\u51fb\u7ee7\u7eed\u3002\u79bb\u5f00 HomeVerb \u4f1a\u53d6\u6d88\u672c\u6b21\u767b\u5f55\u3002';
+	@override String get mobileQrDisplayFailed => '\u65e0\u6cd5\u663e\u793a\u4e8c\u7ef4\u7801\uff0c\u8bf7\u53d6\u6d88\u540e\u91cd\u65b0\u767b\u5f55\u3002';
+	@override String get mobileQrRenewed => '\u626b\u7801\u6388\u6743\u5df2\u7eed\u671f\u3002';
+	@override String get mobileQrSaved => '\u626b\u7801\u6388\u6743\u5df2\u4fdd\u5b58\u3002';
+	@override String get mobileQrDirectoryFailed => '\u65e0\u6cd5\u83b7\u53d6\u626b\u7801\u8fde\u63a5\u7684\u76ee\u5f55\u3002';
+	@override String mobileQrDirectoryCount({required Object count}) => '\u626b\u7801\u76ee\u5f55\u6761\u76ee\uff1a${count}\u3002\u8fd9\u4e9b\u6761\u76ee\u5c1a\u672a\u5bfc\u5165\u4e3a\u8bbe\u5907\u5361\u7247\u3002';
+	@override String get mobileQrConnection => '\u626b\u7801\u8fde\u63a5';
+	@override String get mobileQrOperationsNote => '\u8fd9\u4e9b\u64cd\u4f5c\u9700\u8981\u5df2\u4fdd\u5b58\u7684\u626b\u7801\u6388\u6743\u3002\u5982\u679c\u6b64\u8d26\u53f7\u4ec5\u901a\u8fc7\u5bc6\u7801\u767b\u5f55\uff0c\u8bf7\u5148\u626b\u7801\u767b\u5f55\u3002';
+	@override String get mobileQrRefresh => '\u5237\u65b0\u626b\u7801\u76ee\u5f55';
+	@override String get mobileQrRecover => '\u6062\u590d\u626b\u7801\u6388\u6743';
+	@override String get mobileQrRenew => '\u7eed\u671f\u626b\u7801\u6388\u6743';
+	@override String get mobileQrDirectoryResult => '\u626b\u7801\u76ee\u5f55\u7ed3\u679c\u3002';
+	@override String get mobileQrConnecting => '\u6b63\u5728\u8fde\u63a5\u626b\u7801\u8d26\u53f7\u2026';
 }
