@@ -183,7 +183,13 @@ abstract class ModernAccountQr {
 
 enum ModernAccountOperation { refresh, recover, renew }
 
-enum ModernAccountResultKind { connected, directory, renewed }
+enum ModernAccountResultKind {
+  connected,
+  directory,
+  renewed,
+  connectedDevices,
+  devices,
+}
 
 class ModernDirectoryResult {
   const ModernDirectoryResult({
@@ -203,10 +209,12 @@ class ModernAccountResult {
     required this.kind,
     required this.account,
     this.directory,
+    this.deviceReport,
   });
   final ModernAccountResultKind kind;
   final Json account;
   final ModernDirectoryResult? directory;
+  final Json? deviceReport;
 }
 
 abstract interface class ModernAccountClient {

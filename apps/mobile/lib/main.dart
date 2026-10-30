@@ -464,7 +464,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       return;
     }
     final modernOperation = switch (label) {
-      'Refresh QR Directory' => ModernAccountOperation.refresh,
+      'Refresh QR Connection' => ModernAccountOperation.refresh,
       'Recover QR Authorization' => ModernAccountOperation.recover,
       'Renew QR Authorization' => ModernAccountOperation.renew,
       _ => null,

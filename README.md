@@ -53,9 +53,9 @@ This exits with code 11. Refresh state to inspect the result; do not blindly res
   reviewed fan/light/purifier/outlet controls and an explicit bounded historical-read
   dialog; only the protected `cuco.plug.v3` daily-energy profile is admitted for
   history. Synthetic evidence and Android archive checks do not establish real
-  provider/device acceptance. Modern QR sign-in and explicit directory/recovery/renewal have Flutter fixture
-  evidence; physical-card reconciliation and broader event/control
-  coverage remain incomplete; door-lock writes are unavailable. Startup performs
+  provider/device acceptance. Modern QR sign-in, grouped device-card publication, explicit refresh/recovery
+  and renewal have Flutter fixture evidence with API 1.37. Modern controls/history
+  and broader event/control coverage remain incomplete; door-lock writes are unavailable. Startup performs
   no account refresh or network operation. Explicit `--adapter xiaomi.mijia`
   also provides read-only CLI/local MCP hosting and bounded historical queries.
 

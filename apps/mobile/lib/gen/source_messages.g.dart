@@ -2296,7 +2296,7 @@ String? translateSource(
   "QR connection" => t.mobileQrConnection,
   "These operations require a saved QR authorization. Sign in with a QR code first if this account only uses a password." =>
     t.mobileQrOperationsNote,
-  "Refresh QR Directory" => t.mobileQrRefresh,
+  "Refresh QR Connection" => t.mobileQrRefresh,
   "Recover QR Authorization" => t.mobileQrRecover,
   "Renew QR Authorization" => t.mobileQrRenew,
   "QR directory result." => t.mobileQrDirectoryResult,
@@ -4636,7 +4636,7 @@ String? sourceForKey(String key) => switch (key) {
   "mobile.qrConnection" => "QR connection",
   "mobile.qrOperationsNote" =>
     "These operations require a saved QR authorization. Sign in with a QR code first if this account only uses a password.",
-  "mobile.qrRefresh" => "Refresh QR Directory",
+  "mobile.qrRefresh" => "Refresh QR Connection",
   "mobile.qrRecover" => "Recover QR Authorization",
   "mobile.qrRenew" => "Renew QR Authorization",
   "mobile.qrDirectoryResult" => "QR directory result.",

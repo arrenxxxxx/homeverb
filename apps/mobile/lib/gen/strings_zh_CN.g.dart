@@ -1859,7 +1859,7 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String mobileQrDirectoryCount({required Object count}) => '\u626b\u7801\u76ee\u5f55\u6761\u76ee\uff1a${count}\u3002\u8fd9\u4e9b\u6761\u76ee\u5c1a\u672a\u5bfc\u5165\u4e3a\u8bbe\u5907\u5361\u7247\u3002';
 	@override String get mobileQrConnection => '\u626b\u7801\u8fde\u63a5';
 	@override String get mobileQrOperationsNote => '\u8fd9\u4e9b\u64cd\u4f5c\u9700\u8981\u5df2\u4fdd\u5b58\u7684\u626b\u7801\u6388\u6743\u3002\u5982\u679c\u6b64\u8d26\u53f7\u4ec5\u901a\u8fc7\u5bc6\u7801\u767b\u5f55\uff0c\u8bf7\u5148\u626b\u7801\u767b\u5f55\u3002';
-	@override String get mobileQrRefresh => '\u5237\u65b0\u626b\u7801\u76ee\u5f55';
+	@override String get mobileQrRefresh => '\u5237\u65b0\u626b\u7801\u8fde\u63a5';
 	@override String get mobileQrRecover => '\u6062\u590d\u626b\u7801\u6388\u6743';
 	@override String get mobileQrRenew => '\u7eed\u671f\u626b\u7801\u6388\u6743';
 	@override String get mobileQrDirectoryResult => '\u626b\u7801\u76ee\u5f55\u7ed3\u679c\u3002';

@@ -208,5 +208,6 @@ limited to partial/failed with unique local device IDs. Old logical requests kee
 their results. Negotiate the version before sending additions. Ordinary account
 refresh/recovery selects inventory from protected stored protocol evidence without
 fallback. See [ADR-0102](../../docs/adr/0102-native-modern-device-publication.md).
-Flutter opt-in and packaging remain pending; native support does not establish
-provider, phone or physical-device acceptance.
+Flutter now negotiates the opt-in and adopts validated device reports after local
+reload; 1.36 retains logical reports. Packaging remains pending, and fictional
+native/App evidence does not establish provider, phone or physical-device acceptance.

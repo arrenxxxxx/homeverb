@@ -5514,8 +5514,8 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	/// en-US: 'These operations require a saved QR authorization. Sign in with a QR code first if this account only uses a password.'
 	String get mobileQrOperationsNote => 'These operations require a saved QR authorization. Sign in with a QR code first if this account only uses a password.';
 
-	/// en-US: 'Refresh QR Directory'
-	String get mobileQrRefresh => 'Refresh QR Directory';
+	/// en-US: 'Refresh QR Connection'
+	String get mobileQrRefresh => 'Refresh QR Connection';
 
 	/// en-US: 'Recover QR Authorization'
 	String get mobileQrRecover => 'Recover QR Authorization';

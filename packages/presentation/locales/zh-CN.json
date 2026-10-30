@@ -1825,7 +1825,7 @@
   "mobile.qrDirectoryCount": "扫码目录条目：{count}。这些条目尚未导入为设备卡片。",
   "mobile.qrConnection": "扫码连接",
   "mobile.qrOperationsNote": "这些操作需要已保存的扫码授权。如果此账号仅通过密码登录，请先扫码登录。",
-  "mobile.qrRefresh": "刷新扫码目录",
+  "mobile.qrRefresh": "刷新扫码连接",
   "mobile.qrRecover": "恢复扫码授权",
   "mobile.qrRenew": "续期扫码授权",
   "mobile.qrDirectoryResult": "扫码目录结果。",

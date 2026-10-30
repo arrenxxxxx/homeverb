@@ -929,10 +929,15 @@ class DeviceHome extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Copy('My home', size: 16, bold: true),
-            const SizedBox(width: 8),
-            const Icon(Icons.keyboard_arrow_down, size: 16),
-            const Spacer(),
+            const Expanded(
+              child: Row(
+                children: [
+                  Flexible(child: Copy('My home', size: 16, bold: true)),
+                  SizedBox(width: 8),
+                  Icon(Icons.keyboard_arrow_down, size: 16),
+                ],
+              ),
+            ),
             SizedBox(
               height: 32,
               child: IconAction(

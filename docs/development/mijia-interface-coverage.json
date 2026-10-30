@@ -7,19 +7,19 @@
       "id": "directory",
       "route": "/v2/home/device_list_page",
       "status": "legacy_host_and_modern_typed_read",
-      "reason": "Modern reference-origin typed reads and protected accounts are implemented; typed Host device publication and Core reads are implemented; App card adoption remains pending."
+      "reason": "Modern reference-origin typed reads and protected accounts are implemented; native and Flutter device publication and Core reads are implemented; provider acceptance remains pending."
     },
     {
       "id": "homes",
       "route": "/v2/homeroom/gethome_merged",
       "status": "legacy_host_and_modern_typed_read",
-      "reason": "Modern reference-origin typed reads and protected accounts are implemented; typed Host device publication and Core reads are implemented; App card adoption remains pending."
+      "reason": "Modern reference-origin typed reads and protected accounts are implemented; native and Flutter device publication and Core reads are implemented; provider acceptance remains pending."
     },
     {
       "id": "properties",
       "route": "/miotspec/prop/get",
       "status": "legacy_host_and_modern_typed_read",
-      "reason": "Modern reference-origin typed reads and protected accounts are implemented; typed Host device publication and Core reads are implemented; App card adoption remains pending."
+      "reason": "Modern reference-origin typed reads and protected accounts are implemented; native and Flutter device publication and Core reads are implemented; provider acceptance remains pending."
     },
     {
       "id": "property_write_candidate",
@@ -5400,7 +5400,7 @@
     "status": "implemented_typed_reference_directory_homes_and_pinned_properties",
     "origin": "https://core.api.mijia.tech/app",
     "codec": "continuous_rc4_drop1024_with_bounded_encrypted_gzip",
-    "logical_parent_reconciliation": "implemented_typed_groups_protected_bindings_and_host_publication_app_pending",
+    "logical_parent_reconciliation": "implemented_groups_protected_bindings_and_native_flutter_publication",
     "group_evidence": "ADR-0099; fictional bounded parent-graph tests",
     "protected_account": "implemented_typed_rust",
     "typed_host_directory_and_recovery": "implemented",
@@ -5409,7 +5409,8 @@
     "typed_host_device_publication": "implemented_explicit_qr_continuation_refresh_and_recovery",
     "native_c_device_publication": "implemented_api_1_37_explicit_opt_in",
     "ordinary_account_refresh": "implemented_protected_protocol_selection_without_fallback",
-    "physical_core_and_app": "native_device_publication_and_core_reads_implemented_app_opt_in_pending",
+    "physical_core_and_app": "implemented_native_flutter_device_publication_and_core_reads",
+    "app_evidence": "ADR-0102; fictional ABI negotiation, QR-to-card clicks and Core-client state requests",
     "provider_acceptance": "pending"
   },
   "remaining": [

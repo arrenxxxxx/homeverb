@@ -130,12 +130,61 @@ ModernAccountResult _modernResult(
     'kind',
     if (kind == ModernAccountResultKind.renewed) 'account' else 'report',
   });
-  if (body['kind'] != kind.name) throw const FormatException();
+  final wireKind = kind == ModernAccountResultKind.connectedDevices
+      ? 'connected_devices'
+      : kind.name;
+  if (body['kind'] != wireKind) throw const FormatException();
   if (kind == ModernAccountResultKind.renewed)
     return ModernAccountResult(
       kind: kind,
       account: _modernAccount(body['account'], expectedId),
     );
+  if (kind == ModernAccountResultKind.connectedDevices ||
+      kind == ModernAccountResultKind.devices) {
+    final report = _modernObject(body['report'], {
+      'account',
+      'authentication',
+      'retrieval',
+    });
+    if (report['authentication'] !=
+        (kind == ModernAccountResultKind.connectedDevices
+            ? 'succeeded'
+            : 'not_attempted')) {
+      throw const FormatException();
+    }
+    final retrieval = _modernObject(report['retrieval'], {
+      'status',
+      'device_ids',
+      'error',
+    });
+    final ids = retrieval['device_ids'];
+    final uuid = RegExp(
+      r'^[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}$',
+    );
+    if (!['partial', 'failed'].contains(retrieval['status']) ||
+        ids is! List ||
+        ids.length > 4096 ||
+        ids.any((id) => id is! String || !uuid.hasMatch(id)) ||
+        ids.map((id) => (id as String).toLowerCase()).toSet().length !=
+            ids.length ||
+        (retrieval['status'] == 'failed' && ids.isNotEmpty)) {
+      throw const FormatException();
+    }
+    final account = _modernAccount(report['account'], expectedId);
+    return ModernAccountResult(
+      kind: kind,
+      account: account,
+      deviceReport: Map.unmodifiable({
+        'account': account,
+        'authentication': report['authentication'],
+        'retrieval': Map<String, dynamic>.unmodifiable({
+          'status': retrieval['status'],
+          'device_ids': List<String>.unmodifiable(ids.cast<String>()),
+          'error': _modernError(retrieval['error']),
+        }),
+      }),
+    );
+  }
   final report = _modernObject(body['report'], {
     'account',
     'authentication',
@@ -316,12 +365,15 @@ mixin _NativeModernAccount {
           'operation_id': operation,
           'timeout_ms': remaining.clamp(1, 120000),
           'challenge_id': pending.id,
+          if (client.apiAtLeast(37)) 'publish_devices': true,
         }, 0),
       );
       _requireModern(generation);
       return _modernResult(
         result,
-        ModernAccountResultKind.connected,
+        client.apiAtLeast(37)
+            ? ModernAccountResultKind.connectedDevices
+            : ModernAccountResultKind.connected,
         pending.accountId,
       );
     } on FormatException {
@@ -357,7 +409,10 @@ mixin _NativeModernAccount {
           'operation_id': operation,
           'timeout_ms': 30000,
           'account_id': accountId,
-          'operation': action.name,
+          'operation':
+              client.apiAtLeast(37) && action != ModernAccountOperation.renew
+              ? '${action.name}_devices'
+              : action.name,
         }, 0),
       );
       _requireModern(generation);
@@ -365,6 +420,8 @@ mixin _NativeModernAccount {
         result,
         action == ModernAccountOperation.renew
             ? ModernAccountResultKind.renewed
+            : client.apiAtLeast(37)
+            ? ModernAccountResultKind.devices
             : ModernAccountResultKind.directory,
         accountId,
       );

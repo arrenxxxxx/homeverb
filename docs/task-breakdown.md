@@ -1,5 +1,34 @@
 # Implementation status and next tasks
 
+## Flutter modern device publication -- October 30, 2026
+
+The API 1.37 Flutter client now requests modern device publication after QR
+continuation and explicit refresh/recovery under ADR-0102. API 1.36 retains logical
+reports, and 1.35 refuses QR before symbol lookup. Distinct result kinds validate
+closed fields, exact account/provider/authentication, partial/failed status,
+required errors and at most 4096 unique UUID IDs. Owned parsed reports are immutable.
+No successful logical count becomes a device count.
+
+The controller reloads local accounts/cards before adopting a current foreground
+report. Existing partial/failure UI displays returned device counts and keeps
+historical cards; cancelled navigation/account/lifecycle work cannot restore late
+reports. A failed local reload retains the reload requirement without repeating
+login. Card taps use existing descriptor-driven Core state reads; modern controls
+and history remain unavailable. QR connection wording supports both native
+versions. A shared home-header title now wraps within its available width instead
+of overflowing at 320 pixels and doubled English text.
+
+The affected 134 Flutter account/native/QR/localization/foreground-read tests
+passed, including 20 new ABI/widget/controller cases. They cover actual fictional
+C libraries for 1.35/1.36/1.37 and an App QR-to-card click/state-read path, plus
+partial/failed/empty results, malformed/private/oversized results, owned-memory
+cleanup, cancelled ready replies and local reload failure. These tests use no
+provider or appliance. Both shared portrait/landscape reflow tests, Flutter
+analysis and all seven presentation tests also passed. Native API 1.37 and protected storage formats are
+unchanged. New Android packaging and real account/phone/model acceptance remain
+pending; the old API 1.35 APK does not contain these changes.
+
+
 ## Native modern device publication (API 1.37) -- October 30, 2026
 
 [ADR-0102](adr/0102-native-modern-device-publication.md) adds optional Boolean

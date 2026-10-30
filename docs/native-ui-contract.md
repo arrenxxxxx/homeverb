@@ -1929,4 +1929,7 @@ I/O, with no fallback on failure. Modern refresh selects modern reads for return
 roots and removes unsupported modern control/history options; absent historical
 bindings retain their selection. Shared account IDs and organization stay intact.
 No JSON field chooses credentials, origin or codec. Storage versions and C export
-counts are unchanged. Flutter adoption and packaging are still pending.
+counts are unchanged. Flutter now negotiates 1.37, validates distinct immutable
+device reports and adopts them after local reload and lifecycle checks. API 1.36
+keeps its logical-only report. New packaging and provider/phone acceptance remain
+pending.

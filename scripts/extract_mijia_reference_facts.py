@@ -95,7 +95,7 @@ def project():
                        'reference_read_summary': model['independent_read_summary'], 'entries': entries})
     operations = [{'id': o['id'], 'route': o['route'],
                    'status': 'legacy_host_and_modern_typed_read' if o['id'] in ('directory', 'homes', 'properties') else 'not_admitted_by_reference',
-                   'reason': ('Modern reference-origin typed reads and protected accounts are implemented; typed Host device publication and Core reads are implemented; App card adoption remains pending.'
+                   'reason': ('Modern reference-origin typed reads and protected accounts are implemented; native and Flutter device publication and Core reads are implemented; provider acceptance remains pending.'
                               if o['id'] in ('directory', 'homes', 'properties')
                               else 'No credential crossover or arbitrary RPC; separate exact control admission is required.')}
                   for o in contract['operations']]
@@ -117,7 +117,7 @@ def project():
                     'status': 'implemented_typed_reference_directory_homes_and_pinned_properties',
                     'origin': 'https://core.api.mijia.tech/app',
                     'codec': 'continuous_rc4_drop1024_with_bounded_encrypted_gzip',
-                    'logical_parent_reconciliation': 'implemented_typed_groups_protected_bindings_and_host_publication_app_pending',
+                    'logical_parent_reconciliation': 'implemented_groups_protected_bindings_and_native_flutter_publication',
                     'group_evidence': 'ADR-0099; fictional bounded parent-graph tests',
                     'protected_account': 'implemented_typed_rust',
                     'typed_host_directory_and_recovery': 'implemented',
@@ -126,7 +126,8 @@ def project():
                     'typed_host_device_publication': 'implemented_explicit_qr_continuation_refresh_and_recovery',
                     'native_c_device_publication': 'implemented_api_1_37_explicit_opt_in',
                     'ordinary_account_refresh': 'implemented_protected_protocol_selection_without_fallback',
-                    'physical_core_and_app': 'native_device_publication_and_core_reads_implemented_app_opt_in_pending',
+                    'physical_core_and_app': 'implemented_native_flutter_device_publication_and_core_reads',
+                    'app_evidence': 'ADR-0102; fictional ABI negotiation, QR-to-card clicks and Core-client state requests',
                     'provider_acceptance': 'pending'},
                 'remaining': ['modern_app_package_and_provider_acceptance',
                               'modern_api_origin_and_codec_acceptance', 'cloud_cache_inventory_reconciliation',

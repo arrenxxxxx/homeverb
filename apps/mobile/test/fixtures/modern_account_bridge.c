@@ -23,6 +23,8 @@ char *homeverb_open(const char *metadata) { (void)metadata; return response("{\"
 char *homeverb_call(uint64_t handle,const char *metadata) { (void)handle; (void)metadata;
 #ifdef OMIT_MODERN
   return response("{\"api_version\":\"1.35.0\",\"methods\":{\"list_accounts\":{},\"refresh_account\":{}}}");
+#elif defined(PUBLISH_DEVICES)
+  return response("{\"api_version\":\"1.37.0\",\"methods\":{\"list_accounts\":{},\"refresh_account\":{}}}");
 #else
   return response("{\"api_version\":\"1.36.0\",\"methods\":{\"list_accounts\":{},\"refresh_account\":{}}}");
 #endif
@@ -47,19 +49,47 @@ char *homeverb_begin_modern_account_login(uint64_t handle,const char *metadata,u
 static char *result(bool renewed,bool connected) {
   char account[768], data[1600];
   snprintf(account,sizeof(account),"{\"id\":\"00000000-0000-4000-8000-00000000000%s\",\"provider\":\"%s\",\"region\":\"CN\",\"label\":\"Home\",\"credential_state\":\"stored\",\"authorization\":\"not_checked\",\"last_complete_inventory_at\":null}",mode==11?"2":"1",mode==8?"midea.meiju":"xiaomi.mijia");
+
+#ifdef PUBLISH_DEVICES
+  if (!renewed) {
+    char *ids=calloc(200000,1), *projected=calloc(220000,1);
+    int count=(mode==12 || mode==22)?0:mode==15?2:mode==20?4097:1;
+    size_t length=0;
+    for (int i=0;i<count;i++) {
+      if (mode==10) length+=(size_t)snprintf(ids+length,200000-length,"%s\"invalid-id\"",i?",":"");
+      else length+=(size_t)snprintf(ids+length,200000-length,"%s\"40000000-0000-4000-8000-%012x\"",i?",":"",mode==15?1:i+1);
+    }
+    snprintf(projected,220000,"{\"kind\":\"%s\",\"report\":{\"account\":%s,\"authentication\":\"%s\",\"retrieval\":{\"status\":\"%s\",\"device_ids\":[%s],\"error\":%s%s}}}",
+      mode==21?"directory":connected?"connected_devices":"devices",account,
+      mode==18?"unconfirmed":connected?"succeeded":"not_attempted",
+      mode==9?"complete":(mode==12 || mode==16)?"failed":"partial",ids,
+      mode==17?"null":mode==12?"{\"code\":\"MIJIA_REQUEST_FAILED\",\"message\":\"Fictional failure.\",\"retryable\":false}":"{\"code\":\"MIJIA_INVENTORY_PARTIAL\",\"message\":\"Fictional partial inventory.\",\"retryable\":false}",
+      mode==19?",\"provider_id\":\"PRIVATE\"":"");
+    char *value=response(projected); free(projected); free(ids); return value;
+  }
+#endif
   if (renewed) snprintf(data,sizeof(data),"{\"kind\":\"renewed\",\"account\":%s}",account);
   else snprintf(data,sizeof(data),"{\"kind\":\"%s\",\"report\":{\"account\":%s,\"authentication\":\"%s\",\"directory\":{\"status\":\"%s\",\"logical_entry_count\":%d,\"complete\":%s,\"issues\":[],\"error\":%s}}}",connected?"connected":"directory",account,connected?"succeeded":"not_attempted",mode==12?"failed":"partial",mode==10?-1:mode==12?0:3,mode==9?"true":"false",mode==12?"{\"code\":\"MIJIA_REQUEST_FAILED\",\"message\":\"Fictional directory failure.\",\"retryable\":false}":"null");
   return response(data);
 }
 char *homeverb_continue_modern_account_login(uint64_t handle,const char *metadata) {
   if (handle!=1 || !strstr(metadata,"\"challenge_id\":1") || strstr(metadata,"PRIVATE")) return failure();
+#ifdef PUBLISH_DEVICES
+  if (!strstr(metadata,"\"publish_devices\":true")) return failure();
+#else
+  if (strstr(metadata,"publish_devices")) return failure();
+#endif
   continues++; stall(6); return result(false,true);
 }
 char *homeverb_modern_account_session(uint64_t handle,const char *metadata) {
   if (handle!=1 || !strstr(metadata,"00000000-0000-4000-8000-000000000001") || strstr(metadata,"PRIVATE")) return failure();
   sessions++; stall(7);
   if (strstr(metadata,"\"operation\":\"renew\"")) return result(true,false);
+#ifdef PUBLISH_DEVICES
+  if (!strstr(metadata,"\"operation\":\"refresh_devices\"") && !strstr(metadata,"\"operation\":\"recover_devices\"")) return failure();
+#else
   if (!strstr(metadata,"\"operation\":\"refresh\"") && !strstr(metadata,"\"operation\":\"recover\"")) return failure();
+#endif
   return result(false,false);
 }
 #endif

@@ -1825,7 +1825,7 @@
   "mobile.qrDirectoryCount": "QR directory entries: {count}. These entries are not yet imported as device cards.",
   "mobile.qrConnection": "QR connection",
   "mobile.qrOperationsNote": "These operations require a saved QR authorization. Sign in with a QR code first if this account only uses a password.",
-  "mobile.qrRefresh": "Refresh QR Directory",
+  "mobile.qrRefresh": "Refresh QR Connection",
   "mobile.qrRecover": "Recover QR Authorization",
   "mobile.qrRenew": "Renew QR Authorization",
   "mobile.qrDirectoryResult": "QR directory result.",

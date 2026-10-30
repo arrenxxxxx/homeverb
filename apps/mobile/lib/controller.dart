@@ -1315,7 +1315,6 @@ class HomeController extends ChangeNotifier {
       await client.discardModernAccountLogin(challenge);
     }
     requireCurrent();
-    modernAccountReport = result;
     selectedAccount = result.account['id'] as String;
     await reloadAccountViews();
     if (!_foreground ||
@@ -1323,10 +1322,23 @@ class HomeController extends ChangeNotifier {
         core != client ||
         selectedAccount != result.account['id']) {
       accountNeedsReload = true;
+      accountReport = null;
       modernAccountReport = null;
       throw NativeFailure('CANCELLED', 'Sign-in was cancelled.');
     }
+    _acceptModernAccountReport(result);
   });
+
+  void _acceptModernAccountReport(ModernAccountResult result) {
+    if (result.deviceReport case final report?) {
+      validateAccountReport(report);
+      accountReport = report;
+      modernAccountReport = null;
+    } else {
+      accountReport = null;
+      modernAccountReport = result;
+    }
+  }
 
   Future<bool> modernAccountSession(ModernAccountOperation operation) =>
       perform(() async {
@@ -1352,15 +1364,16 @@ class HomeController extends ChangeNotifier {
         modernAccountReport = null;
         final result = await client.modernAccountSession(id, operation);
         requireCurrent();
-        modernAccountReport = result;
         await reloadAccountViews();
         try {
           requireCurrent();
         } catch (_) {
           accountNeedsReload = true;
+          accountReport = null;
           modernAccountReport = null;
           rethrow;
         }
+        _acceptModernAccountReport(result);
       });
 
   Future<bool> connectAccount(

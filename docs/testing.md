@@ -750,3 +750,15 @@ mixed-before/after-adoption, pending recovery and unavailable modern transport;
 failures never contact legacy routes or authenticate. Run the Mijia/Host workspace
 regression and rebuilt `scripts/verify_native_contract.py`. No provider/phone
 traffic or new mobile package is exercised by these checks.
+
+
+From `apps/mobile`, run `fvm flutter test test/modern_device_bridge_test.dart
+ test/modern_device_flow_test.dart test/modern_account_bridge_test.dart
+ test/account_qr_test.dart`. The new 1.37 C fixture requires publication metadata
+and device operation names, refuses malformed result shapes/IDs, and checks late
+reply cancellation with the same protected QR cleanup. Widget/controller fixtures
+exercise actual card clicks and Core-client state requests, local reload failure
+without login replay, partial/failed/empty outcomes and late navigation/account/
+foreground results. Retain account/native/localization/foreground-read regressions
+and the `screens_test.dart` portrait/landscape reflow checks for the flexible header.
+These fixtures perform no provider or physical-device operation.

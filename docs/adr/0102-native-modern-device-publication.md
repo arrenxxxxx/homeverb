@@ -1,6 +1,6 @@
 # ADR-0102: Native modern Mijia device publication
 
-Status: Native API 1.37 implemented and synthetic-tested; Flutter adoption pending.
+Status: Native API 1.37 and Flutter adoption implemented with fictional evidence; packaging/provider acceptance pending.
 Date: October 30, 2026.
 
 ## Decision
@@ -71,3 +71,47 @@ Documentation, repository hygiene and both reference-projection tests passed.
 These are fictional software checks. Flutter opt-in, a new APK, signed iOS runtime,
 provider authentication and physical-device acceptance were not performed. No
 provider account, appliance write, remote CI, push or publication was used.
+
+## Flutter adoption contract
+
+The Flutter client negotiates API 1.37 before adding publication metadata; API
+1.36 keeps logical results and API 1.35 still refuses QR before symbol lookup.
+Distinct typed result kinds retain either a logical directory or a sanitized
+account device report, never both. Validate exact report fields, expected account,
+provider/authentication, partial/failed status, error shape, unique bounded UUID
+IDs and no complete claim before controller adoption. Owned result maps/lists are
+immutable. No new credential or scan material enters ordinary JSON.
+
+After a current foreground result the controller reloads local accounts/cards,
+then retains the device report for existing partial/failure presentation. Account,
+client, navigation and lifecycle changes invalidate late reports; interrupted work
+keeps the local reload requirement. Publication does not imply online devices or
+physical support. Card opening uses existing descriptor-driven Core reads and
+never obtains modern control authority. Explicit QR refresh/recovery requests
+publish devices on 1.37, while renewal remains authentication-only. QR connection
+labels work with both native versions; legacy logical results retain their warning.
+
+Required App evidence includes actual fictional C ABI negotiation for 1.35/1.36/
+1.37, closed new result parsing, cancellation after ready replies, QR-to-card clicks
+and state reads, partial/failed/empty results, local reload failure, bilingual
+narrow layouts and unchanged legacy login/account regressions. Flutter implementation now has the evidence below; packaging and provider/phone
+acceptance remain separate unfinished gates.
+
+## Flutter implementation evidence
+
+The affected 134-test Flutter account/native/QR/localization/foreground-read run
+passed, including 20 new device-publication cases. Fictional C libraries verify
+actual API negotiation, new metadata, immutable parsed results, closed response
+refusal and cancellation after ready replies. Widget/controller tests follow QR
+submission to new cards, click a card and request state through the Core client
+interface; separate Host tests above establish native Core behavior. They also
+cover empty/failed retrieval, both locales at 320 pixels/doubled text, navigation/
+account/background races and local reload failure without repeated login. The
+shared home title was made flexible after this test exposed English overflow.
+This is software evidence, not a real QR login, phone or appliance test.
+
+Both shared reflow tests passed: all screens at 320 pixels/200 percent text and
+all states in landscape/150 percent text. Flutter analysis reported no issues,
+and all seven shared presentation tests passed. No full Flutter-suite pass or
+new mobile package is claimed; the known unrelated macOS pixel/legacy-click
+failures remain outside this affected passing regression.

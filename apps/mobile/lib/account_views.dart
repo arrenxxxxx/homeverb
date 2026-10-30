@@ -486,7 +486,7 @@ List<dynamic> accountBlocks(
                 'These operations require a saved QR authorization. Sign in with a QR code first if this account only uses a password.',
               ],
               for (final label in [
-                'Refresh QR Directory',
+                'Refresh QR Connection',
                 'Recover QR Authorization',
                 'Renew QR Authorization',
               ])

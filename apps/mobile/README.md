@@ -1,6 +1,6 @@
 # HomeVerb Flutter application
 
-The native application embeds Core using native UI contract 1.27.0. The separate visual preview contains fictional Window Light fixtures and never opens Core. The default build opens an isolated Mock profile. Explicit Meiju builds provide protected account connection, local metadata, retrieval/recovery and scoped local removal; Android startup wiring and Mock process journeys are emulator-tested; actual Keystore and physical acceptance remain pending. Cache and history clearing are connected with separate confirmations. Nearby sharing and full-profile deletion remain unavailable. Their preview states are not live features.
+The native application embeds Core using native UI contract 1.37.0. The separate visual preview contains fictional Window Light fixtures and never opens Core. The default build opens an isolated Mock profile. Explicit Meiju builds provide protected account connection, local metadata, retrieval/recovery and scoped local removal; Android startup wiring and Mock process journeys are emulator-tested; actual Keystore and physical acceptance remain pending. Cache and history clearing are connected with separate confirmations. Nearby sharing and full-profile deletion remain unavailable. Their preview states are not live features.
 
 ## Mijia and combined account builds
 
@@ -16,8 +16,13 @@ selection. Reauthorization keeps the saved account's provider and identity.
 Partial inventory may include positive named cards; unsupported devices remain
 visible. Fan, lock, doorbell and battery readings use the generic capability panel.
 Raw lock status codes never become an unlock action; missing power stays unknown.
-There are no Mijia controls in this phase. Native account verification challenges
-are reported as incomplete login and cannot yet be completed in the App.
+Legacy Mijia bindings have reviewed exact fan, light, purifier, outlet and auxiliary
+controls with independent native grants; captcha and phone/email verification have
+explicit foreground flows. API 1.36 adds QR sign-in. With API 1.37, successful QR
+continuation imports grouped device cards and explicit QR refresh/recovery updates
+them; old 1.36 libraries retain logical-directory summaries. Modern bindings are
+read-only, without modern controls or history. Partial/failed retrieval stays
+separate from authentication, and local reload failure never repeats login.
 See the [Mijia guide](../../docs/development/11-mijia.md) for owner acceptance and
 [verification](verification.md) for fictional local checks.
 

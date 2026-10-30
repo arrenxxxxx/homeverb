@@ -307,7 +307,7 @@ void main() {
         await tester.tap(section);
         await tester.pumpAndSettle();
         for (final label in [
-          'Refresh QR Directory',
+          'Refresh QR Connection',
           'Recover QR Authorization',
           'Renew QR Authorization',
         ]) {
