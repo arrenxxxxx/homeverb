@@ -32,6 +32,8 @@ The later [ab34f21 API 1.40 package](../../apps/mobile/verification.md#no-argume
 includes all six actions with clean-source archive checks. The subsequent
 [d505ccb API 1.41 package](../../apps/mobile/verification.md#power-toggle-api-141-android-package--october-30-2026)
 includes the five elevated power toggles as well, without runtime acceptance.
+The later [87f3410 API 1.42 package](../../apps/mobile/verification.md#maintenance-actions-api-142-android-package--october-30-2026)
+adds the four trusted maintenance actions with clean-source archive checks.
 
 - Eight-part MIoT URNs retain their exact extension; malformed/foreign URNs refuse.
 - Seventeen exact model/specification catalogs project 264 reviewed scalar read
@@ -2072,3 +2074,30 @@ Flutter analysis reported no issues; seven shared presentation tests and both
 reference projection tests passed. These focused regressions do not resolve the
 eight previously recorded unrelated macOS visual/legacy-click full-suite failures.
 No live account, appliance write, phone acceptance or remote CI is claimed.
+
+
+## Maintenance actions API 1.42 Android package -- October 30, 2026
+
+Clean source 87f3410c6bbe1f13f5b5894251d0dc6a8110e568 produced the combined-platform
+release APK apps/mobile/build/delivery/mijia/87f3410/homeverb-mijia-0.2.0-87f3410.apk.
+Size: 79,204,178 bytes. SHA-256:
+5d258ebfa6c4ded3dd3802cd9c6b6cdeef008503b83575f8e7dab0e4bcec2fba.
+The adjacent verification.json records clean source, exact current-AAR code after
+NDK stripping, arm64-v8a/x86_64 composition, 31 exports per ABI, development
+signature and 16 KiB ZIP/Core ELF alignment. This is archive evidence, not runtime
+or distribution acceptance.
+
+Both Android native cross-builds and the universal AAR passed using the installed
+Android target toolchain, NDK 28.2.13676358, API 35 stubs and JDK. Flutter 3.47.7
+assembled the release APK with temporary SDK/JDK configuration; the original
+android/local.properties was restored and source remained clean. The actual
+verifier confirmed signature, alignment, exports and exact AAR match.
+No SDK/app installation, real account/appliance request, push or publication was
+performed. A fresh git fetch confirmed origin/main remains ccf2975 and is an
+ancestor of the worktree, with zero merge commits in origin/main..HEAD.
+
+This package contains all fifteen admitted exact actions, including four elevated
+maintenance actions with independent startup grants and actual trusted user
+confirmation, alongside 33 scalar controls and bounded history views. The other
+25 actions, 192 writable definitions, 78 events, specialized paths and real
+provider/phone/model acceptance remain incomplete.

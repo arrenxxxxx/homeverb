@@ -1,6 +1,7 @@
 # ADR-0112: Exact Mijia maintenance and stop actions
 
-Status: Typed protocol/Core implementation verified; native/App adoption pending.
+Status: Typed protocol/Core implementation verified; native/App adoption follows
+[ADR-0113](0113-native-mijia-maintenance-actions.md).
 Date: October 30, 2026.
 
 ## Evidence and scope

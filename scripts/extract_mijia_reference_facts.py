@@ -250,7 +250,9 @@ def project():
         'evidence': 'ADR-0112/0113; pinned exact no-input/no-output maintenance actions',
         'exact_actions': 4, 'models': 2, 'route': '/miotspec/action',
         'risk': 'elevated', 'idempotency': 'non_idempotent',
-        'native_app': 'implemented_api_1_42_and_flutter', 'provider_acceptance': 'pending',
+        'native_app': 'implemented_api_1_42_and_flutter',
+        'android_package': 'archive_checked_87f3410_no_runtime_acceptance',
+        'provider_acceptance': 'pending',
     }
     return {CATALOG: profiles, LEDGER: coverage, ACTION_CATALOG: action_profiles}
 
