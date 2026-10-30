@@ -4506,3 +4506,43 @@ and Flutter alongside the existing 33 scalar controls and bounded history views.
 No installation, real account, appliance request, remote push or publication was
 performed. Archive evidence is not provider, phone or model acceptance. The
 remaining 34 actions, event support and other reference gaps stay incomplete.
+
+## Foreground App power toggles -- October 30, 2026
+
+Flutter now negotiates API 1.41 before requesting exact elevated power actions or
+reopening with their grants. Both the independent power-action inspection opt-in
+and a trusted approval bridge are required. Older versions and hosts without that
+bridge keep their existing inspection and acquire no power-toggle authority.
+The exact switch-2/switch-3/switch-11/switch-12 tuples remain separate from property
+and low-risk action permissions; protected native evidence still selects the five
+model/service profiles.
+
+Device opening performs no command preparation or send. The existing generic
+form requires an explicit cloud route, then displays the immutable trusted preview.
+Only a separate confirmation executes once; repeated clicks, cancellation,
+backgrounding and unknown results never replay the command. No next-state guess,
+optimistic power update or companion setter is added. English/Chinese forms reuse
+existing labels and confirmation presentation without model-specific UI branches.
+All eleven admitted actions now have Core/native/App wiring. A matching Android
+package and real provider/phone/model acceptance remain pending; the ab34f21 APK
+still contains API 1.40 and six low-risk actions. The remaining 29 actions, events
+and specialized reference paths are incomplete.
+
+Executed App verification: the 16-file affected Flutter regression suite passed
+140 tests, including 14 new power-action cases. After adding the specific bilingual
+confirmation copy, the power-action/localization/trusted-approval suites passed
+23 tests and Flutter analysis again found no issues. Actual C fixtures verify
+API 1.40 refusal before any granted open; the rebuilt API 1.41 library opens both
+Mijia and combined modes with all four exact startup tuples and no account traffic.
+Both projection unit tests, shared presentation tests and generated locale checks
+passed. The known eight unrelated full-suite macOS visual/legacy-click failures
+are not claimed fixed. No new APK, installation, provider/device operation, push
+or publication occurred in this App phase.
+
+Commands: fvm flutter analyze; fvm flutter test with mijia_power_actions_test,
+mijia_actions_test, mijia_outlet_test, mijia_auxiliary_test, mijia_settings_test,
+mijia_hood_test, mijia_controls_test, session_permissions_test,
+device_detail_controls_test, controls_test, component_test, localization_test,
+current_contract_test, native_test, approval_test and state_refresh_test (all
+under test/ with .dart suffixes). The final three-file run used
+mijia_power_actions_test.dart, localization_test.dart and approval_test.dart.

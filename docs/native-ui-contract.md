@@ -2072,4 +2072,5 @@ API 1.40 rejects the new flag and switch grant tuples. Clients must refuse an
 explicit request on older libraries rather than silently omit it. The Rust
 InspectControlOptions constructor gains a Boolean field; JSON omission remains
 compatible. There are no new methods/exports or SQLite/protected payload versions.
-Flutter adoption and a new APK remain pending; ab34f21 stays API 1.40.
+Flutter now negotiates this admission and uses the existing generic trusted
+confirmation form. A new APK remains pending; ab34f21 stays API 1.40.

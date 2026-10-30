@@ -65,7 +65,9 @@ This exits with code 11. Refresh state to inspect the result; do not blindly res
   also provides read-only CLI/local MCP hosting and bounded historical queries.
 
   ADR-0109/API 1.40 adds six exact no-argument actions through native/App, with
-  independent startup grants and no replay after uncertain execution.
+  independent startup grants and no replay after uncertain execution. API 1.41
+  adds five exact elevated power toggles through native/App with separate trusted
+  confirmation; no real-provider or phone acceptance is implied.
 - Capability-driven validation, device/component/argument/route-scoped low-risk grants, shared deadlines, cancellation, and timestamped verification.
 - SQLite metadata/cache/execution journal, cross-process device locks, and request-ID replay protection.
 - A [trusted single-command approval bridge](docs/adr/0043-native-trusted-approval-bridge.md) for elevated actions: immutable preview, matching grants, 60-second expiry, one-use execution and lifecycle invalidation. Three separate C functions and a fictional Mock scenario support Flutter integration; Flutter consent UI is implemented; real-platform consent and physical acceptance remain pending. Profile-scoped experimental Meiju dishwasher starts now require the separate confirmation path and exact startup grants.

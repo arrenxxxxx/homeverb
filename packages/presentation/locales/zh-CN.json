@@ -1842,5 +1842,7 @@
   "mobile.toggle": "切换开关状态",
   "mobile.brightness_up": "调亮",
   "mobile.brightness_down": "调暗",
-  "mobile.toggle_light_mode": "切换灯光模式"
+  "mobile.toggle_light_mode": "切换灯光模式",
+  "vendor.xiaomi.mijia.switch.toggle": "切换电源",
+  "vendor.xiaomi.mijia.switch.toggle.confirm": "请求切换 {device} 的电源？连接的设备可能启动或停止，操作后的实际状态尚未确认。"
 }

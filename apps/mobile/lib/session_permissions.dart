@@ -31,6 +31,8 @@ class SessionPermission {
       requiresReferenceSettingApi &&
       const {'hood-2', 'fan_control-3', 'screen-13'}.contains(component);
   bool get requiresActionApi => startupField == 'mijia_action_grants';
+  bool get requiresPowerToggleApi =>
+      requiresActionApi && capability == 'vendor.xiaomi.mijia.switch';
   bool get requiresOutletApi => startupField == "mijia_outlet_grants";
   String get identity =>
       jsonEncode([device, component, capability, action, value]);
@@ -134,6 +136,7 @@ class SessionPermission {
     Map<String, dynamic> inspection, {
     bool trustedApproval = false,
     bool includeNoArgumentActions = false,
+    bool includePowerToggleActions = false,
   }) {
     if (inspection['source'] != 'saved_inventory' ||
         inspection['authorization'] != 'not_checked' ||
@@ -143,6 +146,17 @@ class SessionPermission {
     for (final option in inspection['options'] as List? ?? []) {
       if (includeNoArgumentActions && option is Map) {
         final action = _noArgumentChoice(inspection['device_id'], option);
+        if (action != null) {
+          result.add(action);
+          continue;
+        }
+      }
+      if (includePowerToggleActions && trustedApproval && option is Map) {
+        final action = _noArgumentChoice(
+          inspection['device_id'],
+          option,
+          power: true,
+        );
         if (action != null) {
           result.add(action);
           continue;
@@ -402,11 +416,22 @@ class SessionPermission {
     ('light-6', 'vendor.xiaomi.mijia.light', 'toggle'),
   };
 
-  static SessionPermission? _noArgumentChoice(String device, Map option) {
+  static const _powerToggleActions = {
+    ('switch-2', 'vendor.xiaomi.mijia.switch', 'toggle'),
+    ('switch-3', 'vendor.xiaomi.mijia.switch', 'toggle'),
+    ('switch-11', 'vendor.xiaomi.mijia.switch', 'toggle'),
+    ('switch-12', 'vendor.xiaomi.mijia.switch', 'toggle'),
+  };
+
+  static SessionPermission? _noArgumentChoice(
+    String device,
+    Map option, {
+    bool power = false,
+  }) {
     if (!RegExp(
           r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$',
         ).hasMatch(device) ||
-        !_noArgumentActions.contains((
+        !(power ? _powerToggleActions : _noArgumentActions).contains((
           option['component_id'],
           option['capability'],
           option['action'],
@@ -414,7 +439,7 @@ class SessionPermission {
       return null;
     final definition = option['definition'];
     if (definition is! Map ||
-        definition['risk'] != 'low' ||
+        definition['risk'] != (power ? 'elevated' : 'low') ||
         definition['idempotency'] != 'non_idempotent' ||
         definition['atomic'] != false ||
         definition['independent_fields'] != false ||

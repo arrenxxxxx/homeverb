@@ -30,8 +30,8 @@
     {
       "id": "action_candidate",
       "route": "/miotspec/action",
-      "status": "implemented_eleven_native_and_six_app_actions",
-      "reason": "ADR-0107/0108/0109 supply six exact actions through Core/native/App. ADR-0110/0111 add five elevated power toggles through Core/native with independent grants and trusted approval; their App admission and all real acceptance remain pending."
+      "status": "implemented_eleven_core_native_app_actions",
+      "reason": "ADR-0107/0108/0109 supply six exact actions through Core/native/App. ADR-0110/0111 add five elevated power toggles through Core/native/App with independent grants and trusted approval; all real acceptance remains pending."
     },
     {
       "id": "event_candidate",
@@ -714,7 +714,7 @@
           "siid": 2,
           "iid": 1,
           "name": "toggle",
-          "status": "implemented_core_native_trusted_power_toggle"
+          "status": "implemented_core_native_app_trusted_power_toggle"
         },
         {
           "kind": "property",
@@ -3006,7 +3006,7 @@
           "siid": 3,
           "iid": 1,
           "name": "toggle",
-          "status": "implemented_core_native_trusted_power_toggle"
+          "status": "implemented_core_native_app_trusted_power_toggle"
         },
         {
           "kind": "event",
@@ -3110,7 +3110,7 @@
           "siid": 11,
           "iid": 1,
           "name": "toggle",
-          "status": "implemented_core_native_trusted_power_toggle"
+          "status": "implemented_core_native_app_trusted_power_toggle"
         },
         {
           "kind": "property",
@@ -3137,7 +3137,7 @@
           "siid": 12,
           "iid": 1,
           "name": "toggle",
-          "status": "implemented_core_native_trusted_power_toggle"
+          "status": "implemented_core_native_app_trusted_power_toggle"
         },
         {
           "kind": "event",
@@ -5533,7 +5533,7 @@
           "siid": 2,
           "iid": 1,
           "name": "toggle",
-          "status": "implemented_core_native_trusted_power_toggle"
+          "status": "implemented_core_native_app_trusted_power_toggle"
         },
         {
           "kind": "property",
@@ -5953,14 +5953,14 @@
     "provider_acceptance": "pending"
   },
   "power_toggle_actions": {
-    "status": "implemented_protocol_core_native_with_trusted_approval",
+    "status": "implemented_protocol_core_native_app_with_trusted_approval",
     "evidence": "ADR-0110/0111; pinned exact empty-input switch actions",
     "exact_actions": 5,
     "models": 4,
     "route": "/miotspec/action",
     "risk": "elevated",
     "idempotency": "non_idempotent",
-    "native_app": "native_api_1_41_implemented_flutter_pending",
+    "native_app": "implemented_api_1_41_opt_in_and_trusted_flutter_confirmation",
     "provider_acceptance": "pending"
   }
 }

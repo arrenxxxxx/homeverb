@@ -1842,5 +1842,7 @@
   "mobile.toggle": "Toggle power",
   "mobile.brightness_up": "Increase brightness",
   "mobile.brightness_down": "Decrease brightness",
-  "mobile.toggle_light_mode": "Switch light mode"
+  "mobile.toggle_light_mode": "Switch light mode",
+  "vendor.xiaomi.mijia.switch.toggle": "Toggle power",
+  "vendor.xiaomi.mijia.switch.toggle.confirm": "Request a power toggle on {device}? Connected equipment may turn on or off; the resulting state is not confirmed."
 }

@@ -1,5 +1,27 @@
 # 11. Mijia native integration
 
+## Foreground App power toggles -- October 30, 2026
+
+Flutter now negotiates API 1.41 before requesting exact elevated power actions or
+reopening with their grants. Both the independent power-action inspection opt-in
+and a trusted approval bridge are required. Older versions and hosts without that
+bridge keep their existing inspection and acquire no power-toggle authority.
+The exact switch-2/switch-3/switch-11/switch-12 tuples remain separate from property
+and low-risk action permissions; protected native evidence still selects the five
+model/service profiles.
+
+Device opening performs no command preparation or send. The existing generic
+form requires an explicit cloud route, then displays the immutable trusted preview.
+Only a separate confirmation executes once; repeated clicks, cancellation,
+backgrounding and unknown results never replay the command. No next-state guess,
+optimistic power update or companion setter is added. English/Chinese forms reuse
+existing labels and confirmation presentation without model-specific UI branches.
+All eleven admitted actions now have Core/native/App wiring. A matching Android
+package and real provider/phone/model acceptance remain pending; the ab34f21 APK
+still contains API 1.40 and six low-risk actions. The remaining 29 actions, events
+and specialized reference paths are incomplete.
+
+
 ## Native elevated power toggles -- October 30, 2026
 
 [ADR-0111](../adr/0111-native-mijia-power-toggle-actions.md) extends API 1.41's independent mijia_action_grants to the

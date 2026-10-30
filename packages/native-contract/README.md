@@ -226,4 +226,5 @@ five elevated power toggles. The independent include_power_toggle_actions flag
 defaults to false and leaves API 1.40 inspection unchanged. Every toggle needs
 actual trusted consent through the existing approval exports; startup grants are
 not consent. See the [power-toggle contract](../../docs/native-ui-contract.md#exact-elevated-power-toggle-actions-api-141).
-Flutter/API negotiation and package delivery remain a separate phase.
+Flutter now negotiates API 1.41 and uses the existing trusted review/confirmation
+form. Package delivery and real acceptance remain pending.

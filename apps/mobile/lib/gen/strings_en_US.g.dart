@@ -5567,4 +5567,10 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Switch light mode'
 	String get mobileToggleLightMode => 'Switch light mode';
+
+	/// en-US: 'Toggle power'
+	String get vendorXiaomiMijiaSwitchToggle => 'Toggle power';
+
+	/// en-US: 'Request a power toggle on {device}? Connected equipment may turn on or off; the resulting state is not confirmed.'
+	String vendorXiaomiMijiaSwitchToggleConfirm({required Object device}) => 'Request a power toggle on ${device}? Connected equipment may turn on or off; the resulting state is not confirmed.';
 }

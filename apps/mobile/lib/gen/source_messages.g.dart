@@ -2311,10 +2311,14 @@ String? translateSource(
   "Set hood power" => t.vendorXiaomiMijiaHoodSetOn1,
   "Set display content" => t.vendorXiaomiMijiaScreenSetDisplayState1,
   "Set automatic screen off" => t.vendorXiaomiMijiaScreenSetAutoScreenOff2,
-  "Toggle power" => t.mobileToggle,
+  "Toggle power" => t.vendorXiaomiMijiaSwitchToggle,
   "Increase brightness" => t.mobileBrightnessUp,
   "Decrease brightness" => t.mobileBrightnessDown,
   "Switch light mode" => t.mobileToggleLightMode,
+  "Request a power toggle on {device}? Connected equipment may turn on or off; the resulting state is not confirmed." =>
+    t.vendorXiaomiMijiaSwitchToggleConfirm(
+      device: args["device"] ?? "{device}",
+    ),
   _ => null,
 };
 
@@ -4671,5 +4675,8 @@ String? sourceForKey(String key) => switch (key) {
   "mobile.brightness_up" => "Increase brightness",
   "mobile.brightness_down" => "Decrease brightness",
   "mobile.toggle_light_mode" => "Switch light mode",
+  "vendor.xiaomi.mijia.switch.toggle" => "Toggle power",
+  "vendor.xiaomi.mijia.switch.toggle.confirm" =>
+    "Request a power toggle on {device}? Connected equipment may turn on or off; the resulting state is not confirmed.",
   _ => null,
 };

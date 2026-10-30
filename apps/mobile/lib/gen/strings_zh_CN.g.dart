@@ -1877,4 +1877,6 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get mobileBrightnessUp => '\u8c03\u4eae';
 	@override String get mobileBrightnessDown => '\u8c03\u6697';
 	@override String get mobileToggleLightMode => '\u5207\u6362\u706f\u5149\u6a21\u5f0f';
+	@override String get vendorXiaomiMijiaSwitchToggle => '\u5207\u6362\u7535\u6e90';
+	@override String vendorXiaomiMijiaSwitchToggleConfirm({required Object device}) => '\u8bf7\u6c42\u5207\u6362 ${device} \u7684\u7535\u6e90\uff1f\u8fde\u63a5\u7684\u8bbe\u5907\u53ef\u80fd\u542f\u52a8\u6216\u505c\u6b62\uff0c\u64cd\u4f5c\u540e\u7684\u5b9e\u9645\u72b6\u6001\u5c1a\u672a\u786e\u8ba4\u3002';
 }

@@ -1,6 +1,6 @@
 # ADR-0111: Native exact Mijia power-toggle actions
 
-Status: Native implementation verified; Flutter adoption pending.
+Status: Native implementation verified; foreground Flutter adoption implemented.
 Date: October 30, 2026.
 
 ## Decision
@@ -65,3 +65,35 @@ reopen without replay. Contract checks passed 25 schemas, 79 positive and 1,547
 negative fixtures; reference projection and both projection unit tests passed.
 Documentation, repository hygiene, diff and commit checks passed. These are
 fictional software checks, not Flutter, package, provider or physical acceptance.
+
+## Foreground App power toggles -- October 30, 2026
+
+Flutter now negotiates API 1.41 before requesting exact elevated power actions or
+reopening with their grants. Both the independent power-action inspection opt-in
+and a trusted approval bridge are required. Older versions and hosts without that
+bridge keep their existing inspection and acquire no power-toggle authority.
+The exact switch-2/switch-3/switch-11/switch-12 tuples remain separate from property
+and low-risk action permissions; protected native evidence still selects the five
+model/service profiles.
+
+Device opening performs no command preparation or send. The existing generic
+form requires an explicit cloud route, then displays the immutable trusted preview.
+Only a separate confirmation executes once; repeated clicks, cancellation,
+backgrounding and unknown results never replay the command. No next-state guess,
+optimistic power update or companion setter is added. English/Chinese forms reuse
+existing labels and confirmation presentation without model-specific UI branches.
+All eleven admitted actions now have Core/native/App wiring. A matching Android
+package and real provider/phone/model acceptance remain pending; the ab34f21 APK
+still contains API 1.40 and six low-risk actions. The remaining 29 actions, events
+and specialized reference paths are incomplete.
+
+Executed App verification: the 16-file affected Flutter regression suite passed
+140 tests, including 14 new power-action cases. After adding the specific bilingual
+confirmation copy, the power-action/localization/trusted-approval suites passed
+23 tests and Flutter analysis again found no issues. Actual C fixtures verify
+API 1.40 refusal before any granted open; the rebuilt API 1.41 library opens both
+Mijia and combined modes with all four exact startup tuples and no account traffic.
+Both projection unit tests, shared presentation tests and generated locale checks
+passed. The known eight unrelated full-suite macOS visual/legacy-click failures
+are not claimed fixed. No new APK, installation, provider/device operation, push
+or publication occurred in this App phase.
