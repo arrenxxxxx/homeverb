@@ -1,6 +1,6 @@
 # HomeVerb native contract
 
-Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.43.0 has 36 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions three trusted connection-link functions and three trusted account-identity recovery functions and three dedicated interactive login functions and four protected verification functions and four modern account functions; the JSON envelope schema is 1.0.
+Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.44.0 has 38 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions three trusted connection-link functions and three trusted account-identity recovery functions and three dedicated interactive login functions and four protected verification functions and four modern account functions; the JSON envelope schema is 1.0.
 
 API 1.19 adds nullable `last_complete_inventory_at` to account summaries. It is
 historical local retrieval metadata, not authorization or online status. SQLite
@@ -241,3 +241,17 @@ indicator_light-4 on_1 and custom-7 child_lock_7. Negotiate before supplying new
 tuples. The protected reviewed models decide support; power/startup/input-lock
 writes retain trusted confirmation and independent outlet grants. Existing
 methods, exports, storage and outcomes are unchanged. See ADR-0114.
+
+## Native event occurrence history
+
+API 1.44 adds `inspect_event_history_options` and `read_event_history`, returning
+ADR-0116 event selectors and occurrence times through ordinary foreground queries.
+The trusted startup Boolean `mijia_event_history` defaults to false; true requires
+Mijia or combined platforms. Explicit connect/refresh publishes event metadata.
+Inspection is local. Reads preserve same-second occurrences, return no payload,
+and never retry, renew login, poll or mutate state/receipts. C/JNI signatures and
+exports, SQLite 5 and protected payload 3 are unchanged. Negotiate API 1.44 and
+both methods before reopening with the flag. See the
+[UI contract](../../docs/native-ui-contract.md#event-occurrence-history-api-144)
+and [ADR-0117](../../docs/adr/0117-native-event-history.md). Flutter and APK adoption
+are pending; current package 85fefd8 stays on API 1.43.

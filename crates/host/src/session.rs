@@ -69,6 +69,13 @@ pub enum Request {
     ReadHistory {
         history: HistoryRequest,
     },
+    InspectEventHistoryOptions {
+        device_id: String,
+        connection_id: String,
+    },
+    ReadEventHistory {
+        history: EventHistoryRequest,
+    },
     InspectSessionGrants {
         device_id: String,
         connection_id: String,
@@ -725,6 +732,19 @@ impl Session {
             Request::ReadHistory { history } => self
                 .core
                 .read_history(&history, &operation)
+                .await
+                .map(|value| json!(value)),
+            Request::InspectEventHistoryOptions {
+                device_id,
+                connection_id,
+            } => self
+                .core
+                .inspect_event_history_options(&device_id, &connection_id, &operation)
+                .await
+                .map(|value| json!(value)),
+            Request::ReadEventHistory { history } => self
+                .core
+                .read_event_history(&history, &operation)
                 .await
                 .map(|value| json!(value)),
             Request::InspectSessionGrants {

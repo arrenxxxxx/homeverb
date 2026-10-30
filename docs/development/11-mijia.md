@@ -1,5 +1,43 @@
 # 11. Mijia native integration
 
+## Native event occurrence history -- October 30, 2026
+
+[ADR-0117](../adr/0117-native-event-history.md) adds native API 1.44 foreground methods
+inspect_event_history_options/read_event_history and trusted startup
+mijia_event_history (default false). Mijia-only and combined compositions can
+opt in without granting controls or starting networking; explicit connect/refresh
+publishes all 78 reviewed event selectors. Old constructors preserve false.
+Ordinary requests cannot change the flag. Wrong startup modes/types fail before
+profile creation. The method count is 38; C/JNI exports/signatures, SQLite 5 and
+protected payload 3 are unchanged.
+
+Reads use ADR-0116 exact local selectors and a bounded explicit UTC window. Results
+contain occurrence times only, preserve same-second rows and retain unproven
+completeness. Protected identity/protocol checks, no retry/renewal/fallback,
+foreground cancellation and unchanged credentials/cache/receipts remain enforced.
+Flutter/CLI/MCP adoption, a matching APK, event payload semantics and pagination
+remain incomplete. Persistent background subscriptions remain outside the product
+boundary. The verified 85fefd8 APK is still API 1.43; 185 writable definitions,
+25 actions, specialized paths and real provider/phone/model acceptance remain open.
+
+Executed verification: Rust 1.96 offline/locked workspace tests passed 733 tests
+with one opt-in test ignored, excluding the known macOS Meiju LAN-alias package
+and using four test threads. Eleven generic event-history tests include ordinary
+Session dispatch and device-lock cancellation; two protected Host journeys cover
+QR/inventory/event queries, enabled/default composition, closed schemas, failure
+without retry, account-lease release and cancel/background/close/drop/late output.
+Strict workspace Clippy, formatting and the native FFI build passed. The actual
+C ABI passed 38 ordinary methods, 86 live fictional examples and 76 modern-account
+boundary cases, including startup mode/type refusal before profile creation and
+omitted/false compatibility. All three reference projection checks and contracts
+(26 schemas, 88 positive and 1,966 negative fixtures) passed. Documentation and
+repository hygiene checks passed. These checks use fictional peers and do not
+establish provider/phone/model acceptance. No real account/device operation,
+installation, APK rebuild, push or publication occurred.
+
+A fresh origin/main fetch still resolved to ccf2975, already an ancestor of this
+branch; origin/main..HEAD contains no merge commits.
+
 ## Protected Core event occurrence history -- October 30, 2026
 
 ADR-0116 now implements typed Core occurrence-history inspection/reads and the

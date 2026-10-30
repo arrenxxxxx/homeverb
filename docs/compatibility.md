@@ -1,5 +1,25 @@
 # Platform and device compatibility matrix
 
+## Native event occurrence history -- October 30, 2026
+
+[ADR-0117](adr/0117-native-event-history.md) adds native API 1.44 foreground methods
+inspect_event_history_options/read_event_history and trusted startup
+mijia_event_history (default false). Mijia-only and combined compositions can
+opt in without granting controls or starting networking; explicit connect/refresh
+publishes all 78 reviewed event selectors. Old constructors preserve false.
+Ordinary requests cannot change the flag. Wrong startup modes/types fail before
+profile creation. The method count is 38; C/JNI exports/signatures, SQLite 5 and
+protected payload 3 are unchanged.
+
+Reads use ADR-0116 exact local selectors and a bounded explicit UTC window. Results
+contain occurrence times only, preserve same-second rows and retain unproven
+completeness. Protected identity/protocol checks, no retry/renewal/fallback,
+foreground cancellation and unchanged credentials/cache/receipts remain enforced.
+Flutter/CLI/MCP adoption, a matching APK, event payload semantics and pagination
+remain incomplete. Persistent background subscriptions remain outside the product
+boundary. The verified 85fefd8 APK is still API 1.43; 185 writable definitions,
+25 actions, specialized paths and real provider/phone/model acceptance remain open.
+
 ## Protected Core event occurrence history -- October 30, 2026
 
 ADR-0116 now implements typed Core occurrence-history inspection/reads and the

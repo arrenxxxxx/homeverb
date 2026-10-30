@@ -1018,3 +1018,14 @@ fallback, reauthentication or replay. The existing event-history schema and
 capability.mijia-event-history example describe the boundary; positive/negative
 runtime fixtures are in crates/host/tests/event_history.rs and the Mijia protected
 event-history suite. Native API 1.43 and ordinary method schemas remain unchanged.
+
+## Native event occurrence queries (ADR-0117)
+
+API 1.44 delegates inspect_event_history_options/read_event_history through the
+ordinary Session read boundary into ADR-0116 Core validation. Startup opt-in only
+selects the reviewed adapter family; it does not grant write authority, relax
+protected device admission, or initiate network work. Explicit connect/refresh
+publishes event descriptors. Session cancellation, background, close and deadline
+release pending reads and suppress late output; there is no automatic retry,
+renewal, fallback, subscription, receipt or snapshot write. Occurrence timestamps
+never satisfy action verification. C/JNI signatures and storage formats are unchanged.

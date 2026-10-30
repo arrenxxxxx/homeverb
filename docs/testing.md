@@ -1051,3 +1051,23 @@ All checks use fictional accounts and local transports. They do not establish
 Host/native/CLI/MCP/App availability, decoded event arguments, subscriptions,
 provider delivery/retention or phone/model acceptance. Run the broader workspace
 and native ABI regressions when changing protected descriptor admission.
+
+## Native event occurrence history checks
+
+ADR-0117 uses the generic Session event tests and protected modern QR/inventory/
+event journey with fictional peers. Run:
+
+```sh
+cargo +1.96.0 test -p homeverb-host --test event_history --offline --locked -- --test-threads=4
+cargo +1.96.0 test -p homeverb-host --test mijia_accounts event_history --offline --locked -- --test-threads=4
+cargo +1.96.0 build -p homeverb-ffi --offline --locked
+python3 scripts/verify_native_contract.py
+```
+
+Tests cover closed shapes, retained equal timestamps, opt-in/default behavior,
+local inspection, no protocol/login/inventory replay, failure without retry,
+protected lease and device-lock release, cancel/background/close/drop and late
+result suppression. The actual ABI verifier checks both new methods, startup
+mode/type refusal before profile creation and omitted/false compatibility. No
+provider request, real credentials, phone installation or appliance operation is
+part of this evidence. Flutter adoption and real acceptance remain separate gates.

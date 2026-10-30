@@ -1,5 +1,5 @@
 {
-  "api_version": "1.43.0",
+  "api_version": "1.44.0",
   "methods": {
     "get_api_info": {
       "response_kind": "query"
@@ -107,6 +107,12 @@
       "response_kind": "query"
     },
     "read_history": {
+      "response_kind": "query"
+    },
+    "inspect_event_history_options": {
+      "response_kind": "query"
+    },
+    "read_event_history": {
       "response_kind": "query"
     }
   },

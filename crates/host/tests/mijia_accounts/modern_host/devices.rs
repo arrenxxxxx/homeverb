@@ -631,3 +631,128 @@ async fn qr_outlet_uses_ordinary_native_history_without_login_or_inventory_repla
     assert_eq!(f.peer.auth_count(), auth);
     assert_eq!(f.cloud.calls.load(Ordering::SeqCst), 0);
 }
+
+#[tokio::test]
+async fn qr_event_history_is_opted_in_and_uses_closed_native_queries_without_replay() {
+    for enabled in [false, true] {
+        let f = ModernFixture::with_events(enabled);
+        *f.peer.directory.lock().unwrap() = Some(
+            json!({"list":[{"did":"PRIVATE-MODERN-DID","name":"Modern outlet","model":"cuco.plug.v3","pid":0}],"has_more":false}),
+        );
+        connect(&f).await;
+        let card = cards(&f).await.remove(0);
+        let inspect = json!({"method":"inspect_event_history_options","device_id":card["id"],"connection_id":card["connections"][0]["id"]});
+        let auth = f.peer.auth_count();
+        let puts = f.secrets.puts.load(Ordering::SeqCst);
+        let options = f.call(inspect.clone()).await;
+        validate(&options, "inspect_event_history_options");
+        assert!(options["error"].is_null(), "{options}");
+        assert_eq!(
+            options["data"]["options"].as_array().unwrap().len(),
+            if enabled { 3 } else { 0 }
+        );
+        assert_eq!(f.peer.events.load(Ordering::SeqCst), 0);
+        assert_eq!(f.peer.reads.load(Ordering::SeqCst), 1);
+        if !enabled {
+            continue;
+        }
+        let target = options["data"]["options"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|o| o["target"]["component_id"] == "quick_countdown-8")
+            .unwrap()["target"]
+            .clone();
+        let read = json!({"method":"read_event_history","history":{"schema_version":"1.0","device_id":card["id"],"connection_id":card["connections"][0]["id"],"target":target,"projection":"occurrence_times","start":"2023-11-14T22:13:20Z","end":"2023-11-15T22:13:20Z"}});
+        let result = f.call(read.clone()).await;
+        validate(&result, "read_event_history");
+        assert!(result["error"].is_null(), "{result}");
+        let parsed: homeverb_domain::EventHistoryResult =
+            serde_json::from_value(result["data"].clone()).unwrap();
+        assert_eq!(parsed.records.len(), 2);
+        assert_eq!(parsed.records[0], parsed.records[1]);
+        assert_eq!(
+            parsed.completeness,
+            homeverb_domain::HistoryCompleteness::Unproven
+        );
+        assert!(!result.to_string().contains("PRIVATE"));
+        assert_eq!(f.peer.events.load(Ordering::SeqCst), 1);
+        f.peer.fail_read.store(true, Ordering::SeqCst);
+        assert_eq!(
+            f.call(read.clone()).await["error"]["code"],
+            "MIJIA_REQUEST_FAILED"
+        );
+        assert_eq!(f.peer.events.load(Ordering::SeqCst), 2);
+        f.session.set_foreground(false);
+        for request in [read, inspect] {
+            assert_eq!(f.call(request).await["error"]["code"], "HOST_BACKGROUND");
+        }
+        assert_eq!(f.peer.events.load(Ordering::SeqCst), 2);
+        assert_eq!(f.peer.reads.load(Ordering::SeqCst), 1);
+        assert_eq!(f.peer.properties.load(Ordering::SeqCst), 0);
+        assert_eq!(f.peer.statistics.load(Ordering::SeqCst), 0);
+        assert_eq!(f.peer.auth_count(), auth);
+        assert_eq!(f.secrets.puts.load(Ordering::SeqCst), puts);
+        assert_eq!(f.cloud.calls.load(Ordering::SeqCst), 0);
+    }
+}
+
+#[tokio::test]
+async fn event_history_lifecycle_releases_protected_lease_and_suppresses_late_results() {
+    for mode in ["cancel", "background", "close", "drop", "late"] {
+        let f = ModernFixture::with_events(true);
+        *f.peer.directory.lock().unwrap() = Some(
+            json!({"list":[{"did":"PRIVATE-MODERN-DID","name":"Modern outlet","model":"cuco.plug.v3","pid":0}],"has_more":false}),
+        );
+        let account = id(&connect(&f).await);
+        let card = cards(&f).await.remove(0);
+        let options = f.call(json!({"method":"inspect_event_history_options","device_id":card["id"],"connection_id":card["connections"][0]["id"]})).await;
+        let target = options["data"]["options"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|o| o["target"]["component_id"] == "quick_countdown-8")
+            .unwrap()["target"]
+            .clone();
+        let read = json!({"method":"read_event_history","history":{"schema_version":"1.0","device_id":card["id"],"connection_id":card["connections"][0]["id"],"target":target,"projection":"occurrence_times","start":"2023-11-14T22:13:20Z","end":"2023-11-15T22:13:20Z"}});
+        let auth = f.peer.auth_count();
+        let puts = f.secrets.puts.load(Ordering::SeqCst);
+        if mode == "late" {
+            let session = f.session.clone();
+            *f.peer.on_reply.lock().unwrap() =
+                Some(Box::new(move || session.set_foreground(false)));
+            let result = f.call(read.clone()).await;
+            assert_eq!(result["error"]["code"], "CANCELLED");
+            assert!(result["data"].is_null());
+        } else {
+            f.peer.pause.store(3, Ordering::SeqCst);
+            {
+                let work = f.call(read.clone());
+                tokio::pin!(work);
+                tokio::select! {_ = f.peer.started.notified() => {}, value = &mut work => panic!("Event read must wait: {value}")}
+                match mode {
+                    "cancel" => assert!(f.session.cancel("public")),
+                    "background" => f.session.set_foreground(false),
+                    "close" => f.session.close(),
+                    _ => (),
+                }
+                if mode != "drop" {
+                    assert_eq!(work.await["error"]["code"], "CANCELLED");
+                }
+            }
+        }
+        assert!(!f.session.cancel("public"));
+        drop(f.vault.lease(account, &op()).await.unwrap());
+        assert_eq!(f.peer.events.load(Ordering::SeqCst), 1);
+        if mode != "close" {
+            f.peer.pause.store(0, Ordering::SeqCst);
+            f.session.set_foreground(true);
+            assert!(f.call(read).await["error"].is_null());
+            assert_eq!(f.peer.events.load(Ordering::SeqCst), 2);
+        }
+        assert_eq!(f.peer.auth_count(), auth);
+        assert_eq!(f.secrets.puts.load(Ordering::SeqCst), puts);
+        assert_eq!(f.peer.reads.load(Ordering::SeqCst), 1);
+        assert_eq!(f.cloud.calls.load(Ordering::SeqCst), 0);
+    }
+}

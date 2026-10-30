@@ -56,6 +56,16 @@ pub struct MeijuControlGrants<'a> {
     pub dishwasher_cycle: &'a [MeijuDishwasherCycleGrant],
 }
 
+/// Trusted session composition; event reads do not grant any write authority.
+#[derive(Default)]
+pub struct MijiaSessionOptions<'a> {
+    pub fan: &'a [MijiaFanGrant],
+    pub settings: &'a [MijiaSettingGrant],
+    pub outlets: &'a [MijiaOutletGrant],
+    pub actions: &'a [MijiaActionGrant],
+    pub event_history: bool,
+}
+
 /// Compose a native account vault without reading credentials or starting authentication.
 pub fn open_accounts(directory: &Path) -> Result<homeverb_core::AccountVault> {
     use homeverb_core::AccountStore;
@@ -171,7 +181,7 @@ fn meiju_parts(
     directory: &Path,
     grants: MeijuControlGrants<'_>,
 ) -> Result<(Core, Arc<homeverb_midea::MeijuAdapter>)> {
-    platform_parts(directory, grants, false, &[], &[], &[], &[])
+    platform_parts(directory, grants, false, MijiaSessionOptions::default())
         .map(|(core, meiju, _)| (core, meiju))
 }
 
@@ -179,15 +189,19 @@ fn platform_parts(
     directory: &Path,
     grants: MeijuControlGrants<'_>,
     include_mijia: bool,
-    mijia_grants: &[MijiaFanGrant],
-    setting_grants: &[MijiaSettingGrant],
-    outlet_grants: &[MijiaOutletGrant],
-    action_grants: &[MijiaActionGrant],
+    mijia_options: MijiaSessionOptions<'_>,
 ) -> Result<(
     Core,
     Arc<homeverb_midea::MeijuAdapter>,
     Option<Arc<homeverb_mijia::MijiaAdapter>>,
 )> {
+    let MijiaSessionOptions {
+        fan: mijia_grants,
+        settings: setting_grants,
+        outlets: outlet_grants,
+        actions: action_grants,
+        event_history,
+    } = mijia_options;
     let action_policy = mijia_action_policy(action_grants)?;
     let outlet_policy = mijia_outlet_policy(outlet_grants)?;
     let reference_policy = mijia_setting_policy(setting_grants)?;
@@ -255,6 +269,11 @@ fn platform_parts(
             Arc::new(homeverb_mijia::MijiaHttps),
         )
         .with_modern_control_transport(Arc::new(homeverb_mijia::MijiaHttps));
+        let adapter = if event_history {
+            adapter.with_event_history()
+        } else {
+            adapter
+        };
         let adapter = if mijia_grants.is_empty() {
             adapter
         } else {
@@ -356,6 +375,29 @@ pub fn open_mijia_session_with_actions(
     outlets: &[MijiaOutletGrant],
     actions: &[MijiaActionGrant],
 ) -> Result<Session> {
+    open_mijia_session_with_options(
+        directory,
+        MijiaSessionOptions {
+            fan: grants,
+            settings,
+            outlets,
+            actions,
+            ..Default::default()
+        },
+    )
+}
+
+pub fn open_mijia_session_with_options(
+    directory: &Path,
+    options: MijiaSessionOptions<'_>,
+) -> Result<Session> {
+    let MijiaSessionOptions {
+        fan: grants,
+        settings,
+        outlets,
+        actions,
+        event_history,
+    } = options;
     let action_policy = mijia_action_policy(actions)?;
     let outlet_policy = mijia_outlet_policy(outlets)?;
     let reference_policy = mijia_setting_policy(settings)?;
@@ -376,6 +418,11 @@ pub fn open_mijia_session_with_actions(
         Arc::new(homeverb_mijia::MijiaHttps),
     )
     .with_modern_control_transport(Arc::new(homeverb_mijia::MijiaHttps));
+    let adapter = if event_history {
+        adapter.with_event_history()
+    } else {
+        adapter
+    };
     let adapter = if grants.is_empty() {
         adapter
     } else {
@@ -441,15 +488,25 @@ pub fn open_platform_session_with_actions(
     outlets: &[MijiaOutletGrant],
     actions: &[MijiaActionGrant],
 ) -> Result<Session> {
-    let (core, meiju, mijia) = platform_parts(
+    open_platform_session_with_options(
         directory,
         grants,
-        true,
-        mijia_grants,
-        settings,
-        outlets,
-        actions,
-    )?;
+        MijiaSessionOptions {
+            fan: mijia_grants,
+            settings,
+            outlets,
+            actions,
+            ..Default::default()
+        },
+    )
+}
+
+pub fn open_platform_session_with_options(
+    directory: &Path,
+    grants: MeijuControlGrants<'_>,
+    options: MijiaSessionOptions<'_>,
+) -> Result<Session> {
+    let (core, meiju, mijia) = platform_parts(directory, grants, true, options)?;
     Ok(Session::with_platform_accounts(core, Some(meiju), mijia))
 }
 

@@ -143,6 +143,30 @@ def main():
                 assert not request_schema.is_valid(request)
                 assert raw(handle, request)['error']['code'] == 'INVALID_ARGUMENT'
 
+            assert call(handle, 'inspect_event_history_options', device_id=devices[0]['id'], connection_id=history_connection)['data']['options'] == []
+            event = load('examples/event-history.request.json')
+            event.update(device_id=devices[0]['id'], connection_id=history_connection)
+            event['target'] = {'component_id': 'main', 'capability': 'climate', 'event': 'reported_activity'}
+            assert call(handle, 'read_event_history', history=event)['error']['code'] == 'CAPABILITY_UNSUPPORTED'
+            for field in ['principal', 'provider', 'did', 'key', 'limit', 'payload', 'cursor', 'confirmed', 'mijia_event_history']:
+                bad = copy.deepcopy(event); bad[field] = 'FORBIDDEN'
+                request = envelope('read_event_history', history=bad)
+                assert not request_schema.is_valid(request)
+                assert raw(handle, request)['error']['code'] == 'INVALID_ARGUMENT'
+
+            for field, value in [('projection', 'payload'), ('start', '2026-10-01T00:00:00.123Z'),
+                                 ('end', '2026-10-02T01:00:00+01:00'), ('target', {'did': 'PRIVATE'})]:
+                bad = copy.deepcopy(event); bad[field] = value
+                request = envelope('read_event_history', history=bad)
+                assert not request_schema.is_valid(request)
+                assert raw(handle, request)['error']['code'] == 'INVALID_ARGUMENT'
+            event_result = {'schema_version': '1.0', 'data': load('examples/event-history.result.json'), 'warnings': [], 'error': None}
+            responses['read_event_history'].validate(event_result)
+            for field in ['payload', 'actor', 'value', 'event_id', 'url', 'verified']:
+                bad = copy.deepcopy(event_result)
+                bad['data']['records'][0][field] = 'FORBIDDEN'
+                assert not responses['read_event_history'].is_valid(bad)
+
             for transport in ['lan', 'cloud']:
                 grants = call(handle, 'inspect_session_grants', device_id=devices[0]['id'],
                               connection_id='conn-example-' + transport)
@@ -579,6 +603,31 @@ def main():
                 assert not open_schema.is_valid(config)
                 assert decode(library.homeverb_open(json.dumps(config).encode()))['error']['code'] == 'INVALID_ARGUMENT'
                 assert not private.exists()
+
+    # Event startup is read-only and rejects invalid composition before storage.
+    for adapter in ['homeverb.mock', 'midea.meiju', 'xiaomi.mijia', 'homeverb.platforms']:
+        for value in ['omitted', False, True, None, 1, 'true', {}, []]:
+            with tempfile.TemporaryDirectory(prefix='homeverb-events-') as directory:
+                profile = Path(directory) / 'profile'
+                config = {'schema_version': '1.0', 'data_dir': str(profile), 'adapter': adapter, 'allow_mock_writes': False}
+                if value != 'omitted':
+                    config['mijia_event_history'] = value
+                valid = value == 'omitted' or value is False or (value is True and adapter in ['xiaomi.mijia', 'homeverb.platforms'])
+                assert open_schema.is_valid(config) == valid, config
+                opened = decode(library.homeverb_open(json.dumps(config).encode()))
+                responses['open'].validate(opened)
+                if not valid:
+                    assert opened['error']['code'] == 'INVALID_ARGUMENT', opened
+                    assert not profile.exists()
+                    continue
+                assert opened['error'] is None, opened
+                handle = opened['data']['handle']
+                try:
+                    assert raw(handle, envelope('get_api_info'))['data'] == api
+                    assert raw(handle, envelope('list_devices'))['data'] == []
+                    assert raw(handle, envelope('list_accounts'))['data'] == []
+                finally:
+                    library.homeverb_close(handle)
 
     # Exact action startup admission must precede profile or credential access.
     action_startup = load('examples/native-open.mijia-actions.json')

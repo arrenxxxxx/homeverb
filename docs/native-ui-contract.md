@@ -1,6 +1,6 @@
 # Native UI contract
 
-The October 30 exact action control bridge uses native API **1.43.0**, following
+The October 30 event occurrence history bridge uses native API **1.44.0**, following
 the October 24 linear mainline update. Earlier Mijia phase versions are historical. See
 [contract reconciliation](adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
 remain available alongside Mijia; identity restoration remains Meiju-only.
@@ -43,7 +43,7 @@ The 22 C functions in [homeverb.h](../crates/ffi/include/homeverb.h) form the na
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects Meiju, `xiaomi.mijia` selects Mijia, and `homeverb.platforms` selects both. `scenario` defaults to `normal`. All platform modes require `allow_mock_writes: false` and reject any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms the selected mode. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.43.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.44.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -97,6 +97,8 @@ All rows use query envelopes except the two execution methods. The schemas and a
 | `list_devices` | None | Device array from local storage |
 | `discover` | None | Local Device array after selected-adapter discovery; Mock or model-scoped Meiju |
 | `describe_device` | `device` | `{device, capabilities}` |
+| `inspect_event_history_options` | `device_id`, `connection_id` | Exact saved event selectors and bounded occurrence-history limits; local inspection |
+| `read_event_history` | `history` | Reported occurrence timestamps, explicit window, source and receipt time; completeness remains unproven |
 | `read_state` | `device`, `component`, `connection`, `cached` | State snapshot; missing/null observations remain unknown |
 | `plan` | `command` | Command, permitted transports, warnings, optional independent steps |
 | `execute` | `command` | Execution receipt directly; command timeout must equal the outer timeout |
@@ -2116,3 +2118,36 @@ trusted preview/confirm. The adapter independently enforces outlet-family grants
 and protected risk even if public metadata is altered. Indicator-only changes
 are low risk and cannot set power. No model selector, new background activity,
 implicit toggle, companion write, retry or physical verification is introduced.
+
+## Event occurrence history (API 1.44)
+
+[ADR-0117](adr/0117-native-event-history.md) adds two ordinary foreground queries,
+using [event-history.schema.json](../schemas/event-history.schema.json). Negotiate
+API 1.44 and both method names before enabling the trusted startup Boolean
+`mijia_event_history`. It defaults to false and is valid as true only with
+`xiaomi.mijia` or `homeverb.platforms`; invalid modes/types fail before creating
+the profile. Opening the session performs no account/credential/network work and
+grants no control authority. An explicit connect/refresh publishes the reviewed
+event capabilities, including event-only components. Existing scalar-only saved
+descriptors need that refresh before events are listed.
+
+Call `inspect_event_history_options` with exact local device and connection IDs.
+Choose a returned target and supply an `EventHistoryRequest` under `history` to
+`read_event_history`: schema 1.0, the same local IDs/target, projection
+`occurrence_times`, and explicit whole-second UTC start/end. Core permits at most
+32 days, a positive half-open window, and no future end. Each request returns one
+page of at most 31 records; records contain only `reported_at`. Preserve equal
+timestamps, rejected-record counts and `limit_reached`. Completeness is always
+`unproven`; empty results do not establish that no event occurred. Never describe
+these rows as current state, verified device actions or complete activity logs.
+
+Inspection performs no networking. Reads use the independently validated protected
+account/model/spec/route and do not refresh login, retry, change protocol, write
+current-state cache or execution records, or mutate credentials. Background,
+cancel, close and deadline terminate work and suppress late results. Do not poll
+this method under the foreground state-read exception. No raw provider ID/key,
+payload, actor, media URL, pagination cursor or user-selected principal is accepted
+or returned. Ordinary requests cannot enable the startup flag. Mock/Meiju return
+empty options and unsupported reads. Event argument interpretation, Flutter
+adoption and a matching Android package remain subsequent work; the verified
+85fefd8 APK remains API 1.43.

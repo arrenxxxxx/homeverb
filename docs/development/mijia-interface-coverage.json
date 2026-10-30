@@ -871,7 +871,7 @@
           "siid": 8,
           "iid": 1,
           "name": "open-event",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "property",
@@ -928,14 +928,14 @@
           "siid": 10,
           "iid": 1,
           "name": "over-day-push",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 10,
           "iid": 2,
           "name": "over-month-push",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "property",
@@ -1311,21 +1311,21 @@
           "siid": 5,
           "iid": 1012,
           "name": "click",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 5,
           "iid": 1013,
           "name": "double-click",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 5,
           "iid": 1014,
           "name": "long-press",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         }
       ]
     },
@@ -1457,14 +1457,14 @@
           "siid": 2,
           "iid": 1020,
           "name": "lock-event",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 2,
           "iid": 1007,
           "name": "exception-occurred",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "property",
@@ -1511,7 +1511,7 @@
           "siid": 5,
           "iid": 1006,
           "name": "doorbell-ring",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "property",
@@ -1618,21 +1618,21 @@
           "siid": 7,
           "iid": 1,
           "name": "doorbell-ring",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 7,
           "iid": 3,
           "name": "someone-passed-by",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 7,
           "iid": 4,
           "name": "someone-at-the-door",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "property",
@@ -1693,7 +1693,7 @@
           "siid": 10,
           "iid": 1,
           "name": "low-battery",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "property",
@@ -1980,7 +1980,7 @@
           "siid": 2,
           "iid": 1001,
           "name": "low-battery",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "property",
@@ -1997,28 +1997,28 @@
           "siid": 3,
           "iid": 1012,
           "name": "click",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 3,
           "iid": 1013,
           "name": "double-click",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 3,
           "iid": 1014,
           "name": "long-press",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 3,
           "iid": 1028,
           "name": "device-be-reset",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         }
       ]
     },
@@ -2130,28 +2130,28 @@
           "siid": 2,
           "iid": 1,
           "name": "doorbell-forcibly-removed",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 2,
           "iid": 2,
           "name": "doorbell-ring",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 2,
           "iid": 3,
           "name": "someone-at-the-door",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 2,
           "iid": 4,
           "name": "someone-passed-by",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "property",
@@ -2208,7 +2208,7 @@
           "siid": 8,
           "iid": 1,
           "name": "low-battery",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "property",
@@ -2515,49 +2515,49 @@
           "siid": 10,
           "iid": 8,
           "name": "upgrade-event",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 10,
           "iid": 10,
           "name": "upgrade-success",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 10,
           "iid": 11,
           "name": "upgrade-fail",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 10,
           "iid": 12,
           "name": "no-battery",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 10,
           "iid": 16,
           "name": "low-battery",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 10,
           "iid": 17,
           "name": "new-battery",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 10,
           "iid": 18,
           "name": "temp-abnormal",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         }
       ]
     },
@@ -3013,21 +3013,21 @@
           "siid": 2,
           "iid": 1,
           "name": "click",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 2,
           "iid": 2,
           "name": "double-click",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 2,
           "iid": 3,
           "name": "long-press",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         }
       ]
     },
@@ -3144,42 +3144,42 @@
           "siid": 2,
           "iid": 1,
           "name": "click",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 2,
           "iid": 2,
           "name": "double-click",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 2,
           "iid": 3,
           "name": "long-press",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 3,
           "iid": 1,
           "name": "click",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 3,
           "iid": 2,
           "name": "double-click",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 3,
           "iid": 3,
           "name": "long-press",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         }
       ]
     },
@@ -3375,14 +3375,14 @@
           "siid": 2,
           "iid": 1,
           "name": "ir-turned-on",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 2,
           "iid": 2,
           "name": "ir-turned-off",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "property",
@@ -3723,35 +3723,35 @@
           "siid": 8,
           "iid": 7,
           "name": "detected-babycry-event",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 8,
           "iid": 10,
           "name": "object-motion",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 8,
           "iid": 2,
           "name": "someone-appeared",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 8,
           "iid": 6,
           "name": "pet-appeared",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 8,
           "iid": 18,
           "name": "abnormal-sound",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "property",
@@ -3778,14 +3778,14 @@
           "siid": 10,
           "iid": 1,
           "name": "into-fav-area",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 10,
           "iid": 2,
           "name": "out-fav-area",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "property",
@@ -3862,14 +3862,14 @@
           "siid": 11,
           "iid": 1,
           "name": "cruise-started",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 11,
           "iid": 2,
           "name": "cruise-ended",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "property",
@@ -3986,14 +3986,14 @@
           "siid": 15,
           "iid": 1,
           "name": "people-fence-in",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 15,
           "iid": 2,
           "name": "people-fence-out",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "property",
@@ -4030,7 +4030,7 @@
           "siid": 18,
           "iid": 1,
           "name": "fire-smoke-event",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "property",
@@ -4246,7 +4246,7 @@
           "siid": 26,
           "iid": 1,
           "name": "self-check-complete",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "property",
@@ -4263,14 +4263,14 @@
           "siid": 12,
           "iid": 1,
           "name": "key-call-start",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 12,
           "iid": 2,
           "name": "phone-call-start",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "property",
@@ -4297,7 +4297,7 @@
           "siid": 16,
           "iid": 1,
           "name": "long-time-no-humang",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "property",
@@ -4344,14 +4344,14 @@
           "siid": 19,
           "iid": 1,
           "name": "no-huamn-appear",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 19,
           "iid": 2,
           "name": "reid-event",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         }
       ]
     },
@@ -4483,14 +4483,14 @@
           "siid": 2,
           "iid": 1104,
           "name": "submersion-sensor-event",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 2,
           "iid": 1028,
           "name": "device-be-reset",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "property",
@@ -4537,7 +4537,7 @@
           "siid": 6,
           "iid": 1022,
           "name": "customized-event-1",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         }
       ]
     },
@@ -4659,14 +4659,14 @@
           "siid": 2,
           "iid": 1,
           "name": "network-changed",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 2,
           "iid": 2,
           "name": "network-changed",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "property",
@@ -4700,7 +4700,7 @@
           "siid": 4,
           "iid": 1,
           "name": "virtual-event",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         }
       ]
     },
@@ -4972,49 +4972,49 @@
           "siid": 2,
           "iid": 1,
           "name": "clean-remind",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 2,
           "iid": 4,
           "name": "auto-ventilation-open",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 2,
           "iid": 5,
           "name": "auto-ventilation-close",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 2,
           "iid": 6,
           "name": "auto-ventilation-invalid",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 2,
           "iid": 7,
           "name": "oil-cup-clean-remind",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 2,
           "iid": 8,
           "name": "oil-cup-clean-remind",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 2,
           "iid": 9,
           "name": "auto-ventilation-open",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "property",
@@ -5172,21 +5172,21 @@
           "siid": 7,
           "iid": 1,
           "name": "working-remind",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 7,
           "iid": 2,
           "name": "off-on-time",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "event",
           "siid": 7,
           "iid": 3,
           "name": "cooking-finished",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "property",
@@ -5297,7 +5297,7 @@
           "siid": 10,
           "iid": 1,
           "name": "dry-cleaning-timing-remind",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "property",
@@ -5314,7 +5314,7 @@
           "siid": 11,
           "iid": 1,
           "name": "low-battery",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "property",
@@ -5371,7 +5371,7 @@
           "siid": 12,
           "iid": 1,
           "name": "pm-warning",
-          "status": "typed_core_occurrence_history_native_app_pending"
+          "status": "core_native_occurrence_history_app_pending"
         },
         {
           "kind": "property",
@@ -5945,8 +5945,8 @@
     "additional_write_runtime_contracts"
   ],
   "reported_event_history": {
-    "status": "implemented_typed_core_occurrence_times_only",
-    "evidence": "ADR-0115; pinned public SDK MIoT event keys and community history envelope",
+    "status": "implemented_core_native_occurrence_times_only",
+    "evidence": "ADR-0115/0116/0117; pinned public SDK keys, community history envelope and fictional Core/Host/native ABI tests",
     "event_definitions": 78,
     "route": "/user/get_user_device_data",
     "legacy_origin": "https://api.io.mi.com/app",
@@ -5958,9 +5958,9 @@
     "maximum_window_days": 32,
     "returned_data": "reported_timestamps_only_without_payload_or_actor",
     "completeness": "unproven",
-    "core_native_app": "typed_core_implemented_native_app_pending",
+    "core_native_app": "core_native_api_1_44_implemented_app_pending",
     "protected_admission": "exact_account_model_root_membership_and_selected_protocol",
-    "descriptor_publication": "explicit_typed_opt_in_and_refresh_with_event_only_components",
+    "descriptor_publication": "explicit_typed_or_native_startup_opt_in_and_refresh_with_event_only_components",
     "payload_semantics_pagination_and_subscriptions": "pending",
     "provider_acceptance": "pending"
   },

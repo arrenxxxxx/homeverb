@@ -894,3 +894,14 @@ DEVICE_IDENTITY_CONFLICT or the existing protected-account confirmation error;
 secret-store and account-state errors retain their existing sanitized codes.
 Cancellation/deadline/drop release locks without fallback, renewal or persistent
 history mutation. No command/result schema or error-code vocabulary changes.
+
+## Native event occurrence history (API 1.44)
+
+Event queries retain ADR-0116 errors through ordinary Session dispatch. Invalid
+startup types or true mijia_event_history outside Mijia/combined modes return
+INVALID_ARGUMENT before profile creation. Unknown request fields, raw payloads,
+provider selectors and injected startup options are rejected. Disabled adapters
+return empty options and CAPABILITY_UNSUPPORTED for reads; stale or invalid
+protected bindings fail closed. HOST_BACKGROUND/HOST_CLOSED deny admission;
+CANCELLED/DEADLINE_EXCEEDED stop admitted reads without retry or late publication.
+No history error causes login renewal, protocol fallback or an appliance write.

@@ -26,6 +26,7 @@ def main() -> int:
         ("capability", "capability.mijia-maintenance-action"), ("command", "command.mijia-maintenance-action"),
         ("capability", "capability.mijia-power-action"), ("command", "command.mijia-power-action"),
         ("native-open", "native-open.mijia-actions"),
+        ("native-open", "native-open.mijia-events"),
         ("native-open", "native-open.mijia-power-actions"),
         ("native-open", "native-open.mijia-maintenance-actions"),
         ("native-open", "native-open.mijia-hood"),
@@ -200,6 +201,12 @@ def main() -> int:
     outlet_parameters.validate(outlet_command["arguments"])
     for args in [{"state":1}, {"state":"true"}, {"state":None}, {}, {"state":True,"confirmed":True}, {"state":True,"piid":1}]:
         negative.append(("closed outlet arguments", outlet_parameters, args))
+
+    event_startup = load("examples/native-open.mijia-events.json")
+    for adapter in ["homeverb.mock", "midea.meiju"]:
+        negative.append(("event startup adapter", validators["native-open"], {**event_startup, "adapter": adapter}))
+    for value in [None, 1, "true", {}, []]:
+        negative.append(("event startup Boolean", validators["native-open"], {**event_startup, "mijia_event_history": value}))
 
     action_startup = load("examples/native-open.mijia-actions.json")
     action_startup["mijia_action_grants"] += load("examples/native-open.mijia-power-actions.json")["mijia_action_grants"]

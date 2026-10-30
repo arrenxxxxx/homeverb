@@ -15,6 +15,7 @@ struct Peer {
     reads: AtomicUsize,
     properties: AtomicUsize,
     statistics: AtomicUsize,
+    events: AtomicUsize,
     directory: Mutex<Option<Value>>,
     fail_read: AtomicBool,
     pause: AtomicUsize,
@@ -107,6 +108,8 @@ impl ModernReadTransport for Peer {
             self.reads.fetch_add(1, Ordering::SeqCst);
         } else if request.endpoint() == ModernReadEndpoint::Statistics {
             self.statistics.fetch_add(1, Ordering::SeqCst);
+        } else if request.endpoint() == ModernReadEndpoint::EventHistory {
+            self.events.fetch_add(1, Ordering::SeqCst);
         } else {
             assert_eq!(request.endpoint(), ModernReadEndpoint::Properties);
             self.properties.fetch_add(1, Ordering::SeqCst);
@@ -144,6 +147,24 @@ impl ModernReadTransport for Peer {
             assert_eq!(data["key"], "11.1");
             assert_eq!(data["data_type"], "stat_day_v3");
             json!([{"did":data["did"],"key":"11.1","time":1700000000,"value":"[125]"}])
+        } else if request.endpoint() == ModernReadEndpoint::EventHistory {
+            let data: Value =
+                serde_json::from_slice(&stream(&key, &STANDARD.decode(&fields["data"]).unwrap()))
+                    .unwrap();
+            assert_eq!(
+                request.endpoint().url(),
+                "https://api.mijia.tech/app/user/get_user_device_data"
+            );
+            assert_eq!(data["did"], "PRIVATE-MODERN-DID");
+            assert_eq!(data["key"], "8.1");
+            assert_eq!(data["type"], "event");
+            assert_eq!(data["limit"], 31);
+            assert_eq!(data["time_start"], 1700000000);
+            assert_eq!(data["time_end"], 1700086400);
+            json!([
+                {"did":data["did"],"key":"8.1","type":"event","time":1700000000,"value":"PRIVATE-PAYLOAD"},
+                {"did":data["did"],"key":"8.1","type":"event","time":1700000000,"value":{"actor":"PRIVATE-ACTOR"}}
+            ])
         } else {
             let data: Value =
                 serde_json::from_slice(&stream(&key, &STANDARD.decode(&fields["data"]).unwrap()))
@@ -223,6 +244,9 @@ impl Drop for ModernFixture {
 }
 impl ModernFixture {
     fn new() -> Self {
+        Self::with_events(false)
+    }
+    fn with_events(events: bool) -> Self {
         let directory =
             std::env::temp_dir().join(format!("homeverb-modern-host-{}", Uuid::new_v4()));
         let store = Arc::new(SqliteStore::open(&directory).unwrap());
@@ -231,10 +255,13 @@ impl ModernFixture {
         let clock = Arc::new(SystemClock);
         let peer = Arc::new(Peer::default());
         let cloud = Arc::new(Cloud::default());
-        let adapter = Arc::new(
-            MijiaAdapter::new(vault.clone(), cloud.clone(), clock.clone())
-                .with_modern_protocol(peer.clone(), peer.clone()),
-        );
+        let adapter = MijiaAdapter::new(vault.clone(), cloud.clone(), clock.clone())
+            .with_modern_protocol(peer.clone(), peer.clone());
+        let adapter = Arc::new(if events {
+            adapter.with_event_history()
+        } else {
+            adapter
+        });
         let meiju = Arc::new(homeverb_midea::MeijuAdapter::new(
             vault.clone(),
             Arc::new(NoMeijuTraffic),

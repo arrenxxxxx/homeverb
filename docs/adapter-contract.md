@@ -119,3 +119,12 @@ pinned catalog and retains account leases through exact selected-protocol reques
 Old saved scalar layouts require explicit refresh before event options appear;
 complete event-enriched layouts remain valid for ordinary scalar reads even when
 a host disables event history. No native/App entry point is added in this phase.
+
+## Native event-history composition
+
+ADR-0117/API 1.44 exposes the implemented event hooks through ordinary Session
+queries. MijiaSessionOptions.event_history and the trusted native startup Boolean
+mijia_event_history default to false; enabling them changes no write policy.
+Only explicit connect/refresh publishes enriched descriptors. Existing constructors
+remain compatible, and disabled hosts preserve ordinary scalar reads for complete
+enriched layouts. Flutter and CLI/MCP entry points remain separate adoption work.

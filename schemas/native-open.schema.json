@@ -1482,6 +1482,11 @@
           }
         ]
       }
+    },
+    "mijia_event_history": {
+      "type": "boolean",
+      "default": false,
+      "description": "API 1.44 trusted startup opt-in for exact reported event occurrence history; no networking or control authority."
     }
   },
   "required": [
@@ -1591,6 +1596,9 @@
           },
           "mijia_action_grants": {
             "maxItems": 0
+          },
+          "mijia_event_history": {
+            "const": false
           }
         }
       }
