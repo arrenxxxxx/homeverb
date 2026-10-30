@@ -12,7 +12,9 @@ impl ModernMijiaSession {
     ) -> Result<SecretBytes> {
         if !matches!(
             endpoint,
-            ModernReadEndpoint::Statistics | ModernReadEndpoint::PropertyHistory
+            ModernReadEndpoint::Statistics
+                | ModernReadEndpoint::PropertyHistory
+                | ModernReadEndpoint::EventHistory
         ) {
             return Err(invalid());
         }

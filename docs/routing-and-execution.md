@@ -979,3 +979,22 @@ uses one property request on the selected protocol, without toggle, companion
 writes or state inference. Accepted remains unverified and uncertain sends never
 retry, renew credentials or switch protocols. Explicit refresh upgrades old
 read-only derivations; existing receipts and identities remain intact.
+
+
+## Typed event occurrence reads
+
+ADR-0115 adds a single bounded historical request on the selected legacy or modern
+Mijia community history profile. Exact pinned model/spec/SIID/EIID admission and
+positive nonfuture window validation precede sending. Modern subject and protected
+mapping checks remain independent. The result contains only correlated reported
+timestamps, preserves equal-second rows and leaves completeness unproven. A full
+page is not evidence of more data. No payload interpretation, subscription, retry,
+renewal, fallback, state-cache update or write verification follows.
+
+This protocol phase does not expose an ordinary request schema or Core/Host/App
+method. Later Core integration must independently enforce protected membership,
+read policy and account leases. Positive and negative executable fixtures live in
+crates/mijia/src/event_history/tests.rs and
+crates/mijia/src/modern/reads/tests/event_history.rs; local TLS tests additionally
+check fixed origins, encryption headers, redirects, response bounds and cleanup.
+Existing command/result schemas and write outcomes are unchanged.

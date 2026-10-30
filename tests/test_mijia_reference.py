@@ -20,6 +20,36 @@ class ReferenceTests(unittest.TestCase):
         prop = {'type': 'urn:miot-spec-v2:property:on:00000006:fiction:1', 'format': 'bool', 'access': ['write']}
         self.assertEqual(module.exclusion(service, prop), 'not_readable')
 
+    def test_event_catalog_preserves_every_exact_public_definition(self):
+        import json
+        import zipfile
+        projected = module.project()
+        events = projected[module.EVENT_CATALOG]
+        with zipfile.ZipFile(module.ARCHIVE) as archive:
+            models = json.loads(archive.read('models.json'))['models']
+        expected = [
+            {'model': model['model'], 'spec_type': model['spec_urn'],
+             'service_type': service['type'], 'event_type': event['type'],
+             'siid': service['iid'], 'eiid': event['iid'], 'arguments': event['arguments']}
+            for model in models for service in model['services']
+            for event in service.get('events', [])
+        ]
+        self.assertEqual(events, expected)
+        self.assertEqual(len(events), 78)
+        self.assertEqual(len({(e['model'], e['spec_type'], e['siid'], e['eiid']) for e in events}), 78)
+        for event in events:
+            self.assertEqual(set(event), {'model', 'spec_type', 'service_type', 'event_type',
+                                          'siid', 'eiid', 'arguments'})
+            self.assertTrue(all(isinstance(argument, int) and argument > 0 for argument in event['arguments']))
+        event_coverage = projected[module.LEDGER]['reported_event_history']
+        self.assertEqual(event_coverage['event_definitions'], 78)
+        self.assertEqual(event_coverage['core_native_app'], 'pending')
+        entries = [entry for model in projected[module.LEDGER]['models'] for entry in model['entries']
+                   if entry['kind'] == 'event']
+        self.assertEqual(len(entries), 78)
+        self.assertEqual({entry['status'] for entry in entries},
+                         {'typed_occurrence_history_only_core_native_app_pending'})
+
     def test_every_source_definition_has_one_audit_entry_and_no_private_values(self):
         projected = module.project()
         profiles, ledger = projected[module.CATALOG], projected[module.LEDGER]

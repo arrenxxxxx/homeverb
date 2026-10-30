@@ -1,5 +1,16 @@
 # Implementation status and next tasks
 
+## Typed event history checkpoint -- October 30, 2026
+
+ADR-0115 implements exact occurrence-time requests for all 78 pinned event
+selectors on legacy and modern transports. Remaining event work: Core read-policy
+and protected membership admission, Host/native/App contracts and UI, reviewed
+payload semantics, pagination and foreground subscription evidence. Occurrence
+timestamps alone do not complete the event requirement or infer current state.
+API 1.43 and the verified 85fefd8 APK remain the current native/App checkpoint.
+The other 185 writable definitions, 25 actions, specialized reference paths and
+provider/phone/model acceptance remain incomplete.
+
 ## Foreground App switch and outlet settings -- October 30, 2026
 
 Flutter now adopts ADR-0114's seven additional property controls. New exact

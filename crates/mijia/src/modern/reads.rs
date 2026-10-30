@@ -7,6 +7,7 @@ use std::collections::HashSet;
 
 mod actions;
 mod community;
+mod event_history;
 mod property_history;
 mod reconciliation;
 mod statistics;

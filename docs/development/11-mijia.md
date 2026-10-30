@@ -1,5 +1,20 @@
 # 11. Mijia native integration
 
+## Typed event occurrence history -- October 30, 2026
+
+[ADR-0115](../adr/0115-mijia-reported-event-occurrences.md) adds one-page historical
+occurrence reads for all 78 pinned event definitions. Both legacy and modern
+sessions send the exact documented MIoT event key on their separate reviewed
+history profiles. Only correlated reported timestamps are returned; opaque
+values and actors are omitted, and completeness remains unproven. Windows,
+response sizes and record counts are bounded; cancellation/drop ends the read
+without retry, renewal, fallback or background work.
+
+Core protected binding/policy checks and native/App adoption remain the next
+implementation phase. Payload semantics, paging, subscriptions and physical
+acceptance remain unresolved. Native API 1.43, descriptors and saved formats
+are unchanged; the 85fefd8 APK remains the latest packaged native/App scope.
+
 ## Foreground App switch and outlet settings -- October 30, 2026
 
 Flutter now adopts ADR-0114's seven additional property controls. New exact

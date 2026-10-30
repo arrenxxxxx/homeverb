@@ -6,7 +6,11 @@ pub use action::ActionQuery;
 mod auth;
 mod codec;
 mod control;
+mod event_history;
 mod inventory;
+pub use event_history::{
+    EventHistoryQuery, EventHistoryWindow, EventOccurrence, ReportedEventHistory,
+};
 mod modern;
 mod property_history;
 mod protected;

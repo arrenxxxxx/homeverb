@@ -1,0 +1,773 @@
+[
+  {
+    "model": "cuco.plug.v3",
+    "spec_type": "urn:miot-spec-v2:device:outlet:0000A002:cuco-v3:2",
+    "service_type": "urn:cuco-spec:service:quick-countdown:00007805:cuco-v3:1",
+    "siid": 8,
+    "eiid": 1,
+    "event_type": "urn:cuco-spec:event:open-event:00005001:cuco-v3:1",
+    "arguments": []
+  },
+  {
+    "model": "cuco.plug.v3",
+    "spec_type": "urn:miot-spec-v2:device:outlet:0000A002:cuco-v3:2",
+    "service_type": "urn:cuco-spec:service:over-use-ele-alert:00007807:cuco-v3:1",
+    "siid": 10,
+    "eiid": 1,
+    "event_type": "urn:cuco-spec:event:over-day-push:00005001:cuco-v3:1",
+    "arguments": []
+  },
+  {
+    "model": "cuco.plug.v3",
+    "spec_type": "urn:miot-spec-v2:device:outlet:0000A002:cuco-v3:2",
+    "service_type": "urn:cuco-spec:service:over-use-ele-alert:00007807:cuco-v3:1",
+    "siid": 10,
+    "eiid": 2,
+    "event_type": "urn:cuco-spec:event:over-month-push:00005002:cuco-v3:1",
+    "arguments": []
+  },
+  {
+    "model": "linp.sensor_ht.ks1bp",
+    "spec_type": "urn:miot-spec-v2:device:temperature-humidity-sensor:0000A00A:linp-ks1bp:1",
+    "service_type": "urn:miot-spec-v2:service:switch-sensor-for-ble:000078B0:linp-ks1bp:1",
+    "siid": 5,
+    "eiid": 1012,
+    "event_type": "urn:miot-spec-v2:event:click:00005007:linp-ks1bp:1",
+    "arguments": [
+      1
+    ]
+  },
+  {
+    "model": "linp.sensor_ht.ks1bp",
+    "spec_type": "urn:miot-spec-v2:device:temperature-humidity-sensor:0000A00A:linp-ks1bp:1",
+    "service_type": "urn:miot-spec-v2:service:switch-sensor-for-ble:000078B0:linp-ks1bp:1",
+    "siid": 5,
+    "eiid": 1013,
+    "event_type": "urn:miot-spec-v2:event:double-click:00005008:linp-ks1bp:1",
+    "arguments": [
+      1
+    ]
+  },
+  {
+    "model": "linp.sensor_ht.ks1bp",
+    "spec_type": "urn:miot-spec-v2:device:temperature-humidity-sensor:0000A00A:linp-ks1bp:1",
+    "service_type": "urn:miot-spec-v2:service:switch-sensor-for-ble:000078B0:linp-ks1bp:1",
+    "siid": 5,
+    "eiid": 1014,
+    "event_type": "urn:miot-spec-v2:event:long-press:00005009:linp-ks1bp:1",
+    "arguments": [
+      1
+    ]
+  },
+  {
+    "model": "loock.lock.h01myk",
+    "spec_type": "urn:miot-spec-v2:device:lock:0000A038:loock-h01myk:1",
+    "service_type": "urn:miot-spec-v2:service:lock:00007855:loock-h01myk:1",
+    "siid": 2,
+    "eiid": 1020,
+    "event_type": "urn:miot-spec-v2:event:lock-event:00005033:loock-h01myk:1",
+    "arguments": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "model": "loock.lock.h01myk",
+    "spec_type": "urn:miot-spec-v2:device:lock:0000A038:loock-h01myk:1",
+    "service_type": "urn:miot-spec-v2:service:lock:00007855:loock-h01myk:1",
+    "siid": 2,
+    "eiid": 1007,
+    "event_type": "urn:miot-spec-v2:event:exception-occurred:00005011:loock-h01myk:1",
+    "arguments": [
+      5,
+      6
+    ]
+  },
+  {
+    "model": "loock.lock.h01myk",
+    "spec_type": "urn:miot-spec-v2:device:lock:0000A038:loock-h01myk:1",
+    "service_type": "urn:miot-spec-v2:service:doorbell:00007857:loock-h01myk:1",
+    "siid": 5,
+    "eiid": 1006,
+    "event_type": "urn:miot-spec-v2:event:doorbell-ring:00005013:loock-h01myk:1",
+    "arguments": [
+      1
+    ]
+  },
+  {
+    "model": "loock.lock.h01myk",
+    "spec_type": "urn:miot-spec-v2:device:lock:0000A038:loock-h01myk:1",
+    "service_type": "urn:miot-spec-v2:service:video-doorbell:00007863:loock-h01myk:1",
+    "siid": 7,
+    "eiid": 1,
+    "event_type": "urn:miot-spec-v2:event:doorbell-ring:00005013:loock-h01myk:1",
+    "arguments": [
+      10,
+      9
+    ]
+  },
+  {
+    "model": "loock.lock.h01myk",
+    "spec_type": "urn:miot-spec-v2:device:lock:0000A038:loock-h01myk:1",
+    "service_type": "urn:miot-spec-v2:service:video-doorbell:00007863:loock-h01myk:1",
+    "siid": 7,
+    "eiid": 3,
+    "event_type": "urn:miot-spec-v2:event:someone-passed-by:0000502C:loock-h01myk:1",
+    "arguments": [
+      10,
+      9
+    ]
+  },
+  {
+    "model": "loock.lock.h01myk",
+    "spec_type": "urn:miot-spec-v2:device:lock:0000A038:loock-h01myk:1",
+    "service_type": "urn:miot-spec-v2:service:video-doorbell:00007863:loock-h01myk:1",
+    "siid": 7,
+    "eiid": 4,
+    "event_type": "urn:miot-spec-v2:event:someone-at-the-door:0000502D:loock-h01myk:1",
+    "arguments": [
+      10,
+      9
+    ]
+  },
+  {
+    "model": "loock.lock.h01myk",
+    "spec_type": "urn:miot-spec-v2:device:lock:0000A038:loock-h01myk:1",
+    "service_type": "urn:miot-spec-v2:service:battery:00007805:loock-h01myk:1",
+    "siid": 10,
+    "eiid": 1,
+    "event_type": "urn:miot-spec-v2:event:low-battery:00005003:loock-h01myk:1",
+    "arguments": []
+  },
+  {
+    "model": "lumi.remote.mcn001",
+    "spec_type": "urn:miot-spec-v2:device:remote-control:0000A021:lumi-mcn001:1",
+    "service_type": "urn:miot-spec-v2:service:battery:00007805:lumi-mcn001:1",
+    "siid": 2,
+    "eiid": 1001,
+    "event_type": "urn:miot-spec-v2:event:low-battery:00005003:lumi-mcn001:1",
+    "arguments": []
+  },
+  {
+    "model": "lumi.remote.mcn001",
+    "spec_type": "urn:miot-spec-v2:device:remote-control:0000A021:lumi-mcn001:1",
+    "service_type": "urn:miot-spec-v2:service:switch-sensor-for-ble:000078B0:lumi-mcn001:1",
+    "siid": 3,
+    "eiid": 1012,
+    "event_type": "urn:miot-spec-v2:event:click:00005007:lumi-mcn001:1",
+    "arguments": []
+  },
+  {
+    "model": "lumi.remote.mcn001",
+    "spec_type": "urn:miot-spec-v2:device:remote-control:0000A021:lumi-mcn001:1",
+    "service_type": "urn:miot-spec-v2:service:switch-sensor-for-ble:000078B0:lumi-mcn001:1",
+    "siid": 3,
+    "eiid": 1013,
+    "event_type": "urn:miot-spec-v2:event:double-click:00005008:lumi-mcn001:1",
+    "arguments": []
+  },
+  {
+    "model": "lumi.remote.mcn001",
+    "spec_type": "urn:miot-spec-v2:device:remote-control:0000A021:lumi-mcn001:1",
+    "service_type": "urn:miot-spec-v2:service:switch-sensor-for-ble:000078B0:lumi-mcn001:1",
+    "siid": 3,
+    "eiid": 1014,
+    "event_type": "urn:miot-spec-v2:event:long-press:00005009:lumi-mcn001:1",
+    "arguments": []
+  },
+  {
+    "model": "lumi.remote.mcn001",
+    "spec_type": "urn:miot-spec-v2:device:remote-control:0000A021:lumi-mcn001:1",
+    "service_type": "urn:miot-spec-v2:service:switch-sensor-for-ble:000078B0:lumi-mcn001:1",
+    "siid": 3,
+    "eiid": 1028,
+    "event_type": "urn:miot-spec-v2:event:device-be-reset:0000503C:lumi-mcn001:1",
+    "arguments": []
+  },
+  {
+    "model": "madv.cateye.mi3iot",
+    "spec_type": "urn:miot-spec-v2:device:video-doorbell:0000A03A:madv-mi3iot:1",
+    "service_type": "urn:miot-spec-v2:service:video-doorbell:00007863:madv-mi3iot:1",
+    "siid": 2,
+    "eiid": 1,
+    "event_type": "urn:miot-spec-v2:event:doorbell-forcibly-removed:00005025:madv-mi3iot:1",
+    "arguments": [
+      8
+    ]
+  },
+  {
+    "model": "madv.cateye.mi3iot",
+    "spec_type": "urn:miot-spec-v2:device:video-doorbell:0000A03A:madv-mi3iot:1",
+    "service_type": "urn:miot-spec-v2:service:video-doorbell:00007863:madv-mi3iot:1",
+    "siid": 2,
+    "eiid": 2,
+    "event_type": "urn:miot-spec-v2:event:doorbell-ring:00005013:madv-mi3iot:1",
+    "arguments": [
+      8
+    ]
+  },
+  {
+    "model": "madv.cateye.mi3iot",
+    "spec_type": "urn:miot-spec-v2:device:video-doorbell:0000A03A:madv-mi3iot:1",
+    "service_type": "urn:miot-spec-v2:service:video-doorbell:00007863:madv-mi3iot:1",
+    "siid": 2,
+    "eiid": 3,
+    "event_type": "urn:miot-spec-v2:event:someone-at-the-door:0000502D:madv-mi3iot:1",
+    "arguments": [
+      8
+    ]
+  },
+  {
+    "model": "madv.cateye.mi3iot",
+    "spec_type": "urn:miot-spec-v2:device:video-doorbell:0000A03A:madv-mi3iot:1",
+    "service_type": "urn:miot-spec-v2:service:video-doorbell:00007863:madv-mi3iot:1",
+    "siid": 2,
+    "eiid": 4,
+    "event_type": "urn:miot-spec-v2:event:someone-passed-by:0000502C:madv-mi3iot:1",
+    "arguments": [
+      8
+    ]
+  },
+  {
+    "model": "madv.cateye.mi3iot",
+    "spec_type": "urn:miot-spec-v2:device:video-doorbell:0000A03A:madv-mi3iot:1",
+    "service_type": "urn:miot-spec-v2:service:battery:00007805:madv-mi3iot:1",
+    "siid": 8,
+    "eiid": 1,
+    "event_type": "urn:miot-spec-v2:event:low-battery:00005003:madv-mi3iot:1",
+    "arguments": []
+  },
+  {
+    "model": "madv.cateye.mi3iot",
+    "spec_type": "urn:miot-spec-v2:device:video-doorbell:0000A03A:madv-mi3iot:1",
+    "service_type": "urn:madv-spec:service:madv-doorbell:00007801:madv-mi3iot:1",
+    "siid": 10,
+    "eiid": 8,
+    "event_type": "urn:madv-spec:event:upgrade-event:00005008:madv-mi3iot:1",
+    "arguments": []
+  },
+  {
+    "model": "madv.cateye.mi3iot",
+    "spec_type": "urn:miot-spec-v2:device:video-doorbell:0000A03A:madv-mi3iot:1",
+    "service_type": "urn:madv-spec:service:madv-doorbell:00007801:madv-mi3iot:1",
+    "siid": 10,
+    "eiid": 10,
+    "event_type": "urn:madv-spec:event:upgrade-success:0000500a:madv-mi3iot:1",
+    "arguments": []
+  },
+  {
+    "model": "madv.cateye.mi3iot",
+    "spec_type": "urn:miot-spec-v2:device:video-doorbell:0000A03A:madv-mi3iot:1",
+    "service_type": "urn:madv-spec:service:madv-doorbell:00007801:madv-mi3iot:1",
+    "siid": 10,
+    "eiid": 11,
+    "event_type": "urn:madv-spec:event:upgrade-fail:0000500b:madv-mi3iot:1",
+    "arguments": []
+  },
+  {
+    "model": "madv.cateye.mi3iot",
+    "spec_type": "urn:miot-spec-v2:device:video-doorbell:0000A03A:madv-mi3iot:1",
+    "service_type": "urn:madv-spec:service:madv-doorbell:00007801:madv-mi3iot:1",
+    "siid": 10,
+    "eiid": 12,
+    "event_type": "urn:madv-spec:event:no-battery:00005009:madv-mi3iot:1",
+    "arguments": []
+  },
+  {
+    "model": "madv.cateye.mi3iot",
+    "spec_type": "urn:miot-spec-v2:device:video-doorbell:0000A03A:madv-mi3iot:1",
+    "service_type": "urn:madv-spec:service:madv-doorbell:00007801:madv-mi3iot:1",
+    "siid": 10,
+    "eiid": 16,
+    "event_type": "urn:madv-spec:event:low-battery:0000500f:madv-mi3iot:1",
+    "arguments": []
+  },
+  {
+    "model": "madv.cateye.mi3iot",
+    "spec_type": "urn:miot-spec-v2:device:video-doorbell:0000A03A:madv-mi3iot:1",
+    "service_type": "urn:madv-spec:service:madv-doorbell:00007801:madv-mi3iot:1",
+    "siid": 10,
+    "eiid": 17,
+    "event_type": "urn:madv-spec:event:new-battery:00005001:madv-mi3iot:1",
+    "arguments": []
+  },
+  {
+    "model": "madv.cateye.mi3iot",
+    "spec_type": "urn:miot-spec-v2:device:video-doorbell:0000A03A:madv-mi3iot:1",
+    "service_type": "urn:madv-spec:service:madv-doorbell:00007801:madv-mi3iot:1",
+    "siid": 10,
+    "eiid": 18,
+    "event_type": "urn:madv-spec:event:temp-abnormal:00005002:madv-mi3iot:1",
+    "arguments": []
+  },
+  {
+    "model": "opple.switch.0010d5",
+    "spec_type": "urn:miot-spec-v2:device:switch:0000A003:opple-0010d5:1:0000C808",
+    "service_type": "urn:miot-spec-v2:service:switch-sensor:00007828:opple-0010d5:1:0000C808",
+    "siid": 2,
+    "eiid": 1,
+    "event_type": "urn:miot-spec-v2:event:click:00005007:opple-0010d5:1:0000C808",
+    "arguments": []
+  },
+  {
+    "model": "opple.switch.0010d5",
+    "spec_type": "urn:miot-spec-v2:device:switch:0000A003:opple-0010d5:1:0000C808",
+    "service_type": "urn:miot-spec-v2:service:switch-sensor:00007828:opple-0010d5:1:0000C808",
+    "siid": 2,
+    "eiid": 2,
+    "event_type": "urn:miot-spec-v2:event:double-click:00005008:opple-0010d5:1",
+    "arguments": []
+  },
+  {
+    "model": "opple.switch.0010d5",
+    "spec_type": "urn:miot-spec-v2:device:switch:0000A003:opple-0010d5:1:0000C808",
+    "service_type": "urn:miot-spec-v2:service:switch-sensor:00007828:opple-0010d5:1:0000C808",
+    "siid": 2,
+    "eiid": 3,
+    "event_type": "urn:miot-spec-v2:event:long-press:00005009:opple-0010d5:1",
+    "arguments": []
+  },
+  {
+    "model": "opple.switch.0010d6",
+    "spec_type": "urn:miot-spec-v2:device:switch:0000A003:opple-0010d6:1:0000C809",
+    "service_type": "urn:miot-spec-v2:service:switch-sensor:00007828:opple-0010d6:1:0000C809",
+    "siid": 2,
+    "eiid": 1,
+    "event_type": "urn:miot-spec-v2:event:click:00005007:opple-0010d6:1:0000C809",
+    "arguments": []
+  },
+  {
+    "model": "opple.switch.0010d6",
+    "spec_type": "urn:miot-spec-v2:device:switch:0000A003:opple-0010d6:1:0000C809",
+    "service_type": "urn:miot-spec-v2:service:switch-sensor:00007828:opple-0010d6:1:0000C809",
+    "siid": 2,
+    "eiid": 2,
+    "event_type": "urn:miot-spec-v2:event:double-click:00005008:opple-0010d6:1",
+    "arguments": []
+  },
+  {
+    "model": "opple.switch.0010d6",
+    "spec_type": "urn:miot-spec-v2:device:switch:0000A003:opple-0010d6:1:0000C809",
+    "service_type": "urn:miot-spec-v2:service:switch-sensor:00007828:opple-0010d6:1:0000C809",
+    "siid": 2,
+    "eiid": 3,
+    "event_type": "urn:miot-spec-v2:event:long-press:00005009:opple-0010d6:1",
+    "arguments": []
+  },
+  {
+    "model": "opple.switch.0010d6",
+    "spec_type": "urn:miot-spec-v2:device:switch:0000A003:opple-0010d6:1:0000C809",
+    "service_type": "urn:miot-spec-v2:service:switch-sensor:00007828:opple-0010d6:1:0000C809",
+    "siid": 3,
+    "eiid": 1,
+    "event_type": "urn:miot-spec-v2:event:click:00005007:opple-0010d6:1:0000C809",
+    "arguments": []
+  },
+  {
+    "model": "opple.switch.0010d6",
+    "spec_type": "urn:miot-spec-v2:device:switch:0000A003:opple-0010d6:1:0000C809",
+    "service_type": "urn:miot-spec-v2:service:switch-sensor:00007828:opple-0010d6:1:0000C809",
+    "siid": 3,
+    "eiid": 2,
+    "event_type": "urn:miot-spec-v2:event:double-click:00005008:opple-0010d6:1",
+    "arguments": []
+  },
+  {
+    "model": "opple.switch.0010d6",
+    "spec_type": "urn:miot-spec-v2:device:switch:0000A003:opple-0010d6:1:0000C809",
+    "service_type": "urn:miot-spec-v2:service:switch-sensor:00007828:opple-0010d6:1:0000C809",
+    "siid": 3,
+    "eiid": 3,
+    "event_type": "urn:miot-spec-v2:event:long-press:00005009:opple-0010d6:1",
+    "arguments": []
+  },
+  {
+    "model": "xiaomi.camera.083ac1",
+    "spec_type": "urn:miot-spec-v2:device:camera:0000A01C:xiaomi-083ac1:2:0000D070",
+    "service_type": "urn:miot-spec-v2:service:camera-control:0000782F:xiaomi-083ac1:1:0000D070",
+    "siid": 2,
+    "eiid": 1,
+    "event_type": "urn:miot-spec-v2:event:ir-turned-on:00005058:xiaomi-083ac1:1:0000D070",
+    "arguments": []
+  },
+  {
+    "model": "xiaomi.camera.083ac1",
+    "spec_type": "urn:miot-spec-v2:device:camera:0000A01C:xiaomi-083ac1:2:0000D070",
+    "service_type": "urn:miot-spec-v2:service:camera-control:0000782F:xiaomi-083ac1:1:0000D070",
+    "siid": 2,
+    "eiid": 2,
+    "event_type": "urn:miot-spec-v2:event:ir-turned-off:00005059:xiaomi-083ac1:1:0000D070",
+    "arguments": []
+  },
+  {
+    "model": "xiaomi.camera.083ac1",
+    "spec_type": "urn:miot-spec-v2:device:camera:0000A01C:xiaomi-083ac1:2:0000D070",
+    "service_type": "urn:miot-spec-v2:service:ai-detection:000078C8:xiaomi-083ac1:1:0000D070",
+    "siid": 8,
+    "eiid": 7,
+    "event_type": "urn:miot-spec-v2:event:detected-babycry-event:0000504D:xiaomi-083ac1:1:0000D070",
+    "arguments": []
+  },
+  {
+    "model": "xiaomi.camera.083ac1",
+    "spec_type": "urn:miot-spec-v2:device:camera:0000A01C:xiaomi-083ac1:2:0000D070",
+    "service_type": "urn:miot-spec-v2:service:ai-detection:000078C8:xiaomi-083ac1:1:0000D070",
+    "siid": 8,
+    "eiid": 10,
+    "event_type": "urn:miot-spec-v2:event:object-motion:00005055:xiaomi-083ac1:1:0000D070",
+    "arguments": []
+  },
+  {
+    "model": "xiaomi.camera.083ac1",
+    "spec_type": "urn:miot-spec-v2:device:camera:0000A01C:xiaomi-083ac1:2:0000D070",
+    "service_type": "urn:miot-spec-v2:service:ai-detection:000078C8:xiaomi-083ac1:1:0000D070",
+    "siid": 8,
+    "eiid": 2,
+    "event_type": "urn:miot-spec-v2:event:someone-appeared:0000504A:xiaomi-083ac1:1",
+    "arguments": [
+      1,
+      11
+    ]
+  },
+  {
+    "model": "xiaomi.camera.083ac1",
+    "spec_type": "urn:miot-spec-v2:device:camera:0000A01C:xiaomi-083ac1:2:0000D070",
+    "service_type": "urn:miot-spec-v2:service:ai-detection:000078C8:xiaomi-083ac1:1:0000D070",
+    "siid": 8,
+    "eiid": 6,
+    "event_type": "urn:miot-spec-v2:event:pet-appeared:00005048:xiaomi-083ac1:1",
+    "arguments": [
+      2,
+      11
+    ]
+  },
+  {
+    "model": "xiaomi.camera.083ac1",
+    "spec_type": "urn:miot-spec-v2:device:camera:0000A01C:xiaomi-083ac1:2:0000D070",
+    "service_type": "urn:miot-spec-v2:service:ai-detection:000078C8:xiaomi-083ac1:1:0000D070",
+    "siid": 8,
+    "eiid": 18,
+    "event_type": "urn:miot-spec-v2:event:abnormal-sound:000050E2:xiaomi-083ac1:1",
+    "arguments": []
+  },
+  {
+    "model": "xiaomi.camera.083ac1",
+    "spec_type": "urn:miot-spec-v2:device:camera:0000A01C:xiaomi-083ac1:2:0000D070",
+    "service_type": "urn:miot-spec-v2:service:camera-fav-area:000078C9:xiaomi-083ac1:1:0000D070",
+    "siid": 10,
+    "eiid": 1,
+    "event_type": "urn:miot-spec-v2:event:into-fav-area:00005062:xiaomi-083ac1:1:0000D070",
+    "arguments": [
+      2
+    ]
+  },
+  {
+    "model": "xiaomi.camera.083ac1",
+    "spec_type": "urn:miot-spec-v2:device:camera:0000A01C:xiaomi-083ac1:2:0000D070",
+    "service_type": "urn:miot-spec-v2:service:camera-fav-area:000078C9:xiaomi-083ac1:1:0000D070",
+    "siid": 10,
+    "eiid": 2,
+    "event_type": "urn:miot-spec-v2:event:out-fav-area:00005063:xiaomi-083ac1:1:0000D070",
+    "arguments": [
+      2
+    ]
+  },
+  {
+    "model": "xiaomi.camera.083ac1",
+    "spec_type": "urn:miot-spec-v2:device:camera:0000A01C:xiaomi-083ac1:2:0000D070",
+    "service_type": "urn:miot-spec-v2:service:cruise:000078CA:xiaomi-083ac1:1:0000D070",
+    "siid": 11,
+    "eiid": 1,
+    "event_type": "urn:miot-spec-v2:event:cruise-started:00005064:xiaomi-083ac1:1:0000D070",
+    "arguments": []
+  },
+  {
+    "model": "xiaomi.camera.083ac1",
+    "spec_type": "urn:miot-spec-v2:device:camera:0000A01C:xiaomi-083ac1:2:0000D070",
+    "service_type": "urn:miot-spec-v2:service:cruise:000078CA:xiaomi-083ac1:1:0000D070",
+    "siid": 11,
+    "eiid": 2,
+    "event_type": "urn:miot-spec-v2:event:cruise-ended:00005065:xiaomi-083ac1:1:0000D070",
+    "arguments": []
+  },
+  {
+    "model": "xiaomi.camera.083ac1",
+    "spec_type": "urn:miot-spec-v2:device:camera:0000A01C:xiaomi-083ac1:2:0000D070",
+    "service_type": "urn:miot-spec-v2:service:virtual-fence:000078F2:xiaomi-083ac1:1:0000D070",
+    "siid": 15,
+    "eiid": 1,
+    "event_type": "urn:miot-spec-v2:event:people-fence-in:000050B6:xiaomi-083ac1:1:0000D070",
+    "arguments": []
+  },
+  {
+    "model": "xiaomi.camera.083ac1",
+    "spec_type": "urn:miot-spec-v2:device:camera:0000A01C:xiaomi-083ac1:2:0000D070",
+    "service_type": "urn:miot-spec-v2:service:virtual-fence:000078F2:xiaomi-083ac1:1:0000D070",
+    "siid": 15,
+    "eiid": 2,
+    "event_type": "urn:miot-spec-v2:event:people-fence-out:000050B7:xiaomi-083ac1:1:0000D070",
+    "arguments": []
+  },
+  {
+    "model": "xiaomi.camera.083ac1",
+    "spec_type": "urn:miot-spec-v2:device:camera:0000A01C:xiaomi-083ac1:2:0000D070",
+    "service_type": "urn:miot-spec-v2:service:fire-smoke:0000791E:xiaomi-083ac1:1:0000D070",
+    "siid": 18,
+    "eiid": 1,
+    "event_type": "urn:miot-spec-v2:event:fire-smoke-event:000050D4:xiaomi-083ac1:1:0000D070",
+    "arguments": []
+  },
+  {
+    "model": "xiaomi.camera.083ac1",
+    "spec_type": "urn:miot-spec-v2:device:camera:0000A01C:xiaomi-083ac1:2:0000D070",
+    "service_type": "urn:miot-spec-v2:service:self-check:000078D7:xiaomi-083ac1:1",
+    "siid": 26,
+    "eiid": 1,
+    "event_type": "urn:miot-spec-v2:event:self-check-complete:00005079:xiaomi-083ac1:1",
+    "arguments": []
+  },
+  {
+    "model": "xiaomi.camera.083ac1",
+    "spec_type": "urn:miot-spec-v2:device:camera:0000A01C:xiaomi-083ac1:2:0000D070",
+    "service_type": "urn:miot-spec-v2:service:key-call:000078CB:xiaomi-083ac1:1",
+    "siid": 12,
+    "eiid": 1,
+    "event_type": "urn:miot-spec-v2:event:key-call-start:000050BE:xiaomi-083ac1:1",
+    "arguments": []
+  },
+  {
+    "model": "xiaomi.camera.083ac1",
+    "spec_type": "urn:miot-spec-v2:device:camera:0000A01C:xiaomi-083ac1:2:0000D070",
+    "service_type": "urn:miot-spec-v2:service:key-call:000078CB:xiaomi-083ac1:1",
+    "siid": 12,
+    "eiid": 2,
+    "event_type": "urn:miot-spec-v2:event:phone-call-start:000050BF:xiaomi-083ac1:1",
+    "arguments": []
+  },
+  {
+    "model": "xiaomi.camera.083ac1",
+    "spec_type": "urn:miot-spec-v2:device:camera:0000A01C:xiaomi-083ac1:2:0000D070",
+    "service_type": "urn:xiaomi-spec:service:family-guard:00007801:xiaomi-083ac1:1",
+    "siid": 16,
+    "eiid": 1,
+    "event_type": "urn:xiaomi-spec:event:long-time-no-humang:00005001:xiaomi-083ac1:1",
+    "arguments": [
+      2
+    ]
+  },
+  {
+    "model": "xiaomi.camera.083ac1",
+    "spec_type": "urn:miot-spec-v2:device:camera:0000A01C:xiaomi-083ac1:2:0000D070",
+    "service_type": "urn:xiaomi-spec:service:other-functions:00007802:xiaomi-083ac1:1",
+    "siid": 19,
+    "eiid": 1,
+    "event_type": "urn:xiaomi-spec:event:no-huamn-appear:00005001:xiaomi-083ac1:1",
+    "arguments": [
+      1
+    ]
+  },
+  {
+    "model": "xiaomi.camera.083ac1",
+    "spec_type": "urn:miot-spec-v2:device:camera:0000A01C:xiaomi-083ac1:2:0000D070",
+    "service_type": "urn:xiaomi-spec:service:other-functions:00007802:xiaomi-083ac1:1",
+    "siid": 19,
+    "eiid": 2,
+    "event_type": "urn:xiaomi-spec:event:reid-event:00005002:xiaomi-083ac1:2",
+    "arguments": [
+      3,
+      4
+    ]
+  },
+  {
+    "model": "xiaomi.flood.oh83w",
+    "spec_type": "urn:miot-spec-v2:device:submersion-sensor:0000A024:xiaomi-oh83w:1:0000D017",
+    "service_type": "urn:miot-spec-v2:service:submersion-sensor:00007839:xiaomi-oh83w:1:0000D017",
+    "siid": 2,
+    "eiid": 1104,
+    "event_type": "urn:miot-spec-v2:event:submersion-sensor-event:000050F8:xiaomi-oh83w:1:0000D017",
+    "arguments": [
+      4
+    ]
+  },
+  {
+    "model": "xiaomi.flood.oh83w",
+    "spec_type": "urn:miot-spec-v2:device:submersion-sensor:0000A024:xiaomi-oh83w:1:0000D017",
+    "service_type": "urn:miot-spec-v2:service:submersion-sensor:00007839:xiaomi-oh83w:1:0000D017",
+    "siid": 2,
+    "eiid": 1028,
+    "event_type": "urn:miot-spec-v2:event:device-be-reset:0000503C:xiaomi-oh83w:1",
+    "arguments": []
+  },
+  {
+    "model": "xiaomi.flood.oh83w",
+    "spec_type": "urn:miot-spec-v2:device:submersion-sensor:0000A024:xiaomi-oh83w:1:0000D017",
+    "service_type": "urn:miot-spec-v2:service:customized-service-for-ble:000078B4:xiaomi-oh83w:1",
+    "siid": 6,
+    "eiid": 1022,
+    "event_type": "urn:miot-spec-v2:event:customized-event-1:00005035:xiaomi-oh83w:1",
+    "arguments": [
+      1,
+      2
+    ]
+  },
+  {
+    "model": "xiaomi.gateway.hub1",
+    "spec_type": "urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:3",
+    "service_type": "urn:miot-spec-v2:service:gateway:00007875:xiaomi-hub1:1",
+    "siid": 2,
+    "eiid": 1,
+    "event_type": "urn:miot-spec-v2:event:network-changed:0000502E:xiaomi-hub1:1",
+    "arguments": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  {
+    "model": "xiaomi.gateway.hub1",
+    "spec_type": "urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:3",
+    "service_type": "urn:miot-spec-v2:service:gateway:00007875:xiaomi-hub1:1",
+    "siid": 2,
+    "eiid": 2,
+    "event_type": "urn:miot-spec-v2:event:network-changed:0000502E:xiaomi-hub1:2",
+    "arguments": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "model": "xiaomi.gateway.hub1",
+    "spec_type": "urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:3",
+    "service_type": "urn:miot-spec-v2:service:virtual-service:000078E0:xiaomi-hub1:3",
+    "siid": 4,
+    "eiid": 1,
+    "event_type": "urn:miot-spec-v2:event:virtual-event:00005069:xiaomi-hub1:3",
+    "arguments": [
+      1
+    ]
+  },
+  {
+    "model": "xiaomi.hood.cyp10",
+    "spec_type": "urn:miot-spec-v2:device:hood:0000A01B:xiaomi-cyp10:2",
+    "service_type": "urn:miot-spec-v2:service:hood:0000782B:xiaomi-cyp10:1",
+    "siid": 2,
+    "eiid": 1,
+    "event_type": "urn:miot-spec-v2:event:clean-remind:00005056:xiaomi-cyp10:1",
+    "arguments": []
+  },
+  {
+    "model": "xiaomi.hood.cyp10",
+    "spec_type": "urn:miot-spec-v2:device:hood:0000A01B:xiaomi-cyp10:2",
+    "service_type": "urn:miot-spec-v2:service:hood:0000782B:xiaomi-cyp10:1",
+    "siid": 2,
+    "eiid": 4,
+    "event_type": "urn:miot-spec-v2:event:auto-ventilation-open:000050A0:xiaomi-cyp10:1",
+    "arguments": []
+  },
+  {
+    "model": "xiaomi.hood.cyp10",
+    "spec_type": "urn:miot-spec-v2:device:hood:0000A01B:xiaomi-cyp10:2",
+    "service_type": "urn:miot-spec-v2:service:hood:0000782B:xiaomi-cyp10:1",
+    "siid": 2,
+    "eiid": 5,
+    "event_type": "urn:miot-spec-v2:event:auto-ventilation-close:000050A1:xiaomi-cyp10:1",
+    "arguments": []
+  },
+  {
+    "model": "xiaomi.hood.cyp10",
+    "spec_type": "urn:miot-spec-v2:device:hood:0000A01B:xiaomi-cyp10:2",
+    "service_type": "urn:miot-spec-v2:service:hood:0000782B:xiaomi-cyp10:1",
+    "siid": 2,
+    "eiid": 6,
+    "event_type": "urn:miot-spec-v2:event:auto-ventilation-invalid:000050A2:xiaomi-cyp10:1",
+    "arguments": []
+  },
+  {
+    "model": "xiaomi.hood.cyp10",
+    "spec_type": "urn:miot-spec-v2:device:hood:0000A01B:xiaomi-cyp10:2",
+    "service_type": "urn:miot-spec-v2:service:hood:0000782B:xiaomi-cyp10:1",
+    "siid": 2,
+    "eiid": 7,
+    "event_type": "urn:miot-spec-v2:event:oil-cup-clean-remind:000050A3:xiaomi-cyp10:1",
+    "arguments": []
+  },
+  {
+    "model": "xiaomi.hood.cyp10",
+    "spec_type": "urn:miot-spec-v2:device:hood:0000A01B:xiaomi-cyp10:2",
+    "service_type": "urn:miot-spec-v2:service:hood:0000782B:xiaomi-cyp10:1",
+    "siid": 2,
+    "eiid": 8,
+    "event_type": "urn:miot-spec-v2:event:oil-cup-clean-remind:000050A3:xiaomi-cyp10:1",
+    "arguments": []
+  },
+  {
+    "model": "xiaomi.hood.cyp10",
+    "spec_type": "urn:miot-spec-v2:device:hood:0000A01B:xiaomi-cyp10:2",
+    "service_type": "urn:miot-spec-v2:service:hood:0000782B:xiaomi-cyp10:1",
+    "siid": 2,
+    "eiid": 9,
+    "event_type": "urn:miot-spec-v2:event:auto-ventilation-open:000050A0:xiaomi-cyp10:1",
+    "arguments": []
+  },
+  {
+    "model": "xiaomi.hood.cyp10",
+    "spec_type": "urn:miot-spec-v2:device:hood:0000A01B:xiaomi-cyp10:2",
+    "service_type": "urn:miot-spec-v2:service:kitchen-stove:00007869:xiaomi-cyp10:1",
+    "siid": 7,
+    "eiid": 1,
+    "event_type": "urn:miot-spec-v2:event:working-remind:00005068:xiaomi-cyp10:1",
+    "arguments": []
+  },
+  {
+    "model": "xiaomi.hood.cyp10",
+    "spec_type": "urn:miot-spec-v2:device:hood:0000A01B:xiaomi-cyp10:2",
+    "service_type": "urn:miot-spec-v2:service:kitchen-stove:00007869:xiaomi-cyp10:1",
+    "siid": 7,
+    "eiid": 2,
+    "event_type": "urn:miot-spec-v2:event:off-on-time:0000506A:xiaomi-cyp10:1",
+    "arguments": []
+  },
+  {
+    "model": "xiaomi.hood.cyp10",
+    "spec_type": "urn:miot-spec-v2:device:hood:0000A01B:xiaomi-cyp10:2",
+    "service_type": "urn:miot-spec-v2:service:kitchen-stove:00007869:xiaomi-cyp10:1",
+    "siid": 7,
+    "eiid": 3,
+    "event_type": "urn:miot-spec-v2:event:cooking-finished:0000501C:xiaomi-cyp10:2",
+    "arguments": []
+  },
+  {
+    "model": "xiaomi.hood.cyp10",
+    "spec_type": "urn:miot-spec-v2:device:hood:0000A01B:xiaomi-cyp10:2",
+    "service_type": "urn:miot-spec-v2:service:hood-smart-dry-wash:000078F7:xiaomi-cyp10:1",
+    "siid": 10,
+    "eiid": 1,
+    "event_type": "urn:miot-spec-v2:event:dry-cleaning-timing-remind:0000509A:xiaomi-cyp10:1",
+    "arguments": []
+  },
+  {
+    "model": "xiaomi.hood.cyp10",
+    "spec_type": "urn:miot-spec-v2:device:hood:0000A01B:xiaomi-cyp10:2",
+    "service_type": "urn:miot-spec-v2:service:battery:00007805:xiaomi-cyp10:1",
+    "siid": 11,
+    "eiid": 1,
+    "event_type": "urn:miot-spec-v2:event:low-battery:00005003:xiaomi-cyp10:1",
+    "arguments": []
+  },
+  {
+    "model": "xiaomi.hood.cyp10",
+    "spec_type": "urn:miot-spec-v2:device:hood:0000A01B:xiaomi-cyp10:2",
+    "service_type": "urn:miot-spec-v2:service:environment:0000780A:xiaomi-cyp10:1",
+    "siid": 12,
+    "eiid": 1,
+    "event_type": "urn:miot-spec-v2:event:pm-warning:0000509F:xiaomi-cyp10:1",
+    "arguments": []
+  }
+]

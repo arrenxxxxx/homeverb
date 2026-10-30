@@ -866,3 +866,18 @@ startup tuples or values fail before creating a profile; unsupported exact sourc
 missing independent grants or absent trusted approval fail before send. The new
 indicator tuple does not authorize power. Ambiguous or foreign replies after send
 remain unknown, without renewal, fallback, replay or optimistic state.
+
+
+## Typed Mijia event occurrence history
+
+ADR-0115 reuses existing error codes. Unknown model/spec/event tuples or unsupported
+modern logical kinds return CAPABILITY_UNSUPPORTED before networking. Invalid
+windows return INVALID_ARGUMENT. Foreign modern subject or mapping identity
+returns DEVICE_IDENTITY_CONFLICT. Invalid catalog syntax, malformed envelopes,
+excessive pages and missing/foreign object-row correlation return
+MIJIA_INVALID_RESPONSE without exposing provider text or opaque event data.
+Malformed timestamps and missing value fields count as rejected rows; they never
+become current observations. Authentication failures remain AUTH_REQUIRED, and
+CANCELLED/DEADLINE_EXCEEDED stop the operation without retry or renewal. Full/empty
+pages retain unproven completeness rather than proving delivery or absence.
+No public error/result schema or native API version changes in this typed phase.

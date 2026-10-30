@@ -875,49 +875,44 @@ async fn statistics_tls_uses_fixed_legacy_route_and_encryption_headers_once() {
     );
 }
 #[tokio::test]
-async fn property_history_tls_uses_fixed_legacy_route_and_encryption_headers_once() {
-    assert_eq!(
-        request(CloudEndpoint::PropertyHistory)
-            .url()
-            .unwrap()
-            .as_str(),
-        "https://api.io.mi.com/app/user/get_user_device_data"
-    );
-    let server = Server::start(
-        b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\n{}".to_vec(),
-        false,
-    )
-    .await;
-    transmit(
-        server.client.clone(),
-        Url::parse(&server.url).unwrap(),
-        &request(CloudEndpoint::PropertyHistory),
-        None,
-        &operation(),
-    )
-    .await
-    .unwrap();
-    {
-        let requests = server.requests.lock().unwrap();
-        assert_eq!(requests.len(), 1);
-        let wire = String::from_utf8_lossy(&requests[0]);
-        assert!(wire.starts_with("POST "));
-        assert!(wire.contains("miot-encrypt-algorithm: ENCRYPT-RC4"));
-        assert!(wire.contains("x-xiaomi-protocal-flag-cli: PROTOCAL-HTTP2"));
-        assert!(wire.ends_with("data=fictional"));
+async fn property_and_event_history_tls_uses_fixed_legacy_route_and_encryption_headers_once() {
+    for endpoint in [CloudEndpoint::PropertyHistory, CloudEndpoint::EventHistory] {
+        assert_eq!(
+            request(endpoint).url().unwrap().as_str(),
+            "https://api.io.mi.com/app/user/get_user_device_data"
+        );
+        let server = Server::start(
+            b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\n{}".to_vec(),
+            false,
+        )
+        .await;
+        transmit(
+            server.client.clone(),
+            Url::parse(&server.url).unwrap(),
+            &request(endpoint),
+            None,
+            &operation(),
+        )
+        .await
+        .unwrap();
+        {
+            let requests = server.requests.lock().unwrap();
+            assert_eq!(requests.len(), 1);
+            let wire = String::from_utf8_lossy(&requests[0]);
+            assert!(wire.starts_with("POST "));
+            assert!(wire.contains("miot-encrypt-algorithm: ENCRYPT-RC4"));
+            assert!(wire.contains("x-xiaomi-protocal-flag-cli: PROTOCAL-HTTP2"));
+            assert!(wire.ends_with("data=fictional"));
+        }
+        assert_eq!(
+            MijiaHttps
+                .send_control(&request(endpoint), &WriteProgress::default(), &operation())
+                .await
+                .unwrap_err()
+                .code,
+            "CAPABILITY_UNSUPPORTED"
+        );
     }
-    assert_eq!(
-        MijiaHttps
-            .send_control(
-                &request(CloudEndpoint::PropertyHistory),
-                &WriteProgress::default(),
-                &operation()
-            )
-            .await
-            .unwrap_err()
-            .code,
-        "CAPABILITY_UNSUPPORTED"
-    );
 }
 
 fn modern_request(endpoint: crate::ModernAuthEndpoint) -> crate::ModernAuthRequest {
@@ -1050,14 +1045,20 @@ async fn modern_reference_tls_has_exact_read_headers_and_refuses_redirect_encodi
         E::Properties,
         E::Statistics,
         E::PropertyHistory,
+        E::EventHistory,
     ] {
         assert_eq!(
             Url::parse(endpoint.url()).unwrap().host_str(),
-            Some(if matches!(endpoint, E::Statistics | E::PropertyHistory) {
-                "api.mijia.tech"
-            } else {
-                "core.api.mijia.tech"
-            })
+            Some(
+                if matches!(
+                    endpoint,
+                    E::Statistics | E::PropertyHistory | E::EventHistory
+                ) {
+                    "api.mijia.tech"
+                } else {
+                    "core.api.mijia.tech"
+                }
+            )
         );
         for mode in 0..11 {
             let reply=match mode {
@@ -1105,7 +1106,10 @@ async fn modern_reference_tls_has_exact_read_headers_and_refuses_redirect_encodi
             assert!(wire.contains("user-agent: Android-13-11.7.709-XiaomiHome"));
             assert_eq!(
                 wire.contains("x-xiaomi-protocal-flag-cli: PROTOCAL-HTTP2"),
-                matches!(endpoint, E::Statistics | E::PropertyHistory)
+                matches!(
+                    endpoint,
+                    E::Statistics | E::PropertyHistory | E::EventHistory
+                )
             );
             assert!(wire.contains("cUserId=fictional-c-user"));
             assert!(!wire.contains("passToken"));
@@ -1121,6 +1125,7 @@ async fn modern_reference_tls_untrusted_peer_cancellation_deadline_and_drop_are_
     for endpoint in [
         crate::ModernReadEndpoint::Directory,
         crate::ModernReadEndpoint::PropertyHistory,
+        crate::ModernReadEndpoint::EventHistory,
     ] {
         for mode in 0..5 {
             let server = Server::start(vec![], true).await;

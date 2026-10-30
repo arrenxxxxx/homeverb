@@ -1,5 +1,15 @@
 # Platform and device compatibility matrix
 
+## Typed Mijia event occurrence history -- October 30, 2026
+
+ADR-0115 adds experimental typed Rust history for 78 exact pinned event selectors.
+It reports timestamps only, with unproven completeness; it supplies no event
+payload, current-state, alarm-delivery or physical-count guarantee. Public native
+API 1.43, ordinary JSON/CLI/MCP, App, SQLite 5 and protected payload 3 are unchanged.
+The unreleased Rust endpoint enums gain EventHistory, requiring downstream
+exhaustive matches to handle that variant. Core/native/App adoption and real
+provider/phone/model acceptance remain pending. The 85fefd8 APK is unchanged.
+
 ## Foreground App switch and outlet settings -- October 30, 2026
 
 Flutter now adopts ADR-0114's seven additional property controls. New exact

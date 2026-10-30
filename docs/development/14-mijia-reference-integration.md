@@ -88,7 +88,7 @@ not change the six actions included in the ab34f21 APK.
 | 28 opaque readable values | Separate typed/business/privacy contracts required |
 | 3 network identity values | Excluded from state and exports |
 | 40 actions | Eleven exact empty-input actions have Core/native/App support, including five elevated power toggles under ADR-0110/0111; four maintenance/stop actions also have Core/native/App support under ADR-0112/0113; the other 25 actions remain incomplete |
-| 78 events | No event-history/subscription body, paging or lifecycle contract; not implemented |
+| 78 events | Typed legacy/modern occurrence-time history under ADR-0115; Core/native/App, payload semantics, paging and subscriptions remain incomplete |
 
 The archived successful reads used **SID `mijia`** and
 `https://core.api.mijia.tech/app`, with a continuous RC4 stream across encrypted
@@ -2192,3 +2192,41 @@ This package contains all 40 admitted scalar controls across eight exact models
 and 15 admitted actions, including trusted power and maintenance confirmation.
 The other 185 writable definitions, 25 actions, 78 events, specialized paths and
 real provider/phone/model acceptance remain incomplete.
+
+
+## Typed reported event occurrences -- October 30, 2026
+
+[ADR-0115](../adr/0115-mijia-reported-event-occurrences.md) adds an exact public
+78-event catalog and one-page legacy/modern history requests using the documented
+MIoT siid.eiid key. Each request selects one pinned model/specification/event,
+at most 31 records and a positive half-open UTC window no longer than 32 days.
+Modern history retains its separate community origin and per-field codec.
+There is no retry, renewal, protocol fallback, subscription or background work.
+
+Results contain only provider-reported timestamps. Every object row must match
+the selected did/key/type; malformed time/value shape is counted as rejected.
+Opaque payloads, actors and media are omitted. Equal timestamps remain separate
+rows without uniqueness or physical-count claims. Completeness remains unproven,
+and a full page is a limit signal, not a continuation cursor or delivery guarantee.
+Custom cuco-spec/madv-spec/xiaomi-spec event URNs retain their exact identities;
+shared device/property namespace admission is unchanged.
+
+This is typed protocol support only. Core protected membership/policy integration,
+Host/native/App adoption, event argument semantics, paging and subscriptions remain
+incomplete. API 1.43, saved formats, descriptors and the 85fefd8 APK are unchanged.
+No real provider/account/device operation, installation, push or publication occurred.
+
+Executed verification: Rust 1.96 offline/locked workspace tests passed 710 tests
+with one opt-in test ignored and the known macOS Meiju LAN-alias package excluded;
+all tests used four test threads. This includes 284 Mijia unit tests and 14
+compile-fail examples. Strict workspace Clippy, formatting and the native FFI
+build passed. All three public-reference projection tests passed, including an
+independent comparison of every event against the digest-pinned archive. Contract
+validation passed 25 schemas, 83 positive and 1,855 negative fixtures. These are
+synthetic/local checks, not real-provider or phone evidence.
+
+The rebuilt actual C ABI passed all 36 ordinary methods, 84 live fictional examples
+and 76 modern-account refusal/buffer/lifecycle cases, plus the existing trusted
+approval/scan/link/identity boundaries. A fresh origin fetch retained main at
+ccf2975, already an ancestor, with zero new merge commits. No mobile source or
+package changed during this protocol-only phase.

@@ -11,6 +11,7 @@ ARCHIVE = ROOT / 'docs/adapter-references/2026-10-22/xiaomi-home-11.7.709-73335d
 DIGEST = 'cb0c7f5855be9b647ca9124999b35d612de58be7a1cd6657fbefba88d0fa00c4'
 CATALOG = ROOT / 'crates/mijia/src/reference_profiles.json'
 ACTION_CATALOG = ROOT / 'crates/mijia/src/action_profiles.json'
+EVENT_CATALOG = ROOT / 'crates/mijia/src/event_profiles.json'
 LEDGER = ROOT / 'docs/development/mijia-interface-coverage.json'
 SCALARS = {'bool', 'uint8', 'uint16', 'uint32', 'int8', 'int16', 'int32', 'float'}
 
@@ -76,7 +77,7 @@ def project():
     with zipfile.ZipFile(ARCHIVE) as archive:
         models = json.loads(archive.read('models.json'))['models']
         contract = json.loads(archive.read('contract.json'))
-    profiles, ledger, action_profiles = [], [], []
+    profiles, ledger, action_profiles, event_profiles = [], [], [], []
     for model in models:
         services, entries = [], []
         for service in model['services']:
@@ -112,7 +113,14 @@ def project():
                                                if kind == 'action' and admitted_power_action(model['model'], service['iid'], item['iid'])
                                                else 'implemented_core_native_app_action'
                                                if kind == 'action' and admitted_action(model['model'], service['iid'], item['iid'])
+                                               else 'typed_occurrence_history_only_core_native_app_pending'
+                                               if kind == 'event'
                                                else 'blocked_runtime_contract_and_separate_admission')})
+                    if kind == 'event':
+                        event_profiles.append({'model': model['model'], 'spec_type': model['spec_urn'],
+                                               'service_type': service['type'], 'siid': service['iid'],
+                                               'eiid': item['iid'], 'event_type': item['type'],
+                                               'arguments': item['arguments']})
                     if kind == 'action' and admitted_action(model['model'], service['iid'], item['iid']):
                         if item.get('in') != [] or item.get('out') != []:
                             raise ValueError('The reviewed action must have no inputs or outputs.')
@@ -224,6 +232,19 @@ def project():
                               'modern_api_origin_and_codec_acceptance', 'cloud_cache_inventory_reconciliation',
                               'specialized_failed_property_read_paths', 'BLE_and_LAN', 'history_and_events',
                               'health_and_media', 'additional_write_runtime_contracts']}
+    coverage['reported_event_history'] = {
+        'status': 'implemented_typed_protocol_occurrence_times_only',
+        'evidence': 'ADR-0115; pinned public SDK MIoT event keys and community history envelope',
+        'event_definitions': len(event_profiles), 'route': '/user/get_user_device_data',
+        'legacy_origin': 'https://api.io.mi.com/app',
+        'modern_origin': 'https://api.mijia.tech/app',
+        'codec': 'per_field_rc4_drop1024', 'request_type': 'event',
+        'key': 'exact_siid_dot_eiid', 'maximum_records': 31, 'maximum_window_days': 32,
+        'returned_data': 'reported_timestamps_only_without_payload_or_actor',
+        'completeness': 'unproven', 'core_native_app': 'pending',
+        'payload_semantics_pagination_and_subscriptions': 'pending',
+        'provider_acceptance': 'pending',
+    }
     coverage['no_argument_actions'] = {
         'status': 'implemented_core_native_app_and_protocol', 'evidence': 'ADR-0107/0108/0109',
         'exact_actions': 6, 'route': '/miotspec/action',
@@ -261,7 +282,7 @@ def project():
         'android_package': 'archive_checked_87f3410_no_runtime_acceptance',
         'provider_acceptance': 'pending',
     }
-    return {CATALOG: profiles, LEDGER: coverage, ACTION_CATALOG: action_profiles}
+    return {CATALOG: profiles, LEDGER: coverage, ACTION_CATALOG: action_profiles, EVENT_CATALOG: event_profiles}
 
 
 def main():

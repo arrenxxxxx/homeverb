@@ -21,7 +21,8 @@ and owner-run physical acceptance.
 The expanded library suite also covers bounded home-page unions, private identity
 conflicts, pagination cycles and partial failures, exact released MIoT model
 selection, readable fan/doorbell/lock/battery mapping and public-spec credential
-isolation. No lock action, event history or physical support follows from it.
+isolation. No lock action or physical support follows from those checks. Typed event history
+is covered separately under ADR-0115 below.
 
 Protected account/Core tests use actual temporary SQLite and an injected fictional
 secret store and cloud. They exercise stable IDs/preferences, same-subject reconnect,
@@ -999,3 +1000,24 @@ fields through bilingual controls. Include existing outlet/action/maintenance,
 permission, control, native, approval and foreground-refresh regressions, plus
 Flutter analysis. The native fixtures use fictional identities and no provider
 traffic; UI tests do not establish physical-device support.
+
+
+## Typed reported Mijia event history
+
+Run the following with fictional data and local TLS peers only:
+
+```sh
+python3 scripts/extract_mijia_reference_facts.py --check
+python3 -m unittest discover -s tests -p test_mijia_reference.py -v
+cargo +1.96.0 test -p homeverb-mijia event_history --offline --locked -- --test-threads=4
+cargo +1.96.0 test -p homeverb-mijia transport::tests --offline --locked -- --test-threads=4
+```
+
+ADR-0115 tests every one of the 78 exact source tuples on each protocol, preserving
+vendor namespaces and refusing foreign model/spec/event selections before send.
+Verify request signatures and separate origins/codecs; malformed/foreign/missing
+correlations; positive time-window, response/count and decompression bounds;
+opaque payload omission; same-second rows; unproven empty/full pages; auth failure;
+late results; cancellation, deadline and future drop without retry. These typed
+checks do not establish protected Core membership, native/App support, payload
+interpretation, pagination, subscriptions or real-provider retention/delivery.

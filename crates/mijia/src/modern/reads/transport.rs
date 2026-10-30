@@ -11,6 +11,7 @@ pub enum ModernReadEndpoint {
     /// Community statistics profile; distinct origin and per-field codec.
     Statistics,
     PropertyHistory,
+    EventHistory,
 }
 impl ModernReadEndpoint {
     pub fn path(self) -> &'static str {
@@ -19,7 +20,7 @@ impl ModernReadEndpoint {
             Self::Homes => "/v2/homeroom/gethome_merged",
             Self::Properties => "/miotspec/prop/get",
             Self::Statistics => "/v2/user/statistics",
-            Self::PropertyHistory => "/user/get_user_device_data",
+            Self::PropertyHistory | Self::EventHistory => "/user/get_user_device_data",
         }
     }
     pub fn url(self) -> &'static str {
@@ -28,7 +29,9 @@ impl ModernReadEndpoint {
             Self::Homes => "https://core.api.mijia.tech/app/v2/homeroom/gethome_merged",
             Self::Properties => "https://core.api.mijia.tech/app/miotspec/prop/get",
             Self::Statistics => "https://api.mijia.tech/app/v2/user/statistics",
-            Self::PropertyHistory => "https://api.mijia.tech/app/user/get_user_device_data",
+            Self::PropertyHistory | Self::EventHistory => {
+                "https://api.mijia.tech/app/user/get_user_device_data"
+            }
         }
     }
 }
@@ -109,7 +112,9 @@ pub(crate) async fn transmit(
             cookie.set_sensitive(true);
             let limit = if matches!(
                 request.endpoint,
-                ModernReadEndpoint::Statistics | ModernReadEndpoint::PropertyHistory
+                ModernReadEndpoint::Statistics
+                    | ModernReadEndpoint::PropertyHistory
+                    | ModernReadEndpoint::EventHistory
             ) {
                 crate::MAX_RESPONSE_BYTES
             } else {
@@ -126,7 +131,9 @@ pub(crate) async fn transmit(
                 .body(request.body.expose().to_vec());
             if matches!(
                 request.endpoint,
-                ModernReadEndpoint::Statistics | ModernReadEndpoint::PropertyHistory
+                ModernReadEndpoint::Statistics
+                    | ModernReadEndpoint::PropertyHistory
+                    | ModernReadEndpoint::EventHistory
             ) {
                 outgoing = outgoing.header("x-xiaomi-protocal-flag-cli", "PROTOCAL-HTTP2");
             }
