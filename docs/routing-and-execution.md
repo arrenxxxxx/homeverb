@@ -849,3 +849,25 @@ ventilation policy or timer write is appended to satisfy another setting.
 A correlated acknowledgement is accepted, never verified physical operation.
 Possible-send timeout, cancellation or malformed acknowledgement remains unknown
 without replay or cross-protocol fallback. Existing receipt/request-ID guards apply.
+
+
+## Typed non-idempotent Mijia actions
+
+ADR-0107 adds six exact no-argument protocol primitives, with no Core action or
+host grant yet. Every admitted attempt uses a params object and one selected
+legacy/modern tracked control transport. Complete protected root identity and
+exact model/specification/SIID/AIID precede sending; no caller arguments or
+unreviewed outputs are admitted. Public property catalogs and saved payloads
+remain unchanged. A consumed WriteProgress cannot send again on either transport.
+
+Only a correlated encrypted global-success/result-code-zero acknowledgement
+marks accepted. Explicit reviewed pre-execution rejection is separate from code 1,
+execution errors, return errors, timeouts and unknown codes, which remain possibly
+sent. Cancellation, drop, uncorrelated/malformed outputs and global/HTTP failures
+never prove physical rollback or authorize replay. No retry, renewal, fallback,
+verification read or state mutation follows. Core request-ID receipt integration
+is required before exposing these non-idempotent actions through native/App.
+Public schemas are unchanged; positive/negative executable protocol fixtures are
+in crates/mijia/src/action/tests.rs and
+crates/mijia/src/modern/reads/tests/actions.rs, with actual local TLS matrices in
+crates/mijia/src/transport/tests.rs. This evidence is not provider acceptance.

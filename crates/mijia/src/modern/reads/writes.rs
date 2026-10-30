@@ -76,6 +76,7 @@ impl ModernMijiaSession {
                     &codec::nonce()?,
                 )?;
                 let request = ModernControlRequest {
+                    endpoint: crate::ModernControlEndpoint::SetProperty,
                     body,
                     cookie: PrivateString::new(format!(
                         "cUserId={}; serviceToken={}; yetAnotherServiceToken={}; countryCode=CN",

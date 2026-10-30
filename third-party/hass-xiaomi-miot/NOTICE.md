@@ -33,3 +33,12 @@ On October 29, 2026, the same pinned revision's `switch.py`, `core/device.py` an
 control behavior. BLE/event examples in `binary_sensor.py` and `sensor.py` were
 also reviewed without transferring their keys to unrelated models. These are
 protocol/design inputs for ADR-0091, not copied source or physical acceptance.
+
+On October 30, 2026, the same pinned revision's `core/xiaomi_cloud.py`,
+`core/device.py` and `core/miot_spec.py` supplied the action request object,
+empty input/output references and differentiated error-code facts used by
+[ADR-0107](../../docs/adr/0107-bounded-no-argument-actions.md). HomeVerb's Rust
+implementation is independent and does not adopt automatic relogin/retry or
+code-1 success semantics. Exact action definitions come from the separately
+pinned public specification projection. No community Python code or HA runtime
+is bundled; modern-profile interoperability and physical acceptance remain open.

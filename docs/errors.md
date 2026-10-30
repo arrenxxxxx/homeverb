@@ -38,7 +38,7 @@ failure or proof that unseen devices disappeared. See
 | MIJIA_AUTH_CHALLENGE_REQUIRED | Mijia requires CAPTCHA or additional account verification | Login remains incomplete; do not retry automatically or expose private challenge URLs |
 | MIJIA_INVALID_RESPONSE | Malformed, oversized, uncorrelated or unsafe Mijia protocol data | Preserve existing evidence and refuse the response |
 | MIJIA_REQUEST_FAILED | Mijia TLS/HTTP operation failed, redirected or disconnected | No implicit retry or authentication; report the bounded failure |
-| MIJIA_REQUEST_REJECTED | Mijia returned a non-success protocol code | Keep sanitized errors; raw vendor messages are private. For the low-level write protocol, only an exact correlated item rejection establishes rejected; global/HTTP errors after send remain uncertain |
+| MIJIA_REQUEST_REJECTED | Mijia returned a non-success protocol code | Keep sanitized errors; raw vendor messages are private. For property writes, only an exact correlated item rejection establishes rejected; for MIoT actions, the code must additionally prove reviewed pre-execution refusal; global/HTTP errors after send remain uncertain |
 | MIJIA_INVENTORY_PARTIAL | Mijia device enumeration is explicitly truncated | Do not remove prior cards or claim complete inventory |
 | MIJIA_SPEC_UNAVAILABLE | Optional public MIoT metadata is unavailable within its budget | Keep named device cards; retry capability lookup only on explicit account refresh |
 | MIJIA_DEVICE_NOT_LISTED | Protected Mijia membership does not admit the selected device | Refuse before any property request; do not trust public card metadata as authority |
@@ -798,3 +798,19 @@ admission or protected source evidence refuses before send. Old Flutter/native
 negotiation reports API_UPGRADE_REQUIRED before granting or refreshing. Rejected
 and uncertain acknowledgements retain their distinct existing receipt phases;
 no error authorizes a companion power-on write or retry.
+
+
+## Typed Mijia action errors
+
+Under ADR-0107, six exact no-input actions use a result object with correlated
+DID/SIID/AIID. The existing MIJIA_REQUEST_REJECTED code represents only reviewed
+pre-execution refusal: -4003, -4006, -4007 and nine-digit negative 70-prefix codes
+ending in 005, 008, 025 or 035. Code 1, execution errors, return errors, timeouts
+and unknown result codes return MIJIA_REQUEST_FAILED while retaining possibly-sent
+progress. Malformed, duplicate, missing or foreign correlations and nonempty out
+return MIJIA_INVALID_RESPONSE, also without proving non-execution. Global auth
+failures may return AUTH_REQUIRED but never reset write progress or renew/retry.
+Cancellation/deadline after send leaves uncertainty; a late valid reply cannot
+mark accepted. Public error schemas and native methods are unchanged; protocol
+fixtures cover these distinctions on both legacy and modern profiles. Core and
+App action exposure and persistent receipt admission remain separate work.

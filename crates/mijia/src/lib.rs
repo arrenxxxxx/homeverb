@@ -1,6 +1,8 @@
 //! Bounded native Mijia cloud protocol. No background tasks or implicit controls.
 
+mod action;
 mod adapter;
+pub use action::ActionQuery;
 mod auth;
 mod codec;
 mod control;
@@ -25,11 +27,11 @@ pub use control::PropertyWrite;
 pub use inventory::{CloudDevice, Inventory, PropertyQuery, PropertyReading};
 pub use modern::{
     ModernAuthEndpoint, ModernAuthRequest, ModernAuthResponse, ModernAuthTransport,
-    ModernContentEncoding, ModernControlRequest, ModernControlResponse, ModernControlTransport,
-    ModernDeviceGroup, ModernDeviceInventory, ModernDirectory, ModernDirectoryEntry, ModernHome,
-    ModernHomes, ModernMijiaSession, ModernQrChallenge, ModernReadEndpoint, ModernReadRequest,
-    ModernReadResponse, ModernReadTransport, ModernUnresolvedEntry, ModernUnresolvedReason,
-    begin_modern_qr_login,
+    ModernContentEncoding, ModernControlEndpoint, ModernControlRequest, ModernControlResponse,
+    ModernControlTransport, ModernDeviceGroup, ModernDeviceInventory, ModernDirectory,
+    ModernDirectoryEntry, ModernHome, ModernHomes, ModernMijiaSession, ModernQrChallenge,
+    ModernReadEndpoint, ModernReadRequest, ModernReadResponse, ModernReadTransport,
+    ModernUnresolvedEntry, ModernUnresolvedReason, begin_modern_qr_login,
 };
 pub use property_history::{NumericPropertyHistory, NumericPropertyRecord, PropertyHistoryWindow};
 pub use spec::{

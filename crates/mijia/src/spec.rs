@@ -119,7 +119,7 @@ impl SpecIndex {
     }
 }
 
-fn urn<'a>(value: &'a str, category: &str) -> Result<(&'a str, &'a str)> {
+pub(crate) fn urn<'a>(value: &'a str, category: &str) -> Result<(&'a str, &'a str)> {
     let parts: Vec<_> = value.split(':').collect();
     if value.len() > 512
         || !matches!(parts.len(), 7 | 8)

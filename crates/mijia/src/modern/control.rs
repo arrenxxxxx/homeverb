@@ -1,11 +1,32 @@
-//! Fixed modern property control transport with an independent send boundary.
+//! Fixed modern property/action control transport with an independent send boundary.
 use super::*;
 use async_trait::async_trait;
 use homeverb_core::WriteProgress;
 use homeverb_domain::Phase;
 use reqwest::{Client, header::HeaderValue};
 
+/// Closed control endpoints; neither exposes an arbitrary RPC route.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ModernControlEndpoint {
+    SetProperty,
+    Action,
+}
+impl ModernControlEndpoint {
+    pub fn path(self) -> &'static str {
+        match self {
+            Self::SetProperty => "/miotspec/prop/set",
+            Self::Action => "/miotspec/action",
+        }
+    }
+    pub fn url(self) -> &'static str {
+        match self {
+            Self::SetProperty => "https://core.api.mijia.tech/app/miotspec/prop/set",
+            Self::Action => "https://core.api.mijia.tech/app/miotspec/action",
+        }
+    }
+}
 pub struct ModernControlRequest {
+    pub(super) endpoint: ModernControlEndpoint,
     pub(super) body: SecretBytes,
     pub(super) cookie: PrivateString,
 }
@@ -16,10 +37,10 @@ impl fmt::Debug for ModernControlRequest {
 }
 impl ModernControlRequest {
     pub fn path(&self) -> &'static str {
-        "/miotspec/prop/set"
+        self.endpoint.path()
     }
     pub fn url(&self) -> &'static str {
-        "https://core.api.mijia.tech/app/miotspec/prop/set"
+        self.endpoint.url()
     }
     /// Protected buffers are for trusted native transports, never host JSON or logs.
     pub fn body(&self) -> &[u8] {
@@ -147,6 +168,6 @@ pub(crate) async fn transmit(
         .await
 }
 #[cfg(test)]
-pub(crate) fn fixture_request() -> ModernControlRequest {
-    ModernControlRequest { body:SecretBytes::new(b"data=fictional".to_vec()),cookie:PrivateString::new("cUserId=fictional-user; serviceToken=fictional-modern-token; yetAnotherServiceToken=fictional-modern-token; countryCode=CN".into()) }
+pub(crate) fn fixture_request(endpoint: ModernControlEndpoint) -> ModernControlRequest {
+    ModernControlRequest { endpoint, body:SecretBytes::new(b"data=fictional".to_vec()),cookie:PrivateString::new("cUserId=fictional-user; serviceToken=fictional-modern-token; yetAnotherServiceToken=fictional-modern-token; countryCode=CN".into()) }
 }

@@ -1,0 +1,62 @@
+[
+  {
+    "model": "abhome.light.wy0a01",
+    "spec_type": "urn:miot-spec-v2:device:light:0000A001:abhome-wy0a01:1:0000C802",
+    "service_type": "urn:miot-spec-v2:service:light:00007802:abhome-wy0a01:1:0000C802",
+    "siid": 2,
+    "aiid": 1,
+    "action_type": "urn:miot-spec-v2:action:toggle:00002811:abhome-wy0a01:1:0000C802",
+    "in": [],
+    "out": []
+  },
+  {
+    "model": "abhome.light.wy0a01",
+    "spec_type": "urn:miot-spec-v2:device:light:0000A001:abhome-wy0a01:1:0000C802",
+    "service_type": "urn:miot-spec-v2:service:light:00007802:abhome-wy0a01:1:0000C802",
+    "siid": 2,
+    "aiid": 2,
+    "action_type": "urn:miot-spec-v2:action:brightness-up:00002828:abhome-wy0a01:1",
+    "in": [],
+    "out": []
+  },
+  {
+    "model": "abhome.light.wy0a01",
+    "spec_type": "urn:miot-spec-v2:device:light:0000A001:abhome-wy0a01:1:0000C802",
+    "service_type": "urn:miot-spec-v2:service:light:00007802:abhome-wy0a01:1:0000C802",
+    "siid": 2,
+    "aiid": 3,
+    "action_type": "urn:miot-spec-v2:action:brightness-down:00002829:abhome-wy0a01:1",
+    "in": [],
+    "out": []
+  },
+  {
+    "model": "abhome.light.wy0a01",
+    "spec_type": "urn:miot-spec-v2:device:light:0000A001:abhome-wy0a01:1:0000C802",
+    "service_type": "urn:miot-spec-v2:service:light:00007802:abhome-wy0a01:1:0000C802",
+    "siid": 2,
+    "aiid": 4,
+    "action_type": "urn:miot-spec-v2:action:toggle-light-mode:0000287F:abhome-wy0a01:1",
+    "in": [],
+    "out": []
+  },
+  {
+    "model": "jdjz.fan.2072fc",
+    "spec_type": "urn:miot-spec-v2:device:fan:0000A005:jdjz-2072fc:1:0000D062",
+    "service_type": "urn:miot-spec-v2:service:fan:00007808:jdjz-2072fc:1:0000D062",
+    "siid": 2,
+    "aiid": 1,
+    "action_type": "urn:miot-spec-v2:action:toggle:00002811:jdjz-2072fc:1:0000D062",
+    "in": [],
+    "out": []
+  },
+  {
+    "model": "xiaomi.hood.cyp10",
+    "spec_type": "urn:miot-spec-v2:device:hood:0000A01B:xiaomi-cyp10:2",
+    "service_type": "urn:miot-spec-v2:service:light:00007802:xiaomi-cyp10:1",
+    "siid": 6,
+    "aiid": 1,
+    "action_type": "urn:miot-spec-v2:action:toggle:00002811:xiaomi-cyp10:1",
+    "in": [],
+    "out": []
+  }
+]

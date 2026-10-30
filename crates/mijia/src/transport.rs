@@ -25,12 +25,16 @@ pub enum CloudEndpoint {
     Statistics,
     PropertyHistory,
     SetProperty,
+    Action,
     Homes,
     HomeDevices,
     SpecIndex,
     SpecInstance,
 }
 impl CloudEndpoint {
+    fn is_control(self) -> bool {
+        matches!(self, Self::SetProperty | Self::Action)
+    }
     pub fn path(self) -> &'static str {
         match self {
             Self::LoginSign => "/pass/serviceLogin",
@@ -41,6 +45,7 @@ impl CloudEndpoint {
             Self::Statistics => "/v2/user/statistics",
             Self::PropertyHistory => "/user/get_user_device_data",
             Self::SetProperty => "/miotspec/prop/set",
+            Self::Action => "/miotspec/action",
             Self::Homes => "/v2/homeroom/gethome_merged",
             Self::HomeDevices => "/v2/home/home_device_list",
             Self::SpecIndex => "/miot-spec-v2/instances",
@@ -218,7 +223,7 @@ impl CloudTransport for MijiaHttps {
     }
 
     async fn send(&self, request: &CloudRequest, operation: &Operation) -> Result<CloudResponse> {
-        if request.endpoint == CloudEndpoint::SetProperty {
+        if request.endpoint.is_control() {
             return Err(control_unsupported());
         }
         operation
@@ -236,7 +241,7 @@ impl CloudTransport for MijiaHttps {
         progress: &WriteProgress,
         operation: &Operation,
     ) -> Result<CloudResponse> {
-        if request.endpoint != CloudEndpoint::SetProperty {
+        if !request.endpoint.is_control() {
             return Err(control_unsupported());
         }
         operation
@@ -256,10 +261,13 @@ async fn transmit(
     progress: Option<&WriteProgress>,
     operation: &Operation,
 ) -> Result<CloudResponse> {
-    if (request.endpoint == CloudEndpoint::SetProperty) != progress.is_some() {
+    if (request.endpoint.is_control()) != progress.is_some() {
         return Err(control_unsupported());
     }
     operation.run(async {
+        if progress.is_some_and(|p| p.phase() != homeverb_domain::Phase::NotSent) {
+            return Err(invalid());
+        }
         let mut headers = HeaderMap::new();
         let mut cookie = HeaderValue::from_str(request.cookie.as_str()).map_err(|_| invalid())?;
         cookie.set_sensitive(true);
@@ -267,7 +275,7 @@ async fn transmit(
         headers.insert("content-type", HeaderValue::from_static("application/x-www-form-urlencoded"));
         headers.insert("accept-encoding", HeaderValue::from_static("identity"));
         headers.insert("user-agent", HeaderValue::from_static("Android-7.1.1-1.0.0-ONEPLUS A3010-136-ABCDEFABCDEF0 APP/xiaomi.smarthome APPV/62830"));
-        if matches!(request.endpoint, CloudEndpoint::Devices | CloudEndpoint::Properties | CloudEndpoint::Statistics | CloudEndpoint::PropertyHistory | CloudEndpoint::SetProperty | CloudEndpoint::Homes | CloudEndpoint::HomeDevices) {
+        if matches!(request.endpoint, CloudEndpoint::Devices | CloudEndpoint::Properties | CloudEndpoint::Statistics | CloudEndpoint::PropertyHistory | CloudEndpoint::SetProperty | CloudEndpoint::Action | CloudEndpoint::Homes | CloudEndpoint::HomeDevices) {
             headers.insert("miot-encrypt-algorithm", HeaderValue::from_static("ENCRYPT-RC4"));
             headers.insert("x-xiaomi-protocal-flag-cli", HeaderValue::from_static("PROTOCAL-HTTP2"));
         }

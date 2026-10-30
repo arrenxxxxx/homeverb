@@ -72,7 +72,7 @@ cargo +1.96.0 test -p homeverb-mijia --offline --locked
 | 78 non-readable properties | No read operation; write/event-only definitions are not state |
 | 28 opaque readable values | Separate typed/business/privacy contracts required |
 | 3 network identity values | Excluded from state and exports |
-| 40 actions | No new action admission; runtime/firmware/composite constraints and risk review missing |
+| 40 actions | Six exact empty-input actions have typed Rust protocol support under ADR-0107; Core/native/App admission and the remaining 34 actions are incomplete |
 | 78 events | No event-history/subscription body, paging or lifecycle contract; not implemented |
 
 The archived successful reads used **SID `mijia`** and
@@ -1678,3 +1678,40 @@ Documentation, source hygiene, 25 schemas with 73 positive/1320 negative fixture
 two coverage-projection tests and seven presentation tests passed. The existing
 eight full Flutter font/pixel/legacy-click failures were not rerun or claimed fixed.
 No real account, appliance, installation, remote push or publication was used.
+
+## Typed no-argument actions -- October 30, 2026
+
+[ADR-0107](../adr/0107-bounded-no-argument-actions.md) adds six exact typed Rust
+MIoT action primitives on legacy and modern sessions: four light actions, one
+fan toggle and one hood illumination toggle. Each requires its pinned model,
+complete specification and exact SIID/AIID; all inputs and outputs are empty.
+The separate action catalog leaves saved property mappings unchanged. These are
+non-idempotent operations and are not yet exposed through Core/native/App grants.
+
+Each attempt uses one tracked control send on the selected protocol. A correlated
+code-zero result is accepted, never physically verified. Only reviewed
+pre-execution argument/identity/missing-action codes prove rejection. Pending,
+execution-error, timeout, malformed, foreign and late replies remain uncertain;
+there is no retry, renewal or alternate-protocol fallback. Logical children and
+foreign modern subjects refuse before I/O. Cancellation and drop release work.
+
+Native API 1.39, C exports/methods, ordinary schemas, SQLite 5 and protected
+payload 3 are unchanged. Rust exhaustive CloudEndpoint consumers must handle
+Action; ModernControlEndpoint supplies two closed routes. Independent Core action
+bindings/grants, persistent non-idempotent receipts, versioned App integration,
+remaining actions/events and real provider/phone/device acceptance remain open.
+The 503ef1f APK predates these library primitives. No account, appliance,
+installation, push or publication is used.
+
+Executed software checks: the workspace excluding the known unrelated Meiju/macOS
+LAN-alias suite passed 653 tests with one ignored, including 244 Mijia unit tests
+and 14 compile-fail tests. Strict all-target workspace Clippy and formatting
+passed. The three projected files, both projection tests, documentation, source
+hygiene and 25 schemas with 73 positive/1320 negative fixtures passed. These tests
+use fictional data and local TLS only. No Flutter test or new Android package is
+claimed for this protocol-only phase; the existing eight full Flutter visual/
+legacy-click failures remain outside this change.
+
+Rebuilt native FFI and the actual C ABI check also passed: 36 ordinary methods,
+60 live examples and 76 modern-account boundary cases. Existing trusted bridges
+retain their guards; no ordinary action grant or method was added.

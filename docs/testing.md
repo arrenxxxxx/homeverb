@@ -837,3 +837,28 @@ fvm flutter analyze
 These include actual old/new ABI startup probes and English/Chinese narrow
 forms for every exact value. No real account/appliance is used. Build and verify
 a clean matching APK separately before advertising updated Android delivery.
+
+
+## Typed no-argument action protocol
+
+Run `cargo +1.96.0 test -p homeverb-mijia --offline --locked` for ADR-0107.
+Action fixtures cover every six exact tuples on both selected protocol profiles,
+independent request decoding/signatures, complete root suffixes, empty input
+objects, and strict acknowledgement correlation. Code-zero acceptance is separate
+from proven pre-execution rejection and uncertain code 1/execution/return/timeout
+errors. Refusal cases include wrong model/spec/query/kind/subject, logical children,
+invalid identities, consumed progress, plaintext/duplicate/missing/foreign replies,
+nonempty outputs, malformed/bomb/concatenated gzip and size limits.
+
+Both control endpoints run the local HTTPS header/path, redirect, certificate,
+size, cancellation, deadline and drop matrices. A consumed progress marker and
+an untracked action open no connection. Pending protocol futures release resources
+and cannot be replayed; late replies do not mark acceptance. No provider or
+appliance is used. Check all three generated projections with
+`python3 scripts/extract_mijia_reference_facts.py --check` and
+`python3 -m unittest discover -s tests -p test_mijia_reference.py`.
+
+Retain workspace and native ABI regression checks; native API 1.39 and all public
+schemas are unchanged. This typed-library phase adds no Flutter control or package.
+Core binding/grant/receipt tests and native/App adoption are required in a later
+phase before claiming user-callable actions.

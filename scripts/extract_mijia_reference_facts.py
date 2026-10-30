@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ARCHIVE = ROOT / 'docs/adapter-references/2026-10-22/xiaomi-home-11.7.709-73335d3c17df-readonly.zip'
 DIGEST = 'cb0c7f5855be9b647ca9124999b35d612de58be7a1cd6657fbefba88d0fa00c4'
 CATALOG = ROOT / 'crates/mijia/src/reference_profiles.json'
+ACTION_CATALOG = ROOT / 'crates/mijia/src/action_profiles.json'
 LEDGER = ROOT / 'docs/development/mijia-interface-coverage.json'
 SCALARS = {'bool', 'uint8', 'uint16', 'uint32', 'int8', 'int16', 'int32', 'float'}
 
@@ -44,13 +45,19 @@ def admitted_write(model, siid, piid):
     return False
 
 
+def admitted_action(model, siid, aiid):
+    return ((model == 'abhome.light.wy0a01' and siid == 2 and aiid in {1, 2, 3, 4})
+            or (model == 'jdjz.fan.2072fc' and siid == 2 and aiid == 1)
+            or (model == 'xiaomi.hood.cyp10' and siid == 6 and aiid == 1))
+
+
 def project():
     if hashlib.sha256(ARCHIVE.read_bytes()).hexdigest() != DIGEST:
         raise ValueError('The reviewed Mijia archive changed.')
     with zipfile.ZipFile(ARCHIVE) as archive:
         models = json.loads(archive.read('models.json'))['models']
         contract = json.loads(archive.read('contract.json'))
-    profiles, ledger = [], []
+    profiles, ledger, action_profiles = [], [], []
     for model in models:
         services, entries = [], []
         for service in model['services']:
@@ -80,7 +87,16 @@ def project():
                 for item in service.get(key, []):
                     entries.append({'kind': kind, 'siid': service['iid'], 'iid': item['iid'],
                                     'name': item['type'].split(':')[3],
-                                    'status': 'blocked_runtime_contract_and_separate_admission'})
+                                    'status': ('implemented_typed_rust_action_protocol_only'
+                                               if kind == 'action' and admitted_action(model['model'], service['iid'], item['iid'])
+                                               else 'blocked_runtime_contract_and_separate_admission')})
+                    if kind == 'action' and admitted_action(model['model'], service['iid'], item['iid']):
+                        if item.get('in') != [] or item.get('out') != []:
+                            raise ValueError('The reviewed action must have no inputs or outputs.')
+                        action_profiles.append({'model': model['model'], 'spec_type': model['spec_urn'],
+                                                'service_type': service['type'], 'siid': service['iid'],
+                                                'aiid': item['iid'], 'action_type': item['type'],
+                                                'in': [], 'out': []})
             if properties:
                 services.append({'iid': service['iid'], 'type': service['type'], 'properties': properties})
         if model['spec_urn']:
@@ -99,11 +115,15 @@ def project():
     operations = [{'id': o['id'], 'route': o['route'],
                    'status': ('legacy_host_and_modern_typed_read' if o['id'] in ('directory', 'homes', 'properties')
                               else 'implemented_exact_granted_legacy_and_modern_property_set'
-                              if o['id'] == 'property_write_candidate' else 'not_admitted_by_reference'),
+                              if o['id'] == 'property_write_candidate'
+                              else 'implemented_six_typed_no_argument_actions_only' if o['id'] == 'action_candidate'
+                              else 'not_admitted_by_reference'),
                    'reason': ('Modern reference-origin typed reads and protected accounts are implemented; native and Flutter device publication and Core reads are implemented; provider acceptance remains pending.'
                               if o['id'] in ('directory', 'homes', 'properties')
                               else 'ADR-0104/0106 admit 33 reviewed scalar mappings across five exact models with grants and trusted elevated approval; no arbitrary setter or physical acceptance.'
                               if o['id'] == 'property_write_candidate'
+                              else 'ADR-0107 supplies six exact typed-only empty-input actions; Core/native/App action admission and real acceptance remain pending.'
+                              if o['id'] == 'action_candidate'
                               else 'No credential crossover or arbitrary RPC; separate exact control admission is required.')}
                   for o in contract['operations']]
     coverage = {'reference_sha256': DIGEST, 'status': 'partial_implementation',
@@ -180,7 +200,15 @@ def project():
                               'modern_api_origin_and_codec_acceptance', 'cloud_cache_inventory_reconciliation',
                               'specialized_failed_property_read_paths', 'BLE_and_LAN', 'history_and_events',
                               'health_and_media', 'additional_write_runtime_contracts']}
-    return {CATALOG: profiles, LEDGER: coverage}
+    coverage['no_argument_actions'] = {
+        'status': 'implemented_typed_rust_protocol_only', 'evidence': 'ADR-0107',
+        'exact_actions': 6, 'route': '/miotspec/action',
+        'legacy_profile': 'SID_xiaomiio_api_io_mi_com_per_field',
+        'modern_profile': 'SID_mijia_core_api_mijia_tech_continuous',
+        'core_native_app': 'pending_independent_grants_and_non_idempotent_receipts',
+        'provider_acceptance': 'pending',
+    }
+    return {CATALOG: profiles, LEDGER: coverage, ACTION_CATALOG: action_profiles}
 
 
 def main():
