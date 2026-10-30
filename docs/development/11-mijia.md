@@ -4,7 +4,7 @@ October 25: 17 exact Mijia reference specifications now supply 264 scalar read
 mappings and localized App labels. Additional writes and modern authentication
 remain incomplete; see the [full coverage and blockers](14-mijia-reference-integration.md).
 
-The October 29 integration uses native API **1.34.0**, following the linear
+The October 30 integration uses native API **1.35.0**, following the linear
 mainline update and dedicated interactive-login bridge. Earlier Mijia phase versions are historical. See
 [contract reconciliation](../adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
 remain available alongside Mijia; identity restoration remains Meiju-only.
@@ -13,7 +13,7 @@ The experimental integration is implemented under [ADR-0070](../adr/0070-mijia-n
 The owner will perform real-account and device acceptance. Do not access saved
 pilot credentials or contact appliances as part of development tests.
 
-Current callable scope includes native API 1.34 Mijia-only/combined sessions,
+Current callable scope includes native API 1.35 Mijia-only/combined sessions,
 protected partial inventory and 264 scalar mappings from 17 pinned reference
 specifications. Exact fan, light and purifier settings have independent protected
 admission and trusted startup grants. Flutter provides account/read/control views,

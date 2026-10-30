@@ -121,8 +121,8 @@ impl MijiaAdapter {
             .await
     }
 
-    /// Typed opt-in inspection for the forthcoming outlet host contract. Existing
-    /// native API 1.33 inspection deliberately retains its previous scopes.
+    /// Native inspection including outlet options and local upgrades from valid
+    /// older protected derivations. This never saves mappings or grants authority.
     pub async fn inspect_control_options_with_outlets(
         &self,
         device: &Device,
@@ -162,6 +162,7 @@ impl MijiaAdapter {
                 Ok(mapping.upgraded()?.control_options())
             }
             Some(mapping) if mapping.is_outlet() => Ok(Vec::new()),
+            Some(mapping) if include_outlets => Ok(mapping.upgraded()?.control_options()),
             Some(mapping) => Ok(mapping.control_options()),
             None => Ok(Vec::new()),
         }

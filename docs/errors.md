@@ -675,3 +675,9 @@ wrong-provider grants return `INVALID_ARGUMENT`. Overlapping purifier/outlet
 identifiers remain scoped to their originating adapter policy; missing exact
 family grants return `POLICY_DENIED` before transport, including after trusted
 approval. Local option inspection is not authority or current provider evidence.
+
+API 1.35 auxiliary reference grants remain closed: unreviewed sibling components,
+fan timing/reservation, non-boolean quiet/power values and brightness outside
+integer codes 0/1/2 return `INVALID_ARGUMENT` at startup. Missing exact grants
+return `POLICY_DENIED`; unadmitted adapter families refuse before transport.
+The existing uncertain-write result and no-replay rules are unchanged.

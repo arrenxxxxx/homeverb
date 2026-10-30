@@ -1,6 +1,6 @@
 # 14. Mijia reference integration and remaining coverage
 
-The October 29 worktree uses API 1.34 and the owner-supplied October 22 Xiaomi Home
+The October 29 worktree uses API 1.35 and the owner-supplied October 22 Xiaomi Home
 11.7.709 analysis. The full official-App feature request remains **incomplete**.
 The source archive explicitly does not supply all authentication, protocol or
 runtime control contracts. An implemented decoder is not physical acceptance.
@@ -1130,3 +1130,31 @@ Archive checks do not prove provider/phone/physical acceptance. Modern SID login
 event breadth, additional controls and other ledger gaps remain incomplete.
 The latest fetched `origin/main` remains `ccf2975df836f8e81ccf24fa26c8b2035390c978`,
 an ancestor of this worktree; there are zero new merge commits and no push.
+
+
+## Native auxiliary settings -- October 30, 2026
+
+API 1.35 implements [ADR-0092](../adr/0092-exact-auxiliary-reference-settings.md):
+the exact `xiaomi.hood.cyp10` illumination switch and brightness enum 0/1/2,
+and `jdjz.fan.2072fc` vendor quiet boolean. These seven targets use independent
+`mijia_setting_grants`; existing fan and outlet admissions do not enable them.
+Only exact protected source evidence permits the properties. No percentage
+brightness conversion, companion power request, ventilation, timing or cleaning
+authority is added. Each command sends one property and preserves accepted/
+unknown outcomes without replay. Local native inspection works before grants.
+
+Existing reference read-only derivations remain valid. Explicit selected-account
+refresh upgrades the mapping; use the matching implementation with newer saved
+derivations. There are still 36 JSON methods and 26 C exports plus the Android
+initializer, with SQLite 5 and protected payload envelope 1 unchanged. Flutter
+API 1.35 negotiation and presentation are pending. The delivered API 1.34 APK
+does not gain these controls. No real provider/account/device acceptance is claimed.
+
+Executed native auxiliary checks: the workspace suite excluding `homeverb-midea`
+passed 483 tests with one ignored; the preexisting macOS Meiju LAN interface
+limitation remains. After the final in-memory inspection upgrade, both selected
+Mijia auxiliary tests and all 19 native Mijia account tests passed, and strict
+workspace/all-target Clippy passed again. The full C ABI verifier passed 36
+methods and 57 examples. Contract checks passed 24 schemas, 69 positive and
+944 negative fixtures; documentation, repository hygiene and reference regeneration
+passed. No provider/account/device traffic was used.

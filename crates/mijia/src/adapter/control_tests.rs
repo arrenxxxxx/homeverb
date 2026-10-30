@@ -350,6 +350,33 @@ async fn reference_fan_settings_keep_exact_grants_wire_ids_and_uncertain_receipt
 async fn exact_light_and_purifier_settings_require_independent_admission_and_keep_wire_values() {
     let cases = [
         (
+            "xiaomi.hood.cyp10",
+            "light-6",
+            "power",
+            "state",
+            6,
+            1,
+            vec![json!(false), json!(true)],
+        ),
+        (
+            "xiaomi.hood.cyp10",
+            "light-6",
+            "vendor.xiaomi.mijia.light",
+            "brightness_2",
+            6,
+            2,
+            vec![json!(0), json!(1), json!(2)],
+        ),
+        (
+            "jdjz.fan.2072fc",
+            "function-3",
+            "vendor.xiaomi.mijia.function",
+            "quiet_5",
+            3,
+            5,
+            vec![json!(false), json!(true)],
+        ),
+        (
             "abhome.light.wy0a01",
             "light-2",
             "power",
@@ -523,6 +550,13 @@ async fn exact_light_and_purifier_settings_require_independent_admission_and_kee
                     ),
                     policy.clone(),
                 ),
+                (
+                    Arc::new(
+                        MijiaAdapter::new(f.vault.clone(), f.cloud.clone(), Arc::new(SystemClock))
+                            .with_outlet_controls(),
+                    ),
+                    policy.clone(),
+                ),
                 (adapter.clone(), Policy::default()),
             ] {
                 let denied = Core::new(
@@ -607,4 +641,62 @@ async fn reference_admission_cannot_enable_fan_writes() {
         Status::Failed
     );
     assert_eq!(f.cloud.count(CloudEndpoint::SetProperty), 0);
+}
+
+#[tokio::test]
+async fn auxiliary_pregrant_inspection_upgrades_old_derivations_only_in_memory() {
+    for (model, component, count) in [
+        ("xiaomi.hood.cyp10", "light-6", 2),
+        ("jdjz.fan.2072fc", "function-3", 1),
+    ] {
+        let f = Fixture::new();
+        *f.cloud.devices.lock().unwrap() =
+            vec![json!({"did":"FICTIONAL-AUXILIARY","name":"Fictional auxiliary","model":model})];
+        let report = f.connect().await;
+        f.publish(&report).await;
+        let device = f.core.list().unwrap().remove(0);
+        let original = {
+            let mut stored = f.secrets.values.lock().unwrap();
+            let bytes = stored.values_mut().next().unwrap();
+            let mut payload: Value = serde_json::from_slice(bytes).unwrap();
+            for property in payload["bindings"][0]["mapping"]["properties"]
+                .as_array_mut()
+                .unwrap()
+            {
+                if property["component"] == component {
+                    property["write_domain"] = Value::Null;
+                }
+            }
+            *bytes = serde_json::to_vec(&payload).unwrap();
+            bytes.clone()
+        };
+        let before = f.cloud.calls.lock().unwrap().len();
+        let puts = f.secrets.puts.load(Ordering::SeqCst);
+        let options = f
+            .adapter
+            .inspect_control_options_with_outlets(&device, &device.connections[0], &operation())
+            .await
+            .unwrap();
+        assert_eq!(
+            options
+                .iter()
+                .filter(|o| o.component_id == component)
+                .count(),
+            count
+        );
+        assert_eq!(f.cloud.calls.lock().unwrap().len(), before);
+        assert_eq!(f.secrets.puts.load(Ordering::SeqCst), puts);
+        assert_eq!(
+            f.secrets.values.lock().unwrap().values().next().unwrap(),
+            &original
+        );
+        assert!(
+            f.core
+                .describe(&device.id)
+                .unwrap()
+                .capabilities
+                .iter()
+                .all(|c| c.actions.is_empty())
+        );
+    }
 }

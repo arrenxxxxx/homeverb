@@ -605,3 +605,14 @@ Bilingual narrow enlarged-text reviews name the consequential effects, while
 forms require explicit target and cloud selection before preparation. Opening a
 device sends no control or approval. Existing `approval_test.dart` covers actual
 preview ownership, lifecycle invalidation and lost-reply receipt lookup.
+
+
+### Exact auxiliary setting checks
+
+Run `cargo +1.96.0 test -p homeverb-mijia --offline --locked` and the Host
+`mijia_setting_grants` / `mijia_accounts` integration tests, then build the FFI
+library and run `scripts/verify_native_contract.py`. ADR-0092 cases cover all
+seven exact targets, wrong model/source/domain/unit/access, independent families
+and grants, old saved derivations, local pregrant inspection, zero companion
+writes, exact wire codes and unknown outcomes without replay. These are fictional
+checks; no physical hood/fan or provider acceptance is established.

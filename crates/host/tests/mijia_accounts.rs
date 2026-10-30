@@ -89,6 +89,7 @@ struct Cloud {
     calls: AtomicUsize,
     empty: AtomicBool,
     outlet: AtomicBool,
+    auxiliary: AtomicUsize,
     writes: AtomicUsize,
     lose_write: AtomicBool,
     stall: AtomicBool,
@@ -205,6 +206,7 @@ impl CloudTransport for Cloud {
             let key = Sha256::digest([STANDARD.decode(&fields["ssecurity"]).unwrap(), STANDARD.decode(&fields["_nonce"]).unwrap()].concat());
             let data: Value = serde_json::from_slice(&stream(&key, &STANDARD.decode(&fields["data"]).unwrap())).unwrap();
             let result = match request.endpoint() {
+                CloudEndpoint::Devices if self.auxiliary.load(Ordering::SeqCst) != 0 => json!({"list":[{"did":"PRIVATE-FICTIONAL-AUXILIARY","name":"Fictional auxiliary","model":if self.auxiliary.load(Ordering::SeqCst)==1 {"xiaomi.hood.cyp10"} else {"jdjz.fan.2072fc"}}]}),
                 CloudEndpoint::Devices if self.outlet.load(Ordering::SeqCst) => json!({"list":[{"did":"PRIVATE-FICTIONAL-OUTLET","name":"Fictional outlet","model":"cuco.plug.v3"}]}),
                 CloudEndpoint::Devices => json!({"list":if self.empty.load(Ordering::SeqCst) {vec![]} else {vec![json!({"did":"PRIVATE-FAN-ID","name":"Desk Fan","model":"fiction.fan.native","spec_type":KIND,"isOnline":true}), json!({"did":"PRIVATE-OTHER-ID","name":"Hall Appliance","model":"fiction.unknown.native","isOnline":true})]}}),
                 CloudEndpoint::Homes => json!({"homelist":[],"has_more":false}),
@@ -819,5 +821,32 @@ async fn native_outlet_approval_is_foreground_single_use_and_preserves_uncertain
             .await;
         assert_eq!(repeated["error"]["code"], "APPROVAL_INVALID");
         assert_eq!(f.cloud.writes.load(Ordering::SeqCst), 1);
+    }
+}
+
+#[tokio::test]
+async fn auxiliary_options_are_local_before_grants_and_match_native_scopes() {
+    for (mode, component, count) in [(1, "light-6", 2), (2, "function-3", 1)] {
+        let f = Fixture::new(true);
+        f.cloud.auxiliary.store(mode, Ordering::SeqCst);
+        let connected = f.connect(Some("xiaomi.mijia"), None).await;
+        assert!(connected["error"].is_null(), "{connected}");
+        let devices = f.call(json!({"method":"list_devices"})).await;
+        let device = &devices["data"][0];
+        let before = f.cloud.calls.load(Ordering::SeqCst);
+        let options=f.call(json!({"method":"inspect_control_options","device_id":device["id"],"connection_id":device["connections"][0]["id"]})).await;
+        assert!(options["error"].is_null(), "{options}");
+        let options: Vec<_> = options["data"]["options"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|o| o["component_id"] == component)
+            .collect();
+        assert_eq!(options.len(), count);
+        assert!(options.iter().all(|o| o["definition"]["risk"] == "low"));
+        let grants=f.call(json!({"method":"inspect_session_grants","device_id":device["id"],"connection_id":device["connections"][0]["id"]})).await;
+        assert_eq!(grants["data"]["grants"], json!([]));
+        assert_eq!(f.cloud.calls.load(Ordering::SeqCst), before);
+        assert_eq!(f.cloud.writes.load(Ordering::SeqCst), 0);
     }
 }

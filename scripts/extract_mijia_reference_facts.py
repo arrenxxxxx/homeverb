@@ -32,7 +32,9 @@ def exclusion(service, prop):
 
 def admitted_write(model, siid, piid):
     if model == 'jdjz.fan.2072fc':
-        return siid == 2 and piid in {1, 3, 4, 5, 6, 7, 8, 9}
+        return (siid == 2 and piid in {1, 3, 4, 5, 6, 7, 8, 9}) or (siid == 3 and piid == 5)
+    if model == 'xiaomi.hood.cyp10':
+        return siid == 6 and piid in {1, 2}
     if model == 'abhome.light.wy0a01':
         return siid == 2 and piid in {1, 2, 3, 7, 9, 12, 13}
     if model == 'cuco.plug.v3':
@@ -84,10 +86,10 @@ def project():
         ledger.append({'model': model['model'], 'spec_type': model['spec_urn'],
                        'status': ('exact_scalar_reads_and_native_outlet_controls'
                                   if model['model'] == 'cuco.plug.v3'
-                                  else 'exact_scalar_reads_and_granted_fan_settings'
+                                  else 'exact_scalar_reads_and_granted_fan_and_quiet_settings'
                                   if model['model'] == 'jdjz.fan.2072fc'
                                   else 'exact_scalar_reads_and_granted_reference_settings'
-                                  if model['model'] in {'abhome.light.wy0a01', 'zhimi.airpurifier.v6'}
+                                  if model['model'] in {'abhome.light.wy0a01', 'zhimi.airpurifier.v6', 'xiaomi.hood.cyp10'}
                                   else 'exact_scalar_reads_only' if services
                                   else 'placeholder_no_reviewed_readable_spec'),
                        'reference_read_summary': model['independent_read_summary'], 'entries': entries})

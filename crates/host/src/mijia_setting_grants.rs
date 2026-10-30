@@ -1,4 +1,4 @@
-//! Trusted startup-only exact light and purifier targets, independent of fan grants.
+//! Trusted startup-only exact reviewed reference targets, independent of fan grants.
 use homeverb_core::{Grant, Policy};
 use homeverb_domain::{Error, Result, Transport};
 use serde::Deserialize;

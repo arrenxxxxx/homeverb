@@ -922,7 +922,7 @@
     {
       "model": "jdjz.fan.2072fc",
       "spec_type": "urn:miot-spec-v2:device:fan:0000A005:jdjz-2072fc:1:0000D062",
-      "status": "exact_scalar_reads_and_granted_fan_settings",
+      "status": "exact_scalar_reads_and_granted_fan_and_quiet_settings",
       "reference_read_summary": {
         "requested": 12,
         "successful_items": 12,
@@ -1089,7 +1089,7 @@
           "iid": 5,
           "name": "quiet",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_property_set",
           "reference_successful_instances": 1
         }
       ]
@@ -4334,7 +4334,7 @@
     {
       "model": "xiaomi.hood.cyp10",
       "spec_type": "urn:miot-spec-v2:device:hood:0000A01B:xiaomi-cyp10:2",
-      "status": "exact_scalar_reads_only",
+      "status": "exact_scalar_reads_and_granted_reference_settings",
       "reference_read_summary": {
         "requested": 55,
         "successful_items": 0,
@@ -4633,7 +4633,7 @@
           "iid": 1,
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_property_set",
           "reference_successful_instances": 0
         },
         {
@@ -4642,7 +4642,7 @@
           "iid": 2,
           "name": "brightness",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_property_set",
           "reference_successful_instances": 0
         },
         {

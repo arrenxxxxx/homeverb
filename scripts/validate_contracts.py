@@ -21,6 +21,7 @@ def checked_formats() -> FormatChecker:
 def main() -> int:
     formats = checked_formats()
     pairs = [
+        ("native-open", "native-open.mijia-auxiliary"),
         ("native-open", "native-open.mijia-outlet"),
         ("capability", "capability.mijia-outlet-power"), ("command", "command.mijia-outlet-power"),
         ("capability", "capability.mijia-light"), ("command", "command.mijia-light"),
@@ -174,6 +175,13 @@ def main() -> int:
         bad = copy.deepcopy(outlet_startup)
         bad["adapter"] = adapter
         negative.append((f"outlet grants on wrong adapter {adapter}", validators["native-open"], bad))
+
+    auxiliary_startup = load("examples/native-open.mijia-auxiliary.json")
+    for entry in auxiliary_startup["mijia_setting_grants"]:
+        for field, value in [("value", None), ("value", "true"), ("value", {}), ("value", -1), ("value", 3), ("value", 1.5), ("property", "timing_1"), ("component_id", "light-7"), ("extra", True)]:
+            bad = copy.deepcopy(auxiliary_startup)
+            bad["mijia_setting_grants"] = [{**entry, field:value}]
+            negative.append((f"invalid auxiliary scope {field}/{value}", validators["native-open"], bad))
 
     settings_startup = load("examples/native-open.mijia-settings.json")
     for entry in settings_startup["mijia_setting_grants"]:

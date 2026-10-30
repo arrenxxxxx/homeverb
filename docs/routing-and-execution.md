@@ -658,3 +658,22 @@ Android initializer), 36 ordinary methods, SQLite 5 and protected payload envelo
 old read-only mappings. Older implementations may refuse those upgraded protected
 contents; retain the matching implementation with that profile. App wiring, an
 updated APK and real-provider/physical acceptance remain pending.
+
+
+## Native auxiliary settings -- October 30, 2026
+
+API 1.35 implements [ADR-0092](adr/0092-exact-auxiliary-reference-settings.md):
+the exact `xiaomi.hood.cyp10` illumination switch and brightness enum 0/1/2,
+and `jdjz.fan.2072fc` vendor quiet boolean. These seven targets use independent
+`mijia_setting_grants`; existing fan and outlet admissions do not enable them.
+Only exact protected source evidence permits the properties. No percentage
+brightness conversion, companion power request, ventilation, timing or cleaning
+authority is added. Each command sends one property and preserves accepted/
+unknown outcomes without replay. Local native inspection works before grants.
+
+Existing reference read-only derivations remain valid. Explicit selected-account
+refresh upgrades the mapping; use the matching implementation with newer saved
+derivations. There are still 36 JSON methods and 26 C exports plus the Android
+initializer, with SQLite 5 and protected payload envelope 1 unchanged. Flutter
+API 1.35 negotiation and presentation are pending. The delivered API 1.34 APK
+does not gain these controls. No real provider/account/device acceptance is claimed.

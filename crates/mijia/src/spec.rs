@@ -797,6 +797,8 @@ fn exact_reference_domain(property: &Property, known: &Value) -> Result<Option<V
 
 fn reference_setting(model: &str, siid: u32, piid: u32) -> bool {
     match model {
+        "xiaomi.hood.cyp10" => siid == 6 && matches!(piid, 1 | 2),
+        "jdjz.fan.2072fc" => siid == 3 && piid == 5,
         "abhome.light.wy0a01" => siid == 2 && matches!(piid, 1 | 2 | 3 | 7 | 9 | 12 | 13),
         "zhimi.airpurifier.v6" => matches!((siid, piid), (2, 1..=3) | (5..=8, 1)),
         _ => false,
@@ -809,15 +811,25 @@ pub fn reference_setting_option(component: &str, property: &str) -> Option<&'sta
     static OPTIONS: std::sync::OnceLock<Vec<ControlOption>> = std::sync::OnceLock::new();
     OPTIONS
         .get_or_init(|| {
-            ["abhome.light.wy0a01", "zhimi.airpurifier.v6"]
-                .into_iter()
-                .flat_map(|model| {
-                    ModelMapping::pinned(model, None)
-                        .expect("reviewed reference")
-                        .expect("pinned model")
-                        .control_options()
-                })
-                .collect()
+            [
+                "abhome.light.wy0a01",
+                "zhimi.airpurifier.v6",
+                "xiaomi.hood.cyp10",
+                "jdjz.fan.2072fc",
+            ]
+            .into_iter()
+            .flat_map(|model| {
+                let mapping = ModelMapping::pinned(model, None)
+                    .expect("reviewed reference")
+                    .expect("pinned model");
+                mapping
+                    .properties
+                    .iter()
+                    .filter(|property| reference_setting(model, property.siid, property.piid))
+                    .filter_map(|property| mapping.control_option(property))
+                    .collect::<Vec<_>>()
+            })
+            .collect()
         })
         .iter()
         .find(|o| {

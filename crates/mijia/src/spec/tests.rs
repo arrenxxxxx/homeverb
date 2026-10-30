@@ -255,20 +255,22 @@ fn exact_reference_catalog_maps_only_reviewed_scalar_reads() {
         );
         assert!(mapping.control_options().iter().all(|o| matches!(
             profile.model.as_str(),
-            "abhome.light.wy0a01" | "zhimi.airpurifier.v6" | "cuco.plug.v3"
-        ) || (o.component_id.starts_with("fan-")
-            && matches!(
-                o.action.as_str(),
-                "set"
-                    | "set_level"
-                    | "set_mode"
-                    | "set_horizontal_swing"
-                    | "set_horizontal_angle"
-                    | "set_horizontal_swing_included_angle_6"
-                    | "set_vertical_swing_7"
-                    | "set_vertical_swing_included_angle_8"
-                    | "set_anion_9"
-            ))));
+            "abhome.light.wy0a01" | "zhimi.airpurifier.v6" | "cuco.plug.v3" | "xiaomi.hood.cyp10"
+        ) || (o.component_id == "function-3"
+            && o.action == "set_quiet_5")
+            || (o.component_id.starts_with("fan-")
+                && matches!(
+                    o.action.as_str(),
+                    "set"
+                        | "set_level"
+                        | "set_mode"
+                        | "set_horizontal_swing"
+                        | "set_horizontal_angle"
+                        | "set_horizontal_swing_included_angle_6"
+                        | "set_vertical_swing_7"
+                        | "set_vertical_swing_included_angle_8"
+                        | "set_anion_9"
+                ))));
         assert!(
             ModelMapping::pinned(
                 &format!("{}.other", profile.model),
@@ -382,7 +384,7 @@ fn reference_fan_controls_preserve_fields_and_accept_only_exact_source_domains()
         assert_eq!(option.component_id, "fan-2");
         assert_eq!(option.definition.parameters["properties"][name], domain);
     }
-    assert_eq!(options.len(), 8);
+    assert_eq!(options.len(), 9);
     for change in [
         "model", "service", "property", "unit", "format", "read", "write", "domain",
     ] {
@@ -425,7 +427,7 @@ fn reference_fan_controls_preserve_fields_and_accept_only_exact_source_domains()
     // The entire previous derivation remains accepted; edited partial derivations do not.
     let mut old = current.clone();
     for property in &mut old.properties {
-        if property.siid == 2 && matches!(property.piid, 6..=9) {
+        if (property.siid == 2 && matches!(property.piid, 6..=9)) || property.siid == 3 {
             property.write_domain = None;
         }
     }
@@ -452,14 +454,28 @@ fn reference_settings_keep_old_mappings_and_require_exact_source() {
         "abhome.light.wy0a01",
         "zhimi.airpurifier.v6",
         "cuco.plug.v3",
+        "xiaomi.hood.cyp10",
+        "jdjz.fan.2072fc",
     ] {
         let current = ModelMapping::pinned(model, None).unwrap().unwrap();
         let outlet = model == "cuco.plug.v3";
-        let count = if outlet { 4 } else { 7 };
-        assert_eq!(current.control_options().len(), count);
+        let fan = model == "jdjz.fan.2072fc";
+        let count = if outlet {
+            4
+        } else if fan {
+            1
+        } else if model == "xiaomi.hood.cyp10" {
+            2
+        } else {
+            7
+        };
+        assert_eq!(
+            current.control_options().len(),
+            count + if fan { 8 } else { 0 }
+        );
         assert!(
             current
-                .controlled_capabilities(true, false, false)
+                .controlled_capabilities(!fan, false, false)
                 .iter()
                 .all(|c| c.actions.is_empty())
         );
@@ -473,7 +489,9 @@ fn reference_settings_keep_old_mappings_and_require_exact_source() {
         );
         let mut old = current.clone();
         for property in &mut old.properties {
-            property.write_domain = None;
+            if !fan || property.siid == 3 {
+                property.write_domain = None;
+            }
         }
         old.validate_saved().unwrap();
         assert_eq!(old.upgraded().unwrap(), current);
@@ -484,7 +502,7 @@ fn reference_settings_keep_old_mappings_and_require_exact_source() {
         for target in current
             .properties
             .iter()
-            .filter(|p| p.write_domain.is_some())
+            .filter(|p| p.write_domain.is_some() && (!fan || p.siid == 3))
         {
             let option = current.control_option(target).unwrap();
             for mutation in [

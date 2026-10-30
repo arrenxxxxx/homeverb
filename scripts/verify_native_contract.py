@@ -512,7 +512,7 @@ def main():
             assert opened['error'] is None, opened
             try:
                 assert raw(opened['data']['handle'], envelope('list_devices'))['data'] == []
-                assert raw(opened['data']['handle'], envelope('get_api_info'))['data']['api_version'] == '1.34.0'
+                assert raw(opened['data']['handle'], envelope('get_api_info'))['data']['api_version'] == api['api_version']
             finally:
                 library.homeverb_close(opened['data']['handle'])
     cases = []
@@ -527,6 +527,26 @@ def main():
             assert not open_schema.is_valid(config)
             assert decode(library.homeverb_open(json.dumps(config).encode()))['error']['code'] == 'INVALID_ARGUMENT'
             assert not private.exists()
+
+    auxiliary = load('examples/native-open.mijia-auxiliary.json')
+    for adapter in ['xiaomi.mijia', 'homeverb.platforms']:
+        with tempfile.TemporaryDirectory(prefix='homeverb-auxiliary-') as directory:
+            config = {**auxiliary, 'adapter':adapter, 'data_dir':directory}
+            open_schema.validate(config)
+            opened = decode(library.homeverb_open(json.dumps(config).encode()))
+            assert opened['error'] is None, opened
+            try:
+                assert raw(opened['data']['handle'], envelope('list_devices'))['data'] == []
+            finally:
+                library.homeverb_close(opened['data']['handle'])
+    for entry in auxiliary['mijia_setting_grants']:
+        for field, value in [('value', None), ('value', 'true'), ('value', {}), ('value', -1), ('value', 3), ('value', 1.5), ('property', 'timing_1'), ('component_id', 'light-7'), ('extra', True)]:
+            with tempfile.TemporaryDirectory(prefix='homeverb-auxiliary-refused-') as directory:
+                private = Path(directory) / 'must-not-create'
+                config = {**auxiliary,'data_dir':str(private),'mijia_setting_grants':[{**entry,field:value}]}
+                assert not open_schema.is_valid(config)
+                assert decode(library.homeverb_open(json.dumps(config).encode()))['error']['code'] == 'INVALID_ARGUMENT'
+                assert not private.exists()
 
     # Local account metadata remains usable without creating any protected session.
     with tempfile.TemporaryDirectory(prefix='homeverb-ui-local-accounts-') as directory:

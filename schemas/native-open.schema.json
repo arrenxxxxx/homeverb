@@ -1000,6 +1000,50 @@
                 "multipleOf": 1
               }
             }
+          },
+          {
+            "properties": {
+              "component_id": {
+                "const": "light-6"
+              },
+              "property": {
+                "const": "state"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "properties": {
+              "component_id": {
+                "const": "light-6"
+              },
+              "property": {
+                "const": "brightness_2"
+              },
+              "value": {
+                "type": "integer",
+                "enum": [
+                  0,
+                  1,
+                  2
+                ]
+              }
+            }
+          },
+          {
+            "properties": {
+              "component_id": {
+                "const": "function-3"
+              },
+              "property": {
+                "const": "quiet_5"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
           }
         ]
       }
@@ -1103,7 +1147,7 @@
     "allow_mock_writes"
   ],
   "additionalProperties": false,
-  "description": "Trusted native startup. data_dir must be an absolute private OS path. adapter defaults to homeverb.mock; scenario defaults to normal. Meiju defaults to read-only; optional meiju_power_grants, meiju_fan_grants, meiju_mode_grants and meiju_temperature_grants separately admit exact-device power, fan, explicit power-on/mode activation and profile-scoped temperature targets over cloud. Meiju rejects Mock grants or fault scenarios. Opening never authenticates, discovers or controls. Optional meiju_dishwasher_grants admit reviewed elevated starts only through separate trusted confirmation. Optional meiju_dishwasher_cycle_grants independently admit reviewed pause, resume, cancel, power-on and power-off requests through trusted confirmation. Optional meiju_ac_feature_grants independently admit reviewed profile-scoped scalar settings; missing reported prerequisites refuse before send. API 1.24 admits Mijia-only and combined platform sessions. Mijia is read-only; combined sessions retain independent Meiju grants. API 1.25 adds exact mijia_fan_grants in Mijia-only and combined sessions. Protected model/spec domains are independently rechecked; startup schema acceptance is not device support. API 1.29 adds four independently granted exact-reference fan settings under ADR-0083; protected model/spec evidence remains required. API 1.30 adds independent exact mijia_setting_grants for reviewed light and purifier settings; fan grants do not enable these settings. API 1.34 adds separate exact mijia_outlet_grants; elevated targets still require actual trusted approval. Adapter family policies remain independent for overlapping property identifiers.",
+  "description": "Trusted native startup. data_dir must be an absolute private OS path. adapter defaults to homeverb.mock; scenario defaults to normal. Meiju defaults to read-only; optional meiju_power_grants, meiju_fan_grants, meiju_mode_grants and meiju_temperature_grants separately admit exact-device power, fan, explicit power-on/mode activation and profile-scoped temperature targets over cloud. Meiju rejects Mock grants or fault scenarios. Opening never authenticates, discovers or controls. Optional meiju_dishwasher_grants admit reviewed elevated starts only through separate trusted confirmation. Optional meiju_dishwasher_cycle_grants independently admit reviewed pause, resume, cancel, power-on and power-off requests through trusted confirmation. Optional meiju_ac_feature_grants independently admit reviewed profile-scoped scalar settings; missing reported prerequisites refuse before send. API 1.24 admits Mijia-only and combined platform sessions. Mijia is read-only; combined sessions retain independent Meiju grants. API 1.25 adds exact mijia_fan_grants in Mijia-only and combined sessions. Protected model/spec domains are independently rechecked; startup schema acceptance is not device support. API 1.29 adds four independently granted exact-reference fan settings under ADR-0083; protected model/spec evidence remains required. API 1.30 adds independent exact mijia_setting_grants for reviewed light and purifier settings; fan grants do not enable these settings. API 1.34 adds separate exact mijia_outlet_grants; elevated targets still require actual trusted approval. Adapter family policies remain independent for overlapping property identifiers. API 1.35 adds exact light-6 power/three-code brightness and function-3 quiet tuples; no companion writes or timer authority.",
   "allOf": [
     {
       "if": {
