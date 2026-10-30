@@ -757,3 +757,14 @@ from partial/failed retrieval, and failed publication reports no device IDs with
 claiming storage rollback. Existing logical C/App calls remain unchanged; modern
 reads still use only protected selected-protocol evidence with no controls/history,
 fallback, automatic renewal, complete-inventory time or write-outcome changes.
+
+
+ADR-0102 exposes modern device publication through API 1.37 opt-in metadata and
+explicit modern device refresh/recovery operations. Ordinary account retrieval
+selects inventory under protected account leases before I/O: modern if no legacy
+slot exists or any binding is modern-selected, otherwise legacy. Missing transports,
+expired sessions and request failures never trigger fallback, renewal or replay.
+Returned modern roots lose unsupported control/history options; historical absent
+bindings retain their selected protocol. This changes account retrieval admission,
+not write outcomes, trust markers or execution authority. No complete membership
+or physical observation follows from successful publication.

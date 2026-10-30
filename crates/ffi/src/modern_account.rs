@@ -1,4 +1,4 @@
-//! API 1.36 protected modern QR and explicit saved-session work, absent from Request.
+//! API 1.37 protected QR/device publication; API 1.36 logical calls remain compatible.
 use super::*;
 use homeverb_host::{
     ContinueAccountLoginRequest, ModernAccountReport, ModernAccountRequest, NativeModernQrLogin,
@@ -12,6 +12,8 @@ enum SessionOperation {
     Refresh,
     Recover,
     Renew,
+    RefreshDevices,
+    RecoverDevices,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -30,6 +32,27 @@ impl SessionInput {
             timeout_ms: self.timeout_ms,
             account_id: self.account_id.parse().map_err(|_| Error::invalid())?,
         })
+    }
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ContinueInput {
+    schema_version: String,
+    operation_id: String,
+    timeout_ms: u64,
+    challenge_id: u64,
+    #[serde(default)]
+    publish_devices: bool,
+}
+impl ContinueInput {
+    fn request(self) -> ContinueAccountLoginRequest {
+        ContinueAccountLoginRequest {
+            schema_version: self.schema_version,
+            operation_id: self.operation_id,
+            timeout_ms: self.timeout_ms,
+            challenge_id: self.challenge_id,
+        }
     }
 }
 
@@ -115,11 +138,20 @@ pub unsafe extern "C" fn homeverb_continue_modern_account_login(
         let Some(host) = host(handle) else {
             return error("HOST_CLOSED", "The native host handle is closed.");
         };
-        let Some(input) = (unsafe { input_json::<ContinueAccountLoginRequest>(metadata) }) else {
+        let Some(input) = (unsafe { input_json::<ContinueInput>(metadata) }) else {
             return error("INVALID_ARGUMENT", "Invalid modern continuation metadata.");
         };
-        let result = host.runtime.block_on(host.session.continue_modern_account_login(input))
-            .map(|report| json!({"kind":"connected","report":ModernAccountReport::connected(report)}));
+        let publish_devices = input.publish_devices;
+        let request = input.request();
+        let result = host.runtime.block_on(async {
+            if publish_devices {
+                host.session.continue_modern_device_login(request).await
+                    .map(|report| json!({"kind":"connected_devices","report":report}))
+            } else {
+                host.session.continue_modern_account_login(request).await
+                    .map(|report| json!({"kind":"connected","report":ModernAccountReport::connected(report)}))
+            }
+        });
         json!(Query::from_result(result))
     })
 }
@@ -152,6 +184,10 @@ pub unsafe extern "C" fn homeverb_modern_account_session(
                     .map(|report| json!({"kind":"directory","report":ModernAccountReport::inspected(report)})),
                 SessionOperation::Recover => host.session.recover_modern_account(request).await
                     .map(|report| json!({"kind":"directory","report":ModernAccountReport::inspected(report)})),
+                SessionOperation::RefreshDevices => host.session.refresh_modern_account_devices(request).await
+                    .map(|report| json!({"kind":"devices","report":report})),
+                SessionOperation::RecoverDevices => host.session.recover_modern_account_devices(request).await
+                    .map(|report| json!({"kind":"devices","report":report})),
                 SessionOperation::Renew => host.session.renew_modern_account(request).await
                     .map(|account| json!({"kind":"renewed","account":account})),
             }

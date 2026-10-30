@@ -56,6 +56,15 @@ fn validate_report(report: &Value, method: &str) {
         .unwrap()
         .validate(&json!({"schema_version":"1.0","data":report,"warnings":[],"error":null}))
         .unwrap();
+    let (definition, kind) = if method == "connect_account" {
+        ("continue_result", "connected_devices")
+    } else {
+        ("session_result", "devices")
+    };
+    validate_modern_result(
+        definition,
+        &json!({"schema_version":"1.0","data":{"kind":kind,"report":report},"warnings":[],"error":null}),
+    );
 }
 
 #[tokio::test]
@@ -444,4 +453,138 @@ async fn uncertain_authentication_save_requires_explicit_recovery_before_any_car
     assert_eq!(report["retrieval"]["status"], "partial");
     assert_eq!(f.peer.auth_count(), 4);
     assert_eq!(f.peer.reads.load(Ordering::SeqCst), 1);
+}
+
+#[tokio::test]
+async fn ordinary_refresh_adopts_modern_only_accounts_with_no_authentication_or_legacy_requests() {
+    for publish in [false, true] {
+        let f = ModernFixture::new();
+        let account = if publish {
+            id(&connect(&f).await)
+        } else {
+            f.connect().await.account.id
+        };
+        let result = f
+            .call(json!({"method":"refresh_account","account_id":account}))
+            .await;
+        assert!(result["error"].is_null(), "{result}");
+        validate_report(&result["data"], "refresh_account");
+        assert_eq!(result["data"]["retrieval"]["status"], "partial");
+        assert_eq!(cards(&f).await.len(), 1);
+        assert_eq!(f.peer.reads.load(Ordering::SeqCst), 2);
+        assert_eq!(f.peer.auth_count(), 4);
+        assert_eq!(f.cloud.calls.load(Ordering::SeqCst), 0);
+    }
+}
+
+#[tokio::test]
+async fn ordinary_mixed_account_refresh_preserves_legacy_until_modern_device_adoption_and_never_falls_back()
+ {
+    let f = ModernFixture::new();
+    let legacy = f
+        .session
+        .connect_account(
+            begin_metadata(),
+            secret(b"fiction@example.invalid"),
+            secret(b"fictional-password"),
+        )
+        .await;
+    assert!(legacy["error"].is_null(), "{legacy}");
+    let original_cards = cards(&f).await;
+    let modern = f.connect().await;
+    let account = modern.account.id;
+    assert_eq!(json!(account), legacy["data"]["account"]["id"]);
+    let cloud = f.cloud.calls.load(Ordering::SeqCst);
+    let result = f
+        .call(json!({"method":"refresh_account","account_id":account}))
+        .await;
+    assert!(result["error"].is_null());
+    assert_eq!(result["data"]["retrieval"]["status"], "partial");
+    assert!(f.cloud.calls.load(Ordering::SeqCst) > cloud);
+    assert_eq!(f.peer.reads.load(Ordering::SeqCst), 1);
+    assert_eq!(cards(&f).await, original_cards);
+    refresh(&f, account, false).await;
+    let cloud = f.cloud.calls.load(Ordering::SeqCst);
+    let result = f
+        .call(json!({"method":"refresh_account","account_id":account}))
+        .await;
+    assert_eq!(result["data"]["retrieval"]["status"], "partial");
+    assert_eq!(f.peer.reads.load(Ordering::SeqCst), 3);
+    assert_eq!(f.cloud.calls.load(Ordering::SeqCst), cloud);
+    let before = cards(&f).await;
+    assert_eq!(before.len(), 3);
+    for device in original_cards {
+        assert!(before.contains(&device));
+    }
+    f.peer.fail_read.store(true, Ordering::SeqCst);
+    let result = f
+        .call(json!({"method":"refresh_account","account_id":account}))
+        .await;
+    assert!(result["error"].is_null());
+    assert_eq!(result["data"]["retrieval"]["status"], "failed");
+    assert_eq!(result["data"]["retrieval"]["device_ids"], json!([]));
+    assert_eq!(f.peer.reads.load(Ordering::SeqCst), 4);
+    assert_eq!(f.peer.auth_count(), 4);
+    assert_eq!(f.cloud.calls.load(Ordering::SeqCst), cloud);
+    assert_eq!(cards(&f).await, before);
+}
+
+#[tokio::test]
+async fn ordinary_recovery_uses_pending_protected_modern_evidence_without_rewriting_or_authentication()
+ {
+    let f = ModernFixture::new();
+    f.secrets.uncertain_at.store(2, Ordering::SeqCst);
+    let first = connect(&f).await;
+    assert_eq!(first["account"]["credential_state"], "pending");
+    let rejected = f
+        .call(json!({"method":"refresh_account","account_id":id(&first)}))
+        .await;
+    assert!(!rejected["error"].is_null());
+    let result = f
+        .call(json!({"method":"recover_account","account_id":id(&first)}))
+        .await;
+    assert!(result["error"].is_null(), "{result}");
+    validate_report(&result["data"], "refresh_account");
+    assert_eq!(result["data"]["account"]["credential_state"], "stored");
+    assert_eq!(cards(&f).await.len(), 1);
+    assert_eq!(f.secrets.puts.load(Ordering::SeqCst), 2);
+    assert_eq!(f.peer.auth_count(), 4);
+    assert_eq!(f.peer.reads.load(Ordering::SeqCst), 2);
+    assert_eq!(f.cloud.calls.load(Ordering::SeqCst), 0);
+}
+
+#[tokio::test]
+async fn selected_modern_protocol_without_registered_transport_refuses_before_legacy_io() {
+    let f = ModernFixture::new();
+    let first = connect(&f).await;
+    let adapter = Arc::new(MijiaAdapter::new(
+        f.vault.clone(),
+        f.cloud.clone(),
+        Arc::new(SystemClock),
+    ));
+    let core = Core::new(
+        Arc::new(SqliteStore::open(&f.directory).unwrap()),
+        vec![adapter.clone()],
+        Arc::new(SystemClock),
+        Policy::default(),
+    );
+    let session = Session::with_platform_accounts(core, None, Some(adapter));
+    let request: HostRequest = serde_json::from_value(
+        json!({"schema_version":"1.0","operation_id":"no-modern-transport","timeout_ms":10000,
+        "request":{"method":"refresh_account","account_id":id(&first)}}),
+    )
+    .unwrap();
+    let result = session.call(request).await;
+    assert!(result["error"].is_null(), "{result}");
+    assert_eq!(result["data"]["retrieval"]["status"], "failed");
+    assert_eq!(
+        result["data"]["retrieval"]["error"]["code"],
+        "CAPABILITY_UNSUPPORTED"
+    );
+    assert_eq!(result["data"]["retrieval"]["device_ids"], json!([]));
+    assert_eq!(cards(&f).await.len(), 1);
+    assert_eq!(f.peer.auth_count(), 4);
+    assert_eq!(f.peer.reads.load(Ordering::SeqCst), 1);
+    assert_eq!(f.cloud.calls.load(Ordering::SeqCst), 0);
+    session.close();
 }

@@ -1,6 +1,6 @@
 # ADR-0102: Native modern Mijia device publication
 
-Status: Accepted design; implementation and verification pending.
+Status: Native API 1.37 implemented and synthetic-tested; Flutter adoption pending.
 Date: October 30, 2026.
 
 ## Decision
@@ -57,3 +57,17 @@ selection, failure without fallback, pending recovery, retained identities, and
 legacy behavior before adoption. Re-run old logical account/native regressions,
 workspace tests, strict Clippy and version-manifest checks. All tests use fictional
 accounts and transports; phone/provider/model acceptance remains pending.
+
+## Executed evidence
+
+The workspace regression excluding the known unrelated Meiju/macOS LAN-alias
+failures passed 595 tests with one ignored. It includes four new ordinary-account
+selection/refusal cases and the previous Host publication cases now validated
+against the API 1.37 result schema. Strict workspace/all-target Clippy and the
+native library build passed. The rebuilt ABI passed all 36 methods/57 examples
+and dedicated bridges, including 76 modern-account refusal/buffer/lifecycle cases.
+Contract validation passed 25 schemas, 69 primary positives and 1,196 negatives.
+Documentation, repository hygiene and both reference-projection tests passed.
+These are fictional software checks. Flutter opt-in, a new APK, signed iOS runtime,
+provider authentication and physical-device acceptance were not performed. No
+provider account, appliance write, remote CI, push or publication was used.

@@ -1,5 +1,5 @@
 {
-  "api_version": "1.36.0",
+  "api_version": "1.37.0",
   "functions": {
     "homeverb_begin_modern_account_login": {
       "request": "native-modern-account#/$defs/begin",
@@ -26,7 +26,8 @@
     "max_pending_logins": 4,
     "lifetime_ms": 180000,
     "scan_capacity": 8192,
-    "max_logical_entries": 4096
+    "max_logical_entries": 4096,
+    "max_devices": 4096
   },
-  "scope": "Trusted foreground UI only. Scan bytes never enter JSON; logical directory counts are not physical Device cards. No ordinary JSON/CLI/MCP method."
+  "scope": "Trusted foreground UI only. API 1.37 publish_devices=true continuation and refresh_devices/recover_devices return protected Core device publication reports. Absent/false and refresh/recover preserve logical summaries. Scan bytes never enter JSON. No ordinary JSON/CLI/MCP authentication method or automatic renewal."
 }

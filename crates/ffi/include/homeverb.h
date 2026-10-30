@@ -55,7 +55,10 @@ char *homeverb_request_account_verification_code(uint64_t handle, const char *me
  * are not dereferenced. Caller clears/frees on every path. Sensitive UTF-8 scan
  * bytes are only for local QR rendering: never log/persist/export/navigate them.
  * JSON contains scan_length, challenge ID and expiry only. Directory results
- * count logical entries, not physical Devices. No automatic poll/retry/renewal. */
+ * count logical entries, not physical Devices. API 1.37 adds optional Boolean
+ * publish_devices on continuation and refresh_devices/recover_devices session
+ * operations, returning connected_devices/devices with partial/failed retrieval.
+ * Absent/false and old operations preserve logical results. No auto retry/renewal. */
 char *homeverb_begin_modern_account_login(uint64_t handle, const char *metadata_json,
     uint8_t *scan, size_t scan_capacity);
 char *homeverb_continue_modern_account_login(uint64_t handle, const char *metadata_json);

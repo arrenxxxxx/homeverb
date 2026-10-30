@@ -1,5 +1,31 @@
 # Implementation status and next tasks
 
+## Native modern device publication (API 1.37) -- October 30, 2026
+
+[ADR-0102](adr/0102-native-modern-device-publication.md) adds optional Boolean
+`publish_devices` to dedicated modern continuation metadata. True returns
+`connected_devices` with a sanitized AccountConnection; absent/false retains
+logical `connected`. New `refresh_devices` / `recover_devices` session operations
+return `devices` with partial/failed retrieval. Old `refresh`, `recover`, `renew`
+keep their behavior. No C export or ordinary JSON method is added.
+
+Ordinary account refresh/recovery selects its protocol from protected saved
+material before I/O, under the same account/registration leases. Modern-only
+accounts and accounts with any modern-selected binding use modern inventory;
+otherwise they use legacy. A modern failure never falls back or renews. Returned
+roots select that protocol; absent historical bindings retain their identities
+and selection. Modern-selected controls/history remain unavailable. Adding only
+a modern authentication slot does not change a legacy account's refresh route.
+
+Positive/negative schemas, fictional Host publication/protocol-selection tests and
+actual C admission checks cover the additions. The workspace passed 595 tests
+with one ignored; strict Clippy and the rebuilt C ABI passed, including 76 modern
+account boundary cases. See ADR-0102 for the exact evidence scope. SQLite 5, Mijia payload 3, Meiju payload 3, 36 JSON methods and 30 C
+exports (31 on Android) remain unchanged. Flutter opt-in/parsing/card adoption,
+a new APK and real provider/phone/model acceptance remain pending. No provider,
+appliance write, package installation, remote push or publication is performed.
+
+
 ## Foreground modern Host device publication -- October 30, 2026
 
 [ADR-0101](adr/0101-mijia-modern-host-device-publication.md) adds typed Host QR

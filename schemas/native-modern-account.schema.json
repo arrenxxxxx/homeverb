@@ -70,6 +70,11 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 18446744073709551615
+        },
+        "publish_devices": {
+          "description": "API 1.37 opt-in to protected device publication; absent/false preserves logical-only results.",
+          "type": "boolean",
+          "default": false
         }
       },
       "required": [
@@ -104,7 +109,9 @@
           "enum": [
             "refresh",
             "recover",
-            "renew"
+            "renew",
+            "refresh_devices",
+            "recover_devices"
           ]
         }
       },
@@ -187,112 +194,143 @@
               "const": "1.0"
             },
             "data": {
-              "type": "object",
-              "properties": {
-                "kind": {
-                  "const": "connected"
-                },
-                "report": {
+              "oneOf": [
+                {
                   "type": "object",
                   "properties": {
-                    "account": {
+                    "kind": {
+                      "const": "connected"
+                    },
+                    "report": {
+                      "type": "object",
+                      "properties": {
+                        "account": {
+                          "allOf": [
+                            {
+                              "$ref": "urn:homeverb:schema:native-response#/$defs/account_summary"
+                            },
+                            {
+                              "properties": {
+                                "provider": {
+                                  "const": "xiaomi.mijia"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "authentication": {
+                          "const": "succeeded"
+                        },
+                        "directory": {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "status": {
+                                  "const": "partial"
+                                },
+                                "logical_entry_count": {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 4096
+                                },
+                                "complete": {
+                                  "const": false
+                                },
+                                "issues": {
+                                  "type": "array",
+                                  "maxItems": 64,
+                                  "items": {
+                                    "$ref": "urn:homeverb:schema:native-response#/$defs/query_error/properties/error"
+                                  }
+                                },
+                                "error": {
+                                  "type": "null"
+                                }
+                              },
+                              "required": [
+                                "status",
+                                "logical_entry_count",
+                                "complete",
+                                "issues",
+                                "error"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "status": {
+                                  "const": "failed"
+                                },
+                                "logical_entry_count": {
+                                  "const": 0
+                                },
+                                "complete": {
+                                  "const": false
+                                },
+                                "issues": {
+                                  "type": "array",
+                                  "maxItems": 0
+                                },
+                                "error": {
+                                  "$ref": "urn:homeverb:schema:native-response#/$defs/query_error/properties/error"
+                                }
+                              },
+                              "required": [
+                                "status",
+                                "logical_entry_count",
+                                "complete",
+                                "issues",
+                                "error"
+                              ],
+                              "additionalProperties": false
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "account",
+                        "authentication",
+                        "directory"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "report"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "const": "connected_devices"
+                    },
+                    "report": {
                       "allOf": [
                         {
-                          "$ref": "urn:homeverb:schema:native-response#/$defs/account_summary"
+                          "$ref": "#/$defs/device_report"
                         },
                         {
                           "properties": {
-                            "provider": {
-                              "const": "xiaomi.mijia"
+                            "authentication": {
+                              "const": "succeeded"
                             }
                           }
-                        }
-                      ]
-                    },
-                    "authentication": {
-                      "const": "succeeded"
-                    },
-                    "directory": {
-                      "oneOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "status": {
-                              "const": "partial"
-                            },
-                            "logical_entry_count": {
-                              "type": "integer",
-                              "minimum": 0,
-                              "maximum": 4096
-                            },
-                            "complete": {
-                              "const": false
-                            },
-                            "issues": {
-                              "type": "array",
-                              "maxItems": 64,
-                              "items": {
-                                "$ref": "urn:homeverb:schema:native-response#/$defs/query_error/properties/error"
-                              }
-                            },
-                            "error": {
-                              "type": "null"
-                            }
-                          },
-                          "required": [
-                            "status",
-                            "logical_entry_count",
-                            "complete",
-                            "issues",
-                            "error"
-                          ],
-                          "additionalProperties": false
-                        },
-                        {
-                          "type": "object",
-                          "properties": {
-                            "status": {
-                              "const": "failed"
-                            },
-                            "logical_entry_count": {
-                              "const": 0
-                            },
-                            "complete": {
-                              "const": false
-                            },
-                            "issues": {
-                              "type": "array",
-                              "maxItems": 0
-                            },
-                            "error": {
-                              "$ref": "urn:homeverb:schema:native-response#/$defs/query_error/properties/error"
-                            }
-                          },
-                          "required": [
-                            "status",
-                            "logical_entry_count",
-                            "complete",
-                            "issues",
-                            "error"
-                          ],
-                          "additionalProperties": false
                         }
                       ]
                     }
                   },
                   "required": [
-                    "account",
-                    "authentication",
-                    "directory"
+                    "kind",
+                    "report"
                   ],
                   "additionalProperties": false
                 }
-              },
-              "required": [
-                "kind",
-                "report"
-              ],
-              "additionalProperties": false
+              ]
             },
             "warnings": {
               "type": "array",
@@ -461,6 +499,33 @@
                     "account"
                   ],
                   "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "const": "devices"
+                    },
+                    "report": {
+                      "allOf": [
+                        {
+                          "$ref": "#/$defs/device_report"
+                        },
+                        {
+                          "properties": {
+                            "authentication": {
+                              "const": "not_attempted"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "report"
+                  ],
+                  "additionalProperties": false
                 }
               ]
             },
@@ -486,6 +551,57 @@
           "$ref": "urn:homeverb:schema:native-response#/$defs/query_error"
         }
       ]
+    },
+    "device_report": {
+      "type": "object",
+      "properties": {
+        "account": {
+          "allOf": [
+            {
+              "$ref": "urn:homeverb:schema:native-response#/$defs/account_summary"
+            },
+            {
+              "properties": {
+                "provider": {
+                  "const": "xiaomi.mijia"
+                }
+              }
+            }
+          ]
+        },
+        "authentication": {
+          "enum": [
+            "succeeded",
+            "not_attempted"
+          ]
+        },
+        "retrieval": {
+          "allOf": [
+            {
+              "$ref": "urn:homeverb:schema:native-response#/$defs/account_retrieval"
+            },
+            {
+              "properties": {
+                "status": {
+                  "enum": [
+                    "partial",
+                    "failed"
+                  ]
+                },
+                "device_ids": {
+                  "maxItems": 4096
+                }
+              }
+            }
+          ]
+        }
+      },
+      "required": [
+        "account",
+        "authentication",
+        "retrieval"
+      ],
+      "additionalProperties": false
     }
   }
 }

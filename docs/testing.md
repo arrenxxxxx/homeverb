@@ -740,3 +740,13 @@ reports, stable organization, partial empty/failing directories, uncertain first
 and second saves, exact-byte recovery, Core identity-publication failure, original
 QR deadline, foreign/consumed handles, lifecycle changes and dropped/cancelled work.
 These checks do not establish a callable C/App device flow or provider acceptance.
+
+
+API 1.37 adds positive/negative modern device-publication contracts and actual C
+checks for optional Boolean publication, the two explicit device operations and
+background/closed/unsupported hosts. The existing Host device cases also validate
+new dedicated result schemas. Additional ordinary account tests cover modern-only,
+mixed-before/after-adoption, pending recovery and unavailable modern transport;
+failures never contact legacy routes or authenticate. Run the Mijia/Host workspace
+regression and rebuilt `scripts/verify_native_contract.py`. No provider/phone
+traffic or new mobile package is exercised by these checks.

@@ -269,9 +269,9 @@ impl AccountAdapter<'_> {
             }
             Self::Mijia(a) => {
                 let result = if recover {
-                    a.recover_devices(id, op).await?
+                    a.recover_selected_devices(id, op).await?
                 } else {
-                    a.refresh_devices(id, op).await?
+                    a.refresh_selected_devices(id, op).await?
                 };
                 Ok(publish_mijia(core, result, "not_attempted", op).await)
             }

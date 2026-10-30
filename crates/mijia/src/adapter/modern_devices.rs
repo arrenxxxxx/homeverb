@@ -8,48 +8,41 @@ impl MijiaAdapter {
         id: Uuid,
         operation: &Operation,
     ) -> Result<AccountDiscovery> {
-        self.reload_modern_devices(id, false, operation).await
+        self.modern_reads.as_ref().ok_or_else(unsupported)?;
+        self.reload(id, false, InventoryProtocol::Modern, operation)
+            .await
     }
     pub async fn recover_modern_devices(
         &self,
         id: Uuid,
         operation: &Operation,
     ) -> Result<AccountDiscovery> {
-        self.reload_modern_devices(id, true, operation).await
+        self.modern_reads.as_ref().ok_or_else(unsupported)?;
+        self.reload(id, true, InventoryProtocol::Modern, operation)
+            .await
     }
-    async fn reload_modern_devices(
+    pub(super) async fn retrieve_modern(
         &self,
-        id: Uuid,
+        account: &mut LoadedAccount,
+        others: &[LoadedAccount],
         recover: bool,
         operation: &Operation,
-    ) -> Result<AccountDiscovery> {
+    ) -> Result<BoundDiscovery> {
         let reads = self.modern_reads.as_deref().ok_or_else(unsupported)?;
-        self.account(id, operation).await?;
-        let _registration = self.vault.lock_registration(operation).await?;
-        let mut accounts = self.load_accounts(recover.then_some(id), operation).await?;
-        let index = accounts
-            .iter()
-            .position(|a| a.lease.record().id == id)
-            .ok_or_else(unconfirmed)?;
-        let mut account = accounts.remove(index);
-        let result = async {
-            let directory = account
-                .payload
-                .modern_session()?
-                .directory(reads, operation)
+        let directory = account
+            .payload
+            .modern_session()?
+            .directory(reads, operation)
+            .await?;
+        let inventory = directory.reconcile(operation).await?;
+        if recover && account.lease.record().credential_state == CredentialState::Pending {
+            account
+                .lease
+                .confirm_session(&account.bytes, operation)
                 .await?;
-            let inventory = directory.reconcile(operation).await?;
-            if recover && account.lease.record().credential_state == CredentialState::Pending {
-                account
-                    .lease
-                    .confirm_session(&account.bytes, operation)
-                    .await?;
-            }
-            self.bind_modern_inventory(&mut account, &accounts, inventory, operation)
-                .await
         }
-        .await;
-        Ok(discovery(account.lease.record().clone(), result))
+        self.bind_modern_inventory(account, others, inventory, operation)
+            .await
     }
     pub(in crate::adapter) async fn bind_modern_inventory(
         &self,

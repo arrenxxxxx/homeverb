@@ -4,7 +4,7 @@ October 25: 17 exact Mijia reference specifications now supply 264 scalar read
 mappings and localized App labels. Additional writes and modern authentication
 remain incomplete; see the [full coverage and blockers](14-mijia-reference-integration.md).
 
-The October 30 integration uses native API **1.36.0**, following the linear
+The October 30 integration uses native API **1.37.0**, following the linear
 mainline update and dedicated interactive-login bridge. Earlier Mijia phase versions are historical. See
 [contract reconciliation](../adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
 remain available alongside Mijia; identity restoration remains Meiju-only.
@@ -13,7 +13,7 @@ The experimental integration is implemented under [ADR-0070](../adr/0070-mijia-n
 The owner will perform real-account and device acceptance. Do not access saved
 pilot credentials or contact appliances as part of development tests.
 
-Current callable scope includes native API 1.36 Mijia-only/combined sessions,
+Current callable scope includes native API 1.37 Mijia-only/combined sessions,
 protected partial inventory and 264 scalar mappings from 17 pinned reference
 specifications. Exact fan, light and purifier settings have independent protected
 admission and trusted startup grants. Flutter provides account/read/control views,
@@ -780,3 +780,29 @@ hygiene, the generated coverage check and both reference-projection tests passed
 These are fictional software checks, not provider, phone or physical-device
 acceptance. No Flutter build, APK, provider account, appliance write, remote CI,
 push or publication was performed.
+
+
+## Native modern device publication (API 1.37) -- October 30, 2026
+
+[ADR-0102](../adr/0102-native-modern-device-publication.md) adds optional Boolean
+`publish_devices` to dedicated modern continuation metadata. True returns
+`connected_devices` with a sanitized AccountConnection; absent/false retains
+logical `connected`. New `refresh_devices` / `recover_devices` session operations
+return `devices` with partial/failed retrieval. Old `refresh`, `recover`, `renew`
+keep their behavior. No C export or ordinary JSON method is added.
+
+Ordinary account refresh/recovery selects its protocol from protected saved
+material before I/O, under the same account/registration leases. Modern-only
+accounts and accounts with any modern-selected binding use modern inventory;
+otherwise they use legacy. A modern failure never falls back or renews. Returned
+roots select that protocol; absent historical bindings retain their identities
+and selection. Modern-selected controls/history remain unavailable. Adding only
+a modern authentication slot does not change a legacy account's refresh route.
+
+Positive/negative schemas, fictional Host publication/protocol-selection tests and
+actual C admission checks cover the additions. The workspace passed 595 tests
+with one ignored; strict Clippy and the rebuilt C ABI passed, including 76 modern
+account boundary cases. See ADR-0102 for the exact evidence scope. SQLite 5, Mijia payload 3, Meiju payload 3, 36 JSON methods and 30 C
+exports (31 on Android) remain unchanged. Flutter opt-in/parsing/card adoption,
+a new APK and real provider/phone/model acceptance remain pending. No provider,
+appliance write, package installation, remote push or publication is performed.

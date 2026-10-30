@@ -24,6 +24,12 @@ use std::{
 };
 use uuid::Uuid;
 
+enum InventoryProtocol {
+    Legacy,
+    Modern,
+    Selected,
+}
+
 /// Public projections must omit credential references and private payloads.
 /// ```compile_fail
 /// fn export(value: &homeverb_mijia::AccountDiscovery) {
@@ -394,19 +400,39 @@ impl MijiaAdapter {
         id: Uuid,
         operation: &Operation,
     ) -> Result<AccountDiscovery> {
-        self.reload(id, false, operation).await
+        self.reload(id, false, InventoryProtocol::Legacy, operation)
+            .await
     }
     pub async fn recover_devices(
         &self,
         id: Uuid,
         operation: &Operation,
     ) -> Result<AccountDiscovery> {
-        self.reload(id, true, operation).await
+        self.reload(id, true, InventoryProtocol::Legacy, operation)
+            .await
+    }
+    /// Explicit account retrieval using protected protocol evidence, without fallback.
+    pub async fn refresh_selected_devices(
+        &self,
+        id: Uuid,
+        operation: &Operation,
+    ) -> Result<AccountDiscovery> {
+        self.reload(id, false, InventoryProtocol::Selected, operation)
+            .await
+    }
+    pub async fn recover_selected_devices(
+        &self,
+        id: Uuid,
+        operation: &Operation,
+    ) -> Result<AccountDiscovery> {
+        self.reload(id, true, InventoryProtocol::Selected, operation)
+            .await
     }
     async fn reload(
         &self,
         id: Uuid,
         recover: bool,
+        protocol: InventoryProtocol,
         operation: &Operation,
     ) -> Result<AccountDiscovery> {
         self.account(id, operation).await?;
@@ -417,6 +443,22 @@ impl MijiaAdapter {
             .position(|a| a.lease.record().id == id)
             .ok_or_else(unconfirmed)?;
         let mut account = accounts.remove(index);
+        let modern = match protocol {
+            InventoryProtocol::Legacy => false,
+            InventoryProtocol::Modern => true,
+            InventoryProtocol::Selected => {
+                account.payload.session.is_none()
+                    || account.payload.bindings.iter().any(|binding| {
+                        binding.read_protocol == crate::protected::BindingReadProtocol::Modern
+                    })
+            }
+        };
+        if modern {
+            let result = self
+                .retrieve_modern(&mut account, &accounts, recover, operation)
+                .await;
+            return Ok(discovery(account.lease.record().clone(), result));
+        }
         // Recovery validates the exact inspected session with one bounded inventory read;
         // it neither logs in again nor treats local bytes as current authorization.
         let result =

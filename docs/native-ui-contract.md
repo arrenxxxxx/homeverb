@@ -1,6 +1,6 @@
 # Native UI contract
 
-The October 30 modern-account bridge uses native API **1.36.0**, following
+The October 30 modern-account bridge uses native API **1.37.0**, following
 the October 24 linear mainline update. Earlier Mijia phase versions are historical. See
 [contract reconciliation](adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
 remain available alongside Mijia; identity restoration remains Meiju-only.
@@ -1901,3 +1901,32 @@ metadata only. Preserve completed account storage when later retrieval fails;
 do not replay login to hide a directory error. Physical/logical reconciliation and
 provider/phone acceptance remain separate tracked work. The Flutter QR/account
 flow is implemented under ADR-0098 with fictional evidence.
+
+
+## Modern device publication (API 1.37)
+
+[ADR-0102](adr/0102-native-modern-device-publication.md) adds an opt-in to the
+existing four modern-account exports. Negotiate 1.37 before sending
+`publish_devices:true` to continuation or `refresh_devices` / `recover_devices`
+to saved-session work. They return `kind=connected_devices` / `kind=devices` with
+`report.account`, `report.authentication` and `report.retrieval`. Retrieval is only
+partial or failed, carries at most 4096 unique local UUID device IDs, and failed
+retrieval has an empty ID list. Successful authentication can coexist with failed
+retrieval. Keep the error and reload local metadata; do not repeat login to hide it.
+
+Absent/false publication and existing session operations preserve API 1.36 shapes.
+A 1.36 client must not send the additions. New Flutter clients must keep distinct
+logical and device reports, validate the closed shape and expected local account,
+then reload cards through ordinary local methods. Device taps use ordinary Core
+state reads; a directory summary alone does not publish cards or establish state.
+Continuation still inherits the original QR deadline with one directory read.
+No automatic retry, renewal, request on startup or write grant is added.
+
+Ordinary `refresh_account` / `recover_account` now select modern inventory if the
+protected account has no legacy slot or any modern-selected binding; otherwise
+they retain legacy inventory. The selection is made under account leases before
+I/O, with no fallback on failure. Modern refresh selects modern reads for returned
+roots and removes unsupported modern control/history options; absent historical
+bindings retain their selection. Shared account IDs and organization stay intact.
+No JSON field chooses credentials, origin or codec. Storage versions and C export
+counts are unchanged. Flutter adoption and packaging are still pending.

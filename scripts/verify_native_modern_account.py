@@ -88,8 +88,12 @@ def verify():
             assert begin(handle, example['begin'], null=True) == 'INVALID_ARGUMENT'
             assert begin(handle, example['begin']) == 'AUTH_FLOW_UNSUPPORTED'
             assert continuation(handle, example['continue']) == 'MIJIA_AUTH_CHALLENGE_REQUIRED'
+            for publish in [False, True]:
+                assert continuation(handle, {**example['continue'], 'publish_devices':publish}) == 'MIJIA_AUTH_CHALLENGE_REQUIRED'
+            for publish in [None, 0, 1, 'true', [], {}]:
+                assert continuation(handle, {**example['continue'], 'publish_devices':publish}) == 'INVALID_ARGUMENT'
             assert not lib.homeverb_discard_modern_account_login(handle, example['continue']['challenge_id'])
-            for operation in ['refresh','recover','renew']:
+            for operation in ['refresh','recover','renew','refresh_devices','recover_devices']:
                 assert session(handle, {**example['session'], 'operation':operation}) == 'AUTH_FLOW_UNSUPPORTED'
             for operation in ['', 'retry', 'reconnect', True, None]:
                 assert session(handle, {**example['session'], 'operation':operation}) == 'INVALID_ARGUMENT'
@@ -104,7 +108,8 @@ def verify():
                 assert decode(lib.homeverb_call(handle,json.dumps(request).encode()))['error']['code'] == 'INVALID_ARGUMENT'
             lib.homeverb_set_foreground(handle, False)
             assert begin(handle, example['begin']) == 'HOST_BACKGROUND'
-            assert session(handle, example['session']) == 'HOST_BACKGROUND'
+            for operation in ['refresh', 'refresh_devices', 'recover_devices']:
+                assert session(handle, {**example['session'], 'operation':operation}) == 'HOST_BACKGROUND'
             assert continuation(handle, example['continue']) == 'MIJIA_AUTH_CHALLENGE_REQUIRED'
             lib.homeverb_set_foreground(handle, True)
             assert not lib.homeverb_cancel(handle, b'not-active')
@@ -114,6 +119,8 @@ def verify():
         assert begin(handle, example['begin']) == 'HOST_CLOSED'
         assert continuation(handle, example['continue']) == 'HOST_CLOSED'
         assert session(handle, example['session']) == 'HOST_CLOSED'
+        assert session(handle, example['session_devices']) == 'HOST_CLOSED'
+        assert continuation(handle, example['continue_devices']) == 'HOST_CLOSED'
         assert not lib.homeverb_discard_modern_account_login(handle, 7)
     print(f'PASS: four modern-account C exports; {cases} refusal/buffer/lifecycle cases. No provider traffic; successful QR/account behavior uses fictional Host and projection tests.')
 

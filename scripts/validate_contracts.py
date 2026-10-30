@@ -529,7 +529,10 @@ def main() -> int:
     for name, definition in [("begin", "begin"), ("continue", "continue"), ("session", "session"),
                              ("qr_result", "begin_result"), ("connected_result", "continue_result"),
                              ("directory_result", "session_result"), ("failed_directory_result", "session_result"),
-                             ("renewed_result", "session_result")]:
+                             ("renewed_result", "session_result"),
+                             ("continue_devices", "continue"), ("session_devices", "session"),
+                             ("connected_devices_result", "continue_result"), ("devices_result", "session_result"),
+                             ("failed_devices_result", "session_result")]:
         shape = native_validator("native-modern-account", definition)
         shape.validate(modern[name])
         for field in ["scan_payload", "url", "service_token", "pass_token", "provider_id", "principal", "origin", "confirmed"]:
@@ -548,7 +551,7 @@ def main() -> int:
     for value in ["other", True, None]:
         bad = copy.deepcopy(modern["session"]); bad["operation"] = value
         negative.append(("modern invalid operation", native_validator("native-modern-account", "session"), bad))
-    for operation in ["refresh", "recover", "renew"]:
+    for operation in ["refresh", "recover", "renew", "refresh_devices", "recover_devices"]:
         native_validator("native-modern-account", "session").validate({**modern["session"], "operation":operation})
     for name, definition in [("connected_result", "continue_result"), ("directory_result", "session_result")]:
         for field, value in [("complete", True), ("status", "complete"), ("logical_entry_count", -1),
@@ -567,6 +570,29 @@ def main() -> int:
     for provider in [None, "midea.meiju", "other"]:
         bad = copy.deepcopy(modern["begin"]); bad["provider"] = provider
         negative.append(("modern invalid provider", native_validator("native-modern-account", "begin"), bad))
+
+    for value in [None, 0, 1, "true", [], {}]:
+        bad = copy.deepcopy(modern["continue_devices"]); bad["publish_devices"] = value
+        negative.append(("modern invalid publication flag", native_validator("native-modern-account", "continue"), bad))
+    native_validator("native-modern-account", "continue").validate({**modern["continue"], "publish_devices":False})
+    for name, definition in [("connected_devices_result", "continue_result"), ("devices_result", "session_result"), ("failed_devices_result", "session_result")]:
+        shape = native_validator("native-modern-account", definition)
+        for path, value in [
+            (("retrieval", "status"), "complete"), (("retrieval", "error"), None),
+            (("retrieval", "device_ids"), ["not-a-local-id"]),
+            (("retrieval", "device_ids"), ["40000000-0000-4000-8000-000000000001"] * 2),
+            (("retrieval", "device_ids"), [f"40000000-0000-4000-8000-{i:012x}" for i in range(4097)]),
+            (("retrieval", "logical_entry_count"), 1), (("retrieval", "complete"), False),
+            (("account", "provider"), "midea.meiju"), (("account", "credential_ref"), "FORBIDDEN"),
+            (("authentication",), "not_attempted" if name == "connected_devices_result" else "succeeded"),
+            (("directory",), {})]:
+            bad = copy.deepcopy(modern[name]); target = bad["data"]["report"]
+            for field in path[:-1]: target = target[field]
+            target[path[-1]] = value
+            negative.append(("modern invalid device report " + ".".join(path), shape, bad))
+    bad = copy.deepcopy(modern["failed_devices_result"])
+    bad["data"]["report"]["retrieval"]["device_ids"] = ["40000000-0000-4000-8000-000000000001"]
+    negative.append(("modern failed devices cannot publish IDs", native_validator("native-modern-account", "session_result"), bad))
 
     mijia_connect = {"schema_version":"1.0", "operation_id":"fictional-connect", "timeout_ms":1000, "label":"Mijia", "provider":"xiaomi.mijia"}
     validators["native-connect"].validate(mijia_connect)

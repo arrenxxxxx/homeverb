@@ -1,5 +1,5 @@
 {
-  "api_version": "1.36.0",
+  "api_version": "1.37.0",
   "provenance": "Fictional metadata and sanitized DTOs; no scan URLs, provider IDs or credentials.",
   "begin": {
     "schema_version": "1.0",
@@ -127,6 +127,111 @@
           "error": {
             "code": "MIJIA_REQUEST_FAILED",
             "message": "Fictional directory request failed.",
+            "retryable": false
+          }
+        }
+      }
+    },
+    "warnings": [],
+    "error": null
+  },
+  "continue_devices": {
+    "schema_version": "1.0",
+    "operation_id": "modern-continue",
+    "timeout_ms": 120000,
+    "challenge_id": 7,
+    "publish_devices": true
+  },
+  "session_devices": {
+    "schema_version": "1.0",
+    "operation_id": "modern-session",
+    "timeout_ms": 30000,
+    "account_id": "00000000-0000-4000-8000-000000000001",
+    "operation": "refresh_devices"
+  },
+  "connected_devices_result": {
+    "schema_version": "1.0",
+    "data": {
+      "kind": "connected_devices",
+      "report": {
+        "account": {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "provider": "xiaomi.mijia",
+          "region": "CN",
+          "label": "Example modern account",
+          "credential_state": "stored",
+          "authorization": "not_checked",
+          "last_complete_inventory_at": null
+        },
+        "authentication": "succeeded",
+        "retrieval": {
+          "status": "partial",
+          "device_ids": [
+            "40000000-0000-4000-8000-000000000001"
+          ],
+          "error": {
+            "code": "MIJIA_INVENTORY_PARTIAL",
+            "message": "Complete inventory coverage is not established.",
+            "retryable": false
+          }
+        }
+      }
+    },
+    "warnings": [],
+    "error": null
+  },
+  "devices_result": {
+    "schema_version": "1.0",
+    "data": {
+      "kind": "devices",
+      "report": {
+        "account": {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "provider": "xiaomi.mijia",
+          "region": "CN",
+          "label": "Example modern account",
+          "credential_state": "stored",
+          "authorization": "not_checked",
+          "last_complete_inventory_at": null
+        },
+        "authentication": "not_attempted",
+        "retrieval": {
+          "status": "partial",
+          "device_ids": [
+            "40000000-0000-4000-8000-000000000001"
+          ],
+          "error": {
+            "code": "MIJIA_INVENTORY_PARTIAL",
+            "message": "Complete inventory coverage is not established.",
+            "retryable": false
+          }
+        }
+      }
+    },
+    "warnings": [],
+    "error": null
+  },
+  "failed_devices_result": {
+    "schema_version": "1.0",
+    "data": {
+      "kind": "devices",
+      "report": {
+        "account": {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "provider": "xiaomi.mijia",
+          "region": "CN",
+          "label": "Example modern account",
+          "credential_state": "stored",
+          "authorization": "not_checked",
+          "last_complete_inventory_at": null
+        },
+        "authentication": "not_attempted",
+        "retrieval": {
+          "status": "failed",
+          "device_ids": [],
+          "error": {
+            "code": "MIJIA_REQUEST_FAILED",
+            "message": "Fictional retrieval failure.",
             "retryable": false
           }
         }
