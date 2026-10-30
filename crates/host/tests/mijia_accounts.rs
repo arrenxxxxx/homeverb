@@ -850,3 +850,6 @@ async fn auxiliary_options_are_local_before_grants_and_match_native_scopes() {
         assert_eq!(f.cloud.writes.load(Ordering::SeqCst), 0);
     }
 }
+
+#[path = "mijia_accounts/modern_host.rs"]
+mod modern_host;

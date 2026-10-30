@@ -714,3 +714,11 @@ cross-protocol leading-zero identities return `ACCOUNT_IDENTITY_CONFLICT`.
 Uncertain secret storage retains `SECRET_STORE_WRITE_UNKNOWN` and pending
 metadata; ordinary reads/renewal refuse until explicit recovery. These typed
 Rust methods do not change ordinary error schemas or execution outcomes.
+
+
+Modern Host entry points under ADR-0096 return `MIJIA_AUTH_CHALLENGE_REQUIRED`
+for absent/foreign/consumed QR handles or late lifecycle-generation results.
+`RESOURCE_BUSY` covers the shared four-pending-login limit or an active duplicate
+operation ID; the attempted continuation handle remains consumed. Existing
+`HOST_BACKGROUND`, `HOST_CLOSED`, `CANCELLED` and `DEADLINE_EXCEEDED` keep their
+foreground/operation meanings. No new ordinary error schema or result code is added.

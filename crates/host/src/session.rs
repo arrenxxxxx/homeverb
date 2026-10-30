@@ -14,6 +14,8 @@ use tokio_util::sync::CancellationToken;
 mod lan_scan;
 pub use lan_scan::{ConfirmLanScanRequest, PendingMeijuLanScan, PrepareLanScanRequest};
 mod account_login;
+mod modern_account;
+pub use modern_account::{ModernAccountRequest, NativeModernQrLogin};
 mod connection_link;
 mod identity_recovery;
 pub use account_login::{ContinueAccountLoginRequest, NativeAccountLogin};
@@ -149,7 +151,14 @@ struct State {
     identity_recoveries: HashMap<u64, homeverb_midea::PendingIdentityRecovery>,
     account_logins: HashMap<u64, homeverb_mijia::PendingMijiaLogin>,
     verification_logins: HashMap<u64, homeverb_mijia::PendingVerificationConnection>,
+    modern_logins: HashMap<u64, homeverb_mijia::PendingModernMijiaLogin>,
     approval_generation: u64,
+}
+
+impl State {
+    fn pending_login_count(&self) -> usize {
+        self.account_logins.len() + self.verification_logins.len() + self.modern_logins.len()
+    }
 }
 
 pub struct Session {
@@ -187,6 +196,7 @@ impl Session {
                 identity_recoveries: HashMap::new(),
                 account_logins: HashMap::new(),
                 verification_logins: HashMap::new(),
+                modern_logins: HashMap::new(),
                 approval_generation: 0,
             })),
         }
@@ -297,6 +307,7 @@ impl Session {
                 state.identity_recoveries.clear();
                 state.account_logins.clear();
                 state.verification_logins.clear();
+                state.modern_logins.clear();
                 state.approval_generation += 1;
                 for token in state.operations.values() {
                     token.cancel();
@@ -310,6 +321,7 @@ impl Session {
             state.identity_recoveries.clear();
             state.account_logins.clear();
             state.verification_logins.clear();
+            state.modern_logins.clear();
             state.approval_generation += 1;
         }
         self.state
@@ -332,6 +344,7 @@ impl Session {
             state.identity_recoveries.clear();
             state.account_logins.clear();
             state.verification_logins.clear();
+            state.modern_logins.clear();
             state.approval_generation += 1;
             for token in state.operations.values() {
                 token.cancel();

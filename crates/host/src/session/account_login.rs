@@ -102,7 +102,10 @@ impl Session {
         state
             .verification_logins
             .retain(|_, pending| pending.expires_at() > now);
-        if state.account_logins.len() + state.verification_logins.len() >= 4 {
+        state
+            .modern_logins
+            .retain(|_, pending| pending.expires_at() > now);
+        if state.pending_login_count() >= 4 {
             return Err(Error::new(
                 "RESOURCE_BUSY",
                 "Finish or dismiss pending sign-in first.",
@@ -128,7 +131,7 @@ impl Session {
                 if state.closed
                     || !state.foreground
                     || state.approval_generation != generation
-                    || state.account_logins.len() + state.verification_logins.len() >= 4
+                    || state.pending_login_count() >= 4
                     || pending.expires_at() <= now
                 {
                     return Err(unavailable());

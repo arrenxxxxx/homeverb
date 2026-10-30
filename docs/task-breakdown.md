@@ -1,5 +1,28 @@
 # Implementation status and next tasks
 
+## Modern Host account lifecycle -- October 30, 2026
+
+[ADR-0096](adr/0096-mijia-modern-host-lifecycle.md) adds typed foreground Session
+methods for protected QR begin/continue/discard and explicit modern account
+directory refresh, recovery and renewal. QR handles belong to one Session, are
+consumed before continuation admission and share the four-entry pending limit
+with captcha and verification. Background, cancel and close clear pending sign-in;
+registered work uses existing cancellation/deadlines and late results cannot cross
+a lifecycle generation. No automatic polling, retry or background work is added.
+
+Mijia-only and combined native Session composition now registers the reviewed
+modern HTTPS transports without contacting them at startup. Core-only CLI/MCP
+composition is unchanged. Modern logical directory entries remain opaque typed
+results; they do not publish Device cards or grant routes/control authority.
+Successful same-subject connection preserves existing legacy cards. Public account
+summaries exclude QR data, provider identity and credential references.
+
+This Host-only phase retains API 1.35, ordinary methods/C exports, SQLite 5 and
+protected payload versions. Dedicated C buffers/API negotiation, Flutter QR
+rendering, logical-parent reconciliation and authenticated provider/physical
+acceptance remain pending. The `9870437` APK is unchanged. No live account,
+message, device command, push or publication was used.
+
 ## Protected modern account sessions -- October 30, 2026
 
 [ADR-0095](adr/0095-mijia-protected-modern-account-sessions.md) adds explicit

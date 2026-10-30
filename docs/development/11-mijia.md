@@ -26,7 +26,7 @@ Native API 1.32 supplies the user-triggered code-request bridge under
 consumes it without automatic message sends or retries. The API 1.33
 [Android package](../../apps/mobile/verification.md#historical-api-133-android-package--october-28-2026)
 includes this account flow and historical UI. Human risk challenges,
-account-settings confirmation, modern SID `mijia` Host/App login, broader event/control
+account-settings confirmation, modern SID `mijia` C/App login, broader event/control
 coverage and owner-run real-provider/device acceptance remain open. Earlier
 phase records below retain their original implementation and evidence scope.
 
@@ -551,3 +551,39 @@ fictional examples. Contract validation passed 24 schemas, 69 positive fixtures
 and 944 negative fixtures. Both reference-projection Python tests, regeneration,
 formatting, documentation and repository hygiene checks passed. No Flutter flow,
 mobile package, authenticated provider or physical device was tested in this phase.
+
+
+## Modern Host account lifecycle -- October 30, 2026
+
+[ADR-0096](../adr/0096-mijia-modern-host-lifecycle.md) adds typed foreground Session
+methods for protected QR begin/continue/discard and explicit modern account
+directory refresh, recovery and renewal. QR handles belong to one Session, are
+consumed before continuation admission and share the four-entry pending limit
+with captcha and verification. Background, cancel and close clear pending sign-in;
+registered work uses existing cancellation/deadlines and late results cannot cross
+a lifecycle generation. No automatic polling, retry or background work is added.
+
+Mijia-only and combined native Session composition now registers the reviewed
+modern HTTPS transports without contacting them at startup. Core-only CLI/MCP
+composition is unchanged. Modern logical directory entries remain opaque typed
+results; they do not publish Device cards or grant routes/control authority.
+Successful same-subject connection preserves existing legacy cards. Public account
+summaries exclude QR data, provider identity and credential references.
+
+This Host-only phase retains API 1.35, ordinary methods/C exports, SQLite 5 and
+protected payload versions. Dedicated C buffers/API negotiation, Flutter QR
+rendering, logical-parent reconciliation and authenticated provider/physical
+acceptance remain pending. The `9870437` APK is unchanged. No live account,
+message, device command, push or publication was used.
+
+Executed Host phase checks: the Rust workspace excluding `homeverb-midea` passed
+545 tests with one ignored, including the original 12 modern Host cases, the
+existing 19 Mijia Host cases, 170 Mijia unit tests and protected-type documentation
+tests. The known 14 macOS Meiju LAN-alias failures remain excluded. Two additional
+competition/lifecycle cases then passed in all 14 modern Host tests; strict
+workspace/all-target Clippy passed after those tests. Production Rust code did
+not change after the workspace run. The rebuilt C ABI passed all 36 methods
+and 57 fictional examples. Contract validation passed 24 schemas, 69 positive
+and 944 negative fixtures. Both reference-projection tests, regeneration,
+formatting, documentation and repository hygiene passed. No Flutter, new APK,
+real-provider or physical-device acceptance was performed.

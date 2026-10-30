@@ -1,6 +1,6 @@
 # ADR-0096: Modern Mijia Host lifecycle
 
-Status: accepted for implementation; dedicated C/App integration pending.
+Status: implemented in the typed Host; dedicated C/App integration pending.
 Date: October 30, 2026.
 
 ## Decision
@@ -22,7 +22,7 @@ scan window must explicitly request it. Continuation cannot extend that lifetime
 Continuation consumes its handle before validating remaining metadata or registering
 work. Invalid input, timeout, failure and cancellation cannot replay it. A foreign
 Session cannot consume another Session's handle. Discard is local and idempotent.
-Background, cancel and close clear all pending sign-in families and cancel active
+Background, cancel and close clear all pending sign-in families and cancel relevant active
 registered work. A lifecycle generation check rejects late presentation/results
 before returning to a caller. No timer, idle renewal, retry or background task is
 introduced. Credentials successfully saved before cancellation remain saved;
@@ -57,3 +57,12 @@ registration and leases; pending-secret recovery without reauthentication; no
 ordinary JSON methods or protected values in public account output; empty native
 startup remains silent. Run affected Host and Mijia suites and strict Clippy,
 then rebuild/check the native ABI and validate repository contracts/documentation.
+
+## Executed evidence
+
+Fourteen fictional modern Host tests passed. They cover the shared registry,
+provider/ordinary-dispatch refusal, explicit renewal/recovery, legacy-card
+preservation and pending/in-flight/ready-result lifecycle races. The broader
+workspace, ABI and contract results are recorded in the
+[Mijia guide](../development/11-mijia.md). Dedicated C/App and authenticated
+provider/physical acceptance remain pending.

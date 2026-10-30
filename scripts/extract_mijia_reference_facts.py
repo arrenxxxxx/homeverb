@@ -95,7 +95,7 @@ def project():
                        'reference_read_summary': model['independent_read_summary'], 'entries': entries})
     operations = [{'id': o['id'], 'route': o['route'],
                    'status': 'legacy_host_and_modern_typed_read' if o['id'] in ('directory', 'homes', 'properties') else 'not_admitted_by_reference',
-                   'reason': ('Modern reference-origin typed reads and protected accounts are implemented; Core/Host/App adoption is pending.'
+                   'reason': ('Modern reference-origin typed reads and protected accounts are implemented; Core adoption and C/App integration are pending.'
                               if o['id'] in ('directory', 'homes', 'properties')
                               else 'No credential crossover or arbitrary RPC; separate exact control admission is required.')}
                   for o in contract['operations']]
@@ -106,7 +106,8 @@ def project():
                     'evidence': 'ADR-0093; fictional protocol and local TLS tests; anonymous URL shapes only',
                     'protected_account_persistence': 'implemented_payload_v2_with_independent_legacy_and_modern_slots',
                     'account_evidence': 'ADR-0095; fictional SQLite, secret-store and protocol fixtures',
-                    'host_app_and_provider_acceptance': 'pending',
+                    'host_lifecycle': 'implemented_typed_session_qr_and_explicit_account_operations',
+                    'native_c_app_and_provider_acceptance': 'pending',
                     'legacy_session_conversion': 'unavailable',
                     'modern_api_origin_and_codec': 'implemented_reference_continuous_rc4_reads'},
                 'modern_reads': {
@@ -115,9 +116,10 @@ def project():
                     'codec': 'continuous_rc4_drop1024_with_bounded_encrypted_gzip',
                     'logical_parent_reconciliation': 'pending',
                     'protected_account': 'implemented_typed_rust',
-                    'native_host_core_and_app': 'pending',
+                    'typed_host_directory_and_recovery': 'implemented',
+                    'native_c_core_and_app': 'pending',
                     'provider_acceptance': 'pending'},
-                'remaining': ['modern_host_and_app_authentication',
+                'remaining': ['modern_c_and_app_authentication',
                               'modern_api_origin_and_codec_acceptance', 'cloud_cache_inventory_reconciliation',
                               'specialized_failed_property_read_paths', 'BLE_and_LAN', 'history_and_events',
                               'health_and_media', 'additional_write_runtime_contracts']}

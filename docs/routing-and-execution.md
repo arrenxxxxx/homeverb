@@ -710,3 +710,13 @@ QR continuation retains the original lifetime through persistence and refuses
 changed account snapshots. Renewal performs authentication only. Explicit recovery
 validates the exact pending bytes through a bounded modern directory read before
 confirming them; it never renews, rewrites unchanged secrets or replays commands.
+
+
+ADR-0096 adds foreground Host ownership for the modern account flow. Pending QR
+handles share the existing bounded sign-in registry and are consumed before any
+continuation attempt; they are not general JSON authority. Cancel/background/close
+invalidate presentation, cancel the relevant registered work and release leases
+on completion/drop. Explicit directory/recovery and renewal follow the same Host
+operation boundary. A late lifecycle result is refused without pretending to undo
+already-completed protected storage. No physical Device, fallback route, write
+grant or automatic credential renewal follows from a logical directory entry.

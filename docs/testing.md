@@ -658,3 +658,13 @@ owner/snapshot checks before and after exchange, original/continuation
 cancellation, original expiry, removed accounts, uncertain login/renewal saves,
 failed/changed-byte recovery, entry subject isolation and lease release on
 cancellation/drop. No test scans a real QR code or calls a vendor endpoint.
+
+
+Modern Host tests in `crates/host/tests/mijia_accounts/modern_host.rs` use real
+SQLite, fictional modern/legacy peers and an injected secret store. They cover
+protected QR output, same-subject legacy-card preservation, shared login capacity,
+expiry pruning, foreign/repeated handles, invalid-metadata and busy-operation
+consumption, pending/in-flight lifecycle invalidation, late synchronous results,
+dropped futures, lease/operation-ID release, uncertain-save recovery without
+reauthentication, ordinary JSON refusal and sanitized account summaries. Existing
+native startup fixtures continue to require no credentials or provider requests.

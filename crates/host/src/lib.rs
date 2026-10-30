@@ -11,9 +11,10 @@ pub use native_approval::{ExecuteApprovalRequest, PrepareApprovalRequest};
 mod session;
 pub use session::{
     ConfirmConnectionLinkRequest, ConfirmIdentityRecoveryRequest, ConfirmLanScanRequest,
-    ContinueAccountLoginRequest, HostRequest, NativeAccountLogin, NativeVerificationCodeRequest,
-    NativeVerificationLogin, NativeVerificationPrompt, PendingMeijuLanScan,
-    PrepareConnectionLinkRequest, PrepareLanScanRequest, Request, Session,
+    ContinueAccountLoginRequest, HostRequest, ModernAccountRequest, NativeAccountLogin,
+    NativeModernQrLogin, NativeVerificationCodeRequest, NativeVerificationLogin,
+    NativeVerificationPrompt, PendingMeijuLanScan, PrepareConnectionLinkRequest,
+    PrepareLanScanRequest, Request, Session,
 };
 mod accounts;
 pub use accounts::{AccountConnection, AccountProvider, AccountSummary, ConnectRequest};
@@ -240,6 +241,10 @@ fn platform_parts(
             vault,
             Arc::new(homeverb_mijia::MijiaHttps),
             clock.clone(),
+        )
+        .with_modern_protocol(
+            Arc::new(homeverb_mijia::MijiaHttps),
+            Arc::new(homeverb_mijia::MijiaHttps),
         );
         let adapter = if mijia_grants.is_empty() {
             adapter
@@ -339,6 +344,10 @@ pub fn open_mijia_session_with_outlets(
         vault,
         Arc::new(homeverb_mijia::MijiaHttps),
         clock.clone(),
+    )
+    .with_modern_protocol(
+        Arc::new(homeverb_mijia::MijiaHttps),
+        Arc::new(homeverb_mijia::MijiaHttps),
     );
     let adapter = if grants.is_empty() {
         adapter
