@@ -1,6 +1,6 @@
 # HomeVerb native contract
 
-Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.44.0 has 38 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions three trusted connection-link functions and three trusted account-identity recovery functions and three dedicated interactive login functions and four protected verification functions and four modern account functions; the JSON envelope schema is 1.0.
+Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.45.0 has 38 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions three trusted connection-link functions and three trusted account-identity recovery functions and three dedicated interactive login functions and four protected verification functions and four modern account functions; the JSON envelope schema is 1.0.
 
 API 1.19 adds nullable `last_complete_inventory_at` to account summaries. It is
 historical local retrieval metadata, not authorization or online status. SQLite
@@ -253,5 +253,16 @@ and never retry, renew login, poll or mutate state/receipts. C/JNI signatures an
 exports, SQLite 5 and protected payload 3 are unchanged. Negotiate API 1.44 and
 both methods before reopening with the flag. See the
 [UI contract](../../docs/native-ui-contract.md#event-occurrence-history-api-144)
-and [ADR-0117](../../docs/adr/0117-native-event-history.md). Flutter and APK adoption
-are pending; current package 85fefd8 stays on API 1.43.
+and [ADR-0117](../../docs/adr/0117-native-event-history.md). Flutter event adoption and the historical 93cabfd API 1.44 APK are implemented;
+real provider/phone acceptance remains pending.
+
+## Native hood preferences
+
+API 1.45 adds five exact hood-2 reference-setting tuples under
+[ADR-0119](../../docs/adr/0119-mijia-hood-preferences.md). Power/light linkage,
+reminder enable and gesture enable are independent Boolean properties;
+clean_remind_time_12 admits exactly 20/30/40/50 hours. Each grant retains one
+selected value, without companion commands or background scheduling. Existing
+complete saved mappings remain valid until explicit refresh. Methods, exports,
+SQLite 5 and protected payload 3 are unchanged. Flutter adoption and an updated
+APK are pending for these five preferences.

@@ -1,5 +1,33 @@
 # 11. Mijia native integration
 
+## Exact hood preferences, native API 1.45 -- October 30, 2026
+
+[ADR-0119](../adr/0119-mijia-hood-preferences.md) admits five additional exact
+xiaomi.hood.cyp10 preferences: light-linked power-on/off, cleaning-reminder enable,
+20/30/40/50-hour reminder threshold and gesture input enable. Each is a separate
+low-risk set-value target in the existing reference-setting family; one request
+sends one property without companion commands, inferred schedules or background
+work. Protected legacy and modern selection, exact grants and unknown-without-
+replay behavior remain unchanged. Native defaults stay read-only.
+
+API 1.45 adds five closed startup tuples without new methods or C/JNI exports.
+Complete older hood mappings remain valid; explicit refresh upgrades them while
+rejecting arbitrary partial authority. SQLite 5 and protected payload 3 are
+unchanged. There are now 45 Core/native scalar controls, with 40 in App and five
+awaiting version-negotiated Flutter adoption. Of 225 source writable definitions,
+180 remain unimplemented. The 25 remaining actions, event payload/paging work,
+specialized paths and real provider/phone/model acceptance remain open. The
+historical API 1.44 APK is unchanged. Verification is recorded in ADR-0119;
+no provider/account/device operation, installation, push or publication occurred.
+
+Executed verification: 742 workspace Rust tests passed with one ignored,
+excluding the known macOS Meiju LAN-alias failures. Strict Clippy, formatting and
+build passed. Actual C ABI checks passed 38 methods/86 live examples and 76 modern
+account boundary cases. Contracts passed 26 schemas/89 positive/2,118 negative
+fixtures, three projection tests passed, and 50 existing Flutter permission/control
+compatibility tests passed. These checks do not establish new App or physical
+acceptance; see ADR-0119 for scope.
+
 ## Latest mainline integration -- October 30, 2026
 
 The worktree now includes fetched mainline `b4f0aeb` through a linear rebase of

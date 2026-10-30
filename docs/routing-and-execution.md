@@ -1041,3 +1041,14 @@ cannot initiate login renewal or fallback. EOF, cancellation and deadlines relea
 pending work without replay, state-cache updates or execution receipts. Eight
 read-only MCP tools do not grant any appliance-control authority; the separate
 Meiju startup-grant boundary still controls the two additional planning/execution tools.
+
+## Exact Mijia hood preference execution
+
+ADR-0119 uses independent device/component/property/value reference grants for
+five hood preferences. Adapter and Core separately validate the protected domain
+and read protocol before sending one property. A reminder threshold does not
+enable reminders; light linkage does not send a light or power command; gestures
+do not synthesize an input. Old complete mappings remain read-only for new fields
+until explicit refresh. A correlated acknowledgement is accepted, not verified.
+Unknown outcomes never trigger replay, a companion action, account renewal or
+protocol fallback. Firmware may apply its existing configuration after a write.

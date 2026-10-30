@@ -60,6 +60,10 @@ This exits with code 11. Refresh state to inspect the result; do not blindly res
   five models to modern bindings with independent grants and trusted outlet approval.
   ADR-0106/API 1.39 adds four exact hood manual/display controls, bringing that
   scope to 33 properties. No fan-level selection inserts a power-on write.
+  ADR-0119/API 1.45 adds five exact hood preference controls, bringing Core/native
+  scalar coverage to 45; 40 have Flutter adoption and the new five await it.
+  Light linkage, cleaning reminders and gesture preferences remain independent
+  single-property writes without companion actions or App scheduling.
   Broader history and event/control coverage remain incomplete; door-lock writes are unavailable. Startup performs
   no account refresh or network operation. Explicit `--adapter xiaomi.mijia`
   also provides read-only CLI/local MCP hosting and bounded historical queries.

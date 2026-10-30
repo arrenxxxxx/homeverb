@@ -127,3 +127,50 @@ fn hood_manual_grants_retain_exact_codes_without_clock_or_companion_authority() 
         assert!(mijia_setting_policy(&[grant(component, property, value)]).is_err());
     }
 }
+
+#[test]
+fn hood_preferences_admit_only_exact_independent_values() {
+    let fixture: Value = serde_json::from_str(include_str!(
+        "../../../examples/native-open.mijia-hood-preferences.json"
+    ))
+    .unwrap();
+    let grants: Vec<MijiaSettingGrant> =
+        serde_json::from_value(fixture["mijia_setting_grants"].clone()).unwrap();
+    let policy = mijia_setting_policy(&grants).unwrap();
+    assert_eq!(policy.grants.len(), 12);
+    for (input, output) in grants.iter().zip(&policy.grants) {
+        assert_eq!(
+            output.argument_schema,
+            json!({"const":{input.property.clone():input.value}})
+        );
+        assert_eq!(output.capability, "vendor.xiaomi.mijia.hood");
+        assert_eq!(output.component_id, "hood-2");
+        assert_eq!(output.action, format!("set_{}", input.property));
+        let mut foreign = input.clone();
+        foreign.component_id = "hood-3".into();
+        assert!(mijia_setting_policy(&[foreign]).is_err());
+    }
+    for value in [
+        json!(0),
+        json!(10),
+        json!(19),
+        json!(21),
+        json!(25),
+        json!(49),
+        json!(51),
+        json!(60),
+        json!(20.5),
+        json!(true),
+        json!("20"),
+    ] {
+        assert!(mijia_setting_policy(&[grant("hood-2", "clean_remind_time_12", value)]).is_err());
+    }
+    for name in [
+        "power_on_with_light_9",
+        "power_off_with_light_10",
+        "clean_remind_on_11",
+        "gestures_18",
+    ] {
+        assert!(mijia_setting_policy(&[grant("hood-2", name, json!(1))]).is_err());
+    }
+}

@@ -36,7 +36,7 @@ def admitted_write(model, siid, piid):
     if model == 'jdjz.fan.2072fc':
         return (siid == 2 and piid in {1, 3, 4, 5, 6, 7, 8, 9}) or (siid == 3 and piid == 5)
     if model == 'xiaomi.hood.cyp10':
-        return (siid == 6 and piid in {1, 2}) or (siid in {2, 3} and piid == 1) or (siid == 13 and piid in {1, 2})
+        return (siid == 6 and piid in {1, 2}) or (siid in {2, 3} and piid == 1) or (siid == 13 and piid in {1, 2}) or (siid == 2 and piid in {9, 10, 11, 12, 18})
     if model == 'abhome.light.wy0a01':
         return siid == 2 and piid in {1, 2, 3, 7, 9, 12, 13}
     if model == 'cuco.plug.v3':
@@ -190,17 +190,17 @@ def project():
                     'provider_acceptance': 'pending'},
                 'modern_controls': {
                     'status': 'implemented_exact_granted_native_property_set',
-                    'evidence': 'ADR-0104/0106/0114; fictional protocol, TLS, Core, native Host and Flutter tests',
+                    'evidence': 'ADR-0104/0106/0114/0119; exact protected controls; latest hood preferences require separate App adoption',
                     'origin': 'https://core.api.mijia.tech/app',
                     'route': '/miotspec/prop/set',
                     'codec': 'continuous_rc4_drop1024_with_bounded_encrypted_gzip',
                     'models': {'jdjz.fan.2072fc': 9, 'abhome.light.wy0a01': 7,
                                'zhimi.airpurifier.v6': 7, 'cuco.plug.v3': 4,
-                               'xiaomi.hood.cyp10': 6, 'yutai.plug.jdls1': 4,
+                               'xiaomi.hood.cyp10': 11, 'yutai.plug.jdls1': 4,
                                'opple.switch.0010d5': 1, 'opple.switch.0010d6': 2},
                     'authority': 'exact_startup_grants_and_independent_protected_family_admission',
                     'elevated_outlet': 'immutable_trusted_approval_required',
-                    'native_and_app': 'api_1_43_exact_switch_outlet_extension_with_trusted_flutter',
+                    'native_and_app': 'api_1_45_adds_five_hood_preferences_with_app_adoption_pending',
                     'uncertainty': 'preserve_unknown_without_retry_or_protocol_fallback',
                     'android_package': 'archive_checked_85fefd8_api_1_43_no_runtime_acceptance',
                     'provider_acceptance': 'pending'},

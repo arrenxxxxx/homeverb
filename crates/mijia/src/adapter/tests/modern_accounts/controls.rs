@@ -169,6 +169,9 @@ fn values(field: &crate::MappedProperty) -> Vec<Value> {
     if d["type"] == "boolean" {
         return vec![json!(false), json!(true)];
     }
+    if field.component == "hood-2" && field.property == "clean_remind_time_12" {
+        return vec![json!(20), json!(30), json!(40), json!(50)];
+    }
     let mut result = vec![d["minimum"].clone(), d["maximum"].clone()];
     if d["type"] == "integer" {
         result = result
@@ -272,7 +275,7 @@ async fn every_modern_exact_control_keeps_grants_wire_values_and_outlet_approval
         assert_eq!(t.p.auth.lock().unwrap().len(), auth);
         assert_eq!(puts(&t.f), writes);
     }
-    assert_eq!(fields, 40);
+    assert_eq!(fields, 45);
 }
 #[tokio::test]
 async fn modern_controls_remain_read_only_without_opt_in_and_legacy_selection_stays_legacy() {

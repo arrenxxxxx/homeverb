@@ -30,6 +30,7 @@ def main() -> int:
         ("native-open", "native-open.mijia-power-actions"),
         ("native-open", "native-open.mijia-maintenance-actions"),
         ("native-open", "native-open.mijia-hood"),
+        ("native-open", "native-open.mijia-hood-preferences"),
         ("native-open", "native-open.mijia-auxiliary"),
         ("native-open", "native-open.mijia-outlet"),
         ("native-open", "native-open.mijia-switch-outlet"),
@@ -227,8 +228,9 @@ def main() -> int:
         negative.append((f"outlet grants on wrong adapter {adapter}", validators["native-open"], bad))
 
     hood_startup = load("examples/native-open.mijia-hood.json")
+    hood_startup["mijia_setting_grants"] += load("examples/native-open.mijia-hood-preferences.json")["mijia_setting_grants"]
     for entry in hood_startup["mijia_setting_grants"]:
-        for field, value in [("value", None), ("value", "true"), ("value", {}), ("value", -1), ("value", 5), ("value", 1.5), ("property", "auto_screen_off_time_5"), ("component_id", "screen-14"), ("extra", True)]:
+        for field, value in [("value", None), ("value", "true"), ("value", {}), ("value", -1), ("value", 5), ("value", 25), ("value", 60), ("value", 1.5), ("property", "auto_screen_off_time_5"), ("component_id", "screen-14"), ("extra", True)]:
             bad = copy.deepcopy(hood_startup)
             bad["mijia_setting_grants"] = [{**entry, field:value}]
             negative.append((f"invalid hood scope {field}/{value}", validators["native-open"], bad))

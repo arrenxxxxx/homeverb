@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "data_dir": "/private/homeverb-fixture",
+  "allow_mock_writes": false,
+  "adapter": "xiaomi.mijia",
+  "mijia_setting_grants": [
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "hood-2",
+      "property": "power_on_with_light_9",
+      "value": false
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "hood-2",
+      "property": "power_on_with_light_9",
+      "value": true
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "hood-2",
+      "property": "power_off_with_light_10",
+      "value": false
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "hood-2",
+      "property": "power_off_with_light_10",
+      "value": true
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "hood-2",
+      "property": "clean_remind_on_11",
+      "value": false
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "hood-2",
+      "property": "clean_remind_on_11",
+      "value": true
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "hood-2",
+      "property": "clean_remind_time_12",
+      "value": 20
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "hood-2",
+      "property": "clean_remind_time_12",
+      "value": 30
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "hood-2",
+      "property": "clean_remind_time_12",
+      "value": 40
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "hood-2",
+      "property": "clean_remind_time_12",
+      "value": 50
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "hood-2",
+      "property": "gestures_18",
+      "value": false
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "hood-2",
+      "property": "gestures_18",
+      "value": true
+    }
+  ]
+}

@@ -473,7 +473,7 @@ fn reference_settings_keep_old_mappings_and_require_exact_source() {
             "cuco.plug.v3" | "yutai.plug.jdls1" => 4,
             "opple.switch.0010d5" | "jdjz.fan.2072fc" => 1,
             "opple.switch.0010d6" => 2,
-            "xiaomi.hood.cyp10" => 6,
+            "xiaomi.hood.cyp10" => 11,
             _ => 7,
         };
         assert_eq!(
@@ -639,13 +639,15 @@ fn prior_hood_illumination_mapping_upgrades_without_accepting_partial_new_domain
         .unwrap();
     let mut previous = current.clone();
     for property in &mut previous.properties {
-        if hood_manual_setting(&current.model, property.siid, property.piid) {
+        if hood_manual_setting(&current.model, property.siid, property.piid)
+            || hood_preference_setting(&current.model, property.siid, property.piid)
+        {
             property.write_domain = None;
         }
     }
     previous.validate_saved().unwrap();
     assert_eq!(previous.control_options().len(), 2);
-    assert_eq!(current.control_options().len(), 6);
+    assert_eq!(current.control_options().len(), 11);
     assert_eq!(previous.upgraded().unwrap(), current);
     assert_eq!(
         serde_json::to_value(previous.capabilities()).unwrap(),
@@ -685,5 +687,47 @@ fn prior_hood_illumination_mapping_upgrades_without_accepting_partial_new_domain
                 .write_domain
                 .is_none()
         );
+    }
+}
+
+#[test]
+fn hood_preferences_preserve_complete_old_mapping_and_refuse_mixed_authority() {
+    let current = ModelMapping::pinned("xiaomi.hood.cyp10", None)
+        .unwrap()
+        .unwrap();
+    let mut previous = current.clone();
+    for property in &mut previous.properties {
+        if hood_preference_setting(&current.model, property.siid, property.piid) {
+            property.write_domain = None;
+        }
+    }
+    previous.validate_saved().unwrap();
+    assert_eq!(previous.control_options().len(), 6);
+    assert_eq!(previous.upgraded().unwrap(), current);
+    assert_eq!(
+        serde_json::to_value(previous.capabilities()).unwrap(),
+        serde_json::to_value(current.capabilities()).unwrap()
+    );
+    for target in current
+        .properties
+        .iter()
+        .filter(|p| hood_preference_setting(&current.model, p.siid, p.piid))
+    {
+        let mut mixed = previous.clone();
+        mixed
+            .properties
+            .iter_mut()
+            .find(|p| p.siid == target.siid && p.piid == target.piid)
+            .unwrap()
+            .write_domain = target.write_domain.clone();
+        assert!(mixed.validate_saved().is_err());
+        let mut missing = current.clone();
+        missing
+            .properties
+            .iter_mut()
+            .find(|p| p.siid == target.siid && p.piid == target.piid)
+            .unwrap()
+            .write_domain = None;
+        assert!(missing.validate_saved().is_err());
     }
 }

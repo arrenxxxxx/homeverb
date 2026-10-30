@@ -138,3 +138,13 @@ select the new composition; explicit CLI account connect/refresh opts into event
 publication. No constructor reads credentials, logs in, refreshes accounts or
 schedules work. Adapter identity/model/membership/protocol checks and Core
 occurrence-time validation remain the same as native/App event reads.
+
+## Exact hood preferences
+
+ADR-0119 adds five independent protected xiaomi.hood.cyp10 preference targets to
+the reference-setting family: power_on_with_light_9, power_off_with_light_10,
+clean_remind_on_11, clean_remind_time_12 and gestures_18 on hood-2. The first,
+second, third and fifth are Boolean; the threshold is exactly 20/30/40/50 hours.
+Preserve exact service/property/type/unit/access evidence. One set-value request
+never enables its companion or invokes a cleaning/power action. No physical
+verification or complete model support follows from an accepted response.

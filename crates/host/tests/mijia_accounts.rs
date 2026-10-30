@@ -828,7 +828,7 @@ async fn native_outlet_approval_is_foreground_single_use_and_preserves_uncertain
 async fn auxiliary_options_are_local_before_grants_and_match_native_scopes() {
     for (mode, component, count) in [
         (1, "light-6", 2),
-        (1, "hood-2", 1),
+        (1, "hood-2", 6),
         (1, "fan_control-3", 1),
         (1, "screen-13", 2),
         (2, "function-3", 1),

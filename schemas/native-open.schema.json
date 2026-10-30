@@ -1106,6 +1106,74 @@
                 "type": "boolean"
               }
             }
+          },
+          {
+            "properties": {
+              "component_id": {
+                "const": "hood-2"
+              },
+              "property": {
+                "const": "power_on_with_light_9"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "properties": {
+              "component_id": {
+                "const": "hood-2"
+              },
+              "property": {
+                "const": "power_off_with_light_10"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "properties": {
+              "component_id": {
+                "const": "hood-2"
+              },
+              "property": {
+                "const": "clean_remind_on_11"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "properties": {
+              "component_id": {
+                "const": "hood-2"
+              },
+              "property": {
+                "const": "clean_remind_time_12"
+              },
+              "value": {
+                "type": "integer",
+                "minimum": 20,
+                "maximum": 50,
+                "multipleOf": 10
+              }
+            }
+          },
+          {
+            "properties": {
+              "component_id": {
+                "const": "hood-2"
+              },
+              "property": {
+                "const": "gestures_18"
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
           }
         ]
       }

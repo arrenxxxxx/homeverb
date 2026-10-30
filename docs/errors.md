@@ -915,3 +915,13 @@ MCP reports query failures with isError=true and the unchanged query envelope;
 read-only annotations never suppress errors or grant a principal. CANCELLED and
 DEADLINE_EXCEEDED end work without retries or receipt writes. Empty options/rows
 never establish device state or event absence. Native error contracts are unchanged.
+
+## Mijia hood preference refusal
+
+API 1.45 refuses invalid hood preference startup tuples with INVALID_ARGUMENT
+before storage: wrong component/property, non-Boolean switch values or reminder
+thresholds outside exact 20/30/40/50-hour steps. Missing exact authority, disabled
+reference admission, changed protected evidence and unreviewed gas/stove/schedule
+fields retain existing pre-send refusals. Correlated provider rejection remains
+failed; a possibly-sent request without a correlated reply remains unknown and
+is not retried or converted into physical confirmation.

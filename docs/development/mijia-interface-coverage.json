@@ -4833,7 +4833,7 @@
           "iid": 9,
           "name": "power-on-with-light",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
@@ -4843,7 +4843,7 @@
           "iid": 10,
           "name": "power-off-with-light",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
@@ -4853,7 +4853,7 @@
           "iid": 11,
           "name": "clean-remind-on",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
@@ -4863,7 +4863,7 @@
           "iid": 12,
           "name": "clean-remind-time",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "numeric_sample_history_status": "implemented_core_native_app_reported_samples",
           "reference_successful_instances": 0
         },
@@ -4873,7 +4873,7 @@
           "iid": 18,
           "name": "gestures",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
@@ -5886,7 +5886,7 @@
   },
   "modern_controls": {
     "status": "implemented_exact_granted_native_property_set",
-    "evidence": "ADR-0104/0106/0114; fictional protocol, TLS, Core, native Host and Flutter tests",
+    "evidence": "ADR-0104/0106/0114/0119; exact protected controls; latest hood preferences require separate App adoption",
     "origin": "https://core.api.mijia.tech/app",
     "route": "/miotspec/prop/set",
     "codec": "continuous_rc4_drop1024_with_bounded_encrypted_gzip",
@@ -5895,14 +5895,14 @@
       "abhome.light.wy0a01": 7,
       "zhimi.airpurifier.v6": 7,
       "cuco.plug.v3": 4,
-      "xiaomi.hood.cyp10": 6,
+      "xiaomi.hood.cyp10": 11,
       "yutai.plug.jdls1": 4,
       "opple.switch.0010d5": 1,
       "opple.switch.0010d6": 2
     },
     "authority": "exact_startup_grants_and_independent_protected_family_admission",
     "elevated_outlet": "immutable_trusted_approval_required",
-    "native_and_app": "api_1_43_exact_switch_outlet_extension_with_trusted_flutter",
+    "native_and_app": "api_1_45_adds_five_hood_preferences_with_app_adoption_pending",
     "uncertainty": "preserve_unknown_without_retry_or_protocol_fallback",
     "android_package": "archive_checked_85fefd8_api_1_43_no_runtime_acceptance",
     "provider_acceptance": "pending"
@@ -5991,8 +5991,8 @@
   },
   "property_control_coverage": {
     "declared_writable_definitions": 225,
-    "implemented_exact_definitions": 40,
-    "pending_separate_admission": 185,
+    "implemented_exact_definitions": 45,
+    "pending_separate_admission": 180,
     "meaning": "Source write access alone does not establish command semantics, risk, authorization, runtime support or physical acceptance."
   },
   "maintenance_actions": {

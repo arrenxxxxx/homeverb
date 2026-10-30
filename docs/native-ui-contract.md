@@ -1,6 +1,6 @@
 # Native UI contract
 
-The October 30 event occurrence history bridge uses native API **1.44.0**, following
+The October 30 hood preference extension uses native API **1.45.0**, following
 the October 24 linear mainline update. Earlier Mijia phase versions are historical. See
 [contract reconciliation](adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
 remain available alongside Mijia; identity restoration remains Meiju-only.
@@ -43,7 +43,7 @@ The 22 C functions in [homeverb.h](../crates/ffi/include/homeverb.h) form the na
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects Meiju, `xiaomi.mijia` selects Mijia, and `homeverb.platforms` selects both. `scenario` defaults to `normal`. All platform modes require `allow_mock_writes: false` and reject any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms the selected mode. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.44.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.45.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -2162,3 +2162,15 @@ known such components skip selected-device state reads. Event history remains
 explicit and ephemeral; the visible-state timer is suspended while its dialog is
 open. Shared catalogs cover all 78 selectors. APK adoption and real acceptance
 remain pending; see the [App verification record](../apps/mobile/verification.md).
+
+## Exact hood preferences (API 1.45)
+
+[ADR-0119](adr/0119-mijia-hood-preferences.md) adds five `hood-2` tuples to the
+existing `mijia_setting_grants`: Boolean power_on_with_light_9,
+power_off_with_light_10, clean_remind_on_11 and gestures_18, plus
+clean_remind_time_12 with exact integer values 20/30/40/50 hours. Each tuple grants
+one value only. There is no companion write, scheduled App work or verification
+promise. The existing option-inspection method returns the precise parameter
+schema after explicit refresh; native defaults remain read-only. Negotiate API
+1.45 before supplying these tuples. App adoption and a new APK remain pending.
+The ordinary method list, exports and storage versions are unchanged.

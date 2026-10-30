@@ -1108,3 +1108,13 @@ MCP notification/EOF/host shutdown and actual subprocess error/exit behavior.
 Existing protected adapter tests cover all 78 events through both protocols.
 Startup/idle tests use empty real-mode profiles and fictional peers; no real
 credentials, provider traffic or physical actuation is part of this evidence.
+
+## Hood preference extension
+
+ADR-0119 coverage adds all twelve exact targets on both protected protocols,
+source/domain mutations, independent family/grant refusal, local inspection,
+complete old mapping upgrades and partial-authority rejection. Native startup
+examples include native-open.mijia-hood-preferences; contract and actual C ABI
+checks refuse off-grid threshold values and foreign fields before storage.
+Run the Mijia and Host suites, workspace regression, strict Clippy, build and
+verify_native_contract.py. App and APK adoption are separate pending phases.
