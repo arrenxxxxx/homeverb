@@ -81,6 +81,7 @@ def main() -> int:
     pairs.extend(("history", "history." + name) for name in ["options", "request", "result"])
     pairs.extend(("history", "history.samples." + name) for name in ["options", "request", "result"])
     validators = {}
+    pairs.extend(("event-history", "event-history." + name) for name in ["options", "request", "result"])
     for path in (ROOT / "schemas").glob("*.schema.json"):
         sch = json.loads(path.read_text(encoding="utf-8"))
         Draft202012Validator.check_schema(sch)
@@ -693,6 +694,50 @@ def main() -> int:
     for value in [True, None, "-1", {}, []]:
         bad = copy.deepcopy(samples["result"]); bad["records"][0]["value"] = value
         negative.append(("sample history requires numeric values", validators["history"], bad))
+
+    events = {name: load(f"examples/event-history.{name}.json") for name in ["options", "request", "result"]}
+    event_validator = validators["event-history"]
+    for name, fixture in events.items():
+        for field in ["provider", "did", "key", "uid", "token", "principal", "confirmed", "limit", "endpoint", "cursor", "payload"]:
+            bad = copy.deepcopy(fixture); bad[field] = "FORBIDDEN"
+            negative.append((f"event {name} rejects {field}", event_validator, bad))
+        for field in fixture:
+            bad = copy.deepcopy(fixture); del bad[field]
+            negative.append((f"event {name} requires {field}", event_validator, bad))
+    for name in ["request", "result"]:
+        for field, value in [("projection", "raw_payload"), ("projection", "reported_samples"), ("target", {}),
+                             ("start", "2026-10-01T00:00:00.000Z"), ("end", "2026-10-01T00:00:00+00:00"),
+                             ("start", "2026-02-30T00:00:00Z"), ("start", "2026-10-01T00:00:60Z")]:
+            bad = copy.deepcopy(events[name]); bad[field] = value
+            negative.append((f"event {name} invalid {field}", event_validator, bad))
+        for field in ["property", "siid", "eiid", "key", "did"]:
+            bad = copy.deepcopy(events[name]); bad["target"][field] = "FORBIDDEN"
+            negative.append((f"event target rejects {field}", event_validator, bad))
+    for field, value in [("completeness", "complete"), ("rejected_records", -1), ("rejected_records", 32),
+                         ("rejected_records", True), ("limit_reached", 1), ("received_at", "invalid"),
+                         ("records", events["result"]["records"] * 16), ("source", "cache")]:
+        bad = copy.deepcopy(events["result"]); bad[field] = value
+        negative.append((f"event result invalid {field}", event_validator, bad))
+    for field in ["value", "payload", "actor", "event_id", "url", "verified"]:
+        bad = copy.deepcopy(events["result"]); bad["records"][0][field] = "FORBIDDEN"
+        negative.append((f"event record rejects {field}", event_validator, bad))
+    for field, value in [("max_records", 0), ("max_records", 32), ("max_records", True),
+                         ("max_window_seconds", 0), ("max_window_seconds", 2764801),
+                         ("projection", "raw_payload"), ("target", {})]:
+        bad = copy.deepcopy(events["options"]); bad["options"][0][field] = value
+        negative.append((f"event option invalid {field}", event_validator, bad))
+    bad = copy.deepcopy(events["options"]); bad["options"] *= 2
+    negative.append(("event duplicate options", event_validator, bad))
+    bad = copy.deepcopy(events["options"]); bad["options"] *= 65
+    negative.append(("event excessive options", event_validator, bad))
+    for count in [0, 31]:
+        page = copy.deepcopy(events["result"])
+        page["records"] = page["records"][:1] * count
+        page["rejected_records"] = 0
+        page["limit_reached"] = count == 31
+        event_validator.validate(page)
+    empty = copy.deepcopy(events["options"]); empty["options"] = []
+    event_validator.validate(empty)
 
     for name, validator, data in negative:
         if validator.is_valid(data):

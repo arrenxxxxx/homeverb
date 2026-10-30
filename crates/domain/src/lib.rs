@@ -5,6 +5,9 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::BTreeMap;
 
+mod event_history;
+pub use event_history::*;
+
 mod history;
 pub use history::*;
 

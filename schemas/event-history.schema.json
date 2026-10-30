@@ -1,0 +1,238 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Bounded event occurrence history",
+  "description": "ADR-0116. Occurrence times only, not event payloads, live state or execution evidence. Core integration must additionally validate exact event admission and window/order/receipt/count consistency; that runtime integration is pending. Equal timestamps are permitted and completeness is unproven.",
+  "$defs": {
+    "target": {
+      "type": "object",
+      "properties": {
+        "component_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "capability": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "event": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      },
+      "required": [
+        "component_id",
+        "capability",
+        "event"
+      ],
+      "additionalProperties": false
+    },
+    "option": {
+      "type": "object",
+      "properties": {
+        "target": {
+          "$ref": "#/$defs/target"
+        },
+        "max_window_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2764800
+        },
+        "max_records": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 31
+        },
+        "projection": {
+          "const": "occurrence_times"
+        }
+      },
+      "required": [
+        "target",
+        "max_window_seconds",
+        "max_records",
+        "projection"
+      ],
+      "additionalProperties": false
+    },
+    "options": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "device_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "connection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/option"
+          },
+          "maxItems": 64,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "schema_version",
+        "device_id",
+        "connection_id",
+        "options"
+      ],
+      "additionalProperties": false
+    },
+    "request": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "device_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "connection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "target": {
+          "$ref": "#/$defs/target"
+        },
+        "start": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+        },
+        "projection": {
+          "const": "occurrence_times"
+        }
+      },
+      "required": [
+        "schema_version",
+        "device_id",
+        "connection_id",
+        "target",
+        "start",
+        "end",
+        "projection"
+      ],
+      "additionalProperties": false
+    },
+    "result": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "device_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "connection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "target": {
+          "$ref": "#/$defs/target"
+        },
+        "start": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+        },
+        "source": {
+          "enum": [
+            "lan",
+            "cloud"
+          ]
+        },
+        "received_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "records": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "reported_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+              }
+            },
+            "required": [
+              "reported_at"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 31
+        },
+        "rejected_records": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 31
+        },
+        "limit_reached": {
+          "type": "boolean"
+        },
+        "completeness": {
+          "const": "unproven"
+        },
+        "projection": {
+          "const": "occurrence_times"
+        }
+      },
+      "required": [
+        "schema_version",
+        "device_id",
+        "connection_id",
+        "target",
+        "start",
+        "end",
+        "source",
+        "received_at",
+        "records",
+        "rejected_records",
+        "limit_reached",
+        "completeness",
+        "projection"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/options"
+    },
+    {
+      "$ref": "#/$defs/request"
+    },
+    {
+      "$ref": "#/$defs/result"
+    }
+  ]
+}

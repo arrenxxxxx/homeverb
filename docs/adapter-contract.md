@@ -95,3 +95,15 @@ type/unit/access/domain evidence. Fan/outlet opt-ins cannot enable them. Histori
 illumination-only mappings are accepted only as a complete known derivation;
 partial new-domain mixtures refuse. Inspection may upgrade a temporary mapping
 without changing saved authority; explicit refresh performs the protected upgrade.
+
+
+## Event occurrence history contract phase
+
+[ADR-0116](adr/0116-bounded-event-history.md) defines a separate domain/schema
+contract for occurrence-time inspection and reads. It does not yet add Adapter
+hooks. The forthcoming default is empty inspection and unsupported reads. Opt-in
+adapters must independently derive event support from protected bindings, retain
+account leases through one request and admit event-only service components during
+explicit descriptor refresh without inventing state. Public event metadata never
+substitutes for protected evidence. Numeric history and existing adapters are
+unchanged in this contract-only phase.

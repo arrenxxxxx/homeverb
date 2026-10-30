@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "device_id": "fictional-event-source",
+  "connection_id": "fictional-cloud",
+  "options": [
+    {
+      "target": {
+        "component_id": "event-sensor",
+        "capability": "vendor.example.sensor",
+        "event": "reported_activity"
+      },
+      "max_window_seconds": 2764800,
+      "max_records": 31,
+      "projection": "occurrence_times"
+    }
+  ]
+}

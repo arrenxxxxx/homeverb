@@ -1021,3 +1021,15 @@ opaque payload omission; same-second rows; unproven empty/full pages; auth failu
 late results; cancellation, deadline and future drop without retry. These typed
 checks do not establish protected Core membership, native/App support, payload
 interpretation, pagination, subscriptions or real-provider retention/delivery.
+
+
+## Event history domain contract checks
+
+Run cargo +1.96.0 test -p homeverb-domain --offline --locked for the ADR-0116
+round-trip, canonical UTC/leap-second, remote selector/authority and event-payload
+refusal tests. Run python3 scripts/validate_contracts.py for the event-history
+schema's three fictional fixtures and negative boundary cases, including empty,
+partial/full pages, equal timestamps and option/record bounds. The separate
+numeric history schema must continue rejecting event results. These checks do not
+exercise Core event admission, adapter bindings, native/App methods or devices.
+Core cross-field time/count/identity checks remain a required implementation phase.

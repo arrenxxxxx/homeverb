@@ -3,7 +3,7 @@ use crate::Transport;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-fn whole_utc<'de, D: serde::Deserializer<'de>>(d: D) -> Result<DateTime<Utc>, D::Error> {
+pub(crate) fn whole_utc<'de, D: serde::Deserializer<'de>>(d: D) -> Result<DateTime<Utc>, D::Error> {
     let text = String::deserialize(d)?;
     let value = DateTime::parse_from_rfc3339(&text).map_err(serde::de::Error::custom)?;
     if text.len() != 20 || !text.ends_with('Z') || value.timestamp_subsec_nanos() != 0 {

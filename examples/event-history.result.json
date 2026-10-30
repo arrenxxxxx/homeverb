@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "device_id": "fictional-event-source",
+  "connection_id": "fictional-cloud",
+  "target": {
+    "component_id": "event-sensor",
+    "capability": "vendor.example.sensor",
+    "event": "reported_activity"
+  },
+  "start": "2026-10-01T00:00:00Z",
+  "end": "2026-10-03T00:00:00Z",
+  "source": "cloud",
+  "received_at": "2026-10-04T12:00:00Z",
+  "records": [
+    {
+      "reported_at": "2026-10-01T16:00:00Z"
+    },
+    {
+      "reported_at": "2026-10-01T16:00:00Z"
+    }
+  ],
+  "rejected_records": 1,
+  "limit_reached": false,
+  "completeness": "unproven",
+  "projection": "occurrence_times"
+}

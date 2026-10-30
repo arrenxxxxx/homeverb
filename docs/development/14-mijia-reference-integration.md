@@ -2230,3 +2230,28 @@ and 76 modern-account refusal/buffer/lifecycle cases, plus the existing trusted
 approval/scan/link/identity boundaries. A fresh origin fetch retained main at
 ccf2975, already an ancestor, with zero new merge commits. No mobile source or
 package changed during this protocol-only phase.
+
+
+## Event history domain contract -- October 30, 2026
+
+[ADR-0116](../adr/0116-bounded-event-history.md) defines event history independently
+of numeric samples. Public domain/schema targets use component/capability/event,
+with an explicit occurrence_times projection, canonical UTC windows and only
+reported timestamps. Duplicate timestamps are preserved; opaque payloads, actors,
+provider IDs and complete-delivery claims are excluded. Three fictional fixtures
+cover options, requests and partial results; empty/full pages retain unproven
+completeness. The catalog contains 25 argument-bearing events and several services
+without readable components, so future adapter publication must include event-only
+services and still leave payload interpretation explicitly incomplete.
+
+This phase implements contracts only. Core cross-field/read-policy validation,
+protected adapter membership and descriptor publication, Host/native/App adoption,
+payload semantics, pagination, subscriptions and provider/phone/model acceptance
+remain unfinished. Native API 1.43 and the 85fefd8 APK do not change.
+
+Executed checks for this contract phase: all four domain tests and all 14 existing
+Host numeric-history tests passed with Rust 1.96 offline/locked and four test
+threads. Strict workspace Clippy and formatting passed. Contract validation passed
+26 schemas, 86 positive fixtures and 1,959 negative cases, including 104 additional
+event counterexamples. Documentation and repository hygiene checks passed.
+These checks do not establish callable Core event support or new mobile behavior.

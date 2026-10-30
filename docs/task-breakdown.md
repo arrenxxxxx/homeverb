@@ -1,5 +1,13 @@
 # Implementation status and next tasks
 
+## Event history domain contract -- October 30, 2026
+
+ADR-0116's separate event-history domain types, schema and fixtures are implemented.
+Next: Core cross-field validation/default Adapter hooks, protected Mijia event and
+event-only-component publication, Host/native/CLI/MCP/App adoption. Event payload
+semantics, paging, subscriptions and real acceptance remain incomplete. This
+contract phase adds no callable method and leaves API 1.43 and 85fefd8 unchanged.
+
 ## Typed event history checkpoint -- October 30, 2026
 
 ADR-0115 implements exact occurrence-time requests for all 78 pinned event

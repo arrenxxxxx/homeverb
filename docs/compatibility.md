@@ -3349,3 +3349,12 @@ Mijia daily-energy profile remains the only admitted real-platform series.
 No native exports, schemas, saved formats, authority or physical compatibility
 change. English/Chinese fixtures cover explicit reads and cancellation; provider
 acceptance and a matching updated Android package remain pending.
+
+
+## Event history domain contract -- October 30, 2026
+
+ADR-0116 adds Rust domain types and a separate event-history schema. Existing
+numeric history types/semantics, API 1.43, capability schemas, ordinary methods,
+SQLite 5 and protected payload 3 are unchanged. Core/adapter/native/App event
+admission remains pending, as do payload/paging/subscription and physical checks.
+The 85fefd8 APK is unchanged; new contract fixtures do not add mobile functionality.

@@ -95,3 +95,16 @@ matching unit, or null when the property has none. Daily statistics retain their
 historical string unit and nonnegative values. Uniqueness is `(target, aggregation)`.
 See the [sample result](../examples/history.samples.result.json). Neither series
 is event history; both retain unproven completeness and the existing time/count bounds.
+
+
+## Bounded event occurrence history contract
+
+[ADR-0116](adr/0116-bounded-event-history.md) introduces separate EventHistoryTarget,
+Option/Options, Request, Record and Result types. A target selects an existing
+component/capability/event; the initial projection is occurrence_times, with no
+numeric value, event payload, actor or provider identifier. Whole-second UTC
+windows and reported record times are distinct from local receipt time. Equal
+reported timestamps are preserved; completeness is always unproven. The contract
+has 64-option, 31-record and 32-day bounds. Core cross-field validation and adapter
+admission remain pending; these types do not create callable history methods.
+Existing numeric history and persisted formats are unchanged.
