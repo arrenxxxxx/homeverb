@@ -1,3 +1,4 @@
+import 'device_page.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -2293,26 +2294,40 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           if (!popped) action('Back');
         },
         child: Scaffold(
-          body: ScreenView(
-            key: id == 'S06' ? ObjectKey(c.receipt) : null,
-            id: id,
-            catalog: widget.catalog,
-            screenOverride: screen,
-            home: content,
-            resolveScreen: screenFor,
-            resolveHome: specialFor,
-            onAction: action,
-            fields: fields,
-            choices: choices,
-            values: values,
-            onChanged: changed,
-            busy: c.busy,
-            showOperationProgress:
-                content is! ClimateControls &&
-                quickPowerDevice == null &&
-                !accountRefreshing,
-            error: id == 'C10' && actionCapability != null ? null : c.error,
-          ),
+          body:
+              content is ClimateControls ||
+                  content is CompartmentControls ||
+                  (content is DeviceDetailControls &&
+                      c.capability('vendor.midea.dishwasher') != null)
+              ? DevicePage(
+                  title: screen['header'] as Object,
+                  onAction: action,
+                  busy: c.busy && content is! ClimateControls,
+                  error: c.error,
+                  child: content!,
+                )
+              : ScreenView(
+                  key: id == 'S06' ? ObjectKey(c.receipt) : null,
+                  id: id,
+                  catalog: widget.catalog,
+                  screenOverride: screen,
+                  home: content,
+                  resolveScreen: screenFor,
+                  resolveHome: specialFor,
+                  onAction: action,
+                  fields: fields,
+                  choices: choices,
+                  values: values,
+                  onChanged: changed,
+                  busy: c.busy,
+                  showOperationProgress:
+                      content is! ClimateControls &&
+                      quickPowerDevice == null &&
+                      !accountRefreshing,
+                  error: id == 'C10' && actionCapability != null
+                      ? null
+                      : c.error,
+                ),
         ),
       ),
     );

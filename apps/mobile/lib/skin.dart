@@ -6,6 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+// Explicit system-family fallback; Latin and numbers retain bundled Inter.
+const windowFontFallback = ['Noto Sans CJK SC', 'PingFang SC'];
+
 const ink = Color(0xff292b2d),
     muted = Color(0xff626566),
     accent = Color(0xffb94e29);
@@ -97,6 +100,7 @@ Future<void> loadWindowSkin() => _skinAssetsLoad ??= () async {
 }();
 ThemeData windowTheme({bool highContrast = false}) => ThemeData(
   fontFamily: 'Inter',
+  fontFamilyFallback: windowFontFallback,
   useMaterial3: true,
   scaffoldBackgroundColor: Colors.transparent,
   extensions: const [HomeVerbSkin()],
@@ -153,6 +157,7 @@ Color powerForeground(BuildContext context, bool? state) =>
 
 const windowFieldTextStyle = TextStyle(
   fontFamily: 'Inter',
+  fontFamilyFallback: windowFontFallback,
   fontSize: 15,
   fontWeight: FontWeight.w400,
   height: 4 / 3,
@@ -209,11 +214,12 @@ class Copy extends StatelessWidget {
     this.center = false,
     this.control = false,
     this.paragraph = false,
+    this.lineHeight = 1.4,
     this.maxLines,
     super.key,
   });
   final Object text;
-  final double size;
+  final double size, lineHeight;
   final Color color;
   final bool bold, center, control, paragraph;
   final int? maxLines;
@@ -225,8 +231,9 @@ class Copy extends StatelessWidget {
         : size;
     final style = TextStyle(
       fontFamily: 'Inter',
+      fontFamilyFallback: windowFontFallback,
       fontSize: textSize,
-      height: 1.4,
+      height: lineHeight,
       letterSpacing: 0,
       wordSpacing: 0,
       color: readableInk(context, color),
@@ -262,7 +269,7 @@ class Copy extends StatelessWidget {
         final double leading;
         if (paragraph) {
           // Preserve the specified line box despite native paragraph rounding.
-          final lineHeight = scaler.scale(textSize) * 1.4;
+          final lineHeight = scaler.scale(textSize) * this.lineHeight;
           leading = math.max(
             0.0,
             measure.computeLineMetrics().length * lineHeight - glyphHeight,
@@ -1321,6 +1328,7 @@ class ChoiceTile extends StatelessWidget {
                   text: localize(context, label),
                   style: TextStyle(
                     fontFamily: 'Inter',
+                    fontFamilyFallback: windowFontFallback,
                     fontSize: 13,
                     height: 1.4,
                     letterSpacing: 0,

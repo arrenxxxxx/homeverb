@@ -491,3 +491,9 @@ for exact product catalogs and remaining authentication, TSL and service gaps,
 and the [function comparison](../../docs/development/10-meiju-ac-parity.md)
 for unfinished controls. These changes do not establish complete feature parity
 or physical-device support.
+
+## Device interaction design
+
+Follow the [shared device interaction contract](../../docs/development/14-device-interaction-design.md) when adding or changing device pages, including future Hisense and Mijia/Xiaomi integrations. The design never grants device authority.
+
+The [current synthetic UI verification report](../../docs/development/device-interaction-verification.md) records tests and screenshot limits without modifying the existing historical verification record.

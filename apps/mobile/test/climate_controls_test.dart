@@ -1,15 +1,18 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:homeverb_mobile/climate_controls.dart';
 import 'package:homeverb_mobile/controller.dart';
+import 'package:homeverb_mobile/device_typography.dart';
 import 'package:homeverb_mobile/localization.dart';
 import 'package:homeverb_mobile/main.dart';
 import 'package:homeverb_mobile/native_client.dart';
 import 'package:homeverb_mobile/preferences.dart';
 import 'package:homeverb_mobile/screens.dart' hide Json;
 import 'package:homeverb_mobile/skin.dart';
+
 import 'controls_test.dart' show ControlsFixture, capability, setter, example;
 
 class ClimateFixture extends ControlsFixture {
@@ -111,17 +114,135 @@ void main() {
   }
 
   testWidgets(
+    'refresh reads without executing and rejects background callbacks',
+    (tester) async {
+      final (core, c, _) = await open(tester);
+      core.calls.clear();
+      final refresh = find.byKey(const ValueKey('climate-refresh'));
+      await tap(tester, refresh);
+      expect(
+        core.calls.where((v) => v['method'] == 'read_state'),
+        hasLength(1),
+      );
+      expect(core.calls.where((v) => v['method'] == 'execute'), isEmpty);
+      final callback = tester.widget<ActionButton>(refresh).onPressed!;
+      core.calls.clear();
+      c.setForeground(false);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      await tester.pumpAndSettle();
+      expect(tester.widget<ActionButton>(refresh).onPressed, isNull);
+      callback();
+      await tester.pumpAndSettle();
+      expect(core.calls, isEmpty);
+      c.setForeground(true);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
+  testWidgets('power is a switch and selected mode has a checkmark', (
+    tester,
+  ) async {
+    final (core, _, _) = await open(tester);
+    final power = tester.widget<Switch>(
+      find.byKey(const ValueKey('climate-power')),
+    );
+    expect(power.value, true);
+    final mode = tester.widget<ChoiceChip>(
+      find.byKey(const ValueKey('climate-option:mode:cool')),
+    );
+    expect(mode.selected, true);
+    expect(mode.showCheckmark, true);
+    expect(mode.labelStyle!.fontSize, DeviceTypography.body);
+    expect(mode.labelStyle!.height, DeviceTypography.lineHeight);
+    core.calls.clear();
+    await tap(tester, find.byKey(const ValueKey('climate-option:mode:cool')));
+    expect(core.calls.where((v) => v['method'] == 'execute'), isEmpty);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  for (final layout in [(430.0, 1.0), (320.0, 1.0), (320.0, 2.0)]) {
+    testWidgets(
+      'fan presets stay on one line at ${layout.$1}px and ${layout.$2}x text',
+      (tester) async {
+        LocaleSettings.setLocale(AppLocale.zhCn);
+        final (core, c, _) = await open(tester);
+        tester.view.physicalSize = Size(layout.$1 * 2, 1688);
+        tester.platformDispatcher.textScaleFactorTestValue = layout.$2;
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+        await tester.pumpAndSettle();
+        final fan = find.byKey(const ValueKey('climate-row:Fan speed'));
+        final chips = find.descendant(
+          of: fan,
+          matching: find.byType(ChoiceChip),
+        );
+        expect(chips, findsNWidgets(6));
+        final rows = <int>{};
+        for (var i = 0; i < 6; i++) {
+          rows.add(tester.getTopLeft(chips.at(i)).dy.round());
+          expect(
+            tester.widget<ChoiceChip>(chips.at(i)).labelStyle!.fontSize,
+            DeviceTypography.body,
+          );
+          expect(tester.getSize(chips.at(i)).height, greaterThanOrEqualTo(44));
+        }
+        expect(rows, hasLength(1));
+        final scroll = find.byKey(const ValueKey('climate-fan-scroll'));
+        if (layout.$1 == 430 && layout.$2 == 1) expect(scroll, findsNothing);
+        if (layout.$2 == 2) expect(scroll, findsOneWidget);
+        final choice = climateChoice(c, {'wind_speed'})!;
+        core.calls.clear();
+        for (final option in choice.available(c)) {
+          core.observations[choice.property] = option;
+          await c.refresh();
+          await tester.pumpAndSettle();
+          final selected = find.byKey(
+            ValueKey('climate-option:${choice.parameter}:$option'),
+          );
+          expect(tester.widget<ChoiceChip>(selected).selected, true);
+          final viewport = tester.getRect(
+            scroll.evaluate().isEmpty ? fan : scroll,
+          );
+          final bounds = tester.getRect(selected);
+          expect(bounds.left, greaterThanOrEqualTo(viewport.left - 1));
+          expect(bounds.right, lessThanOrEqualTo(viewport.right + 1));
+        }
+        if (layout.$2 == 2) {
+          for (final key in [
+            'climate-fan-scroll-back',
+            'climate-fan-scroll-forward',
+          ]) {
+            final arrow = find.byKey(ValueKey(key));
+            for (
+              var step = 0;
+              step < 12 && tester.widget<IconButton>(arrow).onPressed != null;
+              step++
+            ) {
+              await tester.ensureVisible(arrow);
+              await tester.tap(arrow);
+              await tester.pumpAndSettle();
+            }
+            expect(tester.widget<IconButton>(arrow).onPressed, isNull);
+          }
+        }
+        expect(
+          core.calls.where((call) => call['method'] == 'execute'),
+          isEmpty,
+        );
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox());
+      },
+    );
+  }
+
+  testWidgets(
     'power feedback stays local and observed until the post-command read',
     (tester) async {
       final (core, c, _) = await open(tester);
       final power = find.byKey(const ValueKey('climate-power'));
-      Color? background() => tester
-          .widget<FilledButton>(power)
-          .style!
-          .backgroundColor!
-          .resolve({});
+      expect(tester.widget<Switch>(power).value, true);
       expect(find.text('Powered on'), findsOneWidget);
-      final onColor = background();
       core.executionGate = Completer<void>();
       core.readGate = Completer<void>();
       core.calls.clear();
@@ -130,13 +251,10 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
       expect(c.observed('power.state'), true);
       expect(find.text('Turning off…'), findsOneWidget);
-      expect(
-        find.descendant(of: power, matching: find.byType(OperationPulse)),
-        findsOneWidget,
-      );
+      expect(find.byType(OperationPulse), findsOneWidget);
       expect(find.byType(OperationProgress), findsNothing);
       expect(find.byType(LinearProgressIndicator), findsNothing);
-      expect(tester.widget<FilledButton>(power).onPressed, isNull);
+      expect(tester.widget<Switch>(power).onChanged, isNull);
       expect(
         tester
             .widget<ChoiceChip>(
@@ -154,10 +272,10 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(OperationPulse), findsNothing);
       expect(find.text('Powered off'), findsOneWidget);
-      expect(background(), isNot(onColor));
+      expect(tester.widget<Switch>(power).value, false);
       expect(c.receipt!['status'], 'accepted');
-      expect(find.text('Accepted'), findsNothing);
-      expect(find.text('View Details'), findsNothing);
+      expect(find.text('Accepted'), findsOneWidget);
+      expect(find.text('View Details'), findsOneWidget);
       expect(core.calls.where((v) => v['method'] == 'execute').length, 1);
       expect(core.calls.where((v) => v['method'] == 'read_state').length, 1);
       await tester.pumpWidget(const SizedBox());
@@ -318,6 +436,7 @@ void main() {
       }
       await c.refresh();
       await tester.pumpAndSettle();
+      await tap(tester, find.byKey(const ValueKey('climate-more-settings')));
       expect(find.text('Cool energy saving'), findsOneWidget);
       expect(find.text('Strong cooling'), findsOneWidget);
       expect(find.text('Light sensing'), findsOneWidget);
@@ -383,6 +502,11 @@ void main() {
     await c.refresh();
     await tester.pumpAndSettle();
     core.calls.clear();
+    expect(
+      find.byKey(const ValueKey('climate-temperature-slider')),
+      findsNothing,
+    );
+    await tap(tester, find.byKey(const ValueKey('climate-more-settings')));
     var slider = tester.widget<Slider>(
       find.byKey(const ValueKey('climate-temperature-slider')),
     );
@@ -468,6 +592,7 @@ void main() {
     await c.refresh();
     await tester.pumpAndSettle();
     core.calls.clear();
+    await tap(tester, find.byKey(const ValueKey('climate-more-settings')));
     await tap(tester, find.byKey(const ValueKey('climate-switch:sleep')));
     expect(
       core.calls

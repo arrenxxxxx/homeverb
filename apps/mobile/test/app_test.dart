@@ -202,23 +202,23 @@ void main({bool deviceRun = false}) {
         await settle();
         await tap('Discover Mock device');
         expect(controller.cards.length, 1);
-        await tester.runAsync(
-          () => tester.tap(find.byTooltip('Power mock-ac')),
+        final quickPower = find.byKey(
+          ValueKey('card-power:${controller.cards.single['device']['id']}'),
         );
+        expect(tester.widget<InkWell>(quickPower).onTap, isNull);
+        await tester.tap(quickPower);
         await settle();
-        expect((controller.error as NativeFailure).code, 'STATE_UNAVAILABLE');
+        expect(controller.error, isNull);
+        expect(controller.receipt, isNull);
         expect(app.currentState!.id, 'D01');
-        await capture('Click quick power before reading state');
-        await tap('Dismiss error');
+        await capture('Quick power disabled before reading state');
         await tester.runAsync(() => tester.tap(find.text('mock-ac').first));
         await settle();
         expect(app.currentState!.id, 'C01');
         await tap('Refresh State');
         expect(controller.snapshot, isNotNull);
         await route('D01');
-        await tester.runAsync(
-          () => tester.tap(find.byTooltip('Power mock-ac')),
-        );
+        await tester.runAsync(() => tester.tap(quickPower));
         await settle();
         expect(app.currentState!.id, 'D01');
         expect(controller.receipt!['status'], 'verified');
@@ -514,7 +514,14 @@ void main({bool deviceRun = false}) {
         await tap('Remove Local Data');
         expect(find.text('Full cleanup unavailable'), findsOneWidget);
         expect(find.text('Confirm Clear'), findsNothing);
-        for (final id in ['P01', 'P02', 'H01', 'H05', 'S09']) {
+        await route('P02');
+        expect(find.text('Available platforms'), findsOneWidget);
+        expect(find.text('Meiju'), findsOneWidget);
+        expect(
+          find.text('Choose the app you already use for your appliances.'),
+          findsOneWidget,
+        );
+        for (final id in ['P01', 'H01', 'H05', 'S09']) {
           await route(id);
           expect(
             find

@@ -1,0 +1,97 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'blocks.dart';
+import 'localization.dart';
+import 'skin.dart';
+import 'device_typography.dart';
+
+/// The real device-detail shell shared by capability-specific appliance panels.
+/// Connectivity is not inferred from a cached reading or a successful render.
+class DevicePage extends StatelessWidget {
+  const DevicePage({
+    required this.title,
+    required this.child,
+    required this.onAction,
+    this.busy = false,
+    this.error,
+    super.key,
+  });
+  final Object title;
+  final Widget child;
+  final ActionHandler onAction;
+  final bool busy;
+  final Object? error;
+
+  @override
+  Widget build(BuildContext context) => CallbackShortcuts(
+    bindings: {
+      const SingleActivator(LogicalKeyboardKey.escape): () => onAction('Back'),
+    },
+    child: FocusScope(
+      autofocus: true,
+      child: Material(
+        color: const Color(0xfff8f6f0),
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: Row(
+                  children: [
+                    IconButton(
+                      tooltip: localize(context, 'Back'),
+                      onPressed: () => onAction('Back'),
+                      icon: const Icon(Icons.chevron_left, size: 28),
+                    ),
+                    Expanded(
+                      child: Semantics(
+                        header: true,
+                        namesRoute: true,
+                        child: Copy(
+                          title,
+                          size: DeviceTypography.title,
+                          lineHeight: DeviceTypography.lineHeight,
+                          bold: true,
+                          center: true,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 48),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (busy)
+                        const Padding(
+                          padding: EdgeInsets.only(bottom: 10),
+                          child: OperationProgress(),
+                        ),
+                      if (error != null) ...[
+                        Copy('Could not complete this operation', bold: true),
+                        Copy(
+                          localizedError(context, error!),
+                          color: const Color(0xff9e3421),
+                        ),
+                        TextButton(
+                          onPressed: () => onAction('Dismiss error'),
+                          child: const Copy('Dismiss error'),
+                        ),
+                        const SizedBox(height: 10),
+                      ],
+                      child,
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}

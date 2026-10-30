@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -13,6 +14,7 @@ import 'package:homeverb_mobile/native_client.dart';
 import 'package:homeverb_mobile/preferences.dart';
 import 'package:homeverb_mobile/screens.dart' hide Json;
 import 'package:homeverb_mobile/skin.dart';
+
 import 'controls_test.dart' show ControlsFixture, example;
 import 'component_test.dart' show CompartmentFixture;
 
@@ -36,6 +38,8 @@ class DishwasherFixture extends ControlsFixture
     observations
       ..clear()
       ..addAll({
+        '$dishwasher.work_status': 'power_on',
+        '$dishwasher.mode': 'eco_wash',
         '$dishwasher.temperature': 42,
         '$dishwasher.remaining_minutes': 35,
         '$dishwasher.additional': 9,
@@ -262,54 +266,36 @@ void main() {
         });
         await tester.pumpAndSettle();
         expect(find.byType(DeviceDetailControls), findsOneWidget);
+        await tap(find.byKey(const ValueKey('cycle-readings')));
         expect(find.text('42°C'), findsOneWidget);
-        expect(find.text('One extra rinse'), findsOneWidget);
-        expect(find.text('35 min'), findsOneWidget);
-        expect(find.text('Stale'), findsWidgets);
+        expect(find.text('One extra rinse'), findsWidgets);
+        expect(find.text('35 min'), findsNothing);
+        expect(
+          find.text(
+            'Readings may be out of date; the measurement time is unverified.',
+          ),
+          findsOneWidget,
+        );
         expect(find.text('Unknown'), findsWidgets);
+        await tap(find.byKey(const ValueKey('cycle-readings')));
         await capture(allowed ? 'dishwasher-status' : 'dishwasher-read-only');
         final start = find.byKey(const ValueKey('control:0:start_cycle'));
         if (allowed) {
-          expect(tester.widget(start), isA<ActionButton>());
-          await tester.ensureVisible(start);
-          await tester.pumpAndSettle();
+          expect(tester.widget<ActionButton>(start).onPressed, isNull);
           expect(
-            tester.getTopLeft(start).dy,
-            tester
-                .getTopLeft(find.byKey(const ValueKey('control:0:pause_cycle')))
-                .dy,
+            find.byKey(const ValueKey('control:0:pause_cycle')),
+            findsNothing,
           );
-          await capture('dishwasher-buttons');
-          for (final action in [
-            'pause_cycle',
-            'resume_cycle',
-            'cancel_cycle',
-            'power_on',
-            'power_off',
-          ]) {
-            await tap(find.byKey(ValueKey('control:0:$action')));
-            expect(
-              find.byKey(const ValueKey('parameter:additional:9')),
-              findsOneWidget,
-            );
-            expect(core.prepared, isNull);
-            await tap(find.text('Cancel'));
-          }
-          for (final action in ['power_on', 'power_off']) {
-            await tap(find.byKey(ValueKey('control:0:$action')));
-            await tap(find.text('Cloud'));
-            await tap(find.text('Review Command'));
-            expect(core.prepared, isNull);
-            await tap(find.byKey(const ValueKey('parameter:additional:9')));
-            await tap(find.text('Review Command'));
-            expect(core.prepared?['action'], action);
-            expect(core.prepared?['arguments'], {'additional': 9});
-            expect(core.prepared?['connection'], 'cloud');
-            expect(core.calls.where((v) => v['method'] == 'execute'), isEmpty);
-            await tap(find.text('Cancel'));
-            core.prepared = null;
-          }
+          expect(
+            find.byKey(const ValueKey('control:0:resume_cycle')),
+            findsNothing,
+          );
           await tap(find.byKey(const ValueKey('wash-program:eco_wash')));
+          expect(core.prepared, isNull);
+          expect(tester.widget<ActionButton>(start).onPressed, isNull);
+          await tap(find.byKey(const ValueKey('wash-additional:9')));
+          expect(core.prepared, isNull);
+          await tap(start);
           expect(
             tester
                 .widget<ChoiceChip>(
@@ -324,27 +310,59 @@ void main() {
                   find.byKey(const ValueKey('parameter:additional:9')),
                 )
                 .selected,
-            false,
+            true,
           );
-          expect(core.prepared, isNull);
-          await tap(find.text('Cancel'));
-          await tap(start);
-          await tap(find.byKey(const ValueKey('parameter:program:eco_wash')));
           await tap(find.text('Cloud'));
-          await tap(find.text('Review Command'));
-          expect(
-            core.prepared,
-            isNull,
-            reason: 'Additional option must be explicitly selected.',
-          );
-          await tap(find.byKey(const ValueKey('parameter:additional:9')));
           await tap(find.text('Review Command'));
           expect(core.prepared?['arguments'], {
             'program': 'eco_wash',
             'additional': 9,
           });
           expect(core.prepared?['connection'], 'cloud');
+          expect(core.calls.where((v) => v['method'] == 'execute'), isEmpty);
           await tap(find.text('Cancel'));
+          core.prepared = null;
+          for (final scenario in [
+            ('work', 'start', 'pause_cycle'),
+            ('work', 'pause', 'resume_cycle'),
+            ('work', 'start', 'cancel_cycle'),
+            ('power_off', '', 'power_on'),
+            ('power_on', '', 'power_off'),
+          ]) {
+            core.observations['$dishwasher.work_status'] = scenario.$1;
+            core.observations['$dishwasher.operator'] = scenario.$2;
+            await c.selectDevice(core.device['id']);
+            await tester.pumpAndSettle();
+            if (scenario.$3.startsWith('power_') &&
+                find
+                    .byKey(ValueKey('control:0:${scenario.$3}'))
+                    .evaluate()
+                    .isEmpty)
+              await tap(find.text('Power controls'));
+            expect(
+              find.byKey(ValueKey('control:0:${scenario.$3}')),
+              findsOneWidget,
+              reason: '$scenario ${c.snapshot}',
+            );
+            await tap(find.byKey(ValueKey('control:0:${scenario.$3}')));
+            await tap(find.text('Cloud'));
+            await tap(find.text('Review Command'));
+            expect(
+              core.prepared,
+              isNull,
+              reason:
+                  'Additional option remains explicit during trusted review.',
+            );
+            await tap(find.byKey(const ValueKey('parameter:additional:9')));
+            await tap(find.text('Review Command'));
+            expect(core.prepared?['action'], scenario.$3);
+            expect(core.prepared?['arguments'], {'additional': 9});
+            expect(core.calls.where((v) => v['method'] == 'execute'), isEmpty);
+            await tap(find.text('Cancel'));
+            core.prepared = null;
+          }
+          core.observations['$dishwasher.work_status'] = 'power_on';
+          core.observations.remove('$dishwasher.operator');
           core.allowed = false;
           await c.selectDevice(core.device['id']);
           await tester.pumpAndSettle();
@@ -373,10 +391,8 @@ void main() {
           await tester.ensureVisible(start);
           await tester.pumpAndSettle();
           expect(
-            tester
-                .getTopLeft(find.byKey(const ValueKey('control:0:pause_cycle')))
-                .dy,
-            greaterThan(tester.getTopLeft(start).dy),
+            find.byKey(const ValueKey('control:0:pause_cycle')),
+            findsNothing,
           );
         }
         await capture('dishwasher-large-text-$allowed');

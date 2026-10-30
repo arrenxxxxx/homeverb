@@ -7,6 +7,8 @@ import 'localization.dart';
 import 'native_client.dart';
 import 'receipts.dart';
 import 'skin.dart';
+import 'device_readings.dart';
+import 'device_typography.dart';
 
 /// Presentation for explicitly named capabilities, never a brand or model guess.
 class ApplianceGrid extends StatelessWidget {
@@ -69,7 +71,12 @@ class ApplianceReading extends StatelessWidget {
 }
 
 class RefrigeratorModes extends StatelessWidget {
-  const RefrigeratorModes({required this.controller, super.key});
+  const RefrigeratorModes({
+    required this.controller,
+    this.compact = false,
+    super.key,
+  });
+  final bool compact;
   final HomeController controller;
 
   static const _base = 'vendor.midea.refrigerator';
@@ -167,16 +174,16 @@ class RefrigeratorModes extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.only(top: 24, bottom: 12),
+          padding: const EdgeInsets.only(top: 18, bottom: 10),
           child: Semantics(
             header: true,
             child: Copy(title, bold: true, size: 20),
           ),
         ),
-        ApplianceGrid(
+        DeviceReadings(
           children: [
             for (final property in properties)
-              ApplianceReading(
+              DeviceReadingRow(
                 controlLabel(property),
                 propertyValue(
                   readings[property]['value'],
@@ -184,10 +191,14 @@ class RefrigeratorModes extends StatelessWidget {
                   propertyId: property,
                 ),
                 key: ValueKey('refrigerator-reading:$property'),
-                active: readings[property]['value'] == true,
-                icon: entries[property]!['unit'] == 'celsius'
-                    ? Icons.thermostat_outlined
-                    : icon,
+                valueColor: readings[property]['value'] == true ? accent : null,
+                progress:
+                    property == '$_details.e_cleaning_percentage' &&
+                        readings[property]['value'] is num &&
+                        (readings[property]['value'] as num) >= 0 &&
+                        (readings[property]['value'] as num) <= 100
+                    ? (readings[property]['value'] as num).toDouble() / 100
+                    : null,
               ),
           ],
         ),
@@ -197,6 +208,54 @@ class RefrigeratorModes extends StatelessWidget {
     final other = entries.keys.where(
       (property) => !classified.contains(property),
     );
+    if (compact && entries.isNotEmpty) {
+      Iterable<String> inGroups(Set<String> ids) => _groups
+          .where((g) => ids.contains(g.id))
+          .expand((g) => g.properties)
+          .where(entries.containsKey);
+      final features = inGroups({'smart', 'functions'}).toList();
+      final doors = inGroups({'status', 'settings'}).toList();
+      final secondary = [
+        ...inGroups({'variable'}),
+        ...other,
+      ];
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (features.isNotEmpty)
+            section(
+              'functions',
+              'Function status',
+              Icons.kitchen_outlined,
+              features,
+            ),
+          if (doors.isNotEmpty)
+            section(
+              'status',
+              'Doors and reminders',
+              Icons.door_front_door_outlined,
+              doors,
+            ),
+          if (secondary.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: ExpansionTile(
+                title: const Copy('Other readings', size: 13),
+                tilePadding: EdgeInsets.zero,
+                children: [
+                  section(
+                    'other',
+                    'Other readings',
+                    Icons.sensors_outlined,
+                    secondary,
+                  ),
+                ],
+              ),
+            ),
+          const SizedBox(height: 8),
+        ],
+      );
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -209,14 +268,6 @@ class RefrigeratorModes extends StatelessWidget {
             ),
           )
         else ...[
-          const Padding(
-            padding: EdgeInsets.only(top: 8),
-            child: Copy(
-              'Reported modes are read-only on this connection.',
-              size: 12,
-              color: muted,
-            ),
-          ),
           for (final group in _groups)
             if (group.properties.any(entries.containsKey))
               section(
@@ -234,7 +285,9 @@ class RefrigeratorModes extends StatelessWidget {
   }
 }
 
-class DishwasherPanel extends StatelessWidget {
+/// Cycle controls keep reported state separate from a draft for the next wash.
+/// Selections never dispatch commands: every action still opens trusted review.
+class DishwasherPanel extends StatefulWidget {
   const DishwasherPanel({
     required this.controller,
     required this.onAction,
@@ -244,21 +297,67 @@ class DishwasherPanel extends StatelessWidget {
   final ActionHandler onAction;
   static const id = 'vendor.midea.dishwasher';
   @override
+  State<DishwasherPanel> createState() => _DishwasherPanelState();
+}
+
+class _DishwasherPanelState extends State<DishwasherPanel> {
+  Object? _program, _additional;
+  String? _device;
+  static const id = DishwasherPanel.id;
+  @override
   Widget build(BuildContext context) {
-    final c = controller, cap = c.capability(id)!;
+    final c = widget.controller, cap = c.capability(id)!;
+    if (_device != c.selectedDevice) {
+      _device = c.selectedDevice;
+      _program = _additional = null;
+    }
     final properties = cap['properties'] as Json,
         actions = cap['actions'] as Json;
     final index = c.capabilities.indexOf(cap);
+    final renderedDevice = c.selectedDevice, renderedComponent = c.component;
+    final renderedEpoch = c.controlEpoch;
+    bool sameView() =>
+        c.controlEpoch == renderedEpoch &&
+        c.selectedDevice == renderedDevice &&
+        c.component == renderedComponent &&
+        identical(c.capability(id), cap);
+    bool currentStateAllows(String action) {
+      final work = c.snapshot?['observations']?['$id.work_status']?['value'];
+      final operation = c.snapshot?['observations']?['$id.operator']?['value'];
+      final isPaused = work == 'work' && operation == 'pause';
+      final isRunning =
+          work == 'work' &&
+          (operation == null || operation == '' || operation == 'start');
+      final isIdle = ['power_on', 'power_off', 'cancel'].contains(work);
+      return switch (action) {
+        'start_cycle' => isIdle,
+        'pause_cycle' => isRunning,
+        'resume_cycle' => isPaused,
+        'cancel_cycle' => isRunning || isPaused,
+        'power_on' => work == 'power_off',
+        'power_off' => isIdle && work != 'power_off',
+        _ => false,
+      };
+    }
+
     Json? observation(String key) =>
         c.snapshot?['observations']?['$id.$key'] as Json?;
     Object display(String key) {
       final value = observation(key)?['value'];
-      final label = key == 'mode' && value != null
-          ? sourceForKey('$id.program.$value')
-          : null;
-      if (key == 'remaining_minutes' && value is num) {
+      if (key == 'remaining_minutes' && value is num)
         return UiMessage('{value} min', {'value': value});
-      }
+      final label = sourceForKey(
+        '$id.${key == 'mode' ? 'program' : key}.$value',
+      );
+      // Raw door and supply integers have no reviewed semantic mapping. Do not
+      // guess that 0 means safe/normal or 1 means closed/needs replenishment.
+      if ([
+        'doorswitch',
+        'water_lack',
+        'softwater_lack',
+        'bright_lack',
+      ].contains(key))
+        return label ?? 'Unknown';
       return label ??
           propertyValue(
             value,
@@ -267,24 +366,225 @@ class DishwasherPanel extends StatelessWidget {
           );
     }
 
+    bool admitted(String action) =>
+        actions[action] != null && c.hasControlAction(id, action);
     bool allowed(String action) =>
+        sameView() &&
         !c.busy &&
         c.isForeground &&
-        c.hasControlAction(id, action) &&
-        actions[action] != null &&
+        admitted(action) &&
         actionUnavailable(
               cap,
               actions[action] as Json,
               trustedApproval: c.supportsTrustedApproval,
             ) ==
             null;
-    void open(String action, [Json? selection]) => onAction(
-      'control:$index:${Uri.encodeComponent(action)}${selection == null ? '' : ':${Uri.encodeComponent(jsonEncode(selection))}'}',
+    void open(String action, [Json? selection]) {
+      // Recheck foreground, exact view, permission and state at tap time.
+      if (!allowed(action) || !currentStateAllows(action)) return;
+      widget.onAction(
+        'control:$index:${Uri.encodeComponent(action)}${selection == null ? '' : ':${Uri.encodeComponent(jsonEncode(selection))}'}',
+      );
+    }
+
+    final status = observation('work_status')?['value'];
+    final operator = observation('operator')?['value'];
+    final paused = status == 'work' && operator == 'pause';
+    final running =
+        status == 'work' &&
+        (operator == null || operator == '' || operator == 'start');
+    final idle = ['power_on', 'power_off', 'cancel'].contains(status);
+    final known = idle || running || paused;
+    final schema = actions['start_cycle']?['parameters'] as Json? ?? {};
+    final programSchema = schema['properties']?['program'] as Json? ?? {};
+    final additionalSchema = schema['properties']?['additional'] as Json?;
+    final programs = programSchema['enum'] as List? ?? [];
+    final additional = additionalSchema?['enum'] as List? ?? [];
+    if (!programs.contains(_program)) _program = null;
+    if (!additional.contains(_additional)) _additional = null;
+    final draft = <String, dynamic>{
+      if (_program != null) 'program': _program,
+      if (_additional != null) 'additional': _additional,
+    };
+    final ready =
+        _program != null &&
+        (schema['required'] as List? ?? []).every(draft.containsKey) &&
+        draft.entries.every(
+          (e) =>
+              validateValue(e.value, schema['properties'][e.key] as Json) ==
+              null,
+        );
+    Widget heading(String label) => Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Semantics(
+        header: true,
+        child: Copy(
+          label,
+          size: DeviceTypography.section,
+          lineHeight: DeviceTypography.lineHeight,
+          bold: true,
+        ),
+      ),
     );
-    final programs =
-        actions['start_cycle']?['parameters']?['properties']?['program']?['enum']
-            as List? ??
-        [];
+    Widget reading(String key, {bool icon = false}) => Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (icon) ...[
+            Icon(
+              switch (key) {
+                'temperature' => Icons.thermostat_outlined,
+                'doorswitch' => Icons.door_front_door_outlined,
+                _ => Icons.tune,
+              },
+              size: 20,
+              color: muted,
+            ),
+            const SizedBox(width: 10),
+          ],
+          Expanded(
+            child: Copy(
+              controlLabel('$id.$key'),
+              size: DeviceTypography.body,
+              lineHeight: DeviceTypography.lineHeight,
+              color: muted,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Copy(
+                display(key),
+                size: DeviceTypography.body,
+                lineHeight: DeviceTypography.lineHeight,
+                bold: true,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    Widget action(
+      String name, {
+      bool secondary = false,
+      Json? selection,
+      Object? label,
+      bool enabled = true,
+    }) => Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: _CycleActionButton(
+        localize(context, label ?? controlLabel('$id.$name')),
+        key: ValueKey('control:$index:$name'),
+        style: secondary ? 'secondary' : '',
+        onPressed: allowed(name) && enabled
+            ? () => open(name, selection)
+            : null,
+      ),
+    );
+    Widget card(List<Widget> children, {bool subdued = false}) => Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Material(
+        color: subdued ? const Color(0xffefefec) : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        clipBehavior: Clip.antiAlias,
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: children,
+          ),
+        ),
+      ),
+    );
+    // Prioritize familiar programs only when the exact descriptor admits them.
+    final primaryPrograms = [
+      for (final value in ['standard_wash', 'eco_wash', 'fast_wash'])
+        if (programs.contains(value)) value,
+    ];
+    for (final value in programs) {
+      if (primaryPrograms.length >= 3) break;
+      if (!primaryPrograms.contains(value)) primaryPrograms.add(value);
+    }
+    Widget choices(String parameter, List options, Object? selected) {
+      Widget tile(Object value) => RadioListTile<Object>(
+        key: ValueKey(
+          parameter == 'program'
+              ? 'wash-program:$value'
+              : 'wash-additional:$value',
+        ),
+        value: value,
+        enabled: allowed('start_cycle') && idle,
+        activeColor: accent,
+        selected: selected == value,
+        selectedTileColor: accent.withValues(alpha: 0.08),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        contentPadding: EdgeInsets.zero,
+        dense: true,
+        title: Copy(
+          parameter == 'program'
+              ? controlLabel('$id.program.$value')
+              : propertyValue(
+                  value,
+                  additionalSchema!,
+                  propertyId: '$id.additional',
+                ),
+          size: DeviceTypography.option,
+          lineHeight: DeviceTypography.lineHeight,
+          color: selected == value ? accent : ink,
+          bold: selected == value,
+        ),
+      );
+      final primary = parameter == 'program'
+          ? primaryPrograms
+          : options.take(2).toList();
+      final rest = options.where((value) => !primary.contains(value)).toList();
+      return RadioGroup<Object>(
+        groupValue: selected,
+        onChanged: (value) {
+          if (!allowed('start_cycle') || !currentStateAllows('start_cycle'))
+            return;
+          setState(() {
+            if (parameter == 'program') {
+              _program = value;
+            } else {
+              _additional = value;
+            }
+          });
+        },
+        child: Column(
+          children: [
+            for (final value in primary) tile(value),
+            if (rest.isNotEmpty)
+              ExpansionTile(
+                key: ValueKey('more-wash-$parameter'),
+                tilePadding: const EdgeInsets.symmetric(horizontal: 8),
+                title: Copy(
+                  parameter == 'program' ? 'More programs' : 'More options',
+                  size: DeviceTypography.secondary,
+                  color: muted,
+                ),
+                subtitle: rest.contains(selected)
+                    ? Copy(
+                        parameter == 'program'
+                            ? controlLabel('$id.program.$selected')
+                            : propertyValue(
+                                selected,
+                                additionalSchema!,
+                                propertyId: '$id.additional',
+                              ),
+                        color: accent,
+                        size: DeviceTypography.secondary,
+                      )
+                    : null,
+                children: [for (final value in rest) tile(value)],
+              ),
+          ],
+        ),
+      );
+    }
+
     final timestamps =
         (c.snapshot?['observations'] as Json? ?? {}).values
             .whereType<Map>()
@@ -292,43 +592,88 @@ class DishwasherPanel extends StatelessWidget {
             .whereType<String>()
             .toList()
           ..sort();
+    final receipt = c.receipt;
+    final mainReadings = [
+      'temperature',
+      'doorswitch',
+      'additional',
+    ].where(properties.containsKey).toList();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: ink,
-            borderRadius: BorderRadius.circular(28),
+        if (running || paused)
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: ink,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Copy(
+                  paused ? 'Paused' : display('work_status'),
+                  size: 24,
+                  lineHeight: DeviceTypography.lineHeight,
+                  bold: true,
+                  color: Colors.white,
+                ),
+                const SizedBox(height: 6),
+                Copy(
+                  UiMessage('Current program: {program}', {
+                    'program': localize(context, display('mode')),
+                  }),
+                  size: DeviceTypography.body,
+                  lineHeight: DeviceTypography.lineHeight,
+                  color: Colors.white70,
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 12,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    const Copy(
+                      'Remaining time',
+                      size: DeviceTypography.secondary,
+                      color: Colors.white70,
+                    ),
+                    Copy(
+                      display('remaining_minutes'),
+                      size: 36,
+                      lineHeight: DeviceTypography.lineHeight,
+                      bold: true,
+                      color: Colors.white,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              children: [
+                const Expanded(
+                  child: Copy(
+                    'Reported cycle state',
+                    color: muted,
+                    size: DeviceTypography.body,
+                    lineHeight: DeviceTypography.lineHeight,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Flexible(
+                  child: Copy(
+                    known ? display('work_status') : 'Unknown',
+                    size: DeviceTypography.body,
+                    lineHeight: DeviceTypography.lineHeight,
+                    bold: true,
+                  ),
+                ),
+              ],
+            ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Icon(
-                Icons.local_dining_outlined,
-                color: Colors.white70,
-                size: 32,
-              ),
-              const SizedBox(height: 20),
-              Copy(
-                display('work_status'),
-                size: 26,
-                bold: true,
-                color: Colors.white,
-              ),
-              const SizedBox(height: 8),
-              Copy(display('mode'), color: Colors.white70),
-              const SizedBox(height: 24),
-              const Copy('Remaining time', size: 13, color: Colors.white70),
-              Copy(
-                display('remaining_minutes'),
-                size: 32,
-                bold: true,
-                color: Colors.white,
-              ),
-            ],
-          ),
-        ),
         if ((c.snapshot?['observations'] as Json? ?? {}).values
             .whereType<Map>()
             .any((o) => o['stale'] == true))
@@ -336,125 +681,241 @@ class DishwasherPanel extends StatelessWidget {
             padding: EdgeInsets.only(top: 12),
             child: Copy(
               'Readings may be out of date; the measurement time is unverified.',
-              size: 12,
+              size: DeviceTypography.secondary,
               color: muted,
             ),
           ),
-        const SizedBox(height: 16),
-        ApplianceGrid(
-          children: [
-            for (final key in [
-              'temperature',
-              'doorswitch',
-              'additional',
-              'operator',
-            ])
-              if (properties.containsKey(key) &&
-                  (key != 'operator' || observation(key) != null))
-                ApplianceReading(
-                  controlLabel('$id.$key'),
-                  display(key),
-                  stale: observation(key)?['stale'] == true,
-                  icon: key == 'temperature'
-                      ? Icons.thermostat_outlined
-                      : Icons.tune,
+        if (running || paused)
+          card([
+            for (var i = 0; i < mainReadings.length; i++) ...[
+              if (i > 0)
+                const Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: Color(0xffefefec),
                 ),
-          ],
-        ),
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 16),
-          child: Copy('Wash controls', size: 20, bold: true),
-        ),
+              reading(mainReadings[i], icon: true),
+            ],
+          ]),
         if (actions.isEmpty)
           const Copy(
             'Controls are not connected for this model yet. Available readings are shown below.',
             color: muted,
           )
-        else if (!actions.keys.any((action) => c.hasControlAction(id, action)))
+        else if (!actions.keys.any(admitted))
           const Copy(
             'No controls are allowed for this device on this connection.',
             color: muted,
           )
-        else
-          ApplianceGrid(
-            children: [
-              for (final action in actions.keys)
-                if (c.hasControlAction(id, action))
-                  ActionButton(
-                    controlLabel('$id.$action'),
-                    key: ValueKey(
-                      'control:$index:${Uri.encodeComponent(action)}',
-                    ),
-                    style: 'secondary',
-                    onPressed: allowed(action) ? () => open(action) : null,
-                  ),
-            ],
-          ),
-        if (programs.isNotEmpty && c.hasControlAction(id, 'start_cycle')) ...[
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            child: Copy('Wash programs', size: 20, bold: true),
-          ),
-          ApplianceGrid(
-            children: [
-              for (final program in programs)
-                ActionButton(
-                  controlLabel('$id.program.$program'),
-                  key: ValueKey('wash-program:$program'),
-                  style: 'secondary',
-                  onPressed: allowed('start_cycle')
-                      ? () => open('start_cycle', {'program': program})
-                      : null,
-                ),
-            ],
-          ),
-        ],
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 16),
-          child: Copy('Supplies and reminders', size: 20, bold: true),
-        ),
-        ApplianceGrid(
-          children: [
-            for (final key in ['water_lack', 'softwater_lack', 'bright_lack'])
-              if (properties.containsKey(key))
-                ApplianceReading(
-                  controlLabel('$id.$key'),
-                  display(key),
-                  stale: observation(key)?['stale'] == true,
-                  icon: Icons.water_drop_outlined,
-                ),
-          ],
-        ),
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 12),
-          child: Copy(
-            'Unreported readings stay unknown. Supply codes are not remaining percentages.',
-            size: 12,
+        else if (!known)
+          const Copy(
+            'Cycle state is unknown. Refresh before choosing a wash action.',
             color: muted,
+          )
+        else ...[
+          if (idle && admitted('start_cycle')) ...[
+            card([
+              heading('Next wash program (choose one)'),
+              choices('program', programs, _program),
+            ]),
+            if (additional.isNotEmpty)
+              card([
+                heading('Additional option (choose one)'),
+                const Copy(
+                  'This device accepts one additional option, not a combination.',
+                  size: DeviceTypography.secondary,
+                  color: muted,
+                ),
+                choices('additional', additional, _additional),
+              ]),
+            const SizedBox(height: 10),
+            const Copy(
+              'Selecting options does not start the appliance.',
+              size: DeviceTypography.secondary,
+              color: muted,
+            ),
+            action(
+              'start_cycle',
+              enabled: ready,
+              selection: draft,
+              label: _program == null
+                  ? 'Select a wash program'
+                  : UiMessage('Start {program}', {
+                      'program': UiMessage(
+                        controlLabel('$id.program.$_program'),
+                      ),
+                    }),
+            ),
+          ],
+          if (running && admitted('pause_cycle')) action('pause_cycle'),
+          if (paused && admitted('resume_cycle')) action('resume_cycle'),
+          if ((running || paused) && admitted('cancel_cycle')) ...[
+            action('cancel_cycle', secondary: true),
+            const Padding(
+              padding: EdgeInsets.only(top: 6),
+              child: Copy(
+                'Review and confirmation are required. Cancellation is not a physical rollback.',
+                size: DeviceTypography.secondary,
+                color: muted,
+              ),
+            ),
+          ],
+          if (running || paused) ...[
+            const SizedBox(height: 16),
+            card([
+              const Row(
+                children: [
+                  Icon(Icons.lock_outline, color: muted),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Copy(
+                      'Program and options are locked during a cycle.',
+                      color: muted,
+                    ),
+                  ),
+                ],
+              ),
+            ], subdued: true),
+          ],
+          if (idle &&
+              admitted(status == 'power_off' ? 'power_on' : 'power_off'))
+            ExpansionTile(
+              title: const Copy(
+                'Power controls',
+                size: DeviceTypography.secondary,
+                lineHeight: DeviceTypography.lineHeight,
+              ),
+              children: [
+                action(
+                  status == 'power_off' ? 'power_on' : 'power_off',
+                  secondary: true,
+                ),
+              ],
+            ),
+        ],
+        if (c.busy)
+          const Padding(
+            padding: EdgeInsets.only(top: 12),
+            child: Copy(
+              'Operation in progress; reported state has not been replaced.',
+              color: muted,
+            ),
           ),
+        if (receipt != null && receipt['device_id'] == c.selectedDevice)
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Copy(outcomeSummary(receipt['status']), color: muted),
+          ),
+        ExpansionTile(
+          key: const ValueKey('cycle-readings'),
+          title: const Copy(
+            'Supplies and reminders',
+            size: DeviceTypography.secondary,
+            lineHeight: DeviceTypography.lineHeight,
+          ),
+          children: [
+            for (final key in [
+              if (!running && !paused) ...[
+                'mode',
+                'temperature',
+                'doorswitch',
+                'additional',
+              ],
+              'water_lack',
+              'softwater_lack',
+              'bright_lack',
+            ])
+              if (properties.containsKey(key)) reading(key),
+          ],
         ),
         if (timestamps.isNotEmpty)
           Padding(
-            padding: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.symmetric(vertical: 12),
             child: Copy(
               UiMessage('Latest read: {time}', {
                 'time': receiptTime(timestamps.last, compact: true),
               }),
-              size: 12,
+              size: DeviceTypography.secondary,
               color: muted,
             ),
           ),
-        for (final label in [
+        ActionButton(
           'Refresh State',
-          'Device information',
-          'Recent Operations',
-        ])
-          ActionButton(
-            label,
-            style: 'secondary',
-            onPressed: c.busy || !c.isForeground ? null : () => onAction(label),
+          style: 'secondary',
+          onPressed: c.busy || !c.isForeground
+              ? null
+              : () => widget.onAction('Refresh State'),
+        ),
+        ExpansionTile(
+          title: const Copy(
+            'Device details',
+            size: DeviceTypography.secondary,
+            lineHeight: DeviceTypography.lineHeight,
           ),
+          children: [
+            for (final label in ['Device information', 'Recent Operations'])
+              ActionButton(
+                label,
+                style: 'secondary',
+                onPressed: c.busy || !c.isForeground
+                    ? null
+                    : () => widget.onAction(label),
+              ),
+          ],
+        ),
       ],
     );
+  }
+}
+
+/// Local cycle actions follow the approved contrast hierarchy without changing
+/// the shared skin used by unrelated screens.
+class _CycleActionButton extends ActionButton {
+  const _CycleActionButton(
+    super.label, {
+    required super.onPressed,
+    super.style,
+    super.key,
+  });
+  @override
+  Widget build(BuildContext context) {
+    final highContrast = MediaQuery.highContrastOf(context);
+    final color = highContrast ? Colors.black : accent;
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(14),
+    );
+    final text = Text(
+      localize(context, label),
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontFamily: 'Inter',
+        fontFamilyFallback: windowFontFallback,
+        fontSize: style == 'secondary'
+            ? DeviceTypography.option
+            : DeviceTypography.primaryAction,
+        height: DeviceTypography.lineHeight,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+    final buttonStyle = FilledButton.styleFrom(
+      minimumSize: const Size(double.infinity, 52),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      backgroundColor: color,
+      foregroundColor: Colors.white,
+      shape: shape,
+    );
+    return style == 'secondary'
+        ? OutlinedButton(
+            onPressed: onPressed,
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 48),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              foregroundColor: color,
+              side: BorderSide(color: onPressed == null ? muted : color),
+              shape: shape,
+            ),
+            child: text,
+          )
+        : FilledButton(onPressed: onPressed, style: buttonStyle, child: text);
   }
 }

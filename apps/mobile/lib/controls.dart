@@ -19,6 +19,12 @@ String controlUnit(dynamic unit) =>
 String propertyValue(dynamic value, Json property, {String? propertyId}) {
   final label = propertyId == null ? null : sourceForKey('$propertyId.$value');
   if (label != null) return label;
+  if (const {
+    'vendor.midea.refrigerator.details.storage_door_state',
+    'vendor.midea.refrigerator.details.freezer_door_state',
+    'vendor.midea.refrigerator.details.flexzone_door_state',
+  }.contains(propertyId))
+    return 'Unknown';
   if (value == null) return 'Unknown';
   final text = value is bool ? (value ? 'On' : 'Off') : '$value';
   final unit = controlUnit(property['unit']);

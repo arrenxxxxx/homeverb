@@ -561,7 +561,7 @@ String? translateSource(
   "Program" => t.mobileProgram,
   "Duration" => t.mobileDuration,
   "Remaining time" => t.vendorMideaDishwasherRemainingMinutes,
-  "Closed" => t.mobileClosed,
+  "Closed" => t.vendorMideaRefrigeratorDetailsFlexzoneDoorStateClosed,
   "Active" => t.mobileActive,
   "Stale" => t.mobileStale,
   "Cached" => t.mobileCached,
@@ -1775,6 +1775,60 @@ String? translateSource(
   "Refrigerator functions" => t.mobileRefrigeratorFunctions,
   "Refrigerator status" => t.mobileRefrigeratorStatus,
   "Other readings" => t.mobileRefrigeratorOtherReadings,
+  "Choose one" => t.mobileControlsSingleChoice,
+  "Level {value}" => t.mobileControlsLevel(value: args["value"] ?? "{value}"),
+  "Value {value}" => t.mobileControlsValue(value: args["value"] ?? "{value}"),
+  "Turn off swing before choosing a fixed direction." =>
+    t.mobileControlsStopSwing,
+  "Refresh swing state before choosing a fixed direction." =>
+    t.mobileControlsRefreshSwing,
+  "View only. Controls are unavailable on this connection." =>
+    t.mobileControlsViewOnly,
+  "Not received" => t.mobileControlsNotReceived,
+  "Set temperature" => t.mobileControlsSetTemperature,
+  "Open" => t.vendorMideaRefrigeratorDetailsFlexzoneDoorStateOpen,
+  "Reported cycle state" => t.mobileCycleReportedState,
+  "Current program: {program}" => t.mobileCycleCurrentProgram(
+    program: args["program"] ?? "{program}",
+  ),
+  "Next wash program (choose one)" => t.mobileCycleNextProgram,
+  "Additional option (choose one)" => t.mobileCycleAdditionalChoice,
+  "This device accepts one additional option, not a combination." =>
+    t.mobileCycleSingleAdditionalNotice,
+  "Selecting options does not start the appliance." =>
+    t.mobileCycleSelectionOnly,
+  "Select a wash program" => t.mobileCycleSelectProgram,
+  "Start {program}" => t.mobileCycleStartProgram(
+    program: args["program"] ?? "{program}",
+  ),
+  "Review and confirmation are required. Cancellation is not a physical rollback." =>
+    t.mobileCycleCancellationReview,
+  "Program and options are locked during a cycle." =>
+    t.mobileCycleLockedConfiguration,
+  "Power controls" => t.mobileCyclePowerControls,
+  "Operation in progress; reported state has not been replaced." =>
+    t.mobileCycleOperationPending,
+  "Unmapped door and supply codes remain unknown." => t.mobileCycleUnknownCodes,
+  "Device details" => t.mobileCycleDeviceDetails,
+  "Cycle state is unknown. Refresh before choosing a wash action." =>
+    t.mobileCycleUnknownState,
+  "Interface preview \u00b7 Fictional data" => t.mobileDeviceDesignPreview,
+  "No real devices connected. No appliance operations." =>
+    t.mobileDeviceDesignNoOperations,
+  "Swing" => t.mobileControlsSwing,
+  "Fixed directions are in Other settings." => t.mobileControlsFixedDirections,
+  "More programs" => t.mobileCycleMorePrograms,
+  "More options" => t.mobileCycleMoreOptions,
+  "Zone" => t.mobileFridgeZone,
+  "Function status" => t.mobileFridgeFunctionStatus,
+  "Doors and reminders" => t.mobileFridgeDoorsReminders,
+  "Kitchen dishwasher" => t.mobilePreviewKitchenDishwasher,
+  "Kitchen refrigerator" => t.mobilePreviewKitchenRefrigerator,
+  "Adjust in Other settings." => t.mobileControlsAdjustSettings,
+  "Unavailable while swing is on." => t.mobileControlsSwingUnavailable,
+  "Swing state is unknown." => t.mobileControlsSwingUnknown,
+  "Previous fan speeds" => t.mobileClimatePreviousFanSpeeds,
+  "More fan speeds" => t.mobileClimateMoreFanSpeeds,
   _ => null,
 };
 
@@ -3490,5 +3544,61 @@ String? sourceForKey(String key) => switch (key) {
   "mobile.refrigeratorFunctions" => "Refrigerator functions",
   "mobile.refrigeratorStatus" => "Refrigerator status",
   "mobile.refrigeratorOtherReadings" => "Other readings",
+  "mobile.controlsSingleChoice" => "Choose one",
+  "mobile.controlsLevel" => "Level {value}",
+  "mobile.controlsValue" => "Value {value}",
+  "mobile.controlsStopSwing" =>
+    "Turn off swing before choosing a fixed direction.",
+  "mobile.controlsRefreshSwing" =>
+    "Refresh swing state before choosing a fixed direction.",
+  "mobile.controlsViewOnly" =>
+    "View only. Controls are unavailable on this connection.",
+  "mobile.controlsNotReceived" => "Not received",
+  "mobile.controlsSetTemperature" => "Set temperature",
+  "vendor.midea.refrigerator.details.storage_door_state.closed" => "Closed",
+  "vendor.midea.refrigerator.details.storage_door_state.open" => "Open",
+  "vendor.midea.refrigerator.details.freezer_door_state.closed" => "Closed",
+  "vendor.midea.refrigerator.details.freezer_door_state.open" => "Open",
+  "vendor.midea.refrigerator.details.flexzone_door_state.closed" => "Closed",
+  "vendor.midea.refrigerator.details.flexzone_door_state.open" => "Open",
+  "mobile.cycleReportedState" => "Reported cycle state",
+  "mobile.cycleCurrentProgram" => "Current program: {program}",
+  "mobile.cycleNextProgram" => "Next wash program (choose one)",
+  "mobile.cycleAdditionalChoice" => "Additional option (choose one)",
+  "mobile.cycleSingleAdditionalNotice" =>
+    "This device accepts one additional option, not a combination.",
+  "mobile.cycleSelectionOnly" =>
+    "Selecting options does not start the appliance.",
+  "mobile.cycleSelectProgram" => "Select a wash program",
+  "mobile.cycleStartProgram" => "Start {program}",
+  "mobile.cycleCancellationReview" =>
+    "Review and confirmation are required. Cancellation is not a physical rollback.",
+  "mobile.cycleLockedConfiguration" =>
+    "Program and options are locked during a cycle.",
+  "mobile.cyclePowerControls" => "Power controls",
+  "mobile.cycleOperationPending" =>
+    "Operation in progress; reported state has not been replaced.",
+  "mobile.cycleUnknownCodes" =>
+    "Unmapped door and supply codes remain unknown.",
+  "mobile.cycleDeviceDetails" => "Device details",
+  "mobile.cycleUnknownState" =>
+    "Cycle state is unknown. Refresh before choosing a wash action.",
+  "mobile.deviceDesignPreview" => "Interface preview \u00b7 Fictional data",
+  "mobile.deviceDesignNoOperations" =>
+    "No real devices connected. No appliance operations.",
+  "mobile.controlsSwing" => "Swing",
+  "mobile.controlsFixedDirections" => "Fixed directions are in Other settings.",
+  "mobile.cycleMorePrograms" => "More programs",
+  "mobile.cycleMoreOptions" => "More options",
+  "mobile.fridgeZone" => "Zone",
+  "mobile.fridgeFunctionStatus" => "Function status",
+  "mobile.fridgeDoorsReminders" => "Doors and reminders",
+  "mobile.previewKitchenDishwasher" => "Kitchen dishwasher",
+  "mobile.previewKitchenRefrigerator" => "Kitchen refrigerator",
+  "mobile.controlsAdjustSettings" => "Adjust in Other settings.",
+  "mobile.controlsSwingUnavailable" => "Unavailable while swing is on.",
+  "mobile.controlsSwingUnknown" => "Swing state is unknown.",
+  "mobile.climatePreviousFanSpeeds" => "Previous fan speeds",
+  "mobile.climateMoreFanSpeeds" => "More fan speeds",
   _ => null,
 };

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -12,6 +13,7 @@ import 'package:homeverb_mobile/main.dart';
 import 'package:homeverb_mobile/native_client.dart';
 import 'package:homeverb_mobile/preferences.dart';
 import 'package:homeverb_mobile/screens.dart' hide Json;
+
 import 'climate_controls_test.dart' show ClimateFixture;
 import 'controls_test.dart' show setter;
 
@@ -99,6 +101,7 @@ void main() {
       core.observations['vendor.midea.ac.breezeless'] = 0;
       await c.refresh();
       await tester.pumpAndSettle();
+      await tap(tester, 'climate-more-settings');
       expect(find.byKey(const ValueKey('climate-switch:eco')), findsOneWidget);
       expect(
         find.byKey(const ValueKey('climate-option:breezeless:2')),
@@ -194,6 +197,7 @@ void main() {
       );
       expect(c.observed('vendor.midea.ac.horizontal_swing'), false);
       core.calls.clear();
+      await tap(tester, 'climate-more-settings');
       await tap(tester, 'climate-option:vertical_direction:lower');
       expect(
         core.calls
@@ -202,6 +206,55 @@ void main() {
         {'vertical_direction': 'lower'},
       );
       expect(core.calls.where((v) => v['method'] == 'read_state').length, 1);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
+  testWidgets(
+    'fixed direction waits for swing off and rechecks stale callbacks',
+    (tester) async {
+      final (core, c) = await open(tester);
+      field(core, 'horizontal_swing', {'type': 'boolean'}, false);
+      field(core, 'horizontal_direction', {
+        'type': 'string',
+        'enum': ['left', 'center', 'right'],
+      }, 'center');
+      await c.refresh();
+      await tester.pumpAndSettle();
+      expect(find.text('Adjust in Other settings.'), findsOneWidget);
+      expect(
+        find.byKey(
+          const ValueKey('climate-direction-summary:Vertical direction'),
+        ),
+        findsNothing,
+      );
+      await tap(tester, 'climate-more-settings');
+      final direction = find.byKey(
+        const ValueKey('climate-option:horizontal_direction:left'),
+      );
+      final oldCallback = tester.widget<ChoiceChip>(direction).onSelected!;
+      core.observations['vendor.midea.ac.horizontal_swing'] = true;
+      await c.refresh();
+      await tester.pumpAndSettle();
+      expect(tester.widget<ChoiceChip>(direction).onSelected, isNull);
+      expect(find.text('Unavailable while swing is on.'), findsOneWidget);
+      expect(
+        find.text('Turn off swing before choosing a fixed direction.'),
+        findsOneWidget,
+      );
+      core.calls.clear();
+      oldCallback(true);
+      await tester.pumpAndSettle();
+      expect(core.calls.where((v) => v['method'] == 'execute'), isEmpty);
+      core.observations.remove('vendor.midea.ac.horizontal_swing');
+      await c.refresh();
+      await tester.pumpAndSettle();
+      expect(tester.widget<ChoiceChip>(direction).onSelected, isNull);
+      expect(find.text('Swing state is unknown.'), findsOneWidget);
+      expect(
+        find.text('Refresh swing state before choosing a fixed direction.'),
+        findsOneWidget,
+      );
       await tester.pumpWidget(const SizedBox());
     },
   );
@@ -224,7 +277,8 @@ void main() {
     await c.refresh();
     await tester.pumpAndSettle();
     core.calls.clear();
-    await tap(tester, 'climate-increase:fan_speed');
+    expect(find.text('Level 6'), findsOneWidget);
+    await tap(tester, 'climate-option:fan_speed:8');
     expect(
       core.calls
           .where((v) => v['method'] == 'execute')
@@ -234,10 +288,13 @@ void main() {
     core.observations['vendor.midea.ac.fan_speed'] = 8;
     await c.refresh();
     await tester.pumpAndSettle();
-    final plus = tester.widget<IconButton>(
-      find.byKey(const ValueKey('climate-increase:fan_speed')),
+    final selected = tester.widget<ChoiceChip>(
+      find.byKey(const ValueKey('climate-option:fan_speed:8')),
     );
-    expect(plus.onPressed, isNull);
+    expect(selected.selected, true);
+    core.calls.clear();
+    await tap(tester, 'climate-option:fan_speed:8');
+    expect(core.calls.where((v) => v['method'] == 'execute'), isEmpty);
     await tester.pumpWidget(const SizedBox());
   });
 
@@ -256,6 +313,7 @@ void main() {
         find.byKey(const ValueKey('climate-switch:button_sound')),
         findsNothing,
       );
+      await tap(tester, 'climate-more-settings');
       expect(
         find.byKey(const ValueKey('climate-option:button_sound:true')),
         findsOneWidget,
@@ -415,7 +473,7 @@ void main() {
       );
       expect(
         tester.getTopLeft(horizontal).dy,
-        lessThan(tester.getTopLeft(vertical).dy),
+        lessThanOrEqualTo(tester.getTopLeft(vertical).dy),
       );
       Future<void> capture(String name) async {
         await tester.runAsync(() async {
@@ -434,6 +492,7 @@ void main() {
       }
 
       await capture('main-controls');
+      await tap(tester, 'climate-more-settings');
       await tester.ensureVisible(
         find.byKey(const ValueKey('climate-switch:button_sound')),
       );

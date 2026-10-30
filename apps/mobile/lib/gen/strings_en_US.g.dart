@@ -4022,4 +4022,139 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Other readings'
 	String get mobileRefrigeratorOtherReadings => 'Other readings';
+
+	/// en-US: 'Choose one'
+	String get mobileControlsSingleChoice => 'Choose one';
+
+	/// en-US: 'Level {value}'
+	String mobileControlsLevel({required Object value}) => 'Level ${value}';
+
+	/// en-US: 'Value {value}'
+	String mobileControlsValue({required Object value}) => 'Value ${value}';
+
+	/// en-US: 'Turn off swing before choosing a fixed direction.'
+	String get mobileControlsStopSwing => 'Turn off swing before choosing a fixed direction.';
+
+	/// en-US: 'Refresh swing state before choosing a fixed direction.'
+	String get mobileControlsRefreshSwing => 'Refresh swing state before choosing a fixed direction.';
+
+	/// en-US: 'View only. Controls are unavailable on this connection.'
+	String get mobileControlsViewOnly => 'View only. Controls are unavailable on this connection.';
+
+	/// en-US: 'Not received'
+	String get mobileControlsNotReceived => 'Not received';
+
+	/// en-US: 'Set temperature'
+	String get mobileControlsSetTemperature => 'Set temperature';
+
+	/// en-US: 'Closed'
+	String get vendorMideaRefrigeratorDetailsStorageDoorStateClosed => 'Closed';
+
+	/// en-US: 'Open'
+	String get vendorMideaRefrigeratorDetailsStorageDoorStateOpen => 'Open';
+
+	/// en-US: 'Closed'
+	String get vendorMideaRefrigeratorDetailsFreezerDoorStateClosed => 'Closed';
+
+	/// en-US: 'Open'
+	String get vendorMideaRefrigeratorDetailsFreezerDoorStateOpen => 'Open';
+
+	/// en-US: 'Closed'
+	String get vendorMideaRefrigeratorDetailsFlexzoneDoorStateClosed => 'Closed';
+
+	/// en-US: 'Open'
+	String get vendorMideaRefrigeratorDetailsFlexzoneDoorStateOpen => 'Open';
+
+	/// en-US: 'Reported cycle state'
+	String get mobileCycleReportedState => 'Reported cycle state';
+
+	/// en-US: 'Current program: {program}'
+	String mobileCycleCurrentProgram({required Object program}) => 'Current program: ${program}';
+
+	/// en-US: 'Next wash program (choose one)'
+	String get mobileCycleNextProgram => 'Next wash program (choose one)';
+
+	/// en-US: 'Additional option (choose one)'
+	String get mobileCycleAdditionalChoice => 'Additional option (choose one)';
+
+	/// en-US: 'This device accepts one additional option, not a combination.'
+	String get mobileCycleSingleAdditionalNotice => 'This device accepts one additional option, not a combination.';
+
+	/// en-US: 'Selecting options does not start the appliance.'
+	String get mobileCycleSelectionOnly => 'Selecting options does not start the appliance.';
+
+	/// en-US: 'Select a wash program'
+	String get mobileCycleSelectProgram => 'Select a wash program';
+
+	/// en-US: 'Start {program}'
+	String mobileCycleStartProgram({required Object program}) => 'Start ${program}';
+
+	/// en-US: 'Review and confirmation are required. Cancellation is not a physical rollback.'
+	String get mobileCycleCancellationReview => 'Review and confirmation are required. Cancellation is not a physical rollback.';
+
+	/// en-US: 'Program and options are locked during a cycle.'
+	String get mobileCycleLockedConfiguration => 'Program and options are locked during a cycle.';
+
+	/// en-US: 'Power controls'
+	String get mobileCyclePowerControls => 'Power controls';
+
+	/// en-US: 'Operation in progress; reported state has not been replaced.'
+	String get mobileCycleOperationPending => 'Operation in progress; reported state has not been replaced.';
+
+	/// en-US: 'Unmapped door and supply codes remain unknown.'
+	String get mobileCycleUnknownCodes => 'Unmapped door and supply codes remain unknown.';
+
+	/// en-US: 'Device details'
+	String get mobileCycleDeviceDetails => 'Device details';
+
+	/// en-US: 'Cycle state is unknown. Refresh before choosing a wash action.'
+	String get mobileCycleUnknownState => 'Cycle state is unknown. Refresh before choosing a wash action.';
+
+	/// en-US: 'Interface preview \u00b7 Fictional data'
+	String get mobileDeviceDesignPreview => 'Interface preview \u00b7 Fictional data';
+
+	/// en-US: 'No real devices connected. No appliance operations.'
+	String get mobileDeviceDesignNoOperations => 'No real devices connected. No appliance operations.';
+
+	/// en-US: 'Swing'
+	String get mobileControlsSwing => 'Swing';
+
+	/// en-US: 'Fixed directions are in Other settings.'
+	String get mobileControlsFixedDirections => 'Fixed directions are in Other settings.';
+
+	/// en-US: 'More programs'
+	String get mobileCycleMorePrograms => 'More programs';
+
+	/// en-US: 'More options'
+	String get mobileCycleMoreOptions => 'More options';
+
+	/// en-US: 'Zone'
+	String get mobileFridgeZone => 'Zone';
+
+	/// en-US: 'Function status'
+	String get mobileFridgeFunctionStatus => 'Function status';
+
+	/// en-US: 'Doors and reminders'
+	String get mobileFridgeDoorsReminders => 'Doors and reminders';
+
+	/// en-US: 'Kitchen dishwasher'
+	String get mobilePreviewKitchenDishwasher => 'Kitchen dishwasher';
+
+	/// en-US: 'Kitchen refrigerator'
+	String get mobilePreviewKitchenRefrigerator => 'Kitchen refrigerator';
+
+	/// en-US: 'Adjust in Other settings.'
+	String get mobileControlsAdjustSettings => 'Adjust in Other settings.';
+
+	/// en-US: 'Unavailable while swing is on.'
+	String get mobileControlsSwingUnavailable => 'Unavailable while swing is on.';
+
+	/// en-US: 'Swing state is unknown.'
+	String get mobileControlsSwingUnknown => 'Swing state is unknown.';
+
+	/// en-US: 'Previous fan speeds'
+	String get mobileClimatePreviousFanSpeeds => 'Previous fan speeds';
+
+	/// en-US: 'More fan speeds'
+	String get mobileClimateMoreFanSpeeds => 'More fan speeds';
 }

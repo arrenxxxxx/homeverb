@@ -78,7 +78,10 @@ void main() {
         await tap('mock-ac');
         await tap('Refresh State');
         final before = controller.observed('power.state');
-        await tap(before == true ? 'Turn off' : 'Turn on');
+        final power = find.byKey(const ValueKey('climate-power'));
+        expect(tester.widget<Switch>(power).value, before);
+        await tester.runAsync(() => tester.tap(power));
+        await settle();
         expect(app.currentState!.id, 'C01');
         expect(find.text(outcomeLabel(scenario.value)), findsOneWidget);
         expect(controller.receipt!['status'], scenario.value);

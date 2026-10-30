@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:homeverb_mobile/appliance_panels.dart';
+import 'package:homeverb_mobile/device_readings.dart';
 import 'package:homeverb_mobile/compartment_controls.dart';
 import 'package:homeverb_mobile/controller.dart';
 import 'package:homeverb_mobile/native_client.dart';
@@ -175,15 +176,20 @@ class GroupedFridgeFixture extends ReferenceFridgeFixture {
 void main() {
   setUpAll(() async {
     const cjkFont = String.fromEnvironment('HOMEVERB_CJK_FONT');
-    final font = FontLoader('Inter');
+    await (FontLoader('Inter')
+          ..addFont(rootBundle.load('assets/fonts/Inter-Regular.otf'))
+          ..addFont(rootBundle.load('assets/fonts/Inter-SemiBold.otf')))
+        .load();
     if (cjkFont.isNotEmpty) {
-      font.addFont(File(cjkFont).readAsBytes().then(ByteData.sublistView));
-    } else {
-      font
-        ..addFont(rootBundle.load('assets/fonts/Inter-Regular.otf'))
-        ..addFont(rootBundle.load('assets/fonts/Inter-SemiBold.otf'));
+      const explicitBold = String.fromEnvironment('HOMEVERB_CJK_BOLD_FONT');
+      final bold = explicitBold.isNotEmpty
+          ? explicitBold
+          : '${File(cjkFont).parent.path}/NotoSansCJK-Bold.ttc';
+      await (FontLoader('Noto Sans CJK SC')
+            ..addFont(File(cjkFont).readAsBytes().then(ByteData.sublistView))
+            ..addFont(File(bold).readAsBytes().then(ByteData.sublistView)))
+          .load();
     }
-    await font.load();
     await (FontLoader(
       'MaterialIcons',
     )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
@@ -264,9 +270,9 @@ void main() {
             'vendor.midea.refrigerator.details.open_door_tips_switch',
           );
           inGroup('other', 'vendor.midea.refrigerator.details.future_status');
-          expect(find.byType(ApplianceReading), findsNWidgets(24));
+          expect(find.byType(DeviceReadingRow), findsNWidgets(24));
           expect(find.text('0%'), findsOneWidget);
-          expect(find.text('unrecognized-code'), findsNWidgets(3));
+          expect(find.text('unrecognized-code'), findsNWidgets(2));
           expect(find.byType(Switch), findsNothing);
           expect(find.text(locale.translations.mobileStale), findsNothing);
           expect(find.text('Modes and freshness'), findsNothing);
@@ -309,6 +315,70 @@ void main() {
       );
     }
   }
+
+  for (final scale in [1.0, 2.0])
+    testWidgets('read-only overview separates setpoints at text scale $scale', (
+      tester,
+    ) async {
+      tester.view.physicalSize = Size(scale == 1 ? 430 : 320, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final core = ReferenceFridgeFixture();
+      for (final cap in core.capabilities) {
+        cap['actions'] = <String, dynamic>{};
+        for (final property in (cap['properties'] as Json).values) {
+          property['writable'] = false;
+        }
+      }
+      final c = HomeController(
+        core,
+        LocalPreferences(File('/unused/readonly-fridge.json')),
+      );
+      addTearDown(c.dispose);
+      await c.initialize();
+      await c.selectDevice(core.device['id']);
+      final before = core.calls.length;
+      final actions = <String>[];
+      await tester.pumpWidget(
+        TranslationProvider(
+          child: MaterialApp(
+            home: Scaffold(
+              body: MediaQuery(
+                data: MediaQueryData(textScaler: TextScaler.linear(scale)),
+                child: SingleChildScrollView(
+                  child: CompartmentControls(
+                    controller: c,
+                    onAction: actions.add,
+                    onTarget: (_, __) => fail('Read-only target callback'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.text('View only. Controls are unavailable on this connection.'),
+        findsOneWidget,
+      );
+      expect(find.text('Set temperature'), findsNWidgets(scale == 1 ? 1 : 3));
+      expect(
+        find.text('Current temperature'),
+        findsNWidgets(scale == 1 ? 1 : 3),
+      );
+      expect(find.text('Not received'), findsNWidgets(3));
+      expect(find.text('4°C'), findsOneWidget);
+      expect(find.text('-18°C'), findsOneWidget);
+      expect(find.text('6°C'), findsOneWidget);
+      expect(find.text('Closed'), findsOneWidget);
+      expect(find.byType(Switch), findsNothing);
+      expect(find.byType(Slider), findsNothing);
+      expect(core.calls.length, before);
+      expect(actions, isEmpty);
+      expect(tester.takeException(), isNull);
+    });
 
   testWidgets('unreported refrigerator groups remain absent', (tester) async {
     final core = ModeFixture()..omitModeReadings = true;

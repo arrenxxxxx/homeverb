@@ -7,6 +7,8 @@ import 'appliance_panels.dart';
 import 'native_client.dart';
 import 'receipts.dart';
 import 'skin.dart';
+import 'device_readings.dart';
+import 'device_typography.dart';
 
 bool hasDirectTarget(Json action) {
   final parameters = action['parameters'] as Json;
@@ -41,28 +43,327 @@ class CompartmentControls extends StatelessWidget {
   final void Function(String component, num target) onTarget;
 
   @override
-  Widget build(BuildContext context) => Column(
+  Widget build(BuildContext context) => _readOnly
+      ? _readOnlyOverview(context)
+      : Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Padding(
+              padding: EdgeInsets.only(bottom: 16),
+              child: Copy('Temperature zones', size: 22, bold: true),
+            ),
+            for (final part in controller.components)
+              compartment(context, part),
+            RefrigeratorModes(controller: controller),
+            ActionButton(
+              'Refresh State',
+              style: 'secondary',
+              onPressed: controller.busy
+                  ? null
+                  : () => onAction('Refresh State'),
+            ),
+            for (final label in ['Device information', 'Recent Operations'])
+              ActionButton(
+                label,
+                style: 'secondary',
+                onPressed: controller.busy ? null : () => onAction(label),
+              ),
+          ],
+        );
+
+  bool get _readOnly => !controller.components.any(
+    (part) => controller
+        .capabilitiesFor(part['id'] as String)
+        .any(
+          (capability) => (capability['actions'] as Json).entries.any(
+            (entry) =>
+                controller.hasControlAction(
+                  capability['id'] as String,
+                  entry.key,
+                  componentId: part['id'] as String,
+                ) &&
+                actionUnavailable(
+                      capability,
+                      entry.value as Json,
+                      trustedApproval: controller.supportsTrustedApproval,
+                    ) ==
+                    null,
+          ),
+        ),
+  );
+
+  Widget _readOnlyOverview(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      const Padding(
-        padding: EdgeInsets.only(bottom: 16),
-        child: Copy('Temperature zones', size: 22, bold: true),
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xfffff0ce),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: const Row(
+          children: [
+            Icon(Icons.lock_outline, size: 20),
+            SizedBox(width: 10),
+            Expanded(
+              child: Copy(
+                'View only. Controls are unavailable on this connection.',
+                size: DeviceTypography.body,
+                lineHeight: DeviceTypography.lineHeight,
+              ),
+            ),
+          ],
+        ),
       ),
-      for (final part in controller.components) compartment(context, part),
-      RefrigeratorModes(controller: controller),
-      ActionButton(
-        'Refresh State',
-        style: 'secondary',
-        onPressed: controller.busy ? null : () => onAction('Refresh State'),
+      const Padding(
+        padding: EdgeInsets.only(top: 18, bottom: 10),
+        child: Copy('Temperature zones', size: 20, bold: true),
+      ),
+      LayoutBuilder(
+        builder: (context, constraints) {
+          final expandedText = MediaQuery.textScalerOf(context).scale(14) > 21;
+          return DeviceReadings(
+            children: expandedText || constraints.maxWidth < 280
+                ? [
+                    for (final part in controller.components)
+                      _readOnlyZone(context, part),
+                  ]
+                : [
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 10),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Copy(
+                              'Zone',
+                              size: DeviceTypography.secondary,
+                              lineHeight: DeviceTypography.lineHeight,
+                              color: muted,
+                            ),
+                          ),
+                          Expanded(
+                            child: Copy(
+                              'Set temperature',
+                              size: DeviceTypography.secondary,
+                              lineHeight: DeviceTypography.lineHeight,
+                              color: muted,
+                              center: true,
+                            ),
+                          ),
+                          Expanded(
+                            child: Copy(
+                              'Current temperature',
+                              size: DeviceTypography.secondary,
+                              lineHeight: DeviceTypography.lineHeight,
+                              color: muted,
+                              center: true,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    for (final part in controller.components)
+                      _temperatureTableRow(context, part),
+                  ],
+          );
+        },
+      ),
+      RefrigeratorModes(controller: controller, compact: true),
+      if (controller.components.any((part) {
+        final snapshot = controller.componentSnapshot(part['id'] as String);
+        return snapshot?['from_cache'] == true ||
+            (snapshot?['observations'] as Json? ?? {}).values
+                .whereType<Map>()
+                .any((value) => value['stale'] == true);
+      }))
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 8),
+          child: Copy(
+            'Readings may be out of date; the measurement time is unverified.',
+            size: DeviceTypography.secondary,
+            color: muted,
+          ),
+        ),
+      OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: accent,
+          side: const BorderSide(color: accent),
+          minimumSize: const Size(double.infinity, 44),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        onPressed: controller.busy || !controller.isForeground
+            ? null
+            : () => onAction('Refresh State'),
+        child: const Copy(
+          'Refresh State',
+          size: DeviceTypography.body,
+          lineHeight: DeviceTypography.lineHeight,
+          bold: true,
+          color: accent,
+        ),
       ),
       for (final label in ['Device information', 'Recent Operations'])
-        ActionButton(
-          label,
-          style: 'secondary',
-          onPressed: controller.busy ? null : () => onAction(label),
+        TextButton(
+          onPressed: controller.busy || !controller.isForeground
+              ? null
+              : () => onAction(label),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: Copy(
+                  label,
+                  size: DeviceTypography.body,
+                  lineHeight: DeviceTypography.lineHeight,
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Icon(Icons.chevron_right, size: 20),
+            ],
+          ),
         ),
     ],
   );
+
+  Widget _temperatureTableRow(BuildContext context, Json part) {
+    final id = part['id'] as String;
+    final climate = controller.componentCapability(id, 'climate');
+    final observations =
+        controller.componentSnapshot(id)?['observations'] as Json? ?? {};
+    Object value(String property) {
+      final observed = observations['climate.$property']?['value'];
+      return UiMessage(
+        observed == null
+            ? 'Not received'
+            : propertyValue(
+                observed,
+                climate?['properties']?[property] as Json? ?? {},
+              ),
+      );
+    }
+
+    final error = controller.componentReadError(id);
+    return Padding(
+      key: ValueKey('readonly-zone:$id'),
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Copy(
+                  controlLabel(id),
+                  size: DeviceTypography.reading,
+                  lineHeight: DeviceTypography.lineHeight,
+                  bold: true,
+                ),
+              ),
+              Expanded(
+                child: Copy(
+                  value('target_temperature'),
+                  size: 24,
+                  lineHeight: DeviceTypography.lineHeight,
+                  bold: true,
+                  center: true,
+                ),
+              ),
+              Expanded(
+                child: Copy(
+                  value('current_temperature'),
+                  size: DeviceTypography.reading,
+                  lineHeight: DeviceTypography.lineHeight,
+                  color: muted,
+                  center: true,
+                ),
+              ),
+            ],
+          ),
+          if (error != null)
+            Copy(
+              UiMessage('{component} could not be read: {error}', {
+                'component': UiMessage(controlLabel(id)),
+                'error': localizedError(context, error),
+              }),
+              color: const Color(0xff9e3421),
+            ),
+          for (final cap in controller.capabilitiesFor(id))
+            if (cap['id'] != 'climate' &&
+                cap['id'] != 'vendor.midea.refrigerator' &&
+                cap['id'] != 'vendor.midea.refrigerator.details')
+              for (final entry in (cap['properties'] as Json).entries)
+                if (entry.value['readable'] == true)
+                  DeviceReadingRow(
+                    controlLabel(entry.key),
+                    UiMessage(
+                      propertyValue(
+                        observations['${cap['id']}.${entry.key}']?['value'],
+                        entry.value as Json,
+                        propertyId: '${cap['id']}.${entry.key}',
+                      ),
+                    ),
+                  ),
+        ],
+      ),
+    );
+  }
+
+  Widget _readOnlyZone(BuildContext context, Json part) {
+    final id = part['id'] as String;
+    final climate = controller.componentCapability(id, 'climate');
+    final snapshot = controller.componentSnapshot(id);
+    final observations = snapshot?['observations'] as Json? ?? {};
+    Object value(String property) {
+      final observed = observations['climate.$property']?['value'];
+      return UiMessage(
+        observed == null
+            ? 'Not received'
+            : propertyValue(
+                observed,
+                climate?['properties']?[property] as Json? ?? {},
+              ),
+      );
+    }
+
+    final error = controller.componentReadError(id);
+    return Padding(
+      key: ValueKey('readonly-zone:$id'),
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Copy(controlLabel(id), bold: true, size: 18),
+          DeviceReadingRow('Set temperature', value('target_temperature')),
+          DeviceReadingRow('Current temperature', value('current_temperature')),
+          for (final cap in controller.capabilitiesFor(id))
+            if (cap['id'] != 'climate' &&
+                cap['id'] != 'vendor.midea.refrigerator' &&
+                cap['id'] != 'vendor.midea.refrigerator.details')
+              for (final entry in (cap['properties'] as Json).entries)
+                if (entry.value['readable'] == true)
+                  DeviceReadingRow(
+                    controlLabel(entry.key),
+                    UiMessage(
+                      propertyValue(
+                        observations['${cap['id']}.${entry.key}']?['value'],
+                        entry.value as Json,
+                        propertyId: '${cap['id']}.${entry.key}',
+                      ),
+                    ),
+                  ),
+          if (error != null)
+            Copy(
+              UiMessage('{component} could not be read: {error}', {
+                'component': UiMessage(controlLabel(id)),
+                'error': localizedError(context, error),
+              }),
+              color: const Color(0xff9e3421),
+            ),
+        ],
+      ),
+    );
+  }
 
   Widget compartment(BuildContext context, Json part) {
     final id = part['id'] as String, label = controlLabel(id);
