@@ -6,6 +6,7 @@ use serde_json::json;
 use std::collections::HashSet;
 
 mod reconciliation;
+mod statistics;
 pub use reconciliation::{
     ModernDeviceGroup, ModernDeviceInventory, ModernUnresolvedEntry, ModernUnresolvedReason,
 };
@@ -301,6 +302,7 @@ impl ModernMijiaSession {
                 let request = ModernReadRequest {
                     endpoint,
                     body,
+                    agent: PrivateString::new("Android-13-11.7.709-XiaomiHome".into()),
                     cookie: PrivateString::new(format!(
                         "cUserId={}; serviceToken={}; yetAnotherServiceToken={}; countryCode=CN",
                         self.encrypted_subject.as_str(),

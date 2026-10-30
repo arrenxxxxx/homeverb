@@ -588,3 +588,46 @@ async fn selected_modern_protocol_without_registered_transport_refuses_before_le
     assert_eq!(f.cloud.calls.load(Ordering::SeqCst), 0);
     session.close();
 }
+
+#[tokio::test]
+async fn qr_outlet_uses_ordinary_native_history_without_login_or_inventory_replay() {
+    let f = ModernFixture::new();
+    *f.peer.directory.lock().unwrap() = Some(
+        json!({"list":[{"did":"PRIVATE-MODERN-DID","name":"Modern outlet","model":"cuco.plug.v3","pid":0}],"has_more":false}),
+    );
+    connect(&f).await;
+    let card = cards(&f).await.remove(0);
+    let inspect = json!({"method":"inspect_history_options","device_id":card["id"],"connection_id":card["connections"][0]["id"]});
+    let options = f.call(inspect.clone()).await;
+    assert!(options["error"].is_null(), "{options}");
+    assert_eq!(options["data"]["options"].as_array().unwrap().len(), 1);
+    assert_eq!(f.peer.statistics.load(Ordering::SeqCst), 0);
+    let read = json!({"method":"read_history","history":{"schema_version":"1.0","device_id":card["id"],"connection_id":card["connections"][0]["id"],"target":options["data"]["options"][0]["target"],"aggregation":"reported_daily","start":"2023-11-14T22:13:20Z","end":"2023-11-15T22:13:20Z"}});
+    let auth = f.peer.auth_count();
+    let puts = f.secrets.puts.load(Ordering::SeqCst);
+    let history = f.call(read.clone()).await;
+    assert!(history["error"].is_null(), "{history}");
+    let parsed: homeverb_domain::HistoryResult =
+        serde_json::from_value(history["data"].clone()).unwrap();
+    assert_eq!(parsed.records[0].value, 1.25);
+    assert_eq!(
+        parsed.completeness,
+        homeverb_domain::HistoryCompleteness::Unproven
+    );
+    assert_eq!(f.peer.statistics.load(Ordering::SeqCst), 1);
+    assert_eq!(f.peer.reads.load(Ordering::SeqCst), 1);
+    assert_eq!(f.peer.auth_count(), auth);
+    assert_eq!(f.secrets.puts.load(Ordering::SeqCst), puts);
+    assert_eq!(f.cloud.calls.load(Ordering::SeqCst), 0);
+    f.peer.fail_read.store(true, Ordering::SeqCst);
+    assert_eq!(
+        f.call(read.clone()).await["error"]["code"],
+        "MIJIA_REQUEST_FAILED"
+    );
+    assert_eq!(f.peer.statistics.load(Ordering::SeqCst), 2);
+    f.session.set_foreground(false);
+    assert_eq!(f.call(read).await["error"]["code"], "HOST_BACKGROUND");
+    assert_eq!(f.peer.statistics.load(Ordering::SeqCst), 2);
+    assert_eq!(f.peer.auth_count(), auth);
+    assert_eq!(f.cloud.calls.load(Ordering::SeqCst), 0);
+}

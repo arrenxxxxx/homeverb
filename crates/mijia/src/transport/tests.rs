@@ -971,10 +971,10 @@ async fn modern_auth_tls_cancellation_deadline_and_drop_close_socket() {
 async fn modern_reference_tls_has_exact_read_headers_and_refuses_redirect_encoding_and_size() {
     use crate::modern::reads::transport::{fixture_request, transmit};
     use crate::{ModernContentEncoding, ModernReadEndpoint as E};
-    for endpoint in [E::Directory, E::Homes, E::Properties] {
+    for endpoint in [E::Directory, E::Homes, E::Properties, E::Statistics] {
         assert_eq!(
             Url::parse(endpoint.url()).unwrap().host_str(),
-            Some("core.api.mijia.tech")
+            Some(if endpoint == E::Statistics {"api.mijia.tech"} else {"core.api.mijia.tech"})
         );
         for mode in 0..11 {
             let reply=match mode {
@@ -1020,6 +1020,7 @@ async fn modern_reference_tls_has_exact_read_headers_and_refuses_redirect_encodi
             assert!(wire.contains("miot-accept-encoding: GZIP"));
             assert!(wire.contains("accept-encoding: identity"));
             assert!(wire.contains("user-agent: Android-13-11.7.709-XiaomiHome"));
+            assert_eq!(wire.contains("x-xiaomi-protocal-flag-cli: PROTOCAL-HTTP2"), endpoint == E::Statistics);
             assert!(wire.contains("cUserId=fictional-c-user"));
             assert!(!wire.contains("passToken"));
             assert!(!wire.contains("deviceId="));

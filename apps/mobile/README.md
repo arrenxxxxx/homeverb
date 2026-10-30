@@ -21,7 +21,9 @@ controls with independent native grants; captcha and phone/email verification ha
 explicit foreground flows. API 1.36 adds QR sign-in. With API 1.37, successful QR
 continuation imports grouped device cards and explicit QR refresh/recovery updates
 them; old 1.36 libraries retain logical-directory summaries. Modern bindings are
-read-only, without modern controls or history. Partial/failed retrieval stays
+read-only, without modern controls. Exact `cuco.plug.v3` daily-energy history
+is available through the existing explicit history dialog on legacy and modern
+bindings; all other historical targets remain unavailable. Partial/failed retrieval stays
 separate from authentication, and local reload failure never repeats login.
 See the [Mijia guide](../../docs/development/11-mijia.md) for owner acceptance and
 [verification](verification.md) for fictional local checks.

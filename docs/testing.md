@@ -762,3 +762,17 @@ without login replay, partial/failed/empty outcomes and late navigation/account/
 foreground results. Retain account/native/localization/foreground-read regressions
 and the `screens_test.dart` portrait/landscape reflow checks for the flexible header.
 These fixtures perform no provider or physical-device operation.
+
+## Modern exact statistics profile
+
+ADR-0103 adds fictional protocol tests in
+`crates/mijia/src/modern/reads/tests/statistics.rs`, real Core/SQLite tests in
+`crates/mijia/src/adapter/tests/modern_accounts/history.rs`, and an ordinary Host
+history journey after QR publication. Assert per-field encryption/signatures,
+exact source origin/cookies/parameters, complete root identity, independent
+historical units and bounded plaintext/encrypted/gzip replies. Refusal tests cover
+foreign/logical identities, unsupported profiles, malformed/corrupt/oversized data,
+limits and late lifecycle results. Mixed-account tests preserve saved protocol
+selection, avoid fallback/reauthentication, and release account/device leases.
+Run the existing local TLS suite and native ABI checker plus Flutter
+`test/numeric_history_test.dart`; they use fictional data and no appliance.

@@ -1933,3 +1933,15 @@ counts are unchanged. Flutter now negotiates 1.37, validates distinct immutable
 device reports and adopts them after local reload and lifecycle checks. API 1.36
 keeps its logical-only report. New packaging and provider/phone acceptance remain
 pending.
+
+## Modern exact historical reads
+
+ADR-0103 makes the existing inspect_history_options/read_history contract available
+for the exact protected modern cuco.plug.v3 daily-energy binding. No native version,
+method, export or JSON field changes. Controllers consume inspected local targets,
+UTC range, kWh records and unproven completeness through the existing history UI.
+They cannot select a provider endpoint, raw key, credential slot or codec. A failed
+query never implies reauthentication or permits automatic retry. Modern controls
+and all unreviewed historical targets remain unavailable. Older binaries continue
+to return no modern history options; the API 1.37 package built from dd51c73 predates
+this additive adapter support.

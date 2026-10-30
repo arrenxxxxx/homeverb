@@ -1,4 +1,4 @@
-//! Fixed reference origin and read-only paths, never a generic modern RPC transport.
+//! Fixed source-specific read profiles, never a generic modern RPC transport.
 use super::*;
 use async_trait::async_trait;
 use reqwest::{Client, header::HeaderValue};
@@ -8,6 +8,8 @@ pub enum ModernReadEndpoint {
     Directory,
     Homes,
     Properties,
+    /// Community statistics profile; distinct origin and per-field codec.
+    Statistics,
 }
 impl ModernReadEndpoint {
     pub fn path(self) -> &'static str {
@@ -15,6 +17,7 @@ impl ModernReadEndpoint {
             Self::Directory => "/v2/home/device_list_page",
             Self::Homes => "/v2/homeroom/gethome_merged",
             Self::Properties => "/miotspec/prop/get",
+            Self::Statistics => "/v2/user/statistics",
         }
     }
     pub fn url(self) -> &'static str {
@@ -22,6 +25,7 @@ impl ModernReadEndpoint {
             Self::Directory => "https://core.api.mijia.tech/app/v2/home/device_list_page",
             Self::Homes => "https://core.api.mijia.tech/app/v2/homeroom/gethome_merged",
             Self::Properties => "https://core.api.mijia.tech/app/miotspec/prop/get",
+            Self::Statistics => "https://api.mijia.tech/app/v2/user/statistics",
         }
     }
 }
@@ -29,6 +33,7 @@ pub struct ModernReadRequest {
     pub(super) endpoint: ModernReadEndpoint,
     pub(super) body: SecretBytes,
     pub(super) cookie: PrivateString,
+    pub(super) agent: PrivateString,
 }
 impl fmt::Debug for ModernReadRequest {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -99,28 +104,31 @@ pub(crate) async fn transmit(
             let mut cookie =
                 HeaderValue::from_str(request.cookie.as_str()).map_err(|_| invalid())?;
             cookie.set_sensitive(true);
-            let mut response = client
+            let limit = if request.endpoint == ModernReadEndpoint::Statistics {
+                crate::MAX_RESPONSE_BYTES
+            } else {
+                MAX_READ_BYTES
+            };
+            let mut outgoing = client
                 .post(url)
                 .header("cookie", cookie)
                 .header("content-type", "application/x-www-form-urlencoded")
                 .header("accept-encoding", "identity")
                 .header("miot-encrypt-algorithm", "ENCRYPT-RC4")
                 .header("miot-accept-encoding", "GZIP")
-                .header("user-agent", "Android-13-11.7.709-XiaomiHome")
-                .body(request.body.expose().to_vec())
-                .send()
-                .await
-                .map_err(|_| crate::failed())?;
+                .header("user-agent", request.agent.as_str())
+                .body(request.body.expose().to_vec());
+            if request.endpoint == ModernReadEndpoint::Statistics {
+                outgoing = outgoing.header("x-xiaomi-protocal-flag-cli", "PROTOCAL-HTTP2");
+            }
+            let mut response = outgoing.send().await.map_err(|_| crate::failed())?;
             if matches!(response.status().as_u16(), 401 | 403) {
                 return Err(auth_required());
             }
             if response.status() != reqwest::StatusCode::OK {
                 return Err(crate::failed());
             }
-            if response
-                .content_length()
-                .is_some_and(|v| v > MAX_READ_BYTES as u64)
-            {
+            if response.content_length().is_some_and(|v| v > limit as u64) {
                 return Err(invalid());
             }
             let mut encoding = ModernContentEncoding::Plain;
@@ -140,7 +148,7 @@ pub(crate) async fn transmit(
             }
             let mut body = zeroize::Zeroizing::new(Vec::new());
             while let Some(chunk) = response.chunk().await.map_err(|_| crate::failed())? {
-                if body.len() + chunk.len() > MAX_READ_BYTES {
+                if body.len() + chunk.len() > limit {
                     return Err(invalid());
                 }
                 body.extend_from_slice(&chunk);
@@ -155,5 +163,5 @@ pub(crate) async fn transmit(
 
 #[cfg(test)]
 pub(crate) fn fixture_request(endpoint: ModernReadEndpoint) -> ModernReadRequest {
-    ModernReadRequest { endpoint, body: SecretBytes::new(b"data=fictional".to_vec()), cookie: PrivateString::new("cUserId=fictional-c-user; serviceToken=fictional-service; yetAnotherServiceToken=fictional-service; countryCode=CN".into()) }
+    ModernReadRequest { endpoint, agent: PrivateString::new("Android-13-11.7.709-XiaomiHome".into()), body: SecretBytes::new(b"data=fictional".to_vec()), cookie: PrivateString::new("cUserId=fictional-c-user; serviceToken=fictional-service; yetAnotherServiceToken=fictional-service; countryCode=CN".into()) }
 }

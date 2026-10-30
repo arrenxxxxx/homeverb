@@ -15,6 +15,8 @@ are recorded below; they do not establish full reference coverage. API 1.37 adds
 modern QR login, protected account/device binding, grouped card publication and
 Core reads through Flutter. The [Android package](../../apps/mobile/verification.md#modern-qr-and-device-publication-android-package--october-30-2026)
 has clean-source archive checks, without installation or provider acceptance.
+ADR-0103 subsequently adds exact modern outlet daily-energy history through the
+existing Core/native/App history interface; the package above predates that addition.
 
 - Eight-part MIoT URNs retain their exact extension; malformed/foreign URNs refuse.
 - Seventeen exact model/specification catalogs project 264 reviewed scalar read
@@ -87,7 +89,8 @@ identifiers enter this ledger.
 
 The HA source review below supplies protocol evidence used by the implemented
 legacy verification flow and exact energy-history profile. Still blocked pending
-additional evidence: modern control/history protocols and authenticated acceptance; specialized paths for
+additional evidence: modern control and broader historical/event protocols,
+authenticated acceptance and specialized paths for
 failed cloud properties and BLE devices; broader statistics, event pagination and
 foreground subscriptions; health/media/streams; plugin-specific
 composite conversion and additional write constraints. Door unlocking stays denied.
@@ -1532,3 +1535,15 @@ was performed. The reference ledger continues to report partial implementation.
 adoption, payload 3 and Core reads for all 264 pinned scalar mappings with fictional
 evidence. Host/App card publication is still pending; the coverage ledger keeps
 that distinction and retains the remaining control/event/BLE/LAN/media work.
+
+## Modern daily-energy history -- October 30, 2026
+
+[ADR-0103](../adr/0103-modern-mijia-daily-energy-history.md) admits the exact
+cuco.plug.v3 daily-energy profile for modern-selected bindings. The reviewed MIT
+source has a separate fixed api.mijia.tech statistics route with per-field RC4,
+modern session cookies and plaintext/encrypted JSON or encrypted gzip replies.
+The shared exact-model decoder retains ADR-0088 units, limits and incomplete
+record semantics. No ID suffix is stripped and no credential/codec fallback is
+available. Ordinary native/App history queries reuse existing schemas and UI;
+modern controls and broader events/history remain unavailable. The previous APK
+predates this implementation. See the ADR for verification and acceptance scope.

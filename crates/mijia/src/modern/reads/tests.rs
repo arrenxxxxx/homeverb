@@ -600,3 +600,6 @@ async fn cancelled_delivery_cannot_publish_a_synchronously_ready_response() {
 }
 
 mod reconciliation;
+
+#[path = "tests/statistics.rs"]
+mod statistics;

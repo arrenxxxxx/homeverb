@@ -7,8 +7,7 @@ use homeverb_domain::{
 
 fn option(binding: &Binding) -> Option<HistoryOption> {
     let mapping = binding.mapping.as_ref()?;
-    if binding.is_modern()
-        || !binding.listed
+    if !binding.listed
         || binding.model != crate::statistics::DAILY_ENERGY_MODEL
         || mapping.spec_type != crate::statistics::DAILY_ENERGY_SPEC
     {
@@ -55,6 +54,9 @@ impl MijiaAdapter {
                     .find(|b| b.device_id.to_string() == device.id)
                     .ok_or_else(conflict)?;
                 validate_device(binding, id, device, connection)?;
+                if binding.is_modern() && self.modern_reads.is_none() {
+                    return Ok(Vec::new());
+                }
                 Ok(option(binding).into_iter().collect())
             })
             .await
@@ -99,13 +101,31 @@ impl MijiaAdapter {
                     request.start.timestamp(),
                     request.end.timestamp(),
                 )?;
-                let session = account.payload.legacy_session()?;
                 let mut exact_device = binding.device();
                 // A protected pinned reference derivation is evidence even when inventory omitted the URN.
                 exact_device.spec_type = Some(crate::statistics::DAILY_ENERGY_SPEC.into());
-                let history = session
-                    .daily_energy_history(self.transport.as_ref(), &exact_device, window, operation)
-                    .await?;
+                let history = if binding.is_modern() {
+                    let session = account.payload.modern_session()?;
+                    let transport = self.modern_reads.as_deref().ok_or_else(unsupported)?;
+                    let mut entry = session.protected_entry(&exact_device)?;
+                    entry.kind = Some(crate::modern::reads::DirectoryKind(
+                        binding.modern.as_ref().ok_or_else(conflict)?.kind,
+                    ));
+                    session
+                        .daily_energy_history(transport, &entry, window, operation)
+                        .await?
+                } else {
+                    account
+                        .payload
+                        .legacy_session()?
+                        .daily_energy_history(
+                            self.transport.as_ref(),
+                            &exact_device,
+                            window,
+                            operation,
+                        )
+                        .await?
+                };
                 let result = HistoryResult {
                     schema_version: SCHEMA_VERSION.into(),
                     device_id: device.id.clone(),

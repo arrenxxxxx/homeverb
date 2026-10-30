@@ -5414,6 +5414,18 @@
     "android_package": "archive_checked_api_1_37_no_runtime_acceptance",
     "provider_acceptance": "pending"
   },
+  "modern_history": {
+    "status": "implemented_exact_daily_energy_through_core_and_native_history",
+    "evidence": "ADR-0103; pinned MIT statistics transport and Apache exact model semantics",
+    "origin": "https://api.mijia.tech/app",
+    "route": "/v2/user/statistics",
+    "codec": "per_field_rc4_drop1024",
+    "model": "cuco.plug.v3",
+    "spec_type": "urn:miot-spec-v2:device:outlet:0000A002:cuco-v3:2",
+    "unit": "kWh",
+    "completeness": "unproven",
+    "provider_acceptance": "pending"
+  },
   "remaining": [
     "modern_provider_and_phone_acceptance",
     "modern_api_origin_and_codec_acceptance",

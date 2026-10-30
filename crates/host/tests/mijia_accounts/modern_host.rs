@@ -14,6 +14,7 @@ struct Peer {
     auth: Mutex<Vec<Auth>>,
     reads: AtomicUsize,
     properties: AtomicUsize,
+    statistics: AtomicUsize,
     directory: Mutex<Option<Value>>,
     fail_read: AtomicBool,
     pause: AtomicUsize,
@@ -104,6 +105,8 @@ impl ModernReadTransport for Peer {
     ) -> Result<ModernReadResponse> {
         if request.endpoint() == ModernReadEndpoint::Directory {
             self.reads.fetch_add(1, Ordering::SeqCst);
+        } else if request.endpoint() == ModernReadEndpoint::Statistics {
+            self.statistics.fetch_add(1, Ordering::SeqCst);
         } else {
             assert_eq!(request.endpoint(), ModernReadEndpoint::Properties);
             self.properties.fetch_add(1, Ordering::SeqCst);
@@ -129,6 +132,12 @@ impl ModernReadTransport for Peer {
         let result = if request.endpoint() == ModernReadEndpoint::Directory {
             self.directory.lock().unwrap().clone().unwrap_or_else(||
                 json!({"list":[{"did":"PRIVATE-MODERN-DID","name":"Modern Fan","model":"jdjz.fan.2072fc","pid":0}],"has_more":false}))
+        } else if request.endpoint() == ModernReadEndpoint::Statistics {
+            let data: Value = serde_json::from_slice(&stream(&key,&STANDARD.decode(&fields["data"]).unwrap())).unwrap();
+            assert_eq!(request.endpoint().url(),"https://api.mijia.tech/app/v2/user/statistics");
+            assert_eq!(data["did"],"PRIVATE-MODERN-DID");
+            assert_eq!(data["key"],"11.1"); assert_eq!(data["data_type"],"stat_day_v3");
+            json!([{"did":data["did"],"key":"11.1","time":1700000000,"value":"[125]"}])
         } else {
             let data: Value =
                 serde_json::from_slice(&stream(&key, &STANDARD.decode(&fields["data"]).unwrap()))

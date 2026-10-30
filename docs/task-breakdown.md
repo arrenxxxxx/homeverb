@@ -1,5 +1,24 @@
 # Implementation status and next tasks
 
+## Modern exact daily-energy history -- October 30, 2026
+
+ADR-0103 implements the exact cuco.plug.v3 daily-energy query for modern-selected
+bindings through existing Core/native/App history contracts. A separate fixed
+api.mijia.tech profile uses modern credentials and per-field RC4; current-state
+reference reads keep their continuous codec and origin. Legacy bindings retain
+legacy statistics. Exact identity/model/specification, bounded windows/records,
+unknown completeness and foreground cancellation remain mandatory. There is no
+fallback, automatic renewal, credential/cache mutation or new write authority.
+
+Executed evidence: 604 workspace tests passed with one ignored (excluding the
+known unrelated Meiju/macOS LAN-alias suite); strict Clippy, FFI build and native
+ABI checks passed. All 65 affected Flutter history/device-flow tests passed.
+The final four protocol tests also passed after expanded gzip/auth negatives.
+This is fictional software evidence, not real provider/device acceptance. The
+API 1.37 APK from dd51c73 predates this addition. Native API/schema/storage formats
+are unchanged. Modern controls, broader history/events, BLE/LAN, health/media and
+additional model/runtime contracts remain open.
+
 ## API 1.37 Android package -- October 30, 2026
 
 The native/Flutter modern QR-to-card/read phase is committed as `dd51c73`.

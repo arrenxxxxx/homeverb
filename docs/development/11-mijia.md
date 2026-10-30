@@ -3,7 +3,8 @@
 October 30: 17 exact Mijia reference specifications supply 264 scalar read
 mappings and localized App labels. Modern QR authentication, grouped device
 publication and Core reads are integrated through Flutter with fictional evidence.
-Modern controls/history and broader reference coverage remain incomplete; see the
+Exact modern outlet daily-energy history uses the existing history interface.
+Modern controls, broader history and other reference coverage remain incomplete; see the
 [coverage ledger and remaining work](14-mijia-reference-integration.md).
 
 The October 30 integration uses native API **1.37.0**, following the linear
@@ -29,7 +30,8 @@ consumes it without automatic message sends or retries. The API 1.33
 [Android package](../../apps/mobile/verification.md#historical-api-133-android-package--october-28-2026)
 includes this account flow and historical UI. The [API 1.37 package](../../apps/mobile/verification.md#modern-qr-and-device-publication-android-package--october-30-2026)
 also contains modern SID `mijia` QR login, grouped cards and read-only state views.
-Human risk challenges, account-settings confirmation, modern controls/history,
+ADR-0103 adds exact modern outlet daily-energy history after that APK revision.
+Human risk challenges, account-settings confirmation, modern controls/broader history,
 broader event/control coverage and real-provider/device acceptance remain open. Earlier
 phase records below retain their original implementation and evidence scope.
 

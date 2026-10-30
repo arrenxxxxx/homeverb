@@ -768,3 +768,14 @@ Returned modern roots lose unsupported control/history options; historical absen
 bindings retain their selected protocol. This changes account retrieval admission,
 not write outcomes, trust markers or execution authority. No complete membership
 or physical observation follows from successful publication.
+
+## Modern historical profile selection
+
+ADR-0103 extends explicit historical reads for the exact protected outlet profile.
+The saved binding selects the credential slot before I/O. Modern uses the reviewed
+api.mijia.tech statistics origin with per-field RC4; legacy retains api.io.mi.com.
+This choice does not change current-state routing or the reference continuous codec.
+No request selects a raw endpoint or key. Failure never tries the other protocol,
+renews credentials or changes write receipts. Account/device leases and foreground
+cancellation cover the whole query and result validation; history remains separate
+from current state, execution acceptance and physical verification.

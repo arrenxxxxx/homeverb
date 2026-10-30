@@ -15,3 +15,12 @@ automatic relogin, retries or device/control behavior from the reference.
 
 This protocol is unofficial. Source licensing and anonymous endpoint inspection
 do not establish successful account authentication or physical compatibility.
+
+The separate modern daily-energy statistics profile in ADR-0103 also uses protocol
+facts from the same pinned `src/mijia_api.rs`: get_user_statistics_with_query,
+api_headers, encrypted_form_body and parse_plain_or_gzip_json. The numeric-userId
+selection was checked in [src/storage.rs](https://github.com/ttys026/mit/blob/a5d32181d0251ee36dde6edb316e16879d5ac175/src/storage.rs)
+(blob `cbe5005be0464e2c2df0dec855eb08bbf41f1892`). HomeVerb independently implements
+a fixed exact-model request, protected root identity without suffix inference,
+bounded decoding, cancellation and no fallback. It does not adopt that project's
+plaintext storage, configurable origins, automatic renewal or generic device data.

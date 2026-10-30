@@ -152,7 +152,7 @@ fn energy(value: Option<&Value>) -> Option<f64> {
     Some(if converted == 0.0 { 0.0 } else { converted })
 }
 
-fn decode_history(
+pub(crate) fn decode_history(
     bytes: &[u8],
     did: &str,
     window: DailyEnergyWindow,

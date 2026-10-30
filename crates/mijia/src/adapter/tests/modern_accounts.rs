@@ -131,6 +131,12 @@ impl ModernReadTransport for Peer {
             Read::Directory => {
                 json!({"list":self.devices.lock().unwrap().clone(),"has_more":false})
             }
+            Read::Statistics => {
+                assert_eq!(request.endpoint().url(), "https://api.mijia.tech/app/v2/user/statistics");
+                assert_eq!(data["key"],"11.1"); assert_eq!(data["data_type"],"stat_day_v3");
+                assert_eq!(data["limit"],31);
+                json!([{"did":data["did"],"key":"11.1","time":1700000000,"value":"[125]"}])
+            }
             Read::Properties => {
                 let params = data["params"].as_array().unwrap();
                 self.property_requests
@@ -892,3 +898,6 @@ async fn original_cancellation_during_secret_write_keeps_pending_bytes_for_expli
 
 #[path = "modern_accounts/devices.rs"]
 mod devices;
+
+#[path = "modern_accounts/history.rs"]
+mod history;

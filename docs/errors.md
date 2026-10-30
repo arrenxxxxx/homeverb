@@ -742,3 +742,15 @@ failed/not-sent without a legacy fallback. Uncertain binding storage retains
 pending metadata and `SECRET_STORE_WRITE_UNKNOWN`; explicit recovery validates
 saved bytes without login or unchanged-secret rewrite. No public error schema or
 ordinary JSON field changes.
+
+## Modern exact historical reads
+
+ADR-0103 reuses the existing error contract. Unsupported model/specification,
+logical-child identity or unavailable transport refuses before networking.
+Invalid intervals/targets return validation errors; protected identity mismatch
+remains a conflict. HTTP authentication failure and reviewed expired-session codes
+return AUTH_REQUIRED without renewal or fallback. Malformed, oversized, ambiguous
+or foreign-correlated statistics fail closed. Malformed individual records retain
+the documented rejected-record count, never fabricated zero values. Cancellation
+and deadline errors retain their existing foreground semantics. These read failures
+do not create or change an execution outcome.

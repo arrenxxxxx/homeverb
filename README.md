@@ -54,8 +54,9 @@ This exits with code 11. Refresh state to inspect the result; do not blindly res
   dialog; only the protected `cuco.plug.v3` daily-energy profile is admitted for
   history. Synthetic evidence and Android archive checks do not establish real
   provider/device acceptance. Modern QR sign-in, grouped device-card publication, explicit refresh/recovery
-  and renewal have Flutter fixture evidence with API 1.37. Modern controls/history
-  and broader event/control coverage remain incomplete; door-lock writes are unavailable. Startup performs
+  and renewal have Flutter fixture evidence with API 1.37. Exact modern outlet daily-energy history uses the separate community statistics
+  profile under ADR-0103. Modern controls, broader history
+  and event/control coverage remain incomplete; door-lock writes are unavailable. Startup performs
   no account refresh or network operation. Explicit `--adapter xiaomi.mijia`
   also provides read-only CLI/local MCP hosting and bounded historical queries.
 
