@@ -62,7 +62,12 @@ class Blocks extends StatelessWidget {
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             onPressed: () => onAction(b[1]),
-            child: Copy(b[1], color: accent, bold: true, control: true),
+            child: Copy(
+              b[1],
+              color: skinAccent(context),
+              bold: true,
+              control: true,
+            ),
           ),
         );
       case 'summary':
@@ -77,7 +82,7 @@ class Blocks extends StatelessWidget {
                   size: 30,
                   color: MediaQuery.highContrastOf(context)
                       ? Colors.black
-                      : accent,
+                      : skinAccent(context),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -501,7 +506,7 @@ class Blocks extends StatelessWidget {
                 value: (b[1] as num).toDouble(),
                 minHeight: 6,
                 borderRadius: BorderRadius.circular(3),
-                color: accent,
+                color: skinAccent(context),
                 backgroundColor: const Color(0xffdeded6),
               ),
               const SizedBox(height: 12),
@@ -581,7 +586,7 @@ class Blocks extends StatelessWidget {
           return Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: Surface(
-              border: accent,
+              border: skinAccent(context),
               borderWidth: 1.2,
               child: SizedBox(
                 height: 205,
@@ -638,7 +643,7 @@ class Blocks extends StatelessWidget {
                                   height: 7,
                                   child: DecoratedBox(
                                     decoration: BoxDecoration(
-                                      color: accent,
+                                      color: skinAccent(context),
                                       borderRadius: BorderRadius.circular(3),
                                     ),
                                   ),
@@ -662,7 +667,7 @@ class Blocks extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const Positioned(
+                    Positioned(
                       right: 18,
                       top: 147,
                       height: 58,
@@ -671,7 +676,7 @@ class Blocks extends StatelessWidget {
                           'Current',
                           control: true,
                           size: 12,
-                          color: accent,
+                          color: skinAccent(context),
                           bold: true,
                         ),
                       ),
@@ -685,7 +690,7 @@ class Blocks extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.only(bottom: 16),
           child: Surface(
-            border: accent,
+            border: skinAccent(context),
             padding: const EdgeInsets.all(12),
             child: Column(
               children: [
@@ -710,8 +715,8 @@ class Blocks extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(6, 0, 6, 12),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(6, 0, 6, 12),
                   child: Row(
                     children: [
                       Expanded(
@@ -725,7 +730,7 @@ class Blocks extends StatelessWidget {
                       Copy(
                         'Current',
                         size: 12,
-                        color: accent,
+                        color: skinAccent(context),
                         bold: true,
                         control: true,
                       ),
@@ -771,8 +776,17 @@ Widget product(String key, {double size = 80}) {
   if (source == null)
     return Center(
       child: key == 'appliance'
-          ? const Icon(Icons.devices_other_outlined, size: 52, color: accent)
-          : Glyph(key, size: 52, color: accent),
+          ? Builder(
+              builder: (context) => Icon(
+                Icons.devices_other_outlined,
+                size: 52,
+                color: skinAccent(context),
+              ),
+            )
+          : Builder(
+              builder: (context) =>
+                  Glyph(key, size: 52, color: skinAccent(context)),
+            ),
     );
   final asset = {'refrigerator', 'dishwasher'}.contains(key)
       ? 'assets/$key-v1.png'
@@ -1121,7 +1135,7 @@ class Climate extends StatelessWidget {
                   child: _step(
                     '+',
                     'Increase target',
-                    enabled ? accent : const Color(0xff535452),
+                    enabled ? skinAccent(context) : const Color(0xff535452),
                   ),
                 ),
                 Positioned(
@@ -1184,7 +1198,7 @@ class Climate extends StatelessWidget {
                     center: true,
                   ),
                 ),
-                _step('+', 'Increase target', accent),
+                _step('+', 'Increase target', skinAccent(context)),
               ],
             ),
           ],
@@ -1320,7 +1334,7 @@ class DeviceTile extends StatelessWidget {
         ? 'Turn Off'
         : 'Turn On';
     final powerColor = presentation == null
-        ? (active ? accent : const Color(0xffe0ddd5))
+        ? (active ? skinAccent(context) : const Color(0xffe0ddd5))
         : powerBackground(context, state);
     final powerInk = presentation == null
         ? (active ? Colors.white : ink)

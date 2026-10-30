@@ -65,3 +65,36 @@ class DeviceOptionGrid extends StatelessWidget {
     },
   );
 }
+
+/// Centers a compact selection mark and label as one visual group.
+/// The parent ChoiceChip still owns selected semantics and the full hit target.
+class DeviceOptionLabel extends StatelessWidget {
+  const DeviceOptionLabel({
+    super.key,
+    required this.text,
+    required this.selected,
+    this.checkColor = Colors.white,
+  });
+  final String text;
+  final bool selected;
+  final Color checkColor;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    width: double.infinity,
+    child: Center(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (selected) ...[
+            ExcludeSemantics(
+              child: Icon(Icons.check, size: 18, color: checkColor),
+            ),
+            const SizedBox(width: 6),
+          ],
+          Flexible(child: Text(text, textAlign: TextAlign.center)),
+        ],
+      ),
+    ),
+  );
+}

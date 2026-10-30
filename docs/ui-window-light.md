@@ -1,6 +1,6 @@
 # Window Light visual system and Flutter handoff
 
-Status: selected by the owner on October 15, 2026. This is the default and **only included skin**. The complete [prototype](../output/prototypes/homeverb-window-light-v1/index.html) applies it to all 82 specified screen states. See the [functional handoff](ui-functional-spec.md) for behaviors and the [screen inventory](ui-screen-inventory.md) for branches.
+Status: selected by the owner on October 15, 2026. This remains the default skin. The independently selectable Sky Blue skin was added on October 30; it uses the same capability-driven controls and local preference boundary. The complete [prototype](../output/prototypes/homeverb-window-light-v1/index.html) applies it to all 82 specified screen states. See the [functional handoff](ui-functional-spec.md) for behaviors and the [screen inventory](ui-screen-inventory.md) for branches.
 
 ## Approved visual character
 
@@ -141,7 +141,7 @@ The presentation-layer registry has this shape:
 {
   "schema_version": 1,
   "default_skin_id": "window_light",
-  "available_skin_ids": ["window_light"]
+  "available_skin_ids": ["window_light", "sky_blue"]
 }
 ```
 

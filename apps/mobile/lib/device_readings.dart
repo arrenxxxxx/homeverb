@@ -82,7 +82,7 @@ class DeviceReadingRow extends StatelessWidget {
                                     value: progress,
                                     minHeight: 7,
                                     borderRadius: BorderRadius.circular(6),
-                                    color: accent,
+                                    color: skinAccent(context),
                                     backgroundColor: const Color(0xffddddda),
                                   ),
                                 ),

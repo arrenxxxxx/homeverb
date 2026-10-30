@@ -511,7 +511,7 @@ class _CapabilityActionFormState extends State<CapabilityActionForm> {
               SliderTheme(
                 data: SliderTheme.of(context).copyWith(
                   trackHeight: 5,
-                  activeTrackColor: accent,
+                  activeTrackColor: skinAccent(context),
                   inactiveTrackColor: const Color(0xffd5d6cf),
                   thumbShape: const WindowSliderThumb(),
                   padding: const EdgeInsets.symmetric(horizontal: 20),

@@ -247,12 +247,9 @@ class _ApplianceControlsState extends State<ApplianceControls> {
                 for (final option in schema['enum'] as List)
                   ChoiceChip(
                     key: ValueKey('appliance-option:$name:$option'),
-                    label: SizedBox(
-                      width: double.infinity,
-                      child: Text(
-                        localize(context, propertyValue(option, {})),
-                        textAlign: TextAlign.center,
-                      ),
+                    label: DeviceOptionLabel(
+                      text: localize(context, propertyValue(option, {})),
+                      selected: value == option,
                     ),
                     labelStyle: TextStyle(
                       fontSize: DeviceTypography.body,
@@ -266,11 +263,15 @@ class _ApplianceControlsState extends State<ApplianceControls> {
                       avatarDrawerAnimation: AnimationStyle.noAnimation,
                     ),
                     selected: value == option,
-                    showCheckmark: true,
+                    showCheckmark: false,
                     checkmarkColor: Colors.white,
                     side: BorderSide.none,
-                    backgroundColor: const Color(0xfff8f5ee),
-                    selectedColor: ink,
+                    backgroundColor: skinOf(context).isSky
+                        ? skinOf(context).secondaryColor
+                        : const Color(0xfff8f5ee),
+                    selectedColor: skinOf(context).isSky
+                        ? skinAccent(context)
+                        : ink,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),

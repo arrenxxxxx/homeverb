@@ -15,18 +15,39 @@ const ink = Color(0xff292b2d),
 
 @immutable
 class HomeVerbSkin extends ThemeExtension<HomeVerbSkin> {
-  const HomeVerbSkin({this.accentColor = accent});
+  const HomeVerbSkin({this.accentColor = accent, this.isSky = false});
   final Color accentColor;
+  final bool isSky;
+  Color get cardColor => isSky ? const Color(0xeef6fbff) : Colors.white;
+  Color get pageColor =>
+      isSky ? const Color(0xffdceefa) : const Color(0xfff8f6f0);
+  Color get onBackground => isSky ? Colors.white : ink;
+  Color get secondaryColor =>
+      isSky ? const Color(0xffe0edf6) : const Color(0xffeeebe3);
+  Color get powerColor => isSky ? const Color(0xff087f70) : accentColor;
   @override
-  HomeVerbSkin copyWith({Color? accentColor}) =>
-      HomeVerbSkin(accentColor: accentColor ?? this.accentColor);
+  HomeVerbSkin copyWith({Color? accentColor, bool? isSky}) => HomeVerbSkin(
+    accentColor: accentColor ?? this.accentColor,
+    isSky: isSky ?? this.isSky,
+  );
   @override
   HomeVerbSkin lerp(HomeVerbSkin? other, double t) => HomeVerbSkin(
     accentColor: Color.lerp(accentColor, other?.accentColor, t)!,
+    isSky: t < .5 ? isSky : (other?.isSky ?? isSky),
   );
 }
 
-const skinRegistry = {'window_light': HomeVerbSkin()};
+const skinRegistry = {
+  'window_light': HomeVerbSkin(),
+  'sky_blue': HomeVerbSkin(accentColor: Color(0xff1266a0), isSky: true),
+};
+const skinLabels = {'window_light': 'Window Light', 'sky_blue': 'Sky Blue'};
+HomeVerbSkin skinOf(BuildContext context) =>
+    Theme.of(context).extension<HomeVerbSkin>() ?? const HomeVerbSkin();
+Color skinAccent(BuildContext context) => MediaQuery.highContrastOf(context)
+    ? Colors.black
+    : skinOf(context).accentColor;
+
 ui.FragmentProgram? _surfaceProgram;
 Future<void>? _skinAssetsLoad;
 final _buttonFaces = <String, ui.Image>{};
@@ -98,57 +119,64 @@ Future<void> loadWindowSkin() => _skinAssetsLoad ??= () async {
     codec.dispose();
   }
 }();
-ThemeData windowTheme({bool highContrast = false}) => ThemeData(
-  fontFamily: 'Inter',
-  fontFamilyFallback: windowFontFallback,
-  useMaterial3: true,
-  scaffoldBackgroundColor: Colors.transparent,
-  extensions: const [HomeVerbSkin()],
-  colorScheme: highContrast
-      ? const ColorScheme.highContrastLight(
-          primary: Colors.black,
-          onPrimary: Colors.white,
-          surface: Colors.white,
-          onSurface: Colors.black,
-        )
-      : ColorScheme.fromSeed(seedColor: accent).copyWith(
-          primary: accent,
-          surface: const Color(0xfff6f2ea),
-          onSurface: ink,
-        ),
-  splashFactory: InkRipple.splashFactory,
-  textSelectionTheme: const TextSelectionThemeData(cursorColor: accent),
-  switchTheme: SwitchThemeData(
-    padding: EdgeInsets.zero,
-    thumbColor: highContrast
-        ? WidgetStateProperty.resolveWith(
-            (states) => states.contains(WidgetState.selected)
-                ? Colors.white
-                : Colors.black,
+ThemeData windowTheme({
+  bool highContrast = false,
+  String skinId = 'window_light',
+}) {
+  final skin = skinRegistry[skinId] ?? skinRegistry['window_light']!;
+  final accent = skin.accentColor;
+  return ThemeData(
+    fontFamily: 'Inter',
+    fontFamilyFallback: windowFontFallback,
+    useMaterial3: true,
+    scaffoldBackgroundColor: Colors.transparent,
+    extensions: [skin],
+    colorScheme: highContrast
+        ? const ColorScheme.highContrastLight(
+            primary: Colors.black,
+            onPrimary: Colors.white,
+            surface: Colors.white,
+            onSurface: Colors.black,
           )
-        : const WidgetStatePropertyAll(Color(0xfffffcf5)),
-    thumbIcon: const WidgetStatePropertyAll(Icon(null)),
-    trackColor: WidgetStateProperty.resolveWith(
-      (states) => states.contains(WidgetState.selected)
-          ? (highContrast ? Colors.black : accent)
-          : (highContrast ? Colors.white : const Color(0xffc2c4bc)),
+        : ColorScheme.fromSeed(seedColor: accent).copyWith(
+            primary: accent,
+            surface: const Color(0xfff6f2ea),
+            onSurface: ink,
+          ),
+    splashFactory: InkRipple.splashFactory,
+    textSelectionTheme: TextSelectionThemeData(cursorColor: accent),
+    switchTheme: SwitchThemeData(
+      padding: EdgeInsets.zero,
+      thumbColor: highContrast
+          ? WidgetStateProperty.resolveWith(
+              (states) => states.contains(WidgetState.selected)
+                  ? Colors.white
+                  : Colors.black,
+            )
+          : const WidgetStatePropertyAll(Color(0xfffffcf5)),
+      thumbIcon: const WidgetStatePropertyAll(Icon(null)),
+      trackColor: WidgetStateProperty.resolveWith(
+        (states) => states.contains(WidgetState.selected)
+            ? (highContrast ? Colors.black : accent)
+            : (highContrast ? Colors.white : const Color(0xffc2c4bc)),
+      ),
+      trackOutlineWidth: WidgetStatePropertyAll(highContrast ? 1.5 : 0),
+      trackOutlineColor: WidgetStatePropertyAll(
+        highContrast ? Colors.black : Colors.transparent,
+      ),
     ),
-    trackOutlineWidth: WidgetStatePropertyAll(highContrast ? 1.5 : 0),
-    trackOutlineColor: WidgetStatePropertyAll(
-      highContrast ? Colors.black : Colors.transparent,
-    ),
-  ),
-);
+  );
+}
 
 Color readableInk(BuildContext context, Color color) =>
     MediaQuery.highContrastOf(context)
     ? (color.computeLuminance() >= .5 ? Colors.white : Colors.black)
-    : color;
+    : (color == accent ? skinAccent(context) : color);
 
 Color powerBackground(BuildContext context, bool? state) =>
     MediaQuery.highContrastOf(context)
     ? (state == true ? Colors.white : Colors.black)
-    : (state == true ? accent : const Color(0xff595d5a));
+    : (state == true ? skinOf(context).powerColor : const Color(0xff595d5a));
 
 Color powerForeground(BuildContext context, bool? state) =>
     MediaQuery.highContrastOf(context) && state == true
@@ -298,8 +326,9 @@ class Copy extends StatelessWidget {
 }
 
 class LightBackground extends StatelessWidget {
-  const LightBackground({required this.child, super.key});
+  const LightBackground({required this.child, this.device = false, super.key});
   final Widget child;
+  final bool device;
   @override
   Widget build(BuildContext context) => Stack(
     fit: StackFit.expand,
@@ -309,6 +338,33 @@ class LightBackground extends StatelessWidget {
           child: ExcludeSemantics(
             child: MediaQuery.highContrastOf(context)
                 ? const ColoredBox(color: Colors.white)
+                : skinOf(context).isSky
+                ? const DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Color(0xff246897),
+                          Color(0xff78b8db),
+                          Color(0xffb6dfed),
+                          Color(0xff287f9d),
+                        ],
+                        stops: [0, .43, .76, 1],
+                      ),
+                    ),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: RadialGradient(
+                          center: Alignment(.8, -.65),
+                          radius: 1.1,
+                          colors: [Color(0x40ffffff), Color(0x00ffffff)],
+                        ),
+                      ),
+                    ),
+                  )
+                : device
+                ? ColoredBox(color: skinOf(context).pageColor)
                 : Image.asset(
                     'assets/window-light-background.png',
                     fit: BoxFit.fill,
@@ -345,15 +401,23 @@ class Surface extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final highContrast = MediaQuery.highContrastOf(context);
-    final faces = highContrast || backgroundColor != null
+    final skin = skinOf(context);
+    final faces = highContrast || skin.isSky || backgroundColor != null
         ? null
         : _surfaceFaces[radius];
     return DecoratedBox(
       decoration: BoxDecoration(
         color: MediaQuery.highContrastOf(context)
             ? (dark ? Colors.black : Colors.white)
-            : backgroundColor,
-        gradient: highContrast || faces != null || backgroundColor != null
+            : backgroundColor ??
+                  (skin.isSky
+                      ? (dark ? const Color(0xdd214d66) : skin.cardColor)
+                      : null),
+        gradient:
+            highContrast ||
+                skin.isSky ||
+                faces != null ||
+                backgroundColor != null
             ? null
             : WindowSurfaceGradient(
                 pixelRatio: MediaQuery.devicePixelRatioOf(context),
@@ -376,7 +440,7 @@ class Surface extends StatelessWidget {
                     ? math.max(borderWidth, 1.5)
                     : borderWidth,
               ),
-        boxShadow: MediaQuery.highContrastOf(context)
+        boxShadow: skin.isSky || MediaQuery.highContrastOf(context)
             ? null
             : const [
                 BoxShadow(
@@ -594,7 +658,7 @@ class ActionButton extends StatelessWidget {
   final VoidCallback? onPressed;
   @override
   Widget build(BuildContext context) {
-    final face = MediaQuery.highContrastOf(context)
+    final face = skinOf(context).isSky || MediaQuery.highContrastOf(context)
         ? null
         : _buttonFaces[onPressed == null
               ? 'disabled'
@@ -634,8 +698,8 @@ class ActionButton extends StatelessWidget {
                 : style == 'danger'
                 ? const Color(0xfffae7df)
                 : style == ''
-                ? accent
-                : const Color(0xffeeebe3),
+                ? skinAccent(context)
+                : skinOf(context).secondaryColor,
             foregroundColor: MediaQuery.highContrastOf(context)
                 ? (style == '' ? Colors.white : Colors.black)
                 : style == 'danger'
@@ -1315,7 +1379,7 @@ class ChoiceTile extends StatelessWidget {
       enabled: onTap != null,
       child: Surface(
         radius: 16,
-        border: selected ? accent : null,
+        border: selected ? skinAccent(context) : null,
         borderWidth: selected ? 1.2 : .6,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
@@ -1361,9 +1425,11 @@ class ChoiceTile extends StatelessWidget {
                         height: 18,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: selected ? accent : null,
+                          color: selected ? skinAccent(context) : null,
                           border: Border.all(
-                            color: selected ? accent : const Color(0xffb3b3ac),
+                            color: selected
+                                ? skinAccent(context)
+                                : const Color(0xffb3b3ac),
                           ),
                         ),
                         child: selected

@@ -1407,4 +1407,8 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get mobileControlsSwingUnknown => '\u6446\u98ce\u72b6\u6001\u672a\u77e5\u3002';
 	@override String get mobileClimatePreviousFanSpeeds => '\u67e5\u770b\u524d\u9762\u7684\u98ce\u901f\u9009\u9879';
 	@override String get mobileClimateMoreFanSpeeds => '\u67e5\u770b\u66f4\u591a\u98ce\u901f\u9009\u9879';
+	@override String get mobileSkyBlue => '\u6674\u7a7a\u84dd';
+	@override String get mobileSkyBlueDescription => '\u84dd\u8272\u6e10\u53d8\u4e0e\u67d4\u767d\u5361\u7247';
+	@override String get mobileWindowLightDescription => '\u6696\u8272\u5e95\u8c03\u4e0e\u9676\u571f\u8272\u63a7\u4ef6';
+	@override String get mobileAppearanceLocalOnly => '\u5916\u89c2\u8bbe\u7f6e\u4ec5\u5f71\u54cd\u672c\u673a\uff0c\u4e0d\u4f1a\u6539\u53d8\u8bbe\u5907\u6743\u9650\u548c\u63a7\u5236\u529f\u80fd\u3002';
 }

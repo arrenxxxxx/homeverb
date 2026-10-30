@@ -158,3 +158,36 @@ expand provider admission, startup grants, background work or device authority.
 See the [current execution record](device-interaction-verification.md) for the
 exact executed checks and limits. The older application verification history is
 unchanged.
+
+
+## Additive skins and provider independence
+
+`HomeVerbSkin` in `apps/mobile/lib/skin.dart` is the Flutter theme extension.
+`skinRegistry` maps stable local IDs to presentation roles. `window_light` remains
+the default; `sky_blue` adds an owner-requested blue gradient, translucent white
+rounded cards, white page headings and blue selection accents. Its distinct green
+power treatment is an observed power role, never an online or execution-success
+claim. It uses original code-rendered decoration, not vendor logos, account names,
+wallpaper copies or fabricated environmental readings.
+
+Appearance is selected in Settings and persisted as `skin_id` in the existing
+schema-1 presentation file. Missing, malformed and unknown IDs fall back to
+Window Light. Changing language or another preference retains the selected skin.
+The save is atomic and must complete before updating the in-memory selection.
+No Core call, account change, grant, descriptor, command or platform mapping is
+needed. High contrast still overrides decorative backgrounds and foregrounds.
+
+Future adapters must consume the same skin roles (`skinAccent`, surface, page,
+secondary-control and power colors), not choose a skin by device brand. Capability
+layouts remain separate from provider adaptation. Keep selection checkmarks,
+unknown values, disabled actions, pending indicators and red failure text; color
+alone never conveys state. Warm artwork is retained only for Window Light;
+Sky Blue surfaces and buttons must not reuse the warm raster artwork.
+
+Visual acceptance uses the actual NativeApp with fictional fixtures, including
+Home, Appearance, AC, refrigerator and dishwasher. A rendered screenshot proves
+layout, not physical-device behavior. Do not export real account headers or
+household identifiers in design artifacts.
+
+The local test and preview scope is recorded in the
+[Sky Blue verification note](blue-theme-verification.md).

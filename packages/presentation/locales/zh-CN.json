@@ -1372,5 +1372,9 @@
   "mobile.controlsSwingUnavailable": "摆风已开启，暂不可选。",
   "mobile.controlsSwingUnknown": "摆风状态未知。",
   "mobile.climatePreviousFanSpeeds": "查看前面的风速选项",
-  "mobile.climateMoreFanSpeeds": "查看更多风速选项"
+  "mobile.climateMoreFanSpeeds": "查看更多风速选项",
+  "mobile.skyBlue": "晴空蓝",
+  "mobile.skyBlueDescription": "蓝色渐变与柔白卡片",
+  "mobile.windowLightDescription": "暖色底调与陶土色控件",
+  "mobile.appearanceLocalOnly": "外观设置仅影响本机，不会改变设备权限和控制功能。"
 }

@@ -1372,5 +1372,9 @@
   "mobile.controlsSwingUnavailable": "Unavailable while swing is on.",
   "mobile.controlsSwingUnknown": "Swing state is unknown.",
   "mobile.climatePreviousFanSpeeds": "Previous fan speeds",
-  "mobile.climateMoreFanSpeeds": "More fan speeds"
+  "mobile.climateMoreFanSpeeds": "More fan speeds",
+  "mobile.skyBlue": "Sky Blue",
+  "mobile.skyBlueDescription": "Blue gradient and soft white cards",
+  "mobile.windowLightDescription": "Warm neutrals and terracotta controls",
+  "mobile.appearanceLocalOnly": "Appearance changes only this installation. Device permissions and controls stay unchanged."
 }

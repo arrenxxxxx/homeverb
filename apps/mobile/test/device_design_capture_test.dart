@@ -22,6 +22,10 @@ import 'refrigerator_modes_test.dart' show ReferenceFridgeFixture;
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   const path = String.fromEnvironment('HOMEVERB_CJK_FONT');
+  const skinId = String.fromEnvironment(
+    'HOMEVERB_CAPTURE_SKIN',
+    defaultValue: 'window_light',
+  );
   setUpAll(() async {
     if (path.isEmpty) return;
     const explicitBoldPath = String.fromEnvironment('HOMEVERB_CJK_BOLD_FONT');
@@ -113,7 +117,9 @@ void main() {
       addTearDown(() => LocaleSettings.setLocale(AppLocale.enUs));
       final catalog = (await tester.runAsync(ScreenCatalog.load))!;
       final app = GlobalKey<NativeAppState>(), boundary = GlobalKey();
-      final preferences = LocalPreferences.memory()..values['locale'] = 'zh-CN';
+      final preferences = LocalPreferences.memory()
+        ..values['locale'] = 'zh-CN'
+        ..values['skin_id'] = skinId;
       ClimateFixture? climate;
       ReferenceFridgeFixture? fridge;
       DishwasherFixture? wash;
@@ -234,6 +240,36 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      Future<void> captureShell(String name) async {
+        await tester.runAsync(() async {
+          final image =
+              await (boundary.currentContext!.findRenderObject()!
+                      as RenderRepaintBoundary)
+                  .toImage(pixelRatio: 2);
+          final data = await image.toByteData(format: ui.ImageByteFormat.png);
+          final directory = Directory(
+            'build/verification/device-design/$skinId',
+          )..createSync(recursive: true);
+          File('${directory.path}/$name.png').writeAsBytesSync(
+            data!.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
+          );
+          image.dispose();
+        });
+      }
+
+      if (scenario == 'ac') {
+        await tester.runAsync(
+          () => precacheImage(
+            const AssetImage('assets/ac.png'),
+            app.currentContext!,
+          ),
+        );
+        await tester.pumpAndSettle();
+        await captureShell('home');
+        await app.currentState!.go('S02');
+        await tester.pumpAndSettle();
+        await captureShell('appearance');
+      }
       await controller.selectDevice(deviceId);
       await app.currentState!.go(scenario == 'fridge-readonly' ? 'C08' : 'C01');
       await tester.pumpAndSettle();
@@ -286,8 +322,9 @@ void main() {
                       as RenderRepaintBoundary)
                   .toImage(pixelRatio: 2);
           final data = await image.toByteData(format: ui.ImageByteFormat.png);
-          final directory = Directory('build/verification/device-design')
-            ..createSync(recursive: true);
+          final directory = Directory(
+            'build/verification/device-design/$skinId',
+          )..createSync(recursive: true);
           File('${directory.path}/$scenario$suffix.png').writeAsBytesSync(
             data!.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
           );
@@ -304,6 +341,37 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(calls.length, before);
       await capture('-full');
+      if (scenario == 'ac') {
+        final root =
+            boundary.currentContext!.findRenderObject()!
+                as RenderRepaintBoundary;
+        Rect region(String title) {
+          final box = tester.renderObject<RenderBox>(
+            find.byKey(ValueKey('climate-row:$title')),
+          );
+          return box.localToGlobal(Offset.zero, ancestor: root) & box.size;
+        }
+
+        final bounds = region(
+          'Mode',
+        ).expandToInclude(region('Fan speed')).inflate(14);
+        // Render the native scene region directly, without editing image pixels.
+        await tester.runAsync(() async {
+          // The test captures a region of the already painted root scene.
+          // ignore: invalid_use_of_protected_member
+          final image = await (root.layer! as OffsetLayer).toImage(
+            bounds,
+            pixelRatio: 2,
+          );
+          final data = await image.toByteData(format: ui.ImageByteFormat.png);
+          File(
+            'build/verification/device-design/$skinId/ac-options-closeup.png',
+          ).writeAsBytesSync(
+            data!.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
+          );
+          image.dispose();
+        });
+      }
       await tester.pumpWidget(const SizedBox());
     }, skip: path.isEmpty);
   }

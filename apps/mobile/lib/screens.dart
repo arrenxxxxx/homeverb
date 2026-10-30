@@ -120,7 +120,7 @@ class ScreenView extends StatelessWidget {
           if (wide &&
               id.startsWith('W') &&
               MediaQuery.textScalerOf(context).scale(13) <= 17)
-            return wideReference(c.maxWidth);
+            return wideReference(c.maxWidth, context);
           final header = ui['header'] as Object;
           final content =
               home ??
@@ -284,6 +284,7 @@ class ScreenView extends StatelessWidget {
                                 : id.startsWith('S') || id.startsWith('H')
                                 ? 'Settings'
                                 : 'Devices'),
+                        context,
                       ),
                     Expanded(
                       child: Column(
@@ -297,6 +298,9 @@ class ScreenView extends StatelessWidget {
                                     'back',
                                     'Back',
                                     () => onAction('Back'),
+                                    color: MediaQuery.highContrastOf(context)
+                                        ? ink
+                                        : skinOf(context).onBackground,
                                   ),
                                 ),
                                 const Spacer(),
@@ -307,12 +311,18 @@ class ScreenView extends StatelessWidget {
                                         context,
                                       ).scale(11) /
                                       11,
-                                  child: const Padding(
-                                    padding: EdgeInsets.only(top: 3),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 3),
                                     child: Copy(
                                       'HomeVerb',
                                       size: 11,
-                                      color: muted,
+                                      color:
+                                          skinOf(context).isSky &&
+                                              !MediaQuery.highContrastOf(
+                                                context,
+                                              )
+                                          ? Colors.white
+                                          : muted,
                                     ),
                                   ),
                                 ),
@@ -340,6 +350,12 @@ class ScreenView extends StatelessWidget {
                                           namesRoute: true,
                                           child: Copy(
                                             header,
+                                            color:
+                                                (MediaQuery.highContrastOf(
+                                                  context,
+                                                )
+                                                ? ink
+                                                : skinOf(context).onBackground),
                                             size: root != null
                                                 ? (id == 'P01' ? 28 : 30)
                                                 : 25,
@@ -357,6 +373,14 @@ class ScreenView extends StatelessWidget {
                                               'search',
                                               'Search',
                                               () => onAction('Search'),
+                                              color:
+                                                  MediaQuery.highContrastOf(
+                                                    context,
+                                                  )
+                                                  ? ink
+                                                  : skinOf(
+                                                      context,
+                                                    ).onBackground,
                                               size: 22,
                                             ),
                                           ),
@@ -370,6 +394,14 @@ class ScreenView extends StatelessWidget {
                                               'plus',
                                               'Add device',
                                               () => onAction('Add device'),
+                                              color:
+                                                  MediaQuery.highContrastOf(
+                                                    context,
+                                                  )
+                                                  ? ink
+                                                  : skinOf(
+                                                      context,
+                                                    ).onBackground,
                                               size: 23,
                                             ),
                                           ),
@@ -477,7 +509,11 @@ class ScreenView extends StatelessWidget {
               if (root != null && !wide) _nav(root, context),
               if (testChrome && !wide)
                 Container(
-                  color: root != null ? const Color(0xfff6f2ea) : null,
+                  color: root != null
+                      ? (skinOf(context).isSky
+                            ? const Color(0xdd285f7f)
+                            : const Color(0xfff6f2ea))
+                      : null,
                   height: 20,
                   alignment: Alignment.center,
                   child: Container(
@@ -498,12 +534,17 @@ class ScreenView extends StatelessWidget {
     );
   }
 
-  Widget wideReference(double width) {
+  Widget wideReference(double width, BuildContext context) {
     final detail = id == 'W02';
     final panelWidth = width - 474;
     return Stack(
       children: [
-        Positioned(left: 0, top: 0, bottom: 0, child: _rail('Devices')),
+        Positioned(
+          left: 0,
+          top: 0,
+          bottom: 0,
+          child: _rail('Devices', context),
+        ),
         Positioned(
           left: 118,
           top: 37,
@@ -636,14 +677,18 @@ class ScreenView extends StatelessWidget {
   }
 
   Widget _nav(String root, BuildContext context) => Container(
-    color: const Color(0xfff6f2ea),
+    color: skinOf(context).isSky
+        ? const Color(0xdd285f7f)
+        : const Color(0xfff6f2ea),
     constraints: const BoxConstraints(minHeight: 58),
     height: MediaQuery.textScalerOf(context).scale(11) > 11 ? null : 58,
     child: Row(
       children: List.generate(3, (i) {
         const labels = ['Devices', 'Platforms', 'Settings'],
             icons = ['home', 'platform', 'settings'];
-        final color = root == labels[i] ? accent : muted;
+        final color = skinOf(context).isSky
+            ? (root == labels[i] ? Colors.white : const Color(0xffc1deed))
+            : (root == labels[i] ? skinAccent(context) : muted);
         return Expanded(
           child: Semantics(
             selected: root == labels[i],
@@ -698,14 +743,14 @@ class ScreenView extends StatelessWidget {
       }),
     ),
   );
-  Widget _rail(String root) => Container(
+  Widget _rail(String root, BuildContext context) => Container(
     width: 88,
     color: const Color(0xfff4f0e8),
     child: SingleChildScrollView(
       child: Column(
         children: [
           const SizedBox(height: 26),
-          const Glyph('home', size: 28, color: accent),
+          Glyph('home', size: 28, color: skinAccent(context)),
           const SizedBox(height: 64),
           for (final entry in const {
             'Devices': 'home',
@@ -734,13 +779,17 @@ class ScreenView extends StatelessWidget {
                         Glyph(
                           entry.value,
                           size: 22,
-                          color: root == entry.key ? accent : muted,
+                          color: root == entry.key
+                              ? skinAccent(context)
+                              : muted,
                         ),
                         const SizedBox(height: 10),
                         Copy(
                           entry.key,
                           size: 10,
-                          color: root == entry.key ? accent : muted,
+                          color: root == entry.key
+                              ? skinAccent(context)
+                              : muted,
                         ),
                       ],
                     ),
@@ -769,6 +818,13 @@ class DeviceHome extends StatelessWidget {
   final List<Object>? roomNames;
   @override
   Widget build(BuildContext context) {
+    final foreground = MediaQuery.highContrastOf(context)
+        ? ink
+        : skinOf(context).onBackground;
+    final secondary =
+        skinOf(context).isSky && !MediaQuery.highContrastOf(context)
+        ? const Color(0xffe3f1fa)
+        : muted;
     if (MediaQuery.textScalerOf(context).scale(13) <= 13) {
       final labels =
           roomNames ?? const ['All', 'Living Room', 'Bedroom', 'Bathroom'];
@@ -780,12 +836,21 @@ class DeviceHome extends StatelessWidget {
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                const Positioned(
+                Positioned(
                   left: 0,
                   top: 0,
-                  child: Copy('My home', size: 16, bold: true),
+                  child: Copy(
+                    'My home',
+                    size: 16,
+                    bold: true,
+                    color: foreground,
+                  ),
                 ),
-                const Positioned(left: 81, top: 0, child: Copy('⌄', size: 16)),
+                Positioned(
+                  left: 81,
+                  top: 0,
+                  child: Copy('⌄', size: 16, color: foreground),
+                ),
                 Positioned(
                   right: -12,
                   top: -15,
@@ -794,7 +859,7 @@ class DeviceHome extends StatelessWidget {
                   child: IconButton(
                     tooltip: localize(context, 'Manage rooms'),
                     onPressed: () => onAction('Manage rooms'),
-                    icon: const Glyph('settings', size: 20, color: muted),
+                    icon: Glyph('settings', size: 20, color: secondary),
                   ),
                 ),
               ],
@@ -836,8 +901,8 @@ class DeviceHome extends StatelessWidget {
                                           (mode == 'living'
                                               ? 'Living Room'
                                               : filter)
-                                      ? ink
-                                      : muted,
+                                      ? foreground
+                                      : secondary,
                                 ),
                               ),
                             ),
@@ -847,7 +912,9 @@ class DeviceHome extends StatelessWidget {
                                 width: labels[i].toString() == 'All' ? 17 : 58,
                                 height: 3,
                                 decoration: BoxDecoration(
-                                  color: accent,
+                                  color: skinOf(context).isSky
+                                      ? foreground
+                                      : skinAccent(context),
                                   borderRadius: BorderRadius.circular(2),
                                 ),
                               ),
@@ -874,7 +941,7 @@ class DeviceHome extends StatelessWidget {
                         ? '2 devices'
                         : '4 devices',
                     size: 11,
-                    color: muted,
+                    color: secondary,
                   ),
                 ),
                 if (cards == null)
@@ -888,7 +955,7 @@ class DeviceHome extends StatelessWidget {
                             ? 'Cached · 2h ago'
                             : 'Updated just now',
                         size: 11,
-                        color: muted,
+                        color: secondary,
                       ),
                     ),
                   ),
@@ -900,7 +967,7 @@ class DeviceHome extends StatelessWidget {
                   child: IconButton(
                     tooltip: localize(context, 'Refresh State'),
                     onPressed: () => onAction('Refresh State'),
-                    icon: const Glyph('refresh', size: 16, color: muted),
+                    icon: Glyph('refresh', size: 16, color: secondary),
                   ),
                 ),
               ],
@@ -919,7 +986,7 @@ class DeviceHome extends StatelessWidget {
               ),
           if (cards == null && mode == 'large') ...[
             const SizedBox(height: 20),
-            const Copy('2 more devices below', size: 14, color: muted),
+            Copy('2 more devices below', size: 14, color: secondary),
           ],
         ],
       );
@@ -929,9 +996,11 @@ class DeviceHome extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Copy('My home', size: 16, bold: true),
+            Flexible(
+              child: Copy('My home', size: 16, bold: true, color: foreground),
+            ),
             const SizedBox(width: 8),
-            const Icon(Icons.keyboard_arrow_down, size: 16),
+            Icon(Icons.keyboard_arrow_down, size: 16, color: foreground),
             const Spacer(),
             SizedBox(
               height: 32,
@@ -939,7 +1008,7 @@ class DeviceHome extends StatelessWidget {
                 'settings',
                 'Manage rooms',
                 () => onAction('Manage rooms'),
-                color: muted,
+                color: secondary,
               ),
             ),
           ],
@@ -966,8 +1035,8 @@ class DeviceHome extends StatelessWidget {
                           color:
                               label.toString() ==
                                   (mode == 'living' ? 'Living Room' : filter)
-                              ? ink
-                              : muted,
+                              ? foreground
+                              : secondary,
                           bold:
                               label.toString() ==
                               (mode == 'living' ? 'Living Room' : filter),
@@ -979,7 +1048,9 @@ class DeviceHome extends StatelessWidget {
                             height: 3,
                             width: label.toString().length < 4 ? 18 : 58,
                             decoration: BoxDecoration(
-                              color: accent,
+                              color: skinOf(context).isSky
+                                  ? foreground
+                                  : skinAccent(context),
                               borderRadius: BorderRadius.circular(2),
                             ),
                           ),
@@ -999,7 +1070,7 @@ class DeviceHome extends StatelessWidget {
                   ? '2 devices'
                   : '4 devices',
               size: 11,
-              color: muted,
+              color: secondary,
             ),
             const Spacer(),
             if (cards == null)
@@ -1009,7 +1080,7 @@ class DeviceHome extends StatelessWidget {
                   child: Copy(
                     mode == 'cached' ? 'Cached · 2h ago' : 'Updated just now',
                     size: 11,
-                    color: muted,
+                    color: secondary,
                   ),
                 ),
               ),
@@ -1020,7 +1091,7 @@ class DeviceHome extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 tooltip: localize(context, 'Refresh State'),
                 onPressed: () => onAction('Refresh State'),
-                icon: const Glyph('refresh', size: 16, color: muted),
+                icon: Glyph('refresh', size: 16, color: secondary),
               ),
             ),
           ],
@@ -1039,7 +1110,7 @@ class DeviceHome extends StatelessWidget {
             ),
         if (cards == null && mode == 'large') ...[
           const SizedBox(height: 20),
-          const Copy('2 more devices below', size: 14, color: muted),
+          Copy('2 more devices below', size: 14, color: secondary),
         ],
       ],
     );

@@ -30,65 +30,80 @@ class DevicePage extends StatelessWidget {
     child: FocusScope(
       autofocus: true,
       child: Material(
-        color: const Color(0xfff8f6f0),
-        child: SafeArea(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: Row(
-                  children: [
-                    IconButton(
-                      tooltip: localize(context, 'Back'),
-                      onPressed: () => onAction('Back'),
-                      icon: const Icon(Icons.chevron_left, size: 28),
-                    ),
-                    Expanded(
-                      child: Semantics(
-                        header: true,
-                        namesRoute: true,
-                        child: Copy(
-                          title,
-                          size: DeviceTypography.title,
-                          lineHeight: DeviceTypography.lineHeight,
-                          bold: true,
-                          center: true,
+        color: Colors.transparent,
+        child: LightBackground(
+          device: true,
+          child: SafeArea(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        tooltip: localize(context, 'Back'),
+                        onPressed: () => onAction('Back'),
+                        icon: Icon(
+                          Icons.chevron_left,
+                          size: 28,
+                          color: (MediaQuery.highContrastOf(context)
+                              ? ink
+                              : skinOf(context).onBackground),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 48),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (busy)
-                        const Padding(
-                          padding: EdgeInsets.only(bottom: 10),
-                          child: OperationProgress(),
+                      Expanded(
+                        child: Semantics(
+                          header: true,
+                          namesRoute: true,
+                          child: Copy(
+                            title,
+                            color: (MediaQuery.highContrastOf(context)
+                                ? ink
+                                : skinOf(context).onBackground),
+                            size: DeviceTypography.title,
+                            lineHeight: DeviceTypography.lineHeight,
+                            bold: true,
+                            center: true,
+                          ),
                         ),
-                      if (error != null) ...[
-                        Copy('Could not complete this operation', bold: true),
-                        Copy(
-                          localizedError(context, error!),
-                          color: const Color(0xff9e3421),
-                        ),
-                        TextButton(
-                          onPressed: () => onAction('Dismiss error'),
-                          child: const Copy('Dismiss error'),
-                        ),
-                        const SizedBox(height: 10),
-                      ],
-                      child,
+                      ),
+                      const SizedBox(width: 48),
                     ],
                   ),
                 ),
-              ),
-            ],
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (busy)
+                          const Padding(
+                            padding: EdgeInsets.only(bottom: 10),
+                            child: OperationProgress(),
+                          ),
+                        if (error != null) ...[
+                          Copy('Could not complete this operation', bold: true),
+                          Copy(
+                            localizedError(context, error!),
+                            color: const Color(0xff9e3421),
+                          ),
+                          TextButton(
+                            onPressed: () => onAction('Dismiss error'),
+                            child: const Copy('Dismiss error'),
+                          ),
+                          const SizedBox(height: 10),
+                        ],
+                        child,
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

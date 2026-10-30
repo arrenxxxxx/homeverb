@@ -186,8 +186,8 @@ class CompartmentControls extends StatelessWidget {
         ),
       OutlinedButton(
         style: OutlinedButton.styleFrom(
-          foregroundColor: accent,
-          side: const BorderSide(color: accent),
+          foregroundColor: skinAccent(context),
+          side: BorderSide(color: skinAccent(context)),
           minimumSize: const Size(double.infinity, 44),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -196,12 +196,12 @@ class CompartmentControls extends StatelessWidget {
         onPressed: controller.busy || !controller.isForeground
             ? null
             : () => onAction('Refresh State'),
-        child: const Copy(
+        child: Copy(
           'Refresh State',
           size: DeviceTypography.body,
           lineHeight: DeviceTypography.lineHeight,
           bold: true,
-          color: accent,
+          color: skinAccent(context),
         ),
       ),
       for (final label in ['Device information', 'Recent Operations'])
@@ -485,7 +485,7 @@ class CompartmentControls extends StatelessWidget {
                   children: [
                     Icon(
                       id == 'freezer' ? Icons.ac_unit : Icons.kitchen_outlined,
-                      color: accent,
+                      color: skinAccent(context),
                     ),
                     const SizedBox(width: 10),
                     Expanded(child: Copy(label, bold: true, size: 18)),

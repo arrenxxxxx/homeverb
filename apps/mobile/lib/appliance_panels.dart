@@ -56,11 +56,16 @@ class ApplianceReading extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: active ? accent : muted, size: 24),
+        Icon(icon, color: active ? skinAccent(context) : muted, size: 24),
         const SizedBox(height: 12),
         Copy(label, size: 13, color: muted),
         const SizedBox(height: 6),
-        Copy(value, size: 18, bold: true, color: active ? accent : ink),
+        Copy(
+          value,
+          size: 18,
+          bold: true,
+          color: active ? skinAccent(context) : ink,
+        ),
         if (stale) ...[
           const SizedBox(height: 6),
           const Copy('Stale', size: 12, color: muted),
@@ -191,7 +196,9 @@ class RefrigeratorModes extends StatelessWidget {
                   propertyId: property,
                 ),
                 key: ValueKey('refrigerator-reading:$property'),
-                valueColor: readings[property]['value'] == true ? accent : null,
+                valueColor: readings[property]['value'] == true
+                    ? skinAccent(context)
+                    : null,
                 progress:
                     property == '$_details.e_cleaning_percentage' &&
                         readings[property]['value'] is num &&
@@ -486,7 +493,9 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
     Widget card(List<Widget> children, {bool subdued = false}) => Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Material(
-        color: subdued ? const Color(0xffefefec) : Colors.white,
+        color: subdued
+            ? skinOf(context).secondaryColor
+            : skinOf(context).cardColor,
         borderRadius: BorderRadius.circular(20),
         clipBehavior: Clip.antiAlias,
         child: Padding(
@@ -516,9 +525,9 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
         ),
         value: value,
         enabled: allowed('start_cycle') && idle,
-        activeColor: accent,
+        activeColor: skinAccent(context),
         selected: selected == value,
-        selectedTileColor: accent.withValues(alpha: 0.08),
+        selectedTileColor: skinAccent(context).withValues(alpha: 0.08),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         contentPadding: EdgeInsets.zero,
         dense: true,
@@ -532,7 +541,7 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
                 ),
           size: DeviceTypography.option,
           lineHeight: DeviceTypography.lineHeight,
-          color: selected == value ? accent : ink,
+          color: selected == value ? skinAccent(context) : ink,
           bold: selected == value,
         ),
       );
@@ -574,7 +583,7 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
                                 additionalSchema!,
                                 propertyId: '$id.additional',
                               ),
-                        color: accent,
+                        color: skinAccent(context),
                         size: DeviceTypography.secondary,
                       )
                     : null,
@@ -654,10 +663,14 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Row(
               children: [
-                const Expanded(
+                Expanded(
                   child: Copy(
                     'Reported cycle state',
-                    color: muted,
+                    color:
+                        skinOf(context).isSky &&
+                            !MediaQuery.highContrastOf(context)
+                        ? Colors.white
+                        : muted,
                     size: DeviceTypography.body,
                     lineHeight: DeviceTypography.lineHeight,
                   ),
@@ -666,6 +679,11 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
                 Flexible(
                   child: Copy(
                     known ? display('work_status') : 'Unknown',
+                    color:
+                        skinOf(context).isSky &&
+                            !MediaQuery.highContrastOf(context)
+                        ? Colors.white
+                        : ink,
                     size: DeviceTypography.body,
                     lineHeight: DeviceTypography.lineHeight,
                     bold: true,
@@ -677,12 +695,15 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
         if ((c.snapshot?['observations'] as Json? ?? {}).values
             .whereType<Map>()
             .any((o) => o['stale'] == true))
-          const Padding(
-            padding: EdgeInsets.only(top: 12),
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
             child: Copy(
               'Readings may be out of date; the measurement time is unverified.',
               size: DeviceTypography.secondary,
-              color: muted,
+              color:
+                  skinOf(context).isSky && !MediaQuery.highContrastOf(context)
+                  ? Colors.white
+                  : muted,
             ),
           ),
         if (running || paused)
@@ -880,7 +901,7 @@ class _CycleActionButton extends ActionButton {
   @override
   Widget build(BuildContext context) {
     final highContrast = MediaQuery.highContrastOf(context);
-    final color = highContrast ? Colors.black : accent;
+    final color = highContrast ? Colors.black : skinAccent(context);
     final shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(14),
     );

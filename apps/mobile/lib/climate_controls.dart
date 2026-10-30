@@ -272,12 +272,14 @@ class _ClimateControlsState extends State<ClimateControls>
     );
     Widget chip(Object option) => ChoiceChip(
       key: ValueKey('climate-option:' + choice.parameter + ':' + '$option'),
-      label: SizedBox(
-        width: double.infinity,
-        child: Text(optionLabel(option), textAlign: TextAlign.center),
+      label: DeviceOptionLabel(
+        text: optionLabel(option),
+        selected: observed == option,
       ),
       selected: observed == option,
-      selectedColor: MediaQuery.highContrastOf(context) ? Colors.black : accent,
+      selectedColor: MediaQuery.highContrastOf(context)
+          ? Colors.black
+          : skinAccent(context),
       labelStyle: TextStyle(
         color: observed == option ? Colors.white : ink,
         fontSize: DeviceTypography.body,
@@ -288,11 +290,13 @@ class _ClimateControlsState extends State<ClimateControls>
       side: MediaQuery.highContrastOf(context)
           ? const BorderSide(color: Colors.black)
           : BorderSide.none,
-      backgroundColor: const Color(0xffe9e7e0),
+      backgroundColor: skinOf(context).isSky
+          ? skinOf(context).secondaryColor
+          : const Color(0xffe9e7e0),
       chipAnimationStyle: ChipAnimationStyle(
         avatarDrawerAnimation: AnimationStyle.noAnimation,
       ),
-      showCheckmark: true,
+      showCheckmark: false,
       checkmarkColor: Colors.white,
       materialTapTargetSize: MaterialTapTargetSize.padded,
       onSelected: interactive
@@ -312,7 +316,7 @@ class _ClimateControlsState extends State<ClimateControls>
 
   Widget card(Widget child, {EdgeInsets padding = const EdgeInsets.all(12)}) =>
       Material(
-        color: Colors.white,
+        color: skinOf(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         child: Container(
           padding: padding,
@@ -321,6 +325,8 @@ class _ClimateControlsState extends State<ClimateControls>
             border: Border.all(
               color: MediaQuery.highContrastOf(context)
                   ? Colors.black
+                  : skinOf(context).isSky
+                  ? const Color(0xffd6e8f3)
                   : const Color(0xffefede8),
             ),
           ),
@@ -462,7 +468,9 @@ class _ClimateControlsState extends State<ClimateControls>
       key: const ValueKey('climate-decrease'),
       tooltip: localize(context, 'Decrease target'),
       style: IconButton.styleFrom(
-        backgroundColor: const Color(0xffedeae4),
+        backgroundColor: skinOf(context).isSky
+            ? skinOf(context).secondaryColor
+            : const Color(0xffedeae4),
         foregroundColor: white,
         minimumSize: const Size(56, 56),
       ),

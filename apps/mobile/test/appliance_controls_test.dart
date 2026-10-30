@@ -323,7 +323,7 @@ void main() {
                 closeTo(presets.first.width, 0.1),
               );
               expect(tester.getSize(face).height, greaterThanOrEqualTo(44));
-              expect(tester.widget<ChoiceChip>(chip).showCheckmark, isTrue);
+              expect(tester.widget<ChoiceChip>(chip).showCheckmark, isFalse);
               expect(tester.widget<ChoiceChip>(chip).labelStyle!.fontSize, 16);
             }
             expect(presets[1].top, presets[0].top);

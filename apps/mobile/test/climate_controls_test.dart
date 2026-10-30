@@ -153,7 +153,14 @@ void main() {
       find.byKey(const ValueKey('climate-option:mode:cool')),
     );
     expect(mode.selected, true);
-    expect(mode.showCheckmark, true);
+    expect(mode.showCheckmark, false);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('climate-option:mode:cool')),
+        matching: find.byIcon(Icons.check),
+      ),
+      findsOneWidget,
+    );
     expect(mode.labelStyle!.fontSize, DeviceTypography.body);
     expect(mode.labelStyle!.height, DeviceTypography.lineHeight);
     core.calls.clear();

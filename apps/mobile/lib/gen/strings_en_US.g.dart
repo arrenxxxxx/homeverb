@@ -4157,4 +4157,16 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'More fan speeds'
 	String get mobileClimateMoreFanSpeeds => 'More fan speeds';
+
+	/// en-US: 'Sky Blue'
+	String get mobileSkyBlue => 'Sky Blue';
+
+	/// en-US: 'Blue gradient and soft white cards'
+	String get mobileSkyBlueDescription => 'Blue gradient and soft white cards';
+
+	/// en-US: 'Warm neutrals and terracotta controls'
+	String get mobileWindowLightDescription => 'Warm neutrals and terracotta controls';
+
+	/// en-US: 'Appearance changes only this installation. Device permissions and controls stay unchanged.'
+	String get mobileAppearanceLocalOnly => 'Appearance changes only this installation. Device permissions and controls stay unchanged.';
 }

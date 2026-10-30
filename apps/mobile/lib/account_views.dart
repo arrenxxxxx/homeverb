@@ -71,7 +71,7 @@ class PlatformAccounts extends StatelessWidget {
                 ),
                 child: Icon(
                   Icons.person_outline_rounded,
-                  color: highContrast ? Colors.black : accent,
+                  color: highContrast ? Colors.black : skinAccent(context),
                   size: 28,
                 ),
               ),
@@ -94,7 +94,9 @@ class PlatformAccounts extends StatelessWidget {
                       Copy(
                         credentialLabel(account['credential_state']),
                         size: 12,
-                        color: highContrast ? Colors.black : accent,
+                        color: highContrast
+                            ? Colors.black
+                            : skinAccent(context),
                       ),
                     ],
                   ],

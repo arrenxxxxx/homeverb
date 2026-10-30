@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:homeverb_mobile/localization.dart';
+import 'package:homeverb_mobile/gen/source_messages.g.dart'
+    show translateSource;
 import 'package:homeverb_mobile/main.dart';
 import 'package:homeverb_mobile/controller.dart';
 import 'package:homeverb_mobile/preferences.dart';
@@ -18,6 +20,33 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() => LocaleSettings.setLocale(AppLocale.enUs));
   tearDown(() => LocaleSettings.setLocale(AppLocale.enUs));
+
+  test('appearance source tokens resolve in both supported languages', () {
+    const sources = {
+      'mobile.appearance': 'Appearance',
+      'mobile.windowLight': 'Window Light',
+      'mobile.skyBlue': 'Sky Blue',
+      'mobile.skyBlueDescription': 'Blue gradient and soft white cards',
+      'mobile.windowLightDescription': 'Warm neutrals and terracotta controls',
+      'mobile.appearanceLocalOnly':
+          'Appearance changes only this installation. Device permissions and controls stay unchanged.',
+    };
+    for (final entry in sources.entries) {
+      expect(sourceForKey(entry.key), entry.value);
+      expect(
+        translateSource(AppLocale.enUs.translations, entry.value, const {}),
+        entry.value,
+      );
+      final chinese = translateSource(
+        AppLocale.zhCn.translations,
+        entry.value,
+        const {},
+      );
+      expect(chinese, isNotNull);
+      expect(chinese, isNot(isEmpty));
+      expect(chinese, isNot(entry.value));
+    }
+  });
 
   test(
     'language preference persists and missing preferences follow the system',

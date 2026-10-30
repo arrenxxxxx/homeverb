@@ -8,7 +8,10 @@ class LocalPreferences {
   LocalPreferences.memory() : file = null;
   final File? file;
   Json values = {};
-  String get skin => 'window_light';
+  static const supportedSkins = {'window_light', 'sky_blue'};
+  String get skin => supportedSkins.contains(values['skin_id'])
+      ? values['skin_id'] as String
+      : 'window_light';
   String? get locale => canonicalLocale(values['locale']);
   String get sharingName => values['sharing_name'] as String? ?? 'Home phone';
   String get root => values['root'] as String? ?? 'D01';
@@ -83,7 +86,9 @@ class LocalPreferences {
   }
 
   Future<void> save(Json changes) async {
-    final next = {...values, ...changes, 'schema_version': 1, 'skin_id': skin};
+    final next = {...values, ...changes, 'schema_version': 1};
+    if (!supportedSkins.contains(next['skin_id']))
+      next['skin_id'] = 'window_light';
     final file = this.file;
     if (file != null) {
       await file.parent.create(recursive: true);

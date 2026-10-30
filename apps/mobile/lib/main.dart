@@ -1024,6 +1024,11 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         device = card?['device'] as Json?,
         prefs = card?['preferences'] as Json?;
     switch (id) {
+      case 'S02':
+        ui.remove('root');
+        ui['header'] = 'Appearance';
+        b = [];
+        break;
       case 'L01':
         ui.remove('root');
         ui['header'] = 'Language';
@@ -1609,6 +1614,29 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         break;
     }
     if (b != null) ui['blocks'] = b;
+    if (id == 'S01') {
+      // Copy only presentation rows; never mutate the shared screen catalog.
+      ui['blocks'] = [
+        for (final block in ui['blocks'] as List)
+          if (block[0] == 'rows')
+            [
+              'rows',
+              [
+                for (final row in block[1] as List)
+                  if (row[0] == 'Appearance')
+                    [
+                      'Appearance',
+                      skinLabels[c.preferences.skin]!,
+                      'Appearance',
+                    ]
+                  else
+                    row,
+              ],
+            ]
+          else
+            block,
+      ];
+    }
     if (formError != null && id == this.id)
       ui['blocks'] = [
         ['status', 'Check this value', formError, 'error'],
@@ -1671,6 +1699,56 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
 
   Widget? specialFor(String id) {
     if (id == 'P01') return PlatformAccounts(controller: c, onAction: action);
+    if (id == 'S02') {
+      return Builder(
+        builder: (context) => RadioGroup<String>(
+          groupValue: c.preferences.skin,
+          onChanged: (value) async {
+            if (!c.busy &&
+                value != null &&
+                await c.savePreferences({'skin_id': value}))
+              changed();
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (final entry in skinRegistry.entries)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Surface(
+                    padding: const EdgeInsets.all(6),
+                    child: Material(
+                      type: MaterialType.transparency,
+                      child: RadioListTile<String>(
+                        key: ValueKey('skin:${entry.key}'),
+                        title: Copy(
+                          skinLabels[entry.key]!,
+                          size: 17,
+                          bold: true,
+                        ),
+                        subtitle: Copy(
+                          entry.value.isSky
+                              ? 'Blue gradient and soft white cards'
+                              : 'Warm neutrals and terracotta controls',
+                        ),
+                        value: entry.key,
+                        enabled: !c.busy,
+                      ),
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 4),
+              Copy(
+                'Appearance changes only this installation. Device permissions and controls stay unchanged.',
+                color: MediaQuery.highContrastOf(context)
+                    ? ink
+                    : skinOf(context).onBackground,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     if (id == 'L01') {
       final t = translationsOf(context);
       return Column(
@@ -1688,7 +1766,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
               ),
               subtitle: locale == null ? null : Text(locale),
               trailing: c.preferences.locale == locale
-                  ? const Icon(Icons.check, color: accent)
+                  ? Icon(Icons.check, color: skinAccent(context))
                   : null,
               onTap: c.busy
                   ? null
@@ -2286,8 +2364,11 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       supportedLocales: AppLocaleUtils.supportedLocales,
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       debugShowCheckedModeBanner: false,
-      theme: windowTheme(),
-      highContrastTheme: windowTheme(highContrast: true),
+      theme: windowTheme(skinId: c.preferences.skin),
+      highContrastTheme: windowTheme(
+        highContrast: true,
+        skinId: c.preferences.skin,
+      ),
       home: PopScope(
         canPop: false,
         onPopInvokedWithResult: (popped, _) {

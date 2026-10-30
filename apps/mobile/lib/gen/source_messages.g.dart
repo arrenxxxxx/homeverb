@@ -1829,6 +1829,11 @@ String? translateSource(
   "Swing state is unknown." => t.mobileControlsSwingUnknown,
   "Previous fan speeds" => t.mobileClimatePreviousFanSpeeds,
   "More fan speeds" => t.mobileClimateMoreFanSpeeds,
+  "Sky Blue" => t.mobileSkyBlue,
+  "Blue gradient and soft white cards" => t.mobileSkyBlueDescription,
+  "Warm neutrals and terracotta controls" => t.mobileWindowLightDescription,
+  "Appearance changes only this installation. Device permissions and controls stay unchanged." =>
+    t.mobileAppearanceLocalOnly,
   _ => null,
 };
 
@@ -3600,5 +3605,10 @@ String? sourceForKey(String key) => switch (key) {
   "mobile.controlsSwingUnknown" => "Swing state is unknown.",
   "mobile.climatePreviousFanSpeeds" => "Previous fan speeds",
   "mobile.climateMoreFanSpeeds" => "More fan speeds",
+  "mobile.skyBlue" => "Sky Blue",
+  "mobile.skyBlueDescription" => "Blue gradient and soft white cards",
+  "mobile.windowLightDescription" => "Warm neutrals and terracotta controls",
+  "mobile.appearanceLocalOnly" =>
+    "Appearance changes only this installation. Device permissions and controls stay unchanged.",
   _ => null,
 };
