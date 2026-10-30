@@ -647,3 +647,14 @@ reference headers, cookie isolation, no redirects/retries, strict content encodi
 body limits, untrusted certificates and cancellation/deadline/drop socket release.
 These tests use fictional data; they do not prove fresh QR credentials work with
 the reference origin or that logical entries are distinct physical appliances.
+
+
+The modern account fixtures in `crates/mijia/src/adapter/tests/modern_accounts.rs`
+use real temporary SQLite and fictional secret/auth/read peers. They cover
+version-1 byte round trips, version-2 profile/client/subject tamper refusal,
+modern-only reopen/read/renewal, adoption in both protocol directions, preserved
+legacy bindings and labels, leading-zero ambiguity, unavailable storage, QR
+owner/snapshot checks before and after exchange, original/continuation
+cancellation, original expiry, removed accounts, uncertain login/renewal saves,
+failed/changed-byte recovery, entry subject isolation and lease release on
+cancellation/drop. No test scans a real QR code or calls a vendor endpoint.

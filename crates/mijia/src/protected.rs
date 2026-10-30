@@ -121,8 +121,10 @@ pub(crate) struct Payload {
     credential_ref: CredentialRef,
     provider: String,
     region: String,
-    pub session: StoredSession,
+    pub session: Option<StoredSession>,
     pub bindings: Vec<Binding>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    modern: Option<crate::modern::StoredModernSession>,
 }
 impl Payload {
     pub fn new(record: &AccountRecord, session: MijiaSession) -> Self {
@@ -132,9 +134,49 @@ impl Payload {
             credential_ref: record.credential_ref,
             provider: PROVIDER.into(),
             region: "CN".into(),
-            session: StoredSession::from_session(session),
+            session: Some(StoredSession::from_session(session)),
             bindings: vec![],
+            modern: None,
         }
+    }
+    pub fn new_modern(record: &AccountRecord, session: crate::ModernMijiaSession) -> Self {
+        Self {
+            version: 2,
+            account_id: record.id,
+            credential_ref: record.credential_ref,
+            provider: PROVIDER.into(),
+            region: "CN".into(),
+            session: None,
+            bindings: vec![],
+            modern: Some(crate::modern::StoredModernSession::from_session(session)),
+        }
+    }
+    pub fn subject(&self) -> &str {
+        self.session
+            .as_ref()
+            .map(StoredSession::subject)
+            .or_else(|| {
+                self.modern
+                    .as_ref()
+                    .map(crate::modern::StoredModernSession::subject)
+            })
+            .unwrap_or("")
+    }
+    pub fn legacy_session(&self) -> Result<MijiaSession> {
+        self.session
+            .as_ref()
+            .ok_or_else(protocol_unavailable)?
+            .session()
+    }
+    pub fn modern_session(&self) -> Result<crate::ModernMijiaSession> {
+        self.modern
+            .as_ref()
+            .ok_or_else(protocol_unavailable)?
+            .session()
+    }
+    pub fn set_modern_session(&mut self, session: crate::ModernMijiaSession) {
+        self.version = 2;
+        self.modern = Some(crate::modern::StoredModernSession::from_session(session));
     }
     pub fn decode(bytes: &SecretBytes, record: &AccountRecord) -> Result<Self> {
         if bytes.expose().len() > crate::MAX_RESPONSE_BYTES {
@@ -153,7 +195,7 @@ impl Payload {
         Ok(bytes)
     }
     fn validate(&self, record: &AccountRecord) -> Result<()> {
-        if self.version != 1
+        if !matches!(self.version, 1 | 2)
             || self.account_id != record.id
             || self.credential_ref != record.credential_ref
             || self.provider != PROVIDER
@@ -164,7 +206,23 @@ impl Payload {
         {
             return Err(unconfirmed());
         }
-        self.session.session()?;
+        match (self.version, &self.session, &self.modern) {
+            (1, Some(legacy), None) => {
+                legacy.session()?;
+            }
+            (2, legacy, Some(modern)) => {
+                modern.session()?;
+                if let Some(legacy) = legacy {
+                    legacy.session()?;
+                    if legacy.subject() != modern.subject() {
+                        return Err(unconfirmed());
+                    }
+                } else if !self.bindings.is_empty() {
+                    return Err(unconfirmed());
+                }
+            }
+            _ => return Err(unconfirmed()),
+        }
         let mut provider_ids = HashSet::new();
         let mut local_ids = HashSet::new();
         for binding in &self.bindings {
@@ -245,4 +303,11 @@ impl LoadedAccount {
         }
         Ok(())
     }
+}
+
+fn protocol_unavailable() -> Error {
+    Error::new(
+        "CAPABILITY_UNSUPPORTED",
+        "The selected account has no admitted session for this protocol.",
+    )
 }

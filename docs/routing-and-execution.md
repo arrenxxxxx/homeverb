@@ -699,3 +699,14 @@ ordinary page failure may return positive partial membership, never deletion
 permission. Reads do not refresh credentials, fall back to community/legacy
 origins, retry properties or alter execution receipts. Modern controls and native
 account/Host/App integration remain pending.
+
+
+ADR-0095 persists the modern session in a separate tagged protected account slot.
+Legacy device routes continue to require the legacy slot; neither directory
+entries nor successful renewal selects another route or changes write authority.
+Modern entries bind to their local account/credential reference and protected
+provider identity. They remain logical entries until independent reconciliation.
+QR continuation retains the original lifetime through persistence and refuses
+changed account snapshots. Renewal performs authentication only. Explicit recovery
+validates the exact pending bytes through a bounded modern directory read before
+confirming them; it never renews, rewrites unchanged secrets or replays commands.

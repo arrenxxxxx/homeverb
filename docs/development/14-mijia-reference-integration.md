@@ -1309,3 +1309,43 @@ These are target checks, not framework/APK packaging, signed-device execution or
 physical acceptance. Rust 1.96.0 supplied the host regression and strict Clippy
 checks above. No toolchain, SDK or dependency installation was needed; new locked
 compression dependencies were already cached locally.
+
+
+## Protected modern account sessions -- October 30, 2026
+
+[ADR-0095](../adr/0095-mijia-protected-modern-account-sessions.md) adds explicit
+Rust adapter composition for modern QR connection, saved directory/property
+reads, renewal and uncertain-save recovery. A version-2 secret-store payload
+retains independent legacy and modern slots for one exact numeric subject.
+Either login can adopt the matching local account without replacing its other
+slot, legacy bindings or label. Ambiguous identities fail closed. Modern logical
+entries are account-bound and do not publish physical Device cards.
+
+Legacy-only version-1 bytes stay unchanged. Version 2 requires the modern slot
+and a fixed reference profile; older implementations cannot read it and must not
+downgrade it. Native API 1.35, C/JSON methods, SQLite 5 and Meiju payload 3 stay
+unchanged. Existing legacy routes require their own slot and never fall back to
+modern credentials. Default adapter composition does not enable modern requests.
+
+QR completion checks its protected account snapshot before and after provider
+exchange; cancellation and the original deadline cover persistence. Explicit
+renewal preserves legacy evidence and does not enumerate. Uncertain saves remain
+pending until explicit modern-directory validation confirms the exact saved bytes,
+without another login, renewal or credential rewrite. No background task is added.
+
+Host lifecycle/registry, C/App QR integration, physical/logical reconciliation,
+modern controls and authenticated provider/device acceptance remain pending.
+The delivered `9870437` APK contains the earlier auxiliary-setting phase only.
+No real account, appliance, message, push or publication was used.
+
+Executed phase checks: the Rust workspace excluding `homeverb-midea` passed 531
+tests with one ignored, including 169 Mijia unit tests and 12 documentation tests.
+The excluded package retains its 14 previously documented macOS LAN-alias failures;
+this is not a full workspace pass. After adding the final secret-write cancellation
+case and missing-legacy-slot assertion, all 17 modern account tests passed and
+strict workspace/all-target Clippy passed again. No production Rust code changed
+after the workspace run. The rebuilt native C ABI passed 36 methods and 57
+fictional examples. Contract validation passed 24 schemas, 69 positive fixtures
+and 944 negative fixtures. Both reference-projection Python tests, regeneration,
+formatting, documentation and repository hygiene checks passed. No Flutter flow,
+mobile package, authenticated provider or physical device was tested in this phase.

@@ -12,7 +12,8 @@ mod statistics;
 mod transport;
 pub use adapter::{
     AccountDiscovery, AccountInventory, AccountLogin, AccountLoginChallenge,
-    DeviceInventoryMembership, MijiaAdapter, PendingMijiaLogin, PendingVerificationConnection,
+    DeviceInventoryMembership, MijiaAdapter, ModernAccountDiscovery, ModernAccountEntry,
+    PendingMijiaLogin, PendingModernMijiaLogin, PendingVerificationConnection,
     VerificationAccountLogin, VerificationAnswer,
 };
 pub use auth::{

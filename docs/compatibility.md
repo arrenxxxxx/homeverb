@@ -1,5 +1,32 @@
 # Platform and device compatibility matrix
 
+## Protected modern account sessions -- October 30, 2026
+
+[ADR-0095](adr/0095-mijia-protected-modern-account-sessions.md) adds explicit
+Rust adapter composition for modern QR connection, saved directory/property
+reads, renewal and uncertain-save recovery. A version-2 secret-store payload
+retains independent legacy and modern slots for one exact numeric subject.
+Either login can adopt the matching local account without replacing its other
+slot, legacy bindings or label. Ambiguous identities fail closed. Modern logical
+entries are account-bound and do not publish physical Device cards.
+
+Legacy-only version-1 bytes stay unchanged. Version 2 requires the modern slot
+and a fixed reference profile; older implementations cannot read it and must not
+downgrade it. Native API 1.35, C/JSON methods, SQLite 5 and Meiju payload 3 stay
+unchanged. Existing legacy routes require their own slot and never fall back to
+modern credentials. Default adapter composition does not enable modern requests.
+
+QR completion checks its protected account snapshot before and after provider
+exchange; cancellation and the original deadline cover persistence. Explicit
+renewal preserves legacy evidence and does not enumerate. Uncertain saves remain
+pending until explicit modern-directory validation confirms the exact saved bytes,
+without another login, renewal or credential rewrite. No background task is added.
+
+Host lifecycle/registry, C/App QR integration, physical/logical reconciliation,
+modern controls and authenticated provider/device acceptance remain pending.
+The delivered `9870437` APK contains the earlier auxiliary-setting phase only.
+No real account, appliance, message, push or publication was used.
+
 ## Modern reference-session reads -- October 30, 2026
 
 [ADR-0094](adr/0094-mijia-reference-session-reads.md) adds independent typed Rust

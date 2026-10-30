@@ -1159,3 +1159,6 @@ mod history;
 
 #[path = "tests/outlet.rs"]
 mod outlet;
+
+#[path = "tests/modern_accounts.rs"]
+mod modern_accounts;

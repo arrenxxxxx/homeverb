@@ -703,3 +703,14 @@ return `AUTH_REQUIRED` without automatic renewal or alternate-origin retry.
 Later ordinary page failures may return positive partial entries and sanitized
 issues; cancelled, expired, malformed and authentication failures abort. Neither
 partial results nor list exhaustion authorize missing-device deletion.
+
+
+Modern protected accounts under ADR-0095 reuse existing errors: unavailable
+composition or a missing protocol slot returns `CAPABILITY_UNSUPPORTED` before
+networking. Malformed/version-mismatched payloads, stale QR account snapshots,
+foreign continuation owners and changed recovery bytes return
+`ACCOUNT_SESSION_UNCONFIRMED`. Ambiguous, selected-account-mismatched or
+cross-protocol leading-zero identities return `ACCOUNT_IDENTITY_CONFLICT`.
+Uncertain secret storage retains `SECRET_STORE_WRITE_UNKNOWN` and pending
+metadata; ordinary reads/renewal refuse until explicit recovery. These typed
+Rust methods do not change ordinary error schemas or execution outcomes.

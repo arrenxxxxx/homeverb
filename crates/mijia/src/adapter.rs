@@ -47,7 +47,8 @@ pub struct AccountInventory {
 
 mod login;
 pub use login::{
-    AccountLogin, AccountLoginChallenge, PendingMijiaLogin, PendingVerificationConnection,
+    AccountLogin, AccountLoginChallenge, ModernAccountDiscovery, ModernAccountEntry,
+    PendingMijiaLogin, PendingModernMijiaLogin, PendingVerificationConnection,
     VerificationAccountLogin, VerificationAnswer,
 };
 
@@ -55,6 +56,8 @@ pub struct MijiaAdapter {
     login_owner: Uuid,
     vault: Arc<AccountVault>,
     transport: Arc<dyn CloudTransport>,
+    modern_auth: Option<Arc<dyn crate::ModernAuthTransport>>,
+    modern_reads: Option<Arc<dyn crate::ModernReadTransport>>,
     clock: Arc<dyn Clock>,
     fan_controls: bool,
     reference_controls: bool,
@@ -71,12 +74,25 @@ impl MijiaAdapter {
             login_owner: Uuid::new_v4(),
             vault,
             transport,
+            modern_auth: None,
+            modern_reads: None,
             clock,
             fan_controls: false,
             reference_controls: false,
             outlet_controls: false,
             control_policies: None,
         }
+    }
+
+    /// Explicit typed modern composition. This does not change existing device routes.
+    pub fn with_modern_protocol(
+        mut self,
+        auth: Arc<dyn crate::ModernAuthTransport>,
+        reads: Arc<dyn crate::ModernReadTransport>,
+    ) -> Self {
+        self.modern_auth = Some(auth);
+        self.modern_reads = Some(reads);
+        self
     }
 
     /// Trusted composition only. Core must independently grant exact arguments.
@@ -291,10 +307,20 @@ impl MijiaAdapter {
         mut accounts: Vec<LoadedAccount>,
         operation: &Operation,
     ) -> Result<AccountDiscovery> {
+        if accounts.iter().any(|account| {
+            account.payload.modern_session().is_ok()
+                && account.payload.subject() != session.user_id.as_str()
+                && account.payload.subject() == session.user_id.as_str().trim_start_matches('0')
+        }) {
+            return Err(Error::new(
+                "ACCOUNT_IDENTITY_CONFLICT",
+                "Legacy sign-in is ambiguous with a protected modern Mijia identity.",
+            ));
+        }
         let matches: Vec<_> = accounts
             .iter()
             .enumerate()
-            .filter(|(_, a)| a.payload.session.subject() == session.user_id.as_str())
+            .filter(|(_, a)| a.payload.subject() == session.user_id.as_str())
             .map(|(i, _)| i)
             .collect();
         if matches.len() > 1 {
@@ -328,7 +354,7 @@ impl MijiaAdapter {
             if current.expose() != account.bytes.expose() {
                 return Err(unconfirmed());
             }
-            account.payload.session = StoredSession::from_session(session);
+            account.payload.session = Some(StoredSession::from_session(session));
             // Explicit reauthorization must confirm the new login even if its bytes match.
             let bytes = account.payload.encode(account.lease.record())?;
             if bytes.expose() == account.bytes.expose() {
@@ -394,8 +420,7 @@ impl MijiaAdapter {
                 async {
                     let inventory = account
                         .payload
-                        .session
-                        .session()?
+                        .legacy_session()?
                         .enumerate(self.transport.as_ref(), operation)
                         .await?;
                     account
@@ -420,8 +445,7 @@ impl MijiaAdapter {
     ) -> Result<BoundDiscovery> {
         let inventory = account
             .payload
-            .session
-            .session()?
+            .legacy_session()?
             .enumerate(self.transport.as_ref(), operation)
             .await?;
         self.bind_inventory(account, others, inventory, operation)
@@ -807,7 +831,7 @@ impl Adapter for MijiaAdapter {
                         piid: p.piid,
                     })
                     .collect();
-                let session = account.payload.session.session()?;
+                let session = account.payload.legacy_session()?;
                 let readings = session
                     .properties(
                         self.transport.as_ref(),
@@ -949,8 +973,7 @@ impl Adapter for MijiaAdapter {
                 option.definition.validate_arguments(&command.arguments)?;
                 account
                     .payload
-                    .session
-                    .session()?
+                    .legacy_session()?
                     .set_property(
                         self.transport.as_ref(),
                         &binding.device(),

@@ -1,6 +1,6 @@
 # ADR-0095: Protected modern Mijia account sessions
 
-Status: accepted for implementation; native Host/App integration pending.
+Status: implemented in the typed Rust adapter; native Host/App integration pending.
 Date: October 30, 2026.
 
 ## Decision
@@ -72,3 +72,11 @@ storage; owner/snapshot/lifecycle refusal for QR continuation; uncertain save an
 exact-byte recovery without replay; concurrency, cancellation, deadline and drop
 lease release; absence of private markers from SQLite/public debug; old read,
 control and account regression suites remain passing.
+
+## Executed evidence
+
+Seventeen fictional account tests passed, including original cancellation during
+an already-performed protected write, which leaves pending bytes for explicit
+recovery. The broader workspace regression, native ABI and static checks are
+recorded in the [Mijia guide](../development/11-mijia.md).
+Host/App, authenticated provider and physical acceptance remain pending.

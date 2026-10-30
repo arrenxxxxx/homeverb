@@ -7,6 +7,8 @@ use serde::Deserialize;
 use std::{collections::BTreeMap, fmt, time::Duration};
 
 pub(crate) mod reads;
+mod stored;
+pub(crate) use stored::StoredModernSession;
 pub(crate) mod transport;
 pub use reads::{
     ModernContentEncoding, ModernDirectory, ModernDirectoryEntry, ModernHome, ModernHomes,

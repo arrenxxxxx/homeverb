@@ -98,7 +98,7 @@ impl MijiaAdapter {
                     request.start.timestamp(),
                     request.end.timestamp(),
                 )?;
-                let session = account.payload.session.session()?;
+                let session = account.payload.legacy_session()?;
                 let mut exact_device = binding.device();
                 // A protected pinned reference derivation is evidence even when inventory omitted the URN.
                 exact_device.spec_type = Some(crate::statistics::DAILY_ENERGY_SPEC.into());

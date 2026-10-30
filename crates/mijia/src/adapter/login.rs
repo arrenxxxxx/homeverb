@@ -5,7 +5,9 @@ use homeverb_core::SecretBytes;
 use sha2::{Digest, Sha256};
 use std::fmt;
 
+mod modern;
 mod verification;
+pub use modern::{ModernAccountDiscovery, ModernAccountEntry, PendingModernMijiaLogin};
 pub use verification::{
     AccountLoginChallenge, PendingVerificationConnection, VerificationAccountLogin,
     VerificationAnswer,
