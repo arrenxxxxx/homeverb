@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0",
+  "request_id": "fictional-light-toggle",
+  "device_id": "30000000-0000-4000-8000-000000000001",
+  "component_id": "light-2",
+  "capability": "vendor.xiaomi.mijia.light",
+  "action": "toggle",
+  "arguments": {},
+  "connection": "cloud",
+  "timeout_ms": 10000,
+  "wait_for": "accepted"
+}

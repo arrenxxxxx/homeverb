@@ -814,3 +814,12 @@ Cancellation/deadline after send leaves uncertainty; a late valid reply cannot
 mark accepted. Public error schemas and native methods are unchanged; protocol
 fixtures cover these distinctions on both legacy and modern profiles. Core and
 App action exposure and persistent receipt admission remain separate work.
+
+
+ADR-0108's typed Core admission reuses existing error and outcome schemas.
+Absent/cross-family action grants return POLICY_DENIED or CAPABILITY_UNSUPPORTED
+before send; changed protected identity refuses without using public wire metadata.
+Core converts possible-send protocol failures into UNKNOWN_OUTCOME receipts.
+REQUEST_CONFLICT and REQUEST_RETIRED preserve replay protection; revoking Core
+grants returns POLICY_DENIED while leaving an existing receipt unchanged. No error
+requests automatic credential renewal, route switching or a replacement request ID.

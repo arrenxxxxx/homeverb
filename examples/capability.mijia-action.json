@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "id": "vendor.xiaomi.mijia.light",
+  "component_id": "light-2",
+  "revision": 1,
+  "properties": {},
+  "actions": {
+    "toggle": {
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "risk": "low",
+      "idempotency": "non_idempotent",
+      "atomic": false,
+      "independent_fields": false,
+      "verification": "unavailable"
+    }
+  },
+  "events": {}
+}

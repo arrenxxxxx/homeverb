@@ -1,6 +1,6 @@
 # ADR-0107: Bounded no-argument MIoT actions
 
-Status: Typed Rust protocol implemented with fictional tests; Core/native/App admission remains pending.
+Status: Typed Rust protocol implemented; dependent typed Core admission is recorded in ADR-0108. Native/App adoption remains pending.
 Date: October 30, 2026.
 
 ## Evidence
@@ -94,5 +94,6 @@ unchanged. Record typed-only scope and remaining entry-point work explicitly.
 
 The implementation and its software verification are recorded in the
 [phase record](../development/14-mijia-reference-integration.md#typed-no-argument-actions--october-30-2026).
-This is typed protocol evidence only; Core/native/App action admission and
-real provider/phone/model acceptance remain incomplete.
+This is typed protocol evidence only. Dependent typed Core admission is now
+recorded in [ADR-0108](0108-mijia-protected-no-argument-actions.md); native/App
+adoption and real provider/phone/model acceptance remain incomplete.

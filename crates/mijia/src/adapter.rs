@@ -70,8 +70,11 @@ pub struct MijiaAdapter {
     fan_controls: bool,
     reference_controls: bool,
     outlet_controls: bool,
+    action_policy: Option<homeverb_core::Policy>,
     control_policies: Option<(homeverb_core::Policy, homeverb_core::Policy)>,
 }
+mod actions;
+
 impl MijiaAdapter {
     pub fn new(
         vault: Arc<AccountVault>,
@@ -90,6 +93,7 @@ impl MijiaAdapter {
             reference_controls: false,
             outlet_controls: false,
             control_policies: None,
+            action_policy: None,
         }
     }
 
@@ -130,6 +134,13 @@ impl MijiaAdapter {
     /// trusted approval for elevated targets remain mandatory at every execution.
     pub fn with_outlet_controls(mut self) -> Self {
         self.outlet_controls = true;
+        self
+    }
+
+    /// Independently opt into exact no-argument actions. Core grants remain required;
+    /// existing property control families cannot supply this authority.
+    pub fn with_action_controls(mut self, policy: homeverb_core::Policy) -> Self {
+        self.action_policy = Some(policy);
         self
     }
 
@@ -657,12 +668,13 @@ impl MijiaAdapter {
         let descriptors = selected
             .into_iter()
             .map(|i| {
-                descriptor(
+                descriptor_with_actions(
                     &account.payload.bindings[i],
                     account.lease.record().id,
                     self.fan_controls,
                     self.reference_controls,
                     self.outlet_controls,
+                    self.action_policy.is_some(),
                 )
             })
             .collect();
@@ -720,11 +732,35 @@ fn descriptor(
     settings: bool,
     outlet: bool,
 ) -> Descriptor {
+    descriptor_with_actions(binding, account, fan, settings, outlet, false)
+}
+
+fn descriptor_with_actions(
+    binding: &Binding,
+    account: Uuid,
+    fan: bool,
+    settings: bool,
+    outlet: bool,
+    actions: bool,
+) -> Descriptor {
     let mut capabilities = binding
         .mapping
         .as_ref()
         .map(|m| m.controlled_capabilities(fan, settings, outlet))
         .unwrap_or_default();
+    if actions
+        && binding.listed
+        && binding.modern.as_ref().is_none_or(|m| m.parent.is_none())
+        && let Some(mapping) = &binding.mapping
+    {
+        for (_, option) in mapping.no_argument_actions() {
+            if let Some(capability) = capabilities.iter_mut().find(|c| {
+                c.id == option.capability && c.component_id.as_deref() == Some(&option.component_id)
+            }) {
+                capability.actions.insert(option.action, option.definition);
+            }
+        }
+    }
     let supported = !capabilities.is_empty();
     if capabilities.is_empty() {
         capabilities.push(Capability {
@@ -953,7 +989,11 @@ impl Adapter for MijiaAdapter {
         progress: WriteProgress,
         operation: &Operation,
     ) -> Result<AdapterOutcome> {
-        if !self.fan_controls && !self.reference_controls && !self.outlet_controls {
+        if !self.fan_controls
+            && !self.reference_controls
+            && !self.outlet_controls
+            && self.action_policy.is_none()
+        {
             return Err(unsupported());
         }
         operation
@@ -985,6 +1025,17 @@ impl Adapter for MijiaAdapter {
                     return Err(unsupported());
                 }
                 let mapping = binding.mapping.as_ref().ok_or_else(unsupported)?;
+                if let Some(action) = mapping.no_argument_actions().into_iter().find(|(_, o)| {
+                    o.component_id == command.component_id
+                        && o.capability == command.capability
+                        && o.action == command.action
+                }) {
+                    return self
+                        .execute_no_argument_action(
+                            &account, binding, command, &action, &progress, operation,
+                        )
+                        .await;
+                }
                 // Re-derive action semantics from protected model/spec evidence, never from
                 // the public descriptor's risk, parameters, wire IDs or writable flag.
                 let (field, option) = mapping

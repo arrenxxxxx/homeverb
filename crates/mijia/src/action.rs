@@ -16,16 +16,16 @@ pub struct ActionQuery {
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
-struct Profile {
-    model: String,
-    spec_type: String,
-    service_type: String,
-    action_type: String,
-    siid: u32,
-    aiid: u32,
+pub(crate) struct Profile {
+    pub(crate) model: String,
+    pub(crate) spec_type: String,
+    pub(crate) service_type: String,
+    pub(crate) action_type: String,
+    pub(crate) siid: u32,
+    pub(crate) aiid: u32,
     #[serde(rename = "in")]
-    input: Vec<u32>,
-    out: Vec<u32>,
+    pub(crate) input: Vec<u32>,
+    pub(crate) out: Vec<u32>,
 }
 
 pub(crate) fn unsupported() -> Error {
@@ -34,8 +34,11 @@ pub(crate) fn unsupported() -> Error {
         "This Mijia action has no reviewed no-argument mapping.",
     )
 }
+pub(crate) fn profiles() -> Result<Vec<Profile>> {
+    crate::decode(include_bytes!("action_profiles.json"))
+}
 pub(crate) fn admit(model: &str, specification: &str, query: &ActionQuery) -> Result<()> {
-    let profiles: Vec<Profile> = crate::decode(include_bytes!("action_profiles.json"))?;
+    let profiles = profiles()?;
     let mut matches = profiles.iter().filter(|p| {
         p.model == model
             && p.spec_type == specification

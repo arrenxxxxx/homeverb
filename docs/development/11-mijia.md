@@ -22,9 +22,10 @@ The experimental integration is implemented under [ADR-0070](../adr/0070-mijia-n
 The owner will perform real-account and device acceptance. Do not access saved
 pilot credentials or contact appliances as part of development tests.
 
-ADR-0107 additionally implements six exact no-argument actions in the typed Rust
-protocol library only. Core/native/App action grants and controls are pending;
-the API 1.39 package does not expose them.
+ADR-0107/0108 additionally implement six exact no-argument actions through typed
+Core with independent action grants and durable receipts. Native/App startup
+grants, inspection and controls are pending; the API 1.39 package does not expose
+these actions.
 
 Current callable scope includes native API 1.39 Mijia-only/combined sessions,
 protected partial inventory and 264 scalar mappings from 17 pinned reference

@@ -1,5 +1,7 @@
 //! Exact-model public MIoT evidence. Only reviewed readable semantics are projected.
 
+mod actions;
+
 use crate::{CloudEndpoint, CloudRequest, CloudTransport, PrivateString, Region, invalid};
 use homeverb_core::{Operation, SecretBytes};
 use homeverb_domain::{Capability, Result};

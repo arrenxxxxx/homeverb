@@ -871,3 +871,29 @@ Public schemas are unchanged; positive/negative executable protocol fixtures are
 in crates/mijia/src/action/tests.rs and
 crates/mijia/src/modern/reads/tests/actions.rs, with actual local TLS matrices in
 crates/mijia/src/transport/tests.rs. This evidence is not provider acceptance.
+
+
+## Protected Core action admission
+
+ADR-0108 now connects ADR-0107's six primitives to typed Core. Empty-object
+arguments and non_idempotent/unavailable-verification metadata are re-derived
+from the protected exact model/specification and independent action catalog.
+The dedicated adapter action policy and Core grant both precede the selected
+protocol send; existing property policies cannot transfer authority. Public action
+metadata or caller SIID/AIID/in fields cannot choose wire operations. Account
+leases and Core device locks cover the whole attempt, including late-result refusal.
+
+The existing request-ID journal is written before possible send. Accepted,
+rejected, not-sent and unknown receipts are retained; after cancellation/deadline/
+drop an uncertain action is never retried. Authorized same-ID execution returns
+its existing receipt after reopen or explicit protocol adoption. Revoked authority
+refuses before receipt lookup without changing the stored outcome. Retiring history
+retains request IDs and does not enable resend. Only a new explicit request can
+represent another action; it must never be created automatically to recover unknown.
+
+Public command/capability schemas retain their shape. The exact no-argument
+contract is represented by examples/capability.mijia-action.json and
+examples/command.mijia-action.json, with closed-argument counterexamples in
+scripts/validate_contracts.py. Protected Core fixtures are in
+crates/mijia/src/adapter/tests/modern_accounts/actions.rs. Native/App startup and
+inspection adoption remain pending; the existing native/property flows stay intact.

@@ -939,3 +939,6 @@ mod controls;
 
 #[path = "modern_accounts/sample_history.rs"]
 mod sample_history;
+
+#[path = "modern_accounts/actions.rs"]
+mod actions;

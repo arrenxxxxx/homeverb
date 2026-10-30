@@ -140,12 +140,13 @@ impl MijiaAdapter {
         let descriptors = selected
             .into_iter()
             .map(|i| {
-                descriptor(
+                descriptor_with_actions(
                     &account.payload.bindings[i],
                     account.lease.record().id,
                     self.fan_controls && self.modern_controls.is_some(),
                     self.reference_controls && self.modern_controls.is_some(),
                     self.outlet_controls && self.modern_controls.is_some(),
+                    self.action_policy.is_some() && self.modern_controls.is_some(),
                 )
             })
             .collect();

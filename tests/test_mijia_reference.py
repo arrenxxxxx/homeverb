@@ -36,6 +36,8 @@ class ReferenceTests(unittest.TestCase):
             for key, kind in [('spec_type', 'device'), ('service_type', 'service'), ('action_type', 'action')]:
                 self.assertTrue(action[key].startswith(f'urn:miot-spec-v2:{kind}:'))
         self.assertEqual(ledger['no_argument_actions']['exact_actions'], 6)
+        self.assertEqual(ledger['no_argument_actions']['core_native_app'],
+                         'typed_core_grants_and_receipts_implemented_native_app_pending')
         self.assertEqual(len(profiles), 17)
         self.assertEqual(len(ledger['models']), 19)
         self.assertEqual(sum(ledger['modern_controls']['models'].values()), 33)

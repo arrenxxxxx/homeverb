@@ -25,6 +25,7 @@ def main() -> int:
         ("native-open", "native-open.mijia-auxiliary"),
         ("native-open", "native-open.mijia-outlet"),
         ("capability", "capability.mijia-outlet-power"), ("command", "command.mijia-outlet-power"),
+        ("capability", "capability.mijia-action"), ("command", "command.mijia-action"),
         ("capability", "capability.mijia-light"), ("command", "command.mijia-light"),
         ("native-open", "native-open.mijia-settings"),
         ("native-open", "native-open.mijia-reference-fan"),
@@ -158,6 +159,14 @@ def main() -> int:
     mijia_fan_validator = Draft202012Validator(load("examples/capability.mijia-fan.json")["actions"]["set_level"]["parameters"])
     mijia_fan_validator.validate(load("examples/command.mijia-fan.json")["arguments"])
     negative = []
+    mijia_action = load("examples/capability.mijia-action.json")["actions"]["toggle"]
+    action_parameters = Draft202012Validator(mijia_action["parameters"])
+    action_parameters.validate(load("examples/command.mijia-action.json")["arguments"])
+    assert mijia_action["idempotency"] == "non_idempotent"
+    assert mijia_action["verification"] == "unavailable"
+    for arguments in [None, [], True, {"in": []}, {"value": True}, {"confirmed": True}, {"aiid": 1}, {"siid": 2}]:
+        negative.append(("closed no-argument action parameters", action_parameters, arguments))
+
     outlet_capability = load("examples/capability.mijia-outlet-power.json")
     outlet_action = outlet_capability["actions"]["set"]
     assert outlet_action["risk"] == "elevated"

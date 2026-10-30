@@ -1,5 +1,49 @@
 # Platform and device compatibility matrix
 
+## Protected Core no-argument actions -- October 30, 2026
+
+[ADR-0108](adr/0108-mijia-protected-no-argument-actions.md) connects the six exact
+ADR-0107 actions to typed Core on legacy and modern protected bindings. A separate
+adapter action policy and an independent Core grant are both required; existing
+fan/reference/outlet property authority cannot enable them. Local action-option
+inspection performs no networking, credential rewrite or permission change.
+Explicit opted-in inventory publication adds non-idempotent, empty-argument
+vendor actions to existing component/capability scopes without changing properties.
+
+Protected source model/specification/service/action identities and the selected
+protocol are rechecked before one send. Public metadata cannot expand arguments
+or choose another action. A parent-bearing modern entry is not admitted as an
+action root. Missing membership, session, transport or exact policy refuses before
+I/O. Accepted is never verified; ambiguous execution replies remain unknown.
+
+Core's existing SQLite journal preserves receipts across reopen and explicit
+protocol adoption. Same-ID retries never send again; same-ID command conflicts
+refuse, and history retirement preserves replay protection. Revoked Core grants refuse before
+journal lookup while retaining the original stored receipt. Cancellation/deadline/
+drop release account/device locks and keep unknown outcomes without replay.
+
+This is typed Rust Core integration. Native API 1.39, ordinary schemas, C exports/
+methods, SQLite 5 and protected payload 3 remain unchanged. Production native,
+CLI and MCP composition does not opt into these actions. Versioned native startup
+grants/inspection and Flutter controls are still pending, as are remaining actions,
+events and real provider/phone/model acceptance. The 503ef1f APK is unchanged.
+No provider, appliance, installation, push or publication is used.
+
+Executed software verification: workspace tests excluding the known unrelated
+Meiju/macOS LAN-alias suite passed 661 tests with one ignored, including 252 Mijia
+unit tests and 14 compile-fail tests. Strict all-target Clippy passed after an
+equivalent Boolean simplification, and the final eight action integration tests
+passed again. Formatting, all three generated projections, both projection tests,
+documentation, source hygiene and 25 schemas with 75 positive/1328 negative
+fixtures passed. No Flutter run, new APK or real-account/device acceptance is
+claimed by this typed Core phase; known full Flutter failures remain unchanged.
+
+The rebuilt FFI and actual native C boundary also passed: 36 ordinary methods,
+60 live examples and 76 modern-account cases, plus existing protected/trusted
+bridge guards. No new native method, startup field or Flutter action is exposed
+by this phase.
+
+
 ## Typed no-argument actions -- October 30, 2026
 
 [ADR-0107](adr/0107-bounded-no-argument-actions.md) adds six exact typed Rust

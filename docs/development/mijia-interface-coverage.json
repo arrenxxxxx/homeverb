@@ -30,8 +30,8 @@
     {
       "id": "action_candidate",
       "route": "/miotspec/action",
-      "status": "implemented_six_typed_no_argument_actions_only",
-      "reason": "ADR-0107 supplies six exact typed-only empty-input actions; Core/native/App action admission and real acceptance remain pending."
+      "status": "implemented_six_typed_core_no_argument_actions",
+      "reason": "ADR-0107/0108 supply six exact empty-input actions through typed Core with independent grants and durable receipts; native/App admission and real acceptance remain pending."
     },
     {
       "id": "event_candidate",
@@ -175,28 +175,28 @@
           "siid": 2,
           "iid": 1,
           "name": "toggle",
-          "status": "implemented_typed_rust_action_protocol_only"
+          "status": "implemented_typed_core_action"
         },
         {
           "kind": "action",
           "siid": 2,
           "iid": 2,
           "name": "brightness-up",
-          "status": "implemented_typed_rust_action_protocol_only"
+          "status": "implemented_typed_core_action"
         },
         {
           "kind": "action",
           "siid": 2,
           "iid": 3,
           "name": "brightness-down",
-          "status": "implemented_typed_rust_action_protocol_only"
+          "status": "implemented_typed_core_action"
         },
         {
           "kind": "action",
           "siid": 2,
           "iid": 4,
           "name": "toggle-light-mode",
-          "status": "implemented_typed_rust_action_protocol_only"
+          "status": "implemented_typed_core_action"
         },
         {
           "kind": "property",
@@ -1159,7 +1159,7 @@
           "siid": 2,
           "iid": 1,
           "name": "toggle",
-          "status": "implemented_typed_rust_action_protocol_only"
+          "status": "implemented_typed_core_action"
         },
         {
           "kind": "property",
@@ -5051,7 +5051,7 @@
           "siid": 6,
           "iid": 1,
           "name": "toggle",
-          "status": "implemented_typed_rust_action_protocol_only"
+          "status": "implemented_typed_core_action"
         },
         {
           "kind": "property",
@@ -5942,13 +5942,13 @@
     "additional_write_runtime_contracts"
   ],
   "no_argument_actions": {
-    "status": "implemented_typed_rust_protocol_only",
-    "evidence": "ADR-0107",
+    "status": "implemented_typed_core_and_protocol",
+    "evidence": "ADR-0107/0108",
     "exact_actions": 6,
     "route": "/miotspec/action",
     "legacy_profile": "SID_xiaomiio_api_io_mi_com_per_field",
     "modern_profile": "SID_mijia_core_api_mijia_tech_continuous",
-    "core_native_app": "pending_independent_grants_and_non_idempotent_receipts",
+    "core_native_app": "typed_core_grants_and_receipts_implemented_native_app_pending",
     "provider_acceptance": "pending"
   }
 }

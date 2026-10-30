@@ -862,3 +862,28 @@ Retain workspace and native ABI regression checks; native API 1.39 and all publi
 schemas are unchanged. This typed-library phase adds no Flutter control or package.
 Core binding/grant/receipt tests and native/App adoption are required in a later
 phase before claiming user-callable actions.
+
+
+## Protected Core no-argument actions
+
+ADR-0108 fixtures are in crates/mijia/src/adapter/tests/modern_accounts/actions.rs.
+Run `cargo +1.96.0 test -p homeverb-mijia --offline --locked` for all six actions
+on both selected protocols, independent Core/adapter grants and exact empty
+arguments. They use real Core/SQLite with fictional protected accounts and injected
+transports. Inspection proves no network or credential mutation, and action
+publication preserves scalar read/history contracts and existing component scopes.
+
+Negative cases exercise absent/wrong/cross-family policies, public argument/action
+forgery, connection identity refusal, protected model/specification/service changes,
+unlisted membership, missing sessions/transports and parent-bearing modern entries.
+Durable receipt cases cover accepted/rejected/not-sent/unknown, concurrent and
+sequential duplicates, conflicts, store/Core reopen, revoked grants, history
+retirement and explicit legacy-to-modern adoption. Cancel/deadline/drop release
+account/device locks and preserve unknown receipts without replay.
+
+Run workspace, strict Clippy, projection/contract validators and rebuilt native
+ABI checks. New examples/capability.mijia-action.json and command.mijia-action.json
+retain the existing schema shape with non-idempotent semantics; parameter
+counterexamples refuse wire IDs, inputs and confirmation flags. Production native
+composition remains unchanged. Flutter/App action admission and provider/phone/
+model acceptance are separate, unverified work.
