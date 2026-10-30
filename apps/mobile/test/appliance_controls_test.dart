@@ -79,6 +79,10 @@ void main() {
           core.observations['power.state'] = true;
         }
 
+        if (family == 'fan') {
+          descriptor['actions']['set']['parameters']['properties']['speed']['enum'] =
+              ['quiet', 'boost', 'low', 'mid', 'high', 'auto'];
+        }
         if (numeric) {
           descriptor['properties']['speed']['type'] = 'integer';
           descriptor['actions']['set']['parameters']['properties']['speed'] = {
@@ -282,6 +286,52 @@ void main() {
               isNull,
             );
           } else if (family == 'fan') {
+            final presets = [
+              for (final option in [
+                'quiet',
+                'boost',
+                'low',
+                'mid',
+                'high',
+                'auto',
+              ])
+                tester.getRect(
+                  find.byKey(ValueKey('appliance-option:speed:$option')),
+                ),
+            ];
+            for (final rect in presets) {
+              expect(rect.width, closeTo(presets.first.width, 0.1));
+              expect(rect.height, greaterThanOrEqualTo(48));
+            }
+            for (final option in [
+              'quiet',
+              'boost',
+              'low',
+              'mid',
+              'high',
+              'auto',
+            ]) {
+              final chip = find.byKey(
+                ValueKey('appliance-option:speed:$option'),
+              );
+              final face = find.descendant(
+                of: chip,
+                matching: find.byType(Material),
+              );
+              expect(
+                tester.getSize(face).width,
+                closeTo(presets.first.width, 0.1),
+              );
+              expect(tester.getSize(face).height, greaterThanOrEqualTo(44));
+              expect(tester.widget<ChoiceChip>(chip).showCheckmark, isTrue);
+              expect(tester.widget<ChoiceChip>(chip).labelStyle!.fontSize, 16);
+            }
+            expect(presets[1].top, presets[0].top);
+            expect(presets[2].top, presets[0].top);
+            expect(presets[3].top, presets[0].bottom);
+            expect(presets[4].top, presets[3].top);
+            expect(presets[5].top, presets[3].top);
+            expect(presets[1].left - presets[0].right, closeTo(8, 0.1));
             expect(find.text('quiet'), findsOneWidget);
             expect(find.text('boost'), findsOneWidget);
             await tap(

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'blocks.dart';
 import 'controller.dart';
 import 'controls.dart';
+import 'device_option_grid.dart';
+import 'device_typography.dart';
 import 'native_client.dart';
 import 'receipts.dart';
 import 'skin.dart';
@@ -235,21 +237,37 @@ class _ApplianceControlsState extends State<ApplianceControls> {
             Rows([
               [controlLabel(name), display(name), null],
             ], onAction: widget.onAction),
-            Wrap(
-              spacing: 7,
-              runSpacing: 8,
+            DeviceOptionGrid(
+              key: ValueKey('appliance-options-grid:$name'),
+              labels: [
+                for (final option in schema['enum'] as List)
+                  localize(context, propertyValue(option, {})),
+              ],
               children: [
                 for (final option in schema['enum'] as List)
                   ChoiceChip(
                     key: ValueKey('appliance-option:$name:$option'),
-                    label: Copy(
-                      control: true,
-                      propertyValue(option, {}),
-                      size: 12,
+                    label: SizedBox(
+                      width: double.infinity,
+                      child: Text(
+                        localize(context, propertyValue(option, {})),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    labelStyle: TextStyle(
+                      fontSize: DeviceTypography.body,
+                      height: DeviceTypography.lineHeight,
                       color: value == option ? Colors.white : muted,
                     ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    labelPadding: const EdgeInsets.symmetric(horizontal: 4),
+                    materialTapTargetSize: MaterialTapTargetSize.padded,
+                    chipAnimationStyle: ChipAnimationStyle(
+                      avatarDrawerAnimation: AnimationStyle.noAnimation,
+                    ),
                     selected: value == option,
-                    showCheckmark: false,
+                    showCheckmark: true,
+                    checkmarkColor: Colors.white,
                     side: BorderSide.none,
                     backgroundColor: const Color(0xfff8f5ee),
                     selectedColor: ink,

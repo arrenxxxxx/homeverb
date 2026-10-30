@@ -28,15 +28,24 @@ combinations, ranges, units or action semantics from the artwork or brand name.
 
 Keep the power switch and target temperature prominent. Label the target
 separately from the observed room temperature. Mode and fan choices show their
-selected state without relying on color alone. Fan presets stay in a single
-horizontal row: compact padding may fit all values at normal width; otherwise
-provide discoverable horizontal scrolling with full-size touch targets and keep
-the observed selection visible. Do not wrap fan presets or shrink their font.
-Display a numeric speed as a
-level, not an unexplained number. Group swing settings; a corresponding fixed
-position cannot be selected while swing is on or its state is unknown. Lower
-frequency settings belong in an expandable section. Descriptor bounds, exact
-value grants and current observations still determine availability.
+selected state without relying on color alone. All equivalent AC option groups
+(mode, fan and direction presets) share `DeviceOptionGrid`: equal widths,
+compact spacing and balanced rows, rather than a full row plus one orphan.
+Six fan presets use a compact
+three-column, two-row grid with equal widths, 16-point labels and at least
+48-pixel touch targets. Use 44-pixel painted faces at normal text size, leaving
+a 4-pixel visual row gap without adding an extra vertical run gap. Preserve
+Material hit areas. Narrow widths or enlarged text may reduce the column count rather than
+shrink labels. Display numeric speeds as levels, not unexplained numbers.
+
+Present supported controls in a flat order: power/target and observed room
+reading, mode, fan, swing and fixed directions, sleep/energy/comfort features,
+then display light and button sound. Do not hide AC controls in an Other settings
+accordion. The primary temperature control is the only target-temperature
+editor; do not duplicate it with a secondary slider. Unsupported controls remain
+absent. A fixed position remains disabled while its corresponding swing is on
+or unknown. Descriptor bounds, exact value grants and observations determine
+availability; generic unclassified controls retain their existing fallback.
 
 ### Refrigerator and other read-only multi-zone devices
 
@@ -75,8 +84,8 @@ online badge without reliable connection evidence.
 At a normal 430-pixel phone width, keep the AC hero near 190–210 pixels tall,
 with a 64-pixel target and 56-pixel step controls. Mode and fan each have their
 own compact white card; selection type sits beside the heading. Swing switches
-share a row when space permits; fixed-direction controls and the fine slider
-belong under More settings. Preserve a stacked layout for enlarged text.
+share a row when space permits; supported fixed directions follow directly in
+flat cards. Preserve a stacked layout for enlarged text.
 
 Read-only refrigerator temperature zones use a three-column table (zone, set,
 current), not three repeated large cards. Group function readings together and

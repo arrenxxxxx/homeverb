@@ -113,8 +113,8 @@ readings. All 19 affected dishwasher/detail/refrigerator tests passed afterward,
 including enlarged Chinese text, disabled actions and exact component authority.
 
 
-The owner subsequently requested a single-row fan selector. This supersedes the
-intermediate balanced-grid visual evidence above: fan presets must not wrap;
+Historical intermediate revision: the owner requested a single-row fan selector.
+At that checkpoint, fan presets did not wrap;
 compact padding or explicit horizontal scrolling preserves all declared values,
 readable text, touch targets and observed-selection visibility.
 The single-row correction passed all 26 AC tests, followed by three focused
@@ -123,3 +123,33 @@ scroll arrows; narrow or enlarged-text cases retain 16-point labels, at least
 44-pixel touch targets and explicit horizontal navigation. Every externally
 observed selection is revealed, both scroll ends are reachable, and scrolling
 never issues a device command.
+
+
+## Flat AC controls correction (October 30, 2026)
+
+The latest owner decision supersedes both the single-row fan revision and the
+collapsed AC settings design. Six presets return to an equal-width three-by-two
+grid with zero additional row gap and at least 48-pixel touch targets. The shared
+`DeviceOptionGrid` also lays out mode/direction and other AC presets consistently;
+four values use two-by-two rows, five use three plus two. Enlarged
+text may use fewer columns. Supported swing/direction, sleep/energy/comfort and
+light/sound controls now appear directly in order without an Other settings
+accordion. The duplicated target slider is removed; the primary control retains
+exact descriptor bounds, half-degree steps where declared, and fallback choices.
+No adapter, grant, observation, lifecycle or command-outcome semantics change.
+
+The 31 focused AC/grid/preview checks passed on the final layout, including
+painted Material-face widths (not only hit-area wrappers), a 4-pixel normal-text
+visual row gap, 48-pixel hit areas, half-degree bounds and primary enum fallback,
+flat ordering, unknown swing guards and lifecycle/stale-callback refusal.
+Actual production-page AC captures use fictional clients and separate real
+Inter/CJK font inputs. This does not establish physical-appliance acceptance.
+
+Final stable-tree validation passed 202 Flutter tests (five opt-in font/capture
+checks skipped in the default suite). The separate final AC capture run passed
+both selected checks with explicit Inter and SC-font inputs. Static analysis,
+70 Python tooling tests, seven presentation tests, documentation, repository
+hygiene and contract validation also passed. An earlier full run overlapped a
+local generic-fan test edit and failed its new geometry assertion; the final
+source-frozen run above supersedes that result. No real appliance commands,
+provider logins, APK build or deployment were performed for this correction.

@@ -55,14 +55,7 @@ void main() {
     tester,
   ) async {
     await open(tester);
-    expect(
-      find.byKey(const ValueKey('climate-stepper:horizontal_direction')),
-      findsNothing,
-    );
-    final more = find.byKey(const ValueKey('climate-more-settings'));
-    await tester.ensureVisible(more);
-    await tester.tap(more);
-    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('climate-more-settings')), findsNothing);
     expect(
       find.byKey(const ValueKey('climate-stepper:horizontal_direction')),
       findsOneWidget,

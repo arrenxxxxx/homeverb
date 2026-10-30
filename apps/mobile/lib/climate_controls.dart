@@ -6,6 +6,7 @@ import 'climate_panel.dart';
 import 'controller.dart';
 import 'controls.dart';
 import 'device_typography.dart';
+import 'device_option_grid.dart';
 import 'localization.dart';
 import 'client_contract.dart';
 import 'receipts.dart';
@@ -31,8 +32,6 @@ class _ClimateControlsState extends State<ClimateControls>
     with WidgetsBindingObserver {
   HomeController get c => widget.controller;
   int selectionEpoch = 0;
-  double? draftTarget;
-  int? targetGestureEpoch;
   (String, Object)? pending;
   bool get enabled => pending == null && !c.busy && c.isForeground;
   bool updating(ClimateChoice? choice) =>
@@ -54,8 +53,6 @@ class _ClimateControlsState extends State<ClimateControls>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) return;
     selectionEpoch++;
-    targetGestureEpoch = null;
-    if (mounted) setState(() => draftTarget = null);
   }
 
   Object? choiceValue(ClimateChoice choice) {
@@ -103,12 +100,7 @@ class _ClimateControlsState extends State<ClimateControls>
   }
 
   static const features = <(String, Set<String>, IconData)>[
-    ('Display light', {'display', 'display_light'}, Icons.light_mode_outlined),
-    (
-      'Button sound',
-      {'button_sound', 'sound', 'buzzer'},
-      Icons.volume_up_outlined,
-    ),
+    ('Lower horizontal swing', {'lower_horizontal_swing'}, Icons.swap_horiz),
     ('Sleep', {'sleep'}, Icons.bedtime_outlined),
     ('Energy saving', {'energy_saving', 'eco'}, Icons.eco_outlined),
     (
@@ -117,7 +109,6 @@ class _ClimateControlsState extends State<ClimateControls>
       Icons.energy_savings_leaf_outlined,
     ),
     ('Strong cooling', {'strong_cooling'}, Icons.ac_unit),
-    ('Light sensing', {'light_sensing'}, Icons.light_mode_outlined),
     (
       'Comfort energy saving',
       {'comfort_energy_saving'},
@@ -130,7 +121,6 @@ class _ClimateControlsState extends State<ClimateControls>
     ('Follow airflow', {'follow_airflow'}, Icons.person_outline),
     ('Dry after shutdown', {'dry_after_shutdown'}, Icons.dry_outlined),
     ('Auxiliary heat', {'auxiliary_heat'}, Icons.waves),
-    ('Lower horizontal swing', {'lower_horizontal_swing'}, Icons.swap_horiz),
     (
       'Odor removal',
       {'fresh_air_remove_odor', 'fengguan_remove_odor'},
@@ -155,6 +145,13 @@ class _ClimateControlsState extends State<ClimateControls>
       'Purifier PM threshold',
       {'auto_purifier_on_pm'},
       Icons.filter_alt_outlined,
+    ),
+    ('Light sensing', {'light_sensing'}, Icons.light_mode_outlined),
+    ('Display light', {'display', 'display_light'}, Icons.light_mode_outlined),
+    (
+      'Button sound',
+      {'button_sound', 'sound', 'buzzer'},
+      Icons.volume_up_outlined,
     ),
   ];
 
@@ -273,14 +270,12 @@ class _ClimateControlsState extends State<ClimateControls>
           ? UiMessage('Level {value}', {'value': '$option'})
           : propertyValue(option, {}, propertyId: choice.property),
     );
-    final isFanChoice = const {
-      'wind_speed',
-      'fan_speed',
-      'speed',
-    }.contains(choice.parameter);
     Widget chip(Object option) => ChoiceChip(
       key: ValueKey('climate-option:' + choice.parameter + ':' + '$option'),
-      label: Text(optionLabel(option)),
+      label: SizedBox(
+        width: double.infinity,
+        child: Text(optionLabel(option), textAlign: TextAlign.center),
+      ),
       selected: observed == option,
       selectedColor: MediaQuery.highContrastOf(context) ? Colors.black : accent,
       labelStyle: TextStyle(
@@ -288,21 +283,15 @@ class _ClimateControlsState extends State<ClimateControls>
         fontSize: DeviceTypography.body,
         height: DeviceTypography.lineHeight,
       ),
-      padding: EdgeInsets.symmetric(
-        horizontal: isFanChoice ? 0 : 4,
-        vertical: 8,
-      ),
-      labelPadding: EdgeInsets.symmetric(horizontal: isFanChoice ? 4 : 6),
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      labelPadding: const EdgeInsets.symmetric(horizontal: 4),
       side: MediaQuery.highContrastOf(context)
           ? const BorderSide(color: Colors.black)
           : BorderSide.none,
       backgroundColor: const Color(0xffe9e7e0),
-      // Keep measured row width stable while revealing an observed selection.
-      chipAnimationStyle: isFanChoice
-          ? ChipAnimationStyle(
-              avatarDrawerAnimation: AnimationStyle.noAnimation,
-            )
-          : null,
+      chipAnimationStyle: ChipAnimationStyle(
+        avatarDrawerAnimation: AnimationStyle.noAnimation,
+      ),
       showCheckmark: true,
       checkmarkColor: Colors.white,
       materialTapTargetSize: MaterialTapTargetSize.padded,
@@ -314,53 +303,10 @@ class _ClimateControlsState extends State<ClimateControls>
             }
           : null,
     );
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final chips = [
-          for (final option in options)
-            if (isFanChoice)
-              ConstrainedBox(
-                constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
-                child: chip(option),
-              )
-            else
-              chip(option),
-        ];
-        final isFan = const {
-          'wind_speed',
-          'fan_speed',
-          'speed',
-        }.contains(choice.parameter);
-        if (!isFan || !constraints.hasBoundedWidth) {
-          return Wrap(spacing: 8, runSpacing: 8, children: chips);
-        }
-        var requiredWidth = 0.0;
-        for (final option in options) {
-          final painter = TextPainter(
-            text: TextSpan(
-              text: optionLabel(option),
-              style: DefaultTextStyle.of(context).style.copyWith(
-                fontSize: DeviceTypography.body,
-                height: DeviceTypography.lineHeight,
-              ),
-            ),
-            textDirection: Directionality.of(context),
-            textScaler: MediaQuery.textScalerOf(context),
-          )..layout();
-          // Compact padding; retain readable labels and the selected checkmark.
-          final naturalWidth =
-              painter.width + 16 + (observed == option ? 24 : 0);
-          final width = naturalWidth < 44 ? 44.0 : naturalWidth;
-          requiredWidth += width;
-          painter.dispose();
-        }
-        return _FanPresetRow(
-          children: chips,
-          selectedIndex: options.indexOf(observed),
-          scrollable:
-              requiredWidth + (options.length - 1) * 4 > constraints.maxWidth,
-        );
-      },
+    return DeviceOptionGrid(
+      key: ValueKey('climate-options-grid:${choice.parameter}'),
+      labels: [for (final option in options) optionLabel(option)],
+      children: [for (final option in options) chip(option)],
     );
   }
 
@@ -497,88 +443,6 @@ class _ClimateControlsState extends State<ClimateControls>
     );
   }
 
-  Widget directionSummary(String label, ClimateChoice? swing) {
-    final observed = swing == null ? false : c.observed(swing.property);
-    final status = observed == true
-        ? 'Unavailable while swing is on.'
-        : observed == false
-        ? 'Adjust in Other settings.'
-        : 'Swing state is unknown.';
-    return Padding(
-      key: ValueKey('climate-direction-summary:$label'),
-      padding: const EdgeInsets.symmetric(vertical: 3),
-      child: Wrap(
-        spacing: 6,
-        runSpacing: 2,
-        children: [
-          Copy(
-            label,
-            size: DeviceTypography.secondary,
-            lineHeight: DeviceTypography.lineHeight,
-          ),
-          Copy(
-            status,
-            size: DeviceTypography.secondary,
-            color: muted,
-            lineHeight: DeviceTypography.lineHeight,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget fineTemperature(ClimateChoice targetChoice) {
-    final target = c.observed('climate.target_temperature');
-    final options = targetChoice.available(c);
-    if (!targetChoice.numeric ||
-        target is! num ||
-        options.length != targetChoice.values.length ||
-        !options.contains(target))
-      return const SizedBox.shrink();
-    final schema = targetChoice.schema;
-    final step = schema['multipleOf'] as num;
-    final epoch = c.controlEpoch, lifecycle = selectionEpoch;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const Copy(
-          'Target temperature',
-          bold: true,
-          size: DeviceTypography.body,
-          lineHeight: DeviceTypography.lineHeight,
-        ),
-        Slider(
-          key: const ValueKey('climate-temperature-slider'),
-          value: draftTarget ?? target.toDouble(),
-          min: (schema['minimum'] as num).toDouble(),
-          max: (schema['maximum'] as num).toDouble(),
-          divisions: ((schema['maximum'] - schema['minimum']) / step).round(),
-          label: (draftTarget ?? target).toString() + '°C',
-          semanticFormatterCallback: (v) => '$v' + '°C',
-          onChangeStart: !enabled ? null : (_) => targetGestureEpoch = epoch,
-          onChanged: !enabled
-              ? null
-              : (v) {
-                  if (epoch == c.controlEpoch && lifecycle == selectionEpoch)
-                    setState(() => draftTarget = v);
-                },
-          onChangeEnd: !enabled
-              ? null
-              : (value) {
-                  if (targetGestureEpoch != epoch ||
-                      epoch != c.controlEpoch ||
-                      lifecycle != selectionEpoch)
-                    return;
-                  targetGestureEpoch = null;
-                  setState(() => draftTarget = null);
-                  if (value != target)
-                    send(targetChoice, value, epoch, lifecycle);
-                },
-        ),
-      ],
-    );
-  }
-
   Widget temperature(ClimateChoice? targetChoice, ClimateChoice? powerChoice) {
     final target = c.observed('climate.target_temperature');
     final power = c.observed('power.state');
@@ -620,10 +484,7 @@ class _ClimateControlsState extends State<ClimateControls>
       fit: BoxFit.scaleDown,
       child: Text(
         (target is num
-                ? (draftTarget ?? target).toString().replaceFirst(
-                    RegExp(r'\.0$'),
-                    '',
-                  )
+                ? target.toString().replaceFirst(RegExp(r'\.0$'), '')
                 : '—') +
             '°C',
         textAlign: TextAlign.center,
@@ -811,8 +672,7 @@ class _ClimateControlsState extends State<ClimateControls>
         row('Horizontal swing', Icons.swap_horiz, horizontal),
       if (vertical != null) row('Vertical swing', Icons.swap_vert, vertical),
     ];
-    final advanced = <Widget>[
-      if (target != null) fineTemperature(target),
+    final additional = <Widget>[
       if (horizontalDirection != null)
         airflow(
           'Horizontal swing',
@@ -857,9 +717,7 @@ class _ClimateControlsState extends State<ClimateControls>
           const SizedBox(height: 8),
           card(row('Fan speed', Icons.air, fan)),
         ],
-        if (swingRows.isNotEmpty ||
-            horizontalDirection != null ||
-            verticalDirection != null) ...[
+        if (swingRows.isNotEmpty) ...[
           const SizedBox(height: 8),
           card(
             Column(
@@ -888,43 +746,13 @@ class _ClimateControlsState extends State<ClimateControls>
                     );
                   },
                 ),
-                if (horizontalDirection != null ||
-                    verticalDirection != null) ...[
-                  const Divider(height: 16),
-                  if (horizontalDirection != null)
-                    directionSummary('Horizontal direction', horizontal),
-                  if (verticalDirection != null)
-                    directionSummary('Vertical direction', vertical),
-                ],
               ],
             ),
           ),
         ],
-        if (advanced.isNotEmpty) ...[
+        for (final control in additional) ...[
           const SizedBox(height: 8),
-          card(
-            ExpansionTile(
-              key: const ValueKey('climate-more-settings'),
-              tilePadding: EdgeInsets.zero,
-              childrenPadding: EdgeInsets.zero,
-              dense: true,
-              visualDensity: VisualDensity.compact,
-              title: const Copy(
-                'Other settings',
-                bold: true,
-                size: DeviceTypography.section,
-                lineHeight: DeviceTypography.lineHeight,
-              ),
-              leading: const Icon(Icons.tune, size: 20),
-              children: [
-                for (var i = 0; i < advanced.length; i++) ...[
-                  if (i > 0) const Divider(height: 20),
-                  advanced[i],
-                ],
-              ],
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-          ),
+          card(control),
         ],
         if (receipt != null &&
             receipt['device_id'] == c.selectedDevice &&
@@ -992,136 +820,4 @@ class _ClimateControlsState extends State<ClimateControls>
       ],
     );
   }
-}
-
-/// Keeps every admitted fan preset on one line without shrinking device labels.
-class _FanPresetRow extends StatefulWidget {
-  const _FanPresetRow({
-    required this.children,
-    required this.selectedIndex,
-    required this.scrollable,
-  });
-  final List<Widget> children;
-  final int selectedIndex;
-  final bool scrollable;
-  @override
-  State<_FanPresetRow> createState() => _FanPresetRowState();
-}
-
-class _FanPresetRowState extends State<_FanPresetRow> {
-  final controller = ScrollController();
-  final itemKeys = <GlobalKey>[];
-  bool canBack = false, canForward = true;
-  double? lastWidth, lastScale;
-
-  @override
-  void initState() {
-    super.initState();
-    controller.addListener(updateEdges);
-    revealSelected();
-  }
-
-  @override
-  void didUpdateWidget(_FanPresetRow oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.selectedIndex != oldWidget.selectedIndex ||
-        widget.children.length != oldWidget.children.length ||
-        widget.scrollable != oldWidget.scrollable)
-      revealSelected();
-  }
-
-  void updateEdges() {
-    if (!mounted || !controller.hasClients) return;
-    final back = controller.offset > .5;
-    final forward =
-        controller.offset < controller.position.maxScrollExtent - .5;
-    if (back != canBack || forward != canForward) {
-      setState(() {
-        canBack = back;
-        canForward = forward;
-      });
-    }
-  }
-
-  void revealSelected() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !controller.hasClients) return;
-      final index = widget.selectedIndex;
-      if (index >= 0 && index < itemKeys.length) {
-        final object = itemKeys[index].currentContext?.findRenderObject();
-        if (object != null)
-          controller.position.ensureVisible(object, alignment: .5);
-      }
-      updateEdges();
-    });
-  }
-
-  void scroll(double direction) {
-    if (!controller.hasClients) return;
-    controller.animateTo(
-      (controller.offset +
-              direction * controller.position.viewportDimension * .75)
-          .clamp(0.0, controller.position.maxScrollExtent),
-      duration: const Duration(milliseconds: 180),
-      curve: Curves.easeOut,
-    );
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => LayoutBuilder(
-    builder: (context, constraints) {
-      while (itemKeys.length < widget.children.length) {
-        itemKeys.add(GlobalKey());
-      }
-      final scale = MediaQuery.textScalerOf(
-        context,
-      ).scale(DeviceTypography.body);
-      if (lastWidth != constraints.maxWidth || lastScale != scale) {
-        lastWidth = constraints.maxWidth;
-        lastScale = scale;
-        revealSelected();
-      }
-      final content = Row(
-        children: [
-          for (var i = 0; i < widget.children.length; i++) ...[
-            if (i > 0) const SizedBox(width: 8),
-            KeyedSubtree(key: itemKeys[i], child: widget.children[i]),
-          ],
-        ],
-      );
-      if (!widget.scrollable) return content;
-      return Row(
-        children: [
-          IconButton(
-            key: const ValueKey('climate-fan-scroll-back'),
-            tooltip: localize(context, 'Previous fan speeds'),
-            constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
-            onPressed: canBack ? () => scroll(-1) : null,
-            icon: const Icon(Icons.chevron_left),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              key: const ValueKey('climate-fan-scroll'),
-              controller: controller,
-              scrollDirection: Axis.horizontal,
-              child: content,
-            ),
-          ),
-          IconButton(
-            key: const ValueKey('climate-fan-scroll-forward'),
-            tooltip: localize(context, 'More fan speeds'),
-            constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
-            onPressed: canForward ? () => scroll(1) : null,
-            icon: const Icon(Icons.chevron_right),
-          ),
-        ],
-      );
-    },
-  );
 }

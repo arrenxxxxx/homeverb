@@ -164,7 +164,7 @@ void main() {
 
   for (final layout in [(430.0, 1.0), (320.0, 1.0), (320.0, 2.0)]) {
     testWidgets(
-      'fan presets stay on one line at ${layout.$1}px and ${layout.$2}x text',
+      'fan presets use a compact equal-width accessible grid at ${layout.$1}px and ${layout.$2}x text',
       (tester) async {
         LocaleSettings.setLocale(AppLocale.zhCn);
         final (core, c, _) = await open(tester);
@@ -185,12 +185,49 @@ void main() {
             tester.widget<ChoiceChip>(chips.at(i)).labelStyle!.fontSize,
             DeviceTypography.body,
           );
-          expect(tester.getSize(chips.at(i)).height, greaterThanOrEqualTo(44));
+          expect(tester.getSize(chips.at(i)).height, greaterThanOrEqualTo(48));
         }
-        expect(rows, hasLength(1));
-        final scroll = find.byKey(const ValueKey('climate-fan-scroll'));
-        if (layout.$1 == 430 && layout.$2 == 1) expect(scroll, findsNothing);
-        if (layout.$2 == 2) expect(scroll, findsOneWidget);
+        expect(rows, hasLength(layout.$2 == 1 ? 2 : 3));
+        expect(find.byKey(const ValueKey('climate-fan-scroll')), findsNothing);
+        final width = tester.getSize(chips.first).width;
+        for (var i = 0; i < 6; i++) {
+          expect(tester.getSize(chips.at(i)).width, closeTo(width, .01));
+          final face = find.descendant(
+            of: chips.at(i),
+            matching: find.byType(Material),
+          );
+          expect(tester.getSize(face).width, closeTo(width, .01));
+        }
+        if (layout.$2 == 1) {
+          Rect faceRect(int index) => tester.getRect(
+            find.descendant(
+              of: chips.at(index),
+              matching: find.byType(Material),
+            ),
+          );
+          expect(faceRect(3).top - faceRect(0).bottom, closeTo(4, .01));
+        }
+        final grid = tester.widget<Wrap>(
+          find.descendant(
+            of: find.byKey(const ValueKey('climate-options-grid:wind_speed')),
+            matching: find.byType(Wrap),
+          ),
+        );
+        expect(grid.runSpacing, 0);
+        final modes = find.descendant(
+          of: find.byKey(const ValueKey('climate-row:Mode')),
+          matching: find.byType(ChoiceChip),
+        );
+        expect(modes, findsNWidgets(5));
+        final modeRows = <int, int>{};
+        final modeWidth = tester.getSize(modes.first).width;
+        for (var i = 0; i < 5; i++) {
+          final y = tester.getTopLeft(modes.at(i)).dy.round();
+          modeRows[y] = (modeRows[y] ?? 0) + 1;
+          expect(tester.getSize(modes.at(i)).width, closeTo(modeWidth, .01));
+          expect(tester.getSize(modes.at(i)).height, greaterThanOrEqualTo(48));
+        }
+        if (layout.$2 == 1) expect(modeRows.values, [3, 2]);
         final choice = climateChoice(c, {'wind_speed'})!;
         core.calls.clear();
         for (final option in choice.available(c)) {
@@ -201,30 +238,10 @@ void main() {
             ValueKey('climate-option:${choice.parameter}:$option'),
           );
           expect(tester.widget<ChoiceChip>(selected).selected, true);
-          final viewport = tester.getRect(
-            scroll.evaluate().isEmpty ? fan : scroll,
-          );
+          final viewport = tester.getRect(fan);
           final bounds = tester.getRect(selected);
           expect(bounds.left, greaterThanOrEqualTo(viewport.left - 1));
           expect(bounds.right, lessThanOrEqualTo(viewport.right + 1));
-        }
-        if (layout.$2 == 2) {
-          for (final key in [
-            'climate-fan-scroll-back',
-            'climate-fan-scroll-forward',
-          ]) {
-            final arrow = find.byKey(ValueKey(key));
-            for (
-              var step = 0;
-              step < 12 && tester.widget<IconButton>(arrow).onPressed != null;
-              step++
-            ) {
-              await tester.ensureVisible(arrow);
-              await tester.tap(arrow);
-              await tester.pumpAndSettle();
-            }
-            expect(tester.widget<IconButton>(arrow).onPressed, isNull);
-          }
         }
         expect(
           core.calls.where((call) => call['method'] == 'execute'),
@@ -436,7 +453,6 @@ void main() {
       }
       await c.refresh();
       await tester.pumpAndSettle();
-      await tap(tester, find.byKey(const ValueKey('climate-more-settings')));
       expect(find.text('Cool energy saving'), findsOneWidget);
       expect(find.text('Strong cooling'), findsOneWidget);
       expect(find.text('Light sensing'), findsOneWidget);
@@ -477,99 +493,101 @@ void main() {
     },
   );
 
-  testWidgets('temperature slider sends once on release within device bounds', (
-    tester,
-  ) async {
-    final (core, c, app) = await open(tester);
-    final climate = core.capabilities.first;
-    climate['properties']['target_temperature'] = {
-      'type': 'number',
-      'readable': true,
-      'writable': true,
-    };
-    climate['actions']['set'] = setter(
-      {
-        'target_temperature': {
-          'type': 'number',
-          'minimum': 18,
-          'maximum': 27,
-          'multipleOf': .5,
+  testWidgets(
+    'target temperature has one primary control with bounded half-degree steps',
+    (tester) async {
+      final (core, c, app) = await open(tester);
+      final climate = core.capabilities.first;
+      climate['properties']['target_temperature'] = {
+        'type': 'number',
+        'readable': true,
+        'writable': true,
+      };
+      climate['actions']['set'] = setter(
+        {
+          'target_temperature': {
+            'type': 'number',
+            'minimum': 18,
+            'maximum': 27,
+            'multipleOf': .5,
+          },
         },
-      },
-      required: ['target_temperature'],
-    );
-    core.observations['climate.target_temperature'] = 24.0;
-    await c.refresh();
-    await tester.pumpAndSettle();
-    core.calls.clear();
-    expect(
-      find.byKey(const ValueKey('climate-temperature-slider')),
-      findsNothing,
-    );
-    await tap(tester, find.byKey(const ValueKey('climate-more-settings')));
-    var slider = tester.widget<Slider>(
-      find.byKey(const ValueKey('climate-temperature-slider')),
-    );
-    expect((slider.min, slider.max, slider.divisions), (18.0, 27.0, 18));
-    slider.onChangeStart!(24);
-    slider.onChanged!(25.5);
-    await tester.pump();
-    expect(core.calls, isEmpty);
-    slider.onChangeEnd!(25.5);
-    await tester.pumpAndSettle();
-    expect(app.currentState!.id, 'C01');
-    expect(
-      core.calls
-          .where((v) => v['method'] == 'execute')
-          .single['command']['arguments'],
-      {'target_temperature': 25.5},
-    );
-    expect(core.calls.where((v) => v['method'] == 'read_state').length, 1);
-    expect(c.observed('climate.target_temperature'), 24.0);
-    slider = tester.widget<Slider>(
-      find.byKey(const ValueKey('climate-temperature-slider')),
-    );
-    expect(
-      slider.value,
-      24.0,
-      reason: 'A requested target is not an observed state.',
-    );
-    core.calls.clear();
-    slider.onChangeStart!(24);
-    slider.onChangeEnd!(27.5);
-    slider.onChangeStart!(24);
-    slider.onChangeEnd!(25.25);
-    await tester.pumpAndSettle();
-    expect(core.calls, isEmpty);
-    slider.onChangeStart!(24);
-    slider.onChanged!(26);
-    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-    await tester.pumpAndSettle();
-    slider.onChangeEnd!(26);
-    await tester.pumpAndSettle();
-    expect(core.calls, isEmpty);
-    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-    await tester.pumpAndSettle();
-    slider.onChangeEnd!(26);
-    await tester.pumpAndSettle();
-    expect(core.calls, isEmpty);
-    expect(
-      tester
-          .widget<Slider>(
-            find.byKey(const ValueKey('climate-temperature-slider')),
-          )
-          .value,
-      24,
-    );
-    climate['actions']['set']['parameters']['required'] = [
-      'target_temperature',
-      'mode',
-    ];
-    await c.refresh();
-    await tester.pumpAndSettle();
-    expect(find.byType(Slider), findsNothing);
-    await tester.pumpWidget(const SizedBox());
-  });
+        required: ['target_temperature'],
+      );
+      core.observations['climate.target_temperature'] = 24.0;
+      await c.refresh();
+      await tester.pumpAndSettle();
+      core.calls.clear();
+      expect(
+        find.byKey(const ValueKey('climate-temperature-slider')),
+        findsNothing,
+      );
+      expect(find.text('Target temperature'), findsOneWidget);
+      expect(find.byKey(const ValueKey('climate-more-settings')), findsNothing);
+      expect(find.text('Other settings'), findsNothing);
+      final increase = find.byKey(const ValueKey('climate-increase'));
+      final decrease = find.byKey(const ValueKey('climate-decrease'));
+      await tap(tester, increase);
+      expect(app.currentState!.id, 'C01');
+      expect(
+        core.calls
+            .where((v) => v['method'] == 'execute')
+            .single['command']['arguments'],
+        {'target_temperature': 24.5},
+      );
+      expect(c.observed('climate.target_temperature'), 24.0);
+      expect(find.text('24°C'), findsOneWidget);
+      for (final edge in [18.0, 27.0]) {
+        core.observations['climate.target_temperature'] = edge;
+        await c.refresh();
+        await tester.pumpAndSettle();
+        expect(
+          tester.widget<IconButton>(edge == 18 ? decrease : increase).onPressed,
+          isNull,
+        );
+      }
+      core.observations['climate.target_temperature'] = 24.0;
+      await c.refresh();
+      await tester.pumpAndSettle();
+      final oldCallback = tester.widget<IconButton>(increase).onPressed!;
+      core.calls.clear();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      oldCallback();
+      await tester.pumpAndSettle();
+      expect(core.calls, isEmpty);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      oldCallback();
+      await tester.pumpAndSettle();
+      expect(core.calls, isEmpty);
+      climate['actions']['set']['parameters']['required'] = [
+        'target_temperature',
+        'mode',
+      ];
+      await c.refresh();
+      await tester.pumpAndSettle();
+      expect(find.byType(Slider), findsNothing);
+      expect(increase, findsNothing);
+      expect(decrease, findsNothing);
+      climate['actions']['set']['parameters']['required'] = [
+        'target_temperature',
+      ];
+      climate['actions']['set']['parameters']['properties']['target_temperature'] =
+          {
+            'type': 'number',
+            'enum': [23.0, 24.0, 25.0],
+          };
+      await c.refresh();
+      await tester.pumpAndSettle();
+      expect(find.text('Target temperature'), findsOneWidget);
+      expect(increase, findsNothing);
+      expect(
+        find.byKey(const ValueKey('climate-option:target_temperature:25.0')),
+        findsOneWidget,
+      );
+
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
 
   testWidgets('additional functions require actual independent capabilities', (
     tester,
@@ -592,7 +610,6 @@ void main() {
     await c.refresh();
     await tester.pumpAndSettle();
     core.calls.clear();
-    await tap(tester, find.byKey(const ValueKey('climate-more-settings')));
     await tap(tester, find.byKey(const ValueKey('climate-switch:sleep')));
     expect(
       core.calls

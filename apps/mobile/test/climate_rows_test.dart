@@ -101,7 +101,6 @@ void main() {
       core.observations['vendor.midea.ac.breezeless'] = 0;
       await c.refresh();
       await tester.pumpAndSettle();
-      await tap(tester, 'climate-more-settings');
       expect(find.byKey(const ValueKey('climate-switch:eco')), findsOneWidget);
       expect(
         find.byKey(const ValueKey('climate-option:breezeless:2')),
@@ -128,13 +127,12 @@ void main() {
       expect(c.observed('vendor.midea.ac.breezeless'), 0);
       LocaleSettings.setLocale(AppLocale.zhCn);
       await tester.pumpAndSettle();
-      final label =
-          tester
-                  .widget<ChoiceChip>(
-                    find.byKey(const ValueKey('climate-option:breezeless:2')),
-                  )
-                  .label
-              as Text;
+      final label = tester.widget<Text>(
+        find.descendant(
+          of: find.byKey(const ValueKey('climate-option:breezeless:2')),
+          matching: find.byType(Text),
+        ),
+      );
       final chinese = jsonDecode(
         File(
           '../../packages/presentation/locales/zh-CN.json',
@@ -197,7 +195,6 @@ void main() {
       );
       expect(c.observed('vendor.midea.ac.horizontal_swing'), false);
       core.calls.clear();
-      await tap(tester, 'climate-more-settings');
       await tap(tester, 'climate-option:vertical_direction:lower');
       expect(
         core.calls
@@ -221,14 +218,13 @@ void main() {
       }, 'center');
       await c.refresh();
       await tester.pumpAndSettle();
-      expect(find.text('Adjust in Other settings.'), findsOneWidget);
+      expect(find.text('Other settings'), findsNothing);
       expect(
         find.byKey(
           const ValueKey('climate-direction-summary:Vertical direction'),
         ),
         findsNothing,
       );
-      await tap(tester, 'climate-more-settings');
       final direction = find.byKey(
         const ValueKey('climate-option:horizontal_direction:left'),
       );
@@ -237,7 +233,7 @@ void main() {
       await c.refresh();
       await tester.pumpAndSettle();
       expect(tester.widget<ChoiceChip>(direction).onSelected, isNull);
-      expect(find.text('Unavailable while swing is on.'), findsOneWidget);
+      expect(find.text('Unavailable while swing is on.'), findsNothing);
       expect(
         find.text('Turn off swing before choosing a fixed direction.'),
         findsOneWidget,
@@ -250,7 +246,7 @@ void main() {
       await c.refresh();
       await tester.pumpAndSettle();
       expect(tester.widget<ChoiceChip>(direction).onSelected, isNull);
-      expect(find.text('Swing state is unknown.'), findsOneWidget);
+      expect(find.text('Swing state is unknown.'), findsNothing);
       expect(
         find.text('Refresh swing state before choosing a fixed direction.'),
         findsOneWidget,
@@ -313,7 +309,6 @@ void main() {
         find.byKey(const ValueKey('climate-switch:button_sound')),
         findsNothing,
       );
-      await tap(tester, 'climate-more-settings');
       expect(
         find.byKey(const ValueKey('climate-option:button_sound:true')),
         findsOneWidget,
@@ -475,6 +470,33 @@ void main() {
         tester.getTopLeft(horizontal).dy,
         lessThanOrEqualTo(tester.getTopLeft(vertical).dy),
       );
+      expect(find.byKey(const ValueKey('climate-more-settings')), findsNothing);
+      expect(find.text('Other settings'), findsNothing);
+      expect(find.text('Target temperature'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('climate-temperature-slider')),
+        findsNothing,
+      );
+      final ordered = [
+        'Fan speed',
+        'Horizontal swing',
+        'Horizontal direction',
+        'Sleep',
+        'Display light',
+        'Button sound',
+      ];
+      for (var i = 1; i < ordered.length; i++) {
+        expect(
+          tester
+              .getTopLeft(find.byKey(ValueKey('climate-row:${ordered[i - 1]}')))
+              .dy,
+          lessThan(
+            tester
+                .getTopLeft(find.byKey(ValueKey('climate-row:${ordered[i]}')))
+                .dy,
+          ),
+        );
+      }
       Future<void> capture(String name) async {
         await tester.runAsync(() async {
           final boundary = tester.renderObject<RenderRepaintBoundary>(
@@ -492,7 +514,6 @@ void main() {
       }
 
       await capture('main-controls');
-      await tap(tester, 'climate-more-settings');
       await tester.ensureVisible(
         find.byKey(const ValueKey('climate-switch:button_sound')),
       );
