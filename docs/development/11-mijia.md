@@ -4,6 +4,8 @@ October 30: 17 exact Mijia reference specifications supply 264 scalar read
 mappings and localized App labels. Modern QR authentication, grouped device
 publication and Core reads are integrated through Flutter with fictional evidence.
 Exact modern outlet daily-energy history uses the existing history interface.
+ADR-0105 adds typed Rust numeric property logs for 161 exact fields; Core/native/App
+reported-sample contracts and presentation remain pending.
 ADR-0104 adds 29 exact modern scalar controls across five models. Broader
 controls/history and other reference coverage remain incomplete; see the
 [coverage ledger and remaining work](14-mijia-reference-integration.md).
@@ -872,3 +874,33 @@ The existing dd51c73 APK predates both modern history and these controls.
 Broader controls/actions/events, BLE/LAN, health/media, additional model/runtime
 contracts, updated packaging and real account/phone/device acceptance remain open.
 No remote push, publication, package installation or real-device write occurred.
+
+## Typed numeric property history -- October 30, 2026
+
+ADR-0105 adds experimental typed Rust property-log requests for the 161 numeric
+fields in the existing pinned scalar mappings. Legacy and modern sessions use
+their own fixed /user/get_user_device_data endpoint and per-field codec. Keys
+come from exact SIID.PIID, type is prop, and the protected root identifier is
+preserved. Boolean, private/opaque and unmapped fields are not admitted.
+
+One explicit query spans at most 32 days and requests at most 31 records. The
+parser retains signed values, original reported units (or no unit), raw numeric
+enums and provider timestamps; it does not apply daily-energy scaling. It derives
+exact numeric domains from pinned specification evidence without changing stored
+read mappings. Foreign supplied correlations fail the response. Invalid/out-of-range
+values and every ambiguous duplicate timestamp count as rejected records. No raw
+actor identity, unknown metadata, cache write, receipt, credential mutation,
+automatic paging, fallback or renewal is added. Completeness remains unproven.
+
+Protocol evidence: 629 workspace tests passed with one ignored, excluding the
+known unrelated Meiju/macOS LAN-alias suite; a final legacy cancel/drop test also
+passed. Strict Clippy, formatting, FFI, native ABI (36 methods/57 examples and 76
+modern-account cases), documentation, schema and projection checks passed. The
+preceding Mijia run passed 227 unit and 14 compile-fail tests. See ADR-0105 for
+exact scope; no Flutter/mobile/provider acceptance is claimed by this phase.
+
+This is a protocol-library phase. Native API 1.37, public history schemas, Core
+options, CLI/MCP and App still expose only the admitted daily-energy series.
+Reported-sample contracts, protected Core admission, versioned native/App adoption
+and provider acceptance remain pending. The verified 9a6c004 APK is unchanged.
+No provider account, appliance, package installation, push or publication is used.

@@ -5,6 +5,8 @@ use homeverb_domain::Error;
 use serde_json::json;
 use std::collections::HashSet;
 
+mod community;
+mod property_history;
 mod reconciliation;
 mod statistics;
 mod writes;

@@ -29,6 +29,10 @@ class ReferenceTests(unittest.TestCase):
         self.assertEqual(sum(e['kind'] == 'property' for e in entries), 470)
         self.assertEqual(sum(e['kind'] == 'action' for e in entries), 40)
         self.assertEqual(sum(e['kind'] == 'event' for e in entries), 78)
+        self.assertEqual(sum(e.get('numeric_sample_history_status') == 'implemented_typed_rust_protocol_only'
+                             for e in entries), 161)
+        self.assertEqual(ledger['numeric_property_history']['core_native_app'],
+                         'pending_reported_samples_contract_and_integration')
         for model in ledger['models']:
             identities = [(e['kind'], e['siid'], e['iid']) for e in model['entries']]
             self.assertEqual(len(identities), len(set(identities)))

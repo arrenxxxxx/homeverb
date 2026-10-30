@@ -23,6 +23,7 @@ pub enum CloudEndpoint {
     Devices,
     Properties,
     Statistics,
+    PropertyHistory,
     SetProperty,
     Homes,
     HomeDevices,
@@ -38,6 +39,7 @@ impl CloudEndpoint {
             Self::Devices => "/home/device_list",
             Self::Properties => "/miotspec/prop/get",
             Self::Statistics => "/v2/user/statistics",
+            Self::PropertyHistory => "/user/get_user_device_data",
             Self::SetProperty => "/miotspec/prop/set",
             Self::Homes => "/v2/homeroom/gethome_merged",
             Self::HomeDevices => "/v2/home/home_device_list",
@@ -265,7 +267,7 @@ async fn transmit(
         headers.insert("content-type", HeaderValue::from_static("application/x-www-form-urlencoded"));
         headers.insert("accept-encoding", HeaderValue::from_static("identity"));
         headers.insert("user-agent", HeaderValue::from_static("Android-7.1.1-1.0.0-ONEPLUS A3010-136-ABCDEFABCDEF0 APP/xiaomi.smarthome APPV/62830"));
-        if matches!(request.endpoint, CloudEndpoint::Devices | CloudEndpoint::Properties | CloudEndpoint::Statistics | CloudEndpoint::SetProperty | CloudEndpoint::Homes | CloudEndpoint::HomeDevices) {
+        if matches!(request.endpoint, CloudEndpoint::Devices | CloudEndpoint::Properties | CloudEndpoint::Statistics | CloudEndpoint::PropertyHistory | CloudEndpoint::SetProperty | CloudEndpoint::Homes | CloudEndpoint::HomeDevices) {
             headers.insert("miot-encrypt-algorithm", HeaderValue::from_static("ENCRYPT-RC4"));
             headers.insert("x-xiaomi-protocal-flag-cli", HeaderValue::from_static("PROTOCAL-HTTP2"));
         }

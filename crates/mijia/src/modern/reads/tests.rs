@@ -606,3 +606,6 @@ mod statistics;
 
 #[path = "tests/writes.rs"]
 mod writes;
+
+#[path = "tests/property_history.rs"]
+mod property_history;

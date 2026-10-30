@@ -10,6 +10,7 @@ pub enum ModernReadEndpoint {
     Properties,
     /// Community statistics profile; distinct origin and per-field codec.
     Statistics,
+    PropertyHistory,
 }
 impl ModernReadEndpoint {
     pub fn path(self) -> &'static str {
@@ -18,6 +19,7 @@ impl ModernReadEndpoint {
             Self::Homes => "/v2/homeroom/gethome_merged",
             Self::Properties => "/miotspec/prop/get",
             Self::Statistics => "/v2/user/statistics",
+            Self::PropertyHistory => "/user/get_user_device_data",
         }
     }
     pub fn url(self) -> &'static str {
@@ -26,6 +28,7 @@ impl ModernReadEndpoint {
             Self::Homes => "https://core.api.mijia.tech/app/v2/homeroom/gethome_merged",
             Self::Properties => "https://core.api.mijia.tech/app/miotspec/prop/get",
             Self::Statistics => "https://api.mijia.tech/app/v2/user/statistics",
+            Self::PropertyHistory => "https://api.mijia.tech/app/user/get_user_device_data",
         }
     }
 }
@@ -104,7 +107,10 @@ pub(crate) async fn transmit(
             let mut cookie =
                 HeaderValue::from_str(request.cookie.as_str()).map_err(|_| invalid())?;
             cookie.set_sensitive(true);
-            let limit = if request.endpoint == ModernReadEndpoint::Statistics {
+            let limit = if matches!(
+                request.endpoint,
+                ModernReadEndpoint::Statistics | ModernReadEndpoint::PropertyHistory
+            ) {
                 crate::MAX_RESPONSE_BYTES
             } else {
                 MAX_READ_BYTES
@@ -118,7 +124,10 @@ pub(crate) async fn transmit(
                 .header("miot-accept-encoding", "GZIP")
                 .header("user-agent", request.agent.as_str())
                 .body(request.body.expose().to_vec());
-            if request.endpoint == ModernReadEndpoint::Statistics {
+            if matches!(
+                request.endpoint,
+                ModernReadEndpoint::Statistics | ModernReadEndpoint::PropertyHistory
+            ) {
                 outgoing = outgoing.header("x-xiaomi-protocal-flag-cli", "PROTOCAL-HTTP2");
             }
             let mut response = outgoing.send().await.map_err(|_| crate::failed())?;

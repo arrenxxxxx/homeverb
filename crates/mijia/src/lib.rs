@@ -6,6 +6,7 @@ mod codec;
 mod control;
 mod inventory;
 mod modern;
+mod property_history;
 mod protected;
 mod spec;
 mod statistics;
@@ -30,6 +31,7 @@ pub use modern::{
     ModernReadResponse, ModernReadTransport, ModernUnresolvedEntry, ModernUnresolvedReason,
     begin_modern_qr_login,
 };
+pub use property_history::{NumericPropertyHistory, NumericPropertyRecord, PropertyHistoryWindow};
 pub use spec::{
     ControlOption, MappedProperty, ModelMapping, SpecIndex, outlet_control_option,
     reference_setting_option,

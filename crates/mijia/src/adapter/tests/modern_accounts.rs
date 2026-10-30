@@ -131,6 +131,7 @@ impl ModernReadTransport for Peer {
             Read::Directory => {
                 json!({"list":self.devices.lock().unwrap().clone(),"has_more":false})
             }
+            Read::PropertyHistory => panic!("Property history is not exposed by this fixture."),
             Read::Statistics => {
                 assert_eq!(
                     request.endpoint().url(),

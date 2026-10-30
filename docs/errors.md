@@ -769,3 +769,14 @@ they never trigger renewal or replay. Invalid encrypted/plaintext success,
 wrong/duplicate/missing acknowledgements and oversized or malformed gzip replies
 remain uncertain after send. Cancellation and timeout preserve the same boundary.
 A request ID returns its existing receipt even after explicit protocol adoption.
+
+## Typed numeric property history
+
+ADR-0105 reuses existing protocol errors without changing public history schemas.
+Unsupported model/specification/Boolean/private fields and missing exact targets
+refuse before networking. Invalid windows, unknown source-domain shapes and wrong
+correlations fail closed. Reviewed authentication failures return AUTH_REQUIRED
+without renewal. Malformed single records are counted, while a malformed envelope,
+foreign did/key/type, excessive record count or oversized/compressed body fails
+the entire query. CANCELLED and DEADLINE_EXCEEDED retain foreground semantics.
+No history failure changes an execution outcome or authorizes replay.

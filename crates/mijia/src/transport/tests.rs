@@ -846,6 +846,51 @@ async fn statistics_tls_uses_fixed_legacy_route_and_encryption_headers_once() {
         "CAPABILITY_UNSUPPORTED"
     );
 }
+#[tokio::test]
+async fn property_history_tls_uses_fixed_legacy_route_and_encryption_headers_once() {
+    assert_eq!(
+        request(CloudEndpoint::PropertyHistory)
+            .url()
+            .unwrap()
+            .as_str(),
+        "https://api.io.mi.com/app/user/get_user_device_data"
+    );
+    let server = Server::start(
+        b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\n{}".to_vec(),
+        false,
+    )
+    .await;
+    transmit(
+        server.client.clone(),
+        Url::parse(&server.url).unwrap(),
+        &request(CloudEndpoint::PropertyHistory),
+        None,
+        &operation(),
+    )
+    .await
+    .unwrap();
+    {
+        let requests = server.requests.lock().unwrap();
+        assert_eq!(requests.len(), 1);
+        let wire = String::from_utf8_lossy(&requests[0]);
+        assert!(wire.starts_with("POST "));
+        assert!(wire.contains("miot-encrypt-algorithm: ENCRYPT-RC4"));
+        assert!(wire.contains("x-xiaomi-protocal-flag-cli: PROTOCAL-HTTP2"));
+        assert!(wire.ends_with("data=fictional"));
+    }
+    assert_eq!(
+        MijiaHttps
+            .send_control(
+                &request(CloudEndpoint::PropertyHistory),
+                &WriteProgress::default(),
+                &operation()
+            )
+            .await
+            .unwrap_err()
+            .code,
+        "CAPABILITY_UNSUPPORTED"
+    );
+}
 
 fn modern_request(endpoint: crate::ModernAuthEndpoint) -> crate::ModernAuthRequest {
     use crate::ModernAuthEndpoint as E;
@@ -971,10 +1016,16 @@ async fn modern_auth_tls_cancellation_deadline_and_drop_close_socket() {
 async fn modern_reference_tls_has_exact_read_headers_and_refuses_redirect_encoding_and_size() {
     use crate::modern::reads::transport::{fixture_request, transmit};
     use crate::{ModernContentEncoding, ModernReadEndpoint as E};
-    for endpoint in [E::Directory, E::Homes, E::Properties, E::Statistics] {
+    for endpoint in [
+        E::Directory,
+        E::Homes,
+        E::Properties,
+        E::Statistics,
+        E::PropertyHistory,
+    ] {
         assert_eq!(
             Url::parse(endpoint.url()).unwrap().host_str(),
-            Some(if endpoint == E::Statistics {
+            Some(if matches!(endpoint, E::Statistics | E::PropertyHistory) {
                 "api.mijia.tech"
             } else {
                 "core.api.mijia.tech"
@@ -1026,7 +1077,7 @@ async fn modern_reference_tls_has_exact_read_headers_and_refuses_redirect_encodi
             assert!(wire.contains("user-agent: Android-13-11.7.709-XiaomiHome"));
             assert_eq!(
                 wire.contains("x-xiaomi-protocal-flag-cli: PROTOCAL-HTTP2"),
-                endpoint == E::Statistics
+                matches!(endpoint, E::Statistics | E::PropertyHistory)
             );
             assert!(wire.contains("cUserId=fictional-c-user"));
             assert!(!wire.contains("passToken"));
@@ -1039,65 +1090,70 @@ async fn modern_reference_tls_has_exact_read_headers_and_refuses_redirect_encodi
 #[tokio::test]
 async fn modern_reference_tls_untrusted_peer_cancellation_deadline_and_drop_are_bounded() {
     use crate::modern::reads::transport::{fixture_request, transmit};
-    for mode in 0..5 {
-        let server = Server::start(vec![], true).await;
-        let mut op = operation();
-        if mode == 0 {
-            op.cancellation.cancel();
-        }
-        if mode == 2 {
-            op.deadline = tokio::time::Instant::now() + Duration::from_millis(200);
-        }
-        let request = fixture_request(crate::ModernReadEndpoint::Directory);
-        if mode == 4 {
-            assert_eq!(
-                transmit(
-                    client_builder().build().unwrap(),
-                    Url::parse(&server.url).unwrap(),
-                    &request,
-                    &op
-                )
-                .await
-                .unwrap_err()
-                .code,
-                "MIJIA_REQUEST_FAILED"
-            );
-            assert!(server.requests.lock().unwrap().is_empty());
-            continue;
-        }
-        let mut pending = Box::pin(transmit(
-            server.client.clone(),
-            Url::parse(&server.url).unwrap(),
-            &request,
-            &op,
-        ));
-        if mode == 0 {
-            assert_eq!(pending.await.unwrap_err().code, "CANCELLED");
-            assert_eq!(server.connections.load(Ordering::SeqCst), 0);
-            continue;
-        }
-        loop {
-            tokio::select! {
-                r=&mut pending=>panic!("Unexpected {r:?}"),
-                _=tokio::time::sleep(Duration::from_millis(1))=>{if !server.requests.lock().unwrap().is_empty(){break;}}
+    for endpoint in [
+        crate::ModernReadEndpoint::Directory,
+        crate::ModernReadEndpoint::PropertyHistory,
+    ] {
+        for mode in 0..5 {
+            let server = Server::start(vec![], true).await;
+            let mut op = operation();
+            if mode == 0 {
+                op.cancellation.cancel();
             }
-        }
-        if mode == 1 {
-            op.cancellation.cancel();
-            assert_eq!(pending.await.unwrap_err().code, "CANCELLED");
-        } else if mode == 2 {
-            assert_eq!(pending.await.unwrap_err().code, "DEADLINE_EXCEEDED");
-        } else {
-            drop(pending);
-        }
-        tokio::time::timeout(Duration::from_secs(2), async {
-            while server.closed.load(Ordering::SeqCst) == 0 {
-                tokio::time::sleep(Duration::from_millis(1)).await;
+            if mode == 2 {
+                op.deadline = tokio::time::Instant::now() + Duration::from_millis(200);
             }
-        })
-        .await
-        .unwrap();
-        assert_eq!(server.connections.load(Ordering::SeqCst), 1);
+            let request = fixture_request(endpoint);
+            if mode == 4 {
+                assert_eq!(
+                    transmit(
+                        client_builder().build().unwrap(),
+                        Url::parse(&server.url).unwrap(),
+                        &request,
+                        &op
+                    )
+                    .await
+                    .unwrap_err()
+                    .code,
+                    "MIJIA_REQUEST_FAILED"
+                );
+                assert!(server.requests.lock().unwrap().is_empty());
+                continue;
+            }
+            let mut pending = Box::pin(transmit(
+                server.client.clone(),
+                Url::parse(&server.url).unwrap(),
+                &request,
+                &op,
+            ));
+            if mode == 0 {
+                assert_eq!(pending.await.unwrap_err().code, "CANCELLED");
+                assert_eq!(server.connections.load(Ordering::SeqCst), 0);
+                continue;
+            }
+            loop {
+                tokio::select! {
+                    r=&mut pending=>panic!("Unexpected {r:?}"),
+                    _=tokio::time::sleep(Duration::from_millis(1))=>{if !server.requests.lock().unwrap().is_empty(){break;}}
+                }
+            }
+            if mode == 1 {
+                op.cancellation.cancel();
+                assert_eq!(pending.await.unwrap_err().code, "CANCELLED");
+            } else if mode == 2 {
+                assert_eq!(pending.await.unwrap_err().code, "DEADLINE_EXCEEDED");
+            } else {
+                drop(pending);
+            }
+            tokio::time::timeout(Duration::from_secs(2), async {
+                while server.closed.load(Ordering::SeqCst) == 0 {
+                    tokio::time::sleep(Duration::from_millis(1)).await;
+                }
+            })
+            .await
+            .unwrap();
+            assert_eq!(server.connections.load(Ordering::SeqCst), 1);
+        }
     }
 }
 

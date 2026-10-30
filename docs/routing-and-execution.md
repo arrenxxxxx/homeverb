@@ -806,3 +806,18 @@ crates/mijia/src/modern/reads/tests/writes.rs,
 crates/mijia/src/adapter/tests/modern_accounts/controls.rs and
 crates/host/tests/mijia_accounts/modern_host/controls.rs. Existing ordinary schema
 fixtures and C ABI checks retain their previous shapes and trust boundary.
+
+## Typed property-log reads
+
+ADR-0105 adds separate typed numeric property-history primitives. They use the
+selected session's fixed community history profile, never reference-codec or
+cross-protocol fallback. Each query validates the exact pinned numeric field and
+bounded window before one read, and checks lifecycle again after parsing. Reported
+log values, including negative values, are not live snapshots, daily statistics,
+actor attribution or physical write-verification evidence. No cache, receipt,
+permission, credential or saved mapping changes. Core/native/App sample-history
+admission remains a dependent phase; their existing daily-history contract is
+unchanged. Positive/negative protocol fixtures are in
+crates/mijia/src/property_history/tests.rs and
+crates/mijia/src/modern/reads/tests/property_history.rs, with fixed-origin local
+TLS coverage in crates/mijia/src/transport/tests.rs.

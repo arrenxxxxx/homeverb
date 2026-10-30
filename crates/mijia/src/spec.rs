@@ -333,6 +333,56 @@ impl ModelMapping {
         })
     }
 
+    /// Derive a temporary numeric-log domain without changing persisted read mappings.
+    pub(crate) fn numeric_history_definition(&self, siid: u32, piid: u32) -> Result<Value> {
+        let source = self.source["services"]
+            .as_array()
+            .and_then(|services| services.iter().find(|s| s["iid"] == siid))
+            .and_then(|service| service["properties"].as_array())
+            .and_then(|properties| properties.iter().find(|p| p["iid"] == piid))
+            .ok_or_else(invalid)?;
+        let property: Property = serde_json::from_value(source.clone()).map_err(|_| invalid())?;
+        let mut definition = property.definition()?.ok_or_else(invalid)?;
+        if !matches!(definition["type"].as_str(), Some("number" | "integer"))
+            || !property.access.iter().any(|a| a == "read")
+            || property.range.is_some() && property.values.is_some()
+        {
+            return Err(invalid());
+        }
+        if let Some(values) = property.values {
+            if values.is_empty()
+                || values.len() > 128
+                || values.iter().any(|v| !within_format(&v.value, &definition))
+            {
+                return Err(invalid());
+            }
+            definition["enum"] = json!(values.into_iter().map(|v| v.value).collect::<Vec<_>>());
+        } else if let Some(range) = property.range {
+            if range.len() != 3
+                || !range.iter().all(|v| v.is_finite())
+                || range[0] > range[1]
+                || range[2] <= 0.0
+                || !within_format(&json!(range[0]), &definition)
+                || !within_format(&json!(range[1]), &definition)
+                || definition["type"] == "integer" && range[2].fract() != 0.0
+            {
+                return Err(invalid());
+            }
+            // The pinned ranges are zero-aligned. Refuse a future offset grid
+            // instead of silently changing its allowed values to multipleOf.
+            let ratio = range[0] / range[2];
+            if !ratio.is_finite() || (ratio - ratio.round()).abs() > 1e-9 {
+                return Err(invalid());
+            }
+            definition["minimum"] = json!(range[0]);
+            definition["maximum"] = json!(range[1]);
+            definition["multipleOf"] = json!(range[2]);
+        }
+        definition["readable"] = json!(true);
+        definition["writable"] = json!(false);
+        Ok(definition)
+    }
+
     /// Re-derive saved mappings from the same protected public-spec evidence. Public
     /// descriptors or edited derived fields cannot select another wire property.
     pub(crate) fn validate_saved(&self) -> Result<()> {

@@ -67,6 +67,7 @@
           "name": "manufacturer",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -76,6 +77,7 @@
           "name": "model",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -85,6 +87,7 @@
           "name": "serial-number",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -94,6 +97,7 @@
           "name": "firmware-revision",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -103,6 +107,7 @@
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -112,6 +117,7 @@
           "name": "brightness",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -121,6 +127,7 @@
           "name": "color-temperature",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -130,6 +137,7 @@
           "name": "mode",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -139,6 +147,7 @@
           "name": "default-power-on-state",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -148,6 +157,7 @@
           "name": "flex-switch",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -157,6 +167,7 @@
           "name": "night-light-switch",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -194,6 +205,7 @@
           "name": "remote-control-addable",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -203,6 +215,7 @@
           "name": "remote-control-list",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -212,6 +225,7 @@
           "name": "remote-control-list",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -221,6 +235,7 @@
           "name": "remote-control-list",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -230,6 +245,7 @@
           "name": "remote-control-list",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -239,6 +255,7 @@
           "name": "remote-control-addable",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -283,6 +300,7 @@
           "name": "brightness-switch",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -292,6 +310,7 @@
           "name": "colortemperature-add",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -301,6 +320,7 @@
           "name": "colortemperatre-dec",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -310,6 +330,7 @@
           "name": "colortemperature-sw",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -319,6 +340,7 @@
           "name": "on-or-brightness",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -328,6 +350,7 @@
           "name": "on-or-colortemp",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -337,6 +360,7 @@
           "name": "brightness-add",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -346,6 +370,7 @@
           "name": "brightness-dec",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -355,6 +380,7 @@
           "name": "delay",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -364,6 +390,7 @@
           "name": "fade-time",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -373,6 +400,7 @@
           "name": "lowest-brightness",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -382,6 +410,7 @@
           "name": "lock-state",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -391,6 +420,7 @@
           "name": "light-mode-one",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -400,6 +430,7 @@
           "name": "light-mode-two",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -409,6 +440,7 @@
           "name": "light-mode-three",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -418,6 +450,7 @@
           "name": "light-mode-four",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -427,6 +460,7 @@
           "name": "sleep-config",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -436,6 +470,7 @@
           "name": "factory-reset",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -445,6 +480,7 @@
           "name": "get",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -454,6 +490,7 @@
           "name": "breathing-mode-set",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -463,6 +500,7 @@
           "name": "beat-mode-set",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -472,6 +510,7 @@
           "name": "binding-id",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -481,6 +520,7 @@
           "name": "binding-id-b",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -490,6 +530,7 @@
           "name": "master-slave-switch",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -499,6 +540,7 @@
           "name": "interactive",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -508,6 +550,7 @@
           "name": "very-dark-brightness",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -517,6 +560,7 @@
           "name": "rhythm-function",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -526,6 +570,7 @@
           "name": "light-mode-a",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -535,6 +580,7 @@
           "name": "light-mode-b",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -544,6 +590,7 @@
           "name": "light-mode-c",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -553,6 +600,7 @@
           "name": "light-mode-d",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -562,6 +610,7 @@
           "name": "light-mode-e",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         }
       ]
@@ -587,6 +636,7 @@
           "name": "manufacturer",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -596,6 +646,7 @@
           "name": "model",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -605,6 +656,7 @@
           "name": "serial-number",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -614,6 +666,7 @@
           "name": "firmware-revision",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -623,6 +676,7 @@
           "name": "serial-no",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -632,6 +686,7 @@
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "implemented_native_outlet_control_legacy_and_modern",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 1
         },
         {
@@ -641,6 +696,7 @@
           "name": "default-power-on-state",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "implemented_native_outlet_control_legacy_and_modern",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 1
         },
         {
@@ -650,6 +706,7 @@
           "name": "fault",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 1
         },
         {
@@ -666,6 +723,7 @@
           "name": "physical-controls-locked",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "implemented_native_outlet_control_legacy_and_modern",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -675,6 +733,7 @@
           "name": "power-consumption",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -684,6 +743,7 @@
           "name": "electric-power",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -693,6 +753,7 @@
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "implemented_native_outlet_control_legacy_and_modern",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -702,6 +763,7 @@
           "name": "mode",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 1
         },
         {
@@ -711,6 +773,7 @@
           "name": "start-time",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -720,6 +783,7 @@
           "name": "end-time",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -729,6 +793,7 @@
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -738,6 +803,7 @@
           "name": "power",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -747,6 +813,7 @@
           "name": "protect-time",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -756,6 +823,7 @@
           "name": "status",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -765,6 +833,7 @@
           "name": "data-value",
           "read_status": "opaque_value_requires_separate_contract",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -774,6 +843,7 @@
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -783,6 +853,7 @@
           "name": "duration",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -792,6 +863,7 @@
           "name": "left-time",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -808,6 +880,7 @@
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -817,6 +890,7 @@
           "name": "power",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -826,6 +900,7 @@
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -835,6 +910,7 @@
           "name": "over-ele-day",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -844,6 +920,7 @@
           "name": "over-ele-month",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -867,6 +944,7 @@
           "name": "on-off-count",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -876,6 +954,7 @@
           "name": "temperature",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -885,6 +964,7 @@
           "name": "power",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -894,6 +974,7 @@
           "name": "protect-time",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -903,6 +984,7 @@
           "name": "power-ext",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         }
       ]
@@ -939,6 +1021,7 @@
           "name": "manufacturer",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -948,6 +1031,7 @@
           "name": "model",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -957,6 +1041,7 @@
           "name": "serial-number",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -966,6 +1051,7 @@
           "name": "firmware-revision",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -975,6 +1061,7 @@
           "name": "serial-no",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -984,6 +1071,7 @@
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 1
         },
         {
@@ -993,6 +1081,7 @@
           "name": "mode",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 1
         },
         {
@@ -1002,6 +1091,7 @@
           "name": "fan-level",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 1
         },
         {
@@ -1011,6 +1101,7 @@
           "name": "fault",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 1
         },
         {
@@ -1020,6 +1111,7 @@
           "name": "horizontal-swing",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 1
         },
         {
@@ -1029,6 +1121,7 @@
           "name": "horizontal-swing-included-angle",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 1
         },
         {
@@ -1038,6 +1131,7 @@
           "name": "vertical-swing",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 1
         },
         {
@@ -1047,6 +1141,7 @@
           "name": "vertical-swing-included-angle",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 1
         },
         {
@@ -1056,6 +1151,7 @@
           "name": "anion",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 1
         },
         {
@@ -1072,6 +1168,7 @@
           "name": "timing",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 1
         },
         {
@@ -1081,6 +1178,7 @@
           "name": "reserve",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 1
         },
         {
@@ -1090,6 +1188,7 @@
           "name": "quiet",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 1
         }
       ]
@@ -1114,6 +1213,7 @@
           "name": "manufacturer",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1123,6 +1223,7 @@
           "name": "model",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1132,6 +1233,7 @@
           "name": "serial-number",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1141,6 +1243,7 @@
           "name": "firmware-revision",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1150,6 +1253,7 @@
           "name": "serial-no",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1159,6 +1263,7 @@
           "name": "temperature",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -1168,6 +1273,7 @@
           "name": "relative-humidity",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -1177,6 +1283,7 @@
           "name": "battery-level",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -1186,6 +1293,7 @@
           "name": "button-type",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1195,6 +1303,7 @@
           "name": "mode",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -1240,6 +1349,7 @@
           "name": "manufacturer",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1249,6 +1359,7 @@
           "name": "model",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1258,6 +1369,7 @@
           "name": "serial-number",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1267,6 +1379,7 @@
           "name": "firmware-revision",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1276,6 +1389,7 @@
           "name": "serial-no",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1285,6 +1399,7 @@
           "name": "operation-position",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1294,6 +1409,7 @@
           "name": "operation-method",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1303,6 +1419,7 @@
           "name": "lock-action",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1312,6 +1429,7 @@
           "name": "operation-id",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1321,6 +1439,7 @@
           "name": "current-time",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1330,6 +1449,7 @@
           "name": "abnormal-condition",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1353,6 +1473,7 @@
           "name": "door-state",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -1362,6 +1483,7 @@
           "name": "battery-level",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -1371,6 +1493,7 @@
           "name": "charging-state",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -1380,6 +1503,7 @@
           "name": "current-time",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1396,6 +1520,7 @@
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1405,6 +1530,7 @@
           "name": "status",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -1414,6 +1540,7 @@
           "name": "night-shot",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -1423,6 +1550,7 @@
           "name": "wdr-mode",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1432,6 +1560,7 @@
           "name": "eco",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1441,6 +1570,7 @@
           "name": "ringtone",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -1450,6 +1580,7 @@
           "name": "image-distortion-correction",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1459,6 +1590,7 @@
           "name": "cloud-video-id",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1468,6 +1600,7 @@
           "name": "current-time",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1477,6 +1610,7 @@
           "name": "auto-screen-on",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1507,6 +1641,7 @@
           "name": "detection-sensitivity",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -1516,6 +1651,7 @@
           "name": "motion-detection-start-time",
           "read_status": "opaque_value_requires_separate_contract",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1525,6 +1661,7 @@
           "name": "motion-detection-end-time",
           "read_status": "opaque_value_requires_separate_contract",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1548,6 +1685,7 @@
           "name": "battery-level",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -1564,6 +1702,7 @@
           "name": "screen-on-duration",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -1573,6 +1712,7 @@
           "name": "record-someone-pass",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1582,6 +1722,7 @@
           "name": "record-someone-stay",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1591,6 +1732,7 @@
           "name": "stay-duration",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -1600,6 +1742,7 @@
           "name": "glimmer-full-color",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1609,6 +1752,7 @@
           "name": "eco-wakeup-duration",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -1618,6 +1762,7 @@
           "name": "real-view-start-time",
           "read_status": "opaque_value_requires_separate_contract",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1627,6 +1772,7 @@
           "name": "real-view-end-time",
           "read_status": "opaque_value_requires_separate_contract",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1636,6 +1782,7 @@
           "name": "ver-wifi-detail",
           "read_status": "opaque_value_requires_separate_contract",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1645,6 +1792,7 @@
           "name": "ver-lock-detail",
           "read_status": "opaque_value_requires_separate_contract",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1654,6 +1802,7 @@
           "name": "ver-camera-detail",
           "read_status": "opaque_value_requires_separate_contract",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1663,6 +1812,7 @@
           "name": "ver-fw-camera",
           "read_status": "opaque_value_requires_separate_contract",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1672,6 +1822,7 @@
           "name": "lcd-show-mode",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -1681,6 +1832,7 @@
           "name": "battery-update-time",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -1690,6 +1842,7 @@
           "name": "device-status",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1699,6 +1852,7 @@
           "name": "online-timestamp",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -1708,6 +1862,7 @@
           "name": "customized-property",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1767,6 +1922,7 @@
           "name": "manufacturer",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1776,6 +1932,7 @@
           "name": "model",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1785,6 +1942,7 @@
           "name": "serial-number",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1794,6 +1952,7 @@
           "name": "firmware-revision",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1803,6 +1962,7 @@
           "name": "serial-no",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1812,6 +1972,7 @@
           "name": "battery-level",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -1828,6 +1989,7 @@
           "name": "mode",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -1880,6 +2042,7 @@
           "name": "manufacturer",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1889,6 +2052,7 @@
           "name": "model",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1898,6 +2062,7 @@
           "name": "serial-number",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1907,6 +2072,7 @@
           "name": "firmware-revision",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1916,6 +2082,7 @@
           "name": "status",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -1925,6 +2092,7 @@
           "name": "night-shot",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -1934,6 +2102,7 @@
           "name": "eco",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1943,6 +2112,7 @@
           "name": "ringtone",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -1952,6 +2122,7 @@
           "name": "cloud-video-id",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -1989,6 +2160,7 @@
           "name": "alarm-interval",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -1998,6 +2170,7 @@
           "name": "detection-sensitivity",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -2007,6 +2180,7 @@
           "name": "motion-detection",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2016,6 +2190,7 @@
           "name": "alarm",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2025,6 +2200,7 @@
           "name": "battery-level",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -2041,6 +2217,7 @@
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2050,6 +2227,7 @@
           "name": "volume",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -2059,6 +2237,7 @@
           "name": "motionpush-pushtype",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -2068,6 +2247,7 @@
           "name": "videodelay",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -2077,6 +2257,7 @@
           "name": "videolength",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -2086,6 +2267,7 @@
           "name": "autoreply",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2095,6 +2277,7 @@
           "name": "autoreply-week",
           "read_status": "opaque_value_requires_separate_contract",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2104,6 +2287,7 @@
           "name": "autoreply-time",
           "read_status": "opaque_value_requires_separate_contract",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2113,6 +2297,7 @@
           "name": "autoreply-item",
           "read_status": "opaque_value_requires_separate_contract",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2122,6 +2307,7 @@
           "name": "ringer-time",
           "read_status": "opaque_value_requires_separate_contract",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2131,6 +2317,7 @@
           "name": "fw-autoupgrade",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2140,6 +2327,7 @@
           "name": "eco-code",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -2149,6 +2337,7 @@
           "name": "motion-time",
           "read_status": "opaque_value_requires_separate_contract",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2158,6 +2347,7 @@
           "name": "test-spec",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2167,6 +2357,7 @@
           "name": "settingsync-time",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2176,6 +2367,7 @@
           "name": "battypedate",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2185,6 +2377,7 @@
           "name": "workinglength",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2194,6 +2387,7 @@
           "name": "startuptimes",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2203,6 +2397,7 @@
           "name": "threeday-work",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2212,6 +2407,7 @@
           "name": "syswork",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2221,6 +2417,7 @@
           "name": "pir",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2230,6 +2427,7 @@
           "name": "videonum",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2239,6 +2437,7 @@
           "name": "fourbat-work",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2248,6 +2447,7 @@
           "name": "connected",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2257,6 +2457,7 @@
           "name": "pwrdate",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2266,6 +2467,7 @@
           "name": "mcu-pir",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2275,6 +2477,7 @@
           "name": "ringer-music",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -2284,6 +2487,7 @@
           "name": "vistpush",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2293,6 +2497,7 @@
           "name": "motionpush",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2302,6 +2507,7 @@
           "name": "motion-detection",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2385,6 +2591,7 @@
           "name": "manufacturer",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2394,6 +2601,7 @@
           "name": "model",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2403,6 +2611,7 @@
           "name": "serial-number",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2412,6 +2621,7 @@
           "name": "firmware-revision",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2421,6 +2631,7 @@
           "name": "serial-no",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2430,6 +2641,7 @@
           "name": "port-c-one-info",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2439,6 +2651,7 @@
           "name": "port-c-two-info",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2448,6 +2661,7 @@
           "name": "port-c-three-info",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2457,6 +2671,7 @@
           "name": "port-a-info",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2466,6 +2681,7 @@
           "name": "scene-mode",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2475,6 +2691,7 @@
           "name": "screen-save-time",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2484,6 +2701,7 @@
           "name": "protocol-ctl",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2493,6 +2711,7 @@
           "name": "count-down-setting",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2502,6 +2721,7 @@
           "name": "c-one-countdown-time",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2511,6 +2731,7 @@
           "name": "c-two-countdown-time",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2520,6 +2741,7 @@
           "name": "c-three-down-time",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2529,6 +2751,7 @@
           "name": "usb-a-countdown-time",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2538,6 +2761,7 @@
           "name": "device-language",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2547,6 +2771,7 @@
           "name": "enter",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2556,6 +2781,7 @@
           "name": "usb-a-always-on",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2565,6 +2791,7 @@
           "name": "port-ctl",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2574,6 +2801,7 @@
           "name": "c-one-c-two-protocol",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2583,6 +2811,7 @@
           "name": "c-three-a-protocol",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2592,6 +2821,7 @@
           "name": "screenoff-while-idle",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2601,6 +2831,7 @@
           "name": "screen-dir-lock",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2610,6 +2841,7 @@
           "name": "protocol-ctl-extend",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2641,6 +2873,7 @@
           "name": "manufacturer",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2650,6 +2883,7 @@
           "name": "model",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2659,6 +2893,7 @@
           "name": "serial-number",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2668,6 +2903,7 @@
           "name": "firmware-revision",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2677,6 +2913,7 @@
           "name": "serial-no",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2686,6 +2923,7 @@
           "name": "status",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 1
         }
       ]
@@ -2710,6 +2948,7 @@
           "name": "manufacturer",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2719,6 +2958,7 @@
           "name": "model",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2728,6 +2968,7 @@
           "name": "serial-number",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2737,6 +2978,7 @@
           "name": "firmware-revision",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2746,6 +2988,7 @@
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 2
         },
         {
@@ -2755,6 +2998,7 @@
           "name": "mode",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 2
         },
         {
@@ -2808,6 +3052,7 @@
           "name": "manufacturer",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2817,6 +3062,7 @@
           "name": "model",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2826,6 +3072,7 @@
           "name": "serial-number",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2835,6 +3082,7 @@
           "name": "firmware-revision",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2844,6 +3092,7 @@
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 1
         },
         {
@@ -2853,6 +3102,7 @@
           "name": "mode",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 1
         },
         {
@@ -2869,6 +3119,7 @@
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 1
         },
         {
@@ -2878,6 +3129,7 @@
           "name": "mode",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 1
         },
         {
@@ -2951,6 +3203,7 @@
           "name": "manufacturer",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2960,6 +3213,7 @@
           "name": "model",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2969,6 +3223,7 @@
           "name": "serial-number",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2978,6 +3233,7 @@
           "name": "firmware-revision",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2987,6 +3243,7 @@
           "name": "serial-no",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -2996,6 +3253,7 @@
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3005,6 +3263,7 @@
           "name": "ptz-camera",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3014,6 +3273,7 @@
           "name": "night-shot",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -3023,6 +3283,7 @@
           "name": "time-watermark",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3032,6 +3293,7 @@
           "name": "glimmer-full-color",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3041,6 +3303,7 @@
           "name": "human-tracking",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3050,6 +3313,7 @@
           "name": "recording-mode",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -3059,6 +3323,7 @@
           "name": "image-distortion-correction",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3068,6 +3333,7 @@
           "name": "zoom-ratio",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -3077,6 +3343,7 @@
           "name": "power-frequency",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -3086,6 +3353,7 @@
           "name": "image-rollover",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -3123,6 +3391,7 @@
           "name": "status",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -3132,6 +3401,7 @@
           "name": "storage-total-space",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -3141,6 +3411,7 @@
           "name": "storage-free-space",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -3150,6 +3421,7 @@
           "name": "storage-used-space",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -3159,6 +3431,7 @@
           "name": "dialog-ejected",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3168,6 +3441,7 @@
           "name": "remaining-recording-duration",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -3191,6 +3465,7 @@
           "name": "motion-detection",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3200,6 +3475,7 @@
           "name": "detection-sensitivity",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -3209,6 +3485,7 @@
           "name": "motion-detection-start-time",
           "read_status": "opaque_value_requires_separate_contract",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3218,6 +3495,7 @@
           "name": "motion-detection-end-time",
           "read_status": "opaque_value_requires_separate_contract",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3227,6 +3505,7 @@
           "name": "alarm-interval",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -3236,6 +3515,7 @@
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3245,6 +3525,7 @@
           "name": "volume",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -3254,6 +3535,7 @@
           "name": "mute",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3263,6 +3545,7 @@
           "name": "face-detection-switch",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3272,6 +3555,7 @@
           "name": "identity-id",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3281,6 +3565,7 @@
           "name": "pet-detection-switch",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3290,6 +3575,7 @@
           "name": "hand-gesture-detection-switch",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3299,6 +3585,7 @@
           "name": "hand-gesture-name",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3308,6 +3595,7 @@
           "name": "human-detection",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3317,6 +3605,7 @@
           "name": "move-detection",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3326,6 +3615,7 @@
           "name": "babycry-detection-switch",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3335,6 +3625,7 @@
           "name": "pets-type",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3344,6 +3635,7 @@
           "name": "current-time",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3353,6 +3645,7 @@
           "name": "people-number",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -3362,6 +3655,7 @@
           "name": "pet-tracking",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3371,6 +3665,7 @@
           "name": "detection-sensitivity",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -3380,6 +3675,7 @@
           "name": "human-close-up",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3389,6 +3685,7 @@
           "name": "abnormal-sound-detection",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3398,6 +3695,7 @@
           "name": "detection-sensitivity",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -3407,6 +3705,7 @@
           "name": "zoom-close-up-function-switch",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3416,6 +3715,7 @@
           "name": "close-up-function-status",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3460,6 +3760,7 @@
           "name": "fav-area",
           "read_status": "opaque_value_requires_separate_contract",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3469,6 +3770,7 @@
           "name": "active-fav-area",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -3492,6 +3794,7 @@
           "name": "cruise-switch",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3501,6 +3804,7 @@
           "name": "cruise-cycle",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -3510,6 +3814,7 @@
           "name": "cruise-start-time",
           "read_status": "opaque_value_requires_separate_contract",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3519,6 +3824,7 @@
           "name": "cruise-end-time",
           "read_status": "opaque_value_requires_separate_contract",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3528,6 +3834,7 @@
           "name": "cruise-repetition",
           "read_status": "opaque_value_requires_separate_contract",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3537,6 +3844,7 @@
           "name": "cruise-mode",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -3546,6 +3854,7 @@
           "name": "cruise-position",
           "read_status": "opaque_value_requires_separate_contract",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3569,6 +3878,7 @@
           "name": "gop-value",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -3578,6 +3888,7 @@
           "name": "vip-offset-num",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -3587,6 +3898,7 @@
           "name": "non-vip-offset-num",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -3596,6 +3908,7 @@
           "name": "virtual-fence-switch",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3605,6 +3918,7 @@
           "name": "virtual-fence-area",
           "read_status": "opaque_value_requires_separate_contract",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3614,6 +3928,7 @@
           "name": "people-fence-in",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3623,6 +3938,7 @@
           "name": "people-fence-out",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3632,6 +3948,7 @@
           "name": "area-shape",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -3641,6 +3958,7 @@
           "name": "area-support-concave",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3650,6 +3968,7 @@
           "name": "area-display-switch",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3659,6 +3978,7 @@
           "name": "area-count",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -3682,6 +4002,7 @@
           "name": "fire-smoke-switch",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3691,6 +4012,7 @@
           "name": "fire-smoke-alarm-switch",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3700,6 +4022,7 @@
           "name": "current-time",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3716,6 +4039,7 @@
           "name": "talk-mode",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3725,6 +4049,7 @@
           "name": "audio-codec",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3734,6 +4059,7 @@
           "name": "audio-bit-width",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3743,6 +4069,7 @@
           "name": "video-codec",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3752,6 +4079,7 @@
           "name": "audio-smp-rate",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3761,6 +4089,7 @@
           "name": "audio-channel",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3770,6 +4099,7 @@
           "name": "talk-codec",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3779,6 +4109,7 @@
           "name": "distortion-crt-osdx",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3788,6 +4119,7 @@
           "name": "distortion-crt-osdy",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3797,6 +4129,7 @@
           "name": "resolution-types",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3827,6 +4160,7 @@
           "name": "region-privacy-switch",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3836,6 +4170,7 @@
           "name": "region-privacy-area",
           "read_status": "opaque_value_requires_separate_contract",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3845,6 +4180,7 @@
           "name": "qrcode-information",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3854,6 +4190,7 @@
           "name": "self-check-items",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3863,6 +4200,7 @@
           "name": "self-check-results",
           "read_status": "opaque_value_requires_separate_contract",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3872,6 +4210,7 @@
           "name": "manual-check-results",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -3916,6 +4255,7 @@
           "name": "key-call-status",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -3939,6 +4279,7 @@
           "name": "family-guard-config",
           "read_status": "opaque_value_requires_separate_contract",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3948,6 +4289,7 @@
           "name": "clock-key",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3964,6 +4306,7 @@
           "name": "long-time-no-humang",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3973,6 +4316,7 @@
           "name": "reid-switch",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3982,6 +4326,7 @@
           "name": "identity-reid",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -3991,6 +4336,7 @@
           "name": "time",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4029,6 +4375,7 @@
           "name": "manufacturer",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4038,6 +4385,7 @@
           "name": "model",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4047,6 +4395,7 @@
           "name": "serial-number",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4056,6 +4405,7 @@
           "name": "firmware-revision",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4065,6 +4415,7 @@
           "name": "serial-no",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4074,6 +4425,7 @@
           "name": "submersion-state",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4083,6 +4435,7 @@
           "name": "submersion-state-top",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4092,6 +4445,7 @@
           "name": "alarm-switch",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4101,6 +4455,7 @@
           "name": "alarm-interval",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4110,6 +4465,7 @@
           "name": "event-type",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4119,6 +4475,7 @@
           "name": "status",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4142,6 +4499,7 @@
           "name": "battery-level",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4151,6 +4509,7 @@
           "name": "long-endurance-mode-on",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4160,6 +4519,7 @@
           "name": "customized-argument-1",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4169,6 +4529,7 @@
           "name": "customized-argument-2",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4200,6 +4561,7 @@
           "name": "manufacturer",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4209,6 +4571,7 @@
           "name": "model",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4218,6 +4581,7 @@
           "name": "serial-number",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4227,6 +4591,7 @@
           "name": "firmware-revision",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4236,6 +4601,7 @@
           "name": "serial-no",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4245,6 +4611,7 @@
           "name": "access-mode",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 1
         },
         {
@@ -4254,6 +4621,7 @@
           "name": "ip-address",
           "read_status": "private_identity_or_credentials",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4263,6 +4631,7 @@
           "name": "wifi-ssid",
           "read_status": "private_identity_or_credentials",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4272,6 +4641,7 @@
           "name": "current-time",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4281,6 +4651,7 @@
           "name": "dhcp-server-mac-adress",
           "read_status": "private_identity_or_credentials",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 1
         },
         {
@@ -4304,6 +4675,7 @@
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 1
         },
         {
@@ -4313,6 +4685,7 @@
           "name": "virtual-param",
           "read_status": "not_readable",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4351,6 +4724,7 @@
           "name": "manufacturer",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4360,6 +4734,7 @@
           "name": "model",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4369,6 +4744,7 @@
           "name": "serial-number",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4378,6 +4754,7 @@
           "name": "firmware-revision",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4387,6 +4764,7 @@
           "name": "serial-no",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4396,6 +4774,7 @@
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4405,6 +4784,7 @@
           "name": "fault",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4414,6 +4794,7 @@
           "name": "off-delay",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4423,6 +4804,7 @@
           "name": "off-delay-time",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4432,6 +4814,7 @@
           "name": "countdown-time",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4441,6 +4824,7 @@
           "name": "stove-link-status",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4450,6 +4834,7 @@
           "name": "power-on-with-light",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4459,6 +4844,7 @@
           "name": "power-off-with-light",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4468,6 +4854,7 @@
           "name": "clean-remind-on",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4477,6 +4864,7 @@
           "name": "clean-remind-time",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4486,6 +4874,7 @@
           "name": "gestures",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4495,6 +4884,7 @@
           "name": "auto-ventilation-on",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4504,6 +4894,7 @@
           "name": "pm-trig-push-value",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4513,6 +4904,7 @@
           "name": "pm-trig-fresh-value",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4522,6 +4914,7 @@
           "name": "ch4-out-auto-ventilation",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4531,6 +4924,7 @@
           "name": "auto-ventilation-on",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4540,6 +4934,7 @@
           "name": "off-delay-time",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4549,6 +4944,7 @@
           "name": "off-delay",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4558,6 +4954,7 @@
           "name": "off-delay-time",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4567,6 +4964,7 @@
           "name": "clean-remind-time",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4625,6 +5023,7 @@
           "name": "fan-level",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4634,6 +5033,7 @@
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4643,6 +5043,7 @@
           "name": "brightness",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4659,6 +5060,7 @@
           "name": "status",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4668,6 +5070,7 @@
           "name": "current-heat-level",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4677,6 +5080,7 @@
           "name": "left-time",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4686,6 +5090,7 @@
           "name": "stove-hood-linkage",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4695,6 +5100,7 @@
           "name": "working-remind-time",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4704,6 +5110,7 @@
           "name": "status",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4713,6 +5120,7 @@
           "name": "stove-hood-linkage",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4722,6 +5130,7 @@
           "name": "status",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4731,6 +5140,7 @@
           "name": "current-heat-level",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4740,6 +5150,7 @@
           "name": "status",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4784,6 +5195,7 @@
           "name": "status",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4793,6 +5205,7 @@
           "name": "current-heat-level",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4802,6 +5215,7 @@
           "name": "left-time",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4811,6 +5225,7 @@
           "name": "current-heat-level",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4820,6 +5235,7 @@
           "name": "status",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4829,6 +5245,7 @@
           "name": "dry-cleaning-timing-on",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4838,6 +5255,7 @@
           "name": "dry-cleaning-status",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4847,6 +5265,7 @@
           "name": "dry-cleaning-guide",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4856,6 +5275,7 @@
           "name": "dry-cleaning-left-time",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4886,6 +5306,7 @@
           "name": "battery-level",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4902,6 +5323,7 @@
           "name": "pm2.5-density",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4911,6 +5333,7 @@
           "name": "pm1",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4920,6 +5343,7 @@
           "name": "ch4-density",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4929,6 +5353,7 @@
           "name": "ch4-density",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4938,6 +5363,7 @@
           "name": "pm1",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4954,6 +5380,7 @@
           "name": "display-state",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4963,6 +5390,7 @@
           "name": "auto-screen-off",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4972,6 +5400,7 @@
           "name": "auto-screen-off-time",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4981,6 +5410,7 @@
           "name": "auto-screen-off",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -4990,6 +5420,7 @@
           "name": "auto-screen-off-time",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -4999,6 +5430,7 @@
           "name": "display-state",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -5008,6 +5440,7 @@
           "name": "auto-screen-off-time",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         }
       ]
@@ -5032,6 +5465,7 @@
           "name": "manufacturer",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -5041,6 +5475,7 @@
           "name": "model",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -5050,6 +5485,7 @@
           "name": "serial-number",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -5059,6 +5495,7 @@
           "name": "firmware-revision",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -5068,6 +5505,7 @@
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -5077,6 +5515,7 @@
           "name": "default-power-on-state",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -5086,6 +5525,7 @@
           "name": "fault",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -5102,6 +5542,7 @@
           "name": "power-consumption",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -5111,6 +5552,7 @@
           "name": "electric-power",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -5120,6 +5562,7 @@
           "name": "power-consumption-accumulation-way",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -5129,6 +5572,7 @@
           "name": "electric-current",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -5138,6 +5582,7 @@
           "name": "voltage",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -5147,6 +5592,7 @@
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -5156,6 +5602,7 @@
           "name": "indicator-set",
           "read_status": "opaque_value_requires_separate_contract",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -5165,6 +5612,7 @@
           "name": "circle-task",
           "read_status": "opaque_value_requires_separate_contract",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -5174,6 +5622,7 @@
           "name": "max-voltage",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -5183,6 +5632,7 @@
           "name": "double-click-close",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -5192,6 +5642,7 @@
           "name": "jog-mode",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 0
         },
         {
@@ -5201,6 +5652,7 @@
           "name": "child-lock",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -5210,6 +5662,7 @@
           "name": "local-timing",
           "read_status": "opaque_value_requires_separate_contract",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         }
       ]
@@ -5234,6 +5687,7 @@
           "name": "manufacturer",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -5243,6 +5697,7 @@
           "name": "model",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -5252,6 +5707,7 @@
           "name": "serial-number",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -5261,6 +5717,7 @@
           "name": "name",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -5270,6 +5727,7 @@
           "name": "firmware-revision",
           "read_status": "identity_pairing_or_media",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
         {
@@ -5279,6 +5737,7 @@
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 1
         },
         {
@@ -5288,6 +5747,7 @@
           "name": "fan-level",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 1
         },
         {
@@ -5297,6 +5757,7 @@
           "name": "mode",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 1
         },
         {
@@ -5306,6 +5767,7 @@
           "name": "relative-humidity",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 1
         },
         {
@@ -5315,6 +5777,7 @@
           "name": "pm2.5-density",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 1
         },
         {
@@ -5324,6 +5787,7 @@
           "name": "temperature",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 1
         },
         {
@@ -5333,6 +5797,7 @@
           "name": "filter-life-level",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 1
         },
         {
@@ -5342,6 +5807,7 @@
           "name": "filter-used-time",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "not_admitted_by_reference",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 1
         },
         {
@@ -5351,6 +5817,7 @@
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 1
         },
         {
@@ -5360,6 +5827,7 @@
           "name": "alarm",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 1
         },
         {
@@ -5369,6 +5837,7 @@
           "name": "physical-controls-locked",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
+          "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 1
         },
         {
@@ -5378,6 +5847,7 @@
           "name": "favorite-fan-level",
           "read_status": "implemented_exact_scalar_mapping",
           "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
+          "numeric_sample_history_status": "implemented_typed_rust_protocol_only",
           "reference_successful_instances": 1
         }
       ]
@@ -5432,6 +5902,20 @@
     "native_and_app": "existing_api_1_37_options_grants_and_confirmation_contracts",
     "uncertainty": "preserve_unknown_without_retry_or_protocol_fallback",
     "android_package": "archive_checked_9a6c004_no_runtime_acceptance",
+    "provider_acceptance": "pending"
+  },
+  "numeric_property_history": {
+    "status": "implemented_typed_rust_protocol_only",
+    "evidence": "ADR-0105; pinned MIT property-log keys and Apache value channel",
+    "route": "/user/get_user_device_data",
+    "legacy_origin": "https://api.io.mi.com/app",
+    "modern_origin": "https://api.mijia.tech/app",
+    "codec": "per_field_rc4_drop1024",
+    "request_type": "prop",
+    "numeric_fields": 161,
+    "values": "original_signed_numeric_domain_without_daily_scaling",
+    "completeness": "unproven",
+    "core_native_app": "pending_reported_samples_contract_and_integration",
     "provider_acceptance": "pending"
   },
   "modern_history": {

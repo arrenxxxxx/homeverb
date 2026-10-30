@@ -66,6 +66,9 @@ def project():
                                                  if admitted_write(model['model'], service['iid'], prop['iid'])
                                                  and 'write' in prop.get('access', [])
                                                  else 'not_admitted_by_reference'),
+                                'numeric_sample_history_status': ('implemented_typed_rust_protocol_only'
+                                                                  if not reason and prop.get('format') in SCALARS - {'bool'}
+                                                                  else 'not_admitted'),
                                 'reference_successful_instances': len(prop.get('analysis_verification', {}).get('successful_instances', []))})
                 if reason:
                     continue
@@ -148,6 +151,19 @@ def project():
                     'native_and_app': 'existing_api_1_37_options_grants_and_confirmation_contracts',
                     'uncertainty': 'preserve_unknown_without_retry_or_protocol_fallback',
                     'android_package': 'archive_checked_9a6c004_no_runtime_acceptance',
+                    'provider_acceptance': 'pending'},
+                'numeric_property_history': {
+                    'status': 'implemented_typed_rust_protocol_only',
+                    'evidence': 'ADR-0105; pinned MIT property-log keys and Apache value channel',
+                    'route': '/user/get_user_device_data',
+                    'legacy_origin': 'https://api.io.mi.com/app',
+                    'modern_origin': 'https://api.mijia.tech/app',
+                    'codec': 'per_field_rc4_drop1024',
+                    'request_type': 'prop',
+                    'numeric_fields': 161,
+                    'values': 'original_signed_numeric_domain_without_daily_scaling',
+                    'completeness': 'unproven',
+                    'core_native_app': 'pending_reported_samples_contract_and_integration',
                     'provider_acceptance': 'pending'},
                 'modern_history': {
                     'status': 'implemented_exact_daily_energy_through_core_and_native_history',

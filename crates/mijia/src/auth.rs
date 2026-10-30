@@ -71,6 +71,7 @@ impl MijiaSession {
                     CloudEndpoint::Devices
                         | CloudEndpoint::Properties
                         | CloudEndpoint::Statistics
+                        | CloudEndpoint::PropertyHistory
                         | CloudEndpoint::Homes
                         | CloudEndpoint::HomeDevices
                 ) {
