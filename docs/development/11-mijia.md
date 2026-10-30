@@ -1014,3 +1014,26 @@ explicit refresh/execute and uncertain lifecycle recovery without replay.
 Documentation, source hygiene, both reference projection tests and 25 schemas
 with 76 positive/1451 negative fixtures passed. All data is fictional; no Flutter
 run, new package or provider/device acceptance is claimed by this native phase.
+
+
+## Typed elevated power-toggle actions -- October 30, 2026
+
+[ADR-0110](../adr/0110-elevated-mijia-power-toggle-actions.md) adds five exact
+empty-input switch actions across cuco.plug.v3, yutai.plug.jdls1 and the two pinned
+opple wall-switch models. Each protected model/service/action uses the existing
+selected legacy/modern protocol and sends once without companion settings.
+Eleven exact actions now have protocol/Core support; six are already in native/App.
+
+Power toggles are elevated and non-idempotent. Independent action-family and Core
+grants plus actual trusted approval are required. The adapter re-derives risk and
+checks Core's private marker even when public metadata is forged low. Unknown
+outcomes survive cancellation, deadline, drop and reopen without another approval
+or replay. Protected logical children remain refused; wall-switch mode is not
+changed and physical load behavior is not inferred from acceptance.
+
+This phase adds typed Rust support only. API 1.40 startup and opted-in inspection
+remain limited to the earlier six low-risk actions, with explicit native rejection
+of the four new component tuples. C exports/methods, SQLite 5 and protected payload
+3 are unchanged. Versioned native/App adoption, the remaining 29 actions, events
+and real provider/phone/model acceptance remain open. The ab34f21 APK is unchanged.
+No real account, appliance request, installation, push or publication occurred.

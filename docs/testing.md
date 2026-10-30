@@ -915,3 +915,22 @@ fixtures, malformed authority refusal, late background inspection and English/
 Chinese 320-pixel double-text-scale controls. Selecting an action is not a write;
 Apply plans/executes once, repeated pending clicks do not send, and unknown remains
 unknown. No physical behavior is inferred from these fixtures.
+
+
+## Typed elevated power-toggle actions
+
+Run `cargo +1.96.0 test -p homeverb-mijia --offline --locked` for all eleven
+legacy/modern protocol action profiles and the ADR-0110 Core/SQLite journeys in
+adapter/tests/modern_accounts/actions/power.rs. Each exact model/service is
+checked for ordinary denial, trusted approval and a single correlated send.
+Forged public risk, property/foreign grants, cancelled previews, uncertain codes,
+after-send cancellation, deadline, drop and reopened/retired receipts must not
+permit replay. The tests verify released account/device locks and no extra reads
+or companion writes. No provider traffic or physical acceptance is involved.
+
+Run the Host mijia_accounts suite and rebuilt scripts/verify_native_contract.py
+to retain API 1.40's six-action limit. Power-toggle tuples are rejected by native
+startup before creating a profile and are absent from existing inspection opt-in.
+Run projection, contract, documentation and strict workspace checks. New native/
+Flutter admission and matching packaging are dependent phases, not established
+by these typed Rust tests.

@@ -228,3 +228,33 @@ async fn native_action_unknown_reopens_without_replay_and_background_cancels_pen
 fn inspection_request(card: &Value) -> Value {
     inspection(card, Some(true))
 }
+
+#[tokio::test]
+async fn api_140_does_not_admit_typed_elevated_power_toggles() {
+    for (model, component) in [
+        ("cuco.plug.v3", "switch-2"),
+        ("yutai.plug.jdls1", "switch-2"),
+        ("opple.switch.0010d5", "switch-3"),
+        ("opple.switch.0010d6", "switch-11"),
+        ("opple.switch.0010d6", "switch-12"),
+    ] {
+        let (f, _, card) = connected(model).await;
+        let w = Arc::new(Writer::default());
+        let s = reopen(&f, w.clone(), &[], false);
+        let reads = f.peer.reads.load(Ordering::SeqCst);
+        let old = call(&s, inspection(&card, None)).await;
+        let opted = call(&s, inspection(&card, Some(true))).await;
+        assert_eq!(old, opted);
+        assert!(
+            mijia_action_policy(&[MijiaActionGrant {
+                device_id: card["id"].as_str().unwrap().into(),
+                component_id: component.into(),
+                capability: "vendor.xiaomi.mijia.switch".into(),
+                action: "toggle".into(),
+            }])
+            .is_err()
+        );
+        assert_eq!(f.peer.reads.load(Ordering::SeqCst), reads);
+        assert_eq!(w.sends.load(Ordering::SeqCst), 0);
+    }
+}

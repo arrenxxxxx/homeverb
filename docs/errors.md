@@ -831,3 +831,11 @@ ADR-0109/API 1.40 rejects invalid, duplicate, excessive or foreign-adapter
 provider authorization. Missing Core/adapter authority and protected action
 admission keep their existing errors; an uncertain sent action remains `unknown`
 with its durable receipt and must not be replayed. No new error code is introduced.
+
+
+ADR-0110 power toggles return POLICY_DENIED before I/O when protected elevated
+risk lacks Core's trusted approval marker, including forged low-risk descriptors.
+Exact action-family scope is checked independently of existing property grants.
+API 1.40 refuses the new startup tuples with INVALID_ARGUMENT. Existing uncertain
+send/receipt behavior is unchanged; an unknown toggle is not a safe retry and
+cannot obtain another approval with its original request ID. No error code is added.

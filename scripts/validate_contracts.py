@@ -22,6 +22,7 @@ def checked_formats() -> FormatChecker:
 def main() -> int:
     formats = checked_formats()
     pairs = [
+        ("capability", "capability.mijia-power-action"), ("command", "command.mijia-power-action"),
         ("native-open", "native-open.mijia-actions"),
         ("native-open", "native-open.mijia-hood"),
         ("native-open", "native-open.mijia-auxiliary"),
@@ -168,6 +169,15 @@ def main() -> int:
     assert mijia_action["verification"] == "unavailable"
     for arguments in [None, [], True, {"in": []}, {"value": True}, {"confirmed": True}, {"aiid": 1}, {"siid": 2}]:
         negative.append(("closed no-argument action parameters", action_parameters, arguments))
+
+    power_toggle = load("examples/capability.mijia-power-action.json")["actions"]["toggle"]
+    assert power_toggle["risk"] == "elevated"
+    assert power_toggle["idempotency"] == "non_idempotent"
+    assert power_toggle["verification"] == "unavailable"
+    power_parameters = Draft202012Validator(power_toggle["parameters"])
+    power_parameters.validate(load("examples/command.mijia-power-action.json")["arguments"])
+    for arguments in [None, [], True, {"in": []}, {"state": True}, {"confirmed": True}, {"aiid": 1}, {"siid": 2}]:
+        negative.append(("closed elevated toggle parameters", power_parameters, arguments))
 
     outlet_capability = load("examples/capability.mijia-outlet-power.json")
     outlet_action = outlet_capability["actions"]["set"]

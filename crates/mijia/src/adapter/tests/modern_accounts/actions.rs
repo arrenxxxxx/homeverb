@@ -610,7 +610,7 @@ async fn action_inspection_refuses_foreign_identity_and_preserves_read_only_scop
         assert_eq!(t.p.reads.lock().unwrap().len(), reads);
         assert_eq!(t.w.count(), 0);
     }
-    for model in ["cuco.plug.v3", "zhimi.airpurifier.v6"] {
+    for model in ["zhimi.airpurifier.v6"] {
         let t = setup(model, false).await;
         assert!(t.options.is_empty());
     }
@@ -732,3 +732,6 @@ async fn protected_action_binding_tampering_and_missing_modern_transport_refuse_
         }
     }
 }
+
+#[path = "actions/power.rs"]
+mod power;

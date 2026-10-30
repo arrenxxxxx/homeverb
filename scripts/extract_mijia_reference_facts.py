@@ -45,10 +45,17 @@ def admitted_write(model, siid, piid):
     return False
 
 
+def admitted_power_action(model, siid, aiid):
+    return aiid == 1 and ((model in {'cuco.plug.v3', 'yutai.plug.jdls1'} and siid == 2)
+                         or (model == 'opple.switch.0010d5' and siid == 3)
+                         or (model == 'opple.switch.0010d6' and siid in {11, 12}))
+
+
 def admitted_action(model, siid, aiid):
     return ((model == 'abhome.light.wy0a01' and siid == 2 and aiid in {1, 2, 3, 4})
             or (model == 'jdjz.fan.2072fc' and siid == 2 and aiid == 1)
-            or (model == 'xiaomi.hood.cyp10' and siid == 6 and aiid == 1))
+            or (model == 'xiaomi.hood.cyp10' and siid == 6 and aiid == 1)
+            or admitted_power_action(model, siid, aiid))
 
 
 def project():
@@ -87,7 +94,9 @@ def project():
                 for item in service.get(key, []):
                     entries.append({'kind': kind, 'siid': service['iid'], 'iid': item['iid'],
                                     'name': item['type'].split(':')[3],
-                                    'status': ('implemented_core_native_app_action'
+                                    'status': ('implemented_typed_core_trusted_power_toggle'
+                                               if kind == 'action' and admitted_power_action(model['model'], service['iid'], item['iid'])
+                                               else 'implemented_core_native_app_action'
                                                if kind == 'action' and admitted_action(model['model'], service['iid'], item['iid'])
                                                else 'blocked_runtime_contract_and_separate_admission')})
                     if kind == 'action' and admitted_action(model['model'], service['iid'], item['iid']):
@@ -116,13 +125,13 @@ def project():
                    'status': ('legacy_host_and_modern_typed_read' if o['id'] in ('directory', 'homes', 'properties')
                               else 'implemented_exact_granted_legacy_and_modern_property_set'
                               if o['id'] == 'property_write_candidate'
-                              else 'implemented_six_core_native_app_no_argument_actions' if o['id'] == 'action_candidate'
+                              else 'implemented_six_app_and_five_typed_core_actions' if o['id'] == 'action_candidate'
                               else 'not_admitted_by_reference'),
                    'reason': ('Modern reference-origin typed reads and protected accounts are implemented; native and Flutter device publication and Core reads are implemented; provider acceptance remains pending.'
                               if o['id'] in ('directory', 'homes', 'properties')
                               else 'ADR-0104/0106 admit 33 reviewed scalar mappings across five exact models with grants and trusted elevated approval; no arbitrary setter or physical acceptance.'
                               if o['id'] == 'property_write_candidate'
-                              else 'ADR-0107/0108/0109 supply six exact empty-input actions through Core, native API 1.40 and version-negotiated Flutter with independent grants and durable receipts; real acceptance remains pending.'
+                              else 'ADR-0107/0108/0109 supply six exact actions through Core/native/App. ADR-0110 adds five elevated power toggles through typed Core with independent grants and trusted approval; their native/App admission and all real acceptance remain pending.'
                               if o['id'] == 'action_candidate'
                               else 'No credential crossover or arbitrary RPC; separate exact control admission is required.')}
                   for o in contract['operations']]
@@ -207,6 +216,14 @@ def project():
         'modern_profile': 'SID_mijia_core_api_mijia_tech_continuous',
         'core_native_app': 'implemented_api_1_40_opt_in_and_version_negotiated_flutter',
         'android_package': 'archive_checked_ab34f21_no_runtime_acceptance',
+        'provider_acceptance': 'pending',
+    }
+    coverage['power_toggle_actions'] = {
+        'status': 'implemented_typed_protocol_core_with_trusted_approval',
+        'evidence': 'ADR-0110; pinned exact empty-input switch actions',
+        'exact_actions': 5, 'models': 4, 'route': '/miotspec/action',
+        'risk': 'elevated', 'idempotency': 'non_idempotent',
+        'native_app': 'pending_versioned_admission',
         'provider_acceptance': 'pending',
     }
     return {CATALOG: profiles, LEDGER: coverage, ACTION_CATALOG: action_profiles}

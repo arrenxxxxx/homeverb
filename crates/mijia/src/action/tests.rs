@@ -334,7 +334,7 @@ pub(crate) fn bad_replies(query: ActionQuery) -> Vec<Vec<u8>> {
 }
 #[tokio::test]
 async fn every_pinned_action_preserves_exact_wire_identity_and_never_replays() {
-    assert_eq!(profiles().len(), 6);
+    assert_eq!(profiles().len(), 11);
     for (model, spec, query) in profiles() {
         for (code, expected) in outcomes() {
             let peer = Peer::new(query, ack(query, code));

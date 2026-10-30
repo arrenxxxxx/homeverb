@@ -37,3 +37,9 @@ def invalid_action_startups(startup):
                    [{**entries[0], 'device_id': f'40000000-0000-4000-8000-{i:012x}'}
                     for i in range(65)]]:
         yield 'invalid action grant list', {**startup, 'mijia_action_grants': grants}
+    # ADR-0110 typed Core support does not widen API 1.40 startup admission.
+    for component in ['switch-2', 'switch-3', 'switch-11', 'switch-12']:
+        yield f'typed-only elevated action {component}', {
+            **startup, 'mijia_action_grants': [{**entries[0],
+                'component_id': component, 'capability': 'vendor.xiaomi.mijia.switch',
+                'action': 'toggle'}]}

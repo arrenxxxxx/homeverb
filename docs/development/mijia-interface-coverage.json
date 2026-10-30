@@ -30,8 +30,8 @@
     {
       "id": "action_candidate",
       "route": "/miotspec/action",
-      "status": "implemented_six_core_native_app_no_argument_actions",
-      "reason": "ADR-0107/0108/0109 supply six exact empty-input actions through Core, native API 1.40 and version-negotiated Flutter with independent grants and durable receipts; real acceptance remains pending."
+      "status": "implemented_six_app_and_five_typed_core_actions",
+      "reason": "ADR-0107/0108/0109 supply six exact actions through Core/native/App. ADR-0110 adds five elevated power toggles through typed Core with independent grants and trusted approval; their native/App admission and all real acceptance remain pending."
     },
     {
       "id": "event_candidate",
@@ -714,7 +714,7 @@
           "siid": 2,
           "iid": 1,
           "name": "toggle",
-          "status": "blocked_runtime_contract_and_separate_admission"
+          "status": "implemented_typed_core_trusted_power_toggle"
         },
         {
           "kind": "property",
@@ -3006,7 +3006,7 @@
           "siid": 3,
           "iid": 1,
           "name": "toggle",
-          "status": "blocked_runtime_contract_and_separate_admission"
+          "status": "implemented_typed_core_trusted_power_toggle"
         },
         {
           "kind": "event",
@@ -3110,7 +3110,7 @@
           "siid": 11,
           "iid": 1,
           "name": "toggle",
-          "status": "blocked_runtime_contract_and_separate_admission"
+          "status": "implemented_typed_core_trusted_power_toggle"
         },
         {
           "kind": "property",
@@ -3137,7 +3137,7 @@
           "siid": 12,
           "iid": 1,
           "name": "toggle",
-          "status": "blocked_runtime_contract_and_separate_admission"
+          "status": "implemented_typed_core_trusted_power_toggle"
         },
         {
           "kind": "event",
@@ -5533,7 +5533,7 @@
           "siid": 2,
           "iid": 1,
           "name": "toggle",
-          "status": "blocked_runtime_contract_and_separate_admission"
+          "status": "implemented_typed_core_trusted_power_toggle"
         },
         {
           "kind": "property",
@@ -5950,6 +5950,17 @@
     "modern_profile": "SID_mijia_core_api_mijia_tech_continuous",
     "core_native_app": "implemented_api_1_40_opt_in_and_version_negotiated_flutter",
     "android_package": "archive_checked_ab34f21_no_runtime_acceptance",
+    "provider_acceptance": "pending"
+  },
+  "power_toggle_actions": {
+    "status": "implemented_typed_protocol_core_with_trusted_approval",
+    "evidence": "ADR-0110; pinned exact empty-input switch actions",
+    "exact_actions": 5,
+    "models": 4,
+    "route": "/miotspec/action",
+    "risk": "elevated",
+    "idempotency": "non_idempotent",
+    "native_app": "pending_versioned_admission",
     "provider_acceptance": "pending"
   }
 }

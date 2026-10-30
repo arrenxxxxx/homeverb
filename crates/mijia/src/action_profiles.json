@@ -40,6 +40,16 @@
     "out": []
   },
   {
+    "model": "cuco.plug.v3",
+    "spec_type": "urn:miot-spec-v2:device:outlet:0000A002:cuco-v3:2",
+    "service_type": "urn:miot-spec-v2:service:switch:0000780C:cuco-v3:1",
+    "siid": 2,
+    "aiid": 1,
+    "action_type": "urn:miot-spec-v2:action:toggle:00002811:cuco-v3:1",
+    "in": [],
+    "out": []
+  },
+  {
     "model": "jdjz.fan.2072fc",
     "spec_type": "urn:miot-spec-v2:device:fan:0000A005:jdjz-2072fc:1:0000D062",
     "service_type": "urn:miot-spec-v2:service:fan:00007808:jdjz-2072fc:1:0000D062",
@@ -50,12 +60,52 @@
     "out": []
   },
   {
+    "model": "opple.switch.0010d5",
+    "spec_type": "urn:miot-spec-v2:device:switch:0000A003:opple-0010d5:1:0000C808",
+    "service_type": "urn:miot-spec-v2:service:switch:0000780C:opple-0010d5:1:0000C808",
+    "siid": 3,
+    "aiid": 1,
+    "action_type": "urn:miot-spec-v2:action:toggle:00002811:opple-0010d5:1:0000C808",
+    "in": [],
+    "out": []
+  },
+  {
+    "model": "opple.switch.0010d6",
+    "spec_type": "urn:miot-spec-v2:device:switch:0000A003:opple-0010d6:1:0000C809",
+    "service_type": "urn:miot-spec-v2:service:switch:0000780C:opple-0010d6:1:0000C809",
+    "siid": 11,
+    "aiid": 1,
+    "action_type": "urn:miot-spec-v2:action:toggle:00002811:opple-0010d6:1:0000C809",
+    "in": [],
+    "out": []
+  },
+  {
+    "model": "opple.switch.0010d6",
+    "spec_type": "urn:miot-spec-v2:device:switch:0000A003:opple-0010d6:1:0000C809",
+    "service_type": "urn:miot-spec-v2:service:switch:0000780C:opple-0010d6:1:0000C809",
+    "siid": 12,
+    "aiid": 1,
+    "action_type": "urn:miot-spec-v2:action:toggle:00002811:opple-0010d6:1:0000C809",
+    "in": [],
+    "out": []
+  },
+  {
     "model": "xiaomi.hood.cyp10",
     "spec_type": "urn:miot-spec-v2:device:hood:0000A01B:xiaomi-cyp10:2",
     "service_type": "urn:miot-spec-v2:service:light:00007802:xiaomi-cyp10:1",
     "siid": 6,
     "aiid": 1,
     "action_type": "urn:miot-spec-v2:action:toggle:00002811:xiaomi-cyp10:1",
+    "in": [],
+    "out": []
+  },
+  {
+    "model": "yutai.plug.jdls1",
+    "spec_type": "urn:miot-spec-v2:device:outlet:0000A002:yutai-jdls1:1:0000D032",
+    "service_type": "urn:miot-spec-v2:service:switch:0000780C:yutai-jdls1:1:0000D032",
+    "siid": 2,
+    "aiid": 1,
+    "action_type": "urn:miot-spec-v2:action:toggle:00002811:yutai-jdls1:1:0000D032",
     "in": [],
     "out": []
   }

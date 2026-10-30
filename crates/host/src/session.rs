@@ -655,7 +655,12 @@ impl Session {
                         options.extend(
                             adapter
                                 .inspect_action_options(&descriptor.device, connection, &operation)
-                                .await?,
+                                .await?
+                                .into_iter()
+                                // API 1.40 opts into the original six low-risk actions only.
+                                .filter(|option| {
+                                    option.definition.risk == homeverb_domain::Risk::Low
+                                }),
                         );
                     }
                     serde_json::to_value(options).map_err(|_| Error::invalid())?

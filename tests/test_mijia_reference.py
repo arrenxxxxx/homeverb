@@ -24,11 +24,14 @@ class ReferenceTests(unittest.TestCase):
         projected = module.project()
         profiles, ledger = projected[module.CATALOG], projected[module.LEDGER]
         actions = projected[module.ACTION_CATALOG]
-        self.assertEqual(len(actions), 6)
+        self.assertEqual(len(actions), 11)
         self.assertEqual({(a['model'], a['siid'], a['aiid']) for a in actions}, {
             ('abhome.light.wy0a01', 2, 1), ('abhome.light.wy0a01', 2, 2),
             ('abhome.light.wy0a01', 2, 3), ('abhome.light.wy0a01', 2, 4),
             ('jdjz.fan.2072fc', 2, 1), ('xiaomi.hood.cyp10', 6, 1),
+            ('cuco.plug.v3', 2, 1), ('yutai.plug.jdls1', 2, 1),
+            ('opple.switch.0010d5', 3, 1), ('opple.switch.0010d6', 11, 1),
+            ('opple.switch.0010d6', 12, 1),
         })
         for action in actions:
             self.assertEqual(action['in'], [])
@@ -36,6 +39,8 @@ class ReferenceTests(unittest.TestCase):
             for key, kind in [('spec_type', 'device'), ('service_type', 'service'), ('action_type', 'action')]:
                 self.assertTrue(action[key].startswith(f'urn:miot-spec-v2:{kind}:'))
         self.assertEqual(ledger['no_argument_actions']['exact_actions'], 6)
+        self.assertEqual(ledger['power_toggle_actions']['exact_actions'], 5)
+        self.assertEqual(ledger['power_toggle_actions']['native_app'], 'pending_versioned_admission')
         self.assertEqual(ledger['no_argument_actions']['core_native_app'],
                          'implemented_api_1_40_opt_in_and_version_negotiated_flutter')
         self.assertEqual(len(profiles), 17)

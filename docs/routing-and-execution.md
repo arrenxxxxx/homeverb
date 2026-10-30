@@ -911,3 +911,22 @@ and the modern inspect/grant/refresh/execute/unknown journey live in
 crates/host/tests/mijia_action_grants.rs,
 crates/host/tests/mijia_accounts/modern_host/actions.rs and
 scripts/verify_native_contract.py.
+
+
+## Elevated exact power-toggle actions
+
+ADR-0110 adds five pinned outlet/wall-switch toggles to the typed action path.
+Every action needs an independent exact Core and action-family grant, followed by
+actual trusted user consent through the immutable approval boundary. The adapter
+re-derives elevated risk from protected source evidence and checks the private
+ValidatedCommand marker before scope authorization or I/O. Public low-risk
+metadata, property grants or confirmed arguments cannot bypass this check.
+
+No state read, inferred next state, companion power/mode setting or retry is added.
+Accepted remains unverified; an unknown send cannot receive another approval or
+be replayed after reopen or history retirement. Logical parent-bearing entries
+remain denied. Native API 1.40 startup/inspection do not admit these new toggles.
+Positive/negative fixtures are examples/capability.mijia-power-action.json,
+examples/command.mijia-power-action.json, scripts/validate_contracts.py and
+crates/mijia/src/adapter/tests/modern_accounts/actions/power.rs. No result or
+command schema shape changes; existing grant/approval semantics are retained.

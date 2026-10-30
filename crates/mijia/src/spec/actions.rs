@@ -47,6 +47,18 @@ impl ModelMapping {
                 }
                 ("jdjz.fan.2072fc", 2, 1) => ("fan-2", "vendor.xiaomi.mijia.fan", "toggle"),
                 ("xiaomi.hood.cyp10", 6, 1) => ("light-6", "vendor.xiaomi.mijia.light", "toggle"),
+                ("cuco.plug.v3" | "yutai.plug.jdls1", 2, 1) => {
+                    ("switch-2", "vendor.xiaomi.mijia.switch", "toggle")
+                }
+                ("opple.switch.0010d5", 3, 1) => {
+                    ("switch-3", "vendor.xiaomi.mijia.switch", "toggle")
+                }
+                ("opple.switch.0010d6", 11, 1) => {
+                    ("switch-11", "vendor.xiaomi.mijia.switch", "toggle")
+                }
+                ("opple.switch.0010d6", 12, 1) => {
+                    ("switch-12", "vendor.xiaomi.mijia.switch", "toggle")
+                }
                 _ => return None,
             };
         if !self
@@ -66,7 +78,11 @@ impl ModelMapping {
                     parameters: json!({"type":"object","properties":{},"additionalProperties":false}),
                     transports: vec![homeverb_domain::Transport::Cloud],
                     idempotency: Idempotency::NonIdempotent,
-                    risk: Risk::Low,
+                    risk: if capability == "vendor.xiaomi.mijia.switch" {
+                        Risk::Elevated
+                    } else {
+                        Risk::Low
+                    },
                     atomic: false,
                     independent_fields: false,
                     verification: VerificationMethod::Unavailable,
@@ -76,7 +92,7 @@ impl ModelMapping {
     }
 }
 
-/// Closed native startup vocabulary. Protected model admission remains independent.
+/// API 1.40 low-risk native startup vocabulary. Elevated typed actions are not exposed here.
 pub fn no_argument_action_option(
     component: &str,
     capability: &str,

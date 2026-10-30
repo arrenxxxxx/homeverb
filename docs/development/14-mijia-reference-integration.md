@@ -66,6 +66,10 @@ python3 scripts/extract_mijia_reference_facts.py --check
 cargo +1.96.0 test -p homeverb-mijia --offline --locked
 ```
 
+ADR-0110 additionally implements five elevated power-toggle actions through typed
+Core with independent trusted approval. Native/App adoption is pending; this does
+not change the six actions included in the ab34f21 APK.
+
 ## Coverage boundaries
 
 | Source item | Current disposition |
@@ -75,7 +79,7 @@ cargo +1.96.0 test -p homeverb-mijia --offline --locked
 | 78 non-readable properties | No read operation; write/event-only definitions are not state |
 | 28 opaque readable values | Separate typed/business/privacy contracts required |
 | 3 network identity values | Excluded from state and exports |
-| 40 actions | Six exact empty-input actions have Core/native/App support under ADR-0107/0108/0109; the remaining 34 actions are incomplete |
+| 40 actions | Six exact empty-input actions have Core/native/App support; five elevated power toggles have typed Core support under ADR-0110; their native/App adoption and the remaining 29 actions are incomplete |
 | 78 events | No event-history/subscription body, paging or lifecycle contract; not implemented |
 
 The archived successful reads used **SID `mijia`** and
@@ -1844,3 +1848,37 @@ and Flutter alongside the existing 33 scalar controls and bounded history views.
 No installation, real account, appliance request, remote push or publication was
 performed. Archive evidence is not provider, phone or model acceptance. The
 remaining 34 actions, event support and other reference gaps stay incomplete.
+
+
+## Typed elevated power-toggle actions -- October 30, 2026
+
+[ADR-0110](../adr/0110-elevated-mijia-power-toggle-actions.md) adds five exact
+empty-input switch actions across cuco.plug.v3, yutai.plug.jdls1 and the two pinned
+opple wall-switch models. Each protected model/service/action uses the existing
+selected legacy/modern protocol and sends once without companion settings.
+Eleven exact actions now have protocol/Core support; six are already in native/App.
+
+Power toggles are elevated and non-idempotent. Independent action-family and Core
+grants plus actual trusted approval are required. The adapter re-derives risk and
+checks Core's private marker even when public metadata is forged low. Unknown
+outcomes survive cancellation, deadline, drop and reopen without another approval
+or replay. Protected logical children remain refused; wall-switch mode is not
+changed and physical load behavior is not inferred from acceptance.
+
+This phase adds typed Rust support only. API 1.40 startup and opted-in inspection
+remain limited to the earlier six low-risk actions, with explicit native rejection
+of the four new component tuples. C exports/methods, SQLite 5 and protected payload
+3 are unchanged. Versioned native/App adoption, the remaining 29 actions, events
+and real provider/phone/model acceptance remain open. The ab34f21 APK is unchanged.
+No real account, appliance request, installation, push or publication occurred.
+
+Executed verification: the Rust 1.96 offline/locked workspace run passed 672 tests
+with one ignored, excluding homeverb-midea for its known macOS LAN-alias
+limitation. After adding two final approval-boundary cases, the seven-case power
+toggle suite passed separately; no later full-workspace count is claimed. Strict
+all-target workspace Clippy, rustfmt and diff checks passed. The rebuilt C ABI
+verifier passed 36 methods, 68 live examples and 76 modern-account boundary cases,
+including refusal of all new power-toggle startup tuples. Contract validation
+passed 25 schemas, 78 positive and 1,463 negative fixtures. Reference projection
+and its two unit tests passed; documentation and repository checks passed.
+No Flutter tests or new APK were produced in this typed-only phase.

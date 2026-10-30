@@ -1,7 +1,7 @@
 //! Independent protected action inspection and selected-protocol execution.
 use super::*;
 use crate::{ActionQuery, ControlOption};
-use homeverb_domain::Command;
+use homeverb_domain::Risk;
 
 impl MijiaAdapter {
     /// Local exact action choices, independent of grants and property setter options.
@@ -56,19 +56,35 @@ impl MijiaAdapter {
         &self,
         account: &LoadedAccount,
         binding: &Binding,
-        command: &Command,
+        validated: &ValidatedCommand,
         action: &(ActionQuery, ControlOption),
         progress: &WriteProgress,
         operation: &Operation,
     ) -> Result<AdapterOutcome> {
+        let command = validated.command();
         let (query, option) = action;
+        // Re-derived protected risk is independent of mutable public metadata.
+        match option.definition.risk {
+            Risk::Low => {}
+            Risk::Elevated if validated.has_user_approval() => {}
+            _ => {
+                return Err(Error::new(
+                    "POLICY_DENIED",
+                    "This power toggle requires trusted user approval.",
+                ));
+            }
+        }
         let policy = self.action_policy.as_ref().ok_or_else(unsupported)?;
         if binding.modern.as_ref().is_some_and(|m| m.parent.is_some()) {
             return Err(unsupported());
         }
         option.definition.validate_arguments(&command.arguments)?;
+        // The private approval marker was checked above. This check admits only
+        // the exact action-family scope and does not substitute for user consent.
+        let mut scope = option.definition.clone();
+        scope.risk = Risk::Low;
         if !policy
-            .authorize(command, &option.definition)?
+            .authorize(command, &scope)?
             .contains(&Transport::Cloud)
         {
             return Err(Error::new(

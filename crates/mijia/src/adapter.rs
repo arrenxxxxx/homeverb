@@ -1032,7 +1032,7 @@ impl Adapter for MijiaAdapter {
                 }) {
                     return self
                         .execute_no_argument_action(
-                            &account, binding, command, &action, &progress, operation,
+                            &account, binding, validated, &action, &progress, operation,
                         )
                         .await;
                 }
