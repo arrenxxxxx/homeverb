@@ -1107,3 +1107,26 @@ issues. Seven presentation tests passed. Documentation/repository hygiene and
 diff checks passed. The complete Flutter suite was not claimed: previously
 recorded macOS font/pixel/legacy-click failures remain separate. No real account,
 message, appliance write or phone acceptance was performed.
+
+
+## Exact outlet API 1.34 Android package -- October 30, 2026
+
+Clean source `9b50a89f80282d5b0786fcd86ecabc9849116ebb` produced the combined-platform
+release APK `apps/mobile/build/delivery/mijia/9b50a89/homeverb-mijia-0.2.0-9b50a89.apk`.
+Size: 76,783,114 bytes. SHA-256:
+`df26923b04abef92a1a368c9b36d4dd48ab0a96fb179eac3365038db55f2ae6c`. The adjacent `verification.json` records clean
+source, native/AAR digests, signature, exact two-ABI composition and alignment.
+
+The arm64-v8a and x86_64 native cross-builds passed with 27 exports per ABI
+and 16 KiB ELF alignment. APK v2 development signing, ZIP/ELF alignment and
+exact current-AAR matching after normal NDK stripping passed. API 1.34 includes
+the four exact outlet controls and the App confirmation flow. The initial APK
+attempt selected an unrelated Homebrew SDK and failed before assembly; the retry
+used temporary explicit Flutter SDK/JDK configuration pointing to the existing
+SDK/NDK. No SDK installation or license acceptance was performed.
+
+No installation, provider request, real message or appliance write occurred.
+Archive checks do not prove provider/phone/physical acceptance. Modern SID login,
+event breadth, additional controls and other ledger gaps remain incomplete.
+The latest fetched `origin/main` remains `ccf2975df836f8e81ccf24fa26c8b2035390c978`,
+an ancestor of this worktree; there are zero new merge commits and no push.

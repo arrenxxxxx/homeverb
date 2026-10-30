@@ -1,5 +1,15 @@
 # Implementation status and next tasks
 
+## Exact outlet package availability -- October 30, 2026
+
+The API 1.34 combined-platform APK from clean source `9b50a89` includes exact
+outlet grants and App trusted confirmation. Both ABIs, 27 exports, development
+signature, 16 KiB alignment and exact AAR matching passed. See the
+[delivery record](../apps/mobile/verification.md#exact-outlet-api-134-android-package--october-30-2026).
+No installation or live provider/device operation was performed. Modern SID,
+events and other reference feature gaps remain open.
+
+
 ## App exact outlet controls -- October 29, 2026
 
 The foreground App now negotiates API 1.34 before sending the new independent
