@@ -1,5 +1,10 @@
 # Platform and device compatibility matrix
 
+The subsequent clean-source d505ccb Android package includes API 1.41 and all
+eleven native/App actions. Both ABIs, 31 exports each, current-AAR match, signature
+and 16 KiB alignment passed; no installation or runtime acceptance is implied.
+See the [package record](../apps/mobile/verification.md#power-toggle-api-141-android-package--october-30-2026).
+
 ## Foreground App power toggles -- October 30, 2026
 
 Flutter now negotiates API 1.41 before requesting exact elevated power actions or

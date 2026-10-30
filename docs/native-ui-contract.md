@@ -2073,4 +2073,6 @@ explicit request on older libraries rather than silently omit it. The Rust
 InspectControlOptions constructor gains a Boolean field; JSON omission remains
 compatible. There are no new methods/exports or SQLite/protected payload versions.
 Flutter now negotiates this admission and uses the existing generic trusted
-confirmation form. A new APK remains pending; ab34f21 stays API 1.40.
+confirmation form. The clean-source d505ccb Android package includes API 1.41
+and has archive checks; installation and provider/phone/model acceptance remain
+pending. The earlier ab34f21 package stays API 1.40.

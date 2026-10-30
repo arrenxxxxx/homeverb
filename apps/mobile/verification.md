@@ -4546,3 +4546,27 @@ device_detail_controls_test, controls_test, component_test, localization_test,
 current_contract_test, native_test, approval_test and state_refresh_test (all
 under test/ with .dart suffixes). The final three-file run used
 mijia_power_actions_test.dart, localization_test.dart and approval_test.dart.
+
+## Power-toggle API 1.41 Android package -- October 30, 2026
+
+Clean source d505ccb57bc1ad368e320d41e451b375fdf5bd14 produced the combined-platform
+release APK apps/mobile/build/delivery/mijia/d505ccb/homeverb-mijia-0.2.0-d505ccb.apk.
+Size: 79,138,514 bytes. SHA-256:
+0228a329898b1d9d794f9eeeca63f25e955e22f29db89914e2a5450a305113d6.
+The adjacent verification.json records clean source, exact current-AAR code after
+NDK stripping, arm64-v8a/x86_64 composition, 31 exports per ABI, development
+signature and 16 KiB ZIP/Core ELF alignment. This is archive evidence, not runtime
+or distribution acceptance.
+
+Both Android native cross-builds and the universal AAR passed using the existing
+Android target toolchain, NDK 28.2.13676358, API 35 stubs and installed JDK.
+Flutter 3.47.7 assembled the release APK with temporary SDK/JDK configuration;
+the original android/local.properties was restored and source remained clean.
+The actual verifier confirmed signature, alignment, exports and exact AAR match.
+No SDK installation, app installation, real account/appliance request, push or
+publication was performed.
+
+This package contains all eleven exact actions, including five elevated power
+toggles with independent startup grants and actual trusted confirmation, alongside
+33 scalar controls and bounded history views. The remaining 29 actions, 78 events,
+specialized reference paths and provider/phone/model acceptance stay incomplete.

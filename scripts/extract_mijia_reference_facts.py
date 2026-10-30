@@ -224,6 +224,7 @@ def project():
         'exact_actions': 5, 'models': 4, 'route': '/miotspec/action',
         'risk': 'elevated', 'idempotency': 'non_idempotent',
         'native_app': 'implemented_api_1_41_opt_in_and_trusted_flutter_confirmation',
+        'android_package': 'archive_checked_d505ccb_no_runtime_acceptance',
         'provider_acceptance': 'pending',
     }
     return {CATALOG: profiles, LEDGER: coverage, ACTION_CATALOG: action_profiles}

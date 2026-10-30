@@ -227,4 +227,5 @@ defaults to false and leaves API 1.40 inspection unchanged. Every toggle needs
 actual trusted consent through the existing approval exports; startup grants are
 not consent. See the [power-toggle contract](../../docs/native-ui-contract.md#exact-elevated-power-toggle-actions-api-141).
 Flutter now negotiates API 1.41 and uses the existing trusted review/confirmation
-form. Package delivery and real acceptance remain pending.
+form. The d505ccb Android package has archive checks; runtime and real acceptance
+remain pending.

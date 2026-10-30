@@ -29,7 +29,9 @@ that package predates the new hood extension. The later
 contains all 33 reviewed controls with clean-source archive checks. API 1.40 now
 adds six exact no-argument actions through Core/native/App; that APK predates them.
 The later [ab34f21 API 1.40 package](../../apps/mobile/verification.md#no-argument-actions-api-140-android-package--october-30-2026)
-includes all six actions with clean-source archive checks.
+includes all six actions with clean-source archive checks. The subsequent
+[d505ccb API 1.41 package](../../apps/mobile/verification.md#power-toggle-api-141-android-package--october-30-2026)
+includes the five elevated power toggles as well, without runtime acceptance.
 
 - Eight-part MIoT URNs retain their exact extension; malformed/foreign URNs refuse.
 - Seventeen exact model/specification catalogs project 264 reviewed scalar read
@@ -1943,3 +1945,27 @@ Both projection unit tests, shared presentation tests and generated locale check
 passed. The known eight unrelated full-suite macOS visual/legacy-click failures
 are not claimed fixed. No new APK, installation, provider/device operation, push
 or publication occurred in this App phase.
+
+## Power-toggle API 1.41 Android package -- October 30, 2026
+
+Clean source d505ccb57bc1ad368e320d41e451b375fdf5bd14 produced the combined-platform
+release APK apps/mobile/build/delivery/mijia/d505ccb/homeverb-mijia-0.2.0-d505ccb.apk.
+Size: 79,138,514 bytes. SHA-256:
+0228a329898b1d9d794f9eeeca63f25e955e22f29db89914e2a5450a305113d6.
+The adjacent verification.json records clean source, exact current-AAR code after
+NDK stripping, arm64-v8a/x86_64 composition, 31 exports per ABI, development
+signature and 16 KiB ZIP/Core ELF alignment. This is archive evidence, not runtime
+or distribution acceptance.
+
+Both Android native cross-builds and the universal AAR passed using the existing
+Android target toolchain, NDK 28.2.13676358, API 35 stubs and installed JDK.
+Flutter 3.47.7 assembled the release APK with temporary SDK/JDK configuration;
+the original android/local.properties was restored and source remained clean.
+The actual verifier confirmed signature, alignment, exports and exact AAR match.
+No SDK installation, app installation, real account/appliance request, push or
+publication was performed.
+
+This package contains all eleven exact actions, including five elevated power
+toggles with independent startup grants and actual trusted confirmation, alongside
+33 scalar controls and bounded history views. The remaining 29 actions, 78 events,
+specialized reference paths and provider/phone/model acceptance stay incomplete.
