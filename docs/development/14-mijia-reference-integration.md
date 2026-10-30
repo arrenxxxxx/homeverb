@@ -1,5 +1,22 @@
 # 14. Mijia reference integration and remaining coverage
 
+## Latest mainline integration -- October 30, 2026
+
+The worktree now includes fetched mainline `b4f0aeb` through a linear rebase of
+112 Mijia commits, with zero merge commits above mainline. CLI/MCP event history is
+committed as `723346b`. Both locale catalogs retain all 1,944 keys and regenerated
+artifacts are consistent. Native API 1.44 and storage formats are unchanged;
+the existing 93cabfd package remains historical and has not been rebuilt with
+the newer device-page UI.
+
+Flutter analysis passed. Full tests reported 526 passed, five skipped and five
+failed; repairing the incomplete receipt descriptor fixture was followed by
+31 passing receipt/event/foreground regressions. Four known macOS font/pixel
+failures remain, and skipped captures are not visual acceptance. Seven shared
+presentation tests, three reference projection tests and contract validation
+passed. See the [execution record](../../apps/mobile/verification.md#mainline-ui-integration-and-receipt-regression----october-30-2026)
+for exact scope. No provider, physical-device or publication claim is added.
+
 ## CLI and MCP event occurrence history -- October 30, 2026
 
 [ADR-0118](../adr/0118-cli-mcp-event-history.md) adds event-history options/read to the CLI and

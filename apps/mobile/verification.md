@@ -1,5 +1,37 @@
 # Flutter implementation verification
 
+## Mainline UI integration and receipt regression -- October 30, 2026
+
+Fetched `origin/main` at `b4f0aeb1a5855de2a54a7b7de0fa2894666b8be0` and rebased
+112 Mijia phase commits onto it without a merge commit. The completed CLI/MCP
+event-history phase is now `723346b` (previously `bb8d934`). The mainline device
+interaction layout, controls, design guide and tests are retained. Both canonical
+catalogs preserve the semantic union of mainline and Mijia changes: 1,944 keys
+per locale. Regenerating translations produces no further tracked changes.
+Historical package source hashes remain historical evidence; the checked 93cabfd
+API 1.44 APK does not contain this newer mainline UI and was not rebuilt here.
+
+Executed `fvm flutter analyze`: no issues. Full `fvm flutter test --reporter
+expanded`: 526 passed, five skipped and five failed. Four failures are the known
+macOS font/pixel assertions in button_labels_test, field_alignment_test and the
+two control_labels_test cases. The fifth exposed an incomplete receipt fixture:
+its descriptor omitted capabilities required by the event-only component filter.
+The fixture now declares the existing fictional climate capability and asserts
+error-free, exact-component state refresh while preserving the original receipt
+and the no-execution check. The subsequent receipts_test, event_history_test and
+state_refresh_test run passed all 31 tests. This is not a full-suite pass; the
+five font/capture skips are not counted as runtime or visual evidence.
+
+Seven shared presentation tests, three Mijia reference-projection tests and
+contract validation (26 schemas, 88 positive and 1,966 negative fixtures) passed.
+The rebase leaves Rust, CLI, schemas and Cargo manifests/lockfile byte-identical
+to the tested pre-rebase phase; the preceding 740-pass Rust evidence retains its
+explicit Meiju exclusion. No new Rust test run is claimed for this UI-only rebase.
+No account access, provider/device operation, installation, push or publication
+occurred. Remaining Mijia coverage is unchanged: 185 writable definitions,
+25 actions, event payload/paging/subscription work and specialized paths, followed
+by real provider/phone/model acceptance.
+
 ## Event history API 1.44 Android package -- October 30, 2026
 
 Clean source 93cabfd8e6d1cf4dd343a0d213b1fe93ecf42bf3 produced the combined-platform

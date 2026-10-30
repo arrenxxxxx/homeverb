@@ -1,5 +1,14 @@
 # Implementation status and next tasks
 
+## Mainline synchronization -- October 30, 2026
+
+Fetched mainline `b4f0aeb` is now an ancestor of the Mijia branch with no merge
+commits. CLI/MCP event history is committed as `723346b`. The shared device UI is
+integrated; API 1.44/storage and the historical APK remain unchanged. See the
+[rebase and regression evidence](development/14-mijia-reference-integration.md#latest-mainline-integration----october-30-2026).
+This does not close the remaining 185 property writes, 25 actions, event payloads,
+paging/subscriptions, specialized paths or real provider/phone/model acceptance.
+
 ## CLI and MCP event occurrence history -- October 30, 2026
 
 [ADR-0118](adr/0118-cli-mcp-event-history.md) adds event-history options/read to the CLI and

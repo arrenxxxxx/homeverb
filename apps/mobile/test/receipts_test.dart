@@ -47,9 +47,13 @@ class ReceiptFixture implements CoreClient {
         return {
           'device': {
             'components': [
-              {'id': 'main'},
+              {
+                'id': 'main',
+                'capabilities': ['climate'],
+              },
             ],
           },
+          'capabilities': [fixture('capability.climate')],
         };
       case 'read_state':
         return {...fixture('state'), 'device_id': fields['device']};
@@ -135,7 +139,9 @@ void main() {
         final child = controller.receipt;
         await tap(find.text('Refresh State'));
         expect(controller.receipt, same(child));
+        expect(controller.error, isNull);
         expect(core.calls.last['method'], 'read_state');
+        expect(core.calls.last['component'], 'main');
         expect(core.calls.last['device'], child!['device_id']);
         await tap(find.byTooltip('Back'));
         expect(controller.receipt, same(core.parent));
