@@ -1848,4 +1848,6 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get vendorXiaomiMijiaPhysicalControlsLockedPhysicalControlsLocked1True => '\u5df2\u9501\u5b9a';
 	@override String get vendorXiaomiMijiaPhysicalControlsLockedPhysicalControlsLocked1False => '\u672a\u9501\u5b9a';
 	@override String get mobileAuxiliarySettingsRequireNativeApi135 => '\u8f85\u52a9\u8bbe\u7f6e\u9700\u8981\u539f\u751f\u63a5\u53e3 1.35\u3002';
+	@override String get mobileQrSignInRequiresNativeApi136 => '\u626b\u7801\u767b\u5f55\u9700\u8981\u539f\u751f\u63a5\u53e3 1.36\u3002';
+	@override String get mobileInvalidAccountOperation => '\u8d26\u53f7\u64cd\u4f5c\u65e0\u6548\u3002';
 }

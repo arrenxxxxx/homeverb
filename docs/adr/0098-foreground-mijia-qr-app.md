@@ -1,6 +1,6 @@
 # ADR-0098: Foreground Mijia QR sign-in in the App
 
-Status: accepted for implementation.
+Status: Flutter FFI client implemented; foreground QR UI integration pending.
 Date: October 30, 2026.
 
 ## Decision

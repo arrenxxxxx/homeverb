@@ -1813,5 +1813,7 @@
   "power.state.false": "关闭",
   "vendor.xiaomi.mijia.physical_controls_locked.physical_controls_locked_1.true": "已锁定",
   "vendor.xiaomi.mijia.physical_controls_locked.physical_controls_locked_1.false": "未锁定",
-  "mobile.auxiliarySettingsRequireNativeApi135": "辅助设置需要原生接口 1.35。"
+  "mobile.auxiliarySettingsRequireNativeApi135": "辅助设置需要原生接口 1.35。",
+  "mobile.qrSignInRequiresNativeApi136": "扫码登录需要原生接口 1.36。",
+  "mobile.invalidAccountOperation": "账号操作无效。"
 }

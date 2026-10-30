@@ -679,3 +679,11 @@ bytes; Host success reports are validated against the same closed native schema,
 including failed/empty directories and no physical-completeness claim. Android
 and iOS package unit tests use fictional archive/symbol reports; they do not
 establish a newly built AAR/framework/APK or signed-device acceptance.
+
+
+The Flutter modern client uses `test/fixtures/modern_account_bridge.c`, a local
+fictional ABI compiled during `modern_account_bridge_test.dart`. It has no network
+or system-secret access. A separate API 1.35 build deliberately omits modern
+symbols to check pre-lookup negotiation; paused ready-response cases check owned
+scan-array cleanup and lifecycle refusal independently of native cancellation.
+The scoped account/native suite is not full mobile or provider acceptance.

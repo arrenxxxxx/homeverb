@@ -10,6 +10,7 @@ import 'session_permissions.dart';
 export 'client_contract.dart';
 part 'native_account_login.dart';
 part 'native_account_verification.dart';
+part 'native_modern_account.dart';
 
 enum _RecoveryStage {
   previewReady,
@@ -291,14 +292,18 @@ class NativeBindings {
 }
 
 class NativeClient
-    with _InteractiveNativeLogin, _NativeAccountVerification
+    with
+        _InteractiveNativeLogin,
+        _NativeAccountVerification,
+        _NativeModernAccount
     implements
         NativeSessionClient,
         AccountClient,
         ApprovalClient,
         IdentityRecoveryClient,
         InteractiveAccountClient,
-        AccountVerificationClient {
+        AccountVerificationClient,
+        ModernAccountClient {
   NativeClient._(this.path, this.handle, this.adapter)
     : bindings = NativeBindings(path);
   final String path;
@@ -800,6 +805,7 @@ class NativeClient
       _traceRecovery(_RecoveryStage.nativeConfirmReturned);
       _clearLoginChallenges();
       _clearVerificationChallenges();
+      _clearModernChallenges();
       _identityRecoveries.clear();
       endOperation(id);
     }
@@ -820,6 +826,7 @@ class NativeClient
     if (!value) {
       _clearLoginChallenges();
       _clearVerificationChallenges();
+      _clearModernChallenges();
       _identityRecoveries.clear();
       _approvalGeneration++;
       _approvals.clear();
@@ -834,9 +841,12 @@ class NativeClient
   @override
   void cancelAll() {
     final hadLogins =
-        _loginChallenges.isNotEmpty || _verificationChallenges.isNotEmpty;
+        _loginChallenges.isNotEmpty ||
+        _verificationChallenges.isNotEmpty ||
+        _modernChallenges.isNotEmpty;
     _clearLoginChallenges();
     _clearVerificationChallenges();
+    _clearModernChallenges();
     final hadRecoveries = _identityRecoveries.isNotEmpty;
     _identityRecoveries.clear();
     _approvalGeneration++;

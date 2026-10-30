@@ -4151,3 +4151,24 @@ No installation, provider request, real message or appliance write occurred.
 Archive checks do not prove provider, phone or physical acceptance. Modern SID
 login, events, additional controls and other reference gaps remain incomplete.
 No push or publication was performed.
+
+
+## Modern account FFI client -- October 30, 2026
+
+The Dart client binds API 1.36 modern QR/session exports with separate owned byte
+buffers, same-client challenge membership and lifecycle generations. Strict DTO
+validation does not project logical directory entries into physical cards. Ten
+new fictional C-library cases cover protected transport, old libraries with no
+QR exports, malformed lengths/lifetimes/fields, foreign ownership, cancellation,
+background/close, late responses, expiry, failed-directory preservation and explicit
+operations without retries. The corrected fixture reports the exact 33-byte scan
+payload, including its final byte.
+
+Executed `fvm flutter test` for `modern_account_bridge_test.dart`,
+`account_verification_bridge_test.dart`, `account_captcha_test.dart`,
+`account_verification_test.dart`, `account_native_test.dart` and `native_test.dart`:
+67 passed. Static analysis of the client source found no issues. The known eight
+macOS full-suite font/pixel/legacy-click failures are not claimed resolved.
+Controller/widget integration, real QR scans/provider authentication, new mobile
+packaging and physical-phone acceptance remain pending. No account or appliance
+was used. The earlier `9870437` APK remains API 1.35.

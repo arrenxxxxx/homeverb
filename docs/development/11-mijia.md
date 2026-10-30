@@ -631,3 +631,26 @@ then passed all 62 focused modern C verifier cases. Contract validation passed
 1,092 negative fixtures. Both reference-projection tests, regeneration, formatting,
 documentation and repository hygiene passed. No Flutter build, new mobile package,
 authenticated login, physical-device operation or publication was performed.
+
+
+## Flutter modern-account client -- October 30, 2026
+
+The typed Flutter client now consumes all four API 1.36 functions under
+[ADR-0098](../adr/0098-foreground-mijia-qr-app.md). Version/provider negotiation
+precedes lazy symbol lookup; API 1.35 libraries without the new symbols refuse
+before lookup. Worker isolates carry only pointer addresses and nonsecret metadata.
+Native scan buffers are cleared/freed, owned scan arrays are cleared on consumption,
+attempted expired continuation, discard and lifecycle changes; foreign clients
+cannot consume them. The pending object itself schedules no timer.
+
+Closed parsers validate modern QR metadata and account/directory outcomes, including
+exact selected-account identity, provider, conservative completeness and failed
+retrieval. Explicit refresh/recover/renewal remain separate calls; no retry, automatic
+poll or cross-protocol fallback is added. Pending challenges share existing App
+cancel/background/close handling, and late results cannot restore cancelled state.
+
+Ten fictional C-ABI client tests passed as part of a 67-test affected Flutter
+account/native regression. The fixture performs no network, platform-secret or
+appliance access. Native API/storage formats are unchanged. Controller/account-page
+wiring, local QR rendering, modern account actions, Android packaging and real
+account/phone acceptance remain pending. The existing API 1.35 APK is unchanged.

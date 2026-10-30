@@ -171,3 +171,56 @@ abstract interface class AccountVerificationClient {
   );
   Future<void> discardAccountVerification(AccountVerificationPending challenge);
 }
+
+/// Owned foreground scan data. Never log, serialize, navigate to or persist it.
+abstract class ModernAccountQr {
+  Uint8List get scanData;
+  Duration get remaining;
+  void clearScan();
+  @override
+  String toString() => 'ModernAccountQr([REDACTED])';
+}
+
+enum ModernAccountOperation { refresh, recover, renew }
+
+enum ModernAccountResultKind { connected, directory, renewed }
+
+class ModernDirectoryResult {
+  const ModernDirectoryResult({
+    required this.count,
+    required this.failed,
+    required this.issues,
+    this.error,
+  });
+  final int count;
+  final bool failed;
+  final List<Json> issues;
+  final Json? error;
+}
+
+class ModernAccountResult {
+  const ModernAccountResult({
+    required this.kind,
+    required this.account,
+    this.directory,
+  });
+  final ModernAccountResultKind kind;
+  final Json account;
+  final ModernDirectoryResult? directory;
+}
+
+abstract interface class ModernAccountClient {
+  bool get supportsModernAccountLogin;
+  Future<ModernAccountQr> beginModernAccountLogin({
+    required String label,
+    String? accountId,
+  });
+  Future<ModernAccountResult> continueModernAccountLogin(
+    ModernAccountQr challenge,
+  );
+  Future<void> discardModernAccountLogin(ModernAccountQr challenge);
+  Future<ModernAccountResult> modernAccountSession(
+    String accountId,
+    ModernAccountOperation operation,
+  );
+}

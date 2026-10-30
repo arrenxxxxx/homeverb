@@ -2280,6 +2280,9 @@ String? translateSource(
     t.vendorXiaomiMijiaPhysicalControlsLockedPhysicalControlsLocked1False,
   "Auxiliary settings require native API 1.35." =>
     t.mobileAuxiliarySettingsRequireNativeApi135,
+  "QR sign-in requires native API 1.36." =>
+    t.mobileQrSignInRequiresNativeApi136,
+  "Invalid account operation." => t.mobileInvalidAccountOperation,
   _ => null,
 };
 
@@ -4599,5 +4602,8 @@ String? sourceForKey(String key) => switch (key) {
     "Unlocked",
   "mobile.auxiliarySettingsRequireNativeApi135" =>
     "Auxiliary settings require native API 1.35.",
+  "mobile.qrSignInRequiresNativeApi136" =>
+    "QR sign-in requires native API 1.36.",
+  "mobile.invalidAccountOperation" => "Invalid account operation.",
   _ => null,
 };

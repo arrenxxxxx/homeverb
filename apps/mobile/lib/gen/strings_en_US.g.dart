@@ -5480,4 +5480,10 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Auxiliary settings require native API 1.35.'
 	String get mobileAuxiliarySettingsRequireNativeApi135 => 'Auxiliary settings require native API 1.35.';
+
+	/// en-US: 'QR sign-in requires native API 1.36.'
+	String get mobileQrSignInRequiresNativeApi136 => 'QR sign-in requires native API 1.36.';
+
+	/// en-US: 'Invalid account operation.'
+	String get mobileInvalidAccountOperation => 'Invalid account operation.';
 }

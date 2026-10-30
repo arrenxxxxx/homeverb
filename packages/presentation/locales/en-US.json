@@ -1813,5 +1813,7 @@
   "power.state.false": "Off",
   "vendor.xiaomi.mijia.physical_controls_locked.physical_controls_locked_1.true": "Locked",
   "vendor.xiaomi.mijia.physical_controls_locked.physical_controls_locked_1.false": "Unlocked",
-  "mobile.auxiliarySettingsRequireNativeApi135": "Auxiliary settings require native API 1.35."
+  "mobile.auxiliarySettingsRequireNativeApi135": "Auxiliary settings require native API 1.35.",
+  "mobile.qrSignInRequiresNativeApi136": "QR sign-in requires native API 1.36.",
+  "mobile.invalidAccountOperation": "Invalid account operation."
 }
