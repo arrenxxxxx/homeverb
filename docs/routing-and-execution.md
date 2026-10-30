@@ -838,3 +838,14 @@ CLI and local MCP preserve the same Core series. Samples never enter snapshots,
 receipts or verification; no retry, fallback, pagination, background work or
 credential renewal occurs. Daily statistics keep their existing nonnegative values
 and conversion; signed samples retain the protected property's source domain.
+
+## Exact hood manual writes
+
+ADR-0106 uses the existing single-property legacy/modern write paths for four
+exact hood settings. Each command has one exact device/component/property/value
+grant and requires the independently admitted reference-setting family. Preserve
+vendor identifiers, Boolean values and original enum codes. No power, light,
+ventilation policy or timer write is appended to satisfy another setting.
+A correlated acknowledgement is accepted, never verified physical operation.
+Possible-send timeout, cancellation or malformed acknowledgement remains unknown
+without replay or cross-protocol fallback. Existing receipt/request-ID guards apply.

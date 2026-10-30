@@ -1878,7 +1878,7 @@ String? translateSource(
     t.mobileChooseSavedAccountForRefresh,
   "0.2.0 \u00b7 Experimental platform integration" =>
     t.mobileExperimentalPlatformIntegration,
-  "Set fan level" => t.vendorXiaomiMijiaFanSetLevel,
+  "Set fan level" => t.vendorXiaomiMijiaFanControlSetFanLevel1,
   "Set fan mode code" => t.vendorXiaomiMijiaFanSetMode,
   "Set fan oscillation" => t.vendorXiaomiMijiaFanSetHorizontalSwing,
   "Set fan angle" => t.vendorXiaomiMijiaFanSetHorizontalAngle,
@@ -2306,6 +2306,11 @@ String? translateSource(
   "No unit reported" => t.historyNoUnit,
   "Completeness is unproven. Missing records are not zero. Reported samples are not current state or proof of a device action." =>
     t.historySamplesIncomplete,
+  "Hood settings require native API 1.39." =>
+    t.mobileHoodSettingsRequireNativeApi139,
+  "Set hood power" => t.vendorXiaomiMijiaHoodSetOn1,
+  "Set display content" => t.vendorXiaomiMijiaScreenSetDisplayState1,
+  "Set automatic screen off" => t.vendorXiaomiMijiaScreenSetAutoScreenOff2,
   _ => null,
 };
 
@@ -4651,5 +4656,12 @@ String? sourceForKey(String key) => switch (key) {
   "history.noUnit" => "No unit reported",
   "history.samplesIncomplete" =>
     "Completeness is unproven. Missing records are not zero. Reported samples are not current state or proof of a device action.",
+  "mobile.hoodSettingsRequireNativeApi139" =>
+    "Hood settings require native API 1.39.",
+  "vendor.xiaomi.mijia.hood.set_on_1" => "Set hood power",
+  "vendor.xiaomi.mijia.fan_control.set_fan_level_1" => "Set fan level",
+  "vendor.xiaomi.mijia.screen.set_display_state_1" => "Set display content",
+  "vendor.xiaomi.mijia.screen.set_auto_screen_off_2" =>
+    "Set automatic screen off",
   _ => null,
 };

@@ -1833,5 +1833,10 @@
   "history.samples": "Reported samples",
   "history.daily": "Reported daily statistics",
   "history.noUnit": "No unit reported",
-  "history.samplesIncomplete": "Completeness is unproven. Missing records are not zero. Reported samples are not current state or proof of a device action."
+  "history.samplesIncomplete": "Completeness is unproven. Missing records are not zero. Reported samples are not current state or proof of a device action.",
+  "mobile.hoodSettingsRequireNativeApi139": "Hood settings require native API 1.39.",
+  "vendor.xiaomi.mijia.hood.set_on_1": "Set hood power",
+  "vendor.xiaomi.mijia.fan_control.set_fan_level_1": "Set fan level",
+  "vendor.xiaomi.mijia.screen.set_display_state_1": "Set display content",
+  "vendor.xiaomi.mijia.screen.set_auto_screen_off_2": "Set automatic screen off"
 }

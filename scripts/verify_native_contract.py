@@ -558,6 +558,26 @@ def main():
                 assert decode(library.homeverb_open(json.dumps(config).encode()))['error']['code'] == 'INVALID_ARGUMENT'
                 assert not private.exists()
 
+    hood = load('examples/native-open.mijia-hood.json')
+    for adapter in ['xiaomi.mijia', 'homeverb.platforms']:
+        with tempfile.TemporaryDirectory(prefix='homeverb-hood-') as directory:
+            config = {**hood, 'adapter':adapter, 'data_dir':directory}
+            open_schema.validate(config)
+            opened = decode(library.homeverb_open(json.dumps(config).encode()))
+            assert opened['error'] is None, opened
+            try:
+                assert raw(opened['data']['handle'], envelope('list_devices'))['data'] == []
+            finally:
+                library.homeverb_close(opened['data']['handle'])
+    for entry in hood['mijia_setting_grants']:
+        for field, value in [('value', None), ('value', 'true'), ('value', {}), ('value', -1), ('value', 5), ('value', 1.5), ('property', 'auto_screen_off_time_5'), ('component_id', 'light-7'), ('extra', True)]:
+            with tempfile.TemporaryDirectory(prefix='homeverb-hood-refused-') as directory:
+                private = Path(directory) / 'must-not-create'
+                config = {**hood,'data_dir':str(private),'mijia_setting_grants':[{**entry,field:value}]}
+                assert not open_schema.is_valid(config)
+                assert decode(library.homeverb_open(json.dumps(config).encode()))['error']['code'] == 'INVALID_ARGUMENT'
+                assert not private.exists()
+
     # Local account metadata remains usable without creating any protected session.
     with tempfile.TemporaryDirectory(prefix='homeverb-ui-local-accounts-') as directory:
         account_id = '40000000-0000-4000-8000-000000000001'

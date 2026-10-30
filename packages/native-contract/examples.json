@@ -1,5 +1,5 @@
 {
-  "api_version": "1.38.0",
+  "api_version": "1.39.0",
   "cases": [
     {
       "request": {
@@ -12,7 +12,7 @@
       },
       "response": {
         "data": {
-          "api_version": "1.38.0",
+          "api_version": "1.39.0",
           "limits": {
             "max_active_operations": 8,
             "max_request_bytes": 1048576,
@@ -817,21 +817,21 @@
           "observations": {
             "climate.mode": {
               "observed_at": null,
-              "received_at": "2026-10-30T10:01:28.042703Z",
+              "received_at": "2026-10-30T10:19:17.173843Z",
               "source": "lan",
               "stale": false,
               "value": "cool"
             },
             "climate.target_temperature": {
               "observed_at": null,
-              "received_at": "2026-10-30T10:01:28.042703Z",
+              "received_at": "2026-10-30T10:19:17.173843Z",
               "source": "lan",
               "stale": false,
               "value": 26.0
             },
             "power.state": {
               "observed_at": null,
-              "received_at": "2026-10-30T10:01:28.042703Z",
+              "received_at": "2026-10-30T10:19:17.173843Z",
               "source": "lan",
               "stale": false,
               "value": false
@@ -868,21 +868,21 @@
           "observations": {
             "climate.mode": {
               "observed_at": null,
-              "received_at": "2026-10-30T10:01:28.042703Z",
+              "received_at": "2026-10-30T10:19:17.173843Z",
               "source": "lan",
               "stale": false,
               "value": "cool"
             },
             "climate.target_temperature": {
               "observed_at": null,
-              "received_at": "2026-10-30T10:01:28.042703Z",
+              "received_at": "2026-10-30T10:19:17.173843Z",
               "source": "lan",
               "stale": false,
               "value": 26.0
             },
             "power.state": {
               "observed_at": null,
-              "received_at": "2026-10-30T10:01:28.042703Z",
+              "received_at": "2026-10-30T10:19:17.173843Z",
               "source": "lan",
               "stale": false,
               "value": false
@@ -911,7 +911,7 @@
       },
       "response": {
         "data": {
-          "id": "e5be2a81-24dc-40ad-9d91-94c4c8c6dcd2",
+          "id": "7b565e58-2e2b-48ab-b6f2-abecc462ff73",
           "name": "Bedroom",
           "position": 0
         },
@@ -927,13 +927,13 @@
         "timeout_ms": 10000,
         "request": {
           "method": "rename_room",
-          "room_id": "e5be2a81-24dc-40ad-9d91-94c4c8c6dcd2",
+          "room_id": "7b565e58-2e2b-48ab-b6f2-abecc462ff73",
           "name": "Primary Bedroom"
         }
       },
       "response": {
         "data": {
-          "id": "e5be2a81-24dc-40ad-9d91-94c4c8c6dcd2",
+          "id": "7b565e58-2e2b-48ab-b6f2-abecc462ff73",
           "name": "Primary Bedroom",
           "position": 0
         },
@@ -950,14 +950,14 @@
         "request": {
           "method": "reorder_rooms",
           "room_ids": [
-            "e5be2a81-24dc-40ad-9d91-94c4c8c6dcd2"
+            "7b565e58-2e2b-48ab-b6f2-abecc462ff73"
           ]
         }
       },
       "response": {
         "data": [
           {
-            "id": "e5be2a81-24dc-40ad-9d91-94c4c8c6dcd2",
+            "id": "7b565e58-2e2b-48ab-b6f2-abecc462ff73",
             "name": "Primary Bedroom",
             "position": 0
           }
@@ -977,7 +977,7 @@
           "device_id": "dev-mock-ac",
           "preferences": {
             "alias": "Quiet AC",
-            "room_id": "e5be2a81-24dc-40ad-9d91-94c4c8c6dcd2",
+            "room_id": "7b565e58-2e2b-48ab-b6f2-abecc462ff73",
             "favorite": true
           }
         }
@@ -988,7 +988,7 @@
           "device_id": "dev-mock-ac",
           "favorite": true,
           "position": 0,
-          "room_id": "e5be2a81-24dc-40ad-9d91-94c4c8c6dcd2"
+          "room_id": "7b565e58-2e2b-48ab-b6f2-abecc462ff73"
         },
         "error": null,
         "schema_version": "1.0",
@@ -1118,7 +1118,7 @@
         "timeout_ms": 10000,
         "request": {
           "method": "delete_room",
-          "room_id": "e5be2a81-24dc-40ad-9d91-94c4c8c6dcd2"
+          "room_id": "7b565e58-2e2b-48ab-b6f2-abecc462ff73"
         }
       },
       "response": {
@@ -1302,7 +1302,7 @@
       },
       "response": {
         "attempts": [],
-        "completed_at": "2026-10-30T10:01:28.068094Z",
+        "completed_at": "2026-10-30T10:19:17.193707Z",
         "data": {
           "mode": "heat",
           "target_temperature": 25
@@ -1313,12 +1313,12 @@
           {
             "attempts": [
               {
-                "duration_ms": 1,
+                "duration_ms": 0,
                 "phase": "accepted",
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-30T10:01:28.065529Z",
+            "completed_at": "2026-10-30T10:19:17.191721Z",
             "data": {
               "mode": "heat"
             },
@@ -1326,13 +1326,13 @@
             "error": null,
             "request_id": "compound-example:0",
             "schema_version": "1.0",
-            "started_at": "2026-10-30T10:01:28.062381Z",
+            "started_at": "2026-10-30T10:19:17.190343Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-30T10:01:28.064319Z",
+              "received_at": "2026-10-30T10:19:17.191290Z",
               "source": "lan"
             }
           },
@@ -1344,7 +1344,7 @@
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-30T10:01:28.067254Z",
+            "completed_at": "2026-10-30T10:19:17.192975Z",
             "data": {
               "target_temperature": 25
             },
@@ -1352,26 +1352,26 @@
             "error": null,
             "request_id": "compound-example:1",
             "schema_version": "1.0",
-            "started_at": "2026-10-30T10:01:28.065875Z",
+            "started_at": "2026-10-30T10:19:17.191930Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-30T10:01:28.066838Z",
+              "received_at": "2026-10-30T10:19:17.192634Z",
               "source": "lan"
             }
           }
         ],
         "request_id": "compound-example",
         "schema_version": "1.0",
-        "started_at": "2026-10-30T10:01:28.059852Z",
+        "started_at": "2026-10-30T10:19:17.188173Z",
         "status": "verified",
         "verification": {
           "kind": "state_match",
           "matches_target": true,
           "note": "Each sub-operation has separate verification evidence; inspect items. This is not an atomic or exactly-once guarantee.",
-          "received_at": "2026-10-30T10:01:28.064319Z",
+          "received_at": "2026-10-30T10:19:17.191290Z",
           "source": "lan"
         }
       }
@@ -1470,17 +1470,17 @@
         }
       },
       "response": {
-        "completed_at": "2026-10-30T10:01:28.075665Z",
+        "completed_at": "2026-10-30T10:19:17.200657Z",
         "items": [
           {
             "attempts": [
               {
-                "duration_ms": 1,
+                "duration_ms": 0,
                 "phase": "accepted",
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-30T10:01:28.075394Z",
+            "completed_at": "2026-10-30T10:19:17.200376Z",
             "data": {
               "state": true
             },
@@ -1488,19 +1488,19 @@
             "error": null,
             "request_id": "batch-example",
             "schema_version": "1.0",
-            "started_at": "2026-10-30T10:01:28.072894Z",
+            "started_at": "2026-10-30T10:19:17.197956Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-30T10:01:28.074714Z",
+              "received_at": "2026-10-30T10:19:17.199845Z",
               "source": "lan"
             }
           }
         ],
         "schema_version": "1.0",
-        "started_at": "2026-10-30T10:01:28.072390Z",
+        "started_at": "2026-10-30T10:19:17.197305Z",
         "status": "verified"
       }
     },
@@ -1517,7 +1517,7 @@
       "response": {
         "data": {
           "attempts": [],
-          "completed_at": "2026-10-30T10:01:28.068094Z",
+          "completed_at": "2026-10-30T10:19:17.193707Z",
           "data": {
             "mode": "heat",
             "target_temperature": 25
@@ -1528,12 +1528,12 @@
             {
               "attempts": [
                 {
-                  "duration_ms": 1,
+                  "duration_ms": 0,
                   "phase": "accepted",
                   "transport": "lan"
                 }
               ],
-              "completed_at": "2026-10-30T10:01:28.065529Z",
+              "completed_at": "2026-10-30T10:19:17.191721Z",
               "data": {
                 "mode": "heat"
               },
@@ -1541,13 +1541,13 @@
               "error": null,
               "request_id": "compound-example:0",
               "schema_version": "1.0",
-              "started_at": "2026-10-30T10:01:28.062381Z",
+              "started_at": "2026-10-30T10:19:17.190343Z",
               "status": "verified",
               "verification": {
                 "kind": "state_match",
                 "matches_target": true,
                 "note": "Fresh state matches the target; this does not prove request causality.",
-                "received_at": "2026-10-30T10:01:28.064319Z",
+                "received_at": "2026-10-30T10:19:17.191290Z",
                 "source": "lan"
               }
             },
@@ -1559,7 +1559,7 @@
                   "transport": "lan"
                 }
               ],
-              "completed_at": "2026-10-30T10:01:28.067254Z",
+              "completed_at": "2026-10-30T10:19:17.192975Z",
               "data": {
                 "target_temperature": 25
               },
@@ -1567,26 +1567,26 @@
               "error": null,
               "request_id": "compound-example:1",
               "schema_version": "1.0",
-              "started_at": "2026-10-30T10:01:28.065875Z",
+              "started_at": "2026-10-30T10:19:17.191930Z",
               "status": "verified",
               "verification": {
                 "kind": "state_match",
                 "matches_target": true,
                 "note": "Fresh state matches the target; this does not prove request causality.",
-                "received_at": "2026-10-30T10:01:28.066838Z",
+                "received_at": "2026-10-30T10:19:17.192634Z",
                 "source": "lan"
               }
             }
           ],
           "request_id": "compound-example",
           "schema_version": "1.0",
-          "started_at": "2026-10-30T10:01:28.059852Z",
+          "started_at": "2026-10-30T10:19:17.188173Z",
           "status": "verified",
           "verification": {
             "kind": "state_match",
             "matches_target": true,
             "note": "Each sub-operation has separate verification evidence; inspect items. This is not an atomic or exactly-once guarantee.",
-            "received_at": "2026-10-30T10:01:28.064319Z",
+            "received_at": "2026-10-30T10:19:17.191290Z",
             "source": "lan"
           }
         },
@@ -1609,12 +1609,12 @@
           {
             "attempts": [
               {
-                "duration_ms": 1,
+                "duration_ms": 0,
                 "phase": "accepted",
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-30T10:01:28.075394Z",
+            "completed_at": "2026-10-30T10:19:17.200376Z",
             "data": {
               "state": true
             },
@@ -1622,13 +1622,13 @@
             "error": null,
             "request_id": "batch-example",
             "schema_version": "1.0",
-            "started_at": "2026-10-30T10:01:28.072894Z",
+            "started_at": "2026-10-30T10:19:17.197956Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-30T10:01:28.074714Z",
+              "received_at": "2026-10-30T10:19:17.199845Z",
               "source": "lan"
             }
           },
@@ -1640,7 +1640,7 @@
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-30T10:01:28.067254Z",
+            "completed_at": "2026-10-30T10:19:17.192975Z",
             "data": {
               "target_temperature": 25
             },
@@ -1648,25 +1648,25 @@
             "error": null,
             "request_id": "compound-example:1",
             "schema_version": "1.0",
-            "started_at": "2026-10-30T10:01:28.065875Z",
+            "started_at": "2026-10-30T10:19:17.191930Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-30T10:01:28.066838Z",
+              "received_at": "2026-10-30T10:19:17.192634Z",
               "source": "lan"
             }
           },
           {
             "attempts": [
               {
-                "duration_ms": 1,
+                "duration_ms": 0,
                 "phase": "accepted",
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-30T10:01:28.065529Z",
+            "completed_at": "2026-10-30T10:19:17.191721Z",
             "data": {
               "mode": "heat"
             },
@@ -1674,19 +1674,19 @@
             "error": null,
             "request_id": "compound-example:0",
             "schema_version": "1.0",
-            "started_at": "2026-10-30T10:01:28.062381Z",
+            "started_at": "2026-10-30T10:19:17.190343Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-30T10:01:28.064319Z",
+              "received_at": "2026-10-30T10:19:17.191290Z",
               "source": "lan"
             }
           },
           {
             "attempts": [],
-            "completed_at": "2026-10-30T10:01:28.068094Z",
+            "completed_at": "2026-10-30T10:19:17.193707Z",
             "data": {
               "mode": "heat",
               "target_temperature": 25
@@ -1697,12 +1697,12 @@
               {
                 "attempts": [
                   {
-                    "duration_ms": 1,
+                    "duration_ms": 0,
                     "phase": "accepted",
                     "transport": "lan"
                   }
                 ],
-                "completed_at": "2026-10-30T10:01:28.065529Z",
+                "completed_at": "2026-10-30T10:19:17.191721Z",
                 "data": {
                   "mode": "heat"
                 },
@@ -1710,13 +1710,13 @@
                 "error": null,
                 "request_id": "compound-example:0",
                 "schema_version": "1.0",
-                "started_at": "2026-10-30T10:01:28.062381Z",
+                "started_at": "2026-10-30T10:19:17.190343Z",
                 "status": "verified",
                 "verification": {
                   "kind": "state_match",
                   "matches_target": true,
                   "note": "Fresh state matches the target; this does not prove request causality.",
-                  "received_at": "2026-10-30T10:01:28.064319Z",
+                  "received_at": "2026-10-30T10:19:17.191290Z",
                   "source": "lan"
                 }
               },
@@ -1728,7 +1728,7 @@
                     "transport": "lan"
                   }
                 ],
-                "completed_at": "2026-10-30T10:01:28.067254Z",
+                "completed_at": "2026-10-30T10:19:17.192975Z",
                 "data": {
                   "target_temperature": 25
                 },
@@ -1736,26 +1736,26 @@
                 "error": null,
                 "request_id": "compound-example:1",
                 "schema_version": "1.0",
-                "started_at": "2026-10-30T10:01:28.065875Z",
+                "started_at": "2026-10-30T10:19:17.191930Z",
                 "status": "verified",
                 "verification": {
                   "kind": "state_match",
                   "matches_target": true,
                   "note": "Fresh state matches the target; this does not prove request causality.",
-                  "received_at": "2026-10-30T10:01:28.066838Z",
+                  "received_at": "2026-10-30T10:19:17.192634Z",
                   "source": "lan"
                 }
               }
             ],
             "request_id": "compound-example",
             "schema_version": "1.0",
-            "started_at": "2026-10-30T10:01:28.059852Z",
+            "started_at": "2026-10-30T10:19:17.188173Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Each sub-operation has separate verification evidence; inspect items. This is not an atomic or exactly-once guarantee.",
-              "received_at": "2026-10-30T10:01:28.064319Z",
+              "received_at": "2026-10-30T10:19:17.191290Z",
               "source": "lan"
             }
           }
@@ -1780,12 +1780,12 @@
           {
             "attempts": [
               {
-                "duration_ms": 1,
+                "duration_ms": 0,
                 "phase": "accepted",
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-30T10:01:28.075394Z",
+            "completed_at": "2026-10-30T10:19:17.200376Z",
             "data": {
               "state": true
             },
@@ -1793,13 +1793,13 @@
             "error": null,
             "request_id": "batch-example",
             "schema_version": "1.0",
-            "started_at": "2026-10-30T10:01:28.072894Z",
+            "started_at": "2026-10-30T10:19:17.197956Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-30T10:01:28.074714Z",
+              "received_at": "2026-10-30T10:19:17.199845Z",
               "source": "lan"
             }
           },
@@ -1811,7 +1811,7 @@
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-30T10:01:28.067254Z",
+            "completed_at": "2026-10-30T10:19:17.192975Z",
             "data": {
               "target_temperature": 25
             },
@@ -1819,25 +1819,25 @@
             "error": null,
             "request_id": "compound-example:1",
             "schema_version": "1.0",
-            "started_at": "2026-10-30T10:01:28.065875Z",
+            "started_at": "2026-10-30T10:19:17.191930Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-30T10:01:28.066838Z",
+              "received_at": "2026-10-30T10:19:17.192634Z",
               "source": "lan"
             }
           },
           {
             "attempts": [
               {
-                "duration_ms": 1,
+                "duration_ms": 0,
                 "phase": "accepted",
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-30T10:01:28.065529Z",
+            "completed_at": "2026-10-30T10:19:17.191721Z",
             "data": {
               "mode": "heat"
             },
@@ -1845,19 +1845,19 @@
             "error": null,
             "request_id": "compound-example:0",
             "schema_version": "1.0",
-            "started_at": "2026-10-30T10:01:28.062381Z",
+            "started_at": "2026-10-30T10:19:17.190343Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-30T10:01:28.064319Z",
+              "received_at": "2026-10-30T10:19:17.191290Z",
               "source": "lan"
             }
           },
           {
             "attempts": [],
-            "completed_at": "2026-10-30T10:01:28.068094Z",
+            "completed_at": "2026-10-30T10:19:17.193707Z",
             "data": {
               "mode": "heat",
               "target_temperature": 25
@@ -1868,12 +1868,12 @@
               {
                 "attempts": [
                   {
-                    "duration_ms": 1,
+                    "duration_ms": 0,
                     "phase": "accepted",
                     "transport": "lan"
                   }
                 ],
-                "completed_at": "2026-10-30T10:01:28.065529Z",
+                "completed_at": "2026-10-30T10:19:17.191721Z",
                 "data": {
                   "mode": "heat"
                 },
@@ -1881,13 +1881,13 @@
                 "error": null,
                 "request_id": "compound-example:0",
                 "schema_version": "1.0",
-                "started_at": "2026-10-30T10:01:28.062381Z",
+                "started_at": "2026-10-30T10:19:17.190343Z",
                 "status": "verified",
                 "verification": {
                   "kind": "state_match",
                   "matches_target": true,
                   "note": "Fresh state matches the target; this does not prove request causality.",
-                  "received_at": "2026-10-30T10:01:28.064319Z",
+                  "received_at": "2026-10-30T10:19:17.191290Z",
                   "source": "lan"
                 }
               },
@@ -1899,7 +1899,7 @@
                     "transport": "lan"
                   }
                 ],
-                "completed_at": "2026-10-30T10:01:28.067254Z",
+                "completed_at": "2026-10-30T10:19:17.192975Z",
                 "data": {
                   "target_temperature": 25
                 },
@@ -1907,26 +1907,26 @@
                 "error": null,
                 "request_id": "compound-example:1",
                 "schema_version": "1.0",
-                "started_at": "2026-10-30T10:01:28.065875Z",
+                "started_at": "2026-10-30T10:19:17.191930Z",
                 "status": "verified",
                 "verification": {
                   "kind": "state_match",
                   "matches_target": true,
                   "note": "Fresh state matches the target; this does not prove request causality.",
-                  "received_at": "2026-10-30T10:01:28.066838Z",
+                  "received_at": "2026-10-30T10:19:17.192634Z",
                   "source": "lan"
                 }
               }
             ],
             "request_id": "compound-example",
             "schema_version": "1.0",
-            "started_at": "2026-10-30T10:01:28.059852Z",
+            "started_at": "2026-10-30T10:19:17.188173Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Each sub-operation has separate verification evidence; inspect items. This is not an atomic or exactly-once guarantee.",
-              "received_at": "2026-10-30T10:01:28.064319Z",
+              "received_at": "2026-10-30T10:19:17.191290Z",
               "source": "lan"
             }
           }
@@ -1954,13 +1954,13 @@
             "lan": 1
           },
           "device_count": 1,
-          "generated_at": "2026-10-30T10:01:28.084968Z",
+          "generated_at": "2026-10-30T10:19:17.209020Z",
           "receipt_limit": 100,
           "recent_receipts": [
             {
               "attempts": [
                 {
-                  "duration_ms": 1,
+                  "duration_ms": 0,
                   "phase": "accepted",
                   "transport": "lan"
                 }
@@ -2002,7 +2002,7 @@
             {
               "attempts": [
                 {
-                  "duration_ms": 1,
+                  "duration_ms": 0,
                   "phase": "accepted",
                   "transport": "lan"
                 }
@@ -2125,7 +2125,7 @@
       },
       "response": {
         "attempts": [],
-        "completed_at": "2026-10-30T10:01:28.087979Z",
+        "completed_at": "2026-10-30T10:19:17.212072Z",
         "data": null,
         "device_id": "dev-mock-ac",
         "error": {
@@ -2135,7 +2135,7 @@
         },
         "request_id": "unsupported-example",
         "schema_version": "1.0",
-        "started_at": "2026-10-30T10:01:28.087574Z",
+        "started_at": "2026-10-30T10:19:17.211646Z",
         "status": "failed",
         "verification": null
       }
@@ -2246,7 +2246,7 @@
       },
       "response": {
         "data": {
-          "api_version": "1.38.0",
+          "api_version": "1.39.0",
           "limits": {
             "max_active_operations": 8,
             "max_request_bytes": 1048576,
@@ -2469,7 +2469,7 @@
             "transport": "lan"
           }
         ],
-        "completed_at": "2026-10-30T10:01:28.159019Z",
+        "completed_at": "2026-10-30T10:19:17.310187Z",
         "data": null,
         "device_id": "dev-mock-ac",
         "error": {
@@ -2479,7 +2479,7 @@
         },
         "request_id": "scenario-accept-only",
         "schema_version": "1.0",
-        "started_at": "2026-10-30T10:01:28.157360Z",
+        "started_at": "2026-10-30T10:19:17.307922Z",
         "status": "accepted",
         "verification": null
       }
@@ -2565,7 +2565,7 @@
             "transport": "lan"
           }
         ],
-        "completed_at": "2026-10-30T10:01:28.169928Z",
+        "completed_at": "2026-10-30T10:19:17.320849Z",
         "data": null,
         "device_id": "dev-mock-ac",
         "error": {
@@ -2575,7 +2575,7 @@
         },
         "request_id": "scenario-lost-ack",
         "schema_version": "1.0",
-        "started_at": "2026-10-30T10:01:28.168399Z",
+        "started_at": "2026-10-30T10:19:17.319497Z",
         "status": "unknown",
         "verification": null
       }
@@ -2661,7 +2661,7 @@
             "transport": "lan"
           }
         ],
-        "completed_at": "2026-10-30T10:01:28.180640Z",
+        "completed_at": "2026-10-30T10:19:17.330344Z",
         "data": null,
         "device_id": "dev-mock-ac",
         "error": {
@@ -2671,7 +2671,7 @@
         },
         "request_id": "scenario-reject",
         "schema_version": "1.0",
-        "started_at": "2026-10-30T10:01:28.179913Z",
+        "started_at": "2026-10-30T10:19:17.329550Z",
         "status": "failed",
         "verification": null
       }
@@ -2752,7 +2752,7 @@
       },
       "response": {
         "attempts": [],
-        "completed_at": "2026-10-30T10:01:28.195596Z",
+        "completed_at": "2026-10-30T10:19:17.342103Z",
         "data": null,
         "device_id": "dev-mock-ac",
         "error": {
@@ -2769,7 +2769,7 @@
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-30T10:01:28.194717Z",
+            "completed_at": "2026-10-30T10:19:17.341503Z",
             "data": {
               "mode": "heat"
             },
@@ -2777,13 +2777,13 @@
             "error": null,
             "request_id": "scenario-partial:0",
             "schema_version": "1.0",
-            "started_at": "2026-10-30T10:01:28.192912Z",
+            "started_at": "2026-10-30T10:19:17.340107Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-30T10:01:28.194174Z",
+              "received_at": "2026-10-30T10:19:17.341081Z",
               "source": "lan"
             }
           },
@@ -2795,7 +2795,7 @@
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-30T10:01:28.195307Z",
+            "completed_at": "2026-10-30T10:19:17.341902Z",
             "data": null,
             "device_id": "dev-mock-ac",
             "error": {
@@ -2805,14 +2805,14 @@
             },
             "request_id": "scenario-partial:1",
             "schema_version": "1.0",
-            "started_at": "2026-10-30T10:01:28.194955Z",
+            "started_at": "2026-10-30T10:19:17.341697Z",
             "status": "failed",
             "verification": null
           }
         ],
         "request_id": "scenario-partial",
         "schema_version": "1.0",
-        "started_at": "2026-10-30T10:01:28.190712Z",
+        "started_at": "2026-10-30T10:19:17.338304Z",
         "status": "partial",
         "verification": null
       }
@@ -2898,7 +2898,7 @@
             "transport": "lan"
           }
         ],
-        "completed_at": "2026-10-30T10:01:28.212837Z",
+        "completed_at": "2026-10-30T10:19:17.358859Z",
         "data": null,
         "device_id": "dev-mock-ac",
         "error": {
@@ -2908,7 +2908,7 @@
         },
         "request_id": "cancel-before-send",
         "schema_version": "1.0",
-        "started_at": "2026-10-30T10:01:28.206356Z",
+        "started_at": "2026-10-30T10:19:17.352310Z",
         "status": "failed",
         "verification": null
       }

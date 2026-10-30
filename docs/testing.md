@@ -817,3 +817,23 @@ privacy refusal, duplicate series, immutable ownership, explicit reads, backgrou
 cancellation and English/Chinese narrow enlarged layouts. Existing daily history
 and modern card tests retain their prior coverage. Passing this subset does not
 claim the known full Flutter visual/legacy-click failures are resolved.
+
+## Exact hood manual controls
+
+Run the Mijia suite, Host mijia_accounts and mijia_setting_grants suites, then
+rebuild FFI and run scripts/verify_native_contract.py for API 1.39. Exact new values
+are covered on both protocols with independent policy refusal, byte-level request
+correlation, lost acknowledgements and no companion writes. Saved-mapping tests
+cover old illumination-only upgrades and refusal of partial new-domain mixtures.
+
+From apps/mobile run:
+
+```sh
+fvm flutter test test/mijia_hood_test.dart test/mijia_auxiliary_test.dart test/mijia_settings_test.dart test/session_permissions_test.dart
+fvm flutter test test/mijia_controls_test.dart test/mijia_outlet_test.dart test/approval_test.dart test/modern_device_flow_test.dart test/native_test.dart test/account_native_test.dart
+fvm flutter analyze
+```
+
+These include actual old/new ABI startup probes and English/Chinese narrow
+forms for every exact value. No real account/appliance is used. Build and verify
+a clean matching APK separately before advertising updated Android delivery.

@@ -391,6 +391,12 @@ impl ModelMapping {
         }
         let bytes = serde_json::to_vec(&self.source).map_err(|_| invalid())?;
         let expected = Self::decode(&self.model, &self.spec_type, &bytes)?;
+        let mut previous_hood = expected.clone();
+        for property in &mut previous_hood.properties {
+            if hood_manual_setting(&self.model, property.siid, property.piid) {
+                property.write_domain = None;
+            }
+        }
         let mut previous_reference = expected.clone();
         for property in &mut previous_reference.properties {
             if reference_setting(&self.model, property.siid, property.piid)
@@ -408,6 +414,7 @@ impl ModelMapping {
             }
         }
         if expected != *self
+            && previous_hood != *self
             && previous_reference != *self
             && previous_settings != *self
             && Self::decode_inner(&self.model, &self.spec_type, &bytes, false)
@@ -845,9 +852,15 @@ fn exact_reference_domain(property: &Property, known: &Value) -> Result<Option<V
     Ok(domain)
 }
 
+fn hood_manual_setting(model: &str, siid: u32, piid: u32) -> bool {
+    model == "xiaomi.hood.cyp10" && matches!((siid, piid), (2 | 3, 1) | (13, 1 | 2))
+}
+
 fn reference_setting(model: &str, siid: u32, piid: u32) -> bool {
     match model {
-        "xiaomi.hood.cyp10" => siid == 6 && matches!(piid, 1 | 2),
+        "xiaomi.hood.cyp10" => {
+            (siid == 6 && matches!(piid, 1 | 2)) || hood_manual_setting(model, siid, piid)
+        }
         "jdjz.fan.2072fc" => siid == 3 && piid == 5,
         "abhome.light.wy0a01" => siid == 2 && matches!(piid, 1 | 2 | 3 | 7 | 9 | 12 | 13),
         "zhimi.airpurifier.v6" => matches!((siid, piid), (2, 1..=3) | (5..=8, 1)),

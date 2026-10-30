@@ -351,6 +351,42 @@ async fn exact_light_and_purifier_settings_require_independent_admission_and_kee
     let cases = [
         (
             "xiaomi.hood.cyp10",
+            "hood-2",
+            "vendor.xiaomi.mijia.hood",
+            "on_1",
+            2,
+            1,
+            vec![json!(false), json!(true)],
+        ),
+        (
+            "xiaomi.hood.cyp10",
+            "fan_control-3",
+            "vendor.xiaomi.mijia.fan_control",
+            "fan_level_1",
+            3,
+            1,
+            vec![json!(1), json!(2), json!(3), json!(4)],
+        ),
+        (
+            "xiaomi.hood.cyp10",
+            "screen-13",
+            "vendor.xiaomi.mijia.screen",
+            "display_state_1",
+            13,
+            1,
+            vec![json!(0), json!(1)],
+        ),
+        (
+            "xiaomi.hood.cyp10",
+            "screen-13",
+            "vendor.xiaomi.mijia.screen",
+            "auto_screen_off_2",
+            13,
+            2,
+            vec![json!(false), json!(true)],
+        ),
+        (
+            "xiaomi.hood.cyp10",
             "light-6",
             "power",
             "state",
@@ -663,7 +699,7 @@ async fn auxiliary_pregrant_inspection_upgrades_old_derivations_only_in_memory()
                 .as_array_mut()
                 .unwrap()
             {
-                if property["component"] == component {
+                if model == "xiaomi.hood.cyp10" || property["component"] == component {
                     property["write_domain"] = Value::Null;
                 }
             }

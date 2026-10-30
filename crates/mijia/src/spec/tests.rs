@@ -465,7 +465,7 @@ fn reference_settings_keep_old_mappings_and_require_exact_source() {
         } else if fan {
             1
         } else if model == "xiaomi.hood.cyp10" {
-            2
+            6
         } else {
             7
         };
@@ -624,4 +624,60 @@ fn outlet_admission_does_not_publish_other_families() {
         homeverb_domain::Risk::Low
     );
     assert!(outlet_control_option("charging_protection-4", "power_2").is_none());
+}
+
+#[test]
+fn prior_hood_illumination_mapping_upgrades_without_accepting_partial_new_domains() {
+    let current = ModelMapping::pinned("xiaomi.hood.cyp10", None)
+        .unwrap()
+        .unwrap();
+    let mut previous = current.clone();
+    for property in &mut previous.properties {
+        if hood_manual_setting(&current.model, property.siid, property.piid) {
+            property.write_domain = None;
+        }
+    }
+    previous.validate_saved().unwrap();
+    assert_eq!(previous.control_options().len(), 2);
+    assert_eq!(current.control_options().len(), 6);
+    assert_eq!(previous.upgraded().unwrap(), current);
+    assert_eq!(
+        serde_json::to_value(previous.capabilities()).unwrap(),
+        serde_json::to_value(current.capabilities()).unwrap()
+    );
+    let mut mixed = previous.clone();
+    let field = mixed
+        .properties
+        .iter_mut()
+        .find(|p| p.siid == 3 && p.piid == 1)
+        .unwrap();
+    field.write_domain = current
+        .properties
+        .iter()
+        .find(|p| p.siid == 3 && p.piid == 1)
+        .unwrap()
+        .write_domain
+        .clone();
+    assert!(mixed.validate_saved().is_err());
+    for (siid, piid) in [
+        (2, 5),
+        (2, 24),
+        (7, 8),
+        (10, 1),
+        (13, 3),
+        (13, 4),
+        (13, 5),
+        (13, 6),
+        (13, 7),
+    ] {
+        assert!(
+            current
+                .properties
+                .iter()
+                .find(|p| p.siid == siid && p.piid == piid)
+                .unwrap()
+                .write_domain
+                .is_none()
+        );
+    }
 }

@@ -788,3 +788,13 @@ Unavailable/invalid options refuse with CAPABILITY_UNSUPPORTED. Daily negative
 values and null daily units remain invalid. Native include_reported_samples must
 be a boolean; unknown or malformed request fields are INVALID_ARGUMENT. No error
 promotes incomplete property logs to events, current state or execution evidence.
+
+## Exact hood manual controls
+
+ADR-0106 retains existing error/outcome contracts. Unknown component/property,
+wrong scalar type, out-of-domain value or extra native grant fields fail with
+INVALID_ARGUMENT before profile creation. Missing Core grants, independent family
+admission or protected source evidence refuses before send. Old Flutter/native
+negotiation reports API_UPGRADE_REQUIRED before granting or refreshing. Rejected
+and uncertain acknowledgements retain their distinct existing receipt phases;
+no error authorizes a companion power-on write or retry.

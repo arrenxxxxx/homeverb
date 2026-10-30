@@ -1,6 +1,6 @@
 # 14. Mijia reference integration and remaining coverage
 
-The October 30 worktree uses API 1.38 and the owner-supplied October 22 Xiaomi Home
+The October 30 worktree uses API 1.39 and the owner-supplied October 22 Xiaomi Home
 11.7.709 analysis. The full official-App feature request remains **incomplete**.
 The source archive explicitly does not supply all authentication, protocol or
 runtime control contracts. An implemented decoder is not physical acceptance.
@@ -22,7 +22,9 @@ contracts. The later 9a6c004 APK includes both additions; it predates numeric
 samples. ADR-0105 now exposes 161 exact numeric sample series through Core,
 CLI/MCP and version-negotiated API 1.38/App. The
 [2e776a9 Android package](../../apps/mobile/verification.md#reported-samples-api-138-android-package--october-30-2026)
-includes these samples with clean-source archive evidence.
+includes these samples with clean-source archive evidence. ADR-0106/API 1.39
+adds four exact manual/display hood controls, bringing the control count to 33;
+that package predates the new hood extension.
 
 - Eight-part MIoT URNs retain their exact extension; malformed/foreign URNs refuse.
 - Seventeen exact model/specification catalogs project 264 reviewed scalar read
@@ -1639,3 +1641,38 @@ no issues. All 13 CLI/MCP tests and 16 Dart FFI tests also passed. Documentation
 source hygiene, 25 schemas with 72 positive/1230 negative fixtures, both reference
 projection tests and seven shared presentation tests passed. These use fictional
 material and establish no provider/phone/model acceptance. The 9a6c004 APK remains API 1.37; API 1.38 packaging is separate work.
+
+## Exact hood manual controls -- October 30, 2026
+
+ADR-0106 adds four exact xiaomi.hood.cyp10 properties through legacy and modern
+Core paths: hood on-state, fan levels 1/2/3/4, display content codes 0/1 and the
+independent automatic screen-off Boolean. The 33 reviewed scalar controls still
+cover five exact models. Existing vendor IDs and raw codes remain stable; no
+percentage conversion, companion power-on, inferred timer or schedule is added.
+Core and the protected adapter independently require exact reference-setting
+grants; fan/outlet authority does not transfer. Uncertain writes are never replayed.
+
+Native API 1.39 adds four closed startup tuples and three inspection component
+scopes. Flutter probes the native version before any granted reopen and preserves
+all ten target values. Old illumination-only hood mappings remain valid; explicit
+refresh upgrades their domains while keeping identity and organization. Invalid
+partial domain mixtures refuse. Methods, C exports, SQLite 5 and protected payload
+3 are unchanged. Older native libraries refuse new grants/derivations.
+
+Scoped evidence: 233 Mijia unit and 14 compile-fail tests passed, including all
+33 modern controls and every new legacy target. Host account/grant suites passed
+53 and 3 tests. The hood/auxiliary/settings/permissions Flutter suite passed 50
+tests, the related control/approval/device/FFI suite passed 61 tests, and analysis
+reported no issues. All material is fictional. The API 1.38 APK from 2e776a9
+predates the four new controls. Final workspace/native checks and API 1.39
+packaging are recorded separately; provider/phone/model acceptance remains pending.
+
+Final software verification: the workspace excluding the known unrelated
+Meiju/macOS LAN-alias suite passed 642 tests with one ignored. Strict all-target
+Clippy and formatting passed. Rebuilt FFI and actual C boundary checks passed
+36 methods/60 live examples, including new hood startup acceptance/refusal and
+76 modern-account cases. The checked-in examples were regenerated from that run.
+Documentation, source hygiene, 25 schemas with 73 positive/1320 negative fixtures,
+two coverage-projection tests and seven presentation tests passed. The existing
+eight full Flutter font/pixel/legacy-click failures were not rerun or claimed fixed.
+No real account, appliance, installation, remote push or publication was used.

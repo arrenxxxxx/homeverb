@@ -1,6 +1,6 @@
 # Native UI contract
 
-The October 30 reported-sample history bridge uses native API **1.38.0**, following
+The October 30 exact hood control bridge uses native API **1.39.0**, following
 the October 24 linear mainline update. Earlier Mijia phase versions are historical. See
 [contract reconciliation](adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
 remain available alongside Mijia; identity restoration remains Meiju-only.
@@ -1993,3 +1993,27 @@ unpublished exhaustive matches and constructors need source updates. Older nativ
 libraries reject the new request field/aggregation. Existing daily JSON results,
 SQLite 5 and Mijia protected payload 3 remain unchanged. The API 1.37 APK from
 9a6c004 predates this phase; a matching API 1.38 package requires a separate build.
+
+## Exact hood manual settings (API 1.39)
+
+[ADR-0106](adr/0106-exact-hood-manual-controls.md) adds four closed
+mijia_setting_grants tuples: hood-2/on_1 (Boolean), fan_control-3/fan_level_1
+(integer codes 1,2,3,4), screen-13/display_state_1 (integer codes 0,1), and
+screen-13/auto_screen_off_2 (Boolean). All use the existing reference-setting
+family; fan/outlet grants remain independent. The three component scopes are
+added to control-option responses. Negotiate 1.39 before sending the new tuples;
+older libraries reject them before opening a profile. Ordinary method/export
+counts and request/result outcomes remain unchanged.
+
+App startup first probes the version without grants, and the controller refuses
+an older native before reopen or account refresh. All ten exact target values
+remain selectable. Original enum codes are not percentages; a fan-level change
+does not imply power-on. Display and automatic screen-off settings do not admit
+clock, timer or schedule fields. Native defaults remain read-only, and the adapter
+independently rechecks protected identity, family policy and exact source domain.
+
+Old illumination-only hood mappings remain valid and explicit refresh upgrades
+new write domains without changing local identities. Arbitrary partial mixtures
+are not a migration format. SQLite 5 and Mijia protected payload 3 are unchanged;
+older implementations refuse the new derivation. The existing API 1.38 APK from
+2e776a9 predates these four controls. Provider/phone/model acceptance is pending.

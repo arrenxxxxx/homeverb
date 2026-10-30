@@ -34,7 +34,7 @@ def admitted_write(model, siid, piid):
     if model == 'jdjz.fan.2072fc':
         return (siid == 2 and piid in {1, 3, 4, 5, 6, 7, 8, 9}) or (siid == 3 and piid == 5)
     if model == 'xiaomi.hood.cyp10':
-        return siid == 6 and piid in {1, 2}
+        return (siid == 6 and piid in {1, 2}) or (siid in {2, 3} and piid == 1) or (siid == 13 and piid in {1, 2})
     if model == 'abhome.light.wy0a01':
         return siid == 2 and piid in {1, 2, 3, 7, 9, 12, 13}
     if model == 'cuco.plug.v3':
@@ -102,7 +102,7 @@ def project():
                               if o['id'] == 'property_write_candidate' else 'not_admitted_by_reference'),
                    'reason': ('Modern reference-origin typed reads and protected accounts are implemented; native and Flutter device publication and Core reads are implemented; provider acceptance remains pending.'
                               if o['id'] in ('directory', 'homes', 'properties')
-                              else 'ADR-0104 admits only 29 reviewed scalar mappings across five exact models with grants and trusted elevated approval; no arbitrary setter or physical acceptance.'
+                              else 'ADR-0104/0106 admit 33 reviewed scalar mappings across five exact models with grants and trusted elevated approval; no arbitrary setter or physical acceptance.'
                               if o['id'] == 'property_write_candidate'
                               else 'No credential crossover or arbitrary RPC; separate exact control admission is required.')}
                   for o in contract['operations']]
@@ -139,18 +139,18 @@ def project():
                     'provider_acceptance': 'pending'},
                 'modern_controls': {
                     'status': 'implemented_exact_granted_native_property_set',
-                    'evidence': 'ADR-0104; fictional protocol, TLS, Core and native Host tests',
+                    'evidence': 'ADR-0104/0106; fictional protocol, TLS, Core, native Host and App tests',
                     'origin': 'https://core.api.mijia.tech/app',
                     'route': '/miotspec/prop/set',
                     'codec': 'continuous_rc4_drop1024_with_bounded_encrypted_gzip',
                     'models': {'jdjz.fan.2072fc': 9, 'abhome.light.wy0a01': 7,
                                'zhimi.airpurifier.v6': 7, 'cuco.plug.v3': 4,
-                               'xiaomi.hood.cyp10': 2},
+                               'xiaomi.hood.cyp10': 6},
                     'authority': 'exact_startup_grants_and_independent_protected_family_admission',
                     'elevated_outlet': 'immutable_trusted_approval_required',
-                    'native_and_app': 'existing_api_1_37_options_grants_and_confirmation_contracts',
+                    'native_and_app': 'api_1_39_exact_hood_extension_with_existing_independent_grants',
                     'uncertainty': 'preserve_unknown_without_retry_or_protocol_fallback',
-                    'android_package': 'archive_checked_9a6c004_no_runtime_acceptance',
+                    'android_package': 'api_1_39_pending_2e776a9_contains_previous_29_controls',
                     'provider_acceptance': 'pending'},
                 'numeric_property_history': {
                     'status': 'implemented_core_native_app_reported_samples',

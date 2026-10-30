@@ -1,0 +1,68 @@
+{
+  "schema_version": "1.0",
+  "data_dir": "/private/homeverb-fixture",
+  "allow_mock_writes": false,
+  "adapter": "xiaomi.mijia",
+  "mijia_setting_grants": [
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "hood-2",
+      "property": "on_1",
+      "value": false
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "hood-2",
+      "property": "on_1",
+      "value": true
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "fan_control-3",
+      "property": "fan_level_1",
+      "value": 1
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "fan_control-3",
+      "property": "fan_level_1",
+      "value": 2
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "fan_control-3",
+      "property": "fan_level_1",
+      "value": 3
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "fan_control-3",
+      "property": "fan_level_1",
+      "value": 4
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "screen-13",
+      "property": "display_state_1",
+      "value": 0
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "screen-13",
+      "property": "display_state_1",
+      "value": 1
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "screen-13",
+      "property": "auto_screen_off_2",
+      "value": false
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "screen-13",
+      "property": "auto_screen_off_2",
+      "value": true
+    }
+  ]
+}

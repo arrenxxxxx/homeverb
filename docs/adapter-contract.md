@@ -88,3 +88,10 @@ checks descriptor type/domain/unit, request identity and received timestamps.
 Mijia binds the request to the protected selected legacy/modern protocol and root
 identity, holds the account lease through the reply, and never falls back, renews,
 writes cache/receipts or mutates saved credentials during historical reads.
+
+ADR-0106 admits four exact hood manual/display fields through the existing
+reference-setting family. Preserve the complete pinned model/service/property/
+type/unit/access/domain evidence. Fan/outlet opt-ins cannot enable them. Historical
+illumination-only mappings are accepted only as a complete known derivation;
+partial new-domain mixtures refuse. Inspection may upgrade a temporary mapping
+without changing saved authority; explicit refresh performs the protected upgrade.

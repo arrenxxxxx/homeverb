@@ -25,6 +25,9 @@ Json settingsInspection(bool light) {
           !{
             'light-6',
             'function-3',
+            'hood-2',
+            'fan_control-3',
+            'screen-13',
           }.contains(rule['properties']['component_id']['const']))
         (() {
           final component =

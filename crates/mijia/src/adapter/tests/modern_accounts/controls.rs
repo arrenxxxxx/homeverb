@@ -269,7 +269,7 @@ async fn every_modern_exact_control_keeps_grants_wire_values_and_outlet_approval
         assert_eq!(t.p.auth.lock().unwrap().len(), auth);
         assert_eq!(puts(&t.f), writes);
     }
-    assert_eq!(fields, 29);
+    assert_eq!(fields, 33);
 }
 #[tokio::test]
 async fn modern_controls_remain_read_only_without_opt_in_and_legacy_selection_stays_legacy() {

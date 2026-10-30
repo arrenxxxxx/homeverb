@@ -1868,4 +1868,9 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get historyDaily => '\u4e0a\u62a5\u7684\u6bcf\u65e5\u7edf\u8ba1';
 	@override String get historyNoUnit => '\u672a\u63d0\u4f9b\u5355\u4f4d';
 	@override String get historySamplesIncomplete => '\u8bb0\u5f55\u5b8c\u6574\u6027\u5c1a\u672a\u786e\u8ba4\uff0c\u7f3a\u5931\u8bb0\u5f55\u4e0d\u4ee3\u8868\u96f6\u3002\u5386\u53f2\u6837\u672c\u4e0d\u4ee3\u8868\u5f53\u524d\u72b6\u6001\uff0c\u4e5f\u4e0d\u80fd\u8bc1\u660e\u8bbe\u5907\u52a8\u4f5c\u5df2\u6267\u884c\u3002';
+	@override String get mobileHoodSettingsRequireNativeApi139 => '\u6cb9\u70df\u673a\u8bbe\u7f6e\u9700\u8981\u539f\u751f\u63a5\u53e3 1.39\u3002';
+	@override String get vendorXiaomiMijiaHoodSetOn1 => '\u8bbe\u7f6e\u6cb9\u70df\u673a\u5f00\u5173';
+	@override String get vendorXiaomiMijiaFanControlSetFanLevel1 => '\u8bbe\u7f6e\u98ce\u91cf\u6863\u4f4d';
+	@override String get vendorXiaomiMijiaScreenSetDisplayState1 => '\u8bbe\u7f6e\u663e\u793a\u5185\u5bb9';
+	@override String get vendorXiaomiMijiaScreenSetAutoScreenOff2 => '\u8bbe\u7f6e\u81ea\u52a8\u606f\u5c4f';
 }

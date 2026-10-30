@@ -1,6 +1,6 @@
 # HomeVerb Flutter application
 
-The native application embeds Core using native UI contract 1.38.0. The separate visual preview contains fictional Window Light fixtures and never opens Core. The default build opens an isolated Mock profile. Explicit Meiju builds provide protected account connection, local metadata, retrieval/recovery and scoped local removal; Android startup wiring and Mock process journeys are emulator-tested; actual Keystore and physical acceptance remain pending. Cache and history clearing are connected with separate confirmations. Nearby sharing and full-profile deletion remain unavailable. Their preview states are not live features.
+The native application embeds Core using native UI contract 1.39.0. The separate visual preview contains fictional Window Light fixtures and never opens Core. The default build opens an isolated Mock profile. Explicit Meiju builds provide protected account connection, local metadata, retrieval/recovery and scoped local removal; Android startup wiring and Mock process journeys are emulator-tested; actual Keystore and physical acceptance remain pending. Cache and history clearing are connected with separate confirmations. Nearby sharing and full-profile deletion remain unavailable. Their preview states are not live features.
 
 ## Mijia and combined account builds
 
@@ -21,7 +21,7 @@ controls with independent native grants; captcha and phone/email verification ha
 explicit foreground flows. API 1.36 adds QR sign-in. With API 1.37, successful QR
 continuation imports grouped device cards and explicit QR refresh/recovery updates
 them; old 1.36 libraries retain logical-directory summaries. ADR-0104 enables the
-29 reviewed scalar controls across five exact modern model mappings through the
+33 reviewed scalar controls across five exact modern model mappings through the
 existing option/grant/confirmation flow. Default native sessions remain read-only;
 older libraries expose no modern options. Elevated outlet settings still require
 actual confirmation of the immutable preview. Exact `cuco.plug.v3` daily-energy history
@@ -547,3 +547,9 @@ uncertain writes are never replayed automatically. Doorbell and lock writes rema
 unavailable. Combined mode reuses the private `native-meiju` profile; explicit
 `xiaomi.mijia` uses `native-mijia`. No profile or credential migration occurs.
 See the [Mijia guide](../../docs/development/11-mijia.md) for owner acceptance.
+
+API 1.39 adds exact hood on-state, four original fan levels, display content and
+automatic screen-off controls. The App negotiates the version before reopening
+with their independent setting grants. It does not translate levels to percentages,
+append a power-on write or admit clock/schedule fields. See
+[ADR-0106](../../docs/adr/0106-exact-hood-manual-controls.md).

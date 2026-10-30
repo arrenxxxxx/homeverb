@@ -92,3 +92,38 @@ fn auxiliary_settings_keep_exact_codes_and_do_not_admit_fan_timers_or_sibling_li
     float.component_id = "hood-2".into();
     assert!(mijia_setting_policy(&[float]).is_err());
 }
+
+#[test]
+fn hood_manual_grants_retain_exact_codes_without_clock_or_companion_authority() {
+    let fixture: Value = serde_json::from_str(include_str!(
+        "../../../examples/native-open.mijia-hood.json"
+    ))
+    .unwrap();
+    let grants: Vec<MijiaSettingGrant> =
+        serde_json::from_value(fixture["mijia_setting_grants"].clone()).unwrap();
+    let policy = mijia_setting_policy(&grants).unwrap();
+    assert_eq!(policy.grants.len(), 10);
+    for (input, output) in grants.iter().zip(&policy.grants) {
+        assert_eq!(
+            output.argument_schema,
+            json!({"const":{input.property.clone():input.value}})
+        );
+        assert_eq!(output.component_id, input.component_id);
+        assert_eq!(output.action, format!("set_{}", input.property));
+    }
+    for (component, property, value) in [
+        ("hood-2", "on_1", json!(1)),
+        ("hood-2", "state", json!(true)),
+        ("fan_control-3", "fan_level_1", json!(0)),
+        ("fan_control-3", "fan_level_1", json!(5)),
+        ("fan_control-3", "fan_level_1", json!(1.5)),
+        ("screen-13", "display_state_1", json!(2)),
+        ("screen-13", "auto_screen_off_2", json!(1)),
+        ("screen-13", "display_state_6", json!(1)),
+        ("screen-13", "auto_screen_off_time_3", json!(5)),
+        ("screen-13", "auto_screen_off_time_5", json!(1260)),
+        ("hood-2", "ch4_out_auto_ventilation_24", json!(false)),
+    ] {
+        assert!(mijia_setting_policy(&[grant(component, property, value)]).is_err());
+    }
+}

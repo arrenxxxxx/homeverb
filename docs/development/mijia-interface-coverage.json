@@ -25,7 +25,7 @@
       "id": "property_write_candidate",
       "route": "/miotspec/prop/set",
       "status": "implemented_exact_granted_legacy_and_modern_property_set",
-      "reason": "ADR-0104 admits only 29 reviewed scalar mappings across five exact models with grants and trusted elevated approval; no arbitrary setter or physical acceptance."
+      "reason": "ADR-0104/0106 admit 33 reviewed scalar mappings across five exact models with grants and trusted elevated approval; no arbitrary setter or physical acceptance."
     },
     {
       "id": "action_candidate",
@@ -4773,7 +4773,7 @@
           "iid": 1,
           "name": "on",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
@@ -5022,7 +5022,7 @@
           "iid": 1,
           "name": "fan-level",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "numeric_sample_history_status": "implemented_core_native_app_reported_samples",
           "reference_successful_instances": 0
         },
@@ -5379,7 +5379,7 @@
           "iid": 1,
           "name": "display-state",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "numeric_sample_history_status": "implemented_core_native_app_reported_samples",
           "reference_successful_instances": 0
         },
@@ -5389,7 +5389,7 @@
           "iid": 2,
           "name": "auto-screen-off",
           "read_status": "implemented_exact_scalar_mapping",
-          "write_status": "not_admitted_by_reference",
+          "write_status": "implemented_exact_granted_legacy_and_modern_property_set",
           "numeric_sample_history_status": "not_admitted",
           "reference_successful_instances": 0
         },
@@ -5886,7 +5886,7 @@
   },
   "modern_controls": {
     "status": "implemented_exact_granted_native_property_set",
-    "evidence": "ADR-0104; fictional protocol, TLS, Core and native Host tests",
+    "evidence": "ADR-0104/0106; fictional protocol, TLS, Core, native Host and App tests",
     "origin": "https://core.api.mijia.tech/app",
     "route": "/miotspec/prop/set",
     "codec": "continuous_rc4_drop1024_with_bounded_encrypted_gzip",
@@ -5895,13 +5895,13 @@
       "abhome.light.wy0a01": 7,
       "zhimi.airpurifier.v6": 7,
       "cuco.plug.v3": 4,
-      "xiaomi.hood.cyp10": 2
+      "xiaomi.hood.cyp10": 6
     },
     "authority": "exact_startup_grants_and_independent_protected_family_admission",
     "elevated_outlet": "immutable_trusted_approval_required",
-    "native_and_app": "existing_api_1_37_options_grants_and_confirmation_contracts",
+    "native_and_app": "api_1_39_exact_hood_extension_with_existing_independent_grants",
     "uncertainty": "preserve_unknown_without_retry_or_protocol_fallback",
-    "android_package": "archive_checked_9a6c004_no_runtime_acceptance",
+    "android_package": "api_1_39_pending_2e776a9_contains_previous_29_controls",
     "provider_acceptance": "pending"
   },
   "numeric_property_history": {

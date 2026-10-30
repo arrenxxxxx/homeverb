@@ -27,6 +27,9 @@ class SessionPermission {
   bool get requiresAuxiliarySettingApi =>
       requiresReferenceSettingApi &&
       const {'light-6', 'function-3'}.contains(component);
+  bool get requiresHoodManualApi =>
+      requiresReferenceSettingApi &&
+      const {'hood-2', 'fan_control-3', 'screen-13'}.contains(component);
   bool get requiresOutletApi => startupField == "mijia_outlet_grants";
   String get identity =>
       jsonEncode([device, component, capability, action, value]);
@@ -61,6 +64,13 @@ class SessionPermission {
   };
 
   static const _referenceSettings = {
+    ('hood-2', 'vendor.xiaomi.mijia.hood', 'set_on_1'): 'on_1',
+    ('fan_control-3', 'vendor.xiaomi.mijia.fan_control', 'set_fan_level_1'):
+        'fan_level_1',
+    ('screen-13', 'vendor.xiaomi.mijia.screen', 'set_display_state_1'):
+        'display_state_1',
+    ('screen-13', 'vendor.xiaomi.mijia.screen', 'set_auto_screen_off_2'):
+        'auto_screen_off_2',
     ('light-6', 'power', 'set'): 'state',
     ('light-6', 'vendor.xiaomi.mijia.light', 'set_brightness_2'):
         'brightness_2',
@@ -213,6 +223,30 @@ class SessionPermission {
       final auxiliary =
           settingParameter != null &&
           const {'light-6', 'function-3'}.contains(component);
+      final hoodManual =
+          settingParameter != null &&
+          const {'hood-2', 'fan_control-3', 'screen-13'}.contains(component);
+      if (hoodManual) {
+        final codes = switch (mapping.$2) {
+          'fan_level_1' => const [1, 2, 3, 4],
+          'display_state_1' => const [0, 1],
+          _ => null,
+        };
+        if (schema['type'] != (codes == null ? 'boolean' : 'integer') ||
+            schema.keys.any(
+              (key) => !{'type', 'enum', 'title', 'description'}.contains(key),
+            ))
+          continue;
+        if (codes == null) {
+          if (schema.containsKey('enum')) continue;
+        } else {
+          final offered = schema['enum'];
+          if (offered is! List ||
+              offered.length != codes.length ||
+              !codes.every(offered.contains))
+            continue;
+        }
+      }
       if (auxiliary &&
           schema['type'] !=
               (mapping.$2 == 'brightness_2' ? 'integer' : 'boolean'))

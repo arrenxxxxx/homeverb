@@ -75,7 +75,10 @@ flows with fictional evidence. ADR-0102 adds API 1.37 native/Flutter grouped-car
 publication and Core reads. ADR-0103 adds exact modern outlet daily-energy history
 through the existing native/App history contract. ADR-0104 adds 29 exact modern
 scalar controls across five models using existing native/App grants and trusted
-outlet approval. Broader controls/history/events and owner-run real-account/device
+outlet approval. ADR-0106/API 1.39 adds four independently granted exact hood
+manual/display properties, bringing the modern scalar control count to 33. Older
+hood illumination-only derivations remain valid; explicit refresh upgrades them.
+Broader controls/history/events and owner-run real-account/device
 acceptance remain incomplete. ADR-0105 adds numeric property logs for
 161 exact fields through Core, CLI/MCP and native API 1.38/App. Native inspection
 defaults to daily-only for older clients; updated App explicitly opts into samples.

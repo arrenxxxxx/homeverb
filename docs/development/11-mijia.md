@@ -6,11 +6,12 @@ publication and Core reads are integrated through Flutter with fictional evidenc
 Exact modern outlet daily-energy history uses the existing history interface.
 ADR-0105 exposes numeric property logs for 161 exact fields through Core,
 CLI/MCP and API 1.38/App, preserving original signed values and nullable units.
-ADR-0104 adds 29 exact modern scalar controls across five models. Broader
+ADR-0104/0106 provide 33 exact modern scalar controls across five models, including
+four manual/display hood properties in API 1.39. Broader
 controls/history and other reference coverage remain incomplete; see the
 [coverage ledger and remaining work](14-mijia-reference-integration.md).
 
-The October 30 integration uses native API **1.38.0**, following the linear
+The October 30 integration uses native API **1.39.0**, following the linear
 mainline update and dedicated interactive-login bridge. Earlier Mijia phase versions are historical. See
 [contract reconciliation](../adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
 remain available alongside Mijia; identity restoration remains Meiju-only.
@@ -19,7 +20,7 @@ The experimental integration is implemented under [ADR-0070](../adr/0070-mijia-n
 The owner will perform real-account and device acceptance. Do not access saved
 pilot credentials or contact appliances as part of development tests.
 
-Current callable scope includes native API 1.38 Mijia-only/combined sessions,
+Current callable scope includes native API 1.39 Mijia-only/combined sessions,
 protected partial inventory and 264 scalar mappings from 17 pinned reference
 specifications. Exact fan, light and purifier settings have independent protected
 admission and trusted startup grants. Flutter provides account/read/control views,
@@ -932,3 +933,38 @@ no issues. All 13 CLI/MCP tests and 16 Dart FFI tests also passed. Documentation
 source hygiene, 25 schemas with 72 positive/1230 negative fixtures, both reference
 projection tests and seven shared presentation tests passed. These use fictional
 material and establish no provider/phone/model acceptance. The 9a6c004 APK remains API 1.37; API 1.38 packaging is separate work.
+
+## Exact hood manual controls -- October 30, 2026
+
+ADR-0106 adds four exact xiaomi.hood.cyp10 properties through legacy and modern
+Core paths: hood on-state, fan levels 1/2/3/4, display content codes 0/1 and the
+independent automatic screen-off Boolean. The 33 reviewed scalar controls still
+cover five exact models. Existing vendor IDs and raw codes remain stable; no
+percentage conversion, companion power-on, inferred timer or schedule is added.
+Core and the protected adapter independently require exact reference-setting
+grants; fan/outlet authority does not transfer. Uncertain writes are never replayed.
+
+Native API 1.39 adds four closed startup tuples and three inspection component
+scopes. Flutter probes the native version before any granted reopen and preserves
+all ten target values. Old illumination-only hood mappings remain valid; explicit
+refresh upgrades their domains while keeping identity and organization. Invalid
+partial domain mixtures refuse. Methods, C exports, SQLite 5 and protected payload
+3 are unchanged. Older native libraries refuse new grants/derivations.
+
+Scoped evidence: 233 Mijia unit and 14 compile-fail tests passed, including all
+33 modern controls and every new legacy target. Host account/grant suites passed
+53 and 3 tests. The hood/auxiliary/settings/permissions Flutter suite passed 50
+tests, the related control/approval/device/FFI suite passed 61 tests, and analysis
+reported no issues. All material is fictional. The API 1.38 APK from 2e776a9
+predates the four new controls. Final workspace/native checks and API 1.39
+packaging are recorded separately; provider/phone/model acceptance remains pending.
+
+Final software verification: the workspace excluding the known unrelated
+Meiju/macOS LAN-alias suite passed 642 tests with one ignored. Strict all-target
+Clippy and formatting passed. Rebuilt FFI and actual C boundary checks passed
+36 methods/60 live examples, including new hood startup acceptance/refusal and
+76 modern-account cases. The checked-in examples were regenerated from that run.
+Documentation, source hygiene, 25 schemas with 73 positive/1320 negative fixtures,
+two coverage-projection tests and seven presentation tests passed. The existing
+eight full Flutter font/pixel/legacy-click failures were not rerun or claimed fixed.
+No real account, appliance, installation, remote push or publication was used.

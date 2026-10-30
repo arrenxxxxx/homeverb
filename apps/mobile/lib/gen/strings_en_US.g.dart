@@ -5540,4 +5540,19 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Completeness is unproven. Missing records are not zero. Reported samples are not current state or proof of a device action.'
 	String get historySamplesIncomplete => 'Completeness is unproven. Missing records are not zero. Reported samples are not current state or proof of a device action.';
+
+	/// en-US: 'Hood settings require native API 1.39.'
+	String get mobileHoodSettingsRequireNativeApi139 => 'Hood settings require native API 1.39.';
+
+	/// en-US: 'Set hood power'
+	String get vendorXiaomiMijiaHoodSetOn1 => 'Set hood power';
+
+	/// en-US: 'Set fan level'
+	String get vendorXiaomiMijiaFanControlSetFanLevel1 => 'Set fan level';
+
+	/// en-US: 'Set display content'
+	String get vendorXiaomiMijiaScreenSetDisplayState1 => 'Set display content';
+
+	/// en-US: 'Set automatic screen off'
+	String get vendorXiaomiMijiaScreenSetAutoScreenOff2 => 'Set automatic screen off';
 }

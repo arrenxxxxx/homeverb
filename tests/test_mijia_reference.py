@@ -25,6 +25,8 @@ class ReferenceTests(unittest.TestCase):
         profiles, ledger = projected[module.CATALOG], projected[module.LEDGER]
         self.assertEqual(len(profiles), 17)
         self.assertEqual(len(ledger['models']), 19)
+        self.assertEqual(sum(ledger['modern_controls']['models'].values()), 33)
+        self.assertEqual(ledger['modern_controls']['models']['xiaomi.hood.cyp10'], 6)
         entries = [entry for model in ledger['models'] for entry in model['entries']]
         self.assertEqual(sum(e['kind'] == 'property' for e in entries), 470)
         self.assertEqual(sum(e['kind'] == 'action' for e in entries), 40)
