@@ -13,6 +13,7 @@ use tokio_util::sync::CancellationToken;
 
 pub(crate) struct HistoricalAdapter {
     inner: MockAdapter,
+    samples: bool,
     pub calls: AtomicUsize,
     pub active: Arc<AtomicUsize>,
     pub hang: AtomicBool,
@@ -29,7 +30,7 @@ fn option() -> HistoryOption {
     HistoryOption {
         target: target(),
         aggregation: HistoryAggregation::ReportedDaily,
-        unit: "fictional-history-unit".into(),
+        unit: Some("fictional-history-unit".into()),
         max_window_seconds: 2764800,
         max_records: 31,
         bucket_timezone: None,
@@ -67,7 +68,12 @@ impl Adapter for HistoricalAdapter {
         _: &Connection,
         _: &Operation,
     ) -> Result<Vec<HistoryOption>> {
-        Ok(vec![option()])
+        let mut result = option();
+        if self.samples {
+            result.aggregation = HistoryAggregation::ReportedSamples;
+            result.unit = None;
+        }
+        Ok(vec![result])
     }
     async fn read_history(
         &self,
@@ -91,13 +97,13 @@ impl Adapter for HistoricalAdapter {
             aggregation: q.aggregation,
             start: q.start,
             end: q.end,
-            unit: option().unit,
+            unit: if self.samples { None } else { option().unit },
             source: r.transport,
             received_at: Utc::now(),
             records: vec![
                 HistoryRecord {
                     reported_at: q.start,
-                    value: 0.0,
+                    value: if self.samples { -1.0 } else { 0.0 },
                 },
                 HistoryRecord {
                     reported_at: q.start + Duration::seconds(1),
@@ -118,10 +124,14 @@ pub(crate) struct Fixture {
     pub query: HistoryRequest,
 }
 pub(crate) async fn fixture() -> Fixture {
+    fixture_with_samples(false).await
+}
+pub(crate) async fn fixture_with_samples(samples: bool) -> Fixture {
     let directory = tempfile::tempdir().unwrap();
     let clock = Arc::new(SystemClock);
     let store = Arc::new(SqliteStore::open(directory.path()).unwrap());
     let adapter = Arc::new(HistoricalAdapter {
+        samples,
         inner: MockAdapter::open(
             &directory.path().join("appliance.sqlite3"),
             clock.clone(),
@@ -134,16 +144,30 @@ pub(crate) async fn fixture() -> Fixture {
         entered: tokio::sync::Notify::new(),
     });
     let core = Arc::new(Core::new(
-        store,
+        store.clone(),
         vec![adapter.clone()],
         clock,
         Policy::default(),
     ));
     core.discover(&operation()).await.unwrap();
-    let device = core.describe(DEVICE_ID).unwrap().device;
+    let mut descriptor = core.describe(DEVICE_ID).unwrap();
+    if samples {
+        let property = descriptor
+            .capabilities
+            .iter_mut()
+            .find(|c| c.id == "climate")
+            .unwrap()
+            .properties
+            .get_mut("target_temperature")
+            .unwrap();
+        *property = json!({"type":"number", "readable":true, "writable":true, "minimum":-30,
+            "maximum":100, "multipleOf":0.05});
+        store.save_device(&descriptor).unwrap();
+    }
+    let device = descriptor.device;
     let query = serde_json::from_value(json!({"schema_version":"1.0", "device_id":device.id,
         "connection_id":device.connections.iter().find(|v| v.transport == Transport::Cloud).unwrap().id,
-        "target":target(), "aggregation":"reported_daily", "start":"2026-10-01T00:00:00Z", "end":"2026-10-03T00:00:00Z"})).unwrap();
+        "target":target(), "aggregation":if samples {"reported_samples"} else {"reported_daily"}, "start":"2026-10-01T00:00:00Z", "end":"2026-10-03T00:00:00Z"})).unwrap();
     Fixture {
         directory,
         core,
@@ -278,4 +302,32 @@ fn fifo_is_not_a_history_file() {
     let name = std::ffi::CString::new(path.as_os_str().as_bytes()).unwrap();
     assert_eq!(unsafe { libc::mkfifo(name.as_ptr(), 0o600) }, 0);
     assert_eq!(request(&path).unwrap_err().code, "INVALID_ARGUMENT");
+}
+
+#[tokio::test]
+async fn cli_sample_history_preserves_signed_unitless_values() {
+    let f = fixture_with_samples(true).await;
+    let options = run(
+        &f.core,
+        HistoryCommand::Options {
+            device_id: f.query.device_id.clone(),
+            connection_id: f.query.connection_id.clone(),
+        },
+        &operation(),
+    )
+    .await
+    .unwrap();
+    assert_eq!(options["options"][0]["aggregation"], "reported_samples");
+    assert!(options["options"][0]["unit"].is_null());
+    assert_eq!(f.adapter.calls.load(Ordering::SeqCst), 0);
+    let path = f.directory.path().join("samples.json");
+    std::fs::write(&path, serde_json::to_vec(&f.query).unwrap()).unwrap();
+    let result = run(&f.core, HistoryCommand::Read { file: path }, &operation())
+        .await
+        .unwrap();
+    assert_eq!(result["aggregation"], "reported_samples");
+    assert_eq!(result["records"][0]["value"], -1.0);
+    assert!(result["unit"].is_null());
+    assert_eq!(f.adapter.calls.load(Ordering::SeqCst), 1);
+    assert!(f.core.recent_executions().unwrap().is_empty());
 }

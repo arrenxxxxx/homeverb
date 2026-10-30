@@ -76,8 +76,11 @@ publication and Core reads. ADR-0103 adds exact modern outlet daily-energy histo
 through the existing native/App history contract. ADR-0104 adds 29 exact modern
 scalar controls across five models using existing native/App grants and trusted
 outlet approval. Broader controls/history/events and owner-run real-account/device
-acceptance remain incomplete. ADR-0105 adds typed Rust numeric property logs for
-161 exact fields; Core/native/App sample-history integration remains pending. No lock
+acceptance remain incomplete. ADR-0105 adds numeric property logs for
+161 exact fields through Core, CLI/MCP and native API 1.38/App. Native inspection
+defaults to daily-only for older clients; updated App explicitly opts into samples.
+Sample units match the numeric property or remain null, and values retain their
+protected source domain. History is never current state or write verification. No lock
 write or complete-inventory claim is admitted. Meiju payload 3 and SQLite 5 remain unchanged. Legacy-only Mijia payload 1
 remains unchanged; modern account composition writes payload 2, and explicit typed
 modern device adoption writes payload 3 with selected-protocol provenance under

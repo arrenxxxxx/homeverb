@@ -28,7 +28,7 @@ fn option() -> HistoryOption {
     HistoryOption {
         target: target(),
         aggregation: HistoryAggregation::ReportedDaily,
-        unit: "fictional-unit".into(),
+        unit: Some("fictional-unit".into()),
         max_window_seconds: 32 * 86400,
         max_records: 31,
         bucket_timezone: None,
@@ -118,7 +118,15 @@ impl Adapter for HistoricalAdapter {
             aggregation: request.aggregation,
             start: request.start,
             end: request.end,
-            unit: option().unit,
+            unit: self
+                .options
+                .lock()
+                .unwrap()
+                .iter()
+                .find(|o| o.target == request.target && o.aggregation == request.aggregation)
+                .unwrap()
+                .unit
+                .clone(),
             source: connection.transport,
             received_at: Utc::now(),
             records: vec![
@@ -141,7 +149,7 @@ impl Adapter for HistoricalAdapter {
             "device" => result.device_id = "foreign".into(),
             "connection" => result.connection_id = "foreign".into(),
             "target" => result.target.property = "mode".into(),
-            "unit" => result.unit = "wrong".into(),
+            "unit" => result.unit = Some("wrong".into()),
             "source" => {
                 result.source = if connection.transport == Transport::Cloud {
                     Transport::Lan
@@ -159,6 +167,9 @@ impl Adapter for HistoricalAdapter {
             "after" => result.records[1].reported_at = request.end,
             "fractional" => result.records[0].reported_at += Duration::milliseconds(1),
             "negative" => result.records[0].value = -1.0,
+            "sample_range" => result.records[0].value = -31.0,
+            "sample_step" => result.records[0].value = 0.15,
+            "sample_enum" => result.records[0].value = 3.0,
             "nan" => result.records[0].value = f64::NAN,
             "infinity" => result.records[0].value = f64::INFINITY,
             "records" => result.records = vec![result.records[0].clone(); 32],
@@ -372,7 +383,7 @@ async fn invalid_requests_and_public_options_never_dispatch() {
         match fault {
             "duplicate" => {
                 let mut second = option();
-                second.unit = "different".into();
+                second.unit = Some("different".into());
                 options.push(second);
             }
             "count" => options = vec![option(); 65],
@@ -384,8 +395,8 @@ async fn invalid_requests_and_public_options_never_dispatch() {
             "window" => options[0].max_window_seconds = 0,
             "records" => options[0].max_records = 32,
             "timezone" => options[0].bucket_timezone = Some("UTC".into()),
-            "unit" => options[0].unit.clear(),
-            _ => options[0].unit = "bad\nunit".into(),
+            "unit" => options[0].unit = Some(String::new()),
+            _ => options[0].unit = Some("bad\nunit".into()),
         }
         *f.adapter.options.lock().unwrap() = options;
         assert!(
@@ -628,5 +639,162 @@ async fn native_history_cancellation_releases_pending_operation_and_device_lock(
         assert!(f.store.lock_device(DEVICE_ID).is_ok());
         assert!(!session.cancel("pending"));
         assert_eq!(f.adapter.calls.load(Ordering::SeqCst), 1);
+    }
+}
+
+async fn samples() -> Fixture {
+    let mut f = Fixture::new().await;
+    let mut descriptor = f.core.describe(DEVICE_ID).unwrap();
+    let property = descriptor
+        .capabilities
+        .iter_mut()
+        .find(|c| c.id == "climate")
+        .unwrap()
+        .properties
+        .get_mut("target_temperature")
+        .unwrap();
+    property["minimum"] = json!(-30);
+    property["maximum"] = json!(100);
+    property["multipleOf"] = json!(0.05);
+    property["unit"] = json!("celsius");
+    f.store.save_device(&descriptor).unwrap();
+    let mut sample = option();
+    sample.aggregation = HistoryAggregation::ReportedSamples;
+    sample.unit = Some("celsius".into());
+    f.adapter.options.lock().unwrap().push(sample);
+    f.request.aggregation = HistoryAggregation::ReportedSamples;
+    f
+}
+#[tokio::test]
+async fn sample_history_preserves_signed_values_with_exact_units_and_distinct_daily_series() {
+    let f = samples().await;
+    *f.adapter.fault.lock().unwrap() = "negative".into();
+    let options = f
+        .core
+        .inspect_history_options(DEVICE_ID, &f.request.connection_id, &op())
+        .await
+        .unwrap();
+    assert_eq!(options.options.len(), 2);
+    assert_eq!(f.adapter.calls.load(Ordering::SeqCst), 0);
+    let result = f.core.read_history(&f.request, &op()).await.unwrap();
+    assert_eq!(result.records[0].value, -1.0);
+    assert_eq!(result.unit.as_deref(), Some("celsius"));
+    let mut daily = f.request.clone();
+    daily.aggregation = HistoryAggregation::ReportedDaily;
+    assert!(f.core.read_history(&daily, &op()).await.is_err());
+    assert!(f.core.recent_executions().unwrap().is_empty());
+    assert!(f.store.snapshot(DEVICE_ID, "main").unwrap().is_none());
+}
+#[tokio::test]
+async fn sample_history_checks_numeric_domain_and_nullable_unit_before_publication() {
+    let f = samples().await;
+    for mode in [
+        "sample_range",
+        "unit",
+        "nan",
+        "infinity",
+        "duplicate",
+        "order",
+    ] {
+        *f.adapter.fault.lock().unwrap() = mode.into();
+        assert!(
+            f.core.read_history(&f.request, &op()).await.is_err(),
+            "{mode}"
+        );
+    }
+    let mut descriptor = f.core.describe(DEVICE_ID).unwrap();
+    let property = descriptor
+        .capabilities
+        .iter_mut()
+        .find(|c| c.id == "climate")
+        .unwrap()
+        .properties
+        .get_mut("target_temperature")
+        .unwrap();
+    property["multipleOf"] = json!(0.5);
+    f.store.save_device(&descriptor).unwrap();
+    *f.adapter.fault.lock().unwrap() = "sample_step".into();
+    assert!(f.core.read_history(&f.request, &op()).await.is_err());
+    let property = descriptor
+        .capabilities
+        .iter_mut()
+        .find(|c| c.id == "climate")
+        .unwrap()
+        .properties
+        .get_mut("target_temperature")
+        .unwrap();
+    property.as_object_mut().unwrap().remove("unit");
+    property["multipleOf"] = json!(0.05);
+    f.store.save_device(&descriptor).unwrap();
+    assert!(
+        f.core
+            .inspect_history_options(DEVICE_ID, &f.request.connection_id, &op())
+            .await
+            .is_err()
+    );
+    f.adapter.options.lock().unwrap()[1].unit = None;
+    *f.adapter.fault.lock().unwrap() = "negative".into();
+    assert_eq!(
+        f.core.read_history(&f.request, &op()).await.unwrap().unit,
+        None
+    );
+}
+#[tokio::test]
+async fn native_sample_history_is_explicit_opt_in_and_old_inspection_stays_daily_only() {
+    let f = samples().await;
+    let session = homeverb_host::Session::new(Core::new(
+        f.store.clone(),
+        vec![f.adapter.clone()],
+        Arc::new(SystemClock),
+        Policy::default(),
+    ));
+    for include in [None, Some(false), Some(true)] {
+        let mut request = json!({"method":"inspect_history_options","device_id":DEVICE_ID,"connection_id":f.request.connection_id});
+        if let Some(value) = include {
+            request["include_reported_samples"] = json!(value);
+        }
+        let result=session.call(serde_json::from_value(json!({"schema_version":"1.0","operation_id":"sample-inspect","timeout_ms":1000,"request":request})).unwrap()).await;
+        assert!(result["error"].is_null(), "{result}");
+        assert_eq!(
+            result["data"]["options"].as_array().unwrap().len(),
+            if include == Some(true) { 2 } else { 1 }
+        );
+    }
+    *f.adapter.fault.lock().unwrap() = "negative".into();
+    let result=session.call(serde_json::from_value(json!({"schema_version":"1.0","operation_id":"sample-read","timeout_ms":1000,"request":{"method":"read_history","history":f.request}})).unwrap()).await;
+    assert_eq!(result["data"]["aggregation"], "reported_samples");
+    assert_eq!(result["data"]["records"][0]["value"], -1.0);
+    session.close();
+}
+
+#[tokio::test]
+async fn sample_history_enforces_integer_and_enum_domains_independently() {
+    for (key, value, mode) in [
+        ("type", json!("integer"), "sample_step"),
+        ("enum", json!([0.0, 1.25]), "sample_enum"),
+    ] {
+        let f = samples().await;
+        let mut descriptor = f.core.describe(DEVICE_ID).unwrap();
+        let property = descriptor
+            .capabilities
+            .iter_mut()
+            .find(|c| c.id == "climate")
+            .unwrap()
+            .properties
+            .get_mut("target_temperature")
+            .unwrap();
+        property[key] = value;
+        f.store.save_device(&descriptor).unwrap();
+        *f.adapter.fault.lock().unwrap() = mode.into();
+        assert_eq!(
+            f.core
+                .read_history(&f.request, &op())
+                .await
+                .unwrap_err()
+                .code,
+            "INVALID_HISTORY"
+        );
+        assert!(f.store.snapshot(DEVICE_ID, "main").unwrap().is_none());
+        assert!(f.core.recent_executions().unwrap().is_empty());
     }
 }

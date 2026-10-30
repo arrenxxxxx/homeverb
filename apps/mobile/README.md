@@ -1,6 +1,6 @@
 # HomeVerb Flutter application
 
-The native application embeds Core using native UI contract 1.37.0. The separate visual preview contains fictional Window Light fixtures and never opens Core. The default build opens an isolated Mock profile. Explicit Meiju builds provide protected account connection, local metadata, retrieval/recovery and scoped local removal; Android startup wiring and Mock process journeys are emulator-tested; actual Keystore and physical acceptance remain pending. Cache and history clearing are connected with separate confirmations. Nearby sharing and full-profile deletion remain unavailable. Their preview states are not live features.
+The native application embeds Core using native UI contract 1.38.0. The separate visual preview contains fictional Window Light fixtures and never opens Core. The default build opens an isolated Mock profile. Explicit Meiju builds provide protected account connection, local metadata, retrieval/recovery and scoped local removal; Android startup wiring and Mock process journeys are emulator-tested; actual Keystore and physical acceptance remain pending. Cache and history clearing are connected with separate confirmations. Nearby sharing and full-profile deletion remain unavailable. Their preview states are not live features.
 
 ## Mijia and combined account builds
 
@@ -26,7 +26,9 @@ existing option/grant/confirmation flow. Default native sessions remain read-onl
 older libraries expose no modern options. Elevated outlet settings still require
 actual confirmation of the immutable preview. Exact `cuco.plug.v3` daily-energy history
 is available through the existing explicit history dialog on legacy and modern
-bindings; all other historical targets remain unavailable. Partial/failed retrieval stays
+bindings. API 1.38 also exposes 161 exact numeric property sample series. The
+dialog negotiates this version before requesting samples, preserves signed values
+and absent units, and distinguishes them from daily statistics. Partial/failed retrieval stays
 separate from authentication, and local reload failure never repeats login.
 See the [Mijia guide](../../docs/development/11-mijia.md) for owner acceptance and
 [verification](verification.md) for fictional local checks.

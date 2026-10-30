@@ -53,7 +53,14 @@ async fn query(t: &HistoryFixture) -> HistoryRequest {
         t.c.inspect_history_options(&t.device.id, &t.device.connections[0].id, &operation())
             .await
             .unwrap();
-    assert_eq!(options.options.len(), 1);
+    assert_eq!(
+        options
+            .options
+            .iter()
+            .filter(|o| o.aggregation == HistoryAggregation::ReportedDaily)
+            .count(),
+        1
+    );
     HistoryRequest {
         schema_version: "1.0".into(),
         device_id: t.device.id.clone(),
@@ -218,6 +225,86 @@ async fn modern_history_cancellation_deadline_drop_and_late_reply_release_leases
         assert!(t.f.vault.lease(t.record.id, &operation()).await.is_ok());
         assert!(t.f.store.lock_device(&t.device.id).is_ok());
         assert_eq!(*t.p.reads.lock().unwrap(), vec![Read::Statistics]);
+        assert!(t.f.cloud.calls.lock().unwrap().is_empty());
+    }
+}
+
+#[tokio::test]
+async fn modern_sample_history_rechecks_exact_target_identity_and_protected_membership() {
+    let t = fixture(false, true).await;
+    let mut q = query(&t).await;
+    q.aggregation = HistoryAggregation::ReportedSamples;
+    t.p.reads.lock().unwrap().clear();
+    for mode in 0..6 {
+        let mut q = q.clone();
+        let mut device = t.device.clone();
+        match mode {
+            0 => q.target.property = "unreviewed".into(),
+            1 => q.device_id = "foreign".into(),
+            2 => q.connection_id = "foreign".into(),
+            3 => q.start += chrono::Duration::milliseconds(1),
+            4 => q.end = q.start + chrono::Duration::days(33),
+            _ => device.model = "cuco.plug.v2".into(),
+        }
+        assert!(
+            t.a.read_history(&device, &device.connections[0], &q, &operation())
+                .await
+                .is_err()
+        );
+    }
+    let mut saved = payload(&t.f, &t.record);
+    saved["bindings"][0]["listed"] = json!(false);
+    t.f.secrets.values.lock().unwrap().insert(
+        t.record.credential_ref.to_string(),
+        serde_json::to_vec(&saved).unwrap(),
+    );
+    assert!(
+        t.c.inspect_history_options(&t.device.id, &t.device.connections[0].id, &operation())
+            .await
+            .unwrap()
+            .options
+            .is_empty()
+    );
+    assert!(t.c.read_history(&q, &operation()).await.is_err());
+    assert!(t.p.reads.lock().unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn modern_sample_history_cancellation_deadline_drop_and_late_reply_release_leases() {
+    for mode in 0..4 {
+        let t = fixture(false, true).await;
+        let mut q = query(&t).await;
+        q.aggregation = HistoryAggregation::ReportedSamples;
+        t.p.reads.lock().unwrap().clear();
+        let mut op = operation();
+        if mode == 3 {
+            let cancellation = op.cancellation.clone();
+            *t.p.hook.lock().unwrap() = Some(Box::new(move || cancellation.cancel()));
+            assert_eq!(
+                t.c.read_history(&q, &op).await.unwrap_err().code,
+                "CANCELLED"
+            );
+        } else {
+            t.p.pause.store(2, Ordering::SeqCst);
+            if mode == 1 {
+                op.deadline = tokio::time::Instant::now() + Duration::from_millis(100);
+            }
+            let mut work = Box::pin(t.c.read_history(&q, &op));
+            tokio::select! {_=t.p.started.notified()=>{},result=&mut work=>panic!("Unexpected {result:?}")}
+            assert!(t.f.vault.lease(t.record.id, &operation()).await.is_err());
+            assert!(t.f.store.lock_device(&t.device.id).is_err());
+            match mode {
+                0 => {
+                    op.cancellation.cancel();
+                    assert_eq!(work.await.unwrap_err().code, "CANCELLED");
+                }
+                1 => assert_eq!(work.await.unwrap_err().code, "DEADLINE_EXCEEDED"),
+                _ => drop(work),
+            }
+        }
+        assert!(t.f.vault.lease(t.record.id, &operation()).await.is_ok());
+        assert!(t.f.store.lock_device(&t.device.id).is_ok());
+        assert_eq!(*t.p.reads.lock().unwrap(), vec![Read::PropertyHistory]);
         assert!(t.f.cloud.calls.lock().unwrap().is_empty());
     }
 }

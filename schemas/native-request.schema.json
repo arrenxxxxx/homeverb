@@ -642,6 +642,10 @@
               "type": "string",
               "minLength": 1,
               "maxLength": 256
+            },
+            "include_reported_samples": {
+              "type": "boolean",
+              "default": false
             }
           },
           "required": [

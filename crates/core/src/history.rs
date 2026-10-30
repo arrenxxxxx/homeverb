@@ -44,7 +44,15 @@ fn validate_options(options: &HistoryOptions, descriptor: &Descriptor) -> Result
                 property.get("type").and_then(|v| v.as_str()),
                 Some("number" | "integer")
             )
-            || option.unit.chars().any(char::is_control)
+            || option
+                .unit
+                .as_ref()
+                .is_some_and(|unit| unit.chars().any(char::is_control))
+        {
+            return Err(unsupported());
+        }
+        if option.aggregation == HistoryAggregation::ReportedSamples
+            && option.unit.as_deref() != property.get("unit").and_then(|v| v.as_str())
         {
             return Err(unsupported());
         }
@@ -58,6 +66,7 @@ fn validate_result(
     connection: &Connection,
     started: DateTime<Utc>,
     finished: DateTime<Utc>,
+    descriptor: &Descriptor,
 ) -> Result<()> {
     let count = result
         .records
@@ -82,11 +91,23 @@ fn validate_result(
     {
         return Err(invalid_history());
     }
+    let sample_validator = if option.aggregation == HistoryAggregation::ReportedSamples {
+        let definition = descriptor
+            .capability(&option.target.component_id, &option.target.capability)
+            .and_then(|c| c.properties.get(&option.target.property))
+            .ok_or_else(invalid_history)?;
+        Some(jsonschema::validator_for(definition).map_err(|_| invalid_history())?)
+    } else {
+        None
+    };
     let mut previous = None;
     for record in &result.records {
         if record.reported_at.timestamp_subsec_nanos() != 0
             || !record.value.is_finite()
-            || record.value < 0.0
+            || option.aggregation == HistoryAggregation::ReportedDaily && record.value < 0.0
+            || sample_validator
+                .as_ref()
+                .is_some_and(|validator| !validator.is_valid(&serde_json::json!(record.value)))
             || record.reported_at < request.start
             || record.reported_at >= request.end
             || previous.is_some_and(|time| record.reported_at <= time)
@@ -211,6 +232,7 @@ impl Core {
                     &connection,
                     started,
                     self.clock.now(),
+                    &descriptor,
                 )?;
                 // Repeat local descriptor admission after I/O; changed bindings cannot publish history.
                 let current = self.describe(&request.device_id)?;

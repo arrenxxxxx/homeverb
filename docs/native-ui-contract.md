@@ -1,6 +1,6 @@
 # Native UI contract
 
-The October 30 modern-account bridge uses native API **1.37.0**, following
+The October 30 reported-sample history bridge uses native API **1.38.0**, following
 the October 24 linear mainline update. Earlier Mijia phase versions are historical. See
 [contract reconciliation](adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
 remain available alongside Mijia; identity restoration remains Meiju-only.
@@ -1963,3 +1963,33 @@ ordinary JSON cannot provide that consent. App code does not select a protocol,
 origin, codec or credential slot. Failed or unknown requests do not cause refresh,
 renewal, fallback or replay. The previous dd51c73 APK lacks this adapter addition;
 a new package and real provider/phone/model acceptance are separate evidence.
+
+## Reported numeric samples (API 1.38)
+
+ADR-0105 adds optional `include_reported_samples` to `inspect_history_options`.
+Its default is false: omission or false returns daily-only options, preserving
+older clients. After negotiating 1.38, send true to inspect all admitted series.
+Inspection remains local and does not grant authority. Exact `(target, aggregation)`
+pairs identify distinct series, so one property may offer both daily and sample
+history. The ordinary method count remains 36 and no C export is added.
+
+`read_history` accepts the advertised `reported_samples` aggregation using the
+existing bounded request. The result keeps original finite numeric values, including
+negative readings allowed by the property's domain. Its unit must exactly match
+the readable numeric descriptor, including null when absent. Core validates the
+property domain; Mijia independently derives exact enum/range/step admission from
+protected pinned specifications. Daily results still require a string unit and
+nonnegative values. No timestamp, value or unit conversion is inferred for samples.
+
+Flutter negotiates 1.38 before sending the opt-in, labels the two series types,
+and validates immutable numeric domains and responses before display. Old native
+hosts retain daily-only UI behavior. Sample results are ephemeral, incomplete
+historical observations, never current state, actor metadata or command evidence.
+Limits remain 64 options, 31 records and 32 days; lifecycle cancellation and lease
+ownership are unchanged. CLI/MCP use Core directly and expose both admitted types.
+
+The Rust `HistoryAggregation` gains a variant and `unit` becomes `Option<String>`;
+unpublished exhaustive matches and constructors need source updates. Older native
+libraries reject the new request field/aggregation. Existing daily JSON results,
+SQLite 5 and Mijia protected payload 3 remain unchanged. The API 1.37 APK from
+9a6c004 predates this phase; a matching API 1.38 package requires a separate build.

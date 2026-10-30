@@ -4,13 +4,13 @@ October 30: 17 exact Mijia reference specifications supply 264 scalar read
 mappings and localized App labels. Modern QR authentication, grouped device
 publication and Core reads are integrated through Flutter with fictional evidence.
 Exact modern outlet daily-energy history uses the existing history interface.
-ADR-0105 adds typed Rust numeric property logs for 161 exact fields; Core/native/App
-reported-sample contracts and presentation remain pending.
+ADR-0105 exposes numeric property logs for 161 exact fields through Core,
+CLI/MCP and API 1.38/App, preserving original signed values and nullable units.
 ADR-0104 adds 29 exact modern scalar controls across five models. Broader
 controls/history and other reference coverage remain incomplete; see the
 [coverage ledger and remaining work](14-mijia-reference-integration.md).
 
-The October 30 integration uses native API **1.37.0**, following the linear
+The October 30 integration uses native API **1.38.0**, following the linear
 mainline update and dedicated interactive-login bridge. Earlier Mijia phase versions are historical. See
 [contract reconciliation](../adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
 remain available alongside Mijia; identity restoration remains Meiju-only.
@@ -19,12 +19,12 @@ The experimental integration is implemented under [ADR-0070](../adr/0070-mijia-n
 The owner will perform real-account and device acceptance. Do not access saved
 pilot credentials or contact appliances as part of development tests.
 
-Current callable scope includes native API 1.37 Mijia-only/combined sessions,
+Current callable scope includes native API 1.38 Mijia-only/combined sessions,
 protected partial inventory and 264 scalar mappings from 17 pinned reference
 specifications. Exact fan, light and purifier settings have independent protected
 admission and trusted startup grants. Flutter provides account/read/control views,
 explicit captcha and phone/email code continuation, and bounded historical reads
-for the exact `cuco.plug.v3` daily-energy profile. Historical units and incomplete
+for the exact `cuco.plug.v3` daily-energy profile and admitted numeric samples. Historical units and incomplete
 record evidence stay separate from live state and execution verification.
 
 Native API 1.32 supplies the user-triggered code-request bridge under
@@ -904,3 +904,29 @@ options, CLI/MCP and App still expose only the admitted daily-energy series.
 Reported-sample contracts, protected Core admission, versioned native/App adoption
 and provider acceptance remain pending. The verified 9a6c004 APK is unchanged.
 No provider account, appliance, package installation, push or publication is used.
+
+## Reported samples through Core, native and App -- October 30, 2026
+
+ADR-0105 now exposes all 161 pinned numeric history fields through Core on legacy
+and modern protected bindings. Exact `(target, aggregation)` options distinguish
+reported samples from daily statistics. Samples preserve signed values, source
+numeric domains and exact nullable units; daily results remain nonnegative with
+string units. Inspection performs no networking. Reads retain account/device
+leases and do not change secrets, cache, receipts, descriptors or write authority.
+
+Native API 1.38 adds optional include_reported_samples=false to existing inspection;
+older clients remain daily-only. Updated Flutter negotiates 1.38, opts in explicitly,
+labels the two types, validates immutable domains and discards results on lifecycle
+changes. CLI/MCP reuse the same Core contract. SQLite 5, protected payloads and C
+export/method counts are unchanged. Rust enum/nullable-unit changes require source
+updates for unpublished consumers; older native libraries refuse new requests.
+
+Executed native checks: workspace tests excluding the known unrelated Meiju/macOS
+LAN-alias failures passed 637 tests with one ignored; the final Host history suite
+passed 14 tests after an added integer/enum case. Strict workspace Clippy, FFI build
+and actual native ABI checks passed (36 methods, 60 examples, 76 modern-account
+cases). The affected Flutter history/card suite passed 85 tests and analysis found
+no issues. All 13 CLI/MCP tests and 16 Dart FFI tests also passed. Documentation,
+source hygiene, 25 schemas with 72 positive/1230 negative fixtures, both reference
+projection tests and seven shared presentation tests passed. These use fictional
+material and establish no provider/phone/model acceptance. The 9a6c004 APK remains API 1.37; API 1.38 packaging is separate work.

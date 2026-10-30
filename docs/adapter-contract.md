@@ -79,3 +79,12 @@ retain account leases for the bounded request. A single explicit connection is
 used without fallback or paging. Returned historical aggregates require Core
 validation; public metadata alone cannot admit another model or protocol key.
 The first exact protocol candidate is [daily energy](adr/0088-mijia-exact-daily-energy-history.md).
+
+ADR-0105 extends these hooks with numeric `reported_samples`. Derive the exact
+pinned field's numeric domain independently of public descriptor claims; retain
+signed values and the original unit, including null when absent. Return separate
+options when one target supports daily aggregates and samples. Core independently
+checks descriptor type/domain/unit, request identity and received timestamps.
+Mijia binds the request to the protected selected legacy/modern protocol and root
+identity, holds the account lease through the reply, and never falls back, renews,
+writes cache/receipts or mutates saved credentials during historical reads.

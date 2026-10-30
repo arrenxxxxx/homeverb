@@ -50,16 +50,21 @@ class NumericHistoryOption {
     this.unit,
     this.maxWindowSeconds,
     this.maxRecords,
+    this.aggregation,
+    this.domain,
   );
-  final String device, connection, source, unit;
+  final String device, connection, source, aggregation;
+  final String? unit;
+  final Map<String, dynamic> domain;
   final Map<String, String> target;
   final int maxWindowSeconds, maxRecords;
 
   static List<NumericHistoryOption> parse(
     dynamic value,
     Json descriptor,
-    String connection,
-  ) {
+    String connection, {
+    bool includeReportedSamples = false,
+  }) {
     final envelope = _object(value, {
       'schema_version',
       'device_id',
@@ -116,24 +121,54 @@ class NumericHistoryOption {
         if (property is! Map ||
             property['readable'] != true ||
             !['number', 'integer'].contains(property['type']) ||
-            option['aggregation'] != 'reported_daily' ||
+            !(option['aggregation'] == 'reported_daily' ||
+                includeReportedSamples &&
+                    option['aggregation'] == 'reported_samples') ||
             option['bucket_timezone'] != null ||
             !seen.add(
               [
-                'component_id',
-                'capability',
-                'property',
-              ].map((key) => Uri.encodeComponent(owned[key]!)).join('/'),
+                    'component_id',
+                    'capability',
+                    'property',
+                  ].map((key) => Uri.encodeComponent(owned[key]!)).join('/') +
+                  '/${option['aggregation']}',
             ))
           _invalid();
+        final samples = option['aggregation'] == 'reported_samples';
+        final unit = samples && option['unit'] == null
+            ? null
+            : _text(option['unit'], 32);
+        if (samples && unit != property['unit']) _invalid();
+        final domain = <String, dynamic>{'type': property['type']};
+        if (samples) {
+          for (final key in ['minimum', 'maximum', 'multipleOf']) {
+            if (!property.containsKey(key)) continue;
+            final value = property[key];
+            if (value is! num ||
+                !value.isFinite ||
+                key == 'multipleOf' && value <= 0)
+              _invalid();
+            domain[key] = value;
+          }
+          if (property.containsKey('enum')) {
+            final values = property['enum'];
+            if (values is! List ||
+                values.isEmpty ||
+                values.any((v) => v is! num || !v.isFinite))
+              _invalid();
+            domain['enum'] = List<num>.unmodifiable(values.cast<num>());
+          }
+        }
         return NumericHistoryOption._(
           _text(envelope['device_id']),
           _text(connection),
           routes.single['transport'],
           owned,
-          _text(option['unit'], 32),
+          unit,
           _integer(option['max_window_seconds'], 1, 2764800),
           _integer(option['max_records'], 1, 31),
+          option['aggregation'],
+          Map.unmodifiable(domain),
         );
       }),
     );
@@ -162,7 +197,7 @@ class NumericHistoryQuery {
     'device_id': option.device,
     'connection_id': option.connection,
     'target': option.target,
-    'aggregation': 'reported_daily',
+    'aggregation': option.aggregation,
     'start': historyUtc(start),
     'end': historyUtc(end),
   };
@@ -240,7 +275,9 @@ class NumericHistoryResult {
       final number = row['value'];
       if (number is! num ||
           !number.isFinite ||
-          number < 0 ||
+          (query.option.aggregation == 'reported_daily'
+              ? number < 0
+              : !_matchesSample(number, query.option.domain)) ||
           time.isBefore(query.start) ||
           !time.isBefore(query.end) ||
           previous != null && !time.isAfter(previous))
@@ -256,4 +293,19 @@ class NumericHistoryResult {
       raw['limit_reached'],
     );
   }
+}
+
+bool _matchesSample(num value, Map<String, dynamic> schema) {
+  if (schema['type'] == 'integer' && value != value.roundToDouble())
+    return false;
+  if (schema['minimum'] is num && value < schema['minimum']) return false;
+  if (schema['maximum'] is num && value > schema['maximum']) return false;
+  if (schema['enum'] is List && !(schema['enum'] as List).contains(value))
+    return false;
+  if (schema['multipleOf'] is num) {
+    final ratio = value / (schema['multipleOf'] as num);
+    if (!ratio.isFinite || (ratio - ratio.roundToDouble()).abs() > 1e-9)
+      return false;
+  }
+  return true;
 }

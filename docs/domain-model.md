@@ -81,11 +81,17 @@ The Property / Action / Event model takes inspiration from W3C WoT. This project
 
 [ADR-0089](adr/0089-bounded-numeric-history.md) and the
 [history schema](../schemas/history.schema.json) define a separate historical
-result, options and request. Typed Core integration is implemented; public native
-and App adoption remains pending. History references
+result, options and request. Core, native and App integration is implemented, including API 1.38 samples. History references
 an existing local device, connection, component, capability and numeric property.
 Its `reported_daily` aggregation and unit describe the historical series; they
 do not reinterpret live values or establish a provider calendar timezone.
 Requested UTC bounds, provider timestamps, receipt time, rejected count and
 unproven completeness stay explicit. Records never become snapshots or write
 verification evidence. See the [partial result example](../examples/history.result.json).
+
+ADR-0105 adds `reported_samples`, distinct from `reported_daily`. Samples retain
+finite signed numeric values within the readable property's domain and an exact
+matching unit, or null when the property has none. Daily statistics retain their
+historical string unit and nonnegative values. Uniqueness is `(target, aggregation)`.
+See the [sample result](../examples/history.samples.result.json). Neither series
+is event history; both retain unproven completeness and the existing time/count bounds.

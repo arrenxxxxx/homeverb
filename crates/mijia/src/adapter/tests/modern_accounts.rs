@@ -131,7 +131,34 @@ impl ModernReadTransport for Peer {
             Read::Directory => {
                 json!({"list":self.devices.lock().unwrap().clone(),"has_more":false})
             }
-            Read::PropertyHistory => panic!("Property history is not exposed by this fixture."),
+            Read::PropertyHistory => {
+                assert_eq!(
+                    request.endpoint().url(),
+                    "https://api.mijia.tech/app/user/get_user_device_data"
+                );
+                assert_eq!(data["type"], "prop");
+                assert_eq!(data["limit"], 31);
+                let devices = self.devices.lock().unwrap();
+                let device = devices.iter().find(|d| d["did"] == data["did"]).unwrap();
+                let mapping = ModelMapping::pinned(device["model"].as_str().unwrap(), None)
+                    .unwrap()
+                    .unwrap();
+                let field = mapping
+                    .properties
+                    .iter()
+                    .find(|p| format!("{}.{}", p.siid, p.piid) == data["key"].as_str().unwrap())
+                    .unwrap();
+                let domain = mapping
+                    .numeric_history_definition(field.siid, field.piid)
+                    .unwrap();
+                let value = domain["enum"]
+                    .as_array()
+                    .and_then(|v| v.first())
+                    .cloned()
+                    .or_else(|| domain.get("minimum").cloned())
+                    .unwrap_or(json!(0));
+                json!([{"did":data["did"],"key":data["key"],"type":"prop","time":data["time_start"],"value":serde_json::to_string(&vec![value]).unwrap(),"uid":"PRIVATE-ACTOR"}])
+            }
             Read::Statistics => {
                 assert_eq!(
                     request.endpoint().url(),
@@ -909,3 +936,6 @@ mod history;
 
 #[path = "modern_accounts/controls.rs"]
 mod controls;
+
+#[path = "modern_accounts/sample_history.rs"]
+mod sample_history;

@@ -363,7 +363,7 @@ async fn stale_control_descriptors_and_grants_cannot_write_a_modern_selected_bin
             .is_empty()
     );
     assert!(
-        a.history_options(&device, &device.connections[0], &operation())
+        !a.history_options(&device, &device.connections[0], &operation())
             .await
             .unwrap()
             .is_empty()

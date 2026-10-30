@@ -2301,6 +2301,11 @@ String? translateSource(
   "Renew QR Authorization" => t.mobileQrRenew,
   "QR directory result." => t.mobileQrDirectoryResult,
   "Connecting QR account\u2026" => t.mobileQrConnecting,
+  "Reported samples" => t.historySamples,
+  "Reported daily statistics" => t.historyDaily,
+  "No unit reported" => t.historyNoUnit,
+  "Completeness is unproven. Missing records are not zero. Reported samples are not current state or proof of a device action." =>
+    t.historySamplesIncomplete,
   _ => null,
 };
 
@@ -4641,5 +4646,10 @@ String? sourceForKey(String key) => switch (key) {
   "mobile.qrRenew" => "Renew QR Authorization",
   "mobile.qrDirectoryResult" => "QR directory result.",
   "mobile.qrConnecting" => "Connecting QR account\u2026",
+  "history.samples" => "Reported samples",
+  "history.daily" => "Reported daily statistics",
+  "history.noUnit" => "No unit reported",
+  "history.samplesIncomplete" =>
+    "Completeness is unproven. Missing records are not zero. Reported samples are not current state or proof of a device action.",
   _ => null,
 };

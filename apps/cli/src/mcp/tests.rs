@@ -402,3 +402,43 @@ async fn historical_mcp_read_stops_on_notification_eof_and_host_cancel() {
         assert!(f.core.recent_executions().unwrap().is_empty());
     }
 }
+
+#[tokio::test]
+async fn mcp_sample_history_schema_and_read_preserve_signed_unitless_records() {
+    let f = crate::history::tests::fixture_with_samples(true).await;
+    let arguments = json!({"history":f.query});
+    let catalog = tools(false);
+    let tool = catalog["tools"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|t| t["name"] == "history_read")
+        .unwrap();
+    assert!(
+        jsonschema::validator_for(&tool["inputSchema"])
+            .unwrap()
+            .is_valid(&arguments)
+    );
+    let options = invoke(
+        &f.core,
+        false,
+        "history_options",
+        json!({
+            "device_id":f.query.device_id, "connection_id":f.query.connection_id
+        }),
+    )
+    .await;
+    assert_eq!(
+        options["structuredContent"]["data"]["options"][0]["aggregation"],
+        "reported_samples"
+    );
+    assert_eq!(f.adapter.calls.load(std::sync::atomic::Ordering::SeqCst), 0);
+    let result = invoke(&f.core, false, "history_read", arguments).await;
+    assert_eq!(result["isError"], false);
+    let data = &result["structuredContent"]["data"];
+    assert_eq!(data["aggregation"], "reported_samples");
+    assert_eq!(data["records"][0]["value"], -1.0);
+    assert!(data["unit"].is_null());
+    assert_eq!(data["completeness"], "unproven");
+    assert!(f.core.recent_executions().unwrap().is_empty());
+}

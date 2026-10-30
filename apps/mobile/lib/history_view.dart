@@ -117,9 +117,16 @@ class _NumericHistoryDialogState extends State<NumericHistoryDialog>
     final raw = await core.call('inspect_history_options', {
       'device_id': device,
       'connection_id': id,
+      if ((core as NativeSessionClient).apiAtLeast(38))
+        'include_reported_samples': true,
     });
     if (!current) return;
-    options = NumericHistoryOption.parse(raw, descriptor, id);
+    options = NumericHistoryOption.parse(
+      raw,
+      descriptor,
+      id,
+      includeReportedSamples: (core as NativeSessionClient).apiAtLeast(38),
+    );
     if (options.isNotEmpty) choose(options.first);
   });
 
@@ -180,7 +187,7 @@ class _NumericHistoryDialogState extends State<NumericHistoryDialog>
             ) ??
             controlLabel(option.target['property']!),
       ),
-      'unit': option.unit,
+      'unit': option.unit ?? const UiMessage('No unit reported'),
     });
   }
 
@@ -228,6 +235,12 @@ class _NumericHistoryDialogState extends State<NumericHistoryDialog>
               for (final option in options)
                 RadioListTile<NumericHistoryOption>(
                   title: Copy(optionLabel(option), control: true),
+                  subtitle: Copy(
+                    option.aggregation == 'reported_samples'
+                        ? 'Reported samples'
+                        : 'Reported daily statistics',
+                    control: true,
+                  ),
                   value: option,
                   // Kept compatible with the pinned Flutter SDK.
                   // ignore: deprecated_member_use
@@ -301,8 +314,10 @@ class _NumericHistoryDialogState extends State<NumericHistoryDialog>
                   }),
                   control: true,
                 ),
-                const Copy(
-                  'Completeness is unproven. Missing records are not zero. The provider calendar-day timezone is unknown.',
+                Copy(
+                  value.query.option.aggregation == 'reported_samples'
+                      ? 'Completeness is unproven. Missing records are not zero. Reported samples are not current state or proof of a device action.'
+                      : 'Completeness is unproven. Missing records are not zero. The provider calendar-day timezone is unknown.',
                   control: true,
                 ),
                 Copy(
@@ -332,7 +347,7 @@ class _NumericHistoryDialogState extends State<NumericHistoryDialog>
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Copy(
                       LiteralText(
-                        '${historyUtc(row.time)}\n${row.value} ${value.query.option.unit}',
+                        '${historyUtc(row.time)}\n${row.value}${value.query.option.unit == null ? '' : ' ${value.query.option.unit}'}',
                       ),
                       control: true,
                     ),

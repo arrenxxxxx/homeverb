@@ -19,8 +19,15 @@ async fn request(f: &Fixture, device: &Device) -> HistoryRequest {
         .inspect_history_options(&device.id, &device.connections[0].id, &operation())
         .await
         .unwrap();
-    assert_eq!(options.options.len(), 1);
-    assert_eq!(options.options[0].unit, "kWh");
+    assert_eq!(
+        options
+            .options
+            .iter()
+            .filter(|o| o.aggregation == HistoryAggregation::ReportedDaily)
+            .count(),
+        1
+    );
+    assert_eq!(options.options[0].unit.as_deref(), Some("kWh"));
     HistoryRequest {
         schema_version: "1.0".into(),
         device_id: device.id.clone(),
@@ -177,6 +184,46 @@ async fn historical_reads_hold_and_release_account_and_device_leases() {
         );
         assert!(f.store.lock_device(&device.id).is_ok());
         assert_eq!(f.cloud.count(CloudEndpoint::Statistics), 1);
+        assert_eq!(f.cloud.count(CloudEndpoint::SetProperty), 0);
+    }
+}
+
+#[tokio::test]
+async fn sample_historical_reads_hold_and_release_account_and_device_leases() {
+    for mode in ["cancel", "deadline", "drop"] {
+        let (f, account, device) = fixture(true).await;
+        let mut query = request(&f, &device).await;
+        query.aggregation = HistoryAggregation::ReportedSamples;
+        f.cloud.stall_read.store(1, Ordering::SeqCst);
+        let mut op = operation();
+        if mode == "deadline" {
+            op.deadline = tokio::time::Instant::now() + Duration::from_millis(100);
+        }
+        let mut work = Box::pin(f.core.read_history(&query, &op));
+        tokio::select! {result=&mut work=>panic!("Unexpected result: {result:?}"),_=f.cloud.read_gate.notified()=>{}}
+        assert!(
+            f.vault
+                .lease(account.account.id, &operation())
+                .await
+                .is_err()
+        );
+        assert!(f.store.lock_device(&device.id).is_err());
+        match mode {
+            "cancel" => {
+                op.cancellation.cancel();
+                assert_eq!(work.await.unwrap_err().code, "CANCELLED");
+            }
+            "deadline" => assert_eq!(work.await.unwrap_err().code, "DEADLINE_EXCEEDED"),
+            _ => drop(work),
+        }
+        assert!(
+            f.vault
+                .lease(account.account.id, &operation())
+                .await
+                .is_ok()
+        );
+        assert!(f.store.lock_device(&device.id).is_ok());
+        assert_eq!(f.cloud.count(CloudEndpoint::PropertyHistory), 1);
         assert_eq!(f.cloud.count(CloudEndpoint::SetProperty), 0);
     }
 }

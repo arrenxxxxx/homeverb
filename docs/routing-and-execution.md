@@ -821,3 +821,20 @@ unchanged. Positive/negative protocol fixtures are in
 crates/mijia/src/property_history/tests.rs and
 crates/mijia/src/modern/reads/tests/property_history.rs, with fixed-origin local
 TLS coverage in crates/mijia/src/transport/tests.rs.
+
+## Reported property samples through Core and hosts
+
+ADR-0105 adds explicit `reported_samples` reads on the selected connection. Core
+inspects local options, distinguishes `(target, aggregation)`, then independently
+validates result identity, domain, exact nullable unit and receipt timing. The
+adapter repeats protected exact-model/field and selected-protocol admission and
+retains account/device leases across send and post-reply validation. Cancellation,
+deadline, drop and late replies release resources without publishing a stale result.
+
+API 1.38 inspection defaults to daily-only for old clients; an explicit sample
+opt-in does not grant write authority or trigger networking. Flutter negotiates the
+version and suspends foreground state polling while the history dialog is open.
+CLI and local MCP preserve the same Core series. Samples never enter snapshots,
+receipts or verification; no retry, fallback, pagination, background work or
+credential renewal occurs. Daily statistics keep their existing nonnegative values
+and conversion; signed samples retain the protected property's source domain.

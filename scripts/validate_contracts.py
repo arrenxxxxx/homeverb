@@ -70,6 +70,7 @@ def main() -> int:
         ("command-result", "command-result.approval-expired"),
     ]
     pairs.extend(("history", "history." + name) for name in ["options", "request", "result"])
+    pairs.extend(("history", "history.samples." + name) for name in ["options", "request", "result"])
     validators = {}
     for path in (ROOT / "schemas").glob("*.schema.json"):
         sch = json.loads(path.read_text(encoding="utf-8"))
@@ -629,6 +630,22 @@ def main() -> int:
         negative.append((f"history option invalid {field}", validators["history"], bad))
     bad = copy.deepcopy(history["options"]); bad["options"] *= 2
     negative.append(("history duplicate options", validators["history"], bad))
+
+    samples = {name: load(f"examples/history.samples.{name}.json") for name in ["options", "request", "result"]}
+    for name in ["options", "result"]:
+        unitless = copy.deepcopy(samples[name])
+        (unitless["options"][0] if name == "options" else unitless)["unit"] = None
+        validators["history"].validate(unitless)
+        daily = copy.deepcopy(history[name])
+        (daily["options"][0] if name == "options" else daily)["unit"] = None
+        negative.append(("daily history requires a unit", validators["history"], daily))
+    for name, fixture in samples.items():
+        for field in ["provider", "did", "key", "uid", "token", "principal", "limit", "endpoint", "confirmed"]:
+            bad = copy.deepcopy(fixture); bad[field] = "FORBIDDEN"
+            negative.append((f"sample history {name} rejects {field}", validators["history"], bad))
+    for value in [True, None, "-1", {}, []]:
+        bad = copy.deepcopy(samples["result"]); bad["records"][0]["value"] = value
+        negative.append(("sample history requires numeric values", validators["history"], bad))
 
     for name, validator, data in negative:
         if validator.is_valid(data):

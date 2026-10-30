@@ -51,8 +51,9 @@ This exits with code 11. Refresh state to inspect the result; do not blindly res
   partial named inventory and 264 scalar mappings from 17 exact reference specs.
   Native API 1.37 adds opt-in modern device publication to protected QR/session entry points and retains exact hood illumination and fan quiet settings alongside independently granted outlet controls and supports Mijia-only and combined sessions. Flutter exposes
   reviewed fan/light/purifier/outlet controls and an explicit bounded historical-read
-  dialog; only the protected `cuco.plug.v3` daily-energy profile is admitted for
-  history. Synthetic evidence and Android archive checks do not establish real
+  dialog; the protected `cuco.plug.v3` daily-energy profile and 161 exact numeric
+  property sample series are admitted for history under ADR-0105. API 1.38
+  explicitly opts into reported samples with original signed values and nullable units. Synthetic evidence and Android archive checks do not establish real
   provider/device acceptance. Modern QR sign-in, grouped device-card publication, explicit refresh/recovery
   and renewal have Flutter fixture evidence with API 1.37. Exact modern outlet daily-energy history uses the separate community statistics
   profile under ADR-0103. ADR-0104 adds the existing 29 exact scalar controls across

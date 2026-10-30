@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Bounded numeric history",
-  "description": "ADR-0089. Core additionally validates target/descriptor/connection admission, half-open nonfuture ranges, inspected bounds, record order/uniqueness and receipt/count consistency. History never verifies writes or populates state cache.",
+  "description": "ADR-0089/0105. Daily nonnegative aggregates and reported signed numeric samples are distinct. Core additionally checks inspected property domains/units, target/connection, bounded half-open ranges, record order and receipt/count consistency; history never verifies writes or populates state cache.",
   "$defs": {
     "target": {
       "type": "object",
@@ -36,10 +36,16 @@
           "$ref": "#/$defs/target"
         },
         "aggregation": {
-          "const": "reported_daily"
+          "enum": [
+            "reported_daily",
+            "reported_samples"
+          ]
         },
         "unit": {
-          "type": "string",
+          "type": [
+            "string",
+            "null"
+          ],
           "minLength": 1,
           "maxLength": 32
         },
@@ -65,7 +71,25 @@
         "max_records",
         "bucket_timezone"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "aggregation": {
+                "const": "reported_daily"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "unit": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ]
     },
     "options": {
       "type": "object",
@@ -120,7 +144,10 @@
           "$ref": "#/$defs/target"
         },
         "aggregation": {
-          "const": "reported_daily"
+          "enum": [
+            "reported_daily",
+            "reported_samples"
+          ]
         },
         "start": {
           "type": "string",
@@ -164,7 +191,10 @@
           "$ref": "#/$defs/target"
         },
         "aggregation": {
-          "const": "reported_daily"
+          "enum": [
+            "reported_daily",
+            "reported_samples"
+          ]
         },
         "start": {
           "type": "string",
@@ -177,7 +207,10 @@
           "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
         },
         "unit": {
-          "type": "string",
+          "type": [
+            "string",
+            "null"
+          ],
           "minLength": 1,
           "maxLength": 32
         },
@@ -202,8 +235,7 @@
                 "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
               },
               "value": {
-                "type": "number",
-                "minimum": 0
+                "type": "number"
               }
             },
             "required": [
@@ -246,7 +278,34 @@
         "completeness",
         "bucket_timezone"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "aggregation": {
+                "const": "reported_daily"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "unit": {
+                "type": "string"
+              },
+              "records": {
+                "items": {
+                  "properties": {
+                    "value": {
+                      "minimum": 0
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
     }
   },
   "oneOf": [

@@ -239,6 +239,17 @@ impl CloudTransport for Cloud {
             let result=match request.endpoint() {
                 CloudEndpoint::Devices=>json!({"list":self.devices.lock().unwrap().clone()}),
                 CloudEndpoint::Homes=>json!({"homelist":[],"has_more":false}),
+                CloudEndpoint::PropertyHistory=>{
+                    assert_eq!(data["type"],"prop");assert_eq!(data["limit"],31);
+                    if self.stall_read.load(Ordering::SeqCst)!=0 {self.read_gate.notify_one();std::future::pending::<()>().await;}
+                    let devices=self.devices.lock().unwrap();
+                    let device=devices.iter().find(|d|d["did"]==data["did"]).unwrap();
+                    let mapping=ModelMapping::pinned(device["model"].as_str().unwrap(),None).unwrap().unwrap();
+                    let field=mapping.properties.iter().find(|p|format!("{}.{}",p.siid,p.piid)==data["key"].as_str().unwrap()).unwrap();
+                    let domain=mapping.numeric_history_definition(field.siid,field.piid).unwrap();
+                    let value=domain["enum"].as_array().and_then(|v|v.first()).cloned().or_else(||domain.get("minimum").cloned()).unwrap_or(json!(0));
+                    json!([{"did":data["did"],"key":data["key"],"type":"prop","time":data["time_start"],"value":serde_json::to_string(&vec![value]).unwrap(),"uid":"PRIVATE-ACTOR"}])
+                },
                 CloudEndpoint::Statistics=>{
                     assert_eq!(data["key"],"11.1"); assert_eq!(data["data_type"],"stat_day_v3"); assert_eq!(data["limit"],31);
                     assert_eq!(data["did"],"FICTIONAL-ENERGY-DEVICE");

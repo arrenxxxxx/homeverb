@@ -122,10 +122,20 @@ def main():
             call(handle, 'describe_device', device=devices[0]['id'])
             history_connection = 'conn-example-cloud'
             assert call(handle, 'inspect_history_options', device_id=devices[0]['id'], connection_id=history_connection)['data']['options'] == []
+            for include in [False, True]:
+                assert call(handle, 'inspect_history_options', device_id=devices[0]['id'],
+                            connection_id=history_connection, include_reported_samples=include)['data']['options'] == []
+            for include in [None, 1, 'true', {}, []]:
+                request = envelope('inspect_history_options', device_id=devices[0]['id'],
+                                   connection_id=history_connection, include_reported_samples=include)
+                assert not request_schema.is_valid(request)
+                assert raw(handle, request)['error']['code'] == 'INVALID_ARGUMENT'
             history = load('examples/history.request.json')
             history.update(device_id=devices[0]['id'], connection_id=history_connection)
             history['target'] = {'component_id':'main', 'capability':'climate', 'property':'target_temperature'}
             assert call(handle, 'read_history', history=history)['error']['code'] == 'CAPABILITY_UNSUPPORTED'
+            sample = copy.deepcopy(history); sample['aggregation'] = 'reported_samples'
+            assert call(handle, 'read_history', history=sample)['error']['code'] == 'CAPABILITY_UNSUPPORTED'
             for field in ['principal', 'provider', 'did', 'key', 'limit', 'unit', 'confirmed']:
                 bad = copy.deepcopy(history); bad[field] = 'FORBIDDEN'
                 request = envelope('read_history', history=bad)

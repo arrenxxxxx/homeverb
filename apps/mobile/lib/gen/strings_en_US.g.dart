@@ -5528,4 +5528,16 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Connecting QR account\u2026'
 	String get mobileQrConnecting => 'Connecting QR account\u2026';
+
+	/// en-US: 'Reported samples'
+	String get historySamples => 'Reported samples';
+
+	/// en-US: 'Reported daily statistics'
+	String get historyDaily => 'Reported daily statistics';
+
+	/// en-US: 'No unit reported'
+	String get historyNoUnit => 'No unit reported';
+
+	/// en-US: 'Completeness is unproven. Missing records are not zero. Reported samples are not current state or proof of a device action.'
+	String get historySamplesIncomplete => 'Completeness is unproven. Missing records are not zero. Reported samples are not current state or proof of a device action.';
 }

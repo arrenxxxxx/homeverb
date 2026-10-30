@@ -1,6 +1,6 @@
 # ADR-0105: Reported numeric property history
 
-Status: Typed Rust protocol implemented; Core/native/App sample-history integration pending.
+Status: Experimental protocol and Core/native API 1.38/App integration implemented; provider and phone acceptance pending.
 Date: October 30, 2026.
 
 ## Evidence
@@ -109,3 +109,51 @@ protocol-only phase. The delivered 9a6c004 package retains its recorded scope.
 Real provider/sample availability, model behavior and phone acceptance are not
 established by these fictional tests. The next dependent work is the versioned
 reported_samples contract and end-to-end Core/native/App integration.
+
+## Sample contract and native compatibility decision
+
+The dependent contract adds aggregation=reported_samples. Unit is nullable only
+for samples; daily statistics retain a nonempty string unit and nonnegative values.
+Samples must use the readable numeric property's reported unit exactly (or null
+when it has none), and Core validates each value against the public property's
+numeric schema as well as the adapter's independently derived protected domain.
+Both aggregations can exist for one target and are distinct selectable series.
+The existing 64-option, 31-record and 32-day limits remain unchanged.
+
+Native API 1.38 adds optional include_reported_samples=false to the existing local
+inspect_history_options request. Omission/false filters to reported_daily, keeping
+older clients' response shapes unchanged. True exposes both aggregates and samples;
+it conveys no privilege or networking. read_history selects the exact advertised
+aggregation, and ordinary method/export counts are unchanged. Typed Core returns
+all admitted series; current CLI/MCP consumers carry the generic request/result.
+An older library refuses the new opt-in field and sample enum. Updated Flutter
+must negotiate 1.38 before sending the field and retain daily-only behavior on
+older hosts. The unit type change is source-breaking for unpublished Rust consumers
+and must be recorded; SQLite/protected payloads and existing JSON daily results
+are unchanged. Native and Flutter delivery remain separate verified phases.
+
+## Reported samples through Core, native and App -- October 30, 2026
+
+ADR-0105 now exposes all 161 pinned numeric history fields through Core on legacy
+and modern protected bindings. Exact `(target, aggregation)` options distinguish
+reported samples from daily statistics. Samples preserve signed values, source
+numeric domains and exact nullable units; daily results remain nonnegative with
+string units. Inspection performs no networking. Reads retain account/device
+leases and do not change secrets, cache, receipts, descriptors or write authority.
+
+Native API 1.38 adds optional include_reported_samples=false to existing inspection;
+older clients remain daily-only. Updated Flutter negotiates 1.38, opts in explicitly,
+labels the two types, validates immutable domains and discards results on lifecycle
+changes. CLI/MCP reuse the same Core contract. SQLite 5, protected payloads and C
+export/method counts are unchanged. Rust enum/nullable-unit changes require source
+updates for unpublished consumers; older native libraries refuse new requests.
+
+Executed native checks: workspace tests excluding the known unrelated Meiju/macOS
+LAN-alias failures passed 637 tests with one ignored; the final Host history suite
+passed 14 tests after an added integer/enum case. Strict workspace Clippy, FFI build
+and actual native ABI checks passed (36 methods, 60 examples, 76 modern-account
+cases). The affected Flutter history/card suite passed 85 tests and analysis found
+no issues. All 13 CLI/MCP tests and 16 Dart FFI tests also passed. Documentation,
+source hygiene, 25 schemas with 72 positive/1230 negative fixtures, both reference
+projection tests and seven shared presentation tests passed. These use fictional
+material and establish no provider/phone/model acceptance. The 9a6c004 APK remains API 1.37; API 1.38 packaging is separate work.

@@ -1829,5 +1829,9 @@
   "mobile.qrRecover": "恢复扫码授权",
   "mobile.qrRenew": "续期扫码授权",
   "mobile.qrDirectoryResult": "扫码目录结果。",
-  "mobile.qrConnecting": "正在连接扫码账号…"
+  "mobile.qrConnecting": "正在连接扫码账号…",
+  "history.samples": "上报的历史样本",
+  "history.daily": "上报的每日统计",
+  "history.noUnit": "未提供单位",
+  "history.samplesIncomplete": "记录完整性尚未确认，缺失记录不代表零。历史样本不代表当前状态，也不能证明设备动作已执行。"
 }

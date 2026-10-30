@@ -57,6 +57,8 @@ pub enum Request {
     InspectHistoryOptions {
         device_id: String,
         connection_id: String,
+        #[serde(default)]
+        include_reported_samples: bool,
     },
     ReadHistory {
         history: HistoryRequest,
@@ -672,11 +674,19 @@ impl Session {
             Request::InspectHistoryOptions {
                 device_id,
                 connection_id,
+                include_reported_samples,
             } => self
                 .core
                 .inspect_history_options(&device_id, &connection_id, &operation)
                 .await
-                .map(|value| json!(value)),
+                .map(|mut options| {
+                    if !include_reported_samples {
+                        options.options.retain(|option| {
+                            option.aggregation == HistoryAggregation::ReportedDaily
+                        });
+                    }
+                    json!(options)
+                }),
             Request::ReadHistory { history } => self
                 .core
                 .read_history(&history, &operation)

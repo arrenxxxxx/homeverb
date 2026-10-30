@@ -308,3 +308,9 @@ timezone, rejected counts and limit status must not be discarded or treated as
 complete calendar totals. Missing records are not zero, and historical readings
 cannot verify an appliance command. No retry, fallback, polling or persistence
 is performed; cancellation/timeout releases the read and the CLI exits.
+
+ADR-0105 also exposes inspected `reported_samples` through the same commands;
+see the [sample request](../examples/history.samples.request.json). Preserve signed
+numeric values and the exact property unit, including null for unitless fields.
+Daily aggregates retain their separate units and nonnegative requirement. Never
+convert samples into inferred daily totals, current state or event history.

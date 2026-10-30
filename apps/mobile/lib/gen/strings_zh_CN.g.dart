@@ -1864,4 +1864,8 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get mobileQrRenew => '\u7eed\u671f\u626b\u7801\u6388\u6743';
 	@override String get mobileQrDirectoryResult => '\u626b\u7801\u76ee\u5f55\u7ed3\u679c\u3002';
 	@override String get mobileQrConnecting => '\u6b63\u5728\u8fde\u63a5\u626b\u7801\u8d26\u53f7\u2026';
+	@override String get historySamples => '\u4e0a\u62a5\u7684\u5386\u53f2\u6837\u672c';
+	@override String get historyDaily => '\u4e0a\u62a5\u7684\u6bcf\u65e5\u7edf\u8ba1';
+	@override String get historyNoUnit => '\u672a\u63d0\u4f9b\u5355\u4f4d';
+	@override String get historySamplesIncomplete => '\u8bb0\u5f55\u5b8c\u6574\u6027\u5c1a\u672a\u786e\u8ba4\uff0c\u7f3a\u5931\u8bb0\u5f55\u4e0d\u4ee3\u8868\u96f6\u3002\u5386\u53f2\u6837\u672c\u4e0d\u4ee3\u8868\u5f53\u524d\u72b6\u6001\uff0c\u4e5f\u4e0d\u80fd\u8bc1\u660e\u8bbe\u5907\u52a8\u4f5c\u5df2\u6267\u884c\u3002';
 }

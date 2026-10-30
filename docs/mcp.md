@@ -177,5 +177,7 @@ receipt time and unproven completeness. The provider's calendar timezone is
 unknown; missing records are not zero and no complete daily/monthly total or
 control verification follows. Historical queries never populate state snapshots,
 write receipts, repeat automatically or create a subscription. EOF and host
-cancellation drop pending reads without replay. The initial exact Mijia energy
-series is the only real-platform admission; Mock and Meiju return empty options.
+cancellation drop pending reads without replay. Mijia admits exact daily energy and the 161 pinned numeric sample fields under
+ADR-0105; Mock and Meiju return empty options. Sample values may be negative
+within their numeric domains and use the exact property unit or null. Preserve
+aggregation and missing units; samples are neither daily totals nor events.

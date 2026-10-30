@@ -772,7 +772,8 @@ A request ID returns its existing receipt even after explicit protocol adoption.
 
 ## Typed numeric property history
 
-ADR-0105 reuses existing protocol errors without changing public history schemas.
+ADR-0105 reuses existing protocol errors. Its dependent API 1.38 phase extends
+the history schema with signed samples and nullable sample units.
 Unsupported model/specification/Boolean/private fields and missing exact targets
 refuse before networking. Invalid windows, unknown source-domain shapes and wrong
 correlations fail closed. Reviewed authentication failures return AUTH_REQUIRED
@@ -780,3 +781,10 @@ without renewal. Malformed single records are counted, while a malformed envelop
 foreign did/key/type, excessive record count or oversized/compressed body fails
 the entire query. CANCELLED and DEADLINE_EXCEEDED retain foreground semantics.
 No history failure changes an execution outcome or authorizes replay.
+
+Core rejects sample results violating the descriptor numeric domain, exact unit,
+identity, time/count or series correlation with INVALID_HISTORY before publication.
+Unavailable/invalid options refuse with CAPABILITY_UNSUPPORTED. Daily negative
+values and null daily units remain invalid. Native include_reported_samples must
+be a boolean; unknown or malformed request fields are INVALID_ARGUMENT. No error
+promotes incomplete property logs to events, current state or execution evidence.

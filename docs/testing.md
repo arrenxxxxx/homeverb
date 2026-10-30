@@ -795,3 +795,25 @@ limits and late lifecycle results. Mixed-account tests preserve saved protocol
 selection, avoid fallback/reauthentication, and release account/device leases.
 Run the existing local TLS suite and native ABI checker plus Flutter
 `test/numeric_history_test.dart`; they use fictional data and no appliance.
+
+## Reported numeric sample checks
+
+Run `cargo +1.96.0 test -p homeverb-mijia --offline --locked` for protocol and all
+161 exact legacy/modern Core sample mappings. Run the Host history suite with
+`cargo +1.96.0 test -p homeverb-host --test history --offline --locked` and CLI/MCP
+with `cargo +1.96.0 test -p homeverb-cli --offline --locked`. Rebuild FFI and run
+scripts/verify_native_contract.py for the API 1.38 explicit opt-in and closed-field
+boundary. These checks use fictional credentials and no provider traffic.
+
+From apps/mobile run:
+
+```sh
+fvm flutter test test/sample_history_test.dart test/numeric_history_test.dart test/modern_device_flow_test.dart
+fvm flutter analyze
+```
+
+The sample suite covers version negotiation, signed/unitless values, domain and
+privacy refusal, duplicate series, immutable ownership, explicit reads, background
+cancellation and English/Chinese narrow enlarged layouts. Existing daily history
+and modern card tests retain their prior coverage. Passing this subset does not
+claim the known full Flutter visual/legacy-click failures are resolved.

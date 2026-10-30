@@ -25,6 +25,7 @@ pub struct HistoryTarget {
 #[serde(rename_all = "snake_case")]
 pub enum HistoryAggregation {
     ReportedDaily,
+    ReportedSamples,
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -37,7 +38,7 @@ pub enum HistoryCompleteness {
 pub struct HistoryOption {
     pub target: HistoryTarget,
     pub aggregation: HistoryAggregation,
-    pub unit: String,
+    pub unit: Option<String>,
     pub max_window_seconds: u32,
     pub max_records: u32,
     /// Unknown for the initial contract; reported timestamps do not establish a timezone.
@@ -83,7 +84,7 @@ pub struct HistoryResult {
     pub start: DateTime<Utc>,
     #[serde(deserialize_with = "whole_utc")]
     pub end: DateTime<Utc>,
-    pub unit: String,
+    pub unit: Option<String>,
     pub source: Transport,
     pub received_at: DateTime<Utc>,
     pub records: Vec<HistoryRecord>,

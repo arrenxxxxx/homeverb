@@ -1829,5 +1829,9 @@
   "mobile.qrRecover": "Recover QR Authorization",
   "mobile.qrRenew": "Renew QR Authorization",
   "mobile.qrDirectoryResult": "QR directory result.",
-  "mobile.qrConnecting": "Connecting QR account…"
+  "mobile.qrConnecting": "Connecting QR account…",
+  "history.samples": "Reported samples",
+  "history.daily": "Reported daily statistics",
+  "history.noUnit": "No unit reported",
+  "history.samplesIncomplete": "Completeness is unproven. Missing records are not zero. Reported samples are not current state or proof of a device action."
 }

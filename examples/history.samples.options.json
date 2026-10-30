@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "device_id": "fictional-sensor",
+  "connection_id": "fictional-cloud",
+  "options": [
+    {
+      "target": {
+        "component_id": "environment-2",
+        "capability": "vendor.example.environment",
+        "property": "temperature"
+      },
+      "aggregation": "reported_samples",
+      "unit": "celsius",
+      "max_window_seconds": 2764800,
+      "max_records": 31,
+      "bucket_timezone": null
+    }
+  ]
+}

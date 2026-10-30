@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0",
+  "device_id": "fictional-sensor",
+  "connection_id": "fictional-cloud",
+  "target": {
+    "component_id": "environment-2",
+    "capability": "vendor.example.environment",
+    "property": "temperature"
+  },
+  "aggregation": "reported_samples",
+  "start": "2026-10-01T00:00:00Z",
+  "end": "2026-10-03T00:00:00Z",
+  "unit": "celsius",
+  "source": "cloud",
+  "received_at": "2026-10-04T12:00:00Z",
+  "records": [
+    {
+      "reported_at": "2026-10-01T16:00:00Z",
+      "value": -12.3
+    },
+    {
+      "reported_at": "2026-10-02T16:00:00Z",
+      "value": 1.25
+    }
+  ],
+  "rejected_records": 1,
+  "limit_reached": false,
+  "completeness": "unproven",
+  "bucket_timezone": null
+}

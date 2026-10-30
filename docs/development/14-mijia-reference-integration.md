@@ -1,6 +1,6 @@
 # 14. Mijia reference integration and remaining coverage
 
-The October 30 worktree uses API 1.37 and the owner-supplied October 22 Xiaomi Home
+The October 30 worktree uses API 1.38 and the owner-supplied October 22 Xiaomi Home
 11.7.709 analysis. The full official-App feature request remains **incomplete**.
 The source archive explicitly does not supply all authentication, protocol or
 runtime control contracts. An implemented decoder is not physical acceptance.
@@ -18,7 +18,9 @@ has clean-source archive checks, without installation or provider acceptance.
 ADR-0103 subsequently adds exact modern outlet daily-energy history through the
 existing Core/native/App history interface. ADR-0104 adds the 29 reviewed scalar
 controls across five exact modern model mappings through existing Core/native/App
-contracts; the package above predates both additions.
+contracts. The later 9a6c004 APK includes both additions; it predates numeric
+samples. ADR-0105 now exposes 161 exact numeric sample series through Core,
+CLI/MCP and version-negotiated API 1.38/App.
 
 - Eight-part MIoT URNs retain their exact extension; malformed/foreign URNs refuse.
 - Seventeen exact model/specification catalogs project 264 reviewed scalar read
@@ -91,7 +93,7 @@ identifiers enter this ledger.
 
 The HA source review below supplies protocol evidence used by the implemented
 legacy verification flow and exact energy-history profile. Still blocked pending
-additional evidence: modern control and broader historical/event protocols,
+additional evidence: broader control and historical/event protocols,
 authenticated acceptance and specialized paths for
 failed cloud properties and BLE devices; broader statistics, event pagination and
 foreground subscriptions; health/media/streams; plugin-specific
@@ -1609,3 +1611,29 @@ options, CLI/MCP and App still expose only the admitted daily-energy series.
 Reported-sample contracts, protected Core admission, versioned native/App adoption
 and provider acceptance remain pending. The verified 9a6c004 APK is unchanged.
 No provider account, appliance, package installation, push or publication is used.
+
+## Reported samples through Core, native and App -- October 30, 2026
+
+ADR-0105 now exposes all 161 pinned numeric history fields through Core on legacy
+and modern protected bindings. Exact `(target, aggregation)` options distinguish
+reported samples from daily statistics. Samples preserve signed values, source
+numeric domains and exact nullable units; daily results remain nonnegative with
+string units. Inspection performs no networking. Reads retain account/device
+leases and do not change secrets, cache, receipts, descriptors or write authority.
+
+Native API 1.38 adds optional include_reported_samples=false to existing inspection;
+older clients remain daily-only. Updated Flutter negotiates 1.38, opts in explicitly,
+labels the two types, validates immutable domains and discards results on lifecycle
+changes. CLI/MCP reuse the same Core contract. SQLite 5, protected payloads and C
+export/method counts are unchanged. Rust enum/nullable-unit changes require source
+updates for unpublished consumers; older native libraries refuse new requests.
+
+Executed native checks: workspace tests excluding the known unrelated Meiju/macOS
+LAN-alias failures passed 637 tests with one ignored; the final Host history suite
+passed 14 tests after an added integer/enum case. Strict workspace Clippy, FFI build
+and actual native ABI checks passed (36 methods, 60 examples, 76 modern-account
+cases). The affected Flutter history/card suite passed 85 tests and analysis found
+no issues. All 13 CLI/MCP tests and 16 Dart FFI tests also passed. Documentation,
+source hygiene, 25 schemas with 72 positive/1230 negative fixtures, both reference
+projection tests and seven shared presentation tests passed. These use fictional
+material and establish no provider/phone/model acceptance. The 9a6c004 APK remains API 1.37; API 1.38 packaging is separate work.
