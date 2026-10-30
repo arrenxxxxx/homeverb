@@ -1,5 +1,15 @@
 # Implementation status and next tasks
 
+## Auxiliary settings package availability -- October 30, 2026
+
+The API 1.35 combined-platform APK from clean source `9870437` includes all seven
+auxiliary targets and the existing exact outlet confirmation flow. Both ABIs,
+27 exports, development signature, 16 KiB alignment and exact AAR matching passed.
+See the [delivery record](../apps/mobile/verification.md#auxiliary-settings-api-135-android-package--october-30-2026).
+No installation or real provider/device operation was performed. Modern SID,
+events and other reference feature gaps remain open.
+
+
 ## App auxiliary settings -- October 30, 2026
 
 The App now negotiates API 1.35 before sending the three additional reference

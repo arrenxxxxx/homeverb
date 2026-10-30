@@ -1183,3 +1183,25 @@ documentation validation, repository hygiene and diff checks passed. This is a
 scoped regression; the previously documented complete-suite macOS font/pixel/
 legacy-click failures are not claimed resolved. No live account or appliance was
 used.
+
+
+## Auxiliary settings API 1.35 Android package -- October 30, 2026
+
+Clean source `98704373d02b30144f884194b5be6faa7753b1ff` produced the combined-platform
+release APK `apps/mobile/build/delivery/mijia/9870437/homeverb-mijia-0.2.0-9870437.apk`.
+Size: 76,785,758 bytes. SHA-256:
+`4c4ee7b02a644b08224cecfcd354e75d82f798237c3ec93d893b25b3e27ce8e7`.
+The adjacent `verification.json` records clean source, native/AAR digests,
+signature, exact two-ABI composition and alignment.
+
+Both arm64-v8a and x86_64 native cross-builds passed with 27 exports and 16 KiB
+ELF alignment per ABI. APK v2 development signing, ZIP/ELF alignment and exact
+current-AAR matching after normal NDK stripping passed. Explicit temporary
+Flutter SDK/JDK configuration selected the existing Android SDK/NDK. API 1.35
+includes all seven auxiliary setting targets, old-API startup refusal and the
+existing exact outlet confirmation flow.
+
+No installation, provider request, real message or appliance write occurred.
+Archive checks do not prove provider, phone or physical acceptance. Modern SID
+login, events, additional controls and other reference gaps remain incomplete.
+No push or publication was performed.
