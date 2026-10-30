@@ -1,5 +1,14 @@
 # Implementation status and next tasks
 
+## Auxiliary reference setting design -- October 30, 2026
+
+[ADR-0092](adr/0092-exact-auxiliary-reference-settings.md) admits the next exact
+implementation phase: hood illumination power and three-code brightness, plus
+the reference fan's independent custom quiet boolean. Seven exact targets retain
+separate grants, no companion writes and no brightness percentage conversion.
+Native API 1.35 and App rollout are pending; the current API 1.34 APK is unchanged.
+
+
 ## Exact outlet package availability -- October 30, 2026
 
 The API 1.34 combined-platform APK from clean source `9b50a89` includes exact
