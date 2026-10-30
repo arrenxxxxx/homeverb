@@ -636,3 +636,14 @@ Local generated TLS peers check cookie isolation, duplicate-token rejection,
 redirect refusal, no retry and cancelled/deadline/dropped socket closure. They
 never contact Xiaomi. Anonymous endpoint-shape research is recorded separately
 in ADR-0093 and does not establish account login, renewal or device support.
+
+
+The modern reference-read suite in `crates/mijia/src/modern/reads/tests.rs` adds
+an independent continuous-RC4 vector, all 264 pinned scalar query admissions,
+opaque no-read entries, account isolation, pagination/conflict/partial-result
+cases, missing/false/zero distinctions, bounded encrypted gzip/CRC/trailing-data
+refusal and cancellation at synchronous response delivery. Local TLS tests check
+reference headers, cookie isolation, no redirects/retries, strict content encoding,
+body limits, untrusted certificates and cancellation/deadline/drop socket release.
+These tests use fictional data; they do not prove fresh QR credentials work with
+the reference origin or that logical entries are distinct physical appliances.

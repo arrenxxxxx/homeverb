@@ -1,6 +1,6 @@
 # 14. Mijia reference integration and remaining coverage
 
-The October 29 worktree uses API 1.35 and the owner-supplied October 22 Xiaomi Home
+The October 30 worktree uses API 1.35 and the owner-supplied October 22 Xiaomi Home
 11.7.709 analysis. The full official-App feature request remains **incomplete**.
 The source archive explicitly does not supply all authentication, protocol or
 runtime control contracts. An implemented decoder is not physical acceptance.
@@ -27,7 +27,8 @@ are recorded below; they do not establish full reference coverage.
   power, lock state or physical connectivity.
 - API 1.29 adds exact-granted included swing angles, vertical swing and ionizer
   settings for `jdjz.fan.2072fc`, preserving the four existing reference fan
-  setters. Timing/quiet and other additional fields remain read-only.
+  setters. API 1.35 separately admits exact fan quiet and hood illumination settings;
+  timing and other unreviewed fields remain read-only.
   Source write access alone cannot create any new action.
 - Public pinned specifications can supply exact mappings during explicit account
   retrieval without public-spec networking. Conflicting reported URNs do not use
@@ -61,12 +62,14 @@ cargo +1.96.0 test -p homeverb-mijia --offline --locked
 
 The archived successful reads used **SID `mijia`** and
 `https://core.api.mijia.tech/app`, with a continuous RC4 stream across encrypted
-form fields. The existing native login uses **SID `xiaomiio`**, its reviewed
+form fields. The existing native account/App host uses **SID `xiaomiio`**, its reviewed
 `api.io.mi.com` routes and legacy field encryption. These are separate session
 contracts. Do not move a saved legacy token to the modern origin, silently change
 its signing mode, or call modern success evidence proof of independent login.
 The archive excludes the existing App session and reports standalone login,
-renewal and expiry recovery as unverified.
+renewal and expiry recovery as unverified. Independent typed Rust QR/renewal and
+reference reads are now synthetic-tested under ADR-0093/0094; protected modern
+account and App adoption remain pending.
 
 The modern device-page endpoint requests logical split children. The analysis
 records two split switch objects and a cloud/cache mismatch (21 shared IDs out
@@ -1247,3 +1250,62 @@ Strict workspace/all-target Clippy and formatting passed. Documentation,
 repository hygiene, reference regeneration and all 24 schemas, 69 positive and
 944 negative contract fixtures passed. No Flutter flow changed or was retested
 for this Rust-only phase. No authenticated provider or physical-device test ran.
+
+
+## Modern reference-session reads -- October 30, 2026
+
+[ADR-0094](../adr/0094-mijia-reference-session-reads.md) implements the three
+reference read routes through the independent typed Rust modern session:
+`directory`, `homes` and exact pinned `properties`. These requests use only
+`core.api.mijia.tech/app`, continuous RC4 across ordered fields, reference headers
+and bounded encrypted gzip decoding. They never send passToken to a data origin,
+convert a legacy session, select the community alternate codec/origin, or retry
+with new credentials after failure.
+
+Directory traversal retains logical split entries with private IDs, up to 16
+pages and 4,096 entries. It returns positive partial results for later ordinary
+transport/provider failures, while malformed/ambiguous pages, changed identity,
+authentication failure, cancellation and deadline abort. Entries bind to their
+protected subject and encrypted identity; another account cannot query them.
+They are not published as physical Devices or merged into existing bindings.
+Home IDs and owner IDs stay opaque, and neither list exhaustion nor empty results
+establish complete physical membership or permission to remove historical cards.
+
+Scalar reads accept one to 90 distinct properties from the entry's pinned source.
+All 264 existing scalar mappings are admitted across the reference catalog; the
+`njcuk.fitting.ad1204` specification has no readable property and remains an opaque
+entry. Unknown models/specs similarly gain no property request authority. Failed,
+missing and null readings stay absent; explicit false and zero remain values.
+No observation timestamp, live state or physical causality is invented.
+
+The request encoder has an independently calculated Python known-answer vector
+that differs from the legacy per-field reset. Raw and inflated responses are each
+bounded at 8 MiB; corrupt, truncated, concatenated/trailing gzip, ambiguous encoding,
+plaintext success, redirects and untrusted TLS fail closed. The five added Rust
+compression packages are locked, use the pure Rust backend, and retain their
+[license record](../../third-party/mijia-compression/NOTICE.md).
+
+The complete Mijia suite passed 152 unit and ten documentation tests. Workspace
+regression excluding `homeverb-midea` passed 512 tests with one ignored; the known
+macOS LAN-alias failures remain excluded. The final cancellation checkpoint and
+new synchronous-reply cancellation case passed in all 26 modern protocol/TLS
+tests; strict workspace/all-target Clippy passed after that adjustment.
+
+Protected modern account persistence, Core/Host adoption and logical-parent
+reconciliation, native C/App entry points, modern controls and authenticated
+provider/physical acceptance remain pending. Native API 1.35, its C/JSON method
+sets, SQLite 5 and Mijia payload 1 are unchanged. No Flutter flow changed. The
+`9870437` APK still contains the earlier auxiliary-setting phase only. This phase
+performs no account login, device read/write, message, push or publication.
+
+The latest fetched `origin/main` is `ccf2975df836f8e81ccf24fa26c8b2035390c978`,
+already an ancestor of the Mijia branch. No merge commit was introduced.
+
+Additional executed checks: the rebuilt C ABI passed all 36 methods and 57 live
+fictional examples. Native API/exports remain unchanged. The installed Rust 1.99.1
+stable toolchain passed `cargo check -p homeverb-mijia --target` for both
+`aarch64-linux-android` (existing NDK 28.2.13676358) and `aarch64-apple-ios`.
+These are target checks, not framework/APK packaging, signed-device execution or
+physical acceptance. Rust 1.96.0 supplied the host regression and strict Clippy
+checks above. No toolchain, SDK or dependency installation was needed; new locked
+compression dependencies were already cached locally.

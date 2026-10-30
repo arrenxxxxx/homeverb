@@ -688,3 +688,14 @@ foreground completion attempt. A single bounded poll can be followed by one
 exact STS exchange. Renewal independently validates the same protected subject;
 no automatic relogin, retry, device request or write replay follows authentication.
 Native account payloads, ordinary request schemas and write outcomes are unchanged.
+
+
+ADR-0094 admits three typed Rust read routes at the exact modern reference origin,
+using its continuous-stream codec. This creates no Core device connection and
+no alternate write route. Logical directory entries remain bound to the protected
+modern subject. Per-entry mapping checks and post-decode budget checks precede
+returned evidence; malformed or stopped operations publish nothing. A later
+ordinary page failure may return positive partial membership, never deletion
+permission. Reads do not refresh credentials, fall back to community/legacy
+origins, retry properties or alter execution receipts. Modern controls and native
+account/Host/App integration remain pending.

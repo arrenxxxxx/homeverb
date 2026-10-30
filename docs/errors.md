@@ -691,3 +691,15 @@ Cancellation and the original/continuation deadline return `CANCELLED` or
 `DEADLINE_EXCEEDED`; all finish attempts consume the challenge. Transport failures
 remain `MIJIA_REQUEST_FAILED`, with no retry or raw provider diagnostics. No general
 JSON error schema or execution outcome changes; these are typed Rust entry points.
+
+
+Modern reference reads under ADR-0094 use existing codes without changing ordinary
+schemas. `MIJIA_INVALID_RESPONSE` covers malformed/cyclic/ambiguous pages, bad
+compression, over-limit bodies and plaintext success. Duplicate IDs with conflicting
+model/spec evidence or a foreign protected subject return `DEVICE_IDENTITY_CONFLICT`.
+Unreviewed property queries return `CAPABILITY_UNSUPPORTED` before sending;
+invalid query counts/duplicates return `INVALID_ARGUMENT`. Authentication failures
+return `AUTH_REQUIRED` without automatic renewal or alternate-origin retry.
+Later ordinary page failures may return positive partial entries and sanitized
+issues; cancelled, expired, malformed and authentication failures abort. Neither
+partial results nor list exhaustion authorize missing-device deletion.

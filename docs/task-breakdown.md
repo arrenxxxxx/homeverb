@@ -1,5 +1,21 @@
 # Implementation status and next tasks
 
+## Modern reference-session reads -- October 30, 2026
+
+[ADR-0094](adr/0094-mijia-reference-session-reads.md) adds independent typed Rust
+modern directory, home-list and pinned scalar reads at the exact reference origin
+with continuous RC4 and bounded encrypted gzip. All 264 existing scalar mappings
+are covered; the catalog's no-read specification remains an opaque entry.
+Directory pages retain logical children without publishing duplicate physical
+Devices. Subject isolation, conservative completeness, no retry/reauthorization,
+fixed routes and cancellation remain enforced.
+
+Modern protected persistence, Core/Host adoption, logical-parent reconciliation,
+native C/App integration and authenticated provider acceptance remain pending.
+API 1.35, SQLite 5, existing protected account payloads and the delivered APK are
+unchanged. No live account or appliance operation was performed.
+
+
 ## Independent modern QR protocol -- October 30, 2026
 
 Typed Rust QR login, single-use bounded completion and explicit same-subject

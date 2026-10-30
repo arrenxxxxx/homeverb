@@ -291,7 +291,7 @@ struct PropertyWire {
     value: Option<Value>,
 }
 
-fn decode_properties(
+pub(crate) fn decode_properties(
     bytes: &[u8],
     did: &str,
     queries: &[PropertyQuery],

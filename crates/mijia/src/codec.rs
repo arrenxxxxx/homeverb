@@ -113,6 +113,42 @@ pub(crate) fn nonce() -> Result<String> {
     Ok(base64(&bytes))
 }
 
+/// The reference App keeps one RC4 stream across the two ordered encrypted fields.
+/// Do not substitute this encoder for legacy SID=xiaomiio requests.
+pub(crate) fn encode_reference(
+    path: &str,
+    data: &str,
+    security: &str,
+    nonce: &str,
+) -> Result<(SecretBytes, SecretBytes)> {
+    let key = signed_nonce(security, nonce)?;
+    let hash = signature(path, &[("data", data)], &key);
+    let mut plain = Zeroizing::new(Vec::with_capacity(data.len() + hash.as_str().len()));
+    plain.extend_from_slice(data.as_bytes());
+    plain.extend_from_slice(hash.as_str().as_bytes());
+    let encrypted = rc4(&key, &plain);
+    let data_cipher = PrivateString::new(base64(&encrypted.expose()[..data.len()]));
+    let hash_cipher = PrivateString::new(base64(&encrypted.expose()[data.len()..]));
+    let sign = signature(
+        path,
+        &[
+            ("data", data_cipher.as_str()),
+            ("rc4_hash__", hash_cipher.as_str()),
+        ],
+        &key,
+    );
+    Ok((
+        form(&[
+            ("data", data_cipher.as_str()),
+            ("rc4_hash__", hash_cipher.as_str()),
+            ("signature", sign.as_str()),
+            ("_nonce", nonce),
+            ("ssecurity", security),
+        ]),
+        SecretBytes::new(key.to_vec()),
+    ))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

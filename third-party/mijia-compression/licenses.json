@@ -1,0 +1,44 @@
+[
+  {
+    "package": "flate2",
+    "version": "1.1.9",
+    "declared_license": "MIT OR Apache-2.0",
+    "retained_file": "flate2-1.1.9-LICENSE-MIT.txt",
+    "sha256": "025436edff4cfcdde17a5811fdea78892d8482efd1abdec5a17872d07a4f2112"
+  },
+  {
+    "package": "miniz_oxide",
+    "version": "0.8.9",
+    "declared_license": "MIT OR Zlib OR Apache-2.0",
+    "retained_file": "miniz_oxide-0.8.9-LICENSE-MIT.txt",
+    "sha256": "799e9ca9d179295ef372f25d3769cdda7d25bb2668add6a6a1e22d1e4c678b8d"
+  },
+  {
+    "package": "adler2",
+    "version": "2.0.1",
+    "declared_license": "0BSD OR MIT OR Apache-2.0",
+    "retained_file": "adler2-2.0.1-LICENSE-MIT.txt",
+    "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+  },
+  {
+    "package": "adler2",
+    "version": "2.0.1",
+    "declared_license": "0BSD OR MIT OR Apache-2.0",
+    "retained_file": "adler2-2.0.1-LICENSE-0BSD.txt",
+    "sha256": "861399f8c21c042b110517e76dc6b63a2b334276c8cf17412fc3c8908ca8dc17"
+  },
+  {
+    "package": "crc32fast",
+    "version": "1.5.0",
+    "declared_license": "MIT OR Apache-2.0",
+    "retained_file": "crc32fast-1.5.0-LICENSE-MIT.txt",
+    "sha256": "61d383b05b87d78f94d2937e2580cce47226d17823c0430fbcad09596537efcf"
+  },
+  {
+    "package": "simd-adler32",
+    "version": "0.3.10",
+    "declared_license": "MIT",
+    "retained_file": "simd-adler32-0.3.10-LICENSE.txt",
+    "sha256": "42a35170233e83e18856792e748de4c1ce4a63b2afce9a370c89ef3fe23f9f2d"
+  }
+]

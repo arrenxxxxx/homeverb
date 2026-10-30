@@ -6,7 +6,12 @@ use reqwest::Url;
 use serde::Deserialize;
 use std::{collections::BTreeMap, fmt, time::Duration};
 
+pub(crate) mod reads;
 pub(crate) mod transport;
+pub use reads::{
+    ModernContentEncoding, ModernDirectory, ModernDirectoryEntry, ModernHome, ModernHomes,
+    ModernReadEndpoint, ModernReadRequest, ModernReadResponse, ModernReadTransport,
+};
 pub use transport::{
     ModernAuthEndpoint, ModernAuthRequest, ModernAuthResponse, ModernAuthTransport,
 };

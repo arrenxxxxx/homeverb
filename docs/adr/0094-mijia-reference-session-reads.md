@@ -1,6 +1,6 @@
 # ADR-0094: Modern Mijia reference-session reads
 
-Status: accepted for implementation; protected account and App integration pending.
+Status: typed Rust reference reads implemented with synthetic tests; protected account, Core/App integration and authenticated acceptance pending.
 Date: October 30, 2026.
 
 ## Evidence and scope
@@ -80,3 +80,12 @@ TLS peers verify the fixed URL, exact headers/cookies, bounded bodies, no redire
 or retry, and cancellation/deadline/drop socket release. Gzip fixtures cover
 compression bombs, CRC/truncation/trailing data and encoding mismatches. Preserve
 legacy protocol tests and current contract/schema compatibility.
+
+
+Executed evidence: the complete Mijia suite passed 152 unit and ten documentation
+tests; the final 26 modern tests include the new synchronous cancellation guard.
+The workspace excluding the known macOS `homeverb-midea` LAN-alias failures passed
+512 tests with one ignored. Strict Clippy passed. The rebuilt C ABI passed 36
+methods and 57 fictional examples. Installed Rust 1.99.1 Android arm64 and iOS
+arm64 target checks passed; host checks used Rust 1.96.0. No actual account/device
+request or new mobile package was produced by these checks.

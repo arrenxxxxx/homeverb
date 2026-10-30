@@ -65,6 +65,9 @@ The independent modern SID QR authentication work also uses MIT-licensed
 and [license](third-party/mit-mijia/LICENSE.txt). It is separate from legacy
 `xiaomiio` sessions and does not establish official-App route compatibility.
 
+The modern reference-response decoder uses pinned Rust compression dependencies;
+retain their [licenses and digest record](third-party/mijia-compression/NOTICE.md).
+
 ## Dependency review before distribution
 
 `Cargo.lock` and `apps/mobile/pubspec.lock` pin dependency resolutions; they do

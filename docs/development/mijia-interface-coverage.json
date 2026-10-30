@@ -6,44 +6,44 @@
     {
       "id": "directory",
       "route": "/v2/home/device_list_page",
-      "status": "legacy_session_path_only",
-      "reason": "Modern SID/session origin differs; no credential crossover or arbitrary RPC."
+      "status": "legacy_host_and_modern_typed_read",
+      "reason": "Modern reference-origin typed reads are implemented; modern protected account/Core/App integration is pending."
     },
     {
       "id": "homes",
       "route": "/v2/homeroom/gethome_merged",
-      "status": "legacy_session_path_only",
-      "reason": "Modern SID/session origin differs; no credential crossover or arbitrary RPC."
+      "status": "legacy_host_and_modern_typed_read",
+      "reason": "Modern reference-origin typed reads are implemented; modern protected account/Core/App integration is pending."
     },
     {
       "id": "properties",
       "route": "/miotspec/prop/get",
-      "status": "legacy_session_path_only",
-      "reason": "Modern SID/session origin differs; no credential crossover or arbitrary RPC."
+      "status": "legacy_host_and_modern_typed_read",
+      "reason": "Modern reference-origin typed reads are implemented; modern protected account/Core/App integration is pending."
     },
     {
       "id": "property_write_candidate",
       "route": "/miotspec/prop/set",
       "status": "not_admitted_by_reference",
-      "reason": "Modern SID/session origin differs; no credential crossover or arbitrary RPC."
+      "reason": "No credential crossover or arbitrary RPC; separate exact control admission is required."
     },
     {
       "id": "action_candidate",
       "route": "/miotspec/action",
       "status": "not_admitted_by_reference",
-      "reason": "Modern SID/session origin differs; no credential crossover or arbitrary RPC."
+      "reason": "No credential crossover or arbitrary RPC; separate exact control admission is required."
     },
     {
       "id": "event_candidate",
       "route": "/miotspec/event/get",
       "status": "not_admitted_by_reference",
-      "reason": "Modern SID/session origin differs; no credential crossover or arbitrary RPC."
+      "reason": "No credential crossover or arbitrary RPC; separate exact control admission is required."
     },
     {
       "id": "rpc_candidate",
       "route": "/home/rpc/{did}; /home/rpcv2/{did}",
       "status": "not_admitted_by_reference",
-      "reason": "Modern SID/session origin differs; no credential crossover or arbitrary RPC."
+      "reason": "No credential crossover or arbitrary RPC; separate exact control admission is required."
     }
   ],
   "models": [
@@ -5388,7 +5388,15 @@
     "evidence": "ADR-0093; fictional protocol and local TLS tests; anonymous URL shapes only",
     "account_host_app_and_provider_acceptance": "pending",
     "legacy_session_conversion": "unavailable",
-    "modern_api_origin_and_codec": "not_admitted"
+    "modern_api_origin_and_codec": "implemented_reference_continuous_rc4_reads"
+  },
+  "modern_reads": {
+    "status": "implemented_typed_reference_directory_homes_and_pinned_properties",
+    "origin": "https://core.api.mijia.tech/app",
+    "codec": "continuous_rc4_drop1024_with_bounded_encrypted_gzip",
+    "logical_parent_reconciliation": "pending",
+    "native_account_core_and_app": "pending",
+    "provider_acceptance": "pending"
   },
   "remaining": [
     "modern_protected_account_and_app_authentication",
