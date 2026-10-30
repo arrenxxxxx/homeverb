@@ -1,5 +1,29 @@
 # Platform and device compatibility matrix
 
+## Foreground App no-argument actions -- October 30, 2026
+
+Flutter now negotiates API 1.40 and explicitly requests the six ADR-0109 actions
+when preparing a selected device. Exact empty-object definitions become separate
+`mijia_action_grants`; property permissions never imply action authority. Trusted
+startup probes the version before reopening with grants. Older native libraries
+retain property-only inspection and refuse explicitly requested action grants.
+
+The existing descriptor-driven detail buttons and forms display localized action
+labels and non-idempotent warnings. Opening/selecting an action sends nothing;
+Apply plans and executes once with empty arguments and the exact component.
+Pending submission disables duplicate clicks. Unknown receipts remain unknown
+without automatic retries or optimistic state changes. Backgrounded inspection
+cannot reopen or refresh a device. No new method, storage format or UI protocol
+branch is added. Remaining actions/events and provider/phone/model acceptance
+are incomplete; the existing 503ef1f APK predates this App integration.
+
+Executed App verification: the 14-file affected Flutter suite passed all 133 tests,
+including 11 action cases, and Flutter analysis found no issues. Actual old-ABI
+refusal and current Mijia/combined opening use fictional temporary profiles.
+Both reference projection tests and all seven shared presentation tests passed.
+The known eight full-suite macOS font/pixel/legacy-click failures are not claimed
+fixed. No provider account, appliance write, installation or publication occurred.
+
 ## Native exact no-argument actions -- October 30, 2026
 
 [ADR-0109](adr/0109-native-mijia-action-grants.md) exposes the six reviewed

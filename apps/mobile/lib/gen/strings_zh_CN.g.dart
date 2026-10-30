@@ -1873,4 +1873,8 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get vendorXiaomiMijiaFanControlSetFanLevel1 => '\u8bbe\u7f6e\u98ce\u91cf\u6863\u4f4d';
 	@override String get vendorXiaomiMijiaScreenSetDisplayState1 => '\u8bbe\u7f6e\u663e\u793a\u5185\u5bb9';
 	@override String get vendorXiaomiMijiaScreenSetAutoScreenOff2 => '\u8bbe\u7f6e\u81ea\u52a8\u606f\u5c4f';
+	@override String get mobileToggle => '\u5207\u6362\u5f00\u5173\u72b6\u6001';
+	@override String get mobileBrightnessUp => '\u8c03\u4eae';
+	@override String get mobileBrightnessDown => '\u8c03\u6697';
+	@override String get mobileToggleLightMode => '\u5207\u6362\u706f\u5149\u6a21\u5f0f';
 }

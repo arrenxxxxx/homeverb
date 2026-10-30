@@ -26,7 +26,8 @@ includes these samples with clean-source archive evidence. ADR-0106/API 1.39
 adds four exact manual/display hood controls, bringing the control count to 33;
 that package predates the new hood extension. The later
 [503ef1f API 1.39 package](../../apps/mobile/verification.md#exact-hood-controls-api-139-android-package--october-30-2026)
-contains all 33 reviewed controls with clean-source archive checks.
+contains all 33 reviewed controls with clean-source archive checks. API 1.40 now
+adds six exact no-argument actions through Core/native/App; that APK predates them.
 
 - Eight-part MIoT URNs retain their exact extension; malformed/foreign URNs refuse.
 - Seventeen exact model/specification catalogs project 264 reviewed scalar read
@@ -72,7 +73,7 @@ cargo +1.96.0 test -p homeverb-mijia --offline --locked
 | 78 non-readable properties | No read operation; write/event-only definitions are not state |
 | 28 opaque readable values | Separate typed/business/privacy contracts required |
 | 3 network identity values | Excluded from state and exports |
-| 40 actions | Six exact empty-input actions have Core/native support under ADR-0107/0108/0109; Flutter adoption and the remaining 34 actions are incomplete |
+| 40 actions | Six exact empty-input actions have Core/native/App support under ADR-0107/0108/0109; the remaining 34 actions are incomplete |
 | 78 events | No event-history/subscription body, paging or lifecycle contract; not implemented |
 
 The archived successful reads used **SID `mijia`** and
@@ -1792,3 +1793,28 @@ explicit refresh/execute and uncertain lifecycle recovery without replay.
 Documentation, source hygiene, both reference projection tests and 25 schemas
 with 76 positive/1451 negative fixtures passed. All data is fictional; no Flutter
 run, new package or provider/device acceptance is claimed by this native phase.
+
+
+## Foreground App no-argument actions -- October 30, 2026
+
+Flutter now negotiates API 1.40 and explicitly requests the six ADR-0109 actions
+when preparing a selected device. Exact empty-object definitions become separate
+`mijia_action_grants`; property permissions never imply action authority. Trusted
+startup probes the version before reopening with grants. Older native libraries
+retain property-only inspection and refuse explicitly requested action grants.
+
+The existing descriptor-driven detail buttons and forms display localized action
+labels and non-idempotent warnings. Opening/selecting an action sends nothing;
+Apply plans and executes once with empty arguments and the exact component.
+Pending submission disables duplicate clicks. Unknown receipts remain unknown
+without automatic retries or optimistic state changes. Backgrounded inspection
+cannot reopen or refresh a device. No new method, storage format or UI protocol
+branch is added. Remaining actions/events and provider/phone/model acceptance
+are incomplete; the existing 503ef1f APK predates this App integration.
+
+Executed App verification: the 14-file affected Flutter suite passed all 133 tests,
+including 11 action cases, and Flutter analysis found no issues. Actual old-ABI
+refusal and current Mijia/combined opening use fictional temporary profiles.
+Both reference projection tests and all seven shared presentation tests passed.
+The known eight full-suite macOS font/pixel/legacy-click failures are not claimed
+fixed. No provider account, appliance write, installation or publication occurred.

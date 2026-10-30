@@ -2043,4 +2043,5 @@ permissions never enable action authority. Use the ordinary plan/execute and
 receipt interfaces; no new method or C function is added. Background/close cancels
 work, and uncertain execution retains its original request ID. Older clients keep
 their previous inspection results; older libraries reject the new field/flag.
-Flutter adoption and a new APK are pending. See [ADR-0109](adr/0109-native-mijia-action-grants.md).
+Flutter now negotiates this contract and uses the existing generic action forms.
+A matching new APK and real acceptance remain pending. See [ADR-0109](adr/0109-native-mijia-action-grants.md).

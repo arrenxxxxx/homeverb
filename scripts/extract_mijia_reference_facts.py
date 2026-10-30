@@ -87,7 +87,7 @@ def project():
                 for item in service.get(key, []):
                     entries.append({'kind': kind, 'siid': service['iid'], 'iid': item['iid'],
                                     'name': item['type'].split(':')[3],
-                                    'status': ('implemented_typed_core_action'
+                                    'status': ('implemented_core_native_app_action'
                                                if kind == 'action' and admitted_action(model['model'], service['iid'], item['iid'])
                                                else 'blocked_runtime_contract_and_separate_admission')})
                     if kind == 'action' and admitted_action(model['model'], service['iid'], item['iid']):
@@ -116,13 +116,13 @@ def project():
                    'status': ('legacy_host_and_modern_typed_read' if o['id'] in ('directory', 'homes', 'properties')
                               else 'implemented_exact_granted_legacy_and_modern_property_set'
                               if o['id'] == 'property_write_candidate'
-                              else 'implemented_six_typed_core_no_argument_actions' if o['id'] == 'action_candidate'
+                              else 'implemented_six_core_native_app_no_argument_actions' if o['id'] == 'action_candidate'
                               else 'not_admitted_by_reference'),
                    'reason': ('Modern reference-origin typed reads and protected accounts are implemented; native and Flutter device publication and Core reads are implemented; provider acceptance remains pending.'
                               if o['id'] in ('directory', 'homes', 'properties')
                               else 'ADR-0104/0106 admit 33 reviewed scalar mappings across five exact models with grants and trusted elevated approval; no arbitrary setter or physical acceptance.'
                               if o['id'] == 'property_write_candidate'
-                              else 'ADR-0107/0108 supply six exact empty-input actions through typed Core with independent grants and durable receipts; native/App admission and real acceptance remain pending.'
+                              else 'ADR-0107/0108/0109 supply six exact empty-input actions through Core, native API 1.40 and version-negotiated Flutter with independent grants and durable receipts; real acceptance remains pending.'
                               if o['id'] == 'action_candidate'
                               else 'No credential crossover or arbitrary RPC; separate exact control admission is required.')}
                   for o in contract['operations']]
@@ -201,11 +201,11 @@ def project():
                               'specialized_failed_property_read_paths', 'BLE_and_LAN', 'history_and_events',
                               'health_and_media', 'additional_write_runtime_contracts']}
     coverage['no_argument_actions'] = {
-        'status': 'implemented_typed_core_and_protocol', 'evidence': 'ADR-0107/0108',
+        'status': 'implemented_core_native_app_and_protocol', 'evidence': 'ADR-0107/0108/0109',
         'exact_actions': 6, 'route': '/miotspec/action',
         'legacy_profile': 'SID_xiaomiio_api_io_mi_com_per_field',
         'modern_profile': 'SID_mijia_core_api_mijia_tech_continuous',
-        'core_native_app': 'typed_core_grants_and_receipts_implemented_native_app_pending',
+        'core_native_app': 'implemented_api_1_40_opt_in_and_version_negotiated_flutter',
         'provider_acceptance': 'pending',
     }
     return {CATALOG: profiles, LEDGER: coverage, ACTION_CATALOG: action_profiles}

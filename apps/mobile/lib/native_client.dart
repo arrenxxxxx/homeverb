@@ -364,7 +364,9 @@ class NativeClient
         'This host cannot configure real controls.',
       );
     }
-    final minimumReferenceApi = permissions.any((p) => p.requiresHoodManualApi)
+    final minimumReferenceApi = permissions.any((p) => p.requiresActionApi)
+        ? 40
+        : permissions.any((p) => p.requiresHoodManualApi)
         ? 39
         : permissions.any((p) => p.requiresAuxiliarySettingApi)
         ? 35
@@ -375,6 +377,7 @@ class NativeClient
         : 29;
     if (permissions.any(
       (p) =>
+          p.requiresActionApi ||
           p.requiresOutletApi ||
           p.requiresReferenceFanApi ||
           p.requiresReferenceSettingApi,
@@ -431,6 +434,13 @@ class NativeClient
         throw NativeFailure(
           'API_UPGRADE_REQUIRED',
           'Mijia requires native API 1.27 or later.',
+        );
+      }
+      if (permissions.any((p) => p.requiresActionApi) &&
+          !client.apiAtLeast(40)) {
+        throw NativeFailure(
+          'API_UPGRADE_REQUIRED',
+          'No-argument actions require native API 1.40.',
         );
       }
       if (permissions.any((p) => p.requiresHoodManualApi) &&

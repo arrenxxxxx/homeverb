@@ -2311,6 +2311,10 @@ String? translateSource(
   "Set hood power" => t.vendorXiaomiMijiaHoodSetOn1,
   "Set display content" => t.vendorXiaomiMijiaScreenSetDisplayState1,
   "Set automatic screen off" => t.vendorXiaomiMijiaScreenSetAutoScreenOff2,
+  "Toggle power" => t.mobileToggle,
+  "Increase brightness" => t.mobileBrightnessUp,
+  "Decrease brightness" => t.mobileBrightnessDown,
+  "Switch light mode" => t.mobileToggleLightMode,
   _ => null,
 };
 
@@ -4663,5 +4667,9 @@ String? sourceForKey(String key) => switch (key) {
   "vendor.xiaomi.mijia.screen.set_display_state_1" => "Set display content",
   "vendor.xiaomi.mijia.screen.set_auto_screen_off_2" =>
     "Set automatic screen off",
+  "mobile.toggle" => "Toggle power",
+  "mobile.brightness_up" => "Increase brightness",
+  "mobile.brightness_down" => "Decrease brightness",
+  "mobile.toggle_light_mode" => "Switch light mode",
   _ => null,
 };

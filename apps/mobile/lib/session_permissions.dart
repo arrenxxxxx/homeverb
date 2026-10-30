@@ -30,6 +30,7 @@ class SessionPermission {
   bool get requiresHoodManualApi =>
       requiresReferenceSettingApi &&
       const {'hood-2', 'fan_control-3', 'screen-13'}.contains(component);
+  bool get requiresActionApi => startupField == 'mijia_action_grants';
   bool get requiresOutletApi => startupField == "mijia_outlet_grants";
   String get identity =>
       jsonEncode([device, component, capability, action, value]);
@@ -41,7 +42,11 @@ class SessionPermission {
   Map<String, dynamic> get startupEntry => {
     'device_id': device,
     if (startupField == 'meiju_dishwasher_cycle_grants') 'action': action,
-    if (startupField == 'mijia_fan_grants' ||
+    if (requiresActionApi) ...{
+      'component_id': component,
+      'capability': capability,
+      'action': action,
+    } else if (startupField == 'mijia_fan_grants' ||
         startupField == 'mijia_setting_grants' ||
         startupField == 'mijia_outlet_grants') ...{
       'component_id': component,
@@ -128,6 +133,7 @@ class SessionPermission {
   static List<SessionPermission> choices(
     Map<String, dynamic> inspection, {
     bool trustedApproval = false,
+    bool includeNoArgumentActions = false,
   }) {
     if (inspection['source'] != 'saved_inventory' ||
         inspection['authorization'] != 'not_checked' ||
@@ -135,6 +141,13 @@ class SessionPermission {
       return [];
     final result = <SessionPermission>[];
     for (final option in inspection['options'] as List? ?? []) {
+      if (includeNoArgumentActions && option is Map) {
+        final action = _noArgumentChoice(inspection['device_id'], option);
+        if (action != null) {
+          result.add(action);
+          continue;
+        }
+      }
       if (trustedApproval &&
           option['capability'] == 'vendor.midea.dishwasher') {
         result.addAll(_dishwasherChoices(inspection['device_id'], option));
@@ -377,6 +390,68 @@ class SessionPermission {
       }
     }
     return List.unmodifiable(result);
+  }
+
+  // Exact native startup vocabulary; protected adapter evidence decides support.
+  static const _noArgumentActions = {
+    ('light-2', 'vendor.xiaomi.mijia.light', 'toggle'),
+    ('light-2', 'vendor.xiaomi.mijia.light', 'brightness_up'),
+    ('light-2', 'vendor.xiaomi.mijia.light', 'brightness_down'),
+    ('light-2', 'vendor.xiaomi.mijia.light', 'toggle_light_mode'),
+    ('fan-2', 'vendor.xiaomi.mijia.fan', 'toggle'),
+    ('light-6', 'vendor.xiaomi.mijia.light', 'toggle'),
+  };
+
+  static SessionPermission? _noArgumentChoice(String device, Map option) {
+    if (!RegExp(
+          r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$',
+        ).hasMatch(device) ||
+        !_noArgumentActions.contains((
+          option['component_id'],
+          option['capability'],
+          option['action'],
+        )))
+      return null;
+    final definition = option['definition'];
+    if (definition is! Map ||
+        definition['risk'] != 'low' ||
+        definition['idempotency'] != 'non_idempotent' ||
+        definition['atomic'] != false ||
+        definition['independent_fields'] != false ||
+        definition['verification'] != 'unavailable' ||
+        definition['transports'] is! List ||
+        (definition['transports'] as List).length != 1 ||
+        (definition['transports'] as List).single != 'cloud')
+      return null;
+    final schema = definition['parameters'];
+    if (schema is! Map ||
+        schema['type'] != 'object' ||
+        schema['additionalProperties'] != false ||
+        schema['properties'] is! Map ||
+        (schema['properties'] as Map).isNotEmpty ||
+        (schema.containsKey('required') &&
+            (schema['required'] is! List ||
+                (schema['required'] as List).isNotEmpty)) ||
+        schema.keys.any(
+          (key) => !{
+            'type',
+            'properties',
+            'required',
+            'additionalProperties',
+            'description',
+            'title',
+          }.contains(key),
+        ))
+      return null;
+    return SessionPermission._(
+      device,
+      option['component_id'],
+      option['capability'],
+      option['action'],
+      'arguments',
+      const <String, Object>{},
+      'mijia_action_grants',
+    );
   }
 
   /// Host configuration only; all writes still consume a trusted native preview.

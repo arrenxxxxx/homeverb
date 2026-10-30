@@ -24,8 +24,9 @@ pilot credentials or contact appliances as part of development tests.
 
 ADR-0107/0108 additionally implement six exact no-argument actions through typed
 Core with independent action grants and durable receipts. ADR-0109/API 1.40
-adds independent native startup grants and opt-in inspection. Flutter adoption
-is pending; the API 1.39 package does not expose these actions.
+adds independent native startup grants and opt-in inspection. Version-negotiated
+Flutter preparation and generic action forms are implemented with fictional
+evidence; the API 1.39 package does not expose these actions.
 
 Current callable scope includes native API 1.40 Mijia-only/combined sessions,
 protected partial inventory and 264 scalar mappings from 17 pinned reference

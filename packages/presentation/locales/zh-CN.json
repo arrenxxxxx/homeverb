@@ -1838,5 +1838,9 @@
   "vendor.xiaomi.mijia.hood.set_on_1": "设置油烟机开关",
   "vendor.xiaomi.mijia.fan_control.set_fan_level_1": "设置风量档位",
   "vendor.xiaomi.mijia.screen.set_display_state_1": "设置显示内容",
-  "vendor.xiaomi.mijia.screen.set_auto_screen_off_2": "设置自动息屏"
+  "vendor.xiaomi.mijia.screen.set_auto_screen_off_2": "设置自动息屏",
+  "mobile.toggle": "切换开关状态",
+  "mobile.brightness_up": "调亮",
+  "mobile.brightness_down": "调暗",
+  "mobile.toggle_light_mode": "切换灯光模式"
 }

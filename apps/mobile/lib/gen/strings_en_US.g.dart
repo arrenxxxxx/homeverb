@@ -5555,4 +5555,16 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Set automatic screen off'
 	String get vendorXiaomiMijiaScreenSetAutoScreenOff2 => 'Set automatic screen off';
+
+	/// en-US: 'Toggle power'
+	String get mobileToggle => 'Toggle power';
+
+	/// en-US: 'Increase brightness'
+	String get mobileBrightnessUp => 'Increase brightness';
+
+	/// en-US: 'Decrease brightness'
+	String get mobileBrightnessDown => 'Decrease brightness';
+
+	/// en-US: 'Switch light mode'
+	String get mobileToggleLightMode => 'Switch light mode';
 }

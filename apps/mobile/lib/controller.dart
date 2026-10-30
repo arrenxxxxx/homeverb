@@ -428,6 +428,10 @@ class HomeController extends ChangeNotifier {
       (core is! NativeSessionClient ||
           (core as NativeSessionClient).apiAtLeast(22));
 
+  bool get _supportsNoArgumentActions =>
+      core is NativeSessionClient &&
+      (core as NativeSessionClient).apiAtLeast(40);
+
   void _requireCurrentDevice(String device, int epoch) {
     if (!_foreground || epoch != _readEpoch || selectedDevice != device) {
       throw NativeFailure('CANCELLED', 'Device setup was cancelled.');
@@ -451,6 +455,8 @@ class HomeController extends ChangeNotifier {
           await core.call('inspect_control_options', {
                 'device_id': device,
                 'connection_id': connection['id'],
+                if (_supportsNoArgumentActions)
+                  'include_no_argument_actions': true,
               })
               as Json;
     } on NativeFailure catch (error) {
@@ -476,6 +482,7 @@ class HomeController extends ChangeNotifier {
     final next = SessionPermission.choices(
       inspected,
       trustedApproval: supportsTrustedApproval,
+      includeNoArgumentActions: _supportsNoArgumentActions,
     );
     if (next.isEmpty) return;
     if (next.any((p) => p.requiresHoodManualApi) &&
@@ -1234,6 +1241,8 @@ class HomeController extends ChangeNotifier {
           await core.call(method, {
                 'device_id': id,
                 'connection_id': connectionId,
+                if (options && _supportsNoArgumentActions)
+                  'include_no_argument_actions': true,
               })
               as Json;
       if (epoch == _readEpoch && selectedDevice == id) routeInspection = result;

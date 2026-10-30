@@ -37,7 +37,7 @@ class ReferenceTests(unittest.TestCase):
                 self.assertTrue(action[key].startswith(f'urn:miot-spec-v2:{kind}:'))
         self.assertEqual(ledger['no_argument_actions']['exact_actions'], 6)
         self.assertEqual(ledger['no_argument_actions']['core_native_app'],
-                         'typed_core_grants_and_receipts_implemented_native_app_pending')
+                         'implemented_api_1_40_opt_in_and_version_negotiated_flutter')
         self.assertEqual(len(profiles), 17)
         self.assertEqual(len(ledger['models']), 19)
         self.assertEqual(sum(ledger['modern_controls']['models'].values()), 33)

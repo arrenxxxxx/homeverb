@@ -901,3 +901,17 @@ journey inspects before grants without networking, reopens, explicitly refreshes
 plans and executes, then verifies persistent unknown receipts and background
 cancellation without replay. Retain workspace/Clippy and schema validation.
 All fixtures are fictional; no provider/phone/device acceptance follows.
+
+
+For Flutter action adoption run from apps/mobile:
+
+```sh
+fvm flutter test test/mijia_actions_test.dart test/mijia_hood_test.dart test/mijia_auxiliary_test.dart test/mijia_settings_test.dart test/mijia_controls_test.dart test/mijia_outlet_test.dart test/session_permissions_test.dart test/approval_test.dart test/modern_device_flow_test.dart test/native_test.dart test/account_native_test.dart test/controls_test.dart test/device_detail_controls_test.dart test/localization_test.dart
+fvm flutter analyze
+```
+
+The action suite uses actual old/new ABI startup probes, exact six-action grant
+fixtures, malformed authority refusal, late background inspection and English/
+Chinese 320-pixel double-text-scale controls. Selecting an action is not a write;
+Apply plans/executes once, repeated pending clicks do not send, and unknown remains
+unknown. No physical behavior is inferred from these fixtures.

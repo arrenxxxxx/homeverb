@@ -1838,5 +1838,9 @@
   "vendor.xiaomi.mijia.hood.set_on_1": "Set hood power",
   "vendor.xiaomi.mijia.fan_control.set_fan_level_1": "Set fan level",
   "vendor.xiaomi.mijia.screen.set_display_state_1": "Set display content",
-  "vendor.xiaomi.mijia.screen.set_auto_screen_off_2": "Set automatic screen off"
+  "vendor.xiaomi.mijia.screen.set_auto_screen_off_2": "Set automatic screen off",
+  "mobile.toggle": "Toggle power",
+  "mobile.brightness_up": "Increase brightness",
+  "mobile.brightness_down": "Decrease brightness",
+  "mobile.toggle_light_mode": "Switch light mode"
 }

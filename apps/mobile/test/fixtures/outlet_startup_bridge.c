@@ -13,7 +13,7 @@ unsigned fixture_granted(void) { return granted; }
 unsigned fixture_closed(void) { return closed; }
 char *homeverb_open(const char *config) {
     opened++;
-    if ((strstr(config, "mijia_outlet_grants") || strstr(config, "mijia_setting_grants"))) granted++;
+    if ((strstr(config, "mijia_outlet_grants") || strstr(config, "mijia_setting_grants") || strstr(config, "mijia_action_grants"))) granted++;
     return strdup("{\"schema_version\":\"1.0\",\"data\":{\"handle\":1,\"adapter\":\"xiaomi.mijia\"},\"warnings\":[],\"error\":null}");
 }
 char *homeverb_call(uint64_t handle, const char *request) {
