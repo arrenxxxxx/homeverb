@@ -1,5 +1,33 @@
 # Flutter implementation verification
 
+## Modern history and controls Android package -- October 30, 2026
+
+Clean source `9a6c004fc090e208ce40617fd4d0aecc25dae76f` produced the combined
+homeverb.platforms API 1.37 APK:
+`apps/mobile/build/delivery/mijia/9a6c004/homeverb-mijia-0.2.0-9a6c004.apk`.
+Size: 78,675,774 bytes. SHA-256:
+`a5128278aea3cddaa00e2faa4e61194f75f6f26f345a6a0875a2f2e480b069c0`.
+The adjacent verification.json records source_dirty=false and exact native/AAR
+matching after normal NDK stripping. This package supersedes dd51c73 and includes
+modern QR/card/state flows, exact daily-energy history (ADR-0103) and the 29 exact
+scalar control mappings (ADR-0104), using existing grants and trusted approval.
+
+Executed scripts/build_android_native.py with installed Rust 1.99.1, NDK
+28.2.13676358, Android 36 stubs and Android Studio JDK for arm64-v8a and x86_64.
+Both release libraries passed 31 exports and 16 KiB ELF checks. The FVM-pinned
+Flutter 3.47.7 release build passed for android-arm64,android-x64 with
+HOMEVERB_ADAPTER=homeverb.platforms. scripts/verify_flutter_apk.py passed APK v2
+development signature, exact dual-ABI contents, API 28 minimum, disabled backup,
+no IntegrationTestPlugin, current-AAR matching and 16 KiB ZIP/ELF alignment.
+
+A fresh git fetch origin main succeeded: main remained ccf2975df836f8e81ccf24fa26c8b2035390c978,
+an ancestor of the clean source; origin/main..HEAD contains zero merge commits.
+All 309 source commit messages passed the convention validator before packaging.
+Archive checks do not prove installation, provider login, phone policy or physical
+model acceptance. Broader controls/events/history, BLE/LAN, health/media and
+additional runtime/model contracts remain incomplete. No installation, real account
+access, appliance write, remote push, upload or publication was performed.
+
 ## Modern exact daily-energy history -- October 30, 2026
 
 ADR-0103 implements the exact cuco.plug.v3 daily-energy query for modern-selected

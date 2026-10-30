@@ -1,5 +1,15 @@
 # Implementation status and next tasks
 
+## Modern controls package checkpoint -- October 30, 2026
+
+The clean-source 9a6c004 APK includes API 1.37 modern QR/device reads, ADR-0103
+exact daily-energy history and ADR-0104's 29 exact scalar control mappings.
+Both ABIs, 31 native exports, APK v2 development signature, current-AAR matching
+and 16 KiB alignment passed. See the [package evidence](../apps/mobile/verification.md#modern-history-and-controls-android-package--october-30-2026).
+Installation and real provider/phone/model acceptance remain pending; broader
+reference parity is still incomplete. No merge commit, push or real-device write
+was introduced. Historical phase records below retain their original scope.
+
 ## Modern exact scalar controls -- October 30, 2026
 
 ADR-0104 implements the existing 29 reviewed scalar controls for modern-selected

@@ -5431,7 +5431,7 @@
     "elevated_outlet": "immutable_trusted_approval_required",
     "native_and_app": "existing_api_1_37_options_grants_and_confirmation_contracts",
     "uncertainty": "preserve_unknown_without_retry_or_protocol_fallback",
-    "android_package": "pending",
+    "android_package": "archive_checked_9a6c004_no_runtime_acceptance",
     "provider_acceptance": "pending"
   },
   "modern_history": {
