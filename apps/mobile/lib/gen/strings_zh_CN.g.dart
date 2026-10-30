@@ -1711,11 +1711,11 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get vendorXiaomiMijiaHoodOffDelayTime6 => '\u5ef6\u65f6\u5173\u95ed\u65f6\u95f4';
 	@override String get vendorXiaomiMijiaHoodCountdownTime7 => '\u5012\u8ba1\u65f6\u65f6\u95f4';
 	@override String get vendorXiaomiMijiaHoodStoveLinkStatus8 => '\u7076\u5177\u8054\u52a8\u72b6\u6001';
-	@override String get vendorXiaomiMijiaHoodPowerOnWithLight9 => '\u5f00\u673a\u8054\u52a8\u706f\u5149';
-	@override String get vendorXiaomiMijiaHoodPowerOffWithLight10 => '\u5173\u673a\u8054\u52a8\u706f\u5149';
+	@override String get vendorXiaomiMijiaHoodPowerOnWithLight9 => '\u968f\u706f\u5f00\u673a';
+	@override String get vendorXiaomiMijiaHoodPowerOffWithLight10 => '\u968f\u706f\u5173\u673a';
 	@override String get vendorXiaomiMijiaHoodCleanRemindOn11 => '\u6e05\u6d01\u63d0\u9192';
-	@override String get vendorXiaomiMijiaHoodCleanRemindTime12 => '\u6e05\u6d01\u63d0\u9192\u65f6\u95f4';
-	@override String get vendorXiaomiMijiaHoodGestures18 => '\u624b\u52bf\u529f\u80fd';
+	@override String get vendorXiaomiMijiaHoodCleanRemindTime12 => '\u6e05\u6d01\u63d0\u9192\u9608\u503c\uff08\u5c0f\u65f6\uff09';
+	@override String get vendorXiaomiMijiaHoodGestures18 => '\u624b\u52bf\u63a7\u5236';
 	@override String get vendorXiaomiMijiaHoodAutoVentilationOn20 => '\u81ea\u52a8\u6362\u6c14';
 	@override String get vendorXiaomiMijiaHoodPmTrigPushValue21 => '\u9897\u7c92\u7269\u63d0\u9192\u89e6\u53d1\u503c';
 	@override String get vendorXiaomiMijiaHoodPmTrigFreshValue23 => '\u9897\u7c92\u7269\u6362\u6c14\u89e6\u53d1\u503c';
@@ -1977,4 +1977,14 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get vendorXiaomiMijiaEventMiotSpecV2KitchenStoveCookingFinished3 => '\u70f9\u996a\u7ed3\u675f';
 	@override String get vendorXiaomiMijiaEventMiotSpecV2HoodSmartDryWashDryCleaningTimingRemind1 => '\u5e72\u6d17\u5b9a\u65f6\u63d0\u9192';
 	@override String get vendorXiaomiMijiaEventMiotSpecV2EnvironmentPmWarning1 => '\u9897\u7c92\u7269\u8b66\u544a';
+	@override String get mobilePowerOnWithLight9 => '\u968f\u706f\u5f00\u673a';
+	@override String get mobileSetPowerOnWithLight9 => '\u8bbe\u7f6e\u968f\u706f\u5f00\u673a';
+	@override String get mobilePowerOffWithLight10 => '\u968f\u706f\u5173\u673a';
+	@override String get mobileSetPowerOffWithLight10 => '\u8bbe\u7f6e\u968f\u706f\u5173\u673a';
+	@override String get mobileCleanRemindOn11 => '\u6e05\u6d01\u63d0\u9192';
+	@override String get mobileSetCleanRemindOn11 => '\u8bbe\u7f6e\u6e05\u6d01\u63d0\u9192';
+	@override String get mobileCleanRemindTime12 => '\u6e05\u6d01\u63d0\u9192\u9608\u503c\uff08\u5c0f\u65f6\uff09';
+	@override String get mobileSetCleanRemindTime12 => '\u8bbe\u7f6e\u6e05\u6d01\u63d0\u9192\u9608\u503c\uff08\u5c0f\u65f6\uff09';
+	@override String get mobileGestures18 => '\u624b\u52bf\u63a7\u5236';
+	@override String get mobileSetGestures18 => '\u8bbe\u7f6e\u624b\u52bf\u63a7\u5236';
 }

@@ -13,7 +13,14 @@ import 'accounts_test.dart' show AccountPreferences;
 import 'session_permissions_test.dart' show inspection;
 import 'mijia_auxiliary_test.dart' show AuxiliaryCore;
 
-Json hoodInspection() {
+const preferenceProperties = {
+  'power_on_with_light_9',
+  'power_off_with_light_10',
+  'clean_remind_on_11',
+  'clean_remind_time_12',
+  'gestures_18',
+};
+Json hoodInspection({bool preferences = false}) {
   final result = inspection();
   result['device_id'] = '40000000-0000-4000-8000-000000000001';
   final rules = jsonDecode(
@@ -22,10 +29,14 @@ Json hoodInspection() {
   result['options'] = [
     for (final rule in rules)
       if ({
-        'hood-2',
-        'fan_control-3',
-        'screen-13',
-      }.contains(rule['properties']['component_id']['const']))
+            'hood-2',
+            'fan_control-3',
+            'screen-13',
+          }.contains(rule['properties']['component_id']['const']) &&
+          preferenceProperties.contains(
+                rule['properties']['property']['const'],
+              ) ==
+              preferences)
         (() {
           final component =
               rule['properties']['component_id']['const'] as String;

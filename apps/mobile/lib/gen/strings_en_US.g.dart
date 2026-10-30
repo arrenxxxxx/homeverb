@@ -5076,14 +5076,14 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	/// en-US: 'Power off with light'
 	String get vendorXiaomiMijiaHoodPowerOffWithLight10 => 'Power off with light';
 
-	/// en-US: 'Clean remind on'
-	String get vendorXiaomiMijiaHoodCleanRemindOn11 => 'Clean remind on';
+	/// en-US: 'Cleaning reminder'
+	String get vendorXiaomiMijiaHoodCleanRemindOn11 => 'Cleaning reminder';
 
-	/// en-US: 'Clean remind time'
-	String get vendorXiaomiMijiaHoodCleanRemindTime12 => 'Clean remind time';
+	/// en-US: 'Cleaning reminder threshold (hours)'
+	String get vendorXiaomiMijiaHoodCleanRemindTime12 => 'Cleaning reminder threshold (hours)';
 
-	/// en-US: 'Gestures'
-	String get vendorXiaomiMijiaHoodGestures18 => 'Gestures';
+	/// en-US: 'Gesture control'
+	String get vendorXiaomiMijiaHoodGestures18 => 'Gesture control';
 
 	/// en-US: 'Auto ventilation on'
 	String get vendorXiaomiMijiaHoodAutoVentilationOn20 => 'Auto ventilation on';
@@ -5867,4 +5867,34 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Particle warning'
 	String get vendorXiaomiMijiaEventMiotSpecV2EnvironmentPmWarning1 => 'Particle warning';
+
+	/// en-US: 'Power on with light'
+	String get mobilePowerOnWithLight9 => 'Power on with light';
+
+	/// en-US: 'Set power on with light'
+	String get mobileSetPowerOnWithLight9 => 'Set power on with light';
+
+	/// en-US: 'Power off with light'
+	String get mobilePowerOffWithLight10 => 'Power off with light';
+
+	/// en-US: 'Set power off with light'
+	String get mobileSetPowerOffWithLight10 => 'Set power off with light';
+
+	/// en-US: 'Cleaning reminder'
+	String get mobileCleanRemindOn11 => 'Cleaning reminder';
+
+	/// en-US: 'Set cleaning reminder'
+	String get mobileSetCleanRemindOn11 => 'Set cleaning reminder';
+
+	/// en-US: 'Cleaning reminder threshold (hours)'
+	String get mobileCleanRemindTime12 => 'Cleaning reminder threshold (hours)';
+
+	/// en-US: 'Set cleaning reminder threshold (hours)'
+	String get mobileSetCleanRemindTime12 => 'Set cleaning reminder threshold (hours)';
+
+	/// en-US: 'Gesture control'
+	String get mobileGestures18 => 'Gesture control';
+
+	/// en-US: 'Set gesture control'
+	String get mobileSetGestures18 => 'Set gesture control';
 }

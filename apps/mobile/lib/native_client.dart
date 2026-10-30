@@ -373,7 +373,9 @@ class NativeClient
       );
     }
     final minimumReferenceApi =
-        permissions.any((p) => p.requiresExtendedOutletApi)
+        permissions.any((p) => p.requiresHoodPreferenceApi)
+        ? 45
+        : permissions.any((p) => p.requiresExtendedOutletApi)
         ? 43
         : permissions.any((p) => p.requiresMaintenanceApi)
         ? 42
@@ -473,6 +475,13 @@ class NativeClient
         throw NativeFailure(
           'API_UPGRADE_REQUIRED',
           'Mijia requires native API 1.27 or later.',
+        );
+      }
+      if (permissions.any((p) => p.requiresHoodPreferenceApi) &&
+          !client.apiAtLeast(45)) {
+        throw NativeFailure(
+          'API_UPGRADE_REQUIRED',
+          'Hood preferences require native API 1.45.',
         );
       }
       if (permissions.any((p) => p.requiresExtendedOutletApi) &&

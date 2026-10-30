@@ -30,6 +30,10 @@ class SessionPermission {
   bool get requiresHoodManualApi =>
       requiresReferenceSettingApi &&
       const {'hood-2', 'fan_control-3', 'screen-13'}.contains(component);
+  bool get requiresHoodPreferenceApi =>
+      requiresReferenceSettingApi &&
+      component == 'hood-2' &&
+      _hoodPreferences.contains(parameter);
   bool get requiresActionApi => startupField == 'mijia_action_grants';
   bool get requiresPowerToggleApi =>
       requiresActionApi && capability == 'vendor.xiaomi.mijia.switch';
@@ -86,7 +90,25 @@ class SessionPermission {
     ('vendor.midea.ac', 'activate_mode'): ('meiju_mode_grants', 'mode'),
   };
 
+  static const _hoodPreferences = {
+    'power_on_with_light_9',
+    'power_off_with_light_10',
+    'clean_remind_on_11',
+    'clean_remind_time_12',
+    'gestures_18',
+  };
+
   static const _referenceSettings = {
+    ('hood-2', 'vendor.xiaomi.mijia.hood', 'set_power_on_with_light_9'):
+        'power_on_with_light_9',
+    ('hood-2', 'vendor.xiaomi.mijia.hood', 'set_power_off_with_light_10'):
+        'power_off_with_light_10',
+    ('hood-2', 'vendor.xiaomi.mijia.hood', 'set_clean_remind_on_11'):
+        'clean_remind_on_11',
+    ('hood-2', 'vendor.xiaomi.mijia.hood', 'set_clean_remind_time_12'):
+        'clean_remind_time_12',
+    ('hood-2', 'vendor.xiaomi.mijia.hood', 'set_gestures_18'): 'gestures_18',
+
     ('hood-2', 'vendor.xiaomi.mijia.hood', 'set_on_1'): 'on_1',
     ('fan_control-3', 'vendor.xiaomi.mijia.fan_control', 'set_fan_level_1'):
         'fan_level_1',
@@ -292,7 +314,32 @@ class SessionPermission {
       final hoodManual =
           settingParameter != null &&
           const {'hood-2', 'fan_control-3', 'screen-13'}.contains(component);
-      if (hoodManual) {
+      final hoodPreference =
+          hoodManual && _hoodPreferences.contains(mapping.$2);
+      if (hoodPreference &&
+          (definition?['transports'] is! List ||
+              (definition!['transports'] as List).length != 1 ||
+              definition['atomic'] != false ||
+              definition['independent_fields'] != false ||
+              definition['verification'] != 'unavailable'))
+        continue;
+      if (hoodPreference && mapping.$2 == 'clean_remind_time_12') {
+        if (schema['type'] != 'integer' ||
+            schema['minimum'] != 20 ||
+            schema['maximum'] != 50 ||
+            schema['multipleOf'] != 10 ||
+            schema.keys.any(
+              (key) => !{
+                'type',
+                'minimum',
+                'maximum',
+                'multipleOf',
+                'title',
+                'description',
+              }.contains(key),
+            ))
+          continue;
+      } else if (hoodManual) {
         final codes = switch (mapping.$2) {
           'fan_level_1' => const [1, 2, 3, 4],
           'display_state_1' => const [0, 1],

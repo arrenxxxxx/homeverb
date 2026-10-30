@@ -504,6 +504,14 @@ class HomeController extends ChangeNotifier {
       includeMaintenanceActions: _supportsMaintenanceActions,
     );
     if (next.isEmpty) return;
+    if (next.any((p) => p.requiresHoodPreferenceApi) &&
+        core is NativeSessionClient &&
+        !(core as NativeSessionClient).apiAtLeast(45)) {
+      throw NativeFailure(
+        'API_UPGRADE_REQUIRED',
+        'Hood preferences require native API 1.45.',
+      );
+    }
     if (next.any((p) => p.requiresExtendedOutletApi) &&
         core is NativeSessionClient &&
         !(core as NativeSessionClient).apiAtLeast(43)) {
@@ -1090,6 +1098,24 @@ class HomeController extends ChangeNotifier {
     Json arguments, {
     String? componentId,
   }) => perform(() async {
+    final epoch = _readEpoch;
+    final client = core;
+    final device = selectedDevice;
+    final deviceDescription = description;
+    void checkActive() {
+      if (!_foreground ||
+          epoch != _readEpoch ||
+          core != client ||
+          selectedDevice != device ||
+          description != deviceDescription) {
+        throw NativeFailure(
+          'CANCELLED',
+          'Control was cancelled before sending.',
+        );
+      }
+    }
+
+    checkActive();
     final target = componentId ?? component;
     final descriptor =
         componentCapability(target, capabilityId)?['actions']?[action] as Json?;
@@ -1116,8 +1142,9 @@ class HomeController extends ChangeNotifier {
       'timeout_ms': 10000,
       'wait_for': 'verified',
     };
-    await core.call('plan', {'command': command});
-    receipt = await core.call('execute', {'command': command}) as Json;
+    await client.call('plan', {'command': command});
+    checkActive();
+    receipt = await client.call('execute', {'command': command}) as Json;
     // Observations only change after an explicit read, never from a requested value.
   });
   List<Json> accounts = [];
