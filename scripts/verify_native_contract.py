@@ -581,6 +581,7 @@ def main():
 
     # Exact action startup admission must precede profile or credential access.
     action_startup = load('examples/native-open.mijia-actions.json')
+    action_startup['mijia_action_grants'] += load('examples/native-open.mijia-power-actions.json')['mijia_action_grants']
     for adapter in ['xiaomi.mijia', 'homeverb.platforms']:
         for grants in [action_startup['mijia_action_grants'], [
                 {**action_startup['mijia_action_grants'][0],
@@ -596,17 +597,18 @@ def main():
                     assert raw(handle, envelope('get_api_info'))['data'] == api
                     assert raw(handle, envelope('list_devices'))['data'] == []
                     assert raw(handle, envelope('list_accounts'))['data'] == []
-                    for include in [False, True]:
-                        result = call(handle, 'inspect_control_options',
-                                      device_id=grants[0]['device_id'], connection_id='cloud',
-                                      include_no_argument_actions=include)
-                        assert result['error']['code'] == 'DEVICE_NOT_FOUND'
-                    for include in [None, 1, 'true', {}, []]:
-                        request = envelope('inspect_control_options',
-                                           device_id=grants[0]['device_id'], connection_id='cloud',
-                                           include_no_argument_actions=include)
-                        assert not request_schema.is_valid(request)
-                        assert raw(handle, request)['error']['code'] == 'INVALID_ARGUMENT'
+                    for flag in ['include_no_argument_actions', 'include_power_toggle_actions']:
+                        for include in [False, True]:
+                            result = call(handle, 'inspect_control_options',
+                                          device_id=grants[0]['device_id'], connection_id='cloud',
+                                          **{flag: include})
+                            assert result['error']['code'] == 'DEVICE_NOT_FOUND'
+                        for include in [None, 1, 'true', {}, []]:
+                            request = envelope('inspect_control_options',
+                                               device_id=grants[0]['device_id'], connection_id='cloud',
+                                               **{flag: include})
+                            assert not request_schema.is_valid(request)
+                            assert raw(handle, request)['error']['code'] == 'INVALID_ARGUMENT'
                 finally:
                     library.homeverb_close(handle)
     for label, config in invalid_action_startups(action_startup):

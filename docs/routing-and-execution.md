@@ -930,3 +930,16 @@ Positive/negative fixtures are examples/capability.mijia-power-action.json,
 examples/command.mijia-power-action.json, scripts/validate_contracts.py and
 crates/mijia/src/adapter/tests/modern_accounts/actions/power.rs. No result or
 command schema shape changes; existing grant/approval semantics are retained.
+
+## Native power-toggle consent
+
+ADR-0111/API 1.41 admits exact elevated switch toggles through independent startup
+action grants and opt-in local inspection. Granted reopen plus explicit refresh
+publishes descriptors; none of these steps is consent. Only the existing immutable
+trusted approval bridge can execute each action. The protected adapter checks the
+private marker independently. Ordinary plan/execute refuse; unknown receipts
+remain unavailable for another preview or replay after reopen/retirement.
+Positive and negative boundaries are exercised by the native startup fixture,
+Host actions/power.rs journey and actual C ABI validator. Outcomes and public
+command/result shapes are unchanged; response inspection admits exact switch-3,
+switch-11 and switch-12 components in addition to the existing switch-2.

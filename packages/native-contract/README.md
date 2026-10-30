@@ -1,6 +1,6 @@
 # HomeVerb native contract
 
-Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.40.0 has 36 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions three trusted connection-link functions and three trusted account-identity recovery functions and three dedicated interactive login functions and four protected verification functions and four modern account functions; the JSON envelope schema is 1.0.
+Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.41.0 has 36 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions three trusted connection-link functions and three trusted account-identity recovery functions and three dedicated interactive login functions and four protected verification functions and four modern account functions; the JSON envelope schema is 1.0.
 
 API 1.19 adds nullable `last_complete_inventory_at` to account summaries. It is
 historical local retrieval metadata, not authorization or online status. SQLite
@@ -220,3 +220,10 @@ and uncertain non-idempotent receipts are never replayed. See the
 [action contract](../../docs/native-ui-contract.md#exact-no-argument-actions-api-140).
 Version-negotiated Flutter adoption is implemented. The ab34f21 API 1.40 Android
 package has archive checks; real acceptance remains pending.
+
+API 1.41 extends mijia_action_grants with four exact switch component tuples for
+five elevated power toggles. The independent include_power_toggle_actions flag
+defaults to false and leaves API 1.40 inspection unchanged. Every toggle needs
+actual trusted consent through the existing approval exports; startup grants are
+not consent. See the [power-toggle contract](../../docs/native-ui-contract.md#exact-elevated-power-toggle-actions-api-141).
+Flutter/API negotiation and package delivery remain a separate phase.

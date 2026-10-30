@@ -92,3 +92,43 @@ fn invalid_action_startup_does_not_create_a_profile() {
     );
     assert!(!path.exists());
 }
+
+#[test]
+fn power_action_grants_admit_exact_scope_but_never_replace_trusted_consent() {
+    let v: Value = serde_json::from_str(include_str!(
+        "../../../examples/native-open.mijia-power-actions.json"
+    ))
+    .unwrap();
+    let grants: Vec<MijiaActionGrant> =
+        serde_json::from_value(v["mijia_action_grants"].clone()).unwrap();
+    assert_eq!(grants.len(), 4);
+    let policy = mijia_action_policy(&grants).unwrap();
+    for g in grants {
+        let option =
+            homeverb_mijia::no_argument_action_option(&g.component_id, &g.capability, &g.action)
+                .unwrap();
+        assert_eq!(option.definition.risk, homeverb_domain::Risk::Elevated);
+        let c: Command = serde_json::from_value(json!({"schema_version":"1.0","request_id":"fictional-power","device_id":g.device_id,"component_id":g.component_id,"capability":g.capability,"action":g.action,"arguments":{},"connection":"cloud","timeout_ms":5000,"wait_for":"accepted"})).unwrap();
+        assert!(policy.authorize(&c, &option.definition).is_err());
+        let mut scope = option.definition.clone();
+        scope.risk = homeverb_domain::Risk::Low;
+        assert_eq!(
+            policy.authorize(&c, &scope).unwrap(),
+            vec![Transport::Cloud]
+        );
+        for component in ["switch-1", "switch-4", "switch-10", "switch-13", "*"] {
+            let mut bad = g.clone();
+            bad.component_id = component.into();
+            assert!(mijia_action_policy(&[bad]).is_err());
+        }
+        for arguments in [
+            json!({"confirmed":true}),
+            json!({"state":true}),
+            json!({"in":[]}),
+        ] {
+            let mut bad = c.clone();
+            bad.arguments = arguments;
+            assert!(policy.authorize(&bad, &scope).is_err());
+        }
+    }
+}

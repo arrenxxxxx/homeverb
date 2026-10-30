@@ -1,5 +1,23 @@
 # 11. Mijia native integration
 
+## Native elevated power toggles -- October 30, 2026
+
+[ADR-0111](../adr/0111-native-mijia-power-toggle-actions.md) extends API 1.41's independent mijia_action_grants to the
+four exact switch component tuples covering all five ADR-0110 actions. The
+separate include_power_toggle_actions flag defaults to false; API 1.40-style
+inspection still returns only the original six low-risk actions when opted in.
+Inspection remains local and does not grant consent or publish capabilities.
+
+Granted reopen and explicit refresh expose elevated descriptors. Every attempt
+requires immutable trusted preview and actual user confirmation through the
+existing C approval bridge. Ordinary execution stays denied. Cancellation,
+backgrounding, unknown outcomes and reopened receipts never enable replay.
+No new C export, method, storage format, companion write or verification is added.
+Flutter adoption, a matching APK and provider/phone/model acceptance remain
+pending; ab34f21 is still API 1.40. No real account/device operation, installation,
+push or publication occurred in this phase.
+
+
 October 30: 17 exact Mijia reference specifications supply 264 scalar read
 mappings and localized App labels. Modern QR authentication, grouped device
 publication and Core reads are integrated through Flutter with fictional evidence.

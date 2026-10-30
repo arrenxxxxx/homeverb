@@ -1,6 +1,6 @@
 # 14. Mijia reference integration and remaining coverage
 
-The October 30 worktree uses API 1.40 and the owner-supplied October 22 Xiaomi Home
+The October 30 worktree uses API 1.41 and the owner-supplied October 22 Xiaomi Home
 11.7.709 analysis. The full official-App feature request remains **incomplete**.
 The source archive explicitly does not supply all authentication, protocol or
 runtime control contracts. An implemented decoder is not physical acceptance.
@@ -67,7 +67,8 @@ cargo +1.96.0 test -p homeverb-mijia --offline --locked
 ```
 
 ADR-0110 additionally implements five elevated power-toggle actions through typed
-Core with independent trusted approval. Native/App adoption is pending; this does
+Core with independent trusted approval. ADR-0111 adds native API 1.41 admission;
+Flutter adoption is pending. This does
 not change the six actions included in the ab34f21 APK.
 
 ## Coverage boundaries
@@ -79,7 +80,7 @@ not change the six actions included in the ab34f21 APK.
 | 78 non-readable properties | No read operation; write/event-only definitions are not state |
 | 28 opaque readable values | Separate typed/business/privacy contracts required |
 | 3 network identity values | Excluded from state and exports |
-| 40 actions | Six exact empty-input actions have Core/native/App support; five elevated power toggles have typed Core support under ADR-0110; their native/App adoption and the remaining 29 actions are incomplete |
+| 40 actions | Six exact empty-input actions have Core/native/App support; five elevated power toggles have Core/native support under ADR-0110/0111; their App adoption and the remaining 29 actions are incomplete |
 | 78 events | No event-history/subscription body, paging or lifecycle contract; not implemented |
 
 The archived successful reads used **SID `mijia`** and
@@ -1882,3 +1883,31 @@ including refusal of all new power-toggle startup tuples. Contract validation
 passed 25 schemas, 78 positive and 1,463 negative fixtures. Reference projection
 and its two unit tests passed; documentation and repository checks passed.
 No Flutter tests or new APK were produced in this typed-only phase.
+
+## Native elevated power toggles -- October 30, 2026
+
+[ADR-0111](../adr/0111-native-mijia-power-toggle-actions.md) extends API 1.41's independent mijia_action_grants to the
+four exact switch component tuples covering all five ADR-0110 actions. The
+separate include_power_toggle_actions flag defaults to false; API 1.40-style
+inspection still returns only the original six low-risk actions when opted in.
+Inspection remains local and does not grant consent or publish capabilities.
+
+Granted reopen and explicit refresh expose elevated descriptors. Every attempt
+requires immutable trusted preview and actual user confirmation through the
+existing C approval bridge. Ordinary execution stays denied. Cancellation,
+backgrounding, unknown outcomes and reopened receipts never enable replay.
+No new C export, method, storage format, companion write or verification is added.
+Flutter adoption, a matching APK and provider/phone/model acceptance remain
+pending; ab34f21 is still API 1.40. No real account/device operation, installation,
+push or publication occurred in this phase.
+
+Executed verification: Rust 1.96 offline/locked workspace tests passed 678 tests
+with one ignored, excluding homeverb-midea for its known macOS LAN-alias
+limitation. Strict all-target Clippy, rustfmt and FFI rebuild passed. The actual
+C ABI verifier passed 36 methods, 76 live examples, 76 modern-account boundary
+cases and the existing trusted/protected bridges. The 63 scoped Host/account
+tests passed, including all five power-toggle model/service journeys and unknown
+reopen without replay. Contract checks passed 25 schemas, 79 positive and 1,547
+negative fixtures; reference projection and both projection unit tests passed.
+Documentation, repository hygiene, diff and commit checks passed. These are
+fictional software checks, not Flutter, package, provider or physical acceptance.

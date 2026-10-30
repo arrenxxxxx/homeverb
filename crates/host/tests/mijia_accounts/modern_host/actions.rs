@@ -101,8 +101,30 @@ fn reopen(
 async fn call(s: &Session, r: Value) -> Value {
     let method = r["method"].as_str().unwrap().to_string();
     let result=s.call(serde_json::from_value(json!({"schema_version":"1.0","operation_id":"action-test","timeout_ms":5000,"request":r})).unwrap()).await;
-    if method != "execute" {
-        validate(&result, &method);
+    if method == "execute" || (method == "get_execution" && result["error"].is_null()) {
+        // Keep recursive command-result references intact; the account test
+        // helper expands schemas eagerly and cannot expand this recursive root.
+        let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../../schemas/command-result.schema.json");
+        let schema: Value = serde_json::from_slice(&std::fs::read(path).unwrap()).unwrap();
+        let receipt = if method == "execute" {
+            &result
+        } else {
+            &result["data"]
+        };
+        jsonschema::validator_for(&schema)
+            .unwrap()
+            .validate(receipt)
+            .unwrap();
+    } else {
+        validate(
+            &result,
+            if method == "get_execution" {
+                "query_error"
+            } else {
+                &method
+            },
+        );
     }
     result
 }
@@ -230,7 +252,7 @@ fn inspection_request(card: &Value) -> Value {
 }
 
 #[tokio::test]
-async fn api_140_does_not_admit_typed_elevated_power_toggles() {
+async fn api_140_inspection_keeps_power_toggles_hidden() {
     for (model, component) in [
         ("cuco.plug.v3", "switch-2"),
         ("yutai.plug.jdls1", "switch-2"),
@@ -252,9 +274,12 @@ async fn api_140_does_not_admit_typed_elevated_power_toggles() {
                 capability: "vendor.xiaomi.mijia.switch".into(),
                 action: "toggle".into(),
             }])
-            .is_err()
+            .is_ok()
         );
         assert_eq!(f.peer.reads.load(Ordering::SeqCst), reads);
         assert_eq!(w.sends.load(Ordering::SeqCst), 0);
     }
 }
+
+#[path = "actions/power.rs"]
+mod power;

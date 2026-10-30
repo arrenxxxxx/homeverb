@@ -92,7 +92,7 @@ impl ModelMapping {
     }
 }
 
-/// API 1.40 low-risk native startup vocabulary. Elevated typed actions are not exposed here.
+/// Closed native startup vocabulary; elevated actions additionally require trusted approval.
 pub fn no_argument_action_option(
     component: &str,
     capability: &str,
@@ -103,6 +103,10 @@ pub fn no_argument_action_option(
             "abhome.light.wy0a01",
             "jdjz.fan.2072fc",
             "xiaomi.hood.cyp10",
+            "cuco.plug.v3",
+            "yutai.plug.jdls1",
+            "opple.switch.0010d5",
+            "opple.switch.0010d6",
         ]
         .into_iter()
         .filter_map(|model| ModelMapping::pinned(model, None).ok().flatten())

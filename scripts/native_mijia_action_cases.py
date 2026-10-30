@@ -1,4 +1,4 @@
-"""Fictional API 1.40 startup counterexamples shared by schema and C checks."""
+"""Fictional API 1.41 startup counterexamples shared by schema and C checks."""
 
 
 def invalid_action_startups(startup):
@@ -37,9 +37,8 @@ def invalid_action_startups(startup):
                    [{**entries[0], 'device_id': f'40000000-0000-4000-8000-{i:012x}'}
                     for i in range(65)]]:
         yield 'invalid action grant list', {**startup, 'mijia_action_grants': grants}
-    # ADR-0110 typed Core support does not widen API 1.40 startup admission.
-    for component in ['switch-2', 'switch-3', 'switch-11', 'switch-12']:
-        yield f'typed-only elevated action {component}', {
+    for component in ['switch-1', 'switch-4', 'switch-10', 'switch-13']:
+        yield f'unreviewed elevated action {component}', {
             **startup, 'mijia_action_grants': [{**entries[0],
                 'component_id': component, 'capability': 'vendor.xiaomi.mijia.switch',
                 'action': 'toggle'}]}

@@ -1,6 +1,6 @@
 # Native UI contract
 
-The October 30 exact action control bridge uses native API **1.40.0**, following
+The October 30 exact action control bridge uses native API **1.41.0**, following
 the October 24 linear mainline update. Earlier Mijia phase versions are historical. See
 [contract reconciliation](adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
 remain available alongside Mijia; identity restoration remains Meiju-only.
@@ -43,7 +43,7 @@ The 22 C functions in [homeverb.h](../crates/ffi/include/homeverb.h) form the na
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects Meiju, `xiaomi.mijia` selects Mijia, and `homeverb.platforms` selects both. `scenario` defaults to `normal`. All platform modes require `allow_mock_writes: false` and reject any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms the selected mode. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.40.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.41.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -88,7 +88,7 @@ All rows use query envelopes except the two execution methods. The schemas and a
 | `get_account` | `account_id` | `{account, device_ids}` from local metadata; no authorization check |
 | `rename_account` | `account_id`, `label` | Updated local AccountSummary; no credential or permission changes |
 | `remove_account` | `account_id`, `expected_device_ids` | Local cleanup result: `removed` or `pending`; inspect the inner error |
-| `inspect_control_options` | `device_id`, `connection_id`, optional `include_no_argument_actions` (API 1.40) | Saved model-specific permission-form options; no permission check, networking or control enablement |
+| `inspect_control_options` | `device_id`, `connection_id`, optional `include_no_argument_actions` (API 1.40), `include_power_toggle_actions` (API 1.41) | Saved model-specific permission-form options; no permission check, networking or control enablement |
 | `inspect_session_grants` | `device_id`, `connection_id` | Current local session rules for that route; no credential access, provider authorization check or control enablement |
 | `inspect_account_inventory` | `account_id` | Saved protected device/connection membership; no network or mutation |
 | `inspect_device_conflicts` | `account_id`, `device_id` | Saved duplicate-binding candidates across accounts; no merge or authority |
@@ -2046,3 +2046,30 @@ their previous inspection results; older libraries reject the new field/flag.
 Flutter now negotiates this contract and uses the existing generic action forms.
 The ab34f21 API 1.40 Android package has archive checks; real acceptance remains
 pending. See [ADR-0109](adr/0109-native-mijia-action-grants.md).
+
+## Exact elevated power-toggle actions (API 1.41)
+
+Negotiate API 1.41 before requesting include_power_toggle_actions or reopening
+with switch toggle grants. Startup mijia_action_grants admits only switch-2,
+switch-3, switch-11 and switch-12 with vendor.xiaomi.mijia.switch and toggle;
+protected adapter evidence independently checks the exact five model/service
+profiles. See [ADR-0111](adr/0111-native-mijia-power-toggle-actions.md) and the
+[fictional startup](../examples/native-open.mijia-power-actions.json).
+
+The new inspection flag defaults to false. It selects only elevated power actions;
+include_no_argument_actions still selects only the previous six low-risk actions.
+Both flags may be used together without duplicates. Inspection never grants
+permission, confirms an action, changes descriptors or contacts a provider.
+
+After exact granted reopen and explicit refresh, use the existing trusted
+prepare/execute/discard approval exports. Show the immutable preview and obtain
+actual user consent before consuming it. Ordinary plan/execute remain denied,
+including commands with confirmed=true. Never infer the next physical power
+state or create a replacement request to recover an unknown toggle. Background
+invalidates previews and cancels pending sends without physical rollback.
+
+API 1.40 rejects the new flag and switch grant tuples. Clients must refuse an
+explicit request on older libraries rather than silently omit it. The Rust
+InspectControlOptions constructor gains a Boolean field; JSON omission remains
+compatible. There are no new methods/exports or SQLite/protected payload versions.
+Flutter adoption and a new APK remain pending; ab34f21 stays API 1.40.

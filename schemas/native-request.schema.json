@@ -578,7 +578,12 @@
             "include_no_argument_actions": {
               "type": "boolean",
               "default": false,
-              "description": "API 1.40 opt-in for additional exact standalone empty-argument actions. Inspection never grants authority."
+              "description": "API 1.40 opt-in for the six exact low-risk standalone empty-argument actions. Inspection never grants authority."
+            },
+            "include_power_toggle_actions": {
+              "type": "boolean",
+              "default": false,
+              "description": "API 1.41 opt-in for exact elevated power toggles. Inspection never grants authority or trusted consent."
             }
           },
           "required": [

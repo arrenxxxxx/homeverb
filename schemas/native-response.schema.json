@@ -2227,7 +2227,7 @@
                     "properties": {
                       "component_id": {
                         "type": "string",
-                        "pattern": "^(main|fan-[1-9][0-9]{0,9}|switch-2|indicator_light-13|light-2|light-6|function-3|hood-2|fan_control-3|screen-13|air_purifier-2|indicator_light-5|alarm-6|physical_controls_locked-7|air_purifier_favorite-8)$"
+                        "pattern": "^(main|fan-[1-9][0-9]{0,9}|switch-2|switch-3|switch-11|switch-12|indicator_light-13|light-2|light-6|function-3|hood-2|fan_control-3|screen-13|air_purifier-2|indicator_light-5|alarm-6|physical_controls_locked-7|air_purifier_favorite-8)$"
                       },
                       "capability": {
                         "type": "string",

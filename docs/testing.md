@@ -934,3 +934,15 @@ startup before creating a profile and are absent from existing inspection opt-in
 Run projection, contract, documentation and strict workspace checks. New native/
 Flutter admission and matching packaging are dependent phases, not established
 by these typed Rust tests.
+
+## Native elevated Mijia power-toggle checks
+
+ADR-0111/API 1.41 uses fictional Host model/service journeys in
+crates/host/tests/mijia_accounts/modern_host/actions/power.rs. Run the
+mijia_action_grants and mijia_accounts integration targets in homeverb-host, then
+rebuild homeverb-ffi and run scripts/verify_native_contract.py --write-examples.
+Verify separate default-false power inspection, all exact grants in both allowed
+modes, no ordinary execution, preview/dismiss/background and unknown reopen without
+replay. Startup/schema counterexamples cover foreign tuples and forbidden fields.
+The legacy/modern Core tests remain the protected protocol evidence. No provider
+traffic, phone, Flutter or APK acceptance follows from these checks.

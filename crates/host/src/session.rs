@@ -55,6 +55,8 @@ pub enum Request {
         connection_id: String,
         #[serde(default)]
         include_no_argument_actions: bool,
+        #[serde(default)]
+        include_power_toggle_actions: bool,
     },
     InspectHistoryOptions {
         device_id: String,
@@ -625,6 +627,7 @@ impl Session {
                 device_id,
                 connection_id,
                 include_no_argument_actions,
+                include_power_toggle_actions,
             } => {
                 if self.accounts.is_none() && self.mijia_accounts.is_none() {
                     return Err(crate::accounts::unsupported());
@@ -651,15 +654,16 @@ impl Session {
                             &operation,
                         )
                         .await?;
-                    if include_no_argument_actions {
+                    if include_no_argument_actions || include_power_toggle_actions {
                         options.extend(
                             adapter
                                 .inspect_action_options(&descriptor.device, connection, &operation)
                                 .await?
                                 .into_iter()
-                                // API 1.40 opts into the original six low-risk actions only.
-                                .filter(|option| {
-                                    option.definition.risk == homeverb_domain::Risk::Low
+                                .filter(|option| match option.definition.risk {
+                                    homeverb_domain::Risk::Low => include_no_argument_actions,
+                                    homeverb_domain::Risk::Elevated => include_power_toggle_actions,
+                                    homeverb_domain::Risk::High => false,
                                 }),
                         );
                     }

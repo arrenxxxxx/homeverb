@@ -839,3 +839,9 @@ Exact action-family scope is checked independently of existing property grants.
 API 1.40 refuses the new startup tuples with INVALID_ARGUMENT. Existing uncertain
 send/receipt behavior is unchanged; an unknown toggle is not a safe retry and
 cannot obtain another approval with its original request ID. No error code is added.
+
+API 1.41 exact power-toggle grants still produce POLICY_DENIED through ordinary
+execution. Inspection is not approval. Consumed, dismissed or background-invalidated
+trusted handles produce APPROVAL_INVALID. Malformed or unreviewed switch grants
+and non-Boolean include_power_toggle_actions fail INVALID_ARGUMENT before startup
+side effects. Existing unknown receipts never become permission to retry.
