@@ -99,7 +99,14 @@ def project():
                   for o in contract['operations']]
     coverage = {'reference_sha256': DIGEST, 'status': 'partial_implementation',
                 'physical_acceptance': 'pending_owner', 'operations': operations, 'models': ledger,
-                'remaining': ['modern_native_login_and_renewal', 'cloud_cache_inventory_reconciliation',
+                'modern_authentication': {
+                    'status': 'implemented_typed_rust_qr_and_same_subject_renewal',
+                    'evidence': 'ADR-0093; fictional protocol and local TLS tests; anonymous URL shapes only',
+                    'account_host_app_and_provider_acceptance': 'pending',
+                    'legacy_session_conversion': 'unavailable',
+                    'modern_api_origin_and_codec': 'not_admitted'},
+                'remaining': ['modern_protected_account_and_app_authentication',
+                              'modern_api_origin_and_codec_acceptance', 'cloud_cache_inventory_reconciliation',
                               'specialized_failed_property_read_paths', 'BLE_and_LAN', 'history_and_events',
                               'health_and_media', 'additional_write_runtime_contracts']}
     return {CATALOG: profiles, LEDGER: coverage}

@@ -677,3 +677,14 @@ derivations. There are still 36 JSON methods and 26 C exports plus the Android
 initializer, with SQLite 5 and protected payload envelope 1 unchanged. Flutter
 API 1.35 negotiation and presentation are pending. The delivered API 1.34 APK
 does not gain these controls. No real provider/account/device acceptance is claimed.
+
+
+## Independent modern Mijia authentication
+
+ADR-0093 adds a separate typed Rust SID=mijia QR/renewal protocol. It is not a
+new device route or a conversion of saved legacy credentials. One protected
+challenge inherits the original cancellation/deadline and is consumed by one
+foreground completion attempt. A single bounded poll can be followed by one
+exact STS exchange. Renewal independently validates the same protected subject;
+no automatic relogin, retry, device request or write replay follows authentication.
+Native account payloads, ordinary request schemas and write outcomes are unchanged.

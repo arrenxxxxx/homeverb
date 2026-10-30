@@ -681,3 +681,13 @@ fan timing/reservation, non-boolean quiet/power values and brightness outside
 integer codes 0/1/2 return `INVALID_ARGUMENT` at startup. Missing exact grants
 return `POLICY_DENIED`; unadmitted adapter families refuse before transport.
 The existing uncertain-write result and no-replay rules are unchanged.
+
+
+Typed modern QR authentication under ADR-0093 keeps `AUTH_REQUIRED` for rejected
+bootstrap, completion or renewal and missing STS service tokens. Wrong-SID,
+foreign/unreviewed shard URLs, ambiguous queries, malformed identity/signing keys,
+duplicate tokens or inconsistent callback identities return `MIJIA_INVALID_RESPONSE`.
+Cancellation and the original/continuation deadline return `CANCELLED` or
+`DEADLINE_EXCEEDED`; all finish attempts consume the challenge. Transport failures
+remain `MIJIA_REQUEST_FAILED`, with no retry or raw provider diagnostics. No general
+JSON error schema or execution outcome changes; these are typed Rust entry points.

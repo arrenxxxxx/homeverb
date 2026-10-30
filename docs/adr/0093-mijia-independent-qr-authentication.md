@@ -1,6 +1,6 @@
 # ADR-0093: Independent Mijia QR authentication
 
-Status: design accepted for implementation; native host and App integration pending.
+Status: typed Rust protocol implemented with synthetic tests; protected account, native host, App and authenticated acceptance pending.
 Date: October 30, 2026.
 
 ## Evidence
@@ -80,3 +80,11 @@ initial and continuation cancellation/deadline/drop; wrong-subject renewal,
 missing tokens/keys and sanitized rejection; local TLS response bounds, redirect
 and duplicate-token refusal with no retry; redacted debug and nonserializable
 sessions/challenges. Preserve all existing legacy protocol regressions.
+
+
+Executed evidence: 140 Mijia unit and nine documentation tests passed; all 13
+modern protocol/TLS cases passed again after the final adjustment. Workspace
+regression passed 499 tests with one ignored, excluding the previously recorded
+macOS `homeverb-midea` LAN-alias failures. Strict Clippy, formatting, contracts,
+documentation and reference-projection checks passed. This is fictional/local
+transport evidence, not successful provider login or native/App acceptance.

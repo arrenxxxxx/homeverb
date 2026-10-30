@@ -624,3 +624,15 @@ negotiation before additive grants, sibling/timer/wrong-domain refusal, current
 session-grant intersection and narrow enlarged-text panels in both locales.
 The brightness form explicitly sends code 0 or 2, with no percent conversion or
 companion power argument. No provider or appliance is used.
+
+
+## Modern Mijia QR protocol
+
+The `homeverb-mijia` suite includes fictional modern bootstrap/QR/STS/renewal
+sequences, exact SID and endpoint rejection, callback-identity consistency,
+immutable original cancellation/deadline, a 120-second single-poll ceiling,
+pre-cancellation, dropped waits, bounded responses and nonserializable material.
+Local generated TLS peers check cookie isolation, duplicate-token rejection,
+redirect refusal, no retry and cancelled/deadline/dropped socket closure. They
+never contact Xiaomi. Anonymous endpoint-shape research is recorded separately
+in ADR-0093 and does not establish account login, renewal or device support.

@@ -5,6 +5,7 @@ mod auth;
 mod codec;
 mod control;
 mod inventory;
+mod modern;
 mod protected;
 mod spec;
 mod statistics;
@@ -20,6 +21,10 @@ pub use auth::{
 };
 pub use control::PropertyWrite;
 pub use inventory::{CloudDevice, Inventory, PropertyQuery, PropertyReading};
+pub use modern::{
+    ModernAuthEndpoint, ModernAuthRequest, ModernAuthResponse, ModernAuthTransport,
+    ModernMijiaSession, ModernQrChallenge, begin_modern_qr_login,
+};
 pub use spec::{
     ControlOption, MappedProperty, ModelMapping, SpecIndex, outlet_control_option,
     reference_setting_option,

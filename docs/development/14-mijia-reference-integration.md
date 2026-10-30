@@ -77,7 +77,8 @@ not claimed. No private identifiers enter this ledger.
 
 The HA source review below supplies protocol evidence used by the implemented
 legacy verification flow and exact energy-history profile. Still blocked pending
-additional evidence: modern native authentication/renewal; specialized paths for
+additional evidence: modern account/App integration and authenticated acceptance
+(the typed QR/renewal protocol is now synthetic-tested under ADR-0093); specialized paths for
 failed cloud properties and BLE devices; broader statistics, event pagination and
 foreground subscriptions; health/media/streams; plugin-specific
 composite conversion and additional write constraints. Door unlocking stays denied.
@@ -244,7 +245,7 @@ provides the following evidence:
 | Properties/actions | `miotspec/prop/get`, `prop/set`, `action` using service/property/action IDs | Useful protocol evidence; new commands still need exact model semantics and independent grants |
 | Scheduling/retries | HA-managed scheduling and some setter retries or relogin/request replay | Do not transplant automatic uncertain-write replay or background work |
 
-The community client's generic SID parameter and non-default SID branch do not
+This particular community client's generic SID parameter and non-default SID branch do not
 prove `mijia` login, its STS targets, continuous-stream encryption or modern App
 host compatibility. No existing token is forwarded to another origin or service.
 
@@ -1205,3 +1206,44 @@ No installation, provider request, real message or appliance write occurred.
 Archive checks do not prove provider, phone or physical acceptance. Modern SID
 login, events, additional controls and other reference gaps remain incomplete.
 No push or publication was performed.
+
+
+## Independent modern QR protocol -- October 30, 2026
+
+[ADR-0093](../adr/0093-mijia-independent-qr-authentication.md) adds typed Rust
+`begin_modern_qr_login`, single-use `ModernQrChallenge::finish`, and explicit
+`ModernMijiaSession::renew`. The dedicated transport admits only exact reviewed
+account, QR, c3 completion and modern STS endpoints. The challenge inherits its
+original cancellation and deadline, bounded by 180 seconds; finish makes one
+poll capped at 120 seconds and remaining lifetime, then one STS exchange.
+No automatic QR regeneration, retry, redirect, background wait or device request
+occurs. Protected scan data is intended for local trusted QR rendering only.
+
+Renewal sends passToken only to the exact account service-login endpoint and
+requires the same numeric subject, consistent encrypted identity, a returned
+signing key and a service token. Optional STS identity cookies must agree too.
+Failures preserve the old in-memory session; no assumed 30-day expiry is stored.
+Modern sessions cannot be converted into legacy `MijiaSession` values. Native
+API 1.35, C/JSON methods, SQLite 5 and protected account payload 1 remain unchanged.
+
+The source review found concrete SID=mijia QR and renewal implementations. Two
+anonymous GETs checked bootstrap and QR URL shapes without credentials, scanning,
+completion polling, STS exchange or account/device access. These were not account
+acceptance tests. Source attribution and exact observed endpoints are in ADR-0093.
+Community per-field RC4 at `api.mijia.tech/app` and the archive's continuous RC4
+at `core.api.mijia.tech/app` remain separate, unadmitted modern data routes.
+
+Protected persistence, account adoption/identity reconciliation, native challenge
+registry, App QR rendering/foreground integration, authenticated login/renewal
+acceptance and modern device reads remain pending. The delivered `9870437` APK
+contains the auxiliary-setting phase, not these new Rust protocol entry points.
+
+Executed verification: the complete Mijia suite passed 140 unit and nine
+compile-fail documentation tests. The workspace suite excluding `homeverb-midea`
+passed 499 tests with one ignored; its previously recorded macOS LAN-alias
+failures remain excluded. After the final client-format and duplicate-identity
+cookie adjustment, all 13 affected modern protocol/TLS tests passed again.
+Strict workspace/all-target Clippy and formatting passed. Documentation,
+repository hygiene, reference regeneration and all 24 schemas, 69 positive and
+944 negative contract fixtures passed. No Flutter flow changed or was retested
+for this Rust-only phase. No authenticated provider or physical-device test ran.

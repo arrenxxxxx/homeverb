@@ -846,3 +846,123 @@ async fn statistics_tls_uses_fixed_legacy_route_and_encryption_headers_once() {
         "CAPABILITY_UNSUPPORTED"
     );
 }
+
+fn modern_request(endpoint: crate::ModernAuthEndpoint) -> crate::ModernAuthRequest {
+    use crate::ModernAuthEndpoint as E;
+    let url = match endpoint {
+        E::Bootstrap => {
+            "https://account.xiaomi.com/pass/serviceLogin?_json=true&sid=mijia&_locale=zh_CN"
+        }
+        E::Qr => {
+            "https://account.xiaomi.com/longPolling/loginUrl?sid=mijia&callback=https%3A%2F%2Fsts.api.mijia.tech%2Fmijia%2Fsts"
+        }
+        E::Poll => "https://c3.lp.account.xiaomi.com/lp/s?k=fictional-poll",
+        E::Exchange => "https://sts.api.mijia.tech/mijia/sts?ticket=fictional-sts",
+    };
+    crate::ModernAuthRequest::new(
+        endpoint,
+        url.into(),
+        PrivateString::new(if endpoint == E::Bootstrap {
+            "passToken=fictional-pass-token".into()
+        } else {
+            String::new()
+        }),
+        PrivateString::new("fictional-modern-agent".into()),
+    )
+    .unwrap()
+}
+
+#[tokio::test]
+async fn modern_auth_tls_isolated_cookies_bounded_responses_and_no_redirect_retry() {
+    use crate::ModernAuthEndpoint as E;
+    for endpoint in [E::Bootstrap, E::Qr, E::Poll, E::Exchange] {
+        for mode in 0..8 {
+            let reply = match mode {
+                0 => "HTTP/1.1 200 OK\r\nSet-Cookie: serviceToken=fictional-service\r\nContent-Length: 2\r\nConnection: close\r\n\r\n{}".to_owned(),
+                1 => "HTTP/1.1 302 Found\r\nLocation: SERVER_URL\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".to_owned(),
+                2 => "HTTP/1.1 401 Unauthorized\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".to_owned(),
+                3 => "HTTP/1.1 200 OK\r\nContent-Length: 65537\r\nConnection: close\r\n\r\n".to_owned(),
+                4 => "HTTP/1.1 200 OK\r\nSet-Cookie: serviceToken=one\r\nSet-Cookie: serviceToken=two\r\nContent-Length: 2\r\nConnection: close\r\n\r\n{}".to_owned(),
+                5 => format!("HTTP/1.1 200 OK\r\nConnection: close\r\n\r\n{}", "x".repeat(65537)),
+                7 => "HTTP/1.1 200 OK\r\nSet-Cookie: userId=12345\r\nSet-Cookie: userId=54321\r\nContent-Length: 2\r\nConnection: close\r\n\r\n{}".to_owned(),
+                _ => "HTTP/1.1 200 OK\r\nContent-Length: 20\r\nConnection: close\r\n\r\nshort".to_owned(),
+            };
+            let server = Server::start(reply.into_bytes(), false).await;
+            let result = crate::modern::transport::transmit(
+                server.client.clone(),
+                Url::parse(&server.url).unwrap(),
+                &modern_request(endpoint),
+                &operation(),
+            )
+            .await;
+            assert_eq!(
+                result.is_ok(),
+                mode == 0 || ((mode == 4 || mode == 7) && endpoint != E::Exchange)
+            );
+            if let Ok(result) = result {
+                assert_eq!(result.service_token.is_some(), endpoint == E::Exchange);
+                assert_eq!(format!("{result:?}"), "ModernAuthResponse([REDACTED])");
+            }
+            assert_eq!(server.connections.load(Ordering::SeqCst), 1);
+            let requests = server.requests.lock().unwrap();
+            assert_eq!(requests.len(), 1);
+            let wire = String::from_utf8_lossy(&requests[0]);
+            assert!(wire.starts_with("GET "));
+            assert_eq!(wire.contains("cookie:"), endpoint == E::Bootstrap);
+            assert_eq!(
+                wire.contains("passToken=fictional"),
+                endpoint == E::Bootstrap
+            );
+            assert!(!wire.contains("serviceToken="));
+            assert!(!wire.contains("ENCRYPT-RC4"));
+        }
+    }
+}
+
+#[tokio::test]
+async fn modern_auth_tls_cancellation_deadline_and_drop_close_socket() {
+    for mode in 0..4 {
+        let server = Server::start(vec![], true).await;
+        let mut op = operation();
+        if mode == 0 {
+            op.cancellation.cancel();
+        }
+        if mode == 2 {
+            op.deadline = tokio::time::Instant::now() + Duration::from_millis(200);
+        }
+        let request = modern_request(crate::ModernAuthEndpoint::Poll);
+        let mut pending = Box::pin(crate::modern::transport::transmit(
+            server.client.clone(),
+            Url::parse(&server.url).unwrap(),
+            &request,
+            &op,
+        ));
+        if mode == 0 {
+            assert_eq!(pending.await.unwrap_err().code, "CANCELLED");
+            assert_eq!(server.connections.load(Ordering::SeqCst), 0);
+            continue;
+        }
+        loop {
+            tokio::select! {
+                result = &mut pending => panic!("Unexpected {result:?}"),
+                _ = tokio::time::sleep(Duration::from_millis(1)) => { if !server.requests.lock().unwrap().is_empty() { break; } }
+            }
+        }
+        if mode == 1 {
+            op.cancellation.cancel();
+            assert_eq!(pending.await.unwrap_err().code, "CANCELLED");
+        } else if mode == 2 {
+            assert_eq!(pending.await.unwrap_err().code, "DEADLINE_EXCEEDED");
+        } else {
+            drop(pending);
+        }
+        tokio::time::timeout(Duration::from_secs(2), async {
+            while server.closed.load(Ordering::SeqCst) == 0 {
+                tokio::time::sleep(Duration::from_millis(1)).await;
+            }
+        })
+        .await
+        .unwrap();
+        assert_eq!(server.connections.load(Ordering::SeqCst), 1);
+    }
+}

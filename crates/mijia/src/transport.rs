@@ -174,7 +174,7 @@ fn control_unsupported() -> homeverb_domain::Error {
 #[derive(Default)]
 pub struct MijiaHttps;
 
-fn client_builder() -> reqwest::ClientBuilder {
+pub(crate) fn client_builder() -> reqwest::ClientBuilder {
     Client::builder()
         .https_only(true)
         .no_proxy()

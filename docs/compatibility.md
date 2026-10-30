@@ -1,5 +1,19 @@
 # Platform and device compatibility matrix
 
+## Independent modern QR protocol -- October 30, 2026
+
+Typed Rust QR login, single-use bounded completion and explicit same-subject
+renewal now implement [ADR-0093](adr/0093-mijia-independent-qr-authentication.md).
+Protected material remains separate from legacy sessions; exact modern endpoints
+reject redirects and foreign URLs, and expiry/cancellation cannot be extended.
+Source review plus anonymous URL-shape checks are not authenticated acceptance.
+
+Protected account persistence/adoption, native C/App integration, modern data
+origin/codec admission and real login/renewal acceptance remain pending. Native
+API 1.35, existing account payloads and the auxiliary-setting APK are unchanged.
+No message, account login, appliance request, push or publication was performed.
+
+
 ## Independent modern authentication design -- October 30, 2026
 
 [ADR-0093](adr/0093-mijia-independent-qr-authentication.md) records concrete
