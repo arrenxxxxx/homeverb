@@ -1,5 +1,29 @@
 # 11. Mijia native integration
 
+## Typed maintenance and stop actions -- October 30, 2026
+
+[ADR-0112](../adr/0112-exact-mijia-maintenance-actions.md) implements four additional exact no-argument actions through
+protocol/Core: xiaomi.camera.083ac1 PTZ calibration, restart and memory-card
+ejection, and xiaomi.hood.cyp10 dry-cleaning stop. Complete protected model/spec/
+service/action/root evidence selects one legacy or modern request. No property,
+recording-mode, power, schedule, storage-format or companion write is added.
+
+All four are elevated, conservatively non-idempotent and require independent exact
+Core/action-family grants plus actual trusted approval. Protected risk is checked
+independently of public metadata. Accepted is unverified: it establishes neither
+safe card removal, restored monitoring, completed calibration nor a stopped/cooled
+hood. Uncertain sends retain receipts across cancel/drop/reopen/retirement without
+retry, credential renewal or protocol fallback.
+
+Fifteen actions now have typed protocol/Core support; eleven are in native/App.
+API 1.41 intentionally retains its earlier startup vocabulary and inspection.
+The power opt-in selects switch toggles only, never arbitrary elevated actions.
+Native/App adoption of the four maintenance actions, the other 25 actions, all
+78 events, specialized reference paths and real acceptance remain incomplete.
+The d505ccb APK is unchanged. No real account/device operation, installation,
+push or publication occurred in this phase.
+
+
 ## Foreground App power toggles -- October 30, 2026
 
 Flutter now negotiates API 1.41 before requesting exact elevated power actions or

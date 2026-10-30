@@ -70,7 +70,7 @@ impl MijiaAdapter {
             _ => {
                 return Err(Error::new(
                     "POLICY_DENIED",
-                    "This power toggle requires trusted user approval.",
+                    "This action requires trusted user approval.",
                 ));
             }
         }

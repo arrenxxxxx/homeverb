@@ -59,6 +59,26 @@ impl ModelMapping {
                 ("opple.switch.0010d6", 12, 1) => {
                     ("switch-12", "vendor.xiaomi.mijia.switch", "toggle")
                 }
+                ("xiaomi.camera.083ac1", 2, 1) => (
+                    "camera_control-2",
+                    "vendor.xiaomi.mijia.camera_control",
+                    "ptz_calibrate",
+                ),
+                ("xiaomi.camera.083ac1", 2, 2) => (
+                    "camera_control-2",
+                    "vendor.xiaomi.mijia.camera_control",
+                    "restart_device",
+                ),
+                ("xiaomi.camera.083ac1", 4, 2) => (
+                    "memory_card_management-4",
+                    "vendor.xiaomi.mijia.memory_card_management",
+                    "pop_up",
+                ),
+                ("xiaomi.hood.cyp10", 10, 1) => (
+                    "hood_smart_dry_wash-10",
+                    "vendor.xiaomi.mijia.hood_smart_dry_wash",
+                    "stop_dry_cleaning",
+                ),
                 _ => return None,
             };
         if !self
@@ -78,7 +98,13 @@ impl ModelMapping {
                     parameters: json!({"type":"object","properties":{},"additionalProperties":false}),
                     transports: vec![homeverb_domain::Transport::Cloud],
                     idempotency: Idempotency::NonIdempotent,
-                    risk: if capability == "vendor.xiaomi.mijia.switch" {
+                    risk: if matches!(
+                        capability,
+                        "vendor.xiaomi.mijia.switch"
+                            | "vendor.xiaomi.mijia.camera_control"
+                            | "vendor.xiaomi.mijia.memory_card_management"
+                            | "vendor.xiaomi.mijia.hood_smart_dry_wash"
+                    ) {
                         Risk::Elevated
                     } else {
                         Risk::Low
@@ -114,6 +140,11 @@ pub fn no_argument_action_option(
             mapping
                 .no_argument_actions()
                 .into_iter()
+                // API 1.41 excludes the later typed maintenance actions.
+                .filter(|(_, option)| {
+                    option.definition.risk == Risk::Low
+                        || option.capability == "vendor.xiaomi.mijia.switch"
+                })
                 .map(|(_, option)| option)
         })
         .collect()

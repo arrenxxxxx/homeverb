@@ -845,3 +845,12 @@ execution. Inspection is not approval. Consumed, dismissed or background-invalid
 trusted handles produce APPROVAL_INVALID. Malformed or unreviewed switch grants
 and non-Boolean include_power_toggle_actions fail INVALID_ARGUMENT before startup
 side effects. Existing unknown receipts never become permission to retry.
+
+ADR-0112 maintenance actions require trusted approval independently of public
+risk metadata; ordinary execution is POLICY_DENIED. Foreign or altered exact
+model/service/action/argument scope refuses before send. Accepted does not prove
+safe storage removal or restored monitoring. Post-send malformed/uncorrelated
+replies, timeouts and cancellation retain unknown receipts without automatic
+retry. API 1.41 rejects these typed-only startup tuples as INVALID_ARGUMENT before
+creating a profile. Formatting, streaming and output-bearing cleaning start stay
+CAPABILITY_UNSUPPORTED in the no-argument protocol.

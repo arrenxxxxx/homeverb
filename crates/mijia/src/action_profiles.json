@@ -90,12 +90,52 @@
     "out": []
   },
   {
+    "model": "xiaomi.camera.083ac1",
+    "spec_type": "urn:miot-spec-v2:device:camera:0000A01C:xiaomi-083ac1:2:0000D070",
+    "service_type": "urn:miot-spec-v2:service:camera-control:0000782F:xiaomi-083ac1:1:0000D070",
+    "siid": 2,
+    "aiid": 1,
+    "action_type": "urn:miot-spec-v2:action:ptz-calibrate:00002852:xiaomi-083ac1:1",
+    "in": [],
+    "out": []
+  },
+  {
+    "model": "xiaomi.camera.083ac1",
+    "spec_type": "urn:miot-spec-v2:device:camera:0000A01C:xiaomi-083ac1:2:0000D070",
+    "service_type": "urn:miot-spec-v2:service:camera-control:0000782F:xiaomi-083ac1:1:0000D070",
+    "siid": 2,
+    "aiid": 2,
+    "action_type": "urn:miot-spec-v2:action:restart-device:00002884:xiaomi-083ac1:1",
+    "in": [],
+    "out": []
+  },
+  {
+    "model": "xiaomi.camera.083ac1",
+    "spec_type": "urn:miot-spec-v2:device:camera:0000A01C:xiaomi-083ac1:2:0000D070",
+    "service_type": "urn:miot-spec-v2:service:memory-card-management:0000784E:xiaomi-083ac1:1:0000D070",
+    "siid": 4,
+    "aiid": 2,
+    "action_type": "urn:miot-spec-v2:action:pop-up:00002832:xiaomi-083ac1:1:0000D070",
+    "in": [],
+    "out": []
+  },
+  {
     "model": "xiaomi.hood.cyp10",
     "spec_type": "urn:miot-spec-v2:device:hood:0000A01B:xiaomi-cyp10:2",
     "service_type": "urn:miot-spec-v2:service:light:00007802:xiaomi-cyp10:1",
     "siid": 6,
     "aiid": 1,
     "action_type": "urn:miot-spec-v2:action:toggle:00002811:xiaomi-cyp10:1",
+    "in": [],
+    "out": []
+  },
+  {
+    "model": "xiaomi.hood.cyp10",
+    "spec_type": "urn:miot-spec-v2:device:hood:0000A01B:xiaomi-cyp10:2",
+    "service_type": "urn:miot-spec-v2:service:hood-smart-dry-wash:000078F7:xiaomi-cyp10:1",
+    "siid": 10,
+    "aiid": 1,
+    "action_type": "urn:miot-spec-v2:action:stop-dry-cleaning:000028DA:xiaomi-cyp10:1",
     "in": [],
     "out": []
   },

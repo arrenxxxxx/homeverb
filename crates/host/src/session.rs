@@ -662,7 +662,10 @@ impl Session {
                                 .into_iter()
                                 .filter(|option| match option.definition.risk {
                                     homeverb_domain::Risk::Low => include_no_argument_actions,
-                                    homeverb_domain::Risk::Elevated => include_power_toggle_actions,
+                                    homeverb_domain::Risk::Elevated => {
+                                        include_power_toggle_actions
+                                            && option.capability == "vendor.xiaomi.mijia.switch"
+                                    }
                                     homeverb_domain::Risk::High => false,
                                 }),
                         );

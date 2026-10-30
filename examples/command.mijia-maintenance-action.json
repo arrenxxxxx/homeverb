@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0",
+  "request_id": "fictional-power-toggle",
+  "device_id": "30000000-0000-4000-8000-000000000001",
+  "component_id": "camera_control-2",
+  "capability": "vendor.xiaomi.mijia.camera_control",
+  "action": "ptz_calibrate",
+  "arguments": {},
+  "connection": "cloud",
+  "timeout_ms": 10000,
+  "wait_for": "accepted"
+}

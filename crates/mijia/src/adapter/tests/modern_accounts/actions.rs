@@ -251,7 +251,9 @@ async fn six_exact_actions_publish_and_execute_on_each_protected_protocol() {
             ("jdjz.fan.2072fc", 1),
             ("xiaomi.hood.cyp10", 1),
         ] {
-            let t = setup(model, modern).await;
+            let mut t = setup(model, modern).await;
+            t.options
+                .retain(|o| o.definition.risk == homeverb_domain::Risk::Low);
             assert_eq!(t.options.len(), expected);
             count += expected;
             let commands: Vec<_> = t
@@ -281,7 +283,11 @@ async fn six_exact_actions_publish_and_execute_on_each_protected_protocol() {
                 description
                     .capabilities
                     .iter()
-                    .map(|c| c.actions.len())
+                    .map(|c| c
+                        .actions
+                        .values()
+                        .filter(|a| a.risk == homeverb_domain::Risk::Low)
+                        .count())
                     .sum::<usize>(),
                 expected
             );
@@ -342,7 +348,9 @@ async fn six_exact_actions_publish_and_execute_on_each_protected_protocol() {
                 a.inspect_action_options(&t.device, &t.device.connections[0], &operation())
                     .await
                     .unwrap()
-                    .len(),
+                    .iter()
+                    .filter(|o| o.definition.risk == homeverb_domain::Risk::Low)
+                    .count(),
                 expected
             );
             // Adding actions does not invalidate ordinary state reads or history option inspection.
@@ -735,3 +743,6 @@ async fn protected_action_binding_tampering_and_missing_modern_transport_refuse_
 
 #[path = "actions/power.rs"]
 mod power;
+
+#[path = "actions/maintenance.rs"]
+mod maintenance;

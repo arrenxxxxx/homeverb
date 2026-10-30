@@ -77,12 +77,13 @@ not change the six actions included in the ab34f21 APK.
 
 | Source item | Current disposition |
 |---|---|
+| 225 source writable property definitions | 33 exact controls implemented; 192 need separate semantic, risk and runtime admission. A source write flag is not an implemented control |
 | 264 scalar readable properties | Exact mapping implemented; synthetic Core reads; provider/physical acceptance remains per property |
 | 97 identity/pairing/media properties | Excluded from ordinary observations; no identity leakage or streaming inference |
 | 78 non-readable properties | No read operation; write/event-only definitions are not state |
 | 28 opaque readable values | Separate typed/business/privacy contracts required |
 | 3 network identity values | Excluded from state and exports |
-| 40 actions | Eleven exact empty-input actions have Core/native/App support, including five elevated power toggles under ADR-0110/0111; the remaining 29 actions are incomplete |
+| 40 actions | Eleven exact empty-input actions have Core/native/App support, including five elevated power toggles under ADR-0110/0111; four maintenance/stop actions have typed Core support under ADR-0112; their native/App adoption and the other 25 actions are incomplete |
 | 78 events | No event-history/subscription body, paging or lifecycle contract; not implemented |
 
 The archived successful reads used **SID `mijia`** and
@@ -1969,3 +1970,41 @@ This package contains all eleven exact actions, including five elevated power
 toggles with independent startup grants and actual trusted confirmation, alongside
 33 scalar controls and bounded history views. The remaining 29 actions, 78 events,
 specialized reference paths and provider/phone/model acceptance stay incomplete.
+
+## Typed maintenance and stop actions -- October 30, 2026
+
+[ADR-0112](../adr/0112-exact-mijia-maintenance-actions.md) implements four additional exact no-argument actions through
+protocol/Core: xiaomi.camera.083ac1 PTZ calibration, restart and memory-card
+ejection, and xiaomi.hood.cyp10 dry-cleaning stop. Complete protected model/spec/
+service/action/root evidence selects one legacy or modern request. No property,
+recording-mode, power, schedule, storage-format or companion write is added.
+
+All four are elevated, conservatively non-idempotent and require independent exact
+Core/action-family grants plus actual trusted approval. Protected risk is checked
+independently of public metadata. Accepted is unverified: it establishes neither
+safe card removal, restored monitoring, completed calibration nor a stopped/cooled
+hood. Uncertain sends retain receipts across cancel/drop/reopen/retirement without
+retry, credential renewal or protocol fallback.
+
+Fifteen actions now have typed protocol/Core support; eleven are in native/App.
+API 1.41 intentionally retains its earlier startup vocabulary and inspection.
+The power opt-in selects switch toggles only, never arbitrary elevated actions.
+Native/App adoption of the four maintenance actions, the other 25 actions, all
+78 events, specialized reference paths and real acceptance remain incomplete.
+The d505ccb APK is unchanged. No real account/device operation, installation,
+push or publication occurred in this phase.
+
+Executed verification: Rust 1.96 offline/locked workspace tests passed 686 tests
+with one ignored, excluding homeverb-midea for its known macOS LAN-alias
+limitation. Strict all-target Clippy, rustfmt, FFI rebuild and diff checks passed.
+The rebuilt C ABI passed 36 methods, 76 live examples, 76 modern-account boundary
+cases and existing trusted/protected guards; all four maintenance startup tuples
+were refused before creating a profile. Contract validation passed 25 schemas,
+81 positive and 1,558 negative fixtures. Both reference projection tests, source
+hygiene and documentation checks passed. No Flutter run, APK rebuild or real
+provider/device operation was performed in this typed-only phase.
+
+The coverage audit now explicitly counts 225 source writable property definitions:
+33 are implemented exact controls and 192 still require separate semantic/risk/
+runtime admission. This is additional unresolved scope alongside the remaining
+actions/events; a source write flag never establishes implemented support.

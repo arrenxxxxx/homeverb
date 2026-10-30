@@ -943,3 +943,16 @@ Positive and negative boundaries are exercised by the native startup fixture,
 Host actions/power.rs journey and actual C ABI validator. Outcomes and public
 command/result shapes are unchanged; response inspection admits exact switch-3,
 switch-11 and switch-12 components in addition to the existing switch-2.
+
+## Exact maintenance and stop action execution
+
+ADR-0112 adds four typed no-argument actions with existing exact action grants
+and immutable trusted approval. The protected adapter re-derives elevated risk,
+root/model/specification and empty arguments before the one selected-protocol send.
+Camera maintenance and card ejection can interrupt monitoring/recording; hood stop
+is a request, not proof of safety or rollback. Accepted remains unverified and
+possible-send uncertainty remains unknown without another preview or replay.
+Positive/negative fixtures are examples/capability.mijia-maintenance-action.json,
+examples/command.mijia-maintenance-action.json, scripts/validate_contracts.py and
+the maintenance Core tests. Command/result schema shapes are unchanged. API 1.41
+keeps these operations out of startup grants and local action inspection.

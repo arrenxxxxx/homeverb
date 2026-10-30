@@ -283,3 +283,62 @@ async fn api_140_inspection_keeps_power_toggles_hidden() {
 
 #[path = "actions/power.rs"]
 mod power;
+
+#[tokio::test]
+async fn api_141_does_not_admit_typed_maintenance_actions() {
+    for (model, component, capability, action) in [
+        (
+            "xiaomi.camera.083ac1",
+            "camera_control-2",
+            "vendor.xiaomi.mijia.camera_control",
+            "ptz_calibrate",
+        ),
+        (
+            "xiaomi.camera.083ac1",
+            "camera_control-2",
+            "vendor.xiaomi.mijia.camera_control",
+            "restart_device",
+        ),
+        (
+            "xiaomi.camera.083ac1",
+            "memory_card_management-4",
+            "vendor.xiaomi.mijia.memory_card_management",
+            "pop_up",
+        ),
+        (
+            "xiaomi.hood.cyp10",
+            "hood_smart_dry_wash-10",
+            "vendor.xiaomi.mijia.hood_smart_dry_wash",
+            "stop_dry_cleaning",
+        ),
+    ] {
+        let (f, _, card) = connected(model).await;
+        let w = Arc::new(Writer::default());
+        let s = reopen(&f, w.clone(), &[], false);
+        let reads = f.peer.reads.load(Ordering::SeqCst);
+        for low in [false, true] {
+            let before = call(&s, inspection(&card, Some(low))).await;
+            let mut r = inspection(&card, Some(low));
+            r["include_power_toggle_actions"] = json!(true);
+            assert_eq!(before, call(&s, r).await);
+            assert!(
+                before["data"]["options"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .all(|o| o["action"] != action)
+            );
+        }
+        assert!(
+            mijia_action_policy(&[MijiaActionGrant {
+                device_id: card["id"].as_str().unwrap().into(),
+                component_id: component.into(),
+                capability: capability.into(),
+                action: action.into(),
+            }])
+            .is_err()
+        );
+        assert_eq!(f.peer.reads.load(Ordering::SeqCst), reads);
+        assert_eq!(w.sends.load(Ordering::SeqCst), 0);
+    }
+}

@@ -334,7 +334,7 @@ pub(crate) fn bad_replies(query: ActionQuery) -> Vec<Vec<u8>> {
 }
 #[tokio::test]
 async fn every_pinned_action_preserves_exact_wire_identity_and_never_replays() {
-    assert_eq!(profiles().len(), 11);
+    assert_eq!(profiles().len(), 15);
     for (model, spec, query) in profiles() {
         for (code, expected) in outcomes() {
             let peer = Peer::new(query, ack(query, code));
@@ -514,4 +514,42 @@ async fn unsupported_transport_and_read_helper_cannot_send_actions() {
         .is_err()
     );
     assert_eq!(p.phase(), Phase::NotSent);
+}
+
+#[tokio::test]
+async fn maintenance_profiles_do_not_admit_destructive_media_or_output_bearing_actions() {
+    for (model, queries) in [
+        (
+            "xiaomi.camera.083ac1",
+            vec![
+                (4, 1),
+                (9, 1),
+                (9, 2),
+                (9, 3),
+                (26, 1),
+                (26, 2),
+                (26, 3),
+                (26, 4),
+            ],
+        ),
+        ("xiaomi.hood.cyp10", vec![(7, 1), (7, 2), (10, 2)]),
+    ] {
+        let spec = crate::ModelMapping::pinned(model, None)
+            .unwrap()
+            .unwrap()
+            .spec_type;
+        for (siid, aiid) in queries {
+            let q = ActionQuery { siid, aiid };
+            let peer = Peer::new(q, ack(q, 0));
+            let p = WriteProgress::default();
+            assert!(
+                session()
+                    .invoke_action(&peer, &device(model, &spec), &q, &p, &operation())
+                    .await
+                    .is_err()
+            );
+            assert_eq!(peer.count(), 0);
+            assert_eq!(p.phase(), Phase::NotSent);
+        }
+    }
 }

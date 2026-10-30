@@ -22,6 +22,7 @@ def checked_formats() -> FormatChecker:
 def main() -> int:
     formats = checked_formats()
     pairs = [
+        ("capability", "capability.mijia-maintenance-action"), ("command", "command.mijia-maintenance-action"),
         ("capability", "capability.mijia-power-action"), ("command", "command.mijia-power-action"),
         ("native-open", "native-open.mijia-actions"),
         ("native-open", "native-open.mijia-power-actions"),
@@ -179,6 +180,13 @@ def main() -> int:
     power_parameters.validate(load("examples/command.mijia-power-action.json")["arguments"])
     for arguments in [None, [], True, {"in": []}, {"state": True}, {"confirmed": True}, {"aiid": 1}, {"siid": 2}]:
         negative.append(("closed elevated toggle parameters", power_parameters, arguments))
+
+    maintenance = load("examples/capability.mijia-maintenance-action.json")["actions"]["ptz_calibrate"]
+    assert maintenance["risk"] == "elevated" and maintenance["verification"] == "unavailable"
+    maintenance_parameters = Draft202012Validator(maintenance["parameters"])
+    maintenance_parameters.validate(load("examples/command.mijia-maintenance-action.json")["arguments"])
+    for arguments in [None, [], True, {"in": []}, {"confirmed": True}, {"format": True}, {"aiid": 2}]:
+        negative.append(("closed maintenance parameters", maintenance_parameters, arguments))
 
     outlet_capability = load("examples/capability.mijia-outlet-power.json")
     outlet_action = outlet_capability["actions"]["set"]

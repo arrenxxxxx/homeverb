@@ -51,11 +51,17 @@ def admitted_power_action(model, siid, aiid):
                          or (model == 'opple.switch.0010d6' and siid in {11, 12}))
 
 
+def admitted_maintenance_action(model, siid, aiid):
+    return ((model == 'xiaomi.camera.083ac1' and (siid, aiid) in {(2, 1), (2, 2), (4, 2)})
+            or (model == 'xiaomi.hood.cyp10' and (siid, aiid) == (10, 1)))
+
+
 def admitted_action(model, siid, aiid):
     return ((model == 'abhome.light.wy0a01' and siid == 2 and aiid in {1, 2, 3, 4})
             or (model == 'jdjz.fan.2072fc' and siid == 2 and aiid == 1)
             or (model == 'xiaomi.hood.cyp10' and siid == 6 and aiid == 1)
-            or admitted_power_action(model, siid, aiid))
+            or admitted_power_action(model, siid, aiid)
+            or admitted_maintenance_action(model, siid, aiid))
 
 
 def project():
@@ -94,7 +100,9 @@ def project():
                 for item in service.get(key, []):
                     entries.append({'kind': kind, 'siid': service['iid'], 'iid': item['iid'],
                                     'name': item['type'].split(':')[3],
-                                    'status': ('implemented_core_native_app_trusted_power_toggle'
+                                    'status': ('implemented_typed_core_trusted_maintenance_action'
+                                               if kind == 'action' and admitted_maintenance_action(model['model'], service['iid'], item['iid'])
+                                               else 'implemented_core_native_app_trusted_power_toggle'
                                                if kind == 'action' and admitted_power_action(model['model'], service['iid'], item['iid'])
                                                else 'implemented_core_native_app_action'
                                                if kind == 'action' and admitted_action(model['model'], service['iid'], item['iid'])
@@ -125,13 +133,13 @@ def project():
                    'status': ('legacy_host_and_modern_typed_read' if o['id'] in ('directory', 'homes', 'properties')
                               else 'implemented_exact_granted_legacy_and_modern_property_set'
                               if o['id'] == 'property_write_candidate'
-                              else 'implemented_eleven_core_native_app_actions' if o['id'] == 'action_candidate'
+                              else 'implemented_eleven_app_and_four_typed_core_actions' if o['id'] == 'action_candidate'
                               else 'not_admitted_by_reference'),
                    'reason': ('Modern reference-origin typed reads and protected accounts are implemented; native and Flutter device publication and Core reads are implemented; provider acceptance remains pending.'
                               if o['id'] in ('directory', 'homes', 'properties')
                               else 'ADR-0104/0106 admit 33 reviewed scalar mappings across five exact models with grants and trusted elevated approval; no arbitrary setter or physical acceptance.'
                               if o['id'] == 'property_write_candidate'
-                              else 'ADR-0107/0108/0109 supply six exact actions through Core/native/App. ADR-0110/0111 add five elevated power toggles through Core/native/App with independent grants and trusted approval; all real acceptance remains pending.'
+                              else 'ADR-0107/0108/0109 supply six exact actions through Core/native/App. ADR-0110/0111 add five elevated power toggles through Core/native/App with independent grants and trusted approval; ADR-0112 adds four typed Core maintenance/stop actions; their native/App admission and all real acceptance remain pending.'
                               if o['id'] == 'action_candidate'
                               else 'No credential crossover or arbitrary RPC; separate exact control admission is required.')}
                   for o in contract['operations']]
@@ -226,6 +234,23 @@ def project():
         'native_app': 'implemented_api_1_41_opt_in_and_trusted_flutter_confirmation',
         'android_package': 'archive_checked_d505ccb_no_runtime_acceptance',
         'provider_acceptance': 'pending',
+    }
+    writable = [(model['model'], service['iid'], prop['iid'])
+                for model in models for service in model['services']
+                for prop in service.get('properties', []) if 'write' in prop.get('access', [])]
+    pending_writes = [item for item in writable if not admitted_write(*item)]
+    coverage['property_control_coverage'] = {
+        'declared_writable_definitions': len(writable),
+        'implemented_exact_definitions': len(writable) - len(pending_writes),
+        'pending_separate_admission': len(pending_writes),
+        'meaning': 'Source write access alone does not establish command semantics, risk, authorization, runtime support or physical acceptance.',
+    }
+    coverage['maintenance_actions'] = {
+        'status': 'implemented_typed_protocol_core_with_trusted_approval',
+        'evidence': 'ADR-0112; pinned exact no-input/no-output maintenance actions',
+        'exact_actions': 4, 'models': 2, 'route': '/miotspec/action',
+        'risk': 'elevated', 'idempotency': 'non_idempotent',
+        'native_app': 'pending_versioned_admission', 'provider_acceptance': 'pending',
     }
     return {CATALOG: profiles, LEDGER: coverage, ACTION_CATALOG: action_profiles}
 

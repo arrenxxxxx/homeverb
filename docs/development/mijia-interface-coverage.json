@@ -30,8 +30,8 @@
     {
       "id": "action_candidate",
       "route": "/miotspec/action",
-      "status": "implemented_eleven_core_native_app_actions",
-      "reason": "ADR-0107/0108/0109 supply six exact actions through Core/native/App. ADR-0110/0111 add five elevated power toggles through Core/native/App with independent grants and trusted approval; all real acceptance remains pending."
+      "status": "implemented_eleven_app_and_four_typed_core_actions",
+      "reason": "ADR-0107/0108/0109 supply six exact actions through Core/native/App. ADR-0110/0111 add five elevated power toggles through Core/native/App with independent grants and trusted approval; ADR-0112 adds four typed Core maintenance/stop actions; their native/App admission and all real acceptance remain pending."
     },
     {
       "id": "event_candidate",
@@ -3361,14 +3361,14 @@
           "siid": 2,
           "iid": 1,
           "name": "ptz-calibrate",
-          "status": "blocked_runtime_contract_and_separate_admission"
+          "status": "implemented_typed_core_trusted_maintenance_action"
         },
         {
           "kind": "action",
           "siid": 2,
           "iid": 2,
           "name": "restart-device",
-          "status": "blocked_runtime_contract_and_separate_admission"
+          "status": "implemented_typed_core_trusted_maintenance_action"
         },
         {
           "kind": "event",
@@ -3456,7 +3456,7 @@
           "siid": 4,
           "iid": 2,
           "name": "pop-up",
-          "status": "blocked_runtime_contract_and_separate_admission"
+          "status": "implemented_typed_core_trusted_maintenance_action"
         },
         {
           "kind": "property",
@@ -5283,7 +5283,7 @@
           "siid": 10,
           "iid": 1,
           "name": "stop-dry-cleaning",
-          "status": "blocked_runtime_contract_and_separate_admission"
+          "status": "implemented_typed_core_trusted_maintenance_action"
         },
         {
           "kind": "action",
@@ -5962,6 +5962,23 @@
     "idempotency": "non_idempotent",
     "native_app": "implemented_api_1_41_opt_in_and_trusted_flutter_confirmation",
     "android_package": "archive_checked_d505ccb_no_runtime_acceptance",
+    "provider_acceptance": "pending"
+  },
+  "property_control_coverage": {
+    "declared_writable_definitions": 225,
+    "implemented_exact_definitions": 33,
+    "pending_separate_admission": 192,
+    "meaning": "Source write access alone does not establish command semantics, risk, authorization, runtime support or physical acceptance."
+  },
+  "maintenance_actions": {
+    "status": "implemented_typed_protocol_core_with_trusted_approval",
+    "evidence": "ADR-0112; pinned exact no-input/no-output maintenance actions",
+    "exact_actions": 4,
+    "models": 2,
+    "route": "/miotspec/action",
+    "risk": "elevated",
+    "idempotency": "non_idempotent",
+    "native_app": "pending_versioned_admission",
     "provider_acceptance": "pending"
   }
 }

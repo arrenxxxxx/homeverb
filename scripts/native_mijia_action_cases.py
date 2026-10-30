@@ -42,3 +42,13 @@ def invalid_action_startups(startup):
             **startup, 'mijia_action_grants': [{**entries[0],
                 'component_id': component, 'capability': 'vendor.xiaomi.mijia.switch',
                 'action': 'toggle'}]}
+    # ADR-0112 typed support must not widen API 1.41 startup admission.
+    for component, capability, action in [
+        ('camera_control-2', 'vendor.xiaomi.mijia.camera_control', 'ptz_calibrate'),
+        ('camera_control-2', 'vendor.xiaomi.mijia.camera_control', 'restart_device'),
+        ('memory_card_management-4', 'vendor.xiaomi.mijia.memory_card_management', 'pop_up'),
+        ('hood_smart_dry_wash-10', 'vendor.xiaomi.mijia.hood_smart_dry_wash', 'stop_dry_cleaning'),
+    ]:
+        yield f'typed-only maintenance action {component}/{action}', {
+            **startup, 'mijia_action_grants': [{**entries[0],
+                'component_id': component, 'capability': capability, 'action': action}]}

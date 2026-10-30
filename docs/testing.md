@@ -946,3 +946,15 @@ modes, no ordinary execution, preview/dismiss/background and unknown reopen with
 replay. Startup/schema counterexamples cover foreign tuples and forbidden fields.
 The legacy/modern Core tests remain the protected protocol evidence. No provider
 traffic, phone, Flutter or APK acceptance follows from these checks.
+
+## Exact typed Mijia maintenance action checks
+
+Run cargo +1.96.0 test -p homeverb-mijia --offline --locked for all fifteen
+legacy/modern protocol profiles and the maintenance module under
+crates/mijia/src/adapter/tests/modern_accounts/actions/. It checks all four exact
+actions, ordinary denial, independent grants, forged public risk/arguments,
+protected membership/root changes, trusted approval, cancel/deadline/drop and
+unknown receipts after reopen/retirement. Formatting, streams and output-bearing
+actions must refuse before transport. Host tests and rebuilt C ABI checks retain
+API 1.41 startup rejection and power-inspection isolation. No native/App admission,
+Flutter run, package rebuild or real-provider operation follows from these tests.

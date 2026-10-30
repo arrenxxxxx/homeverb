@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "id": "vendor.xiaomi.mijia.camera_control",
+  "component_id": "camera_control-2",
+  "revision": 1,
+  "properties": {},
+  "actions": {
+    "ptz_calibrate": {
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "transports": [
+        "cloud"
+      ],
+      "risk": "elevated",
+      "idempotency": "non_idempotent",
+      "atomic": false,
+      "independent_fields": false,
+      "verification": "unavailable"
+    }
+  },
+  "events": {}
+}
