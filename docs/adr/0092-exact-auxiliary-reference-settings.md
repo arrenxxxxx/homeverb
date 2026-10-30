@@ -1,6 +1,6 @@
 # ADR-0092: Exact auxiliary reference settings
 
-Status: native API 1.35 implemented with synthetic tests; App integration and acceptance pending.
+Status: native API 1.35 and App implemented with synthetic tests; packaging and physical acceptance pending.
 Date: October 30, 2026.
 
 ## Evidence

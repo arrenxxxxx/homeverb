@@ -2278,6 +2278,8 @@ String? translateSource(
     t.vendorXiaomiMijiaPhysicalControlsLockedPhysicalControlsLocked1True,
   "Unlocked" =>
     t.vendorXiaomiMijiaPhysicalControlsLockedPhysicalControlsLocked1False,
+  "Auxiliary settings require native API 1.35." =>
+    t.mobileAuxiliarySettingsRequireNativeApi135,
   _ => null,
 };
 
@@ -4595,5 +4597,7 @@ String? sourceForKey(String key) => switch (key) {
     "Locked",
   "vendor.xiaomi.mijia.physical_controls_locked.physical_controls_locked_1.false" =>
     "Unlocked",
+  "mobile.auxiliarySettingsRequireNativeApi135" =>
+    "Auxiliary settings require native API 1.35.",
   _ => null,
 };

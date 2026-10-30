@@ -616,3 +616,11 @@ seven exact targets, wrong model/source/domain/unit/access, independent families
 and grants, old saved derivations, local pregrant inspection, zero companion
 writes, exact wire codes and unknown outcomes without replay. These are fictional
 checks; no physical hood/fan or provider acceptance is established.
+
+
+From `apps/mobile`, run `fvm flutter test test/mijia_auxiliary_test.dart`. The
+auxiliary App fixtures preserve all seven startup targets, actual old-library
+negotiation before additive grants, sibling/timer/wrong-domain refusal, current
+session-grant intersection and narrow enlarged-text panels in both locales.
+The brightness form explicitly sends code 0 or 2, with no percent conversion or
+companion power argument. No provider or appliance is used.

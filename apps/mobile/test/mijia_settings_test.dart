@@ -21,7 +21,11 @@ Json settingsInspection(bool light) {
   result['options'] = [
     for (final rule
         in schema['properties']['mijia_setting_grants']['items']['oneOf'])
-      if ((rule['properties']['component_id']['const'] == 'light-2') == light)
+      if ((rule['properties']['component_id']['const'] == 'light-2') == light &&
+          !{
+            'light-6',
+            'function-3',
+          }.contains(rule['properties']['component_id']['const']))
         (() {
           final component =
                   rule['properties']['component_id']['const'] as String,

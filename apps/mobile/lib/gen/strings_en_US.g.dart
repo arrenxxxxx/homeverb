@@ -5477,4 +5477,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Unlocked'
 	String get vendorXiaomiMijiaPhysicalControlsLockedPhysicalControlsLocked1False => 'Unlocked';
+
+	/// en-US: 'Auxiliary settings require native API 1.35.'
+	String get mobileAuxiliarySettingsRequireNativeApi135 => 'Auxiliary settings require native API 1.35.';
 }

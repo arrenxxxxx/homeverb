@@ -1812,5 +1812,6 @@
   "power.state.true": "On",
   "power.state.false": "Off",
   "vendor.xiaomi.mijia.physical_controls_locked.physical_controls_locked_1.true": "Locked",
-  "vendor.xiaomi.mijia.physical_controls_locked.physical_controls_locked_1.false": "Unlocked"
+  "vendor.xiaomi.mijia.physical_controls_locked.physical_controls_locked_1.false": "Unlocked",
+  "mobile.auxiliarySettingsRequireNativeApi135": "Auxiliary settings require native API 1.35."
 }

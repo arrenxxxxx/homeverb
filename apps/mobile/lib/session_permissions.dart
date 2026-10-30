@@ -24,6 +24,9 @@ class SessionPermission {
       }.contains(parameter);
   bool get requiresReferenceSettingApi =>
       startupField == "mijia_setting_grants";
+  bool get requiresAuxiliarySettingApi =>
+      requiresReferenceSettingApi &&
+      const {'light-6', 'function-3'}.contains(component);
   bool get requiresOutletApi => startupField == "mijia_outlet_grants";
   String get identity =>
       jsonEncode([device, component, capability, action, value]);
@@ -58,6 +61,10 @@ class SessionPermission {
   };
 
   static const _referenceSettings = {
+    ('light-6', 'power', 'set'): 'state',
+    ('light-6', 'vendor.xiaomi.mijia.light', 'set_brightness_2'):
+        'brightness_2',
+    ('function-3', 'vendor.xiaomi.mijia.function', 'set_quiet_5'): 'quiet_5',
     ('light-2', 'power', 'set'): 'state',
     ('light-2', 'vendor.xiaomi.mijia.light', 'set_brightness_2'):
         'brightness_2',
@@ -203,6 +210,13 @@ class SessionPermission {
           (parameters?['required'] as List? ?? []).any((p) => p != mapping.$2))
         continue;
       final schema = properties![mapping.$2] as Map;
+      final auxiliary =
+          settingParameter != null &&
+          const {'light-6', 'function-3'}.contains(component);
+      if (auxiliary &&
+          schema['type'] !=
+              (mapping.$2 == 'brightness_2' ? 'integer' : 'boolean'))
+        continue;
       if (isOutlet &&
           schema['type'] !=
               (mapping.$2 == 'default_power_on_state_2'
@@ -244,6 +258,10 @@ class SessionPermission {
           ))
         continue;
       bool valid(Object value) {
+        if (auxiliary &&
+            mapping.$2 == 'brightness_2' &&
+            !const [0, 1, 2].contains(value))
+          return false;
         if (isOutlet &&
             mapping.$2 == 'default_power_on_state_2' &&
             !const [0, 1, 2].contains(value))

@@ -1812,5 +1812,6 @@
   "power.state.true": "开启",
   "power.state.false": "关闭",
   "vendor.xiaomi.mijia.physical_controls_locked.physical_controls_locked_1.true": "已锁定",
-  "vendor.xiaomi.mijia.physical_controls_locked.physical_controls_locked_1.false": "未锁定"
+  "vendor.xiaomi.mijia.physical_controls_locked.physical_controls_locked_1.false": "未锁定",
+  "mobile.auxiliarySettingsRequireNativeApi135": "辅助设置需要原生接口 1.35。"
 }

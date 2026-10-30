@@ -1,5 +1,22 @@
 # Platform and device compatibility matrix
 
+## App auxiliary settings -- October 30, 2026
+
+The App now negotiates API 1.35 before sending the three additional reference
+setting tuples from ADR-0092. Exact hood illumination power, brightness 0/1/2
+and vendor fan quiet retain all seven targets. Brightness remains an enum rather
+than a percentage, and zero is an explicit value rather than missing data.
+Current session grants gate the generic component controls. Opening a device
+performs no command preparation or control request. English/Chinese narrow
+enlarged-text panels use existing localized property labels. Older API libraries
+receive only a read-only version probe before refusing the new startup tuples.
+
+No native exports, ordinary methods or storage formats change in this App phase.
+New Android packaging and provider/physical acceptance remain pending; the API
+1.34 APK is unchanged. Modern authentication, events and other ledger gaps remain
+open.
+
+
 ## Native auxiliary settings -- October 30, 2026
 
 API 1.35 implements [ADR-0092](adr/0092-exact-auxiliary-reference-settings.md):

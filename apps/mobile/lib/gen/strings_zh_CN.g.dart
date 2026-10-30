@@ -1847,4 +1847,5 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get powerStateFalse => '\u5173\u95ed';
 	@override String get vendorXiaomiMijiaPhysicalControlsLockedPhysicalControlsLocked1True => '\u5df2\u9501\u5b9a';
 	@override String get vendorXiaomiMijiaPhysicalControlsLockedPhysicalControlsLocked1False => '\u672a\u9501\u5b9a';
+	@override String get mobileAuxiliarySettingsRequireNativeApi135 => '\u8f85\u52a9\u8bbe\u7f6e\u9700\u8981\u539f\u751f\u63a5\u53e3 1.35\u3002';
 }
