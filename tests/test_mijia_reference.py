@@ -43,7 +43,7 @@ class ReferenceTests(unittest.TestCase):
         self.assertEqual(ledger['no_argument_actions']['exact_actions'], 6)
         self.assertEqual(ledger['power_toggle_actions']['exact_actions'], 5)
         self.assertEqual(ledger['maintenance_actions']['exact_actions'], 4)
-        self.assertEqual(ledger['maintenance_actions']['native_app'], 'native_api_1_42_implemented_flutter_pending')
+        self.assertEqual(ledger['maintenance_actions']['native_app'], 'implemented_api_1_42_and_flutter')
         self.assertEqual(ledger['power_toggle_actions']['native_app'], 'implemented_api_1_41_opt_in_and_trusted_flutter_confirmation')
         self.assertEqual(ledger['no_argument_actions']['core_native_app'],
                          'implemented_api_1_40_opt_in_and_version_negotiated_flutter')

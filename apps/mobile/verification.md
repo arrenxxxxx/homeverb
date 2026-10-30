@@ -4570,3 +4570,38 @@ This package contains all eleven exact actions, including five elevated power
 toggles with independent startup grants and actual trusted confirmation, alongside
 33 scalar controls and bounded history views. The remaining 29 actions, 78 events,
 specialized reference paths and provider/phone/model acceptance stay incomplete.
+
+
+## Foreground App maintenance actions -- October 30, 2026
+
+Flutter negotiates API 1.42 and requires the trusted approval bridge before
+requesting include_maintenance_actions or reopening with exact maintenance grants.
+The four reviewed camera calibration/restart/card-ejection and hood cleaning-stop
+tuples remain independent of low-risk and power-toggle action permissions. Older
+native versions retain their previous options and receive no maintenance grants.
+
+Opening a supported device prepares exact grants and refreshes its account to
+publish descriptors; it never prepares or sends a command. Generic descriptor
+buttons open the existing cloud-route selection and immutable review. Separate
+user confirmation executes once. Dismissal/backgrounding invalidates the preview;
+duplicate clicks and unknown outcomes do not replay. English/Chinese copy explains
+possible motion, interrupted monitoring/recording, card-removal uncertainty and
+unconfirmed hood stopping/cooling without inferring a resulting device state.
+
+All fifteen admitted actions now have Core/native/App integration. A matching
+Android package follows separately; d505ccb remains API 1.41. The other 25 actions,
+192 writable definitions, 78 events, specialized paths and real provider/phone/
+model acceptance remain incomplete. No real account/device operation, installation,
+push or publication occurred in this phase.
+
+
+Executed Flutter verification: all 155 tests across the 17 affected maintenance,
+power/action, outlet/settings, permission, control, component, localization,
+current-contract, native, approval and foreground-refresh files passed using
+Flutter 3.47.7. The maintenance suite contains 15 tests, including all four actions
+in both languages at 320 logical pixels and double text size, independent flags,
+actual API 1.41 refusal and current native startup in both allowed modes.
+Flutter analysis reported no issues; seven shared presentation tests and both
+reference projection tests passed. These focused regressions do not resolve the
+eight previously recorded unrelated macOS visual/legacy-click full-suite failures.
+No live account, appliance write, phone acceptance or remote CI is claimed.

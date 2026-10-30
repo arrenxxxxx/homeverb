@@ -5573,4 +5573,28 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Request a power toggle on {device}? Connected equipment may turn on or off; the resulting state is not confirmed.'
 	String vendorXiaomiMijiaSwitchToggleConfirm({required Object device}) => 'Request a power toggle on ${device}? Connected equipment may turn on or off; the resulting state is not confirmed.';
+
+	/// en-US: 'Calibrate camera position'
+	String get vendorXiaomiMijiaCameraControlPtzCalibrate => 'Calibrate camera position';
+
+	/// en-US: 'Request position calibration for {device}? The camera may move and its view may be interrupted. Acceptance does not confirm calibration is complete.'
+	String vendorXiaomiMijiaCameraControlPtzCalibrateConfirm({required Object device}) => 'Request position calibration for ${device}? The camera may move and its view may be interrupted. Acceptance does not confirm calibration is complete.';
+
+	/// en-US: 'Restart camera'
+	String get vendorXiaomiMijiaCameraControlRestartDevice => 'Restart camera';
+
+	/// en-US: 'Request a restart of {device}? Monitoring and recording may be interrupted. Acceptance does not confirm the camera has restarted or monitoring has resumed.'
+	String vendorXiaomiMijiaCameraControlRestartDeviceConfirm({required Object device}) => 'Request a restart of ${device}? Monitoring and recording may be interrupted. Acceptance does not confirm the camera has restarted or monitoring has resumed.';
+
+	/// en-US: 'Eject memory card'
+	String get vendorXiaomiMijiaMemoryCardManagementPopUp => 'Eject memory card';
+
+	/// en-US: 'Request memory-card ejection for {device}? Recording may stop. Acceptance does not confirm that the card is safe to remove; check the device before removing it.'
+	String vendorXiaomiMijiaMemoryCardManagementPopUpConfirm({required Object device}) => 'Request memory-card ejection for ${device}? Recording may stop. Acceptance does not confirm that the card is safe to remove; check the device before removing it.';
+
+	/// en-US: 'Stop hood dry cleaning'
+	String get vendorXiaomiMijiaHoodSmartDryWashStopDryCleaning => 'Stop hood dry cleaning';
+
+	/// en-US: 'Request a dry-cleaning stop for {device}? Acceptance does not confirm that cleaning has stopped or the hood has cooled. Check the device before handling it.'
+	String vendorXiaomiMijiaHoodSmartDryWashStopDryCleaningConfirm({required Object device}) => 'Request a dry-cleaning stop for ${device}? Acceptance does not confirm that cleaning has stopped or the hood has cooled. Check the device before handling it.';
 }

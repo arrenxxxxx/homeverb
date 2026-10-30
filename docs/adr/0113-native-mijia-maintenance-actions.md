@@ -1,6 +1,6 @@
 # ADR-0113: Native exact Mijia maintenance actions
 
-Status: Native implementation verified with fictional evidence; Flutter adoption pending.
+Status: Native and Flutter implementation; fictional verification recorded below.
 Date: October 30, 2026.
 
 ## Decision
@@ -69,3 +69,25 @@ admission and the new Boolean inspection flag; modern-account exports retained
 and 1,720 negative fixtures. Documentation, source hygiene, reference projection,
 both projection unit tests and diff whitespace checks passed. These are synthetic
 software checks; no provider, phone, model or Flutter acceptance is established.
+
+## Flutter adoption
+
+The foreground controller explicitly opts in only with API 1.42 and the trusted
+approval bridge. The native client negotiates read-only before supplying any
+maintenance grant. Existing low-risk and power-toggle grants retain their
+independent versions and inspection flags. The generic descriptor controls use
+exact capability/action localization and the existing immutable review; no model
+branch, automatic preview, inferred state or companion write is added. Dismissal,
+background and duplicate confirmation preserve the existing lifecycle and receipt
+rules. A matching Android package and provider/phone/model acceptance are separate.
+
+Executed Flutter verification: all 155 tests across the 17 affected maintenance,
+power/action, outlet/settings, permission, control, component, localization,
+current-contract, native, approval and foreground-refresh files passed using
+Flutter 3.47.7. The maintenance suite contains 15 tests, including all four actions
+in both languages at 320 logical pixels and double text size, independent flags,
+actual API 1.41 refusal and current native startup in both allowed modes.
+Flutter analysis reported no issues; seven shared presentation tests and both
+reference projection tests passed. These focused regressions do not resolve the
+eight previously recorded unrelated macOS visual/legacy-click full-suite failures.
+No live account, appliance write, phone acceptance or remote CI is claimed.

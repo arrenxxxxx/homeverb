@@ -437,6 +437,11 @@ class HomeController extends ChangeNotifier {
       core is NativeSessionClient &&
       (core as NativeSessionClient).apiAtLeast(41);
 
+  bool get _supportsMaintenanceActions =>
+      supportsTrustedApproval &&
+      core is NativeSessionClient &&
+      (core as NativeSessionClient).apiAtLeast(42);
+
   void _requireCurrentDevice(String device, int epoch) {
     if (!_foreground || epoch != _readEpoch || selectedDevice != device) {
       throw NativeFailure('CANCELLED', 'Device setup was cancelled.');
@@ -464,6 +469,8 @@ class HomeController extends ChangeNotifier {
                   'include_no_argument_actions': true,
                 if (_supportsPowerToggleActions)
                   'include_power_toggle_actions': true,
+                if (_supportsMaintenanceActions)
+                  'include_maintenance_actions': true,
               })
               as Json;
     } on NativeFailure catch (error) {
@@ -491,6 +498,7 @@ class HomeController extends ChangeNotifier {
       trustedApproval: supportsTrustedApproval,
       includeNoArgumentActions: _supportsNoArgumentActions,
       includePowerToggleActions: _supportsPowerToggleActions,
+      includeMaintenanceActions: _supportsMaintenanceActions,
     );
     if (next.isEmpty) return;
     if (next.any((p) => p.requiresHoodManualApi) &&
@@ -1253,6 +1261,8 @@ class HomeController extends ChangeNotifier {
                   'include_no_argument_actions': true,
                 if (options && _supportsPowerToggleActions)
                   'include_power_toggle_actions': true,
+                if (options && _supportsMaintenanceActions)
+                  'include_maintenance_actions': true,
               })
               as Json;
       if (epoch == _readEpoch && selectedDevice == id) routeInspection = result;

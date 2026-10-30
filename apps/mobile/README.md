@@ -1,6 +1,6 @@
 # HomeVerb Flutter application
 
-The native application embeds Core using native UI contract 1.39.0. The separate visual preview contains fictional Window Light fixtures and never opens Core. The default build opens an isolated Mock profile. Explicit Meiju builds provide protected account connection, local metadata, retrieval/recovery and scoped local removal; Android startup wiring and Mock process journeys are emulator-tested; actual Keystore and physical acceptance remain pending. Cache and history clearing are connected with separate confirmations. Nearby sharing and full-profile deletion remain unavailable. Their preview states are not live features.
+The native application embeds Core using native UI contract 1.42.0. The separate visual preview contains fictional Window Light fixtures and never opens Core. The default build opens an isolated Mock profile. Explicit Meiju builds provide protected account connection, local metadata, retrieval/recovery and scoped local removal; Android startup wiring and Mock process journeys are emulator-tested; actual Keystore and physical acceptance remain pending. Cache and history clearing are connected with separate confirmations. Nearby sharing and full-profile deletion remain unavailable. Their preview states are not live features.
 
 ## Mijia and combined account builds
 
@@ -32,6 +32,12 @@ and absent units, and distinguishes them from daily statistics. Partial/failed r
 separate from authentication, and local reload failure never repeats login.
 See the [Mijia guide](../../docs/development/11-mijia.md) for owner acceptance and
 [verification](verification.md) for fictional local checks.
+
+API 1.40 adds six exact no-argument actions; API 1.41 adds five power toggles and
+API 1.42 adds four camera/storage/hood maintenance actions. Power and maintenance
+actions require the trusted approval bridge and explicit immutable confirmation.
+The App negotiates each version before requesting its separate inspection flag
+or startup authority. Provider and physical acceptance remain pending.
 
 ## Device controls
 

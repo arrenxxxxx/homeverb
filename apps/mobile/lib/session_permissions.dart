@@ -33,6 +33,13 @@ class SessionPermission {
   bool get requiresActionApi => startupField == 'mijia_action_grants';
   bool get requiresPowerToggleApi =>
       requiresActionApi && capability == 'vendor.xiaomi.mijia.switch';
+  bool get requiresMaintenanceApi =>
+      requiresActionApi &&
+      const {
+        'vendor.xiaomi.mijia.camera_control',
+        'vendor.xiaomi.mijia.memory_card_management',
+        'vendor.xiaomi.mijia.hood_smart_dry_wash',
+      }.contains(capability);
   bool get requiresOutletApi => startupField == "mijia_outlet_grants";
   String get identity =>
       jsonEncode([device, component, capability, action, value]);
@@ -137,6 +144,7 @@ class SessionPermission {
     bool trustedApproval = false,
     bool includeNoArgumentActions = false,
     bool includePowerToggleActions = false,
+    bool includeMaintenanceActions = false,
   }) {
     if (inspection['source'] != 'saved_inventory' ||
         inspection['authorization'] != 'not_checked' ||
@@ -156,6 +164,17 @@ class SessionPermission {
           inspection['device_id'],
           option,
           power: true,
+        );
+        if (action != null) {
+          result.add(action);
+          continue;
+        }
+      }
+      if (includeMaintenanceActions && trustedApproval && option is Map) {
+        final action = _noArgumentChoice(
+          inspection['device_id'],
+          option,
+          maintenance: true,
         );
         if (action != null) {
           result.add(action);
@@ -423,23 +442,48 @@ class SessionPermission {
     ('switch-12', 'vendor.xiaomi.mijia.switch', 'toggle'),
   };
 
+  static const _maintenanceActions = {
+    ('camera_control-2', 'vendor.xiaomi.mijia.camera_control', 'ptz_calibrate'),
+    (
+      'camera_control-2',
+      'vendor.xiaomi.mijia.camera_control',
+      'restart_device',
+    ),
+    (
+      'memory_card_management-4',
+      'vendor.xiaomi.mijia.memory_card_management',
+      'pop_up',
+    ),
+    (
+      'hood_smart_dry_wash-10',
+      'vendor.xiaomi.mijia.hood_smart_dry_wash',
+      'stop_dry_cleaning',
+    ),
+  };
+
   static SessionPermission? _noArgumentChoice(
     String device,
     Map option, {
     bool power = false,
+    bool maintenance = false,
   }) {
     if (!RegExp(
           r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$',
         ).hasMatch(device) ||
-        !(power ? _powerToggleActions : _noArgumentActions).contains((
-          option['component_id'],
-          option['capability'],
-          option['action'],
-        )))
+        !(maintenance
+                ? _maintenanceActions
+                : power
+                ? _powerToggleActions
+                : _noArgumentActions)
+            .contains((
+              option['component_id'],
+              option['capability'],
+              option['action'],
+            )))
       return null;
     final definition = option['definition'];
     if (definition is! Map ||
-        definition['risk'] != (power ? 'elevated' : 'low') ||
+        definition['risk'] != (power || maintenance ? 'elevated' : 'low') ||
         definition['idempotency'] != 'non_idempotent' ||
         definition['atomic'] != false ||
         definition['independent_fields'] != false ||

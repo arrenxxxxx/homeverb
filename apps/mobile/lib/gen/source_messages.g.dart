@@ -2319,6 +2319,27 @@ String? translateSource(
     t.vendorXiaomiMijiaSwitchToggleConfirm(
       device: args["device"] ?? "{device}",
     ),
+  "Calibrate camera position" => t.vendorXiaomiMijiaCameraControlPtzCalibrate,
+  "Request position calibration for {device}? The camera may move and its view may be interrupted. Acceptance does not confirm calibration is complete." =>
+    t.vendorXiaomiMijiaCameraControlPtzCalibrateConfirm(
+      device: args["device"] ?? "{device}",
+    ),
+  "Restart camera" => t.vendorXiaomiMijiaCameraControlRestartDevice,
+  "Request a restart of {device}? Monitoring and recording may be interrupted. Acceptance does not confirm the camera has restarted or monitoring has resumed." =>
+    t.vendorXiaomiMijiaCameraControlRestartDeviceConfirm(
+      device: args["device"] ?? "{device}",
+    ),
+  "Eject memory card" => t.vendorXiaomiMijiaMemoryCardManagementPopUp,
+  "Request memory-card ejection for {device}? Recording may stop. Acceptance does not confirm that the card is safe to remove; check the device before removing it." =>
+    t.vendorXiaomiMijiaMemoryCardManagementPopUpConfirm(
+      device: args["device"] ?? "{device}",
+    ),
+  "Stop hood dry cleaning" =>
+    t.vendorXiaomiMijiaHoodSmartDryWashStopDryCleaning,
+  "Request a dry-cleaning stop for {device}? Acceptance does not confirm that cleaning has stopped or the hood has cooled. Check the device before handling it." =>
+    t.vendorXiaomiMijiaHoodSmartDryWashStopDryCleaningConfirm(
+      device: args["device"] ?? "{device}",
+    ),
   _ => null,
 };
 
@@ -4678,5 +4699,19 @@ String? sourceForKey(String key) => switch (key) {
   "vendor.xiaomi.mijia.switch.toggle" => "Toggle power",
   "vendor.xiaomi.mijia.switch.toggle.confirm" =>
     "Request a power toggle on {device}? Connected equipment may turn on or off; the resulting state is not confirmed.",
+  "vendor.xiaomi.mijia.camera_control.ptz_calibrate" =>
+    "Calibrate camera position",
+  "vendor.xiaomi.mijia.camera_control.ptz_calibrate.confirm" =>
+    "Request position calibration for {device}? The camera may move and its view may be interrupted. Acceptance does not confirm calibration is complete.",
+  "vendor.xiaomi.mijia.camera_control.restart_device" => "Restart camera",
+  "vendor.xiaomi.mijia.camera_control.restart_device.confirm" =>
+    "Request a restart of {device}? Monitoring and recording may be interrupted. Acceptance does not confirm the camera has restarted or monitoring has resumed.",
+  "vendor.xiaomi.mijia.memory_card_management.pop_up" => "Eject memory card",
+  "vendor.xiaomi.mijia.memory_card_management.pop_up.confirm" =>
+    "Request memory-card ejection for {device}? Recording may stop. Acceptance does not confirm that the card is safe to remove; check the device before removing it.",
+  "vendor.xiaomi.mijia.hood_smart_dry_wash.stop_dry_cleaning" =>
+    "Stop hood dry cleaning",
+  "vendor.xiaomi.mijia.hood_smart_dry_wash.stop_dry_cleaning.confirm" =>
+    "Request a dry-cleaning stop for {device}? Acceptance does not confirm that cleaning has stopped or the hood has cooled. Check the device before handling it.",
   _ => null,
 };

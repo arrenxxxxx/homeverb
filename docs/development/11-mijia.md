@@ -1,5 +1,27 @@
 # 11. Mijia native integration
 
+## Foreground App maintenance actions -- October 30, 2026
+
+Flutter negotiates API 1.42 and requires the trusted approval bridge before
+requesting include_maintenance_actions or reopening with exact maintenance grants.
+The four reviewed camera calibration/restart/card-ejection and hood cleaning-stop
+tuples remain independent of low-risk and power-toggle action permissions. Older
+native versions retain their previous options and receive no maintenance grants.
+
+Opening a supported device prepares exact grants and refreshes its account to
+publish descriptors; it never prepares or sends a command. Generic descriptor
+buttons open the existing cloud-route selection and immutable review. Separate
+user confirmation executes once. Dismissal/backgrounding invalidates the preview;
+duplicate clicks and unknown outcomes do not replay. English/Chinese copy explains
+possible motion, interrupted monitoring/recording, card-removal uncertainty and
+unconfirmed hood stopping/cooling without inferring a resulting device state.
+
+All fifteen admitted actions now have Core/native/App integration. A matching
+Android package follows separately; d505ccb remains API 1.41. The other 25 actions,
+192 writable definitions, 78 events, specialized paths and real provider/phone/
+model acceptance remain incomplete. No real account/device operation, installation,
+push or publication occurred in this phase.
+
 ## Native maintenance actions -- October 30, 2026
 
 [ADR-0113](../adr/0113-native-mijia-maintenance-actions.md) admits four exact ADR-0112 maintenance/stop tuples through

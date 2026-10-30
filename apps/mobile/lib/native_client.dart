@@ -364,7 +364,9 @@ class NativeClient
         'This host cannot configure real controls.',
       );
     }
-    final minimumReferenceApi = permissions.any((p) => p.requiresPowerToggleApi)
+    final minimumReferenceApi = permissions.any((p) => p.requiresMaintenanceApi)
+        ? 42
+        : permissions.any((p) => p.requiresPowerToggleApi)
         ? 41
         : permissions.any((p) => p.requiresActionApi)
         ? 40
@@ -436,6 +438,13 @@ class NativeClient
         throw NativeFailure(
           'API_UPGRADE_REQUIRED',
           'Mijia requires native API 1.27 or later.',
+        );
+      }
+      if (permissions.any((p) => p.requiresMaintenanceApi) &&
+          (!client.apiAtLeast(42) || !client.supportsTrustedApproval)) {
+        throw NativeFailure(
+          'API_UPGRADE_REQUIRED',
+          'Maintenance actions require native API 1.42 and trusted approval.',
         );
       }
       if (permissions.any((p) => p.requiresPowerToggleApi) &&

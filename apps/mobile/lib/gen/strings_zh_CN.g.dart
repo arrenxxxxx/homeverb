@@ -1879,4 +1879,12 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get mobileToggleLightMode => '\u5207\u6362\u706f\u5149\u6a21\u5f0f';
 	@override String get vendorXiaomiMijiaSwitchToggle => '\u5207\u6362\u7535\u6e90';
 	@override String vendorXiaomiMijiaSwitchToggleConfirm({required Object device}) => '\u8bf7\u6c42\u5207\u6362 ${device} \u7684\u7535\u6e90\uff1f\u8fde\u63a5\u7684\u8bbe\u5907\u53ef\u80fd\u542f\u52a8\u6216\u505c\u6b62\uff0c\u64cd\u4f5c\u540e\u7684\u5b9e\u9645\u72b6\u6001\u5c1a\u672a\u786e\u8ba4\u3002';
+	@override String get vendorXiaomiMijiaCameraControlPtzCalibrate => '\u6821\u51c6\u6444\u50cf\u5934\u4f4d\u7f6e';
+	@override String vendorXiaomiMijiaCameraControlPtzCalibrateConfirm({required Object device}) => '\u8bf7\u6c42\u6821\u51c6 ${device} \u7684\u4f4d\u7f6e\uff1f\u6444\u50cf\u5934\u53ef\u80fd\u8f6c\u52a8\uff0c\u753b\u9762\u53ef\u80fd\u4e2d\u65ad\u3002\u8bf7\u6c42\u88ab\u63a5\u53d7\u4e0d\u4ee3\u8868\u6821\u51c6\u5df2\u5b8c\u6210\u3002';
+	@override String get vendorXiaomiMijiaCameraControlRestartDevice => '\u91cd\u542f\u6444\u50cf\u5934';
+	@override String vendorXiaomiMijiaCameraControlRestartDeviceConfirm({required Object device}) => '\u8bf7\u6c42\u91cd\u542f ${device}\uff1f\u76d1\u63a7\u548c\u5f55\u50cf\u53ef\u80fd\u4e2d\u65ad\u3002\u8bf7\u6c42\u88ab\u63a5\u53d7\u4e0d\u4ee3\u8868\u6444\u50cf\u5934\u5df2\u91cd\u542f\u6216\u76d1\u63a7\u5df2\u6062\u590d\u3002';
+	@override String get vendorXiaomiMijiaMemoryCardManagementPopUp => '\u5f39\u51fa\u5b58\u50a8\u5361';
+	@override String vendorXiaomiMijiaMemoryCardManagementPopUpConfirm({required Object device}) => '\u8bf7\u6c42\u5f39\u51fa ${device} \u7684\u5b58\u50a8\u5361\uff1f\u5f55\u50cf\u53ef\u80fd\u505c\u6b62\u3002\u8bf7\u6c42\u88ab\u63a5\u53d7\u4e0d\u4ee3\u8868\u53ef\u4ee5\u5b89\u5168\u53d6\u5361\uff1b\u53d6\u5361\u524d\u8bf7\u68c0\u67e5\u8bbe\u5907\u3002';
+	@override String get vendorXiaomiMijiaHoodSmartDryWashStopDryCleaning => '\u505c\u6b62\u6cb9\u70df\u673a\u5e72\u6d17';
+	@override String vendorXiaomiMijiaHoodSmartDryWashStopDryCleaningConfirm({required Object device}) => '\u8bf7\u6c42\u505c\u6b62 ${device} \u7684\u5e72\u6d17\uff1f\u8bf7\u6c42\u88ab\u63a5\u53d7\u4e0d\u4ee3\u8868\u5e72\u6d17\u5df2\u505c\u6b62\u6216\u6cb9\u70df\u673a\u5df2\u51b7\u5374\u3002\u64cd\u4f5c\u8bbe\u5907\u524d\u8bf7\u68c0\u67e5\u8bbe\u5907\u72b6\u6001\u3002';
 }

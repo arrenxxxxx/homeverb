@@ -1844,5 +1844,13 @@
   "mobile.brightness_down": "调暗",
   "mobile.toggle_light_mode": "切换灯光模式",
   "vendor.xiaomi.mijia.switch.toggle": "切换电源",
-  "vendor.xiaomi.mijia.switch.toggle.confirm": "请求切换 {device} 的电源？连接的设备可能启动或停止，操作后的实际状态尚未确认。"
+  "vendor.xiaomi.mijia.switch.toggle.confirm": "请求切换 {device} 的电源？连接的设备可能启动或停止，操作后的实际状态尚未确认。",
+  "vendor.xiaomi.mijia.camera_control.ptz_calibrate": "校准摄像头位置",
+  "vendor.xiaomi.mijia.camera_control.ptz_calibrate.confirm": "请求校准 {device} 的位置？摄像头可能转动，画面可能中断。请求被接受不代表校准已完成。",
+  "vendor.xiaomi.mijia.camera_control.restart_device": "重启摄像头",
+  "vendor.xiaomi.mijia.camera_control.restart_device.confirm": "请求重启 {device}？监控和录像可能中断。请求被接受不代表摄像头已重启或监控已恢复。",
+  "vendor.xiaomi.mijia.memory_card_management.pop_up": "弹出存储卡",
+  "vendor.xiaomi.mijia.memory_card_management.pop_up.confirm": "请求弹出 {device} 的存储卡？录像可能停止。请求被接受不代表可以安全取卡；取卡前请检查设备。",
+  "vendor.xiaomi.mijia.hood_smart_dry_wash.stop_dry_cleaning": "停止油烟机干洗",
+  "vendor.xiaomi.mijia.hood_smart_dry_wash.stop_dry_cleaning.confirm": "请求停止 {device} 的干洗？请求被接受不代表干洗已停止或油烟机已冷却。操作设备前请检查设备状态。"
 }

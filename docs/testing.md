@@ -969,3 +969,15 @@ and run scripts/verify_native_contract.py --write-examples for actual API 1.42
 startup/Boolean-field acceptance and invalid-input refusal before profile creation.
 Preserve existing 1.40/1.41 inspection results. Fictional evidence does not prove
 Flutter, package, provider or physical acceptance.
+
+## Flutter maintenance action adoption
+
+From apps/mobile, run fvm flutter test test/mijia_maintenance_actions_test.dart
+with the rebuilt current native library. The suite covers all exact tuples,
+independent inspection flags, unsafe metadata/unknown-action refusal, actual old
+ABI refusal before any granted opening, current Mijia and combined startup,
+late inspection after background, descriptor buttons, cloud-route selection,
+immutable bilingual review at 320 logical pixels with double text size, explicit
+single consumption, unknown receipts and background discard. Run the existing
+power/action, permission, native, control and approval suites and Flutter analysis
+as regressions. No provider, account, phone or appliance is used by these tests.
