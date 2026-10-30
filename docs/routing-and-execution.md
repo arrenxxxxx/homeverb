@@ -998,3 +998,23 @@ crates/mijia/src/event_history/tests.rs and
 crates/mijia/src/modern/reads/tests/event_history.rs; local TLS tests additionally
 check fixed origins, encryption headers, redirects, response bounds and cleanup.
 Existing command/result schemas and write outcomes are unchanged.
+
+
+## Protected Core event history
+
+ADR-0116 now supplies typed Core event inspection and reads with default-refusing
+Adapter hooks. Local inspection validates a declared event's occurrence_times
+projection and rejects duplicate targets or invalid limits. A read selects one
+exact connection, locks the device and enforces the positive half-open window
+before adapter I/O. Core validates receipt, target, source, count and sorted record
+times, then rechecks the full descriptor before publishing. Equal timestamps are
+valid reported rows; no current-state or execution evidence is created.
+
+Mijia's typed opt-in independently checks protected account/model/spec/root/listed
+membership and the full published component layout, holds the account lease and
+uses the selected protocol only. Old scalar descriptors do not silently acquire
+event options. Changed bindings, stale/late results and cancellation fail without
+fallback, reauthentication or replay. The existing event-history schema and
+capability.mijia-event-history example describe the boundary; positive/negative
+runtime fixtures are in crates/host/tests/event_history.rs and the Mijia protected
+event-history suite. Native API 1.43 and ordinary method schemas remain unchanged.

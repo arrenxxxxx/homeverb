@@ -881,3 +881,16 @@ become current observations. Authentication failures remain AUTH_REQUIRED, and
 CANCELLED/DEADLINE_EXCEEDED stop the operation without retry or renewal. Full/empty
 pages retain unproven completeness rather than proving delivery or absence.
 No public error/result schema or native API version changes in this typed phase.
+
+
+## Protected Core event-history errors
+
+ADR-0116 reuses INVALID_HISTORY for adapter results that fail event target,
+projection, source, window, receipt time, ordering or count/limit consistency.
+Undeclared events, unsupported projections, invalid options or disabled adapter
+composition return CAPABILITY_UNSUPPORTED before a send. Invalid query windows
+return INVALID_ARGUMENT. Changed public/protected identity returns
+DEVICE_IDENTITY_CONFLICT or the existing protected-account confirmation error;
+secret-store and account-state errors retain their existing sanitized codes.
+Cancellation/deadline/drop release locks without fallback, renewal or persistent
+history mutation. No command/result schema or error-code vocabulary changes.

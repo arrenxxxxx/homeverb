@@ -88,7 +88,7 @@ not change the six actions included in the ab34f21 APK.
 | 28 opaque readable values | Separate typed/business/privacy contracts required |
 | 3 network identity values | Excluded from state and exports |
 | 40 actions | Eleven exact empty-input actions have Core/native/App support, including five elevated power toggles under ADR-0110/0111; four maintenance/stop actions also have Core/native/App support under ADR-0112/0113; the other 25 actions remain incomplete |
-| 78 events | Typed legacy/modern occurrence-time history under ADR-0115; Core/native/App, payload semantics, paging and subscriptions remain incomplete |
+| 78 events | Typed Core/adapter occurrence-time history under ADR-0115/0116; Host/native/App, payload semantics, paging and subscriptions remain incomplete |
 
 The archived successful reads used **SID `mijia`** and
 `https://core.api.mijia.tech/app`, with a continuous RC4 stream across encrypted
@@ -2255,3 +2255,37 @@ threads. Strict workspace Clippy and formatting passed. Contract validation pass
 26 schemas, 86 positive fixtures and 1,959 negative cases, including 104 additional
 event counterexamples. Documentation and repository hygiene checks passed.
 These checks do not establish callable Core event support or new mobile behavior.
+
+
+## Protected Core event occurrence history -- October 30, 2026
+
+ADR-0116 now implements typed Core occurrence-history inspection/reads and the
+protected Mijia adapter. An explicit with_event_history composition and account
+refresh publish all 78 exact event selectors, including event-only services.
+Default native hosts retain their current metadata and API 1.43. Complete old
+and enriched descriptors both retain ordinary scalar reads; partial layouts fail.
+Inspection is local; a read holds account/device locks and validates exact root,
+model, membership, selected protocol and event independently of public metadata.
+
+Core checks bounded windows, target/receipt/count/order consistency and changed
+metadata. Equal timestamps are preserved; completeness stays unproven. No current
+state, credential or execution-record changes, retry, renewal, protocol fallback,
+polling or subscription occur. Host/native/CLI/MCP/App integration, event argument
+semantics, pagination/subscriptions and provider/phone/model acceptance remain
+incomplete. API 1.43 and the 85fefd8 APK are unchanged.
+
+Executed verification: Rust 1.96 offline/locked workspace tests passed 729 tests
+with one opt-in test ignored, excluding the known macOS Meiju LAN-alias package
+and using four test threads. This includes 291 Mijia unit tests, 14 Mijia
+compile-fail examples and nine generic Core event-history tests. The first broad
+run exposed a 200 ms test budget expiring before the scripted peer was entered;
+the after-send deadline fixture now allows one second for bounded admission and
+still requires confirmed peer entry, deadline failure and lock release. The full
+rerun passed. Production operation budgets and cancellation semantics did not change.
+
+Strict workspace Clippy, formatting and native FFI build passed. The rebuilt C
+ABI passed 36 ordinary methods, 84 live fictional examples and 76 modern-account
+refusal/buffer/lifecycle cases, retaining API 1.43. All three projection checks,
+26 schemas with 87 positive and 1,959 negative fixtures, documentation and source
+hygiene checks passed. No real account/provider/device operation, phone installation,
+package rebuild, push or publication occurred in this phase.

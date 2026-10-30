@@ -108,3 +108,15 @@ reported timestamps are preserved; completeness is always unproven. The contract
 has 64-option, 31-record and 32-day bounds. Core cross-field validation and adapter
 admission remain pending; these types do not create callable history methods.
 Existing numeric history and persisted formats are unchanged.
+
+
+## Typed event-history runtime admission
+
+ADR-0116 Core validates EventHistoryOptions/Request/Result against the schema and
+the selected descriptor's declared event. It additionally enforces exact local
+identity/projection/transport, positive nonfuture bounded windows, receipt time,
+sorted in-window records and valid-plus-rejected count/limit consistency. Equal
+timestamps are retained. Event-only capabilities may occupy components without
+readable properties; this never creates a state observation. Mijia explicitly
+publishes those components from protected exact catalog evidence. Host/native/App
+adoption remains pending.

@@ -22,6 +22,7 @@ def checked_formats() -> FormatChecker:
 def main() -> int:
     formats = checked_formats()
     pairs = [
+        ("capability", "capability.mijia-event-history"),
         ("capability", "capability.mijia-maintenance-action"), ("command", "command.mijia-maintenance-action"),
         ("capability", "capability.mijia-power-action"), ("command", "command.mijia-power-action"),
         ("native-open", "native-open.mijia-actions"),

@@ -9,6 +9,7 @@ mod connection_link;
 pub use connection_link::{PendingConnectionLink, ValidatedConnectionLink};
 mod descriptors;
 mod diagnostics;
+mod event_history;
 mod execution;
 mod history;
 mod observations;
@@ -164,6 +165,28 @@ pub trait Adapter: Send + Sync {
         Err(Error::new(
             "CAPABILITY_UNSUPPORTED",
             "This historical series is unavailable.",
+        ))
+    }
+    /// Local event-history admission. Default adapters publish no historical events.
+    async fn event_history_options(
+        &self,
+        _: &Device,
+        _: &Connection,
+        _: &Operation,
+    ) -> Result<Vec<EventHistoryOption>> {
+        Ok(vec![])
+    }
+    /// One explicit occurrence-history read, separate from snapshots and receipts.
+    async fn read_event_history(
+        &self,
+        _: &Device,
+        _: &Connection,
+        _: &EventHistoryRequest,
+        _: &Operation,
+    ) -> Result<EventHistoryResult> {
+        Err(Error::new(
+            "CAPABILITY_UNSUPPORTED",
+            "This event history is unavailable.",
         ))
     }
     async fn discover(&self, operation: &Operation) -> Result<Vec<Descriptor>>;

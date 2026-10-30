@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Bounded event occurrence history",
-  "description": "ADR-0116. Occurrence times only, not event payloads, live state or execution evidence. Core integration must additionally validate exact event admission and window/order/receipt/count consistency; that runtime integration is pending. Equal timestamps are permitted and completeness is unproven.",
+  "description": "ADR-0116. Occurrence times only, not event payloads, live state or execution evidence. Core validates exact event admission and window/order/receipt/count consistency. Native/App integration remains pending. Equal timestamps are permitted and completeness is unproven.",
   "$defs": {
     "target": {
       "type": "object",

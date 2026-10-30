@@ -140,16 +140,17 @@ impl MijiaAdapter {
         let descriptors = selected
             .into_iter()
             .map(|i| {
-                descriptor_with_actions(
+                let descriptor = descriptor_with_actions(
                     &account.payload.bindings[i],
                     account.lease.record().id,
                     self.fan_controls && self.modern_controls.is_some(),
                     self.reference_controls && self.modern_controls.is_some(),
                     self.outlet_controls && self.modern_controls.is_some(),
                     self.action_policy.is_some() && self.modern_controls.is_some(),
-                )
+                );
+                self.event_descriptor(&account.payload.bindings[i], descriptor)
             })
-            .collect();
+            .collect::<Result<Vec<_>>>()?;
         operation
             .run(async {
                 Ok(BoundDiscovery {

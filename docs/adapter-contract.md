@@ -107,3 +107,15 @@ account leases through one request and admit event-only service components durin
 explicit descriptor refresh without inventing state. Public event metadata never
 substitutes for protected evidence. Numeric history and existing adapters are
 unchanged in this contract-only phase.
+
+
+## Implemented typed event-history hooks
+
+ADR-0116 adds event_history_options and read_event_history Adapter hooks. Default
+inspection is empty and reads are unsupported. Core requires a declared event with
+history.projection=occurrence_times and validates every option and returned row.
+Mijia's explicit typed opt-in derives namespace/service/event identities from the
+pinned catalog and retains account leases through exact selected-protocol requests.
+Old saved scalar layouts require explicit refresh before event options appear;
+complete event-enriched layouts remain valid for ordinary scalar reads even when
+a host disables event history. No native/App entry point is added in this phase.

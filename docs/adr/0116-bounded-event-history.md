@@ -1,6 +1,6 @@
 # ADR-0116: Bounded event occurrence history through Core
 
-Status: Accepted; domain/schema contract implemented; Core/adapter/entry points pending.
+Status: Accepted; typed Core and protected Mijia adapter implemented; Host/native/CLI/MCP/App pending.
 Date: October 30, 2026.
 
 ## Context
@@ -76,3 +76,34 @@ services, with no networking during inspection and no protocol fallback. No sche
 or fictional test establishes provider event delivery, retention, physical-device
 or phone acceptance. Full event coverage remains incomplete until these later
 stages and reviewed payload/paging/subscription work are resolved.
+
+
+## Typed Core and protected Mijia implementation
+
+Core now exposes inspect_event_history_options and read_event_history, with
+additive default Adapter hooks. A selected event declaration must contain
+history.projection=occurrence_times; arbitrary object metadata or a numeric
+property does not establish support. Core applies the versioned schema plus
+independent descriptor/selection/window/receipt/count/order checks, holds the
+existing device lock, and rejects changed metadata and late results. Typed Core
+retains the existing current-state read-access boundary; host session/foreground
+admission is required when entry points adopt these methods.
+
+MijiaAdapter::with_event_history explicitly enables typed event publication and
+reads. Construction performs no I/O; existing native hosts do not opt in yet.
+An explicit account refresh adds event capabilities derived from the independent
+pinned catalog, including services with no readable properties. Namespace/service
+capability IDs and event names retain exact source distinctions. Existing scalar
+capabilities, component order, local identity and protected mapping bytes are not
+rewritten merely to inspect or read events. Public event declarations do not
+include raw payload schemas or claim that payload arguments were decoded.
+
+Complete old and complete enriched component layouts remain valid for ordinary
+reads; partial/mixed layouts refuse. Old layouts expose no event options until
+explicit refresh. A host reopened without event support can still read existing
+scalar fields on an enriched layout but cannot read events. Protected event reads
+repeat exact account/device/model/spec/root/listed-membership and protocol checks,
+retain the account lease and never fall back or renew credentials. Parent-bearing
+logical entries do not acquire event reads. Native API 1.43, stored payloads and
+the 85fefd8 APK remain unchanged. This phase still does not complete event payload,
+pagination, subscription or physical acceptance requirements.

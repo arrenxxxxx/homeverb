@@ -239,6 +239,15 @@ impl CloudTransport for Cloud {
             let result=match request.endpoint() {
                 CloudEndpoint::Devices=>json!({"list":self.devices.lock().unwrap().clone()}),
                 CloudEndpoint::Homes=>json!({"homelist":[],"has_more":false}),
+                CloudEndpoint::EventHistory=>{
+                    assert_eq!(data["type"],"event"); assert_eq!(data["limit"],31);
+                    if self.stall_read.load(Ordering::SeqCst)!=0 {self.read_gate.notify_one();std::future::pending::<()>().await;}
+                    let devices=self.devices.lock().unwrap();
+                    let device=devices.iter().find(|d|d["did"]==data["did"]).unwrap();
+                    assert!(crate::event_history::profiles().unwrap().iter().any(|p| p.model == device["model"].as_str().unwrap() && format!("{}.{}",p.siid,p.eiid)==data["key"].as_str().unwrap()));
+                    json!([{"did":data["did"],"key":data["key"],"type":"event","time":data["time_start"],"value":{"opaque":"PRIVATE-PAYLOAD"},"uid":"PRIVATE-ACTOR"},
+                           {"did":data["did"],"key":data["key"],"type":"event","time":data["time_start"],"value":[]}])
+                },
                 CloudEndpoint::PropertyHistory=>{
                     assert_eq!(data["type"],"prop");assert_eq!(data["limit"],31);
                     if self.stall_read.load(Ordering::SeqCst)!=0 {self.read_gate.notify_one();std::future::pending::<()>().await;}

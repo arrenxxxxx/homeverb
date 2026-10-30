@@ -1,5 +1,22 @@
 # Platform and device compatibility matrix
 
+## Protected Core event occurrence history -- October 30, 2026
+
+ADR-0116 now implements typed Core occurrence-history inspection/reads and the
+protected Mijia adapter. An explicit with_event_history composition and account
+refresh publish all 78 exact event selectors, including event-only services.
+Default native hosts retain their current metadata and API 1.43. Complete old
+and enriched descriptors both retain ordinary scalar reads; partial layouts fail.
+Inspection is local; a read holds account/device locks and validates exact root,
+model, membership, selected protocol and event independently of public metadata.
+
+Core checks bounded windows, target/receipt/count/order consistency and changed
+metadata. Equal timestamps are preserved; completeness stays unproven. No current
+state, credential or execution-record changes, retry, renewal, protocol fallback,
+polling or subscription occur. Host/native/CLI/MCP/App integration, event argument
+semantics, pagination/subscriptions and provider/phone/model acceptance remain
+incomplete. API 1.43 and the 85fefd8 APK are unchanged.
+
 ## Typed Mijia event occurrence history -- October 30, 2026
 
 ADR-0115 adds experimental typed Rust history for 78 exact pinned event selectors.

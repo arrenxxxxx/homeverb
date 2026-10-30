@@ -1033,3 +1033,21 @@ partial/full pages, equal timestamps and option/record bounds. The separate
 numeric history schema must continue rejecting event results. These checks do not
 exercise Core event admission, adapter bindings, native/App methods or devices.
 Core cross-field time/count/identity checks remain a required implementation phase.
+
+
+## Protected Core event-history checks
+
+Run cargo +1.96.0 test -p homeverb-host --test event_history --offline --locked --
+--test-threads=4 for generic Core fixtures: declaration/identity/window admission,
+same-second and empty/full/rejected pages, malformed adapter result refusal,
+unchanged snapshots/receipts, metadata changes and lock cleanup. Run
+cargo +1.96.0 test -p homeverb-mijia event_history --offline --locked --
+--test-threads=4 for all 78 exact legacy/modern Core requests, full old/enriched
+layout compatibility, event-only services, independent protected model/root and
+membership checks, unavailable secure storage, cancellation/deadline/drop/late
+reply cleanup and no credential/state/receipt mutation or protocol fallback.
+
+All checks use fictional accounts and local transports. They do not establish
+Host/native/CLI/MCP/App availability, decoded event arguments, subscriptions,
+provider delivery/retention or phone/model acceptance. Run the broader workspace
+and native ABI regressions when changing protected descriptor admission.

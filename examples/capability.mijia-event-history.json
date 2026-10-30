@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "id": "vendor.xiaomi.mijia.event.xiaomi_spec.family_guard",
+  "component_id": "family_guard-16",
+  "revision": 1,
+  "properties": {},
+  "actions": {},
+  "events": {
+    "long_time_no_humang_1": {
+      "history": {
+        "projection": "occurrence_times"
+      }
+    }
+  }
+}

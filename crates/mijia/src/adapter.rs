@@ -1,5 +1,6 @@
 //! Account-bound Core reads and local card identity. Construction performs no I/O.
 
+mod event_history;
 mod history;
 mod modern_devices;
 
@@ -67,6 +68,7 @@ pub struct MijiaAdapter {
     modern_reads: Option<Arc<dyn crate::ModernReadTransport>>,
     modern_controls: Option<Arc<dyn crate::ModernControlTransport>>,
     clock: Arc<dyn Clock>,
+    event_history: bool,
     fan_controls: bool,
     reference_controls: bool,
     outlet_controls: bool,
@@ -89,6 +91,7 @@ impl MijiaAdapter {
             modern_reads: None,
             modern_controls: None,
             clock,
+            event_history: false,
             fan_controls: false,
             reference_controls: false,
             outlet_controls: false,
@@ -114,6 +117,13 @@ impl MijiaAdapter {
         transport: Arc<dyn crate::ModernControlTransport>,
     ) -> Self {
         self.modern_controls = Some(transport);
+        self
+    }
+
+    /// Opt into exact reported event occurrence history. No I/O or authority change.
+    /// Explicit inventory refresh publishes the separate event capability metadata.
+    pub fn with_event_history(mut self) -> Self {
+        self.event_history = true;
         self
     }
 
@@ -668,16 +678,17 @@ impl MijiaAdapter {
         let descriptors = selected
             .into_iter()
             .map(|i| {
-                descriptor_with_actions(
+                let descriptor = descriptor_with_actions(
                     &account.payload.bindings[i],
                     account.lease.record().id,
                     self.fan_controls,
                     self.reference_controls,
                     self.outlet_controls,
                     self.action_policy.is_some(),
-                )
+                );
+                self.event_descriptor(&account.payload.bindings[i], descriptor)
             })
-            .collect();
+            .collect::<Result<Vec<_>>>()?;
         issues.truncate(64);
         operation
             .run(async {
@@ -840,8 +851,7 @@ fn validate_device(
     let expected = descriptor(binding, id, false, false, false);
     if device.model != expected.device.model
         || device.support_status != expected.device.support_status
-        || serde_json::to_value(&device.components).map_err(|_| conflict())?
-            != serde_json::to_value(&expected.device.components).map_err(|_| conflict())?
+        || !event_history::matches_components(binding, &expected, device)?
         || expected.device.connections.as_slice() != device.connections.as_slice()
         || expected.device.connections.first() != Some(connection)
     {
@@ -852,6 +862,26 @@ fn validate_device(
 
 #[async_trait]
 impl Adapter for MijiaAdapter {
+    async fn event_history_options(
+        &self,
+        device: &Device,
+        connection: &Connection,
+        operation: &Operation,
+    ) -> Result<Vec<homeverb_domain::EventHistoryOption>> {
+        self.protected_event_options(device, connection, operation)
+            .await
+    }
+    async fn read_event_history(
+        &self,
+        device: &Device,
+        connection: &Connection,
+        request: &homeverb_domain::EventHistoryRequest,
+        operation: &Operation,
+    ) -> Result<homeverb_domain::EventHistoryResult> {
+        self.protected_event_read(device, connection, request, operation)
+            .await
+    }
+
     async fn history_options(
         &self,
         device: &Device,

@@ -131,6 +131,25 @@ impl ModernReadTransport for Peer {
             Read::Directory => {
                 json!({"list":self.devices.lock().unwrap().clone(),"has_more":false})
             }
+            Read::EventHistory => {
+                assert_eq!(
+                    request.endpoint().url(),
+                    "https://api.mijia.tech/app/user/get_user_device_data"
+                );
+                assert_eq!(data["type"], "event");
+                assert_eq!(data["limit"], 31);
+                let devices = self.devices.lock().unwrap();
+                let device = devices.iter().find(|d| d["did"] == data["did"]).unwrap();
+                assert!(
+                    crate::event_history::profiles()
+                        .unwrap()
+                        .iter()
+                        .any(|p| p.model == device["model"].as_str().unwrap()
+                            && format!("{}.{}", p.siid, p.eiid) == data["key"].as_str().unwrap())
+                );
+                json!([{"did":data["did"],"key":data["key"],"type":"event","time":data["time_start"],"value":{"opaque":"PRIVATE-PAYLOAD"},"uid":"PRIVATE-ACTOR"},
+                       {"did":data["did"],"key":data["key"],"type":"event","time":data["time_start"],"value":[]}])
+            }
             Read::PropertyHistory => {
                 assert_eq!(
                     request.endpoint().url(),
@@ -942,3 +961,6 @@ mod sample_history;
 
 #[path = "modern_accounts/actions.rs"]
 mod actions;
+
+#[path = "modern_accounts/event_history.rs"]
+mod event_history;
