@@ -133,6 +133,7 @@ pub fn no_argument_action_option(
             "yutai.plug.jdls1",
             "opple.switch.0010d5",
             "opple.switch.0010d6",
+            "xiaomi.camera.083ac1",
         ]
         .into_iter()
         .filter_map(|model| ModelMapping::pinned(model, None).ok().flatten())
@@ -140,11 +141,6 @@ pub fn no_argument_action_option(
             mapping
                 .no_argument_actions()
                 .into_iter()
-                // API 1.41 excludes the later typed maintenance actions.
-                .filter(|(_, option)| {
-                    option.definition.risk == Risk::Low
-                        || option.capability == "vendor.xiaomi.mijia.switch"
-                })
                 .map(|(_, option)| option)
         })
         .collect()

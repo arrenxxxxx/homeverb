@@ -854,3 +854,9 @@ replies, timeouts and cancellation retain unknown receipts without automatic
 retry. API 1.41 rejects these typed-only startup tuples as INVALID_ARGUMENT before
 creating a profile. Formatting, streaming and output-bearing cleaning start stay
 CAPABILITY_UNSUPPORTED in the no-argument protocol.
+
+API 1.42 maintenance startup and inspection retain INVALID_ARGUMENT for unreviewed
+tuples, forbidden fields and non-Boolean flags before side effects. Ordinary
+execution remains POLICY_DENIED; consumed/dismissed/background-invalidated trusted
+handles remain APPROVAL_INVALID. Accepted is not physical completion or safety;
+unknown receipts cannot trigger another preview, retry or protocol fallback.

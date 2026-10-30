@@ -958,3 +958,14 @@ unknown receipts after reopen/retirement. Formatting, streams and output-bearing
 actions must refuse before transport. Host tests and rebuilt C ABI checks retain
 API 1.41 startup rejection and power-inspection isolation. No native/App admission,
 Flutter run, package rebuild or real-provider operation follows from these tests.
+
+## Native Mijia maintenance admission checks
+
+Run the homeverb-host mijia_action_grants and mijia_accounts targets for ADR-0113
+exact scope, independent inspection and trusted maintenance journeys. The dedicated
+maintenance module exercises all four actions and retained unknown outcomes after
+reopen, with dismissal/background/single-consumption checks. Rebuild homeverb-ffi
+and run scripts/verify_native_contract.py --write-examples for actual API 1.42
+startup/Boolean-field acceptance and invalid-input refusal before profile creation.
+Preserve existing 1.40/1.41 inspection results. Fictional evidence does not prove
+Flutter, package, provider or physical acceptance.

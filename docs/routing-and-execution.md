@@ -956,3 +956,15 @@ Positive/negative fixtures are examples/capability.mijia-maintenance-action.json
 examples/command.mijia-maintenance-action.json, scripts/validate_contracts.py and
 the maintenance Core tests. Command/result schema shapes are unchanged. API 1.41
 keeps these operations out of startup grants and local action inspection.
+
+## Native maintenance action consent
+
+ADR-0113/API 1.42 exposes four exact maintenance/stop actions with independent
+startup grants and explicit local inspection. These steps never replace immutable
+trusted approval. Core and the protected adapter independently require consent
+before a send; ordinary plan/execute remain denied. Uncertain execution cannot
+receive another preview or replay after reopen/retirement. No result semantics,
+write retry, state inference or companion operation changes. Positive startup and
+negative argument/scope fixtures are checked by schemas, fictional Host journeys
+and the rebuilt actual C ABI. Inspection response components add only the three
+exact camera/storage/hood component identifiers; existing flags retain their scopes.

@@ -582,6 +582,7 @@ def main():
     # Exact action startup admission must precede profile or credential access.
     action_startup = load('examples/native-open.mijia-actions.json')
     action_startup['mijia_action_grants'] += load('examples/native-open.mijia-power-actions.json')['mijia_action_grants']
+    action_startup['mijia_action_grants'] += load('examples/native-open.mijia-maintenance-actions.json')['mijia_action_grants']
     for adapter in ['xiaomi.mijia', 'homeverb.platforms']:
         for grants in [action_startup['mijia_action_grants'], [
                 {**action_startup['mijia_action_grants'][0],
@@ -597,7 +598,7 @@ def main():
                     assert raw(handle, envelope('get_api_info'))['data'] == api
                     assert raw(handle, envelope('list_devices'))['data'] == []
                     assert raw(handle, envelope('list_accounts'))['data'] == []
-                    for flag in ['include_no_argument_actions', 'include_power_toggle_actions']:
+                    for flag in ['include_no_argument_actions', 'include_power_toggle_actions', 'include_maintenance_actions']:
                         for include in [False, True]:
                             result = call(handle, 'inspect_control_options',
                                           device_id=grants[0]['device_id'], connection_id='cloud',

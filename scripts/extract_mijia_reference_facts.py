@@ -100,7 +100,7 @@ def project():
                 for item in service.get(key, []):
                     entries.append({'kind': kind, 'siid': service['iid'], 'iid': item['iid'],
                                     'name': item['type'].split(':')[3],
-                                    'status': ('implemented_typed_core_trusted_maintenance_action'
+                                    'status': ('implemented_core_native_trusted_maintenance_action'
                                                if kind == 'action' and admitted_maintenance_action(model['model'], service['iid'], item['iid'])
                                                else 'implemented_core_native_app_trusted_power_toggle'
                                                if kind == 'action' and admitted_power_action(model['model'], service['iid'], item['iid'])
@@ -133,13 +133,13 @@ def project():
                    'status': ('legacy_host_and_modern_typed_read' if o['id'] in ('directory', 'homes', 'properties')
                               else 'implemented_exact_granted_legacy_and_modern_property_set'
                               if o['id'] == 'property_write_candidate'
-                              else 'implemented_eleven_app_and_four_typed_core_actions' if o['id'] == 'action_candidate'
+                              else 'implemented_fifteen_native_and_eleven_app_actions' if o['id'] == 'action_candidate'
                               else 'not_admitted_by_reference'),
                    'reason': ('Modern reference-origin typed reads and protected accounts are implemented; native and Flutter device publication and Core reads are implemented; provider acceptance remains pending.'
                               if o['id'] in ('directory', 'homes', 'properties')
                               else 'ADR-0104/0106 admit 33 reviewed scalar mappings across five exact models with grants and trusted elevated approval; no arbitrary setter or physical acceptance.'
                               if o['id'] == 'property_write_candidate'
-                              else 'ADR-0107/0108/0109 supply six exact actions through Core/native/App. ADR-0110/0111 add five elevated power toggles through Core/native/App with independent grants and trusted approval; ADR-0112 adds four typed Core maintenance/stop actions; their native/App admission and all real acceptance remain pending.'
+                              else 'ADR-0107/0108/0109 supply six exact actions through Core/native/App. ADR-0110/0111 add five elevated power toggles through Core/native/App with independent grants and trusted approval; ADR-0112/0113 add four Core/native maintenance/stop actions; their App admission and all real acceptance remain pending.'
                               if o['id'] == 'action_candidate'
                               else 'No credential crossover or arbitrary RPC; separate exact control admission is required.')}
                   for o in contract['operations']]
@@ -246,11 +246,11 @@ def project():
         'meaning': 'Source write access alone does not establish command semantics, risk, authorization, runtime support or physical acceptance.',
     }
     coverage['maintenance_actions'] = {
-        'status': 'implemented_typed_protocol_core_with_trusted_approval',
-        'evidence': 'ADR-0112; pinned exact no-input/no-output maintenance actions',
+        'status': 'implemented_protocol_core_native_with_trusted_approval',
+        'evidence': 'ADR-0112/0113; pinned exact no-input/no-output maintenance actions',
         'exact_actions': 4, 'models': 2, 'route': '/miotspec/action',
         'risk': 'elevated', 'idempotency': 'non_idempotent',
-        'native_app': 'pending_versioned_admission', 'provider_acceptance': 'pending',
+        'native_app': 'native_api_1_42_implemented_flutter_pending', 'provider_acceptance': 'pending',
     }
     return {CATALOG: profiles, LEDGER: coverage, ACTION_CATALOG: action_profiles}
 

@@ -285,7 +285,7 @@ async fn api_140_inspection_keeps_power_toggles_hidden() {
 mod power;
 
 #[tokio::test]
-async fn api_141_does_not_admit_typed_maintenance_actions() {
+async fn api_141_inspection_keeps_maintenance_actions_hidden() {
     for (model, component, capability, action) in [
         (
             "xiaomi.camera.083ac1",
@@ -336,9 +336,12 @@ async fn api_141_does_not_admit_typed_maintenance_actions() {
                 capability: capability.into(),
                 action: action.into(),
             }])
-            .is_err()
+            .is_ok()
         );
         assert_eq!(f.peer.reads.load(Ordering::SeqCst), reads);
         assert_eq!(w.sends.load(Ordering::SeqCst), 0);
     }
 }
+
+#[path = "actions/maintenance.rs"]
+mod maintenance;

@@ -57,6 +57,8 @@ pub enum Request {
         include_no_argument_actions: bool,
         #[serde(default)]
         include_power_toggle_actions: bool,
+        #[serde(default)]
+        include_maintenance_actions: bool,
     },
     InspectHistoryOptions {
         device_id: String,
@@ -628,6 +630,7 @@ impl Session {
                 connection_id,
                 include_no_argument_actions,
                 include_power_toggle_actions,
+                include_maintenance_actions,
             } => {
                 if self.accounts.is_none() && self.mijia_accounts.is_none() {
                     return Err(crate::accounts::unsupported());
@@ -654,7 +657,10 @@ impl Session {
                             &operation,
                         )
                         .await?;
-                    if include_no_argument_actions || include_power_toggle_actions {
+                    if include_no_argument_actions
+                        || include_power_toggle_actions
+                        || include_maintenance_actions
+                    {
                         options.extend(
                             adapter
                                 .inspect_action_options(&descriptor.device, connection, &operation)
@@ -663,8 +669,17 @@ impl Session {
                                 .filter(|option| match option.definition.risk {
                                     homeverb_domain::Risk::Low => include_no_argument_actions,
                                     homeverb_domain::Risk::Elevated => {
-                                        include_power_toggle_actions
-                                            && option.capability == "vendor.xiaomi.mijia.switch"
+                                        match option.capability.as_str() {
+                                            "vendor.xiaomi.mijia.switch" => {
+                                                include_power_toggle_actions
+                                            }
+                                            "vendor.xiaomi.mijia.camera_control"
+                                            | "vendor.xiaomi.mijia.memory_card_management"
+                                            | "vendor.xiaomi.mijia.hood_smart_dry_wash" => {
+                                                include_maintenance_actions
+                                            }
+                                            _ => false,
+                                        }
                                     }
                                     homeverb_domain::Risk::High => false,
                                 }),

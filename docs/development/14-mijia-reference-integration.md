@@ -1,6 +1,6 @@
 # 14. Mijia reference integration and remaining coverage
 
-The October 30 worktree uses API 1.41 and the owner-supplied October 22 Xiaomi Home
+The October 30 worktree uses API 1.42 and the owner-supplied October 22 Xiaomi Home
 11.7.709 analysis. The full official-App feature request remains **incomplete**.
 The source archive explicitly does not supply all authentication, protocol or
 runtime control contracts. An implemented decoder is not physical acceptance.
@@ -83,7 +83,7 @@ not change the six actions included in the ab34f21 APK.
 | 78 non-readable properties | No read operation; write/event-only definitions are not state |
 | 28 opaque readable values | Separate typed/business/privacy contracts required |
 | 3 network identity values | Excluded from state and exports |
-| 40 actions | Eleven exact empty-input actions have Core/native/App support, including five elevated power toggles under ADR-0110/0111; four maintenance/stop actions have typed Core support under ADR-0112; their native/App adoption and the other 25 actions are incomplete |
+| 40 actions | Eleven exact empty-input actions have Core/native/App support, including five elevated power toggles under ADR-0110/0111; four maintenance/stop actions have Core/native support under ADR-0112/0113; their App adoption and the other 25 actions are incomplete |
 | 78 events | No event-history/subscription body, paging or lifecycle contract; not implemented |
 
 The archived successful reads used **SID `mijia`** and
@@ -2008,3 +2008,32 @@ The coverage audit now explicitly counts 225 source writable property definition
 33 are implemented exact controls and 192 still require separate semantic/risk/
 runtime admission. This is additional unresolved scope alongside the remaining
 actions/events; a source write flag never establishes implemented support.
+
+## Native maintenance actions -- October 30, 2026
+
+[ADR-0113](../adr/0113-native-mijia-maintenance-actions.md) admits four exact ADR-0112 maintenance/stop tuples through
+API 1.42's existing independent mijia_action_grants. The separate optional
+include_maintenance_actions flag defaults to false. Low-risk and power-toggle
+inspection retain their existing scopes; combined flags do not duplicate options.
+All startup/inspection work stays local and grants no user consent.
+
+Exact granted reopen and explicit account refresh publish the elevated actions.
+Every execution uses the existing immutable trusted preview/confirm/discard bridge;
+ordinary plan/execute remain denied. Acceptance establishes neither physical
+completion nor safe removal/restored monitoring. Cancelled, late or lost replies
+preserve unknown receipts without replay after reopen. No new method/export,
+SQLite/protected payload format, retry, companion action or verification is added.
+
+All fifteen admitted actions now have Core/native support; eleven are in App.
+Flutter adoption of the four maintenance actions and a matching APK remain pending;
+d505ccb stays API 1.41. The other 25 actions, 192 remaining writable definitions,
+78 events, specialized reference paths and real provider/phone/model acceptance
+remain incomplete. No real account/device operation, installation, push or
+publication occurred in this phase.
+
+Executed native verification: 690 Rust tests passed, one ignored, excluding the
+known homeverb-midea macOS LAN-alias failures. Strict workspace Clippy, FFI build,
+68 focused Host account/grant tests, actual C ABI checks (36 methods, 84 examples,
+76 modern-account boundary cases), 25 schemas with 82 positive/1,720 negative
+fixtures, documentation/hygiene and both reference projection tests passed.
+Flutter and refreshed Android packaging follow as separate phases.

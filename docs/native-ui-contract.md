@@ -1,6 +1,6 @@
 # Native UI contract
 
-The October 30 exact action control bridge uses native API **1.41.0**, following
+The October 30 exact action control bridge uses native API **1.42.0**, following
 the October 24 linear mainline update. Earlier Mijia phase versions are historical. See
 [contract reconciliation](adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
 remain available alongside Mijia; identity restoration remains Meiju-only.
@@ -43,7 +43,7 @@ The 22 C functions in [homeverb.h](../crates/ffi/include/homeverb.h) form the na
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects Meiju, `xiaomi.mijia` selects Mijia, and `homeverb.platforms` selects both. `scenario` defaults to `normal`. All platform modes require `allow_mock_writes: false` and reject any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms the selected mode. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.41.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.42.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -88,7 +88,7 @@ All rows use query envelopes except the two execution methods. The schemas and a
 | `get_account` | `account_id` | `{account, device_ids}` from local metadata; no authorization check |
 | `rename_account` | `account_id`, `label` | Updated local AccountSummary; no credential or permission changes |
 | `remove_account` | `account_id`, `expected_device_ids` | Local cleanup result: `removed` or `pending`; inspect the inner error |
-| `inspect_control_options` | `device_id`, `connection_id`, optional `include_no_argument_actions` (API 1.40), `include_power_toggle_actions` (API 1.41) | Saved model-specific permission-form options; no permission check, networking or control enablement |
+| `inspect_control_options` | `device_id`, `connection_id`, optional `include_no_argument_actions` (API 1.40), `include_power_toggle_actions` (API 1.41), `include_maintenance_actions` (API 1.42) | Saved model-specific permission-form options; no permission check, networking or control enablement |
 | `inspect_session_grants` | `device_id`, `connection_id` | Current local session rules for that route; no credential access, provider authorization check or control enablement |
 | `inspect_account_inventory` | `account_id` | Saved protected device/connection membership; no network or mutation |
 | `inspect_device_conflicts` | `account_id`, `device_id` | Saved duplicate-binding candidates across accounts; no merge or authority |
@@ -2076,3 +2076,26 @@ Flutter now negotiates this admission and uses the existing generic trusted
 confirmation form. The clean-source d505ccb Android package includes API 1.41
 and has archive checks; installation and provider/phone/model acceptance remain
 pending. The earlier ab34f21 package stays API 1.40.
+
+## Exact maintenance actions (API 1.42)
+
+Negotiate API 1.42 before using include_maintenance_actions or reopening with
+ADR-0113 maintenance grants. The four closed component/capability/action tuples
+are in the [fictional startup](../examples/native-open.mijia-maintenance-actions.json).
+They use existing mijia_action_grants, exact canonical local device IDs, the shared
+64-entry bound and Mijia/combined-only startup modes. Protected adapter evidence
+independently verifies the exact camera/hood model and selected route.
+
+The default-false maintenance inspection flag is independent of the low-risk and
+power-toggle flags. Inspection is local and gives neither permission nor consent.
+After granted reopen and explicit refresh, use the existing trusted approval
+exports and show their immutable preview. Only actual user confirmation consumes
+it; ordinary plan/execute remain denied. Never claim a successful request proves
+safe storage removal, restored monitoring, completed motion or a stopped/cooled
+hood. Unknown outcomes must not be retried or assigned another automatic request.
+
+Older libraries reject the new flag/tuples. Refuse an explicit unsupported request
+rather than silently downgrading it. The Rust request constructor gains a Boolean;
+JSON omission remains compatible. C exports, ordinary methods, SQLite 5, protected
+payload 3 and result shapes remain unchanged. Flutter and package adoption remain
+pending. See [ADR-0113](adr/0113-native-mijia-maintenance-actions.md).

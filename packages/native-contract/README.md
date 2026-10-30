@@ -1,6 +1,6 @@
 # HomeVerb native contract
 
-Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.41.0 has 36 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions three trusted connection-link functions and three trusted account-identity recovery functions and three dedicated interactive login functions and four protected verification functions and four modern account functions; the JSON envelope schema is 1.0.
+Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.42.0 has 36 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions three trusted connection-link functions and three trusted account-identity recovery functions and three dedicated interactive login functions and four protected verification functions and four modern account functions; the JSON envelope schema is 1.0.
 
 API 1.19 adds nullable `last_complete_inventory_at` to account summaries. It is
 historical local retrieval metadata, not authorization or online status. SQLite
@@ -229,3 +229,9 @@ not consent. See the [power-toggle contract](../../docs/native-ui-contract.md#ex
 Flutter now negotiates API 1.41 and uses the existing trusted review/confirmation
 form. The d505ccb Android package has archive checks; runtime and real acceptance
 remain pending.
+
+API 1.42 adds four exact maintenance/stop tuples to mijia_action_grants and an
+independent default-false include_maintenance_actions inspection flag. Preserve
+the separate low-risk/power flags, version negotiation and actual trusted consent
+for every elevated command. See the [maintenance contract](../../docs/native-ui-contract.md#exact-maintenance-actions-api-142).
+Flutter and new package adoption remain pending; d505ccb stays API 1.41.

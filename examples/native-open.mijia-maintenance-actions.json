@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "data_dir": "/fictional/private/homeverb",
+  "adapter": "xiaomi.mijia",
+  "allow_mock_writes": false,
+  "mijia_action_grants": [
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "camera_control-2",
+      "capability": "vendor.xiaomi.mijia.camera_control",
+      "action": "ptz_calibrate"
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "camera_control-2",
+      "capability": "vendor.xiaomi.mijia.camera_control",
+      "action": "restart_device"
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "memory_card_management-4",
+      "capability": "vendor.xiaomi.mijia.memory_card_management",
+      "action": "pop_up"
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000002",
+      "component_id": "hood_smart_dry_wash-10",
+      "capability": "vendor.xiaomi.mijia.hood_smart_dry_wash",
+      "action": "stop_dry_cleaning"
+    }
+  ]
+}

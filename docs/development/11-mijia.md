@@ -1,5 +1,28 @@
 # 11. Mijia native integration
 
+## Native maintenance actions -- October 30, 2026
+
+[ADR-0113](../adr/0113-native-mijia-maintenance-actions.md) admits four exact ADR-0112 maintenance/stop tuples through
+API 1.42's existing independent mijia_action_grants. The separate optional
+include_maintenance_actions flag defaults to false. Low-risk and power-toggle
+inspection retain their existing scopes; combined flags do not duplicate options.
+All startup/inspection work stays local and grants no user consent.
+
+Exact granted reopen and explicit account refresh publish the elevated actions.
+Every execution uses the existing immutable trusted preview/confirm/discard bridge;
+ordinary plan/execute remain denied. Acceptance establishes neither physical
+completion nor safe removal/restored monitoring. Cancelled, late or lost replies
+preserve unknown receipts without replay after reopen. No new method/export,
+SQLite/protected payload format, retry, companion action or verification is added.
+
+All fifteen admitted actions now have Core/native support; eleven are in App.
+Flutter adoption of the four maintenance actions and a matching APK remain pending;
+d505ccb stays API 1.41. The other 25 actions, 192 remaining writable definitions,
+78 events, specialized reference paths and real provider/phone/model acceptance
+remain incomplete. No real account/device operation, installation, push or
+publication occurred in this phase.
+
+
 ## Typed maintenance and stop actions -- October 30, 2026
 
 [ADR-0112](../adr/0112-exact-mijia-maintenance-actions.md) implements four additional exact no-argument actions through

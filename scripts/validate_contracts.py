@@ -26,6 +26,7 @@ def main() -> int:
         ("capability", "capability.mijia-power-action"), ("command", "command.mijia-power-action"),
         ("native-open", "native-open.mijia-actions"),
         ("native-open", "native-open.mijia-power-actions"),
+        ("native-open", "native-open.mijia-maintenance-actions"),
         ("native-open", "native-open.mijia-hood"),
         ("native-open", "native-open.mijia-auxiliary"),
         ("native-open", "native-open.mijia-outlet"),
@@ -199,6 +200,7 @@ def main() -> int:
 
     action_startup = load("examples/native-open.mijia-actions.json")
     action_startup["mijia_action_grants"] += load("examples/native-open.mijia-power-actions.json")["mijia_action_grants"]
+    action_startup["mijia_action_grants"] += load("examples/native-open.mijia-maintenance-actions.json")["mijia_action_grants"]
     for label, bad in invalid_action_startups(action_startup):
         negative.append((label, validators["native-open"], bad))
 

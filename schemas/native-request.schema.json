@@ -584,6 +584,11 @@
               "type": "boolean",
               "default": false,
               "description": "API 1.41 opt-in for exact elevated power toggles. Inspection never grants authority or trusted consent."
+            },
+            "include_maintenance_actions": {
+              "type": "boolean",
+              "default": false,
+              "description": "API 1.42 opt-in for four exact elevated maintenance/stop actions. Inspection never grants authority or trusted consent."
             }
           },
           "required": [

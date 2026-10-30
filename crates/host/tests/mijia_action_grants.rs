@@ -132,3 +132,50 @@ fn power_action_grants_admit_exact_scope_but_never_replace_trusted_consent() {
         }
     }
 }
+
+#[test]
+fn maintenance_startup_is_exact_empty_scope_and_never_substitutes_for_consent() {
+    let v: Value = serde_json::from_str(include_str!(
+        "../../../examples/native-open.mijia-maintenance-actions.json"
+    ))
+    .unwrap();
+    let grants: Vec<MijiaActionGrant> =
+        serde_json::from_value(v["mijia_action_grants"].clone()).unwrap();
+    assert_eq!(grants.len(), 4);
+    let policy = mijia_action_policy(&grants).unwrap();
+    for g in grants {
+        let option =
+            homeverb_mijia::no_argument_action_option(&g.component_id, &g.capability, &g.action)
+                .unwrap();
+        assert_eq!(option.definition.risk, homeverb_domain::Risk::Elevated);
+        let c: Command = serde_json::from_value(json!({"schema_version":"1.0","request_id":"fictional-maintenance","device_id":g.device_id,"component_id":g.component_id,"capability":g.capability,"action":g.action,"arguments":{},"connection":"cloud","timeout_ms":5000,"wait_for":"accepted"})).unwrap();
+        assert!(policy.authorize(&c, &option.definition).is_err());
+        let mut scope = option.definition.clone();
+        scope.risk = homeverb_domain::Risk::Low;
+        assert_eq!(
+            policy.authorize(&c, &scope).unwrap(),
+            vec![Transport::Cloud]
+        );
+        for action in [
+            "format",
+            "start_p2p_stream",
+            "execute_dry_cleaning",
+            "reset",
+            "*",
+        ] {
+            let mut bad = g.clone();
+            bad.action = action.into();
+            assert!(mijia_action_policy(&[bad]).is_err());
+        }
+        for arguments in [
+            json!({"confirmed":true}),
+            json!({"format":true}),
+            json!({"in":[]}),
+            json!({"out":[]}),
+        ] {
+            let mut bad = c.clone();
+            bad.arguments = arguments;
+            assert!(policy.authorize(&bad, &scope).is_err());
+        }
+    }
+}
