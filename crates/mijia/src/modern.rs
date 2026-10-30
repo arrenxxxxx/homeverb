@@ -11,8 +11,9 @@ mod stored;
 pub(crate) use stored::StoredModernSession;
 pub(crate) mod transport;
 pub use reads::{
-    ModernContentEncoding, ModernDirectory, ModernDirectoryEntry, ModernHome, ModernHomes,
-    ModernReadEndpoint, ModernReadRequest, ModernReadResponse, ModernReadTransport,
+    ModernContentEncoding, ModernDeviceGroup, ModernDeviceInventory, ModernDirectory,
+    ModernDirectoryEntry, ModernHome, ModernHomes, ModernReadEndpoint, ModernReadRequest,
+    ModernReadResponse, ModernReadTransport, ModernUnresolvedEntry, ModernUnresolvedReason,
 };
 pub use transport::{
     ModernAuthEndpoint, ModernAuthRequest, ModernAuthResponse, ModernAuthTransport,

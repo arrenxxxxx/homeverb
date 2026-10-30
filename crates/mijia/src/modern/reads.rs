@@ -5,6 +5,11 @@ use homeverb_domain::Error;
 use serde_json::json;
 use std::collections::HashSet;
 
+mod reconciliation;
+pub use reconciliation::{
+    ModernDeviceGroup, ModernDeviceInventory, ModernUnresolvedEntry, ModernUnresolvedReason,
+};
+
 pub(crate) mod transport;
 pub use transport::{
     ModernContentEncoding, ModernReadEndpoint, ModernReadRequest, ModernReadResponse,
@@ -28,6 +33,8 @@ pub struct ModernDirectoryEntry {
     model: String,
     spec_type: Option<String>,
     online_hint: Option<bool>,
+    kind: Option<DirectoryKind>,
+    parent: Option<PrivateString>,
     mapping: Option<ModelMapping>,
 }
 impl fmt::Debug for ModernDirectoryEntry {
@@ -133,7 +140,7 @@ impl ModernMijiaSession {
                     operation.run(async { Ok(()) }).await?;
                     if !identities.insert(wire.did.clone()) {
                         let old = result.entries.iter().find(|v| v.did == wire.did).ok_or_else(invalid)?;
-                        if old.model != wire.model || old.spec_type != wire.spec_type { return Err(crate::protected::conflict()); }
+                        if old.model != wire.model || old.spec_type != wire.spec_type || old.kind != wire.pid || old.parent.as_ref().map(|p| p.as_str()) != wire.parent_id.as_ref().filter(|p| !p.as_str().is_empty()).map(|p| p.as_str()) { return Err(crate::protected::conflict()); }
                         return Err(invalid());
                     }
                     result.entries.push(self.directory_entry(wire)?);
@@ -214,6 +221,13 @@ impl ModernMijiaSession {
     }
 
     fn directory_entry(&self, wire: EntryWire) -> Result<ModernDirectoryEntry> {
+        let parent = wire.parent_id.filter(|p| !p.as_str().is_empty());
+        if parent
+            .as_ref()
+            .is_some_and(|p| !crate::bounded_text(p.as_str(), 128))
+        {
+            return Err(invalid());
+        }
         if !crate::bounded_text(wire.did.as_str(), 128)
             || !crate::bounded_text(&wire.name, 256)
             || !crate::bounded_text(&wire.model, 256)
@@ -233,6 +247,8 @@ impl ModernMijiaSession {
             model: wire.model,
             spec_type: wire.spec_type,
             online_hint: wire.online,
+            kind: wire.pid,
+            parent,
             mapping,
         })
     }
@@ -341,12 +357,44 @@ struct DirectoryPage {
 }
 #[derive(Deserialize)]
 struct EntryWire {
+    pid: Option<DirectoryKind>,
+    parent_id: Option<PrivateString>,
     did: PrivateString,
     name: String,
     model: String,
     spec_type: Option<String>,
     #[serde(rename = "isOnline")]
     online: Option<bool>,
+}
+/// Closed canonical representation; numeric and textual wire kinds are equivalent.
+#[derive(Clone, Copy, PartialEq, Eq)]
+struct DirectoryKind(u32);
+impl<'de> Deserialize<'de> for DirectoryKind {
+    fn deserialize<D: serde::Deserializer<'de>>(
+        deserializer: D,
+    ) -> std::result::Result<Self, D::Error> {
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        enum Wire {
+            Number(u32),
+            Text(String),
+        }
+        let number = match Wire::deserialize(deserializer)? {
+            Wire::Number(n) => n,
+            Wire::Text(text) => {
+                if text.is_empty()
+                    || text.len() > 10
+                    || (text.len() > 1 && text.starts_with('0'))
+                    || !text.bytes().all(|b| b.is_ascii_digit())
+                {
+                    return Err(serde::de::Error::custom("Invalid directory kind"));
+                }
+                text.parse()
+                    .map_err(|_| serde::de::Error::custom("Invalid directory kind"))?
+            }
+        };
+        Ok(Self(number))
+    }
 }
 #[derive(Deserialize)]
 struct HomeList {

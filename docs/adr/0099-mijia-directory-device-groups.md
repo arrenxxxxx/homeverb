@@ -1,6 +1,6 @@
 # ADR-0099: Mijia directory device groups
 
-Status: Accepted; implementation in progress.
+Status: Typed directory grouping implemented; protected Core adoption pending.
 Date: October 30, 2026.
 
 ## Evidence and decision
@@ -54,3 +54,13 @@ conflicting model/spec; foreign subject/cUserId; duplicates across pages; order
 independence; a complete partition at the 4096-entry bound; cancellation/deadline;
 redacted debug and serialization refusal; no network or inferred property rewrite
 in reconciliation; existing modern account and legacy protocol tests.
+
+## Executed evidence
+
+Fourteen fictional topology tests passed as part of all 184 Mijia unit tests;
+14 documentation compile checks also passed, including the two new serialization
+refusals. Strict Mijia all-target Clippy passed. Before the final four topology
+cases and equivalent implementation cleanup, the combined Mijia/Host regression
+passed 498 tests. These checks use synthetic encrypted replies and local stores,
+not an authenticated provider or physical device. Core publication, stable
+bindings and route admission remain separate pending work.

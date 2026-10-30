@@ -1,5 +1,32 @@
 # Implementation status and next tasks
 
+## Modern directory device groups -- October 30, 2026
+
+[ADR-0099](adr/0099-mijia-directory-device-groups.md) implements typed, protected directory grouping as the prerequisite for
+modern Core adoption. Canonical numeric/text `pid` and optional cloud `parent_id`
+remain inside opaque entries. Kinds 0/6/16/18 are separate candidates; kind 21
+joins only its explicit ordinary parent with compatible model/spec evidence.
+Kind-18 gateway children stay separate, and names or ID suffixes never establish
+identity. Unknown kinds, missing parents and nested logical parents are retained
+unresolved. Duplicate/foreign identities, cycles and contradictory split metadata
+fail before any grouping result. Linear bounded traversal observes cancellation
+and preserves each input exactly once, without property-map fusion or networking.
+
+Fourteen new topology cases passed in the final 184 Mijia unit tests, plus 14
+compile checks including serialization refusal. Strict Mijia all-target Clippy
+passed. The preceding combined Mijia/Host run passed 498 tests before the final
+four cases and equivalent traversal cleanup. No native API, protected payload,
+SQLite, App report or control authority changes. Existing modern directory reads
+now reject malformed kind/parent metadata instead of discarding those fields.
+Missing metadata remains readable but cannot establish a physical candidate.
+
+Protected route provenance, stable legacy/modern binding reconciliation, Core
+publication/reads and App card adoption remain pending. Typed groups are not
+physical device counts, complete membership or evidence that appliances are online.
+No provider/account operation, appliance write, mobile package or remote publication
+was performed. The reference ledger continues to report partial implementation.
+
+
 ## Foreground Flutter QR account flow -- October 30, 2026
 
 The API 1.36 client is now connected to the sign-in and saved-account pages under

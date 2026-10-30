@@ -31,6 +31,15 @@ cloud value/cache checks, cancellation/drop lease cleanup, removal and independe
 adapter write denial. `cargo test -p homeverb-host --test mijia_startup --offline --locked`
 checks empty production Rust composition without credential or provider access.
 
+## Modern directory grouping checks
+
+`cargo test -p homeverb-mijia --offline --locked reconciliation` covers the local
+kind/parent partition, gateway versus logical-child semantics, duplicate/foreign
+identity, cycles, malformed wire metadata, 4096-entry bounds, cancellation and
+unchanged request counts. Full Mijia tests include opaque-type serialization
+refusal and existing account/authentication reads. This does not prove Core card
+publication or physical-device identity; those remain pending under ADR-0099.
+
 ## Foreground QR App checks
 
 Run from `apps/mobile` with the installed FVM SDK. Tests use only fictional
