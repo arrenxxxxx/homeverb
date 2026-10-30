@@ -1,5 +1,35 @@
 # 14. Mijia reference integration and remaining coverage
 
+## Event history API 1.44 Android package -- October 30, 2026
+
+Clean source 93cabfd8e6d1cf4dd343a0d213b1fe93ecf42bf3 produced the combined-platform
+release APK apps/mobile/build/delivery/mijia/93cabfd/homeverb-mijia-0.2.0-93cabfd.apk.
+Size: 79,789,874 bytes. SHA-256:
+96189cc0078cea827e00457818d468be1311b964a71a9069cc371f04eb311b3c.
+The adjacent verification.json records source_dirty=false, exact current-AAR code
+after NDK stripping, both arm64-v8a and x86_64 runtimes, 31 exports per ABI,
+development APK v2 signature and 16 KiB ZIP/Core ELF alignment. The verifier also
+checked minimum API 28, disabled backup, release mode and no integration-test
+plugin. Additional archive inspection confirmed API 1.44 and both event methods/
+startup field in each native library and matching App method/startup strings.
+This is archive evidence; no phone or provider runtime acceptance follows.
+
+Executed scripts/build_android_native.py with installed Rust 1.99.1 Android
+targets, NDK 28.2.13676358, API 35 stubs and Android Studio JDK for both ABIs.
+Flutter 3.47.7 built android-arm64,android-x64 release mode with
+HOMEVERB_ADAPTER=homeverb.platforms. Temporary SDK/JDK configuration was used and
+android/local.properties restored. scripts/verify_flutter_apk.py passed the exact
+AAR match, architecture/export/alignment and manifest/signature checks.
+
+This package supersedes 85fefd8 and includes the explicit foreground event history
+view for 78 exact event selectors, in addition to 40 scalar controls, 15 actions,
+161 numeric-history mappings and daily energy. Event history returns occurrence
+times only; equal timestamps remain separate and completeness is unproven. It
+adds no event polling, payload interpretation, pagination or background service.
+CLI/MCP event adoption, 185 remaining writable definitions, 25 actions, specialized
+paths and real account/provider/phone/model acceptance remain incomplete. No
+installation, real-device request, push, diagnostic upload or publication occurred.
+
 ## Flutter event occurrence history -- October 30, 2026
 
 The App adopts ADR-0117/API 1.44 through a separate Event history dialog. Production
@@ -165,7 +195,7 @@ not change the six actions included in the ab34f21 APK.
 | 28 opaque readable values | Separate typed/business/privacy contracts required |
 | 3 network identity values | Excluded from state and exports |
 | 40 actions | Eleven exact empty-input actions have Core/native/App support, including five elevated power toggles under ADR-0110/0111; four maintenance/stop actions also have Core/native/App support under ADR-0112/0113; the other 25 actions remain incomplete |
-| 78 events | Typed Core/adapter occurrence-time history under ADR-0115/0116; Host/native/App, payload semantics, paging and subscriptions remain incomplete |
+| 78 events | Core/adapter/native/App occurrence-time history under ADR-0115/0116/0117, packaged in 93cabfd; CLI/MCP entry points, payload semantics, paging, foreground subscriptions and real acceptance remain incomplete |
 
 The archived successful reads used **SID `mijia`** and
 `https://core.api.mijia.tech/app`, with a continuous RC4 stream across encrypted

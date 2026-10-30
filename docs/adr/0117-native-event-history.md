@@ -1,6 +1,6 @@
 # ADR-0117: Native event occurrence history
 
-Status: Native and Flutter implemented and synthetic-tested; package adoption pending.
+Status: Native/Flutter implemented and synthetic-tested; Android archive verified; real acceptance pending.
 Date: October 30, 2026.
 
 ## Decision
@@ -84,3 +84,13 @@ shared catalogs cover all 78 pinned selectors in English and Chinese. ABI/storag
 formats and the current 85fefd8 APK remain unchanged. See the
 [App verification record](../../apps/mobile/verification.md) for executed tests;
 provider/phone/model acceptance and event payload interpretation remain open.
+
+## Android package evidence
+
+The subsequent clean-source 93cabfd package includes native API 1.44 and Flutter
+event history for both Android ABIs. Archive checks verify current-AAR matching,
+31 exports per ABI, API 28 minimum, disabled backup, development APK v2 signature
+and 16 KiB alignment. The package supersedes 85fefd8 without changing the ABI or
+storage formats. See the [package record](../development/14-mijia-reference-integration.md)
+for the artifact hash and exact scope; installation/provider/phone/model acceptance,
+event payload semantics and pagination remain incomplete.

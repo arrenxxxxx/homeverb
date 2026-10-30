@@ -577,3 +577,12 @@ limits; it never exposes event payloads or interprets them as live state. Closin
 or leaving the foreground clears the transient result. Known event-only components
 have no state refresh. New APK and real provider/phone/model acceptance remain
 pending; current package 85fefd8 is API 1.43.
+
+### API 1.44 Android package
+
+Clean source 93cabfd provides the current development APK under
+`build/delivery/mijia/93cabfd/homeverb-mijia-0.2.0-93cabfd.apk`, including the event
+history view described above. Both 64-bit ABIs, current native AAR, exports,
+development signature and 16 KiB alignment passed archive inspection. The adjacent
+verification.json records exact hashes. This supersedes 85fefd8; installation and
+real account/phone/model acceptance remain unverified.

@@ -1,6 +1,6 @@
 # ADR-0116: Bounded event occurrence history through Core
 
-Status: Accepted; typed Core and protected Mijia adapter implemented; Host/native/CLI/MCP/App pending.
+Status: Implemented through Core, protected adapter, native API 1.44 and Flutter; CLI/MCP adoption and real acceptance pending.
 Date: October 30, 2026.
 
 ## Context

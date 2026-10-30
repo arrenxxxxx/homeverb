@@ -1,5 +1,16 @@
 # Implementation status and next tasks
 
+## Event history Android package -- October 30, 2026
+
+Source 93cabfd now has a verified API 1.44 dual-ABI Android package including the
+foreground event-history App integration. Native/App method and startup fields,
+current AAR code, 31 exports per ABI, development signature and 16 KiB alignment
+were checked. This supersedes package 85fefd8, without changing schemas, ABI or
+storage. See the [package record](development/14-mijia-reference-integration.md#event-history-api-144-android-package----october-30-2026).
+No installation or real provider/phone/model acceptance is claimed. CLI/MCP event
+entry points, payload semantics, pagination, 185 remaining writable definitions,
+25 actions and specialized paths remain incomplete.
+
 ## Flutter event occurrence history -- October 30, 2026
 
 The App adopts ADR-0117/API 1.44 through a separate Event history dialog. Production
