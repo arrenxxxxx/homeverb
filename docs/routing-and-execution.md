@@ -728,3 +728,22 @@ reports summarize logical entries without publishing physical cards, selecting
 routes or granting controls. Directory failure after successful protected login
 keeps the saved account, while uncertain storage still requires explicit recovery.
 No C caller may turn a transport failure into an automatic renewal or login replay.
+
+## Modern selected-protocol Core bindings
+
+[ADR-0100](adr/0100-mijia-modern-protected-core-reads.md) adds explicit typed
+modern device adoption before Core publication. Each protected binding selects
+legacy or modern reads; public connection metadata cannot choose the codec,
+credentials or origin. Explicit inventory can select its validated protocol while
+preserving local IDs and organization. A failed read never selects the other slot,
+renews credentials or refreshes inventory. Modern observations retain absent
+source time, local receipt time and stale=true, with Core scalar validation.
+
+Modern-selected descriptors have no control actions or historical options.
+Independent adapter checks also refuse stale descriptors and trusted grants before
+send, retaining failed/not-sent semantics. This does not introduce an outcome,
+retry, write authority or ordinary JSON parameter. The protected payload contract
+and positive/negative executable fixtures are in `crates/mijia/src/protected/modern.rs`
+and `crates/mijia/src/adapter/tests/modern_accounts/devices.rs`; public schemas are
+unchanged. Host/App publication is pending; existing QR reports alone do not
+publish physical cards.

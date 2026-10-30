@@ -1,6 +1,7 @@
 //! Account-bound Core reads and local card identity. Construction performs no I/O.
 
 mod history;
+mod modern_devices;
 
 use crate::{
     CloudTransport, Inventory, LoginCredentials, ModelMapping, PROVIDER, PropertyQuery, Region,
@@ -172,6 +173,9 @@ impl MijiaAdapter {
         validate_device(binding, id, device, connection)?;
         if !binding.listed {
             return Err(unsupported());
+        }
+        if binding.is_modern() {
+            return Ok(Vec::new());
         }
         match binding.mapping.as_ref() {
             Some(mapping) if mapping.is_outlet() && include_outlets => {
@@ -462,10 +466,16 @@ impl MijiaAdapter {
         let mut issues = inventory.issues;
         let other_ids: HashSet<_> = others
             .iter()
-            .flat_map(|a| a.payload.bindings.iter().map(|b| &b.did))
+            .flat_map(|a| a.payload.bindings.iter().flat_map(Binding::provider_ids))
             .collect();
         for device in &inventory.devices {
-            if other_ids.contains(&device.did) {
+            if other_ids.contains(&device.did)
+                || account.payload.bindings.iter().any(|b| {
+                    b.modern
+                        .as_ref()
+                        .is_some_and(|m| m.logical_children.contains(&device.did))
+                })
+            {
                 return Err(conflict());
             }
             if account
@@ -533,6 +543,7 @@ impl MijiaAdapter {
                 }
             };
             let binding = &mut account.payload.bindings[position];
+            binding.read_protocol = crate::protected::BindingReadProtocol::Legacy;
             binding.name = device.name.clone();
             binding.listed = true;
             if let Some(mapping) = &binding.mapping {
@@ -659,7 +670,13 @@ fn descriptor(
     let mut capabilities = binding
         .mapping
         .as_ref()
-        .map(|m| m.controlled_capabilities(fan, settings, outlet))
+        .map(|m| {
+            m.controlled_capabilities(
+                fan && !binding.is_modern(),
+                settings && !binding.is_modern(),
+                outlet && !binding.is_modern(),
+            )
+        })
         .unwrap_or_default();
     let supported = !capabilities.is_empty();
     if capabilities.is_empty() {
@@ -831,15 +848,25 @@ impl Adapter for MijiaAdapter {
                         piid: p.piid,
                     })
                     .collect();
-                let session = account.payload.legacy_session()?;
-                let readings = session
-                    .properties(
-                        self.transport.as_ref(),
-                        &binding.device(),
-                        &queries,
-                        operation,
-                    )
-                    .await?;
+                let readings = if binding.is_modern() {
+                    let transport = self.modern_reads.as_deref().ok_or_else(unsupported)?;
+                    let session = account.payload.modern_session()?;
+                    let entry = session.protected_entry(&binding.device())?;
+                    session
+                        .properties(transport, &entry, &queries, operation)
+                        .await?
+                } else {
+                    account
+                        .payload
+                        .legacy_session()?
+                        .properties(
+                            self.transport.as_ref(),
+                            &binding.device(),
+                            &queries,
+                            operation,
+                        )
+                        .await?
+                };
                 let received_at = self.clock.now();
                 let mut values = BTreeMap::new();
                 for reading in readings {
@@ -907,7 +934,7 @@ impl Adapter for MijiaAdapter {
                 {
                     return Err(conflict());
                 }
-                if !binding.listed {
+                if !binding.listed || binding.is_modern() {
                     return Err(unsupported());
                 }
                 let mapping = binding.mapping.as_ref().ok_or_else(unsupported)?;

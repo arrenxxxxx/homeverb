@@ -9,6 +9,9 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use uuid::Uuid;
 
+mod modern;
+pub(crate) use modern::{BindingReadProtocol, ModernBinding};
+
 pub(crate) fn unconfirmed() -> Error {
     Error::new(
         "ACCOUNT_SESSION_UNCONFIRMED",
@@ -87,6 +90,10 @@ pub(crate) struct Binding {
     pub reported_spec: Option<String>,
     pub mapping: Option<ModelMapping>,
     pub listed: bool,
+    #[serde(default, skip_serializing_if = "BindingReadProtocol::is_legacy")]
+    pub read_protocol: BindingReadProtocol,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub modern: Option<ModernBinding>,
 }
 impl Binding {
     pub fn new(device: &CloudDevice) -> Self {
@@ -100,6 +107,8 @@ impl Binding {
             reported_spec: device.spec_type.clone(),
             mapping: None,
             listed: true,
+            read_protocol: BindingReadProtocol::Legacy,
+            modern: None,
         }
     }
     pub fn device(&self) -> CloudDevice {
@@ -175,7 +184,7 @@ impl Payload {
             .session()
     }
     pub fn set_modern_session(&mut self, session: crate::ModernMijiaSession) {
-        self.version = 2;
+        self.version = self.version.max(2);
         self.modern = Some(crate::modern::StoredModernSession::from_session(session));
     }
     pub fn decode(bytes: &SecretBytes, record: &AccountRecord) -> Result<Self> {
@@ -195,7 +204,7 @@ impl Payload {
         Ok(bytes)
     }
     fn validate(&self, record: &AccountRecord) -> Result<()> {
-        if !matches!(self.version, 1 | 2)
+        if !matches!(self.version, 1..=3)
             || self.account_id != record.id
             || self.credential_ref != record.credential_ref
             || self.provider != PROVIDER
@@ -210,19 +219,20 @@ impl Payload {
             (1, Some(legacy), None) => {
                 legacy.session()?;
             }
-            (2, legacy, Some(modern)) => {
+            (2 | 3, legacy, Some(modern)) => {
                 modern.session()?;
                 if let Some(legacy) = legacy {
                     legacy.session()?;
                     if legacy.subject() != modern.subject() {
                         return Err(unconfirmed());
                     }
-                } else if !self.bindings.is_empty() {
+                } else if self.version == 2 && !self.bindings.is_empty() {
                     return Err(unconfirmed());
                 }
             }
             _ => return Err(unconfirmed()),
         }
+        self.validate_modern_bindings()?;
         let mut provider_ids = HashSet::new();
         let mut local_ids = HashSet::new();
         for binding in &self.bindings {

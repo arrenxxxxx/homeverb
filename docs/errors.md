@@ -730,3 +730,15 @@ operation enums return `INVALID_ARGUMENT`; valid scan buffers are already cleare
 A missing host returns `HOST_CLOSED`. A failed logical directory remains a saved
 account report with `status=failed` and zero entries, not failed authentication.
 No new error code or ordinary JSON method is added.
+
+Modern protected device adoption under ADR-0100 reuses existing errors. Changed
+root/child roles, known parent/kind/model contradictions and cross-account identity
+collisions return `DEVICE_IDENTITY_CONFLICT` without persisting new bindings.
+Unsupported/unknown relationships remain partial and do not become cards. Invalid
+payload-3 provenance, mappings, cycles or downgrade attempts return
+`ACCOUNT_SESSION_UNCONFIRMED` before provider traffic. Missing modern composition
+and modern control/history attempts return `CAPABILITY_UNSUPPORTED`; writes stay
+failed/not-sent without a legacy fallback. Uncertain binding storage retains
+pending metadata and `SECRET_STORE_WRITE_UNKNOWN`; explicit recovery validates
+saved bytes without login or unchanged-secret rewrite. No public error schema or
+ordinary JSON field changes.

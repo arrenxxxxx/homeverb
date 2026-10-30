@@ -7,7 +7,8 @@ use homeverb_domain::{
 
 fn option(binding: &Binding) -> Option<HistoryOption> {
     let mapping = binding.mapping.as_ref()?;
-    if !binding.listed
+    if binding.is_modern()
+        || !binding.listed
         || binding.model != crate::statistics::DAILY_ENERGY_MODEL
         || mapping.spec_type != crate::statistics::DAILY_ENERGY_SPEC
     {

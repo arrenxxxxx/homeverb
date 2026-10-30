@@ -8,6 +8,8 @@ use crate::{
 
 struct Peer {
     auth: Mutex<Vec<Auth>>,
+    devices: Mutex<Vec<Value>>,
+    property_requests: Mutex<Vec<Value>>,
     reads: Mutex<Vec<Read>>,
     subject: Mutex<String>,
     renewed: AtomicU8,
@@ -21,6 +23,10 @@ impl Peer {
     fn new() -> Arc<Self> {
         Arc::new(Self {
             auth: Mutex::new(vec![]),
+            devices: Mutex::new(vec![
+                json!({"did":"PRIVATE-MODERN-DEVICE","name":"Modern Fan","model":"jdjz.fan.2072fc","pid":0}),
+            ]),
+            property_requests: Mutex::new(vec![]),
             reads: Mutex::new(vec![]),
             subject: Mutex::new("999001".into()),
             renewed: AtomicU8::new(0),
@@ -122,8 +128,28 @@ impl ModernReadTransport for Peer {
             serde_json::from_slice(codec::decrypt(&key, fields["data"].as_bytes())?.expose())
                 .unwrap();
         let result = match request.endpoint() {
-            Read::Directory => json!({"list":[{"did":"PRIVATE-MODERN-DEVICE","name":"Modern Fan","model":"jdjz.fan.2072fc"}],"has_more":false}),
-            Read::Properties => json!(data["params"].as_array().unwrap().iter().map(|p| json!({"did":p["did"],"siid":p["siid"],"piid":p["piid"],"code":0,"value":false})).collect::<Vec<_>>()),
+            Read::Directory => {
+                json!({"list":self.devices.lock().unwrap().clone(),"has_more":false})
+            }
+            Read::Properties => {
+                let params = data["params"].as_array().unwrap();
+                self.property_requests
+                    .lock()
+                    .unwrap()
+                    .extend(params.clone());
+                json!(params.iter().map(|p| {
+                    let devices = self.devices.lock().unwrap();
+                    let device = devices.iter().find(|d| d["did"] == p["did"]).unwrap();
+                    let mapping = ModelMapping::pinned(device["model"].as_str().unwrap(), None).unwrap().unwrap();
+                    let property = mapping.properties.iter().find(|v| json!(v.siid) == p["siid"] && json!(v.piid) == p["piid"]).unwrap();
+                    let value = match property.definition["type"].as_str().unwrap() {
+                        "boolean" => json!(false),
+                        _ => property.definition["enum"].as_array().and_then(|v| v.first()).cloned()
+                            .or_else(|| property.definition.get("minimum").cloned()).unwrap_or(json!(0)),
+                    };
+                    json!({"did":p["did"],"siid":p["siid"],"piid":p["piid"],"code":0,"value":value})
+                }).collect::<Vec<_>>())
+            }
             _ => panic!("No hidden home request"),
         };
         Ok(ModernReadResponse {
@@ -863,3 +889,6 @@ async fn original_cancellation_during_secret_write_keeps_pending_bytes_for_expli
     assert_eq!(bytes(&f, &record), before);
     assert_eq!(puts(&f), count);
 }
+
+#[path = "modern_accounts/devices.rs"]
+mod devices;

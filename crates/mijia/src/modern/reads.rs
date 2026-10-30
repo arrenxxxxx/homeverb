@@ -28,13 +28,13 @@ const MAX_ENTRIES: usize = 4096;
 pub struct ModernDirectoryEntry {
     subject: PrivateString,
     encrypted_subject: PrivateString,
-    did: PrivateString,
+    pub(crate) did: PrivateString,
     name: String,
     model: String,
     spec_type: Option<String>,
     online_hint: Option<bool>,
-    kind: Option<DirectoryKind>,
-    parent: Option<PrivateString>,
+    pub(crate) kind: Option<DirectoryKind>,
+    pub(crate) parent: Option<PrivateString>,
     mapping: Option<ModelMapping>,
 }
 impl fmt::Debug for ModernDirectoryEntry {
@@ -43,6 +43,16 @@ impl fmt::Debug for ModernDirectoryEntry {
     }
 }
 impl ModernDirectoryEntry {
+    pub(crate) fn cloud_device(&self) -> crate::CloudDevice {
+        crate::CloudDevice {
+            did: self.did.clone(),
+            name: self.name.clone(),
+            model: self.model.clone(),
+            spec_type: self.spec_type.clone(),
+            online_hint: None,
+        }
+    }
+
     pub fn name(&self) -> &str {
         &self.name
     }
@@ -220,6 +230,21 @@ impl ModernMijiaSession {
             .await
     }
 
+    pub(crate) fn protected_entry(
+        &self,
+        device: &crate::CloudDevice,
+    ) -> Result<ModernDirectoryEntry> {
+        self.directory_entry(EntryWire {
+            did: device.did.clone(),
+            name: device.name.clone(),
+            model: device.model.clone(),
+            spec_type: device.spec_type.clone(),
+            online: None,
+            pid: None,
+            parent_id: None,
+        })
+    }
+
     fn directory_entry(&self, wire: EntryWire) -> Result<ModernDirectoryEntry> {
         let parent = wire.parent_id.filter(|p| !p.as_str().is_empty());
         if parent
@@ -368,7 +393,7 @@ struct EntryWire {
 }
 /// Closed canonical representation; numeric and textual wire kinds are equivalent.
 #[derive(Clone, Copy, PartialEq, Eq)]
-struct DirectoryKind(u32);
+pub(crate) struct DirectoryKind(pub(crate) u32);
 impl<'de> Deserialize<'de> for DirectoryKind {
     fn deserialize<D: serde::Deserializer<'de>>(
         deserializer: D,

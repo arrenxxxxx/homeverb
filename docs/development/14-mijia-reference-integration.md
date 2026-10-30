@@ -1518,3 +1518,11 @@ publication/reads and App card adoption remain pending. Typed groups are not
 physical device counts, complete membership or evidence that appliances are online.
 No provider/account operation, appliance write, mobile package or remote publication
 was performed. The reference ledger continues to report partial implementation.
+
+## Modern Core binding checkpoint -- October 30, 2026
+
+[ADR-0100](../adr/0100-mijia-modern-protected-core-reads.md) and the
+[Mijia implementation record](11-mijia.md) now cover typed protected device
+adoption, payload 3 and Core reads for all 264 pinned scalar mappings with fictional
+evidence. Host/App card publication is still pending; the coverage ledger keeps
+that distinction and retains the remaining control/event/BLE/LAN/media work.

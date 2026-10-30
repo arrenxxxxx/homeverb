@@ -1,6 +1,6 @@
 # ADR-0100: Protected modern Mijia device bindings and Core reads
 
-Status: Accepted for implementation.
+Status: Typed protected bindings and Core reads implemented; Host/App publication pending.
 Date: October 30, 2026.
 
 ## Decision
@@ -71,3 +71,17 @@ and drop lease release; modern control/history refusal with stale descriptors;
 protected markers absent from public JSON and plaintext SQLite; existing legacy,
 modern account, Host and native regressions. Host/App card publication and actual
 provider/device acceptance remain tracked separately until implemented/tested.
+
+## Executed evidence
+
+The workspace run excluding the pre-existing unrelated Meiju/macOS LAN-alias
+failures passed 579 tests with one ignored, including all 12 new modern device
+integration tests. These exercise actual SQLite/Core with fictional secret storage
+and encrypted responses, all 264 pinned scalar mappings, stable organization,
+protocol selection, uncertain persistence and refusal paths. Strict workspace
+all-target Clippy passed after an equivalent range-pattern cleanup. The rebuilt
+native library passed 36 ordinary methods/57 examples plus all dedicated export
+checks, including 62 modern-account C refusal/buffer/lifecycle cases. Documentation,
+repository hygiene and reference-projection checks passed. No authenticated provider,
+physical phone/appliance, new APK, remote CI or publication was used. The Host/App
+login-to-card path remains pending and is not established by these typed Core tests.

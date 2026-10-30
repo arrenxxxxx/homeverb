@@ -720,3 +720,30 @@ publication/reads and App card adoption remain pending. Typed groups are not
 physical device counts, complete membership or evidence that appliances are online.
 No provider/account operation, appliance write, mobile package or remote publication
 was performed. The reference ledger continues to report partial implementation.
+
+## Modern protected device bindings and Core reads -- October 30, 2026
+
+[ADR-0100](../adr/0100-mijia-modern-protected-core-reads.md) adds explicit typed modern
+device refresh/recovery returning partial Core descriptors. Protected payload 3
+retains root/child evidence, stable local IDs and selected read-protocol provenance.
+Versions 1/2 remain byte-stable until explicit device adoption; older binaries
+cannot read version 3. SQLite 5, Meiju payload 3 and native API 1.36 are unchanged.
+
+Core can publish these descriptors and read the exact pinned scalar properties
+through modern credentials/origin/codec. Explicit legacy or modern inventory can
+select its own read protocol; failed reads never fall back or reauthenticate.
+Modern-selected bindings suppress controls/history and independently refuse stale
+control descriptors/grants. Logical children never receive separate cards; prior
+root/child and cross-account collisions require reconciliation rather than merging.
+Names, rooms, favorites and device/connection IDs survive exact protocol selection.
+
+Twelve new fictional integration tests cover all 264 mapped scalar readings,
+restart, version-3 tampering, stable organization, partial retention, role/model/
+parent conflicts, uncertain save/recovery, cancellation/drop and write refusal.
+The Rust workspace run excluding the known unrelated Meiju/macOS LAN-alias test
+failures passed 579 tests with one ignored. Strict workspace/all-target Clippy and
+the native library build passed. The rebuilt C ABI passed all 36 ordinary
+methods/57 examples and dedicated-export checks, including 62 modern-account
+refusal/buffer/lifecycle cases. Documentation, repository hygiene and the reference
+projection tests passed. No real provider/device access or mobile package was used. Host/App login-to-card publication remains the next dependent task;
+the existing QR C/App reports still return logical directory summaries only.

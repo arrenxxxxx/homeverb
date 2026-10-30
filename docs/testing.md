@@ -31,6 +31,16 @@ cloud value/cache checks, cancellation/drop lease cleanup, removal and independe
 adapter write denial. `cargo test -p homeverb-host --test mijia_startup --offline --locked`
 checks empty production Rust composition without credential or provider access.
 
+## Modern protected device checks
+
+`cargo test -p homeverb-mijia --offline --locked modern_accounts::devices` uses
+actual Core/SQLite with fictional encrypted modern replies and an in-memory secret
+store. It checks all pinned scalar mappings, selected-protocol isolation, stable
+IDs/organization, payload-3 corruption, split-child identity, stale write denial,
+uncertain save/recovery and cancellation/drop. It performs no provider traffic or
+physical actuation. Run the broader workspace and native ABI checks after changing
+protected payload admission. Host/App publication and real acceptance are separate.
+
 ## Modern directory grouping checks
 
 `cargo test -p homeverb-mijia --offline --locked reconciliation` covers the local

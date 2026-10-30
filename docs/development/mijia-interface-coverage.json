@@ -5400,12 +5400,13 @@
     "status": "implemented_typed_reference_directory_homes_and_pinned_properties",
     "origin": "https://core.api.mijia.tech/app",
     "codec": "continuous_rc4_drop1024_with_bounded_encrypted_gzip",
-    "logical_parent_reconciliation": "implemented_typed_directory_groups_core_binding_pending",
+    "logical_parent_reconciliation": "implemented_typed_groups_and_protected_bindings_host_app_pending",
     "group_evidence": "ADR-0099; fictional bounded parent-graph tests",
     "protected_account": "implemented_typed_rust",
     "typed_host_directory_and_recovery": "implemented",
     "native_c_logical_directory_summary": "implemented_api_1_36",
-    "physical_core_and_app": "pending",
+    "protected_device_bindings": "implemented_payload_v3_explicit_read_protocol_and_logical_evidence",
+    "physical_core_and_app": "typed_core_reads_implemented_host_app_publication_pending",
     "provider_acceptance": "pending"
   },
   "remaining": [
