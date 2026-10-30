@@ -218,5 +218,5 @@ and opt-in `include_no_argument_actions` on control-option inspection. Negotiate
 1.40 before either addition. Defaults stay action-free, inspection stays local,
 and uncertain non-idempotent receipts are never replayed. See the
 [action contract](../../docs/native-ui-contract.md#exact-no-argument-actions-api-140).
-Version-negotiated Flutter adoption is implemented; matching packaging and real
-acceptance remain pending.
+Version-negotiated Flutter adoption is implemented. The ab34f21 API 1.40 Android
+package has archive checks; real acceptance remains pending.

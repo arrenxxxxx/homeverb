@@ -13,6 +13,10 @@ includes these additions with clean-source archive checks. Broader
 controls/history and other reference coverage remain incomplete; see the
 [coverage ledger and remaining work](14-mijia-reference-integration.md).
 
+The [ab34f21 API 1.40 package](../../apps/mobile/verification.md#no-argument-actions-api-140-android-package--october-30-2026)
+includes the six native/App no-argument actions with clean-source archive checks.
+It is not real provider/phone/model acceptance.
+
 The October 30 integration uses native API **1.40.0**, following the linear
 mainline update and dedicated interactive-login bridge. Earlier Mijia phase versions are historical. See
 [contract reconciliation](../adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls

@@ -4482,3 +4482,27 @@ refusal and current Mijia/combined opening use fictional temporary profiles.
 Both reference projection tests and all seven shared presentation tests passed.
 The known eight full-suite macOS font/pixel/legacy-click failures are not claimed
 fixed. No provider account, appliance write, installation or publication occurred.
+
+
+## No-argument actions API 1.40 Android package -- October 30, 2026
+
+Clean source `ab34f2199305ee991a8eb28055674e8acb57bf1e` produced the combined-platform
+release APK `apps/mobile/build/delivery/mijia/ab34f21/homeverb-mijia-0.2.0-ab34f21.apk`.
+Size: 79,113,802 bytes. SHA-256:
+`d699118223e38341a96a6b9385344188865d6ed58968a05f20340d69a6761040`.
+The adjacent `verification.json` records clean source, AAR/native digests,
+exact arm64-v8a/x86_64 composition, development signing and 16 KiB alignment.
+
+Both native cross-builds passed with 31 exports per ABI using the installed
+stable Rust 1.99.1 Android targets, NDK 28.2.13676358 and existing JDK. An initial
+Rust 1.96 attempt failed because that toolchain has no Android targets; no target
+or SDK was installed. Native tests use Rust 1.96 and do not imply an Android
+runtime test. Flutter 3.47.7 assembled the release APK with temporary SDK/JDK
+configuration; the original local properties were restored. Signature, ZIP/ELF
+alignment and exact current-AAR code after normal NDK stripping passed.
+
+This APK contains all six independent exact no-argument actions through API 1.40
+and Flutter alongside the existing 33 scalar controls and bounded history views.
+No installation, real account, appliance request, remote push or publication was
+performed. Archive evidence is not provider, phone or model acceptance. The
+remaining 34 actions, event support and other reference gaps stay incomplete.

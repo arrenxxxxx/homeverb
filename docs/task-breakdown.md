@@ -24,6 +24,11 @@ Both reference projection tests and all seven shared presentation tests passed.
 The known eight full-suite macOS font/pixel/legacy-click failures are not claimed
 fixed. No provider account, appliance write, installation or publication occurred.
 
+The subsequent clean-source ab34f21 APK includes API 1.40 and these App actions.
+Both ABIs, 31 exports each, development signature, 16 KiB alignment and exact
+current-AAR match passed; no runtime/device acceptance is inferred. See the
+[package record](../apps/mobile/verification.md#no-argument-actions-api-140-android-package--october-30-2026).
+
 ## Native exact no-argument actions -- October 30, 2026
 
 [ADR-0109](adr/0109-native-mijia-action-grants.md) exposes the six reviewed

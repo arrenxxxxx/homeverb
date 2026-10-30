@@ -206,6 +206,7 @@ def project():
         'legacy_profile': 'SID_xiaomiio_api_io_mi_com_per_field',
         'modern_profile': 'SID_mijia_core_api_mijia_tech_continuous',
         'core_native_app': 'implemented_api_1_40_opt_in_and_version_negotiated_flutter',
+        'android_package': 'archive_checked_ab34f21_no_runtime_acceptance',
         'provider_acceptance': 'pending',
     }
     return {CATALOG: profiles, LEDGER: coverage, ACTION_CATALOG: action_profiles}

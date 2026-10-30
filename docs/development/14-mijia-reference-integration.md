@@ -28,6 +28,8 @@ that package predates the new hood extension. The later
 [503ef1f API 1.39 package](../../apps/mobile/verification.md#exact-hood-controls-api-139-android-package--october-30-2026)
 contains all 33 reviewed controls with clean-source archive checks. API 1.40 now
 adds six exact no-argument actions through Core/native/App; that APK predates them.
+The later [ab34f21 API 1.40 package](../../apps/mobile/verification.md#no-argument-actions-api-140-android-package--october-30-2026)
+includes all six actions with clean-source archive checks.
 
 - Eight-part MIoT URNs retain their exact extension; malformed/foreign URNs refuse.
 - Seventeen exact model/specification catalogs project 264 reviewed scalar read
@@ -1818,3 +1820,27 @@ refusal and current Mijia/combined opening use fictional temporary profiles.
 Both reference projection tests and all seven shared presentation tests passed.
 The known eight full-suite macOS font/pixel/legacy-click failures are not claimed
 fixed. No provider account, appliance write, installation or publication occurred.
+
+
+## No-argument actions API 1.40 Android package -- October 30, 2026
+
+Clean source `ab34f2199305ee991a8eb28055674e8acb57bf1e` produced the combined-platform
+release APK `apps/mobile/build/delivery/mijia/ab34f21/homeverb-mijia-0.2.0-ab34f21.apk`.
+Size: 79,113,802 bytes. SHA-256:
+`d699118223e38341a96a6b9385344188865d6ed58968a05f20340d69a6761040`.
+The adjacent `verification.json` records clean source, AAR/native digests,
+exact arm64-v8a/x86_64 composition, development signing and 16 KiB alignment.
+
+Both native cross-builds passed with 31 exports per ABI using the installed
+stable Rust 1.99.1 Android targets, NDK 28.2.13676358 and existing JDK. An initial
+Rust 1.96 attempt failed because that toolchain has no Android targets; no target
+or SDK was installed. Native tests use Rust 1.96 and do not imply an Android
+runtime test. Flutter 3.47.7 assembled the release APK with temporary SDK/JDK
+configuration; the original local properties were restored. Signature, ZIP/ELF
+alignment and exact current-AAR code after normal NDK stripping passed.
+
+This APK contains all six independent exact no-argument actions through API 1.40
+and Flutter alongside the existing 33 scalar controls and bounded history views.
+No installation, real account, appliance request, remote push or publication was
+performed. Archive evidence is not provider, phone or model acceptance. The
+remaining 34 actions, event support and other reference gaps stay incomplete.
