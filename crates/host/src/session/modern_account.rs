@@ -91,6 +91,78 @@ impl Session {
         Ok(result)
     }
 
+    /// Publish protected device bindings from the original bounded QR directory read.
+    pub async fn continue_modern_device_login(
+        &self,
+        input: ContinueAccountLoginRequest,
+    ) -> Result<crate::AccountConnection> {
+        let pending = self
+            .state
+            .lock()
+            .map_err(|_| unavailable())?
+            .modern_logins
+            .remove(&input.challenge_id)
+            .ok_or_else(unavailable)?;
+        let (mut operation, _registration) =
+            self.register(&input.schema_version, input.operation_id, input.timeout_ms)?;
+        operation.deadline = operation.deadline.min(pending.expires_at());
+        let generation = self.modern_generation()?;
+        let discovery = self
+            .modern_account_adapter()?
+            .continue_modern_device_connection(pending, &operation)
+            .await?;
+        self.complete_modern_operation(generation, &operation)
+            .await?;
+        let result =
+            crate::accounts::publish_mijia(&self.core, discovery, "succeeded", &operation).await;
+        self.complete_modern_operation(generation, &operation)
+            .await?;
+        Ok(result)
+    }
+
+    pub async fn refresh_modern_account_devices(
+        &self,
+        input: ModernAccountRequest,
+    ) -> Result<crate::AccountConnection> {
+        self.modern_devices(input, false).await
+    }
+
+    pub async fn recover_modern_account_devices(
+        &self,
+        input: ModernAccountRequest,
+    ) -> Result<crate::AccountConnection> {
+        self.modern_devices(input, true).await
+    }
+
+    async fn modern_devices(
+        &self,
+        input: ModernAccountRequest,
+        recover: bool,
+    ) -> Result<crate::AccountConnection> {
+        let (operation, _registration) =
+            self.register(&input.schema_version, input.operation_id, input.timeout_ms)?;
+        homeverb_core::valid_account_id(input.account_id)?;
+        let generation = self.modern_generation()?;
+        let adapter = self.modern_account_adapter()?;
+        let discovery = if recover {
+            adapter
+                .recover_modern_devices(input.account_id, &operation)
+                .await?
+        } else {
+            adapter
+                .refresh_modern_devices(input.account_id, &operation)
+                .await?
+        };
+        self.complete_modern_operation(generation, &operation)
+            .await?;
+        let result =
+            crate::accounts::publish_mijia(&self.core, discovery, "not_attempted", &operation)
+                .await;
+        self.complete_modern_operation(generation, &operation)
+            .await?;
+        Ok(result)
+    }
+
     pub fn discard_modern_account_login(&self, id: u64) -> bool {
         self.state
             .lock()

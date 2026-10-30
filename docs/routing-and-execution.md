@@ -747,3 +747,13 @@ and positive/negative executable fixtures are in `crates/mijia/src/protected/mod
 and `crates/mijia/src/adapter/tests/modern_accounts/devices.rs`; public schemas are
 unchanged. Host/App publication is pending; existing QR reports alone do not
 publish physical cards.
+
+
+ADR-0101 adds explicit typed Host publication after modern QR continuation or
+saved-session device refresh/recovery. It reuses the original login directory and
+lifetime through protected binding persistence; publication is bounded by the
+same QR expiry and foreground generation. Successful authentication is separate
+from partial/failed retrieval, and failed publication reports no device IDs without
+claiming storage rollback. Existing logical C/App calls remain unchanged; modern
+reads still use only protected selected-protocol evidence with no controls/history,
+fallback, automatic renewal, complete-inventory time or write-outcome changes.

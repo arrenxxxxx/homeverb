@@ -1,5 +1,7 @@
 //! Fictional Host lifecycle checks; no vendor traffic or real QR scanning.
 use super::*;
+#[path = "modern_host/devices.rs"]
+mod devices;
 use homeverb_host::{ContinueAccountLoginRequest, ModernAccountRequest, NativeModernQrLogin};
 use homeverb_mijia::{
     ModernAuthEndpoint as Auth, ModernAuthRequest, ModernAuthResponse, ModernAuthTransport,
@@ -11,6 +13,9 @@ use homeverb_mijia::{
 struct Peer {
     auth: Mutex<Vec<Auth>>,
     reads: AtomicUsize,
+    properties: AtomicUsize,
+    directory: Mutex<Option<Value>>,
+    fail_read: AtomicBool,
     pause: AtomicUsize,
     started: tokio::sync::Notify,
     renewal: AtomicBool,
@@ -97,8 +102,12 @@ impl ModernReadTransport for Peer {
         request: &ModernReadRequest,
         _: &Operation,
     ) -> Result<ModernReadResponse> {
-        assert_eq!(request.endpoint(), ModernReadEndpoint::Directory);
-        self.reads.fetch_add(1, Ordering::SeqCst);
+        if request.endpoint() == ModernReadEndpoint::Directory {
+            self.reads.fetch_add(1, Ordering::SeqCst);
+        } else {
+            assert_eq!(request.endpoint(), ModernReadEndpoint::Properties);
+            self.properties.fetch_add(1, Ordering::SeqCst);
+        }
         self.gate(3).await;
         self.hook();
         let fields: HashMap<_, _> = url::form_urlencoded::parse(request.body())
@@ -111,7 +120,38 @@ impl ModernReadTransport for Peer {
             ]
             .concat(),
         );
-        let response = json!({"code":0,"result":{"list":[{"did":"PRIVATE-MODERN-DID","name":"Modern Fan","model":"jdjz.fan.2072fc"}],"has_more":false}});
+        if self.fail_read.load(Ordering::SeqCst) {
+            return Err(homeverb_domain::Error::new(
+                "MIJIA_REQUEST_FAILED",
+                "Fictional read failure.",
+            ));
+        }
+        let result = if request.endpoint() == ModernReadEndpoint::Directory {
+            self.directory.lock().unwrap().clone().unwrap_or_else(||
+                json!({"list":[{"did":"PRIVATE-MODERN-DID","name":"Modern Fan","model":"jdjz.fan.2072fc","pid":0}],"has_more":false}))
+        } else {
+            let data: Value =
+                serde_json::from_slice(&stream(&key, &STANDARD.decode(&fields["data"]).unwrap()))
+                    .unwrap();
+            json!(
+                data["params"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|p| {
+                        assert_eq!(p["did"], "PRIVATE-MODERN-DID");
+                        let mut result =
+                            json!({"did":p["did"],"siid":p["siid"],"piid":p["piid"],"code":-1});
+                        if p["siid"] == 2 && p["piid"] == 1 {
+                            result["code"] = json!(0);
+                            result["value"] = json!(false);
+                        }
+                        result
+                    })
+                    .collect::<Vec<_>>()
+            )
+        };
+        let response = json!({"code":0,"result":result});
         Ok(ModernReadResponse {
             body: secret(
                 STANDARD
@@ -126,6 +166,7 @@ impl ModernReadTransport for Peer {
 struct ProtectedStore {
     inner: Secrets,
     uncertain: AtomicBool,
+    uncertain_at: AtomicUsize,
     puts: AtomicUsize,
 }
 #[async_trait]
@@ -134,9 +175,11 @@ impl SecretStore for ProtectedStore {
         self.inner.get(key, op).await
     }
     async fn put(&self, key: &CredentialRef, value: &SecretBytes, op: &Operation) -> Result<()> {
-        self.puts.fetch_add(1, Ordering::SeqCst);
+        let ordinal = self.puts.fetch_add(1, Ordering::SeqCst) + 1;
         self.inner.put(key, value, op).await?;
-        if self.uncertain.load(Ordering::SeqCst) {
+        if self.uncertain.load(Ordering::SeqCst)
+            || self.uncertain_at.load(Ordering::SeqCst) == ordinal
+        {
             Err(homeverb_domain::Error::new(
                 "SECRET_STORE_WRITE_UNKNOWN",
                 "Fictional uncertain store.",
@@ -687,6 +730,9 @@ async fn provider_metadata_and_ordinary_dispatch_refuse_modern_entry_points() {
     for method in [
         "begin_modern_account_login",
         "continue_modern_account_login",
+        "continue_modern_device_login",
+        "refresh_modern_account_devices",
+        "recover_modern_account_devices",
         "discard_modern_account_login",
         "refresh_modern_account",
         "recover_modern_account",

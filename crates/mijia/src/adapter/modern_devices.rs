@@ -51,7 +51,7 @@ impl MijiaAdapter {
         .await;
         Ok(discovery(account.lease.record().clone(), result))
     }
-    async fn bind_modern_inventory(
+    pub(in crate::adapter) async fn bind_modern_inventory(
         &self,
         account: &mut LoadedAccount,
         others: &[LoadedAccount],

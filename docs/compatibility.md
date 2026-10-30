@@ -1,5 +1,31 @@
 # Platform and device compatibility matrix
 
+## Foreground modern Host device publication -- October 30, 2026
+
+[ADR-0101](adr/0101-mijia-modern-host-device-publication.md) adds typed Host QR
+continuation with device publication and explicit modern device refresh/recovery.
+One bounded directory response is reconciled and persisted under the original
+account/registration leases, then published through Core. The Host inherits the
+original QR deadline and checks foreground generation before and after publication.
+Reports separate successful authentication from partial/failed retrieval and expose
+only local device IDs. Logical children stay grouped; unknown models remain named
+unsupported cards. Existing logical-only methods keep their behavior.
+
+The new path has fictional Host/Core tests for QR-to-card-to-state, exactly one
+directory read, local identity/organization preservation, empty/failed directories,
+uncertain authentication/binding storage, explicit recovery, Core publication
+conflicts, consumed/foreign handles, cancellation, expiry, drop and late lifecycle
+results. The workspace regression passed 591 tests with one ignored; strict Clippy and
+the rebuilt native ABI passed. See ADR-0101 for the exact evidence scope.
+
+Native API 1.36, its logical C/App results, SQLite 5 and protected payload versions
+are unchanged. The next dependent work is versioned C/Flutter device publication
+and generic refresh selection for modern-only/mixed accounts. The existing APK
+does not contain this integration. Modern controls/history, broader reference
+coverage and real provider/phone/device acceptance remain incomplete. No provider
+account, appliance, remote publication or mobile package is used by this phase.
+
+
 ## Modern protected device bindings and Core reads -- October 30, 2026
 
 [ADR-0100](adr/0100-mijia-modern-protected-core-reads.md) adds explicit typed modern

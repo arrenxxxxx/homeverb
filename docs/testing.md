@@ -729,3 +729,14 @@ or system-secret access. A separate API 1.35 build deliberately omits modern
 symbols to check pre-lookup negotiation; paused ready-response cases check owned
 scan-array cleanup and lifecycle refusal independently of native cancellation.
 The scoped account/native suite is not full mobile or provider acceptance.
+
+
+The ADR-0101 cases in
+`crates/host/tests/mijia_accounts/modern_host/devices.rs` exercise actual Host/Core
+publication from one fictional encrypted QR directory response, then ordinary
+state reads. Run `cargo +1.96.0 test -p homeverb-host --test mijia_accounts
+--offline --locked`. Cases cover grouped/unsupported cards, sanitized schema-valid
+reports, stable organization, partial empty/failing directories, uncertain first
+and second saves, exact-byte recovery, Core identity-publication failure, original
+QR deadline, foreign/consumed handles, lifecycle changes and dropped/cancelled work.
+These checks do not establish a callable C/App device flow or provider acceptance.

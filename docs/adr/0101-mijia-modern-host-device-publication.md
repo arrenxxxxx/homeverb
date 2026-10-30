@@ -1,6 +1,6 @@
 # ADR-0101: Foreground modern Mijia device publication
 
-Status: Accepted design; implementation and verification pending.
+Status: Typed adapter/Host publication implemented and synthetic-tested; native/App integration pending.
 Date: October 30, 2026.
 
 ## Decision
@@ -54,3 +54,16 @@ release and late-generation refusal; secret exclusion from reports and SQLite;
 existing logical C/Host behavior and legacy account regressions. New Rust reports
 must satisfy the existing account connection schema, without changing C exports
 or claiming App availability. Real provider/phone/model acceptance stays pending.
+
+## Executed evidence
+
+The Rust workspace regression excluding the documented unrelated Meiju/macOS
+LAN-alias failures passed 591 tests with one ignored, including all 12 new Host
+publication cases. Strict workspace/all-target Clippy and the native library build
+passed. The rebuilt ABI passed 36 ordinary methods/57 examples and all dedicated
+export checks, including 62 modern-account refusal/buffer/lifecycle cases. Contracts
+passed 25 schemas, 69 primary positives and 1,092 negatives; documentation, repository
+hygiene, the generated coverage check and both reference-projection tests passed.
+These are fictional software checks, not provider, phone or physical-device
+acceptance. No Flutter build, APK, provider account, appliance write, remote CI,
+push or publication was performed.

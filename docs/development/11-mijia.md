@@ -747,3 +747,36 @@ methods/57 examples and dedicated-export checks, including 62 modern-account
 refusal/buffer/lifecycle cases. Documentation, repository hygiene and the reference
 projection tests passed. No real provider/device access or mobile package was used. Host/App login-to-card publication remains the next dependent task;
 the existing QR C/App reports still return logical directory summaries only.
+
+
+## Foreground modern Host device publication -- October 30, 2026
+
+[ADR-0101](../adr/0101-mijia-modern-host-device-publication.md) adds typed
+`continue_modern_device_connection` and Host `continue_modern_device_login`.
+The existing logical QR continuation is unchanged. The new continuation reuses
+its one directory read while retaining original account locks and lifetime through
+protected binding persistence. Host publication uses the remaining QR deadline.
+`refresh_modern_account_devices` and `recover_modern_account_devices` explicitly
+publish saved modern bindings without logging in. Ordinary Core state reads use
+the protected selected protocol. Unknown models remain named cards and logical
+split children never become duplicate physical cards.
+
+AccountConnection reports distinguish authentication from partial/failed device
+retrieval; uncertain binding persistence publishes nothing and requires explicit
+recovery. Core publication failure returns no result IDs without promising rollback
+of local storage. Background/cancellation/drop fences publication and releases
+leases. The new typed results use the existing account-report schema; native API
+1.36 C/App results remain logical-only. Versioned C/Flutter wiring and generic
+refresh selection are next, followed by packaging and owner acceptance. No complete
+inventory, modern control/history support or physical acceptance is claimed.
+
+The Rust workspace regression excluding the documented unrelated Meiju/macOS
+LAN-alias failures passed 591 tests with one ignored, including all 12 new Host
+publication cases. Strict workspace/all-target Clippy and the native library build
+passed. The rebuilt ABI passed 36 ordinary methods/57 examples and all dedicated
+export checks, including 62 modern-account refusal/buffer/lifecycle cases. Contracts
+passed 25 schemas, 69 primary positives and 1,092 negatives; documentation, repository
+hygiene, the generated coverage check and both reference-projection tests passed.
+These are fictional software checks, not provider, phone or physical-device
+acceptance. No Flutter build, APK, provider account, appliance write, remote CI,
+push or publication was performed.

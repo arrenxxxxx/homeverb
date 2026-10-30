@@ -95,7 +95,7 @@ def project():
                        'reference_read_summary': model['independent_read_summary'], 'entries': entries})
     operations = [{'id': o['id'], 'route': o['route'],
                    'status': 'legacy_host_and_modern_typed_read' if o['id'] in ('directory', 'homes', 'properties') else 'not_admitted_by_reference',
-                   'reason': ('Modern reference-origin typed reads and protected accounts are implemented; App QR/account operations are implemented; physical Core adoption remains pending.'
+                   'reason': ('Modern reference-origin typed reads and protected accounts are implemented; typed Host device publication and Core reads are implemented; App card adoption remains pending.'
                               if o['id'] in ('directory', 'homes', 'properties')
                               else 'No credential crossover or arbitrary RPC; separate exact control admission is required.')}
                   for o in contract['operations']]
@@ -117,13 +117,14 @@ def project():
                     'status': 'implemented_typed_reference_directory_homes_and_pinned_properties',
                     'origin': 'https://core.api.mijia.tech/app',
                     'codec': 'continuous_rc4_drop1024_with_bounded_encrypted_gzip',
-                    'logical_parent_reconciliation': 'implemented_typed_groups_and_protected_bindings_host_app_pending',
+                    'logical_parent_reconciliation': 'implemented_typed_groups_protected_bindings_and_host_publication_app_pending',
                     'group_evidence': 'ADR-0099; fictional bounded parent-graph tests',
                     'protected_account': 'implemented_typed_rust',
                     'typed_host_directory_and_recovery': 'implemented',
                     'native_c_logical_directory_summary': 'implemented_api_1_36',
                     'protected_device_bindings': 'implemented_payload_v3_explicit_read_protocol_and_logical_evidence',
-                    'physical_core_and_app': 'typed_core_reads_implemented_host_app_publication_pending',
+                    'typed_host_device_publication': 'implemented_explicit_qr_continuation_refresh_and_recovery',
+                    'physical_core_and_app': 'typed_host_publication_and_core_reads_implemented_native_app_pending',
                     'provider_acceptance': 'pending'},
                 'remaining': ['modern_app_package_and_provider_acceptance',
                               'modern_api_origin_and_codec_acceptance', 'cloud_cache_inventory_reconciliation',

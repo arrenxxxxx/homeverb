@@ -71,6 +71,10 @@ impl fmt::Debug for ModernAccountDiscovery {
         f.write_str("ModernAccountDiscovery([REDACTED])")
     }
 }
+enum ModernConnectionDiscovery {
+    Logical(ModernAccountDiscovery),
+    Devices(AccountDiscovery),
+}
 fn project(record: AccountRecord, result: Result<ModernDirectory>) -> ModernAccountDiscovery {
     match result {
         Ok(directory) => ModernAccountDiscovery {
@@ -134,6 +138,38 @@ impl MijiaAdapter {
         pending: PendingModernMijiaLogin,
         operation: &Operation,
     ) -> Result<ModernAccountDiscovery> {
+        match self
+            .finish_modern_connection(pending, false, operation)
+            .await?
+        {
+            ModernConnectionDiscovery::Logical(result) => Ok(result),
+            ModernConnectionDiscovery::Devices(_) => {
+                unreachable!("Logical continuation selects logical discovery")
+            }
+        }
+    }
+    /// Adopt protected devices from the same directory read as foreground QR completion.
+    pub async fn continue_modern_device_connection(
+        &self,
+        pending: PendingModernMijiaLogin,
+        operation: &Operation,
+    ) -> Result<AccountDiscovery> {
+        match self
+            .finish_modern_connection(pending, true, operation)
+            .await?
+        {
+            ModernConnectionDiscovery::Devices(result) => Ok(result),
+            ModernConnectionDiscovery::Logical(_) => {
+                unreachable!("Device continuation selects device discovery")
+            }
+        }
+    }
+    async fn finish_modern_connection(
+        &self,
+        pending: PendingModernMijiaLogin,
+        publish_devices: bool,
+        operation: &Operation,
+    ) -> Result<ModernConnectionDiscovery> {
         let mut lifetime = pending.lifetime.clone();
         lifetime.deadline = lifetime.deadline.min(operation.deadline);
         lifetime
@@ -162,8 +198,8 @@ impl MijiaAdapter {
                     pending.existing,
                     &pending.label,
                     accounts,
+                    publish_devices,
                     &lifetime,
-                    operation,
                 )
                 .await
             }))
@@ -175,9 +211,9 @@ impl MijiaAdapter {
         existing: Option<Uuid>,
         label: &str,
         mut accounts: Vec<LoadedAccount>,
-        lifetime: &Operation,
+        publish_devices: bool,
         operation: &Operation,
-    ) -> Result<ModernAccountDiscovery> {
+    ) -> Result<ModernConnectionDiscovery> {
         let (_, reads) = self.modern_protocol()?;
         let subject = crate::modern::StoredModernSession::from_session(session);
         // A noncanonical old identifier is ambiguous; never create a second account for it.
@@ -209,16 +245,16 @@ impl MijiaAdapter {
             matches.first().copied()
         };
         let session = subject.session()?;
-        let account = if let Some(index) = selected {
+        let mut account = if let Some(index) = selected {
             let mut account = accounts.remove(index);
             unchanged(&account, operation).await?;
-            lifetime.run(async { Ok(()) }).await?;
+            operation.run(async { Ok(()) }).await?;
             account.payload.set_modern_session(session);
             let bytes = account.payload.encode(account.lease.record())?;
             if bytes.expose() == account.bytes.expose() {
-                account.lease.confirm_session(&bytes, lifetime).await?;
+                account.lease.confirm_session(&bytes, operation).await?;
             } else {
-                account.lease.store_session(&bytes, lifetime).await?;
+                account.lease.store_session(&bytes, operation).await?;
                 account.bytes = bytes;
             }
             account
@@ -226,29 +262,45 @@ impl MijiaAdapter {
             if accounts.len() >= 64 {
                 return Err(unconfirmed());
             }
-            lifetime.run(async { Ok(()) }).await?;
-            let mut lease = self.vault.prepare(PROVIDER, "CN", label, lifetime).await?;
+            operation.run(async { Ok(()) }).await?;
+            let mut lease = self.vault.prepare(PROVIDER, "CN", label, operation).await?;
             if lease.inspect_session(operation).await?.is_some() {
                 return Err(unconfirmed());
             }
             let payload = Payload::new_modern(lease.record(), session);
             let bytes = payload.encode(lease.record())?;
             operation.run(async { Ok(()) }).await?;
-            lease.store_session(&bytes, lifetime).await?;
+            lease.store_session(&bytes, operation).await?;
             LoadedAccount {
                 lease,
                 payload,
                 bytes,
             }
         };
-        lifetime.run(async { Ok(()) }).await?;
+        operation.run(async { Ok(()) }).await?;
         let directory = account
             .payload
             .modern_session()?
             .directory(reads, operation)
             .await;
-        lifetime.run(async { Ok(()) }).await?;
-        Ok(project(account.lease.record().clone(), directory))
+        operation.run(async { Ok(()) }).await?;
+        if publish_devices {
+            let result = async {
+                let inventory = directory?.reconcile(operation).await?;
+                self.bind_modern_inventory(&mut account, &accounts, inventory, operation)
+                    .await
+            }
+            .await;
+            Ok(ModernConnectionDiscovery::Devices(discovery(
+                account.lease.record().clone(),
+                result,
+            )))
+        } else {
+            Ok(ModernConnectionDiscovery::Logical(project(
+                account.lease.record().clone(),
+                directory,
+            )))
+        }
     }
     pub async fn refresh_modern_directory(
         &self,
