@@ -22,6 +22,8 @@ pub use accounts::{
 };
 mod mijia_outlet_grants;
 pub use mijia_outlet_grants::{MijiaOutletGrant, mijia_outlet_policy};
+mod mijia_action_grants;
+pub use mijia_action_grants::{MijiaActionGrant, mijia_action_policy};
 mod mijia_setting_grants;
 pub use mijia_setting_grants::{MijiaSettingGrant, mijia_setting_policy};
 mod mijia_fan_grants;
@@ -169,7 +171,8 @@ fn meiju_parts(
     directory: &Path,
     grants: MeijuControlGrants<'_>,
 ) -> Result<(Core, Arc<homeverb_midea::MeijuAdapter>)> {
-    platform_parts(directory, grants, false, &[], &[], &[]).map(|(core, meiju, _)| (core, meiju))
+    platform_parts(directory, grants, false, &[], &[], &[], &[])
+        .map(|(core, meiju, _)| (core, meiju))
 }
 
 fn platform_parts(
@@ -179,14 +182,17 @@ fn platform_parts(
     mijia_grants: &[MijiaFanGrant],
     setting_grants: &[MijiaSettingGrant],
     outlet_grants: &[MijiaOutletGrant],
+    action_grants: &[MijiaActionGrant],
 ) -> Result<(
     Core,
     Arc<homeverb_midea::MeijuAdapter>,
     Option<Arc<homeverb_mijia::MijiaAdapter>>,
 )> {
+    let action_policy = mijia_action_policy(action_grants)?;
     let outlet_policy = mijia_outlet_policy(outlet_grants)?;
     let reference_policy = mijia_setting_policy(setting_grants)?;
     let mut policy = meiju_power_policy(grants.power)?;
+    policy.grants.extend(action_policy.grants.clone());
     policy.grants.extend(outlet_policy.grants.clone());
     policy.grants.extend(mijia_fan_policy(mijia_grants)?.grants);
     policy
@@ -264,6 +270,11 @@ fn platform_parts(
         } else {
             adapter.with_outlet_controls()
         };
+        let adapter = if action_grants.is_empty() {
+            adapter
+        } else {
+            adapter.with_action_controls(action_policy)
+        };
         Arc::new(adapter.with_control_policies(reference_policy, outlet_policy))
     });
     let mut adapters: Vec<Arc<dyn homeverb_core::Adapter>> = vec![adapter.clone()];
@@ -335,9 +346,21 @@ pub fn open_mijia_session_with_outlets(
     settings: &[MijiaSettingGrant],
     outlets: &[MijiaOutletGrant],
 ) -> Result<Session> {
+    open_mijia_session_with_actions(directory, grants, settings, outlets, &[])
+}
+
+pub fn open_mijia_session_with_actions(
+    directory: &Path,
+    grants: &[MijiaFanGrant],
+    settings: &[MijiaSettingGrant],
+    outlets: &[MijiaOutletGrant],
+    actions: &[MijiaActionGrant],
+) -> Result<Session> {
+    let action_policy = mijia_action_policy(actions)?;
     let outlet_policy = mijia_outlet_policy(outlets)?;
     let reference_policy = mijia_setting_policy(settings)?;
     let mut policy = mijia_fan_policy(grants)?;
+    policy.grants.extend(action_policy.grants.clone());
     policy.grants.extend(outlet_policy.grants.clone());
     policy.grants.extend(mijia_setting_policy(settings)?.grants);
     let store = Arc::new(SqliteStore::open(directory)?);
@@ -367,6 +390,11 @@ pub fn open_mijia_session_with_outlets(
         adapter
     } else {
         adapter.with_outlet_controls()
+    };
+    let adapter = if actions.is_empty() {
+        adapter
+    } else {
+        adapter.with_action_controls(action_policy)
     };
     let adapter = Arc::new(adapter.with_control_policies(reference_policy, outlet_policy));
     let core = Core::new(store, vec![adapter.clone()], clock, policy);
@@ -402,8 +430,26 @@ pub fn open_platform_session_with_outlets(
     settings: &[MijiaSettingGrant],
     outlets: &[MijiaOutletGrant],
 ) -> Result<Session> {
-    let (core, meiju, mijia) =
-        platform_parts(directory, grants, true, mijia_grants, settings, outlets)?;
+    open_platform_session_with_actions(directory, grants, mijia_grants, settings, outlets, &[])
+}
+
+pub fn open_platform_session_with_actions(
+    directory: &Path,
+    grants: MeijuControlGrants<'_>,
+    mijia_grants: &[MijiaFanGrant],
+    settings: &[MijiaSettingGrant],
+    outlets: &[MijiaOutletGrant],
+    actions: &[MijiaActionGrant],
+) -> Result<Session> {
+    let (core, meiju, mijia) = platform_parts(
+        directory,
+        grants,
+        true,
+        mijia_grants,
+        settings,
+        outlets,
+        actions,
+    )?;
     Ok(Session::with_platform_accounts(core, Some(meiju), mijia))
 }
 

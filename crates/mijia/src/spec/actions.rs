@@ -75,3 +75,30 @@ impl ModelMapping {
         ))
     }
 }
+
+/// Closed native startup vocabulary. Protected model admission remains independent.
+pub fn no_argument_action_option(
+    component: &str,
+    capability: &str,
+    action: &str,
+) -> Option<&'static ControlOption> {
+    static OPTIONS: std::sync::LazyLock<Vec<ControlOption>> = std::sync::LazyLock::new(|| {
+        [
+            "abhome.light.wy0a01",
+            "jdjz.fan.2072fc",
+            "xiaomi.hood.cyp10",
+        ]
+        .into_iter()
+        .filter_map(|model| ModelMapping::pinned(model, None).ok().flatten())
+        .flat_map(|mapping| {
+            mapping
+                .no_argument_actions()
+                .into_iter()
+                .map(|(_, option)| option)
+        })
+        .collect()
+    });
+    OPTIONS
+        .iter()
+        .find(|o| o.component_id == component && o.capability == capability && o.action == action)
+}

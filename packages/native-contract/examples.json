@@ -1,5 +1,5 @@
 {
-  "api_version": "1.39.0",
+  "api_version": "1.40.0",
   "cases": [
     {
       "request": {
@@ -12,7 +12,7 @@
       },
       "response": {
         "data": {
-          "api_version": "1.39.0",
+          "api_version": "1.40.0",
           "limits": {
             "max_active_operations": 8,
             "max_request_bytes": 1048576,
@@ -817,21 +817,21 @@
           "observations": {
             "climate.mode": {
               "observed_at": null,
-              "received_at": "2026-10-30T10:19:17.173843Z",
+              "received_at": "2026-10-30T11:17:25.634907Z",
               "source": "lan",
               "stale": false,
               "value": "cool"
             },
             "climate.target_temperature": {
               "observed_at": null,
-              "received_at": "2026-10-30T10:19:17.173843Z",
+              "received_at": "2026-10-30T11:17:25.634907Z",
               "source": "lan",
               "stale": false,
               "value": 26.0
             },
             "power.state": {
               "observed_at": null,
-              "received_at": "2026-10-30T10:19:17.173843Z",
+              "received_at": "2026-10-30T11:17:25.634907Z",
               "source": "lan",
               "stale": false,
               "value": false
@@ -868,21 +868,21 @@
           "observations": {
             "climate.mode": {
               "observed_at": null,
-              "received_at": "2026-10-30T10:19:17.173843Z",
+              "received_at": "2026-10-30T11:17:25.634907Z",
               "source": "lan",
               "stale": false,
               "value": "cool"
             },
             "climate.target_temperature": {
               "observed_at": null,
-              "received_at": "2026-10-30T10:19:17.173843Z",
+              "received_at": "2026-10-30T11:17:25.634907Z",
               "source": "lan",
               "stale": false,
               "value": 26.0
             },
             "power.state": {
               "observed_at": null,
-              "received_at": "2026-10-30T10:19:17.173843Z",
+              "received_at": "2026-10-30T11:17:25.634907Z",
               "source": "lan",
               "stale": false,
               "value": false
@@ -911,7 +911,7 @@
       },
       "response": {
         "data": {
-          "id": "7b565e58-2e2b-48ab-b6f2-abecc462ff73",
+          "id": "1e6a0ea6-c46b-4d37-bfb1-35a6098b9a8d",
           "name": "Bedroom",
           "position": 0
         },
@@ -927,13 +927,13 @@
         "timeout_ms": 10000,
         "request": {
           "method": "rename_room",
-          "room_id": "7b565e58-2e2b-48ab-b6f2-abecc462ff73",
+          "room_id": "1e6a0ea6-c46b-4d37-bfb1-35a6098b9a8d",
           "name": "Primary Bedroom"
         }
       },
       "response": {
         "data": {
-          "id": "7b565e58-2e2b-48ab-b6f2-abecc462ff73",
+          "id": "1e6a0ea6-c46b-4d37-bfb1-35a6098b9a8d",
           "name": "Primary Bedroom",
           "position": 0
         },
@@ -950,14 +950,14 @@
         "request": {
           "method": "reorder_rooms",
           "room_ids": [
-            "7b565e58-2e2b-48ab-b6f2-abecc462ff73"
+            "1e6a0ea6-c46b-4d37-bfb1-35a6098b9a8d"
           ]
         }
       },
       "response": {
         "data": [
           {
-            "id": "7b565e58-2e2b-48ab-b6f2-abecc462ff73",
+            "id": "1e6a0ea6-c46b-4d37-bfb1-35a6098b9a8d",
             "name": "Primary Bedroom",
             "position": 0
           }
@@ -977,7 +977,7 @@
           "device_id": "dev-mock-ac",
           "preferences": {
             "alias": "Quiet AC",
-            "room_id": "7b565e58-2e2b-48ab-b6f2-abecc462ff73",
+            "room_id": "1e6a0ea6-c46b-4d37-bfb1-35a6098b9a8d",
             "favorite": true
           }
         }
@@ -988,7 +988,7 @@
           "device_id": "dev-mock-ac",
           "favorite": true,
           "position": 0,
-          "room_id": "7b565e58-2e2b-48ab-b6f2-abecc462ff73"
+          "room_id": "1e6a0ea6-c46b-4d37-bfb1-35a6098b9a8d"
         },
         "error": null,
         "schema_version": "1.0",
@@ -1118,7 +1118,7 @@
         "timeout_ms": 10000,
         "request": {
           "method": "delete_room",
-          "room_id": "7b565e58-2e2b-48ab-b6f2-abecc462ff73"
+          "room_id": "1e6a0ea6-c46b-4d37-bfb1-35a6098b9a8d"
         }
       },
       "response": {
@@ -1302,7 +1302,7 @@
       },
       "response": {
         "attempts": [],
-        "completed_at": "2026-10-30T10:19:17.193707Z",
+        "completed_at": "2026-10-30T11:17:25.658648Z",
         "data": {
           "mode": "heat",
           "target_temperature": 25
@@ -1313,12 +1313,12 @@
           {
             "attempts": [
               {
-                "duration_ms": 0,
+                "duration_ms": 1,
                 "phase": "accepted",
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-30T10:19:17.191721Z",
+            "completed_at": "2026-10-30T11:17:25.655194Z",
             "data": {
               "mode": "heat"
             },
@@ -1326,13 +1326,13 @@
             "error": null,
             "request_id": "compound-example:0",
             "schema_version": "1.0",
-            "started_at": "2026-10-30T10:19:17.190343Z",
+            "started_at": "2026-10-30T11:17:25.652809Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-30T10:19:17.191290Z",
+              "received_at": "2026-10-30T11:17:25.654410Z",
               "source": "lan"
             }
           },
@@ -1344,7 +1344,7 @@
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-30T10:19:17.192975Z",
+            "completed_at": "2026-10-30T11:17:25.657088Z",
             "data": {
               "target_temperature": 25
             },
@@ -1352,26 +1352,26 @@
             "error": null,
             "request_id": "compound-example:1",
             "schema_version": "1.0",
-            "started_at": "2026-10-30T10:19:17.191930Z",
+            "started_at": "2026-10-30T11:17:25.655520Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-30T10:19:17.192634Z",
+              "received_at": "2026-10-30T11:17:25.656539Z",
               "source": "lan"
             }
           }
         ],
         "request_id": "compound-example",
         "schema_version": "1.0",
-        "started_at": "2026-10-30T10:19:17.188173Z",
+        "started_at": "2026-10-30T11:17:25.651136Z",
         "status": "verified",
         "verification": {
           "kind": "state_match",
           "matches_target": true,
           "note": "Each sub-operation has separate verification evidence; inspect items. This is not an atomic or exactly-once guarantee.",
-          "received_at": "2026-10-30T10:19:17.191290Z",
+          "received_at": "2026-10-30T11:17:25.654410Z",
           "source": "lan"
         }
       }
@@ -1470,7 +1470,7 @@
         }
       },
       "response": {
-        "completed_at": "2026-10-30T10:19:17.200657Z",
+        "completed_at": "2026-10-30T11:17:25.666041Z",
         "items": [
           {
             "attempts": [
@@ -1480,7 +1480,7 @@
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-30T10:19:17.200376Z",
+            "completed_at": "2026-10-30T11:17:25.665766Z",
             "data": {
               "state": true
             },
@@ -1488,19 +1488,19 @@
             "error": null,
             "request_id": "batch-example",
             "schema_version": "1.0",
-            "started_at": "2026-10-30T10:19:17.197956Z",
+            "started_at": "2026-10-30T11:17:25.663518Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-30T10:19:17.199845Z",
+              "received_at": "2026-10-30T11:17:25.665219Z",
               "source": "lan"
             }
           }
         ],
         "schema_version": "1.0",
-        "started_at": "2026-10-30T10:19:17.197305Z",
+        "started_at": "2026-10-30T11:17:25.662819Z",
         "status": "verified"
       }
     },
@@ -1517,7 +1517,7 @@
       "response": {
         "data": {
           "attempts": [],
-          "completed_at": "2026-10-30T10:19:17.193707Z",
+          "completed_at": "2026-10-30T11:17:25.658648Z",
           "data": {
             "mode": "heat",
             "target_temperature": 25
@@ -1528,12 +1528,12 @@
             {
               "attempts": [
                 {
-                  "duration_ms": 0,
+                  "duration_ms": 1,
                   "phase": "accepted",
                   "transport": "lan"
                 }
               ],
-              "completed_at": "2026-10-30T10:19:17.191721Z",
+              "completed_at": "2026-10-30T11:17:25.655194Z",
               "data": {
                 "mode": "heat"
               },
@@ -1541,13 +1541,13 @@
               "error": null,
               "request_id": "compound-example:0",
               "schema_version": "1.0",
-              "started_at": "2026-10-30T10:19:17.190343Z",
+              "started_at": "2026-10-30T11:17:25.652809Z",
               "status": "verified",
               "verification": {
                 "kind": "state_match",
                 "matches_target": true,
                 "note": "Fresh state matches the target; this does not prove request causality.",
-                "received_at": "2026-10-30T10:19:17.191290Z",
+                "received_at": "2026-10-30T11:17:25.654410Z",
                 "source": "lan"
               }
             },
@@ -1559,7 +1559,7 @@
                   "transport": "lan"
                 }
               ],
-              "completed_at": "2026-10-30T10:19:17.192975Z",
+              "completed_at": "2026-10-30T11:17:25.657088Z",
               "data": {
                 "target_temperature": 25
               },
@@ -1567,26 +1567,26 @@
               "error": null,
               "request_id": "compound-example:1",
               "schema_version": "1.0",
-              "started_at": "2026-10-30T10:19:17.191930Z",
+              "started_at": "2026-10-30T11:17:25.655520Z",
               "status": "verified",
               "verification": {
                 "kind": "state_match",
                 "matches_target": true,
                 "note": "Fresh state matches the target; this does not prove request causality.",
-                "received_at": "2026-10-30T10:19:17.192634Z",
+                "received_at": "2026-10-30T11:17:25.656539Z",
                 "source": "lan"
               }
             }
           ],
           "request_id": "compound-example",
           "schema_version": "1.0",
-          "started_at": "2026-10-30T10:19:17.188173Z",
+          "started_at": "2026-10-30T11:17:25.651136Z",
           "status": "verified",
           "verification": {
             "kind": "state_match",
             "matches_target": true,
             "note": "Each sub-operation has separate verification evidence; inspect items. This is not an atomic or exactly-once guarantee.",
-            "received_at": "2026-10-30T10:19:17.191290Z",
+            "received_at": "2026-10-30T11:17:25.654410Z",
             "source": "lan"
           }
         },
@@ -1614,7 +1614,7 @@
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-30T10:19:17.200376Z",
+            "completed_at": "2026-10-30T11:17:25.665766Z",
             "data": {
               "state": true
             },
@@ -1622,13 +1622,13 @@
             "error": null,
             "request_id": "batch-example",
             "schema_version": "1.0",
-            "started_at": "2026-10-30T10:19:17.197956Z",
+            "started_at": "2026-10-30T11:17:25.663518Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-30T10:19:17.199845Z",
+              "received_at": "2026-10-30T11:17:25.665219Z",
               "source": "lan"
             }
           },
@@ -1640,7 +1640,7 @@
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-30T10:19:17.192975Z",
+            "completed_at": "2026-10-30T11:17:25.657088Z",
             "data": {
               "target_temperature": 25
             },
@@ -1648,25 +1648,25 @@
             "error": null,
             "request_id": "compound-example:1",
             "schema_version": "1.0",
-            "started_at": "2026-10-30T10:19:17.191930Z",
+            "started_at": "2026-10-30T11:17:25.655520Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-30T10:19:17.192634Z",
+              "received_at": "2026-10-30T11:17:25.656539Z",
               "source": "lan"
             }
           },
           {
             "attempts": [
               {
-                "duration_ms": 0,
+                "duration_ms": 1,
                 "phase": "accepted",
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-30T10:19:17.191721Z",
+            "completed_at": "2026-10-30T11:17:25.655194Z",
             "data": {
               "mode": "heat"
             },
@@ -1674,19 +1674,19 @@
             "error": null,
             "request_id": "compound-example:0",
             "schema_version": "1.0",
-            "started_at": "2026-10-30T10:19:17.190343Z",
+            "started_at": "2026-10-30T11:17:25.652809Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-30T10:19:17.191290Z",
+              "received_at": "2026-10-30T11:17:25.654410Z",
               "source": "lan"
             }
           },
           {
             "attempts": [],
-            "completed_at": "2026-10-30T10:19:17.193707Z",
+            "completed_at": "2026-10-30T11:17:25.658648Z",
             "data": {
               "mode": "heat",
               "target_temperature": 25
@@ -1697,12 +1697,12 @@
               {
                 "attempts": [
                   {
-                    "duration_ms": 0,
+                    "duration_ms": 1,
                     "phase": "accepted",
                     "transport": "lan"
                   }
                 ],
-                "completed_at": "2026-10-30T10:19:17.191721Z",
+                "completed_at": "2026-10-30T11:17:25.655194Z",
                 "data": {
                   "mode": "heat"
                 },
@@ -1710,13 +1710,13 @@
                 "error": null,
                 "request_id": "compound-example:0",
                 "schema_version": "1.0",
-                "started_at": "2026-10-30T10:19:17.190343Z",
+                "started_at": "2026-10-30T11:17:25.652809Z",
                 "status": "verified",
                 "verification": {
                   "kind": "state_match",
                   "matches_target": true,
                   "note": "Fresh state matches the target; this does not prove request causality.",
-                  "received_at": "2026-10-30T10:19:17.191290Z",
+                  "received_at": "2026-10-30T11:17:25.654410Z",
                   "source": "lan"
                 }
               },
@@ -1728,7 +1728,7 @@
                     "transport": "lan"
                   }
                 ],
-                "completed_at": "2026-10-30T10:19:17.192975Z",
+                "completed_at": "2026-10-30T11:17:25.657088Z",
                 "data": {
                   "target_temperature": 25
                 },
@@ -1736,26 +1736,26 @@
                 "error": null,
                 "request_id": "compound-example:1",
                 "schema_version": "1.0",
-                "started_at": "2026-10-30T10:19:17.191930Z",
+                "started_at": "2026-10-30T11:17:25.655520Z",
                 "status": "verified",
                 "verification": {
                   "kind": "state_match",
                   "matches_target": true,
                   "note": "Fresh state matches the target; this does not prove request causality.",
-                  "received_at": "2026-10-30T10:19:17.192634Z",
+                  "received_at": "2026-10-30T11:17:25.656539Z",
                   "source": "lan"
                 }
               }
             ],
             "request_id": "compound-example",
             "schema_version": "1.0",
-            "started_at": "2026-10-30T10:19:17.188173Z",
+            "started_at": "2026-10-30T11:17:25.651136Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Each sub-operation has separate verification evidence; inspect items. This is not an atomic or exactly-once guarantee.",
-              "received_at": "2026-10-30T10:19:17.191290Z",
+              "received_at": "2026-10-30T11:17:25.654410Z",
               "source": "lan"
             }
           }
@@ -1785,7 +1785,7 @@
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-30T10:19:17.200376Z",
+            "completed_at": "2026-10-30T11:17:25.665766Z",
             "data": {
               "state": true
             },
@@ -1793,13 +1793,13 @@
             "error": null,
             "request_id": "batch-example",
             "schema_version": "1.0",
-            "started_at": "2026-10-30T10:19:17.197956Z",
+            "started_at": "2026-10-30T11:17:25.663518Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-30T10:19:17.199845Z",
+              "received_at": "2026-10-30T11:17:25.665219Z",
               "source": "lan"
             }
           },
@@ -1811,7 +1811,7 @@
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-30T10:19:17.192975Z",
+            "completed_at": "2026-10-30T11:17:25.657088Z",
             "data": {
               "target_temperature": 25
             },
@@ -1819,25 +1819,25 @@
             "error": null,
             "request_id": "compound-example:1",
             "schema_version": "1.0",
-            "started_at": "2026-10-30T10:19:17.191930Z",
+            "started_at": "2026-10-30T11:17:25.655520Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-30T10:19:17.192634Z",
+              "received_at": "2026-10-30T11:17:25.656539Z",
               "source": "lan"
             }
           },
           {
             "attempts": [
               {
-                "duration_ms": 0,
+                "duration_ms": 1,
                 "phase": "accepted",
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-30T10:19:17.191721Z",
+            "completed_at": "2026-10-30T11:17:25.655194Z",
             "data": {
               "mode": "heat"
             },
@@ -1845,19 +1845,19 @@
             "error": null,
             "request_id": "compound-example:0",
             "schema_version": "1.0",
-            "started_at": "2026-10-30T10:19:17.190343Z",
+            "started_at": "2026-10-30T11:17:25.652809Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-30T10:19:17.191290Z",
+              "received_at": "2026-10-30T11:17:25.654410Z",
               "source": "lan"
             }
           },
           {
             "attempts": [],
-            "completed_at": "2026-10-30T10:19:17.193707Z",
+            "completed_at": "2026-10-30T11:17:25.658648Z",
             "data": {
               "mode": "heat",
               "target_temperature": 25
@@ -1868,12 +1868,12 @@
               {
                 "attempts": [
                   {
-                    "duration_ms": 0,
+                    "duration_ms": 1,
                     "phase": "accepted",
                     "transport": "lan"
                   }
                 ],
-                "completed_at": "2026-10-30T10:19:17.191721Z",
+                "completed_at": "2026-10-30T11:17:25.655194Z",
                 "data": {
                   "mode": "heat"
                 },
@@ -1881,13 +1881,13 @@
                 "error": null,
                 "request_id": "compound-example:0",
                 "schema_version": "1.0",
-                "started_at": "2026-10-30T10:19:17.190343Z",
+                "started_at": "2026-10-30T11:17:25.652809Z",
                 "status": "verified",
                 "verification": {
                   "kind": "state_match",
                   "matches_target": true,
                   "note": "Fresh state matches the target; this does not prove request causality.",
-                  "received_at": "2026-10-30T10:19:17.191290Z",
+                  "received_at": "2026-10-30T11:17:25.654410Z",
                   "source": "lan"
                 }
               },
@@ -1899,7 +1899,7 @@
                     "transport": "lan"
                   }
                 ],
-                "completed_at": "2026-10-30T10:19:17.192975Z",
+                "completed_at": "2026-10-30T11:17:25.657088Z",
                 "data": {
                   "target_temperature": 25
                 },
@@ -1907,26 +1907,26 @@
                 "error": null,
                 "request_id": "compound-example:1",
                 "schema_version": "1.0",
-                "started_at": "2026-10-30T10:19:17.191930Z",
+                "started_at": "2026-10-30T11:17:25.655520Z",
                 "status": "verified",
                 "verification": {
                   "kind": "state_match",
                   "matches_target": true,
                   "note": "Fresh state matches the target; this does not prove request causality.",
-                  "received_at": "2026-10-30T10:19:17.192634Z",
+                  "received_at": "2026-10-30T11:17:25.656539Z",
                   "source": "lan"
                 }
               }
             ],
             "request_id": "compound-example",
             "schema_version": "1.0",
-            "started_at": "2026-10-30T10:19:17.188173Z",
+            "started_at": "2026-10-30T11:17:25.651136Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Each sub-operation has separate verification evidence; inspect items. This is not an atomic or exactly-once guarantee.",
-              "received_at": "2026-10-30T10:19:17.191290Z",
+              "received_at": "2026-10-30T11:17:25.654410Z",
               "source": "lan"
             }
           }
@@ -1954,7 +1954,7 @@
             "lan": 1
           },
           "device_count": 1,
-          "generated_at": "2026-10-30T10:19:17.209020Z",
+          "generated_at": "2026-10-30T11:17:25.674413Z",
           "receipt_limit": 100,
           "recent_receipts": [
             {
@@ -2002,7 +2002,7 @@
             {
               "attempts": [
                 {
-                  "duration_ms": 0,
+                  "duration_ms": 1,
                   "phase": "accepted",
                   "transport": "lan"
                 }
@@ -2125,7 +2125,7 @@
       },
       "response": {
         "attempts": [],
-        "completed_at": "2026-10-30T10:19:17.212072Z",
+        "completed_at": "2026-10-30T11:17:25.677688Z",
         "data": null,
         "device_id": "dev-mock-ac",
         "error": {
@@ -2135,7 +2135,7 @@
         },
         "request_id": "unsupported-example",
         "schema_version": "1.0",
-        "started_at": "2026-10-30T10:19:17.211646Z",
+        "started_at": "2026-10-30T11:17:25.677132Z",
         "status": "failed",
         "verification": null
       }
@@ -2246,7 +2246,7 @@
       },
       "response": {
         "data": {
-          "api_version": "1.39.0",
+          "api_version": "1.40.0",
           "limits": {
             "max_active_operations": 8,
             "max_request_bytes": 1048576,
@@ -2469,7 +2469,7 @@
             "transport": "lan"
           }
         ],
-        "completed_at": "2026-10-30T10:19:17.310187Z",
+        "completed_at": "2026-10-30T11:17:25.750120Z",
         "data": null,
         "device_id": "dev-mock-ac",
         "error": {
@@ -2479,7 +2479,7 @@
         },
         "request_id": "scenario-accept-only",
         "schema_version": "1.0",
-        "started_at": "2026-10-30T10:19:17.307922Z",
+        "started_at": "2026-10-30T11:17:25.748379Z",
         "status": "accepted",
         "verification": null
       }
@@ -2565,7 +2565,7 @@
             "transport": "lan"
           }
         ],
-        "completed_at": "2026-10-30T10:19:17.320849Z",
+        "completed_at": "2026-10-30T11:17:25.761906Z",
         "data": null,
         "device_id": "dev-mock-ac",
         "error": {
@@ -2575,7 +2575,7 @@
         },
         "request_id": "scenario-lost-ack",
         "schema_version": "1.0",
-        "started_at": "2026-10-30T10:19:17.319497Z",
+        "started_at": "2026-10-30T11:17:25.760207Z",
         "status": "unknown",
         "verification": null
       }
@@ -2661,7 +2661,7 @@
             "transport": "lan"
           }
         ],
-        "completed_at": "2026-10-30T10:19:17.330344Z",
+        "completed_at": "2026-10-30T11:17:25.773253Z",
         "data": null,
         "device_id": "dev-mock-ac",
         "error": {
@@ -2671,7 +2671,7 @@
         },
         "request_id": "scenario-reject",
         "schema_version": "1.0",
-        "started_at": "2026-10-30T10:19:17.329550Z",
+        "started_at": "2026-10-30T11:17:25.771939Z",
         "status": "failed",
         "verification": null
       }
@@ -2752,7 +2752,7 @@
       },
       "response": {
         "attempts": [],
-        "completed_at": "2026-10-30T10:19:17.342103Z",
+        "completed_at": "2026-10-30T11:17:25.787474Z",
         "data": null,
         "device_id": "dev-mock-ac",
         "error": {
@@ -2769,7 +2769,7 @@
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-30T10:19:17.341503Z",
+            "completed_at": "2026-10-30T11:17:25.786952Z",
             "data": {
               "mode": "heat"
             },
@@ -2777,13 +2777,13 @@
             "error": null,
             "request_id": "scenario-partial:0",
             "schema_version": "1.0",
-            "started_at": "2026-10-30T10:19:17.340107Z",
+            "started_at": "2026-10-30T11:17:25.785653Z",
             "status": "verified",
             "verification": {
               "kind": "state_match",
               "matches_target": true,
               "note": "Fresh state matches the target; this does not prove request causality.",
-              "received_at": "2026-10-30T10:19:17.341081Z",
+              "received_at": "2026-10-30T11:17:25.786559Z",
               "source": "lan"
             }
           },
@@ -2795,7 +2795,7 @@
                 "transport": "lan"
               }
             ],
-            "completed_at": "2026-10-30T10:19:17.341902Z",
+            "completed_at": "2026-10-30T11:17:25.787312Z",
             "data": null,
             "device_id": "dev-mock-ac",
             "error": {
@@ -2805,14 +2805,14 @@
             },
             "request_id": "scenario-partial:1",
             "schema_version": "1.0",
-            "started_at": "2026-10-30T10:19:17.341697Z",
+            "started_at": "2026-10-30T11:17:25.787149Z",
             "status": "failed",
             "verification": null
           }
         ],
         "request_id": "scenario-partial",
         "schema_version": "1.0",
-        "started_at": "2026-10-30T10:19:17.338304Z",
+        "started_at": "2026-10-30T11:17:25.783478Z",
         "status": "partial",
         "verification": null
       }
@@ -2893,12 +2893,12 @@
       "response": {
         "attempts": [
           {
-            "duration_ms": 5,
+            "duration_ms": 6,
             "phase": "not_sent",
             "transport": "lan"
           }
         ],
-        "completed_at": "2026-10-30T10:19:17.358859Z",
+        "completed_at": "2026-10-30T11:17:25.805607Z",
         "data": null,
         "device_id": "dev-mock-ac",
         "error": {
@@ -2908,9 +2908,193 @@
         },
         "request_id": "cancel-before-send",
         "schema_version": "1.0",
-        "started_at": "2026-10-30T10:19:17.352310Z",
+        "started_at": "2026-10-30T11:17:25.798030Z",
         "status": "failed",
         "verification": null
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-145",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "inspect_control_options",
+          "device_id": "40000000-0000-4000-8000-000000000001",
+          "connection_id": "cloud",
+          "include_no_argument_actions": false
+        }
+      },
+      "response": {
+        "data": null,
+        "error": {
+          "code": "DEVICE_NOT_FOUND",
+          "message": "The device is not present in this local profile.",
+          "retryable": false
+        },
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-146",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "inspect_control_options",
+          "device_id": "40000000-0000-4000-8000-000000000001",
+          "connection_id": "cloud",
+          "include_no_argument_actions": true
+        }
+      },
+      "response": {
+        "data": null,
+        "error": {
+          "code": "DEVICE_NOT_FOUND",
+          "message": "The device is not present in this local profile.",
+          "retryable": false
+        },
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-155",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "inspect_control_options",
+          "device_id": "40000000-0000-4000-8000-000000000000",
+          "connection_id": "cloud",
+          "include_no_argument_actions": false
+        }
+      },
+      "response": {
+        "data": null,
+        "error": {
+          "code": "DEVICE_NOT_FOUND",
+          "message": "The device is not present in this local profile.",
+          "retryable": false
+        },
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-156",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "inspect_control_options",
+          "device_id": "40000000-0000-4000-8000-000000000000",
+          "connection_id": "cloud",
+          "include_no_argument_actions": true
+        }
+      },
+      "response": {
+        "data": null,
+        "error": {
+          "code": "DEVICE_NOT_FOUND",
+          "message": "The device is not present in this local profile.",
+          "retryable": false
+        },
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-165",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "inspect_control_options",
+          "device_id": "40000000-0000-4000-8000-000000000001",
+          "connection_id": "cloud",
+          "include_no_argument_actions": false
+        }
+      },
+      "response": {
+        "data": null,
+        "error": {
+          "code": "DEVICE_NOT_FOUND",
+          "message": "The device is not present in this local profile.",
+          "retryable": false
+        },
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-166",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "inspect_control_options",
+          "device_id": "40000000-0000-4000-8000-000000000001",
+          "connection_id": "cloud",
+          "include_no_argument_actions": true
+        }
+      },
+      "response": {
+        "data": null,
+        "error": {
+          "code": "DEVICE_NOT_FOUND",
+          "message": "The device is not present in this local profile.",
+          "retryable": false
+        },
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-175",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "inspect_control_options",
+          "device_id": "40000000-0000-4000-8000-000000000000",
+          "connection_id": "cloud",
+          "include_no_argument_actions": false
+        }
+      },
+      "response": {
+        "data": null,
+        "error": {
+          "code": "DEVICE_NOT_FOUND",
+          "message": "The device is not present in this local profile.",
+          "retryable": false
+        },
+        "schema_version": "1.0",
+        "warnings": []
+      }
+    },
+    {
+      "request": {
+        "schema_version": "1.0",
+        "operation_id": "ui-176",
+        "timeout_ms": 10000,
+        "request": {
+          "method": "inspect_control_options",
+          "device_id": "40000000-0000-4000-8000-000000000000",
+          "connection_id": "cloud",
+          "include_no_argument_actions": true
+        }
+      },
+      "response": {
+        "data": null,
+        "error": {
+          "code": "DEVICE_NOT_FOUND",
+          "message": "The device is not present in this local profile.",
+          "retryable": false
+        },
+        "schema_version": "1.0",
+        "warnings": []
       }
     }
   ]

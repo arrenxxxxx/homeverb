@@ -897,3 +897,17 @@ examples/command.mijia-action.json, with closed-argument counterexamples in
 scripts/validate_contracts.py. Protected Core fixtures are in
 crates/mijia/src/adapter/tests/modern_accounts/actions.rs. Native/App startup and
 inspection adoption remain pending; the existing native/property flows stay intact.
+
+
+## Native action composition
+
+ADR-0109/API 1.40 supplies independent startup-only exact empty-argument policies
+to both Core and the protected Mijia adapter. Inspection opt-in does not enable
+execution. A granted reopen followed by explicit account refresh publishes the
+admitted actions; model, membership, root and selected-protocol checks still
+precede sending. No new result, replay, verification or approval semantics follow.
+Existing property authority cannot authorize a toggle. Host/C input counterexamples
+and the modern inspect/grant/refresh/execute/unknown journey live in
+crates/host/tests/mijia_action_grants.rs,
+crates/host/tests/mijia_accounts/modern_host/actions.rs and
+scripts/verify_native_contract.py.

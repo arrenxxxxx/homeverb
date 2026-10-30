@@ -13,7 +13,7 @@ includes these additions with clean-source archive checks. Broader
 controls/history and other reference coverage remain incomplete; see the
 [coverage ledger and remaining work](14-mijia-reference-integration.md).
 
-The October 30 integration uses native API **1.39.0**, following the linear
+The October 30 integration uses native API **1.40.0**, following the linear
 mainline update and dedicated interactive-login bridge. Earlier Mijia phase versions are historical. See
 [contract reconciliation](../adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
 remain available alongside Mijia; identity restoration remains Meiju-only.
@@ -23,11 +23,11 @@ The owner will perform real-account and device acceptance. Do not access saved
 pilot credentials or contact appliances as part of development tests.
 
 ADR-0107/0108 additionally implement six exact no-argument actions through typed
-Core with independent action grants and durable receipts. Native/App startup
-grants, inspection and controls are pending; the API 1.39 package does not expose
-these actions.
+Core with independent action grants and durable receipts. ADR-0109/API 1.40
+adds independent native startup grants and opt-in inspection. Flutter adoption
+is pending; the API 1.39 package does not expose these actions.
 
-Current callable scope includes native API 1.39 Mijia-only/combined sessions,
+Current callable scope includes native API 1.40 Mijia-only/combined sessions,
 protected partial inventory and 264 scalar mappings from 17 pinned reference
 specifications. Exact fan, light and purifier settings have independent protected
 admission and trusted startup grants. Flutter provides account/read/control views,
@@ -975,3 +975,37 @@ Documentation, source hygiene, 25 schemas with 73 positive/1320 negative fixture
 two coverage-projection tests and seven presentation tests passed. The existing
 eight full Flutter font/pixel/legacy-click failures were not rerun or claimed fixed.
 No real account, appliance, installation, remote push or publication was used.
+
+
+## Native exact no-argument actions -- October 30, 2026
+
+[ADR-0109](../adr/0109-native-mijia-action-grants.md) exposes the six reviewed
+ADR-0108 actions through API 1.40. Independent trusted `mijia_action_grants`
+contain only canonical local device IDs and exact component/capability/action
+tuples. Invalid grants refuse before profile creation. Both Core and the adapter
+receive the exact empty-argument policy; existing property grants imply no action
+authority. Default composition remains action-free.
+
+`inspect_control_options` retains its existing result unless the caller explicitly
+sets `include_no_argument_actions:true`. Inspection performs no networking or
+permission changes and returns saved-inventory evidence with authorization not
+checked. Explicit granted reopen and account refresh publish actions on the
+protected selected protocol. Non-idempotent receipts preserve uncertain outcomes
+without retry, including after cancellation/background and session reopen.
+
+Negotiate 1.40 before supplying the new field or inspection flag. Existing Rust
+opening helpers remain compatible; typed Request constructors need the new field.
+SQLite 5, protected payload 3, 36 ordinary methods and C exports are unchanged.
+Flutter adoption, an updated APK, the remaining actions/events and real account/
+phone/model acceptance remain pending. The 503ef1f APK remains API 1.39. No real
+account, appliance, installation, remote push or publication is used.
+
+Executed software checks: workspace tests excluding the known unrelated
+Meiju/macOS LAN-alias suite passed 666 tests with one ignored. Strict all-target
+Clippy, FFI rebuild and the actual C boundary passed: 36 ordinary methods,
+68 live examples, 76 modern-account cases and existing protected/trusted bridge
+guards. The 58 scoped Host/account tests cover action admission, opt-in inspection,
+explicit refresh/execute and uncertain lifecycle recovery without replay.
+Documentation, source hygiene, both reference projection tests and 25 schemas
+with 76 positive/1451 negative fixtures passed. All data is fictional; no Flutter
+run, new package or provider/device acceptance is claimed by this native phase.

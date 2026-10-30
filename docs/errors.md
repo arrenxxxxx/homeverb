@@ -823,3 +823,11 @@ Core converts possible-send protocol failures into UNKNOWN_OUTCOME receipts.
 REQUEST_CONFLICT and REQUEST_RETIRED preserve replay protection; revoking Core
 grants returns POLICY_DENIED while leaving an existing receipt unchanged. No error
 requests automatic credential renewal, route switching or a replacement request ID.
+
+
+ADR-0109/API 1.40 rejects invalid, duplicate, excessive or foreign-adapter
+`mijia_action_grants` with `INVALID_ARGUMENT` before profile creation. Non-Boolean
+`include_no_argument_actions` also refuses. Valid syntax is not device support or
+provider authorization. Missing Core/adapter authority and protected action
+admission keep their existing errors; an uncertain sent action remains `unknown`
+with its durable receipt and must not be replayed. No new error code is introduced.

@@ -929,3 +929,6 @@ async fn native_modern_reports_match_closed_contracts_without_private_membership
 
 #[path = "modern_host/controls.rs"]
 mod controls;
+
+#[path = "modern_host/actions.rs"]
+mod actions;

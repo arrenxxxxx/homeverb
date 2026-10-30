@@ -887,3 +887,17 @@ retain the existing schema shape with non-idempotent semantics; parameter
 counterexamples refuse wire IDs, inputs and confirmation flags. Production native
 composition remains unchanged. Flutter/App action admission and provider/phone/
 model acceptance are separate, unverified work.
+
+
+## Native no-argument action admission
+
+Run `cargo +1.96.0 test -p homeverb-host --test mijia_action_grants --test
+mijia_accounts --offline --locked`, then rebuild FFI and run
+`scripts/verify_native_contract.py --write-examples`. API 1.40 cases exercise all
+six exact tuples, both allowed modes, 64-entry admission, malformed/duplicate/
+excessive lists, cross-family substitutions, extra fields, wrong adapters and
+invalid inspection flags. Rejection must precede profile creation. The Host
+journey inspects before grants without networking, reopens, explicitly refreshes,
+plans and executes, then verifies persistent unknown receipts and background
+cancellation without replay. Retain workspace/Clippy and schema validation.
+All fixtures are fictional; no provider/phone/device acceptance follows.

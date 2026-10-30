@@ -1,6 +1,6 @@
 # 14. Mijia reference integration and remaining coverage
 
-The October 30 worktree uses API 1.39 and the owner-supplied October 22 Xiaomi Home
+The October 30 worktree uses API 1.40 and the owner-supplied October 22 Xiaomi Home
 11.7.709 analysis. The full official-App feature request remains **incomplete**.
 The source archive explicitly does not supply all authentication, protocol or
 runtime control contracts. An implemented decoder is not physical acceptance.
@@ -72,7 +72,7 @@ cargo +1.96.0 test -p homeverb-mijia --offline --locked
 | 78 non-readable properties | No read operation; write/event-only definitions are not state |
 | 28 opaque readable values | Separate typed/business/privacy contracts required |
 | 3 network identity values | Excluded from state and exports |
-| 40 actions | Six exact empty-input actions have typed Core support under ADR-0107/0108; native/App admission and the remaining 34 actions are incomplete |
+| 40 actions | Six exact empty-input actions have Core/native support under ADR-0107/0108/0109; Flutter adoption and the remaining 34 actions are incomplete |
 | 78 events | No event-history/subscription body, paging or lifecycle contract; not implemented |
 
 The archived successful reads used **SID `mijia`** and
@@ -1758,3 +1758,37 @@ The rebuilt FFI and actual native C boundary also passed: 36 ordinary methods,
 60 live examples and 76 modern-account cases, plus existing protected/trusted
 bridge guards. No new native method, startup field or Flutter action is exposed
 by this phase.
+
+
+## Native exact no-argument actions -- October 30, 2026
+
+[ADR-0109](../adr/0109-native-mijia-action-grants.md) exposes the six reviewed
+ADR-0108 actions through API 1.40. Independent trusted `mijia_action_grants`
+contain only canonical local device IDs and exact component/capability/action
+tuples. Invalid grants refuse before profile creation. Both Core and the adapter
+receive the exact empty-argument policy; existing property grants imply no action
+authority. Default composition remains action-free.
+
+`inspect_control_options` retains its existing result unless the caller explicitly
+sets `include_no_argument_actions:true`. Inspection performs no networking or
+permission changes and returns saved-inventory evidence with authorization not
+checked. Explicit granted reopen and account refresh publish actions on the
+protected selected protocol. Non-idempotent receipts preserve uncertain outcomes
+without retry, including after cancellation/background and session reopen.
+
+Negotiate 1.40 before supplying the new field or inspection flag. Existing Rust
+opening helpers remain compatible; typed Request constructors need the new field.
+SQLite 5, protected payload 3, 36 ordinary methods and C exports are unchanged.
+Flutter adoption, an updated APK, the remaining actions/events and real account/
+phone/model acceptance remain pending. The 503ef1f APK remains API 1.39. No real
+account, appliance, installation, remote push or publication is used.
+
+Executed software checks: workspace tests excluding the known unrelated
+Meiju/macOS LAN-alias suite passed 666 tests with one ignored. Strict all-target
+Clippy, FFI rebuild and the actual C boundary passed: 36 ordinary methods,
+68 live examples, 76 modern-account cases and existing protected/trusted bridge
+guards. The 58 scoped Host/account tests cover action admission, opt-in inspection,
+explicit refresh/execute and uncertain lifecycle recovery without replay.
+Documentation, source hygiene, both reference projection tests and 25 schemas
+with 76 positive/1451 negative fixtures passed. All data is fictional; no Flutter
+run, new package or provider/device acceptance is claimed by this native phase.

@@ -1,6 +1,7 @@
 //! Exact-model public MIoT evidence. Only reviewed readable semantics are projected.
 
 mod actions;
+pub use actions::no_argument_action_option;
 
 use crate::{CloudEndpoint, CloudRequest, CloudTransport, PrivateString, Region, invalid};
 use homeverb_core::{Operation, SecretBytes};

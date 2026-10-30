@@ -1,6 +1,6 @@
 # Native UI contract
 
-The October 30 exact hood control bridge uses native API **1.39.0**, following
+The October 30 exact action control bridge uses native API **1.40.0**, following
 the October 24 linear mainline update. Earlier Mijia phase versions are historical. See
 [contract reconciliation](adr/0079-mijia-mainline-reconciliation.md). Mainline Meiju restoration and controls
 remain available alongside Mijia; identity restoration remains Meiju-only.
@@ -43,7 +43,7 @@ The 22 C functions in [homeverb.h](../crates/ffi/include/homeverb.h) form the na
 
 1. Load the platform library and call `homeverb_open` from a worker isolate/thread. Supply schema `1.0`, an absolute OS-private data directory, and an explicit `allow_mock_writes` boolean. `adapter` is optional and defaults to `homeverb.mock`; `midea.meiju` selects Meiju, `xiaomi.mijia` selects Mijia, and `homeverb.platforms` selects both. `scenario` defaults to `normal`. All platform modes require `allow_mock_writes: false` and reject any other scenario before opening the profile. All startup values come from trusted app code, never imported commands. The [startup schema](../schemas/native-open.schema.json) defines fields; Core checks OS path semantics.
 2. Decode the open query envelope. On success, retain `data.handle` as an unsigned 64-bit native handle; `data.adapter` confirms the selected mode. Do not persist handles across app launches. Errors have null data. Free every returned native string exactly once, including errors.
-3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.32.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
+3. Call `get_api_info` with a new operation ID before enabling native features. Require API major version `1`, and check individual methods in `data.methods`. The current `api_version` is `1.40.0`; JSON envelope schema remains `1.0`. Older hosts return `INVALID_ARGUMENT` for this query: show a native-library upgrade requirement. Unknown optional response fields may be retained/ignored, but unknown outcomes must not become success.
 4. Load local rooms/cards/history as needed. Opening a page does not discover devices, refresh their state, or contact every account. Explicit discovery uses the selected adapter. Meiju enumerates stored mainland accounts and retrieves their inventories under the request budget.
 5. Execute every blocking FFI call on a worker. Allow lifecycle/cancel calls from another isolate/thread; do not queue cancellation behind the call being cancelled. At most eight active operations belong to one session. Use globally unique operation IDs within that session, and never reuse one until its call finishes.
 
@@ -88,7 +88,7 @@ All rows use query envelopes except the two execution methods. The schemas and a
 | `get_account` | `account_id` | `{account, device_ids}` from local metadata; no authorization check |
 | `rename_account` | `account_id`, `label` | Updated local AccountSummary; no credential or permission changes |
 | `remove_account` | `account_id`, `expected_device_ids` | Local cleanup result: `removed` or `pending`; inspect the inner error |
-| `inspect_control_options` | `device_id`, `connection_id` | Saved model-specific permission-form options; no permission check, networking or control enablement |
+| `inspect_control_options` | `device_id`, `connection_id`, optional `include_no_argument_actions` (API 1.40) | Saved model-specific permission-form options; no permission check, networking or control enablement |
 | `inspect_session_grants` | `device_id`, `connection_id` | Current local session rules for that route; no credential access, provider authorization check or control enablement |
 | `inspect_account_inventory` | `account_id` | Saved protected device/connection membership; no network or mutation |
 | `inspect_device_conflicts` | `account_id`, `device_id` | Saved duplicate-binding candidates across accounts; no merge or authority |
@@ -2017,3 +2017,30 @@ new write domains without changing local identities. Arbitrary partial mixtures
 are not a migration format. SQLite 5 and Mijia protected payload 3 are unchanged;
 older implementations refuse the new derivation. The existing API 1.38 APK from
 2e776a9 predates these four controls. Provider/phone/model acceptance is pending.
+
+
+## Exact no-argument actions (API 1.40)
+
+Trusted startup accepts `mijia_action_grants` only in Mijia or combined modes.
+The [fictional six-action startup](../examples/native-open.mijia-actions.json)
+shows every exact tuple. Each entry has a canonical version-four local device ID,
+component, capability and action; arguments, wire IDs, model selectors and
+confirmation fields are forbidden. At most 64 unique entries are admitted.
+Validation precedes profile creation. Syntax acceptance does not prove that the
+device exists, supports the action or has provider authorization.
+
+Negotiate 1.40 before any granted reopen. Existing control-option inspection
+omits these actions unless `include_no_argument_actions:true` is explicit.
+An opted-in result uses the existing saved_inventory/not_checked response;
+it changes no grants, saved descriptors or credentials and performs no networking.
+The action definitions contain empty-object parameters, cloud transport,
+non_idempotent idempotency and unavailable verification. Do not convert toggles
+into explicit state setters or replay them to recover an unknown result.
+
+Prepare exact grants in trusted code, reopen, then explicitly refresh the selected
+account before planning/executing against published descriptors. Existing property
+permissions never enable action authority. Use the ordinary plan/execute and
+receipt interfaces; no new method or C function is added. Background/close cancels
+work, and uncertain execution retains its original request ID. Older clients keep
+their previous inspection results; older libraries reject the new field/flag.
+Flutter adoption and a new APK are pending. See [ADR-0109](adr/0109-native-mijia-action-grants.md).

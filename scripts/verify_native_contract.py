@@ -15,6 +15,7 @@ import threading
 import time
 
 from native_contract import ROOT, load, validator
+from native_mijia_action_cases import invalid_action_startups
 
 
 def main():
@@ -577,6 +578,44 @@ def main():
                 assert not open_schema.is_valid(config)
                 assert decode(library.homeverb_open(json.dumps(config).encode()))['error']['code'] == 'INVALID_ARGUMENT'
                 assert not private.exists()
+
+    # Exact action startup admission must precede profile or credential access.
+    action_startup = load('examples/native-open.mijia-actions.json')
+    for adapter in ['xiaomi.mijia', 'homeverb.platforms']:
+        for grants in [action_startup['mijia_action_grants'], [
+                {**action_startup['mijia_action_grants'][0],
+                 'device_id': f'40000000-0000-4000-8000-{i:012x}'} for i in range(64)]]:
+            with tempfile.TemporaryDirectory(prefix='homeverb-actions-') as directory:
+                config = {**action_startup, 'adapter': adapter, 'data_dir': directory,
+                          'mijia_action_grants': grants}
+                open_schema.validate(config)
+                opened = decode(library.homeverb_open(json.dumps(config).encode()))
+                assert opened['error'] is None, opened
+                handle = opened['data']['handle']
+                try:
+                    assert raw(handle, envelope('get_api_info'))['data'] == api
+                    assert raw(handle, envelope('list_devices'))['data'] == []
+                    assert raw(handle, envelope('list_accounts'))['data'] == []
+                    for include in [False, True]:
+                        result = call(handle, 'inspect_control_options',
+                                      device_id=grants[0]['device_id'], connection_id='cloud',
+                                      include_no_argument_actions=include)
+                        assert result['error']['code'] == 'DEVICE_NOT_FOUND'
+                    for include in [None, 1, 'true', {}, []]:
+                        request = envelope('inspect_control_options',
+                                           device_id=grants[0]['device_id'], connection_id='cloud',
+                                           include_no_argument_actions=include)
+                        assert not request_schema.is_valid(request)
+                        assert raw(handle, request)['error']['code'] == 'INVALID_ARGUMENT'
+                finally:
+                    library.homeverb_close(handle)
+    for label, config in invalid_action_startups(action_startup):
+        with tempfile.TemporaryDirectory(prefix='homeverb-action-refused-') as directory:
+            private = Path(directory) / 'must-not-create'
+            config = {**config, 'data_dir': str(private)}
+            assert not open_schema.is_valid(config), label
+            assert decode(library.homeverb_open(json.dumps(config).encode()))['error']['code'] == 'INVALID_ARGUMENT', label
+            assert not private.exists(), label
 
     # Local account metadata remains usable without creating any protected session.
     with tempfile.TemporaryDirectory(prefix='homeverb-ui-local-accounts-') as directory:

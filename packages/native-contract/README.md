@@ -1,6 +1,6 @@
 # HomeVerb native contract
 
-Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.39.0 has 36 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions three trusted connection-link functions and three trusted account-identity recovery functions and three dedicated interactive login functions and four protected verification functions and four modern account functions; the JSON envelope schema is 1.0.
+Start with the [Flutter handoff](../../docs/native-ui-contract.md). API version 1.40.0 has 36 callable JSON methods, one separate protected account-connection function, three trusted appliance-approval functions, three trusted LAN-scan functions three trusted connection-link functions and three trusted account-identity recovery functions and three dedicated interactive login functions and four protected verification functions and four modern account functions; the JSON envelope schema is 1.0.
 
 API 1.19 adds nullable `last_complete_inventory_at` to account summaries. It is
 historical local retrieval metadata, not authorization or online status. SQLite
@@ -211,3 +211,11 @@ fallback. See [ADR-0102](../../docs/adr/0102-native-modern-device-publication.md
 Flutter now negotiates the opt-in and adopts validated device reports after local
 reload; 1.36 retains logical reports. Packaging remains pending, and fictional
 native/App evidence does not establish provider, phone or physical-device acceptance.
+
+
+API 1.40 adds separate exact `mijia_action_grants` for six empty-argument actions
+and opt-in `include_no_argument_actions` on control-option inspection. Negotiate
+1.40 before either addition. Defaults stay action-free, inspection stays local,
+and uncertain non-idempotent receipts are never replayed. See the
+[action contract](../../docs/native-ui-contract.md#exact-no-argument-actions-api-140).
+Flutter adoption and packaging remain pending.

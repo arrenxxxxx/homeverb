@@ -53,6 +53,8 @@ pub enum Request {
     InspectControlOptions {
         device_id: String,
         connection_id: String,
+        #[serde(default)]
+        include_no_argument_actions: bool,
     },
     InspectHistoryOptions {
         device_id: String,
@@ -622,6 +624,7 @@ impl Session {
             Request::InspectControlOptions {
                 device_id,
                 connection_id,
+                include_no_argument_actions,
             } => {
                 if self.accounts.is_none() && self.mijia_accounts.is_none() {
                     return Err(crate::accounts::unsupported());
@@ -641,16 +644,21 @@ impl Session {
                         .mijia_accounts
                         .as_ref()
                         .ok_or_else(crate::accounts::unsupported)?;
-                    serde_json::to_value(
-                        adapter
-                            .inspect_control_options_with_outlets(
-                                &descriptor.device,
-                                connection,
-                                &operation,
-                            )
-                            .await?,
-                    )
-                    .map_err(|_| Error::invalid())?
+                    let mut options = adapter
+                        .inspect_control_options_with_outlets(
+                            &descriptor.device,
+                            connection,
+                            &operation,
+                        )
+                        .await?;
+                    if include_no_argument_actions {
+                        options.extend(
+                            adapter
+                                .inspect_action_options(&descriptor.device, connection, &operation)
+                                .await?,
+                        );
+                    }
+                    serde_json::to_value(options).map_err(|_| Error::invalid())?
                 } else {
                     let adapter = self
                         .accounts

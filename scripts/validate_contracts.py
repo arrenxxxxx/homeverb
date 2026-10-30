@@ -5,6 +5,7 @@ import copy
 import json
 import sys
 from pathlib import Path
+from native_mijia_action_cases import invalid_action_startups
 try:
     from jsonschema import Draft202012Validator, FormatChecker
 except ImportError:
@@ -21,6 +22,7 @@ def checked_formats() -> FormatChecker:
 def main() -> int:
     formats = checked_formats()
     pairs = [
+        ("native-open", "native-open.mijia-actions"),
         ("native-open", "native-open.mijia-hood"),
         ("native-open", "native-open.mijia-auxiliary"),
         ("native-open", "native-open.mijia-outlet"),
@@ -175,6 +177,10 @@ def main() -> int:
     outlet_parameters.validate(outlet_command["arguments"])
     for args in [{"state":1}, {"state":"true"}, {"state":None}, {}, {"state":True,"confirmed":True}, {"state":True,"piid":1}]:
         negative.append(("closed outlet arguments", outlet_parameters, args))
+
+    action_startup = load("examples/native-open.mijia-actions.json")
+    for label, bad in invalid_action_startups(action_startup):
+        negative.append((label, validators["native-open"], bad))
 
     outlet_startup = load("examples/native-open.mijia-outlet.json")
     for entry in outlet_startup["mijia_outlet_grants"]:

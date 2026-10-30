@@ -574,6 +574,11 @@
             "connection_id": {
               "type": "string",
               "minLength": 1
+            },
+            "include_no_argument_actions": {
+              "type": "boolean",
+              "default": false,
+              "description": "API 1.40 opt-in for additional exact standalone empty-argument actions. Inspection never grants authority."
             }
           },
           "required": [

@@ -35,8 +35,8 @@ pub use modern::{
 };
 pub use property_history::{NumericPropertyHistory, NumericPropertyRecord, PropertyHistoryWindow};
 pub use spec::{
-    ControlOption, MappedProperty, ModelMapping, SpecIndex, outlet_control_option,
-    reference_setting_option,
+    ControlOption, MappedProperty, ModelMapping, SpecIndex, no_argument_action_option,
+    outlet_control_option, reference_setting_option,
 };
 pub use statistics::{
     DailyEnergyHistory, DailyEnergyRecord, DailyEnergyWindow, StatisticsCompleteness,

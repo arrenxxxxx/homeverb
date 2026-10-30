@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0",
+  "data_dir": "/fictional/private/homeverb",
+  "adapter": "xiaomi.mijia",
+  "allow_mock_writes": false,
+  "mijia_action_grants": [
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "light-2",
+      "capability": "vendor.xiaomi.mijia.light",
+      "action": "toggle"
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "light-2",
+      "capability": "vendor.xiaomi.mijia.light",
+      "action": "brightness_up"
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "light-2",
+      "capability": "vendor.xiaomi.mijia.light",
+      "action": "brightness_down"
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000001",
+      "component_id": "light-2",
+      "capability": "vendor.xiaomi.mijia.light",
+      "action": "toggle_light_mode"
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000002",
+      "component_id": "fan-2",
+      "capability": "vendor.xiaomi.mijia.fan",
+      "action": "toggle"
+    },
+    {
+      "device_id": "40000000-0000-4000-8000-000000000003",
+      "component_id": "light-6",
+      "capability": "vendor.xiaomi.mijia.light",
+      "action": "toggle"
+    }
+  ]
+}
