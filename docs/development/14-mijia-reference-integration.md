@@ -24,7 +24,9 @@ CLI/MCP and version-negotiated API 1.38/App. The
 [2e776a9 Android package](../../apps/mobile/verification.md#reported-samples-api-138-android-package--october-30-2026)
 includes these samples with clean-source archive evidence. ADR-0106/API 1.39
 adds four exact manual/display hood controls, bringing the control count to 33;
-that package predates the new hood extension.
+that package predates the new hood extension. The later
+[503ef1f API 1.39 package](../../apps/mobile/verification.md#exact-hood-controls-api-139-android-package--october-30-2026)
+contains all 33 reviewed controls with clean-source archive checks.
 
 - Eight-part MIoT URNs retain their exact extension; malformed/foreign URNs refuse.
 - Seventeen exact model/specification catalogs project 264 reviewed scalar read

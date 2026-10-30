@@ -1,5 +1,15 @@
 # Implementation status and next tasks
 
+## Exact hood controls Android delivery -- October 30, 2026
+
+The clean 503ef1f source has an archive-checked API 1.39 Android package for
+arm64-v8a and x86_64. It includes all 33 reviewed scalar controls, including the
+four exact hood settings, and the 161 numeric history fields. The report records
+current-AAR matching, 31 exports per ABI, development signing, disabled backup and
+16 KiB alignment. See the [package evidence](../apps/mobile/verification.md#exact-hood-controls-api-139-android-package--october-30-2026).
+Installation and provider/phone/model acceptance remain pending. Packaging changes
+no authority, saved format or functional scope and performs no remote publication.
+
 ## Exact hood manual controls -- October 30, 2026
 
 ADR-0106 adds four exact xiaomi.hood.cyp10 properties through legacy and modern

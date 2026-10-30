@@ -1,6 +1,6 @@
 # ADR-0106: Exact hood manual controls
 
-Status: Core/native API 1.39/App implemented and synthetic-tested; matching Android packaging and real acceptance pending.
+Status: Core/native API 1.39/App implemented and synthetic-tested; Android archive checks passed. Real acceptance pending.
 Date: October 30, 2026.
 
 ## Evidence and scope
@@ -109,3 +109,8 @@ Documentation, source hygiene, 25 schemas with 73 positive/1320 negative fixture
 two coverage-projection tests and seven presentation tests passed. The existing
 eight full Flutter font/pixel/legacy-click failures were not rerun or claimed fixed.
 No real account, appliance, installation, remote push or publication was used.
+
+The clean 503ef1f API 1.39 Android package subsequently passed dual-ABI/current-AAR,
+31-export, signature and 16 KiB alignment checks. See the
+[delivery record](../../apps/mobile/verification.md#exact-hood-controls-api-139-android-package--october-30-2026).
+No installation, provider query or physical-device write was performed.

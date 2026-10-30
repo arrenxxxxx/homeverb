@@ -7,7 +7,9 @@ Exact modern outlet daily-energy history uses the existing history interface.
 ADR-0105 exposes numeric property logs for 161 exact fields through Core,
 CLI/MCP and API 1.38/App, preserving original signed values and nullable units.
 ADR-0104/0106 provide 33 exact modern scalar controls across five models, including
-four manual/display hood properties in API 1.39. Broader
+four manual/display hood properties in API 1.39. The
+[503ef1f package](../../apps/mobile/verification.md#exact-hood-controls-api-139-android-package--october-30-2026)
+includes these additions with clean-source archive checks. Broader
 controls/history and other reference coverage remain incomplete; see the
 [coverage ledger and remaining work](14-mijia-reference-integration.md).
 

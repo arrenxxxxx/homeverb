@@ -1,5 +1,33 @@
 # Flutter implementation verification
 
+## Exact hood controls API 1.39 Android package -- October 30, 2026
+
+Clean source `503ef1f180367b84c306c363ba52af00110d8e6a` produced the combined
+homeverb.platforms APK at
+`apps/mobile/build/delivery/mijia/503ef1f/homeverb-mijia-0.2.0-503ef1f.apk`.
+Size: 78,898,570 bytes. SHA-256:
+`c535dcb0f5717bb576f964bcac84995d3eb8fdfc1fdc42e228356ceb81fcf98e`.
+The adjacent verification.json records source_dirty=false and exact current
+AAR/native matching after normal NDK stripping. This supersedes the 2e776a9 APK
+and contains the four new exact hood controls (33 total reviewed scalar controls),
+161 numeric history fields and the existing modern account/device flows.
+
+Executed scripts/build_android_native.py with installed Rust 1.99.1, NDK
+28.2.13676358, Android 36 stubs and Android Studio JDK for arm64-v8a and x86_64.
+Both native libraries passed 31 exports and 16 KiB ELF alignment. FVM Flutter
+3.47.7 built the release APK for android-arm64,android-x64 with
+HOMEVERB_ADAPTER=homeverb.platforms. scripts/verify_flutter_apk.py passed APK v2
+development signature, exact dual-ABI contents, API 28 minimum, disabled backup,
+no IntegrationTestPlugin, current-AAR matching and 16 KiB ZIP/ELF alignment.
+
+A fresh git fetch origin succeeded; origin/main remained
+ccf2975df836f8e81ccf24fa26c8b2035390c978 and is an ancestor of this source.
+No merge commits were introduced; all 314 source commit messages passed validation.
+This is archive evidence, not installation or account/phone/model acceptance.
+Broader controls/actions/events, BLE/LAN and health/media remain incomplete.
+No installation, provider query, real-device write, push, upload or publication
+was performed. This packaging record changes no runtime implementation.
+
 ## Reported samples API 1.38 Android package -- October 30, 2026
 
 Clean source `2e776a9a3e96ce042d88739ae07cd32b10e99f21` produced the combined
