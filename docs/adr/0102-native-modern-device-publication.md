@@ -1,6 +1,6 @@
 # ADR-0102: Native modern Mijia device publication
 
-Status: Native API 1.37 and Flutter adoption implemented with fictional evidence; packaging/provider acceptance pending.
+Status: Native API 1.37 and Flutter adoption implemented with fictional evidence; Android archive checked; provider/phone acceptance pending.
 Date: October 30, 2026.
 
 ## Decision
@@ -115,3 +115,11 @@ all states in landscape/150 percent text. Flutter analysis reported no issues,
 and all seven shared presentation tests passed. No full Flutter-suite pass or
 new mobile package is claimed; the known unrelated macOS pixel/legacy-click
 failures remain outside this affected passing regression.
+
+## Android package evidence
+
+Clean source `dd51c73` passed both Android native builds and combined-platform
+release APK assembly. The [package record](../../apps/mobile/verification.md#modern-qr-and-device-publication-android-package--october-30-2026)
+contains the artifact digest and executed signature, exact current-AAR, export,
+ABI and alignment checks. This closes the Android archive gate only; installation,
+provider authentication and phone/model acceptance remain pending.

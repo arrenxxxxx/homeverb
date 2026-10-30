@@ -1,6 +1,6 @@
 # 14. Mijia reference integration and remaining coverage
 
-The October 30 worktree uses API 1.36 and the owner-supplied October 22 Xiaomi Home
+The October 30 worktree uses API 1.37 and the owner-supplied October 22 Xiaomi Home
 11.7.709 analysis. The full official-App feature request remains **incomplete**.
 The source archive explicitly does not supply all authentication, protocol or
 runtime control contracts. An implemented decoder is not physical acceptance.
@@ -11,7 +11,10 @@ API 1.30 adds 14 independently granted settings for the exact reference light
 and purifier under ADR-0084. API 1.32 supplies explicit foreground captcha and
 phone/email verification; API 1.33 supplies exact protected daily-energy history
 through Core/native/App and now CLI/MCP. These additions and their bounded evidence
-are recorded below; they do not establish full reference coverage.
+are recorded below; they do not establish full reference coverage. API 1.37 adds
+modern QR login, protected account/device binding, grouped card publication and
+Core reads through Flutter. The [Android package](../../apps/mobile/verification.md#modern-qr-and-device-publication-android-package--october-30-2026)
+has clean-source archive checks, without installation or provider acceptance.
 
 - Eight-part MIoT URNs retain their exact extension; malformed/foreign URNs refuse.
 - Seventeen exact model/specification catalogs project 264 reviewed scalar read
@@ -62,26 +65,29 @@ cargo +1.96.0 test -p homeverb-mijia --offline --locked
 
 The archived successful reads used **SID `mijia`** and
 `https://core.api.mijia.tech/app`, with a continuous RC4 stream across encrypted
-form fields. The existing native account/App host uses **SID `xiaomiio`**, its reviewed
-`api.io.mi.com` routes and legacy field encryption. These are separate session
+form fields. Native account/App hosts now support that modern protocol separately
+from legacy **SID `xiaomiio`**, reviewed `api.io.mi.com` routes and legacy field
+encryption. These are separate session
 contracts. Do not move a saved legacy token to the modern origin, silently change
 its signing mode, or call modern success evidence proof of independent login.
 The archive excludes the existing App session and reports standalone login,
 renewal and expiry recovery as unverified. Independent typed Rust QR/renewal and
-reference reads are now synthetic-tested under ADR-0093/0094; protected modern
-account and App adoption remain pending.
+reference reads are synthetic-tested under ADR-0093/0094; ADR-0095 through
+ADR-0102 implement protected modern accounts, grouping, Core reads and native/App
+publication. Real account/phone/model acceptance remains pending.
 
 The modern device-page endpoint requests logical split children. The analysis
 records two split switch objects and a cloud/cache mismatch (21 shared IDs out
 of 22 in each source). These do not prove 23 physical appliances. The current
 legacy enumerator retains its bounded account/home union and partial status;
-complete inventory, logical-parent reconciliation and missing-device removal are
-not claimed. No private identifiers enter this ledger.
+complete inventory and missing-device removal are not claimed. Modern logical
+children are grouped by explicit protected parent evidence under ADR-0099/0100;
+ambiguous relations refuse and absent historical bindings are retained. No private
+identifiers enter this ledger.
 
 The HA source review below supplies protocol evidence used by the implemented
 legacy verification flow and exact energy-history profile. Still blocked pending
-additional evidence: modern account/App integration and authenticated acceptance
-(the typed QR/renewal protocol is now synthetic-tested under ADR-0093); specialized paths for
+additional evidence: modern control/history protocols and authenticated acceptance; specialized paths for
 failed cloud properties and BLE devices; broader statistics, event pagination and
 foreground subscriptions; health/media/streams; plugin-specific
 composite conversion and additional write constraints. Door unlocking stays denied.

@@ -1,8 +1,10 @@
 # 11. Mijia native integration
 
-October 25: 17 exact Mijia reference specifications now supply 264 scalar read
-mappings and localized App labels. Additional writes and modern authentication
-remain incomplete; see the [full coverage and blockers](14-mijia-reference-integration.md).
+October 30: 17 exact Mijia reference specifications supply 264 scalar read
+mappings and localized App labels. Modern QR authentication, grouped device
+publication and Core reads are integrated through Flutter with fictional evidence.
+Modern controls/history and broader reference coverage remain incomplete; see the
+[coverage ledger and remaining work](14-mijia-reference-integration.md).
 
 The October 30 integration uses native API **1.37.0**, following the linear
 mainline update and dedicated interactive-login bridge. Earlier Mijia phase versions are historical. See
@@ -25,9 +27,10 @@ Native API 1.32 supplies the user-triggered code-request bridge under
 [ADR-0087](../adr/0087-native-mijia-verification-code-delivery.md); Flutter now
 consumes it without automatic message sends or retries. The API 1.33
 [Android package](../../apps/mobile/verification.md#historical-api-133-android-package--october-28-2026)
-includes this account flow and historical UI. Human risk challenges,
-account-settings confirmation, modern SID `mijia` App login, broader event/control
-coverage and owner-run real-provider/device acceptance remain open. Earlier
+includes this account flow and historical UI. The [API 1.37 package](../../apps/mobile/verification.md#modern-qr-and-device-publication-android-package--october-30-2026)
+also contains modern SID `mijia` QR login, grouped cards and read-only state views.
+Human risk challenges, account-settings confirmation, modern controls/history,
+broader event/control coverage and real-provider/device acceptance remain open. Earlier
 phase records below retain their original implementation and evidence scope.
 
 ## Protocol evidence

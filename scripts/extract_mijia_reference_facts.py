@@ -128,8 +128,9 @@ def project():
                     'ordinary_account_refresh': 'implemented_protected_protocol_selection_without_fallback',
                     'physical_core_and_app': 'implemented_native_flutter_device_publication_and_core_reads',
                     'app_evidence': 'ADR-0102; fictional ABI negotiation, QR-to-card clicks and Core-client state requests',
+                    'android_package': 'archive_checked_api_1_37_no_runtime_acceptance',
                     'provider_acceptance': 'pending'},
-                'remaining': ['modern_app_package_and_provider_acceptance',
+                'remaining': ['modern_provider_and_phone_acceptance',
                               'modern_api_origin_and_codec_acceptance', 'cloud_cache_inventory_reconciliation',
                               'specialized_failed_property_read_paths', 'BLE_and_LAN', 'history_and_events',
                               'health_and_media', 'additional_write_runtime_contracts']}

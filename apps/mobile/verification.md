@@ -1,5 +1,39 @@
 # Flutter implementation verification
 
+## Modern QR and device publication Android package -- October 30, 2026
+
+Clean source `dd51c73707fb566e84cadcd75bad9e6200ebbbe0` produced the combined
+`homeverb.platforms` release APK with native API 1.37:
+`apps/mobile/build/delivery/mijia/dd51c73/homeverb-mijia-0.2.0-dd51c73.apk`.
+Size: 78,534,142 bytes. SHA-256:
+`aa932f8d1434a598f5f2b1edb40bcea4b6a109f477652b2b3cb518afdfd36a82`.
+The adjacent `verification.json` records clean source, current AAR/native digests,
+exact payload matching after normal NDK stripping, and development signing.
+This package supersedes the earlier API 1.35 package for local evaluation.
+
+Executed `scripts/build_android_native.py` for arm64-v8a and x86_64 with the
+installed Rust 1.99.1, NDK 28.2.13676358, Android 36 stubs and Android Studio JDK.
+Both release builds passed all 31 exports per ABI and 16 KiB ELF checks.
+Executed `fvm flutter build apk --release --target-platform
+android-arm64,android-x64 --dart-define=HOMEVERB_ADAPTER=homeverb.platforms`
+with the pinned Flutter 3.47.7 and existing temporary SDK/JDK configuration.
+`scripts/verify_flutter_apk.py` passed APK v2 signature, exact dual-ABI contents,
+API 28 minimum, disabled backup, absence of IntegrationTestPlugin, current AAR
+matching and 16 KiB ZIP/ELF alignment. No toolchain installation was needed.
+
+The package includes modern QR authentication, protected persistence, grouped
+card publication, explicit account refresh/recovery/renewal and Core state reads.
+Modern-selected devices remain read-only; modern controls/history, broader event,
+BLE/LAN, health/media and additional-model coverage remain incomplete. Archive
+checks do not establish runtime loading, provider login, phone policy or physical
+model acceptance. No installation, real account access, appliance command, remote
+push, upload or publication occurred. The previously recorded full-suite macOS
+failures are not resolved by packaging.
+
+A fresh `git fetch origin main` succeeded before packaging. Main remained
+`ccf2975df836f8e81ccf24fa26c8b2035390c978`, an ancestor of the source revision;
+`git rev-list --count --merges origin/main..HEAD` returned zero.
+
 ## Flutter modern device publication -- October 30, 2026
 
 The API 1.37 Flutter client now requests modern device publication after QR

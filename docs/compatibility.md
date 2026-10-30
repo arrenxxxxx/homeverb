@@ -1,5 +1,15 @@
 # Platform and device compatibility matrix
 
+## API 1.37 Android package -- October 30, 2026
+
+The native/Flutter modern QR-to-card/read phase is committed as `dd51c73`.
+Its clean-source combined-platform APK passed dual-ABI, 31-export, signature,
+current-AAR and 16 KiB alignment checks; see the [package evidence](../apps/mobile/verification.md#modern-qr-and-device-publication-android-package--october-30-2026).
+The package is built but not installed or provider-tested. Next work remains
+modern controls/history, broader events, BLE/LAN, health/media, additional runtime
+control contracts and real account/phone/model acceptance. Earlier phase records
+below retain their original scope and are superseded where explicitly noted.
+
 ## Flutter modern device publication -- October 30, 2026
 
 The API 1.37 Flutter client now requests modern device publication after QR
