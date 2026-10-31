@@ -776,6 +776,7 @@ class HomeController extends ChangeNotifier {
     }
   });
   Future<bool> refreshCards() => perform(() async {
+    final epoch = _readEpoch;
     for (final c in visibleCards) {
       final d = c['device'] as Json;
       if (d['support_status'] == 'unsupported') continue;
@@ -787,6 +788,9 @@ class HomeController extends ChangeNotifier {
                 'cached': false,
               })
               as Json;
+      if (epoch != _readEpoch || !_foreground) {
+        throw NativeFailure('CANCELLED', 'Device refresh was cancelled.');
+      }
       snapshots[d['id']] = result;
       _componentReadErrors.remove((
         d['id'] as String,

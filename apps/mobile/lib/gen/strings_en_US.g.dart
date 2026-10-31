@@ -4169,4 +4169,76 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Appearance changes only this installation. Device permissions and controls stay unchanged.'
 	String get mobileAppearanceLocalOnly => 'Appearance changes only this installation. Device permissions and controls stay unchanged.';
+
+	/// en-US: 'Reauthorize your account'
+	String get mobileAuthRefreshReauthorizeYourAccount => 'Reauthorize your account';
+
+	/// en-US: 'Connect your appliances'
+	String get mobileAuthRefreshConnectYourAppliances => 'Connect your appliances';
+
+	/// en-US: 'Unable to connect'
+	String get mobileAuthRefreshUnableToConnect => 'Unable to connect';
+
+	/// en-US: 'Check your account, password and network, then try again. Your saved devices have not been removed.'
+	String get mobileAuthRefreshCheckYourAccountPasswordAndNetworkThenTryAgain => 'Check your account, password and network, then try again. Your saved devices have not been removed.';
+
+	/// en-US: 'Authorization is protected by this device\u2019s secure storage. Signing in does not control appliances.'
+	String get mobileAuthRefreshAuthorizationIsProtectedByThisDeviceSSecureStorage => 'Authorization is protected by this device\u2019s secure storage. Signing in does not control appliances.';
+
+	/// en-US: 'Linked accounts'
+	String get mobileAuthRefreshLinkedAccounts => 'Linked accounts';
+
+	/// en-US: 'Add a platform account'
+	String get mobileAuthRefreshAddAPlatformAccount => 'Add a platform account';
+
+	/// en-US: 'Manage linked accounts'
+	String get mobileAuthRefreshManageLinkedAccounts => 'Manage linked accounts';
+
+	/// en-US: 'View devices, update their list or restore authorization. Use the separate entry below to add an account.'
+	String get mobileAuthRefreshViewDevicesUpdateTheirListOrRestoreAuthorizationUse => 'View devices, update their list or restore authorization. Use the separate entry below to add an account.';
+
+	/// en-US: '{count} accounts saved on this device'
+	String mobileAuthRefreshCountAccountsSavedOnThisDevice({required Object count}) => '${count} accounts saved on this device';
+
+	/// en-US: 'Saved on this device'
+	String get mobileAuthRefreshSavedOnThisDevice => 'Saved on this device';
+
+	/// en-US: 'View this account\u2019s devices'
+	String get mobileAuthRefreshViewThisAccountSDevices => 'View this account\u2019s devices';
+
+	/// en-US: 'Choose a platform to connect'
+	String get mobileAuthRefreshChooseAPlatformToConnect => 'Choose a platform to connect';
+
+	/// en-US: 'Choose the platform where your appliances are already added. Selecting a platform does not change saved accounts.'
+	String get mobileAuthRefreshChooseThePlatformWhereYourAppliancesAreAlreadyAdded => 'Choose the platform where your appliances are already added. Selecting a platform does not change saved accounts.';
+
+	/// en-US: 'Sign in with your existing platform account'
+	String get mobileAuthRefreshSignInWithYourExistingPlatformAccount => 'Sign in with your existing platform account';
+
+	/// en-US: 'Only supported connection methods are shown. Browser authorization and verification codes are unavailable.'
+	String get mobileAuthRefreshOnlySupportedConnectionMethodsAreShownBrowserAuthorizationAnd => 'Only supported connection methods are shown. Browser authorization and verification codes are unavailable.';
+
+	/// en-US: 'View linked accounts'
+	String get mobileAuthRefreshViewLinkedAccounts => 'View linked accounts';
+
+	/// en-US: 'Saved locally does not mean currently online or still authorized.'
+	String get mobileAuthRefreshSavedLocallyDoesNotMeanCurrentlyOnlineOrStill => 'Saved locally does not mean currently online or still authorized.';
+
+	/// en-US: 'Device synchronization'
+	String get mobileAuthRefreshDeviceSynchronization => 'Device synchronization';
+
+	/// en-US: 'No synchronization result checked on this page yet. Refresh the platform device list when needed.'
+	String get mobileAuthRefreshNoSynchronizationResultCheckedOnThisPageYetRefresh => 'No synchronization result checked on this page yet. Refresh the platform device list when needed.';
+
+	/// en-US: '{count} devices associated locally'
+	String mobileAuthRefreshCountDevicesAssociatedLocally({required Object count}) => '${count} devices associated locally';
+
+	/// en-US: 'Some devices could not update'
+	String get mobileAuthRefreshSomeDevicesCouldNotUpdate => 'Some devices could not update';
+
+	/// en-US: 'Your last readings are kept. Check your connection and try again.'
+	String get mobileAuthRefreshYourLastReadingsAreKeptCheckYourConnectionAnd => 'Your last readings are kept. Check your connection and try again.';
+
+	/// en-US: 'Refreshing devices\u2026'
+	String get mobileAuthRefreshRefreshingDevices => 'Refreshing devices\u2026';
 }

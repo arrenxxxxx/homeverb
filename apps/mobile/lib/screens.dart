@@ -810,9 +810,14 @@ class DeviceHome extends StatelessWidget {
     this.cards,
     this.roomNames,
     this.filter = 'All',
+    this.refreshing = false,
+    this.refreshEnabled = true,
+    this.feedback,
     super.key,
   });
   final String mode, filter;
+  final bool refreshing, refreshEnabled;
+  final Widget? feedback;
   final ActionHandler onAction;
   final Widget? cards;
   final List<Object>? roomNames;
@@ -966,13 +971,29 @@ class DeviceHome extends StatelessWidget {
                   height: 48,
                   child: IconButton(
                     tooltip: localize(context, 'Refresh State'),
-                    onPressed: () => onAction('Refresh State'),
-                    icon: Glyph('refresh', size: 16, color: secondary),
+                    onPressed: refreshing || !refreshEnabled
+                        ? null
+                        : () => onAction('Refresh State'),
+                    icon: refreshing
+                        ? SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: secondary,
+                              semanticsLabel: localize(
+                                context,
+                                'Refreshing devices…',
+                              ),
+                            ),
+                          )
+                        : Glyph('refresh', size: 16, color: secondary),
                   ),
                 ),
               ],
             ),
           ),
+          if (feedback != null) feedback!,
           cards ??
               DeviceGrid(
                 keys: mode == 'living'
@@ -1090,13 +1111,29 @@ class DeviceHome extends StatelessWidget {
               child: IconButton(
                 padding: EdgeInsets.zero,
                 tooltip: localize(context, 'Refresh State'),
-                onPressed: () => onAction('Refresh State'),
-                icon: Glyph('refresh', size: 16, color: secondary),
+                onPressed: refreshing || !refreshEnabled
+                    ? null
+                    : () => onAction('Refresh State'),
+                icon: refreshing
+                    ? SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: secondary,
+                          semanticsLabel: localize(
+                            context,
+                            'Refreshing devices…',
+                          ),
+                        ),
+                      )
+                    : Glyph('refresh', size: 16, color: secondary),
               ),
             ),
           ],
         ),
         const SizedBox(height: 10),
+        if (feedback != null) feedback!,
         cards ??
             DeviceGrid(
               keys: mode == 'living'

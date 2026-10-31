@@ -1,7 +1,10 @@
 import 'localization.dart';
 import 'credential_access.dart';
+
 import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+
 import 'controller.dart';
 import 'native_client.dart';
 import 'skin.dart';
@@ -31,100 +34,53 @@ class PlatformAccounts extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = controller;
     final highContrast = MediaQuery.highContrastOf(context);
-    Widget accountCard(Json account) {
-      final id = account['id'] as String;
-      final duplicate =
-          c.accounts
-              .where(
-                (other) =>
-                    c.accountDisplayName(other) ==
-                    c.accountDisplayName(account),
-              )
-              .length >
-          1;
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: OutlinedButton(
-          key: ValueKey('account:$id'),
-          onPressed: !c.busy && c.supports('get_account')
-              ? () => onAction('account:$id')
-              : null,
-          style: OutlinedButton.styleFrom(
-            foregroundColor: highContrast ? Colors.black : ink,
-            backgroundColor: Colors.white,
-            padding: const EdgeInsets.all(20),
-            side: BorderSide(
-              color: highContrast ? Colors.black : const Color(0xffe1e3de),
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(22),
-            ),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: highContrast ? Colors.white : const Color(0xfff7eee6),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Icon(
-                  Icons.person_outline_rounded,
-                  color: highContrast ? Colors.black : skinAccent(context),
-                  size: 28,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Copy(accountDisplayName(c, account), size: 18, bold: true),
-                    const SizedBox(height: 6),
-                    const Copy('Meiju', size: 12, color: muted),
-                    if (duplicate)
-                      Copy(
-                        LiteralText(id.split('-').last),
-                        size: 11,
-                        color: muted,
-                      ),
-                    if (account['credential_state'] != 'stored') ...[
-                      const SizedBox(height: 6),
-                      Copy(
-                        credentialLabel(account['credential_state']),
-                        size: 12,
-                        color: highContrast
-                            ? Colors.black
-                            : skinAccent(context),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Icon(Icons.chevron_right_rounded, size: 22),
-            ],
-          ),
-        ),
-      );
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            const Expanded(child: Copy('Accounts', size: 14, bold: true)),
-            if (c.accountNeedsReload && c.supports('list_accounts'))
-              IconButton(
-                tooltip: localize(context, 'Reload Accounts'),
-                onPressed: c.busy ? null : () => onAction('Reload Accounts'),
-                icon: const Icon(Icons.refresh_rounded, color: muted),
+        Container(
+          decoration: BoxDecoration(
+            color: highContrast ? Colors.white : skinOf(context).cardColor,
+            borderRadius: BorderRadius.circular(25),
+            border: highContrast
+                ? Border.all(color: Colors.black, width: 1.5)
+                : null,
+          ),
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Copy('Manage linked accounts', size: 22, bold: true),
+              const SizedBox(height: 8),
+              const Copy(
+                'View devices, update their list or restore authorization. Use the separate entry below to add an account.',
+                color: muted,
+                paragraph: true,
               ),
-          ],
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  const Icon(Icons.link_rounded, color: muted, size: 20),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Copy(
+                      UiMessage('{count} accounts saved on this device', {
+                        'count': c.accounts.length,
+                      }),
+                      color: muted,
+                    ),
+                  ),
+                ],
+              ),
+              if (c.accountNeedsReload && c.supports('list_accounts'))
+                ActionButton(
+                  'Reload Accounts',
+                  style: 'secondary',
+                  onPressed: c.busy ? null : () => onAction('Reload Accounts'),
+                ),
+            ],
+          ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 16),
         if (c.isMock)
           const Padding(
             padding: EdgeInsets.only(bottom: 16),
@@ -141,7 +97,99 @@ class PlatformAccounts extends StatelessWidget {
               color: muted,
             ),
           ),
-        for (final account in c.accounts) accountCard(account),
+        for (final account in c.accounts)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: OutlinedButton(
+              key: ValueKey('account:${account['id']}'),
+              onPressed: !c.busy && c.supports('get_account')
+                  ? () => onAction('account:${account['id']}')
+                  : null,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: highContrast ? Colors.black : ink,
+                backgroundColor: highContrast
+                    ? Colors.white
+                    : skinOf(context).cardColor,
+                padding: const EdgeInsets.all(20),
+                side: BorderSide(
+                  color: highContrast ? Colors.black : Colors.transparent,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: highContrast
+                          ? Colors.white
+                          : skinOf(context).secondaryColor,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(
+                      Icons.person_outline_rounded,
+                      color: skinAccent(context),
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Copy(
+                          accountDisplayName(c, account),
+                          size: 18,
+                          bold: true,
+                        ),
+                        const SizedBox(height: 6),
+                        const Copy(
+                          'Meiju · Mainland China',
+                          size: 12,
+                          color: muted,
+                        ),
+                        if (c.accounts
+                                .where(
+                                  (other) =>
+                                      c.accountDisplayName(other) ==
+                                      c.accountDisplayName(account),
+                                )
+                                .length >
+                            1)
+                          Copy(
+                            LiteralText(
+                              (account['id'] as String).split('-').last,
+                            ),
+                            size: 11,
+                            color: muted,
+                          ),
+                        const SizedBox(height: 10),
+                        Copy(
+                          account['credential_state'] == 'stored'
+                              ? 'Saved on this device'
+                              : credentialLabel(account['credential_state']),
+                          size: 12,
+                          color: skinAccent(context),
+                        ),
+                        const SizedBox(height: 6),
+                        const Copy(
+                          'View this account’s devices',
+                          size: 12,
+                          color: muted,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.chevron_right_rounded, size: 22),
+                ],
+              ),
+            ),
+          ),
+        const SizedBox(height: 8),
         ActionButton(
           'Add Platform',
           onPressed: c.busy ? null : () => onAction('Add Platform'),
@@ -563,6 +611,8 @@ class AccountSignIn extends StatefulWidget {
     required this.needsReload,
     required this.busy,
     this.reauthorizing = false,
+    this.accountName,
+    this.externalError,
     this.onRecover,
     this.credentialAccess = const PlatformCredentialAccess(),
     super.key,
@@ -572,6 +622,7 @@ class AccountSignIn extends StatefulWidget {
   final VoidCallback onCancel, onReload;
   final bool needsReload, busy, reauthorizing;
   final CredentialAccess credentialAccess;
+  final Object? accountName, externalError;
   @override
   State<AccountSignIn> createState() => _AccountSignInState();
 }
@@ -716,6 +767,13 @@ class _AccountSignInState extends State<AccountSignIn>
                 textAlignVertical: TextAlignVertical.center,
                 decoration: InputDecoration(
                   border: InputBorder.none,
+                  prefixIcon: Icon(
+                    secret
+                        ? Icons.lock_outline_rounded
+                        : Icons.person_outline_rounded,
+                    color: muted,
+                    size: 20,
+                  ),
                   contentPadding: fieldTextPadding(
                     context,
                     secret && value.text.isNotEmpty ? '•' : value.text,
@@ -729,70 +787,178 @@ class _AccountSignInState extends State<AccountSignIn>
     ),
   );
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      const Copy('Meiju · Mainland China', size: 14, color: muted),
-      const SizedBox(height: 20),
-      Copy(
-        widget.reauthorizing
-            ? 'Sign in to the same Meiju account. Your device names and rooms will stay.'
-            : 'Sign in with your Meiju account to add your appliances.',
-        color: muted,
-      ),
-      const SizedBox(height: 16),
-      if (canEnter) ...[
-        field('Meiju account', login),
-        field('Password', password, secret: true),
-      ] else ...[
-        Copy(switch (readiness) {
-          null => 'Checking Android credential protection…',
-          CredentialReadiness.screenLockRequired =>
-            'Set a screen-lock PIN, pattern or password in Android Settings, then unlock this device and return. HomeVerb cannot save authorization without a secure screen lock.',
-          CredentialReadiness.locked =>
-            'Unlock this device, then return to sign in.',
-          _ =>
-            'Android credential support is unavailable. Restart the app or install a matching native build before trying again.',
-        }),
-        if (readiness == CredentialReadiness.screenLockRequired)
-          ActionButton(
-            'Open Android Security Settings',
-            onPressed: openSecuritySettings,
+  Widget build(BuildContext context) {
+    final working = widget.busy || submitting;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Surface(
+          key: const ValueKey('account-signin-card'),
+          radius: 26,
+          backgroundColor: skinOf(context).cardColor,
+          padding: const EdgeInsets.all(22),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: skinOf(context).secondaryColor,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(
+                      widget.reauthorizing
+                          ? Icons.lock_reset_rounded
+                          : Icons.home_outlined,
+                      size: 28,
+                      color: skinAccent(context),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Copy('Meiju', size: 20, bold: true),
+                        SizedBox(height: 6),
+                        Copy('Mainland China', size: 13, color: muted),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Copy(
+                widget.reauthorizing
+                    ? 'Reauthorize your account'
+                    : 'Connect your appliances',
+                size: 22,
+                bold: true,
+              ),
+              if (widget.reauthorizing && widget.accountName != null) ...[
+                const SizedBox(height: 14),
+                Copy(widget.accountName!, size: 15, bold: true),
+              ],
+              const SizedBox(height: 12),
+              Copy(
+                widget.reauthorizing
+                    ? 'Sign in to the same Meiju account. Your device names and rooms will stay.'
+                    : 'Sign in with your Meiju account to add your appliances.',
+                color: muted,
+              ),
+              const SizedBox(height: 20),
+              if (canEnter) ...[
+                field('Meiju account', login),
+                field('Password', password, secret: true),
+              ] else ...[
+                Copy(switch (readiness) {
+                  null => 'Checking Android credential protection…',
+                  CredentialReadiness.screenLockRequired =>
+                    'Set a screen-lock PIN, pattern or password in Android Settings, then unlock this device and return. HomeVerb cannot save authorization without a secure screen lock.',
+                  CredentialReadiness.locked =>
+                    'Unlock this device, then return to sign in.',
+                  _ =>
+                    'Android credential support is unavailable. Restart the app or install a matching native build before trying again.',
+                }),
+                if (readiness == CredentialReadiness.screenLockRequired)
+                  ActionButton(
+                    'Open Android Security Settings',
+                    onPressed: openSecuritySettings,
+                  ),
+                if (readiness != null)
+                  ActionButton(
+                    'Check Again',
+                    style: 'secondary',
+                    onPressed: checkReadiness,
+                  ),
+              ],
+              if (error != null || widget.externalError != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Semantics(
+                    liveRegion: true,
+                    child: Surface(
+                      radius: 14,
+                      backgroundColor: skinOf(context).secondaryColor,
+                      padding: const EdgeInsets.all(14),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Copy('Unable to connect', bold: true),
+                          const SizedBox(height: 6),
+                          Copy(
+                            error ??
+                                'Check your account, password and network, then try again. Your saved devices have not been removed.',
+                            color: muted,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              if (widget.needsReload && !working) ...[
+                const Copy(
+                  'Reload saved accounts before starting another connection. An interrupted sign-in may have saved authorization.',
+                ),
+                ActionButton('Reload Accounts', onPressed: widget.onReload),
+              ] else if (canEnter)
+                ActionButton(
+                  working
+                      ? 'Connecting and retrieving devices…'
+                      : 'Sign In and Retrieve Devices',
+                  loading: working,
+                  onPressed: working ? null : submit,
+                ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.shield_outlined,
+                    size: 16,
+                    color: skinAccent(context),
+                  ),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Copy(
+                      'Authorization is protected by this device’s secure storage. Signing in does not control appliances.',
+                      size: 13,
+                      color: muted,
+                    ),
+                  ),
+                ],
+              ),
+              if (canEnter &&
+                  !widget.needsReload &&
+                  widget.onRecover != null) ...[
+                const SizedBox(height: 20),
+                const Copy(
+                  'If the same account was refused because its identity changed, restore its saved binding after reviewing the matching devices.',
+                  color: muted,
+                ),
+                const SizedBox(height: 12),
+                ActionButton(
+                  'Restore Saved Account',
+                  style: 'secondary',
+                  onPressed: working ? null : () => submit(recovery: true),
+                ),
+              ],
+            ],
           ),
-        if (readiness != null)
-          ActionButton(
-            'Check Again',
-            style: 'secondary',
-            onPressed: checkReadiness,
-          ),
-      ],
-      if (error != null) Copy(error!, color: const Color(0xff9e3421)),
-      if (widget.busy)
-        const Copy('Connecting and retrieving devices…')
-      else if (widget.needsReload) ...[
-        const Copy(
-          'Reload saved accounts before starting another connection. An interrupted sign-in may have saved authorization.',
         ),
-        ActionButton('Reload Accounts', onPressed: widget.onReload),
-      ] else if (canEnter)
+        const SizedBox(height: 24),
         ActionButton(
-          'Sign In and Retrieve Devices',
-          onPressed: submitting ? null : submit,
-        ),
-      if (canEnter && !widget.needsReload && widget.onRecover != null) ...[
-        const Copy(
-          'If the same account was refused because its identity changed, restore its saved binding after reviewing the matching devices.',
-          color: muted,
-        ),
-        ActionButton(
-          'Restore Saved Account',
+          'Cancel',
           style: 'secondary',
-          onPressed: submitting || widget.busy
-              ? null
-              : () => submit(recovery: true),
+          onPressed: () {
+            checkEpoch++;
+            clear();
+            widget.onCancel();
+          },
         ),
       ],
-      ActionButton('Cancel', style: 'secondary', onPressed: widget.onCancel),
-    ],
-  );
+    );
+  }
 }

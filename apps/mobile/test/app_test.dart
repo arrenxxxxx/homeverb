@@ -515,12 +515,12 @@ void main({bool deviceRun = false}) {
         expect(find.text('Full cleanup unavailable'), findsOneWidget);
         expect(find.text('Confirm Clear'), findsNothing);
         await route('P02');
-        expect(find.text('Available platforms'), findsOneWidget);
+        expect(find.text('Add a platform account'), findsOneWidget);
         expect(find.text('Meiju'), findsOneWidget);
-        expect(
-          find.text('Choose the app you already use for your appliances.'),
-          findsOneWidget,
-        );
+        expect(find.text('Choose a platform to connect'), findsOneWidget);
+        expect(find.text('View linked accounts'), findsOneWidget);
+        expect(find.text('Xiaomi'), findsNothing);
+        expect(find.text('Hisense'), findsNothing);
         for (final id in ['P01', 'H01', 'H05', 'S09']) {
           await route(id);
           expect(

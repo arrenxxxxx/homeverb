@@ -1834,6 +1834,47 @@ String? translateSource(
   "Warm neutrals and terracotta controls" => t.mobileWindowLightDescription,
   "Appearance changes only this installation. Device permissions and controls stay unchanged." =>
     t.mobileAppearanceLocalOnly,
+  "Reauthorize your account" => t.mobileAuthRefreshReauthorizeYourAccount,
+  "Connect your appliances" => t.mobileAuthRefreshConnectYourAppliances,
+  "Unable to connect" => t.mobileAuthRefreshUnableToConnect,
+  "Check your account, password and network, then try again. Your saved devices have not been removed." =>
+    t.mobileAuthRefreshCheckYourAccountPasswordAndNetworkThenTryAgain,
+  "Authorization is protected by this device\u2019s secure storage. Signing in does not control appliances." =>
+    t.mobileAuthRefreshAuthorizationIsProtectedByThisDeviceSSecureStorage,
+  "Linked accounts" => t.mobileAuthRefreshLinkedAccounts,
+  "Add a platform account" => t.mobileAuthRefreshAddAPlatformAccount,
+  "Manage linked accounts" => t.mobileAuthRefreshManageLinkedAccounts,
+  "View devices, update their list or restore authorization. Use the separate entry below to add an account." =>
+    t.mobileAuthRefreshViewDevicesUpdateTheirListOrRestoreAuthorizationUse,
+  "{count} accounts saved on this device" =>
+    t.mobileAuthRefreshCountAccountsSavedOnThisDevice(
+      count: args["count"] ?? "{count}",
+    ),
+  "Saved on this device" => t.mobileAuthRefreshSavedOnThisDevice,
+  "View this account\u2019s devices" =>
+    t.mobileAuthRefreshViewThisAccountSDevices,
+  "Choose a platform to connect" => t.mobileAuthRefreshChooseAPlatformToConnect,
+  "Choose the platform where your appliances are already added. Selecting a platform does not change saved accounts." =>
+    t.mobileAuthRefreshChooseThePlatformWhereYourAppliancesAreAlreadyAdded,
+  "Sign in with your existing platform account" =>
+    t.mobileAuthRefreshSignInWithYourExistingPlatformAccount,
+  "Only supported connection methods are shown. Browser authorization and verification codes are unavailable." =>
+    t.mobileAuthRefreshOnlySupportedConnectionMethodsAreShownBrowserAuthorizationAnd,
+  "View linked accounts" => t.mobileAuthRefreshViewLinkedAccounts,
+  "Saved locally does not mean currently online or still authorized." =>
+    t.mobileAuthRefreshSavedLocallyDoesNotMeanCurrentlyOnlineOrStill,
+  "Device synchronization" => t.mobileAuthRefreshDeviceSynchronization,
+  "No synchronization result checked on this page yet. Refresh the platform device list when needed." =>
+    t.mobileAuthRefreshNoSynchronizationResultCheckedOnThisPageYetRefresh,
+  "{count} devices associated locally" =>
+    t.mobileAuthRefreshCountDevicesAssociatedLocally(
+      count: args["count"] ?? "{count}",
+    ),
+  "Some devices could not update" =>
+    t.mobileAuthRefreshSomeDevicesCouldNotUpdate,
+  "Your last readings are kept. Check your connection and try again." =>
+    t.mobileAuthRefreshYourLastReadingsAreKeptCheckYourConnectionAnd,
+  "Refreshing devices\u2026" => t.mobileAuthRefreshRefreshingDevices,
   _ => null,
 };
 
@@ -3610,5 +3651,43 @@ String? sourceForKey(String key) => switch (key) {
   "mobile.windowLightDescription" => "Warm neutrals and terracotta controls",
   "mobile.appearanceLocalOnly" =>
     "Appearance changes only this installation. Device permissions and controls stay unchanged.",
+  "mobile.authRefreshReauthorizeYourAccount" => "Reauthorize your account",
+  "mobile.authRefreshConnectYourAppliances" => "Connect your appliances",
+  "mobile.authRefreshUnableToConnect" => "Unable to connect",
+  "mobile.authRefreshCheckYourAccountPasswordAndNetworkThenTryAgain" =>
+    "Check your account, password and network, then try again. Your saved devices have not been removed.",
+  "mobile.authRefreshAuthorizationIsProtectedByThisDeviceSSecureStorage" =>
+    "Authorization is protected by this device\u2019s secure storage. Signing in does not control appliances.",
+  "mobile.authRefreshLinkedAccounts" => "Linked accounts",
+  "mobile.authRefreshAddAPlatformAccount" => "Add a platform account",
+  "mobile.authRefreshManageLinkedAccounts" => "Manage linked accounts",
+  "mobile.authRefreshViewDevicesUpdateTheirListOrRestoreAuthorizationUse" =>
+    "View devices, update their list or restore authorization. Use the separate entry below to add an account.",
+  "mobile.authRefreshCountAccountsSavedOnThisDevice" =>
+    "{count} accounts saved on this device",
+  "mobile.authRefreshSavedOnThisDevice" => "Saved on this device",
+  "mobile.authRefreshViewThisAccountSDevices" =>
+    "View this account\u2019s devices",
+  "mobile.authRefreshChooseAPlatformToConnect" =>
+    "Choose a platform to connect",
+  "mobile.authRefreshChooseThePlatformWhereYourAppliancesAreAlreadyAdded" =>
+    "Choose the platform where your appliances are already added. Selecting a platform does not change saved accounts.",
+  "mobile.authRefreshSignInWithYourExistingPlatformAccount" =>
+    "Sign in with your existing platform account",
+  "mobile.authRefreshOnlySupportedConnectionMethodsAreShownBrowserAuthorizationAnd" =>
+    "Only supported connection methods are shown. Browser authorization and verification codes are unavailable.",
+  "mobile.authRefreshViewLinkedAccounts" => "View linked accounts",
+  "mobile.authRefreshSavedLocallyDoesNotMeanCurrentlyOnlineOrStill" =>
+    "Saved locally does not mean currently online or still authorized.",
+  "mobile.authRefreshDeviceSynchronization" => "Device synchronization",
+  "mobile.authRefreshNoSynchronizationResultCheckedOnThisPageYetRefresh" =>
+    "No synchronization result checked on this page yet. Refresh the platform device list when needed.",
+  "mobile.authRefreshCountDevicesAssociatedLocally" =>
+    "{count} devices associated locally",
+  "mobile.authRefreshSomeDevicesCouldNotUpdate" =>
+    "Some devices could not update",
+  "mobile.authRefreshYourLastReadingsAreKeptCheckYourConnectionAnd" =>
+    "Your last readings are kept. Check your connection and try again.",
+  "mobile.authRefreshRefreshingDevices" => "Refreshing devices\u2026",
   _ => null,
 };

@@ -12,6 +12,8 @@ import 'blocks.dart';
 import 'appliance_controls.dart';
 import 'climate_controls.dart';
 import 'account_views.dart';
+import 'account_surfaces.dart';
+import 'refresh_feedback.dart';
 import 'approval_review.dart';
 import 'compartment_controls.dart';
 import 'controller.dart';
@@ -141,6 +143,13 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       c.busy &&
       c.isForeground;
   bool get onAccountDetails => id == 'P09' || id == 'P10';
+  int? homeRefreshEpoch;
+  Object? homeRefreshFailure;
+  Object? hiddenTransientError;
+  bool get homeRefreshing =>
+      homeRefreshEpoch == navigation && c.busy && c.isForeground;
+  bool get showingSignIn =>
+      id == 'P04' || (onAccountDetails && accountEditor == 'signin');
   bool exporting = false;
   String? quickPowerDevice;
   String connectionLabel = '';
@@ -170,7 +179,10 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state != AppLifecycleState.resumed) activityEpoch++;
+    if (state != AppLifecycleState.resumed) {
+      activityEpoch++;
+      homeRefreshFailure = null;
+    }
     c.setForeground(state == AppLifecycleState.resumed);
     if (state != AppLifecycleState.resumed && accountEditor != null) {
       setAccountEditor(null);
@@ -224,6 +236,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       receiptParents.clear();
       if (!back) history.add(id);
       id = target;
+      homeRefreshFailure = null;
       accountEditor = null;
       clearFields();
       if (target != 'D03') c.search = '';
@@ -616,9 +629,29 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       return;
     }
     if (label == 'Refresh State') {
-      if (['D01', 'D11'].contains(id))
-        await c.refreshCards();
-      else if (id == 'S06')
+      if (['D01', 'D11', 'D12'].contains(id)) {
+        if (c.busy) return;
+        final epoch = navigation, activity = activityEpoch;
+        setState(() {
+          homeRefreshEpoch = epoch;
+          homeRefreshFailure = null;
+        });
+        final success = await c.refreshCards();
+        if (!mounted) return;
+        final failure = c.error;
+        final current =
+            epoch == navigation && activity == activityEpoch && c.isForeground;
+        setState(() {
+          homeRefreshEpoch = null;
+          if (!success && failure != null) {
+            hiddenTransientError = failure;
+            if (current &&
+                !(failure is NativeFailure && failure.code == 'CANCELLED')) {
+              homeRefreshFailure = failure;
+            }
+          }
+        });
+      } else if (id == 'S06')
         await c.refreshReceipt();
       else if (id == 'C08')
         await c.refreshComponents();
@@ -974,6 +1007,8 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     List<dynamic>? b;
     if (id.startsWith('P')) {
       b = accountBlocks(c, id, refreshing: accountRefreshing);
+      if (id == 'P01') ui['header'] = 'Linked accounts';
+      if (id == 'P02') ui['header'] = 'Add a platform account';
       if (id == 'P03') ui['header'] = 'Connect Meiju';
       if (id == 'P13') ui['header'] = 'Platform connection';
       if (id == 'P03' && editingAccountName) {
@@ -1699,6 +1734,14 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
 
   Widget? specialFor(String id) {
     if (id == 'P01') return PlatformAccounts(controller: c, onAction: action);
+    if (id == 'P02') return PlatformPicker(controller: c, onAction: action);
+    if ((id == 'P09' || id == 'P10') && accountEditor == null) {
+      return AccountDetails(
+        controller: c,
+        onAction: action,
+        refreshing: accountRefreshing,
+      );
+    }
     if (id == 'S02') {
       return Builder(
         builder: (context) => RadioGroup<String>(
@@ -1785,11 +1828,17 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         ((id == 'P09' || id == 'P10') &&
             accountEditor == 'signin' &&
             c.account != null)) {
-      final epoch = navigation;
+      final epoch = navigation, activity = activityEpoch;
       final inline = id != 'P04';
       final signIn = AccountSignIn(
         key: ValueKey('signin:$epoch'),
         reauthorizing: c.selectedAccount != null,
+        accountName: inline && c.account != null
+            ? accountDisplayName(c, c.account!)
+            : null,
+        externalError: identical(c.error, hiddenTransientError)
+            ? null
+            : c.error,
         needsReload: c.accountNeedsReload,
         busy: c.busy,
         onRecover: !c.canRecoverIdentity
@@ -1839,6 +1888,14 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                         false;
                   },
                 );
+                if (mounted &&
+                    (epoch != navigation ||
+                        activity != activityEpoch ||
+                        !c.isForeground)) {
+                  hiddenTransientError = c.error;
+                  changed();
+                  return;
+                }
                 if (success &&
                     mounted &&
                     epoch == navigation &&
@@ -1852,6 +1909,14 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             password,
             connectionLabel,
           );
+          if (mounted &&
+              (epoch != navigation ||
+                  activity != activityEpoch ||
+                  !c.isForeground)) {
+            hiddenTransientError = c.error;
+            changed();
+            return;
+          }
           if (success && mounted && epoch == navigation && c.isForeground) {
             if (inline) {
               setAccountEditor(null);
@@ -1866,23 +1931,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         onCancel: () => action('Cancel'),
         onReload: () => action('Reload Accounts'),
       );
-      return inline
-          ? Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Blocks(
-                  [
-                    ['summary', accountDisplayName(c, c.account!), 'Meiju'],
-                  ],
-                  onAction: action,
-                  fields: fields,
-                  choices: choices,
-                  values: values,
-                ),
-                signIn,
-              ],
-            )
-          : signIn;
+      return signIn;
     }
 
     if (['D01', 'D11', 'D12'].contains(id) && c.cards.isNotEmpty)
@@ -1890,6 +1939,14 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         mode: 'all',
         onAction: action,
         cards: deviceCards(),
+        refreshing: homeRefreshing,
+        refreshEnabled: !c.busy,
+        feedback: homeRefreshFailure == null
+            ? null
+            : RefreshFeedback(
+                onRetry: c.busy ? null : () => action('Refresh State'),
+                onDismiss: () => setState(() => homeRefreshFailure = null),
+              ),
         roomNames: [
           'All',
           ...c.rooms.map((v) => LiteralText(v['name'])),
@@ -2404,8 +2461,13 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                   showOperationProgress:
                       content is! ClimateControls &&
                       quickPowerDevice == null &&
-                      !accountRefreshing,
-                  error: id == 'C10' && actionCapability != null
+                      !accountRefreshing &&
+                      !homeRefreshing &&
+                      !showingSignIn,
+                  error:
+                      (id == 'C10' && actionCapability != null) ||
+                          showingSignIn ||
+                          identical(c.error, hiddenTransientError)
                       ? null
                       : c.error,
                 ),
