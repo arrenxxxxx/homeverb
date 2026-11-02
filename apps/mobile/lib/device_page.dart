@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'blocks.dart';
+import 'feedback.dart';
 import 'localization.dart';
 import 'skin.dart';
 import 'device_typography.dart';
@@ -85,18 +86,16 @@ class DevicePage extends StatelessWidget {
                             padding: EdgeInsets.only(bottom: 10),
                             child: OperationProgress(),
                           ),
-                        if (error != null) ...[
-                          Copy('Could not complete this operation', bold: true),
-                          Copy(
-                            localizedError(context, error!),
-                            color: const Color(0xff9e3421),
+                        if (error != null)
+                          FeedbackNotice(
+                            title: 'Could not complete this operation',
+                            message: LiteralText(
+                              friendlyError(context, error!),
+                            ),
+                            warning: true,
+                            actionLabel: 'Dismiss',
+                            onAction: () => onAction('Dismiss error'),
                           ),
-                          TextButton(
-                            onPressed: () => onAction('Dismiss error'),
-                            child: const Copy('Dismiss error'),
-                          ),
-                          const SizedBox(height: 10),
-                        ],
                         child,
                       ],
                     ),

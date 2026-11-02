@@ -1272,10 +1272,11 @@ class DeviceGrid extends StatelessWidget {
           : c.maxWidth > 780
           ? 3
           : 2;
-      final width = (c.maxWidth - (columns - 1) * 12) / columns;
+      final gap = skinOf(context).compactDeviceCards ? 10.0 : 12.0;
+      final width = (c.maxWidth - (columns - 1) * gap) / columns;
       return Wrap(
-        spacing: 12,
-        runSpacing: large ? 16 : 14,
+        spacing: gap,
+        runSpacing: skinOf(context).compactDeviceCards ? 10 : (large ? 16 : 14),
         children: List.generate(
           keys.length,
           (i) => SizedBox(
@@ -1321,6 +1322,9 @@ class DeviceTile extends StatelessWidget {
             (sampleNames.containsKey(deviceKey) ? deviceKey : 'ac'),
         d = data ?? sampleNames[kind] ?? sampleNames['ac']!;
     final hasCaption = d[3].toString().isNotEmpty;
+    final skin = skinOf(context);
+    final compact = skin.compactDeviceCards;
+    final highContrast = MediaQuery.highContrastOf(context);
     const color = ink, secondary = muted;
     final scale = MediaQuery.textScalerOf(context).scale(13) / 13;
     final largeText = scale > 1.3;
@@ -1333,13 +1337,22 @@ class DeviceTile extends StatelessWidget {
         : state
         ? 'Turn Off'
         : 'Turn On';
-    final powerColor = presentation == null
+    final powerColor = compact && !highContrast
+        ? ((presentation == null ? active : state == true)
+              ? skin.cardPowerOn
+              : skin.cardPowerOff)
+        : presentation == null
         ? (active ? skinAccent(context) : const Color(0xffe0ddd5))
         : powerBackground(context, state);
-    final powerInk = presentation == null
+    final powerInk = compact && !highContrast
+        ? ((presentation == null ? active : state == true)
+              ? skin.cardPowerInk
+              : const Color(0xff42596c))
+        : presentation == null
         ? (active ? Colors.white : ink)
         : powerForeground(context, state);
     Widget power() => Semantics(
+      container: compact,
       label: localize(context, UiMessage('Power {name}', {'name': d[0]})),
       button: true,
       enabled: powerEnabled,
@@ -1401,6 +1414,90 @@ class DeviceTile extends StatelessWidget {
         ),
       ),
     );
+    if (compact) {
+      final showPower = presentation?.showPower ?? (kind != 'sensor');
+      final title = data == null ? d[0] : LiteralText(d[0]);
+      return Surface(
+        radius: 22,
+        backgroundColor: (presentation == null ? active : state == true)
+            ? Colors.white
+            : skin.cardColor,
+        border: Colors.transparent,
+        child: Semantics(
+          label: localize(context, UiMessage('Open {name}', {'name': d[0]})),
+          button: true,
+          child: InkWell(
+            key: ValueKey('card-open:$deviceKey'),
+            borderRadius: BorderRadius.circular(22),
+            onTap: () => onAction('open:$deviceKey'),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 154),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        SizedBox(width: 56, height: 48, child: product(kind)),
+                        const Spacer(),
+                        if (showPower)
+                          GestureDetector(
+                            // A disabled shortcut must not fall through to the
+                            // surrounding card's navigation gesture.
+                            behavior: HitTestBehavior.opaque,
+                            excludeFromSemantics: true,
+                            onTap: powerEnabled ? null : () {},
+                            child: power(),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Copy(
+                      title,
+                      size: 15,
+                      bold: true,
+                      maxLines: largeText ? null : 1,
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Copy(
+                                d[1],
+                                size: 11,
+                                color: secondary,
+                                maxLines: largeText ? null : 1,
+                              ),
+                              Copy(
+                                d[2],
+                                size: 17,
+                                bold: true,
+                                maxLines: largeText ? null : 1,
+                              ),
+                              if (hasCaption)
+                                Copy(
+                                  cached ? 'Cached · 2h ago' : d[3],
+                                  size: 10,
+                                  color: secondary,
+                                  maxLines: largeText ? null : 1,
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     Widget textAt(double top, Widget child, {double right = 14}) =>
         Positioned(left: 14, right: right, top: top, child: child);
     return Surface(

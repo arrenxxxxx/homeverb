@@ -12,7 +12,7 @@ import 'package:homeverb_mobile/native_client.dart';
 import 'package:homeverb_mobile/refresh_feedback.dart';
 import 'package:homeverb_mobile/screens.dart' hide Json;
 import 'package:homeverb_mobile/skin.dart';
-import 'accounts_test.dart' show AccountPreferences;
+import 'accounts_test.dart' show AccountFixture, AccountPreferences;
 import 'climate_controls_test.dart' show ClimateFixture;
 
 class RefreshFailureFixture extends ClimateFixture {
@@ -75,6 +75,10 @@ void main() {
   testWidgets(
     'refresh keeps cards, disables repeated requests and offers safe retry',
     (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
       final (core, c, key) = await start(tester);
       final cards = c.cards;
       core.fail = true;
@@ -89,6 +93,14 @@ void main() {
       await tester.pumpAndSettle();
       expect(c.cards, same(cards));
       expect(find.byType(RefreshFeedback), findsOneWidget);
+      expect(
+        tester
+            .widget<SnackBar>(find.byType(SnackBar))
+            .margin!
+            .resolve(TextDirection.ltr)
+            .bottom,
+        greaterThanOrEqualTo(74),
+      );
       expect(
         tester
             .widgetList<Semantics>(
@@ -112,6 +124,24 @@ void main() {
     },
   );
 
+  testWidgets('unsupported-only home never claims readings were updated', (
+    tester,
+  ) async {
+    final core = AccountFixture();
+    final c = HomeController(core, AccountPreferences());
+    final app = GlobalKey<NativeAppState>();
+    await tester.pumpWidget(
+      NativeApp(key: app, catalog: catalog, controller: c),
+    );
+    await tester.pumpAndSettle();
+    c.stopAutomaticRefresh();
+    await app.currentState!.action('Refresh State');
+    await tester.pumpAndSettle();
+    expect(find.text('Readings updated'), findsNothing);
+    expect(core.requests.any((r) => r['method'] == 'read_state'), isFalse);
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets('late refresh failure cannot appear on another page', (
     tester,
   ) async {
@@ -128,6 +158,24 @@ void main() {
     expect(find.textContaining('PRIVATE'), findsNothing);
     await key.currentState!.go('D01');
     await tester.pumpAndSettle();
+    expect(find.byType(RefreshFeedback), findsNothing);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('late refresh failure stays hidden on a device-detail shell', (
+    tester,
+  ) async {
+    final (core, c, key) = await start(tester);
+    await c.selectDevice(c.cards.first['device']['id'] as String);
+    core.fail = true;
+    core.gate = Completer<void>();
+    final work = key.currentState!.action('Refresh State');
+    await tester.pump();
+    await key.currentState!.go('C01');
+    core.gate!.complete();
+    await work;
+    await tester.pumpAndSettle();
+    expect(find.text('Could not complete this operation'), findsNothing);
     expect(find.byType(RefreshFeedback), findsNothing);
     await tester.pumpWidget(const SizedBox());
   });
@@ -173,6 +221,8 @@ void main() {
       expect(tester.takeException(), isNull);
     });
     testWidgets('capture $skin homepage refresh failure', (tester) async {
+      debugDisableShadows = false;
+      addTearDown(() => debugDisableShadows = true);
       LocaleSettings.setLocale(AppLocale.zhCn);
       tester.view.physicalSize = const Size(860, 1864);
       tester.view.devicePixelRatio = 2;
@@ -210,6 +260,7 @@ void main() {
         image.dispose();
       });
       await tester.pumpWidget(const SizedBox());
+      debugDisableShadows = true;
     }, skip: font.isEmpty);
   }
 }

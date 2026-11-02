@@ -4241,4 +4241,28 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Refreshing devices\u2026'
 	String get mobileAuthRefreshRefreshingDevices => 'Refreshing devices\u2026';
+
+	/// en-US: 'Sign in again'
+	String get feedbackSignInAgain => 'Sign in again';
+
+	/// en-US: 'Go to sign in'
+	String get feedbackGoSignIn => 'Go to sign in';
+
+	/// en-US: 'Your authorization has expired. Sign in again to update devices. Your saved devices are kept.'
+	String get feedbackAuthorizationExpired => 'Your authorization has expired. Sign in again to update devices. Your saved devices are kept.';
+
+	/// en-US: 'Your saved devices are kept. Check your connection and refresh when ready.'
+	String get feedbackSavedDevicesKept => 'Your saved devices are kept. Check your connection and refresh when ready.';
+
+	/// en-US: 'Could not refresh. Your last readings are kept.'
+	String get feedbackRefreshFailed => 'Could not refresh. Your last readings are kept.';
+
+	/// en-US: 'Readings updated'
+	String get feedbackReadingsUpdated => 'Readings updated';
+
+	/// en-US: 'Last device list refresh completed'
+	String get feedbackLastRefreshCompleted => 'Last device list refresh completed';
+
+	/// en-US: 'Something interrupted this operation. Check its result before taking further action.'
+	String get feedbackOperationInterrupted => 'Something interrupted this operation. Check its result before taking further action.';
 }

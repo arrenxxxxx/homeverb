@@ -214,7 +214,7 @@ void main() {
       expect(jsonEncode(core.cards), before);
       expect(
         find.text(
-          'NOT_FOUND: The operation could not finish. Error code: NOT_FOUND',
+          'Something interrupted this operation. Check its result before taking further action.',
         ),
         findsOneWidget,
       );

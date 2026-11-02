@@ -1400,5 +1400,13 @@
   "mobile.authRefreshCountDevicesAssociatedLocally": "本机关联 {count} 台设备",
   "mobile.authRefreshSomeDevicesCouldNotUpdate": "部分设备暂时无法更新",
   "mobile.authRefreshYourLastReadingsAreKeptCheckYourConnectionAnd": "已保留上次读取的状态，检查网络连接后可重试。",
-  "mobile.authRefreshRefreshingDevices": "正在刷新设备…"
+  "mobile.authRefreshRefreshingDevices": "正在刷新设备…",
+  "feedback.signInAgain": "需要重新登录",
+  "feedback.goSignIn": "去登录",
+  "feedback.authorizationExpired": "授权已失效，重新登录后可继续同步设备。已保存的设备仍会保留。",
+  "feedback.savedDevicesKept": "已保留你的设备。请检查网络，稍后再刷新。",
+  "feedback.refreshFailed": "暂时无法刷新，已保留上次状态。",
+  "feedback.readingsUpdated": "设备状态已刷新",
+  "feedback.lastRefreshCompleted": "上次设备列表同步已完成",
+  "feedback.operationInterrupted": "操作未能正常结束，请先确认执行结果，再进行下一步。"
 }

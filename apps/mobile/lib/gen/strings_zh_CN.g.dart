@@ -1435,4 +1435,12 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get mobileAuthRefreshSomeDevicesCouldNotUpdate => '\u90e8\u5206\u8bbe\u5907\u6682\u65f6\u65e0\u6cd5\u66f4\u65b0';
 	@override String get mobileAuthRefreshYourLastReadingsAreKeptCheckYourConnectionAnd => '\u5df2\u4fdd\u7559\u4e0a\u6b21\u8bfb\u53d6\u7684\u72b6\u6001\uff0c\u68c0\u67e5\u7f51\u7edc\u8fde\u63a5\u540e\u53ef\u91cd\u8bd5\u3002';
 	@override String get mobileAuthRefreshRefreshingDevices => '\u6b63\u5728\u5237\u65b0\u8bbe\u5907\u2026';
+	@override String get feedbackSignInAgain => '\u9700\u8981\u91cd\u65b0\u767b\u5f55';
+	@override String get feedbackGoSignIn => '\u53bb\u767b\u5f55';
+	@override String get feedbackAuthorizationExpired => '\u6388\u6743\u5df2\u5931\u6548\uff0c\u91cd\u65b0\u767b\u5f55\u540e\u53ef\u7ee7\u7eed\u540c\u6b65\u8bbe\u5907\u3002\u5df2\u4fdd\u5b58\u7684\u8bbe\u5907\u4ecd\u4f1a\u4fdd\u7559\u3002';
+	@override String get feedbackSavedDevicesKept => '\u5df2\u4fdd\u7559\u4f60\u7684\u8bbe\u5907\u3002\u8bf7\u68c0\u67e5\u7f51\u7edc\uff0c\u7a0d\u540e\u518d\u5237\u65b0\u3002';
+	@override String get feedbackRefreshFailed => '\u6682\u65f6\u65e0\u6cd5\u5237\u65b0\uff0c\u5df2\u4fdd\u7559\u4e0a\u6b21\u72b6\u6001\u3002';
+	@override String get feedbackReadingsUpdated => '\u8bbe\u5907\u72b6\u6001\u5df2\u5237\u65b0';
+	@override String get feedbackLastRefreshCompleted => '\u4e0a\u6b21\u8bbe\u5907\u5217\u8868\u540c\u6b65\u5df2\u5b8c\u6210';
+	@override String get feedbackOperationInterrupted => '\u64cd\u4f5c\u672a\u80fd\u6b63\u5e38\u7ed3\u675f\uff0c\u8bf7\u5148\u786e\u8ba4\u6267\u884c\u7ed3\u679c\uff0c\u518d\u8fdb\u884c\u4e0b\u4e00\u6b65\u3002';
 }

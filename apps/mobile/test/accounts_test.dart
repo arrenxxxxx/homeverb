@@ -324,8 +324,8 @@ void main() {
       core.retrieval = 'failed';
       core.retrievalError = 'AUTH_REQUIRED';
       await tap('Refresh Devices');
-      expect(find.text('Could not update devices'), findsOneWidget);
-      await tap('Reauthorize');
+      expect(find.text('Sign in again'), findsOneWidget);
+      await tap('Go to sign in');
       final login = find.byKey(const ValueKey('credential:Meiju account'));
       final password = find.byKey(const ValueKey('credential:Password'));
       expect(tester.widget<TextField>(password).obscureText, true);
@@ -724,7 +724,7 @@ void main() {
       await tap('Sign In and Retrieve Devices');
       expect(key.currentState!.id, 'P09');
       expect(core.connectionTargets, [null]);
-      expect(find.text('Device list updated'), findsOneWidget);
+      expect(find.text('Last device list refresh completed'), findsOneWidget);
       expect(
         find.text(
           'Check that your appliances are added to this account in Meiju.',

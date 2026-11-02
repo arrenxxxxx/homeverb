@@ -18,7 +18,12 @@ class HomeVerbSkin extends ThemeExtension<HomeVerbSkin> {
   const HomeVerbSkin({this.accentColor = accent, this.isSky = false});
   final Color accentColor;
   final bool isSky;
-  Color get cardColor => isSky ? const Color(0xeef6fbff) : Colors.white;
+  Color get cardColor => isSky ? const Color(0xe6f1f7fc) : Colors.white;
+  bool get compactDeviceCards => isSky;
+  Color get cardPowerOn => isSky ? const Color(0xffc5efe2) : powerColor;
+  Color get cardPowerOff =>
+      isSky ? const Color(0xffd5e2ec) : const Color(0xff595d5a);
+  Color get cardPowerInk => isSky ? const Color(0xff20584f) : Colors.white;
   Color get pageColor =>
       isSky ? const Color(0xffdceefa) : const Color(0xfff8f6f0);
   Color get onBackground => isSky ? Colors.white : ink;
@@ -339,30 +344,7 @@ class LightBackground extends StatelessWidget {
             child: MediaQuery.highContrastOf(context)
                 ? const ColoredBox(color: Colors.white)
                 : skinOf(context).isSky
-                ? const DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Color(0xff246897),
-                          Color(0xff78b8db),
-                          Color(0xffb6dfed),
-                          Color(0xff287f9d),
-                        ],
-                        stops: [0, .43, .76, 1],
-                      ),
-                    ),
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: RadialGradient(
-                          center: Alignment(.8, -.65),
-                          radius: 1.1,
-                          colors: [Color(0x40ffffff), Color(0x00ffffff)],
-                        ),
-                      ),
-                    ),
-                  )
+                ? const CustomPaint(painter: _SkyBackground())
                 : device
                 ? ColoredBox(color: skinOf(context).pageColor)
                 : Image.asset(
@@ -376,6 +358,50 @@ class LightBackground extends StatelessWidget {
       child,
     ],
   );
+}
+
+/// Soft, non-uniform blue light. No bitmap copied from a vendor application.
+class _SkyBackground extends CustomPainter {
+  const _SkyBackground();
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0xff377bb1),
+            Color(0xff5d9bc6),
+            Color(0xff87b6d6),
+            Color(0xff2787a0),
+          ],
+          stops: [0, .38, .78, 1],
+        ).createShader(rect),
+    );
+    // Broad, overlapping light fields avoid a flat cyan wash at the bottom.
+    for (final light in <(Alignment, double, Color)>[
+      (const Alignment(.95, -.7), .72, const Color(0x55d5e7f8)),
+      (const Alignment(-1.2, -.12), .95, const Color(0x3025558d)),
+      (const Alignment(-.65, .72), .8, const Color(0x35e3f0f9)),
+      (const Alignment(1.2, .48), .7, const Color(0x302b72a5)),
+    ]) {
+      canvas.drawRect(
+        rect,
+        Paint()
+          ..shader = RadialGradient(
+            center: light.$1,
+            radius: light.$2,
+            colors: [light.$3, light.$3.withValues(alpha: 0)],
+          ).createShader(rect),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _SkyBackground oldDelegate) => false;
 }
 
 class Surface extends StatelessWidget {

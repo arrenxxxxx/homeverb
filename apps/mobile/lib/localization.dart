@@ -62,6 +62,19 @@ String localize(BuildContext context, Object? value) {
   return translateSource(t, source, const {}) ?? source;
 }
 
+/// Consumer feedback uses allowlisted catalog explanations, not diagnostic codes.
+/// Unknown/provider-controlled codes never enter a toast or account notice.
+String friendlyError(BuildContext context, Object error) {
+  final code = error is NativeFailure ? error.code : 'UNKNOWN';
+  if (sourceForKey('error.$code') == null) {
+    return localize(
+      context,
+      'Something interrupted this operation. Check its result before taking further action.',
+    );
+  }
+  return translateError(translationsOf(context), code);
+}
+
 String localizedError(BuildContext context, Object error) {
   final code = error is NativeFailure ? error.code : 'UNKNOWN';
   return '$code: ${translateError(translationsOf(context), code)}';

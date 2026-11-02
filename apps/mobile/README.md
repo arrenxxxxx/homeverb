@@ -497,3 +497,11 @@ or physical-device support.
 Follow the [shared device interaction contract](../../docs/development/14-device-interaction-design.md) when adding or changing device pages, including future Hisense and Mijia/Xiaomi integrations. The design never grants device authority.
 
 The [current synthetic UI verification report](../../docs/development/device-interaction-verification.md) records tests and screenshot limits without modifying the existing historical verification record.
+
+## Feedback and notices
+
+The shared [feedback surface contract](../../docs/design/feedback-surfaces.md)
+defines floating explicit-operation feedback and persistent account notices.
+Consumers see actionable explanations rather than raw provider errors. Automatic
+foreground reads remain silent; uncertain writes never gain a retry shortcut.
+See the isolated [verification results](../../docs/development/feedback-surface-verification.md).

@@ -14,6 +14,7 @@ import 'climate_controls.dart';
 import 'account_views.dart';
 import 'account_surfaces.dart';
 import 'refresh_feedback.dart';
+import 'feedback.dart';
 import 'approval_review.dart';
 import 'compartment_controls.dart';
 import 'controller.dart';
@@ -145,6 +146,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   bool get onAccountDetails => id == 'P09' || id == 'P10';
   int? homeRefreshEpoch;
   Object? homeRefreshFailure;
+  final feedback = FeedbackQueue();
   Object? hiddenTransientError;
   bool get homeRefreshing =>
       homeRefreshEpoch == navigation && c.busy && c.isForeground;
@@ -181,6 +183,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed) {
       activityEpoch++;
+      feedback.clear();
       homeRefreshFailure = null;
     }
     c.setForeground(state == AppLifecycleState.resumed);
@@ -191,6 +194,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    feedback.clear();
     _disposed = true;
     WidgetsBinding.instance.removeObserver(this);
     c.removeListener(changed);
@@ -214,6 +218,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   }
 
   void setAccountEditor(String? editor) {
+    feedback.clear();
     c.cancelPending();
     c.removalScope = null;
     setState(() {
@@ -225,10 +230,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
 
   Future<void> go(String target, {bool back = false}) async {
     if (!mounted) return;
-    final navContext = navigator.currentContext;
-    if (navContext != null) {
-      ScaffoldMessenger.of(navContext).removeCurrentSnackBar();
-    }
+    feedback.clear();
     final deviceHistory = ['C01', 'C08', 'D06'].contains(id);
     c.cancelPending();
     setState(() {
@@ -260,6 +262,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     String actionName,
     Json arguments,
   ) async {
+    feedback.clear();
     final epoch = navigation;
     final device = c.selectedDevice;
     final component = c.component;
@@ -281,16 +284,25 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           foreground == activityEpoch &&
           !['accepted', 'verified'].contains(c.receipt?['status'])) {
         final context = navigator.currentContext;
+        final receipt = c.receipt;
         if (context != null)
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                localize(context, outcomeSummary(c.receipt?['status'])),
-              ),
-              action: SnackBarAction(
-                label: localize(context, 'View Details'),
-                onPressed: () => action('View Details'),
-              ),
+          feedback.show(
+            context,
+            key: 'operation-outcome',
+            aboveNavigation: true,
+            hasAction: true,
+            content: FeedbackToast(
+              message: outcomeSummary(c.receipt?['status']),
+              actionLabel: 'View Details',
+              onAction: () {
+                if (epoch != navigation ||
+                    foreground != activityEpoch ||
+                    !c.isForeground ||
+                    !identical(receipt, c.receipt))
+                  return;
+                feedback.clear();
+                action('View Details');
+              },
             ),
           );
       }
@@ -434,14 +446,72 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         label == 'Recover Saved Authorization') {
       if (c.busy) return;
       if (onAccountDetails) {
-        final epoch = navigation;
+        final epoch = navigation, activity = activityEpoch;
+        final account = c.selectedAccount;
+        feedback.clear();
         if (label != 'Recover Saved Authorization') {
           setState(() => accountRefreshEpoch = epoch);
         }
         try {
-          await c.retrieveAccount(
+          final completed = await c.retrieveAccount(
             recover: label == 'Recover Saved Authorization',
           );
+          final current =
+              mounted &&
+              epoch == navigation &&
+              activity == activityEpoch &&
+              c.isForeground &&
+              account == c.selectedAccount;
+          if (!current ||
+              (c.error is NativeFailure &&
+                  (c.error as NativeFailure).code == 'CANCELLED')) {
+            hiddenTransientError = c.error;
+            if (mounted) changed();
+          }
+          final context = navigator.currentContext;
+          if (completed &&
+              label != 'Recover Saved Authorization' &&
+              mounted &&
+              epoch == navigation &&
+              activity == activityEpoch &&
+              c.isForeground &&
+              account == c.selectedAccount &&
+              context != null &&
+              !accountRequiresSignIn(c)) {
+            final complete =
+                c.accountReport?['retrieval']['status'] == 'complete';
+            feedback.show(
+              context,
+              key: 'account-refresh',
+              hasAction: !complete,
+              content: FeedbackToast(
+                message: complete
+                    ? 'Device list updated'
+                    : c.accountReport?['retrieval']['status'] == 'partial'
+                    ? 'Some devices could not be updated'
+                    : 'Could not update devices',
+                iconColor: complete
+                    ? const Color(0xffa4ded0)
+                    : const Color(0xffffd586),
+                icon: complete
+                    ? Icons.check_circle_outline_rounded
+                    : Icons.cloud_off_outlined,
+                actionLabel: complete ? null : 'Retry',
+                onAction: complete
+                    ? null
+                    : () {
+                        if (epoch != navigation ||
+                            activity != activityEpoch ||
+                            !c.isForeground ||
+                            c.busy ||
+                            account != c.selectedAccount)
+                          return;
+                        feedback.clear();
+                        action('Refresh Devices');
+                      },
+              ),
+            );
+          }
         } finally {
           if (mounted && accountRefreshEpoch == epoch) {
             setState(() => accountRefreshEpoch = null);
@@ -632,6 +702,10 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       if (['D01', 'D11', 'D12'].contains(id)) {
         if (c.busy) return;
         final epoch = navigation, activity = activityEpoch;
+        final hasReadableTargets = c.visibleCards.any(
+          (card) => card['device']['support_status'] != 'unsupported',
+        );
+        feedback.clear();
         setState(() {
           homeRefreshEpoch = epoch;
           homeRefreshFailure = null;
@@ -651,6 +725,37 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             }
           }
         });
+        final context = navigator.currentContext;
+        if (success && hasReadableTargets && current && context != null) {
+          feedback.show(
+            context,
+            key: 'home-refresh-success',
+            aboveNavigation: true,
+            content: const FeedbackToast(
+              message: 'Readings updated',
+              iconColor: Color(0xffa4ded0),
+              icon: Icons.check_circle_outline_rounded,
+            ),
+          );
+        }
+        if (homeRefreshFailure != null && current && context != null) {
+          feedback.show(
+            context,
+            key: 'home-refresh',
+            aboveNavigation: true,
+            hasAction: true,
+            content: RefreshFeedback(
+              onDismiss: feedback.clear,
+              onRetry: () {
+                if (epoch == navigation &&
+                    activity == activityEpoch &&
+                    c.isForeground &&
+                    !c.busy)
+                  action('Refresh State');
+              },
+            ),
+          );
+        }
       } else if (id == 'S06')
         await c.refreshReceipt();
       else if (id == 'C08')
@@ -1941,12 +2046,6 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         cards: deviceCards(),
         refreshing: homeRefreshing,
         refreshEnabled: !c.busy,
-        feedback: homeRefreshFailure == null
-            ? null
-            : RefreshFeedback(
-                onRetry: c.busy ? null : () => action('Refresh State'),
-                onDismiss: () => setState(() => homeRefreshFailure = null),
-              ),
         roomNames: [
           'All',
           ...c.rooms.map((v) => LiteralText(v['name'])),
@@ -2441,7 +2540,9 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                   title: screen['header'] as Object,
                   onAction: action,
                   busy: c.busy && content is! ClimateControls,
-                  error: c.error,
+                  error: identical(c.error, hiddenTransientError)
+                      ? null
+                      : c.error,
                   child: content!,
                 )
               : ScreenView(

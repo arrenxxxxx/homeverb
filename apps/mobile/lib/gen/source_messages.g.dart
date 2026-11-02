@@ -1875,6 +1875,17 @@ String? translateSource(
   "Your last readings are kept. Check your connection and try again." =>
     t.mobileAuthRefreshYourLastReadingsAreKeptCheckYourConnectionAnd,
   "Refreshing devices\u2026" => t.mobileAuthRefreshRefreshingDevices,
+  "Sign in again" => t.feedbackSignInAgain,
+  "Go to sign in" => t.feedbackGoSignIn,
+  "Your authorization has expired. Sign in again to update devices. Your saved devices are kept." =>
+    t.feedbackAuthorizationExpired,
+  "Your saved devices are kept. Check your connection and refresh when ready." =>
+    t.feedbackSavedDevicesKept,
+  "Could not refresh. Your last readings are kept." => t.feedbackRefreshFailed,
+  "Readings updated" => t.feedbackReadingsUpdated,
+  "Last device list refresh completed" => t.feedbackLastRefreshCompleted,
+  "Something interrupted this operation. Check its result before taking further action." =>
+    t.feedbackOperationInterrupted,
   _ => null,
 };
 
@@ -3689,5 +3700,16 @@ String? sourceForKey(String key) => switch (key) {
   "mobile.authRefreshYourLastReadingsAreKeptCheckYourConnectionAnd" =>
     "Your last readings are kept. Check your connection and try again.",
   "mobile.authRefreshRefreshingDevices" => "Refreshing devices\u2026",
+  "feedback.signInAgain" => "Sign in again",
+  "feedback.goSignIn" => "Go to sign in",
+  "feedback.authorizationExpired" =>
+    "Your authorization has expired. Sign in again to update devices. Your saved devices are kept.",
+  "feedback.savedDevicesKept" =>
+    "Your saved devices are kept. Check your connection and refresh when ready.",
+  "feedback.refreshFailed" => "Could not refresh. Your last readings are kept.",
+  "feedback.readingsUpdated" => "Readings updated",
+  "feedback.lastRefreshCompleted" => "Last device list refresh completed",
+  "feedback.operationInterrupted" =>
+    "Something interrupted this operation. Check its result before taking further action.",
   _ => null,
 };

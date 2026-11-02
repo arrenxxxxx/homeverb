@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'account_views.dart';
 import 'blocks.dart';
 import 'controller.dart';
+import 'feedback.dart';
 import 'localization.dart';
 import 'skin.dart';
 
@@ -132,6 +133,7 @@ class AccountDetails extends StatelessWidget {
         ? c.accountReport
         : null;
     final original = accountBlocks(c, 'P09', refreshing: refreshing);
+    final needsSignIn = accountRequiresSignIn(c);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -183,14 +185,33 @@ class AccountDetails extends StatelessWidget {
             const Copy('Device synchronization', size: 18, bold: true),
             const SizedBox(height: 10),
             if (stored && report != null)
-              _blocks(accountRefreshBlocks(c))
+              if (needsSignIn)
+                FeedbackNotice(
+                  title: 'Sign in again',
+                  message:
+                      'Your authorization has expired. Sign in again to update devices. Your saved devices are kept.',
+                  warning: true,
+                  icon: Icons.lock_outline_rounded,
+                  actionLabel: c.canSignIn ? 'Go to sign in' : null,
+                  onAction: c.busy || !c.canSignIn
+                      ? null
+                      : () => onAction('Reauthorize'),
+                )
+              else if (report['retrieval']['status'] != 'complete')
+                const Copy(
+                  'Your saved devices are kept. Check your connection and refresh when ready.',
+                  color: muted,
+                  paragraph: true,
+                )
+              else
+                _blocks(accountRefreshBlocks(c))
             else if (stored)
               const Copy(
                 'No synchronization result checked on this page yet. Refresh the platform device list when needed.',
                 color: muted,
                 paragraph: true,
               ),
-            if (stored && c.supports('refresh_account')) ...[
+            if (stored && !needsSignIn && c.supports('refresh_account')) ...[
               const SizedBox(height: 16),
               ActionButton(
                 'Refresh Devices',

@@ -1400,5 +1400,13 @@
   "mobile.authRefreshCountDevicesAssociatedLocally": "{count} devices associated locally",
   "mobile.authRefreshSomeDevicesCouldNotUpdate": "Some devices could not update",
   "mobile.authRefreshYourLastReadingsAreKeptCheckYourConnectionAnd": "Your last readings are kept. Check your connection and try again.",
-  "mobile.authRefreshRefreshingDevices": "Refreshing devices…"
+  "mobile.authRefreshRefreshingDevices": "Refreshing devices…",
+  "feedback.signInAgain": "Sign in again",
+  "feedback.goSignIn": "Go to sign in",
+  "feedback.authorizationExpired": "Your authorization has expired. Sign in again to update devices. Your saved devices are kept.",
+  "feedback.savedDevicesKept": "Your saved devices are kept. Check your connection and refresh when ready.",
+  "feedback.refreshFailed": "Could not refresh. Your last readings are kept.",
+  "feedback.readingsUpdated": "Readings updated",
+  "feedback.lastRefreshCompleted": "Last device list refresh completed",
+  "feedback.operationInterrupted": "Something interrupted this operation. Check its result before taking further action."
 }

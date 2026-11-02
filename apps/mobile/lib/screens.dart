@@ -1,3 +1,4 @@
+import 'feedback.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -113,6 +114,7 @@ class ScreenView extends StatelessWidget {
     final ui = screenOverride ?? catalog.ui(id),
         root = ui['root'] as String?,
         base = ui['base'] as String?;
+    final compactHome = skinOf(context).compactDeviceCards && root == 'Devices';
     return LightBackground(
       child: LayoutBuilder(
         builder: (context, c) {
@@ -222,12 +224,11 @@ class ScreenView extends StatelessWidget {
                                 ),
                               content,
                               if (error != null)
-                                Semantics(
-                                  liveRegion: true,
-                                  child: Copy(
-                                    localizedError(context, error!),
-                                    color: const Color(0xff9e3421),
+                                FeedbackNotice(
+                                  message: LiteralText(
+                                    friendlyError(context, error!),
                                   ),
+                                  warning: true,
                                 ),
                             ],
                           ),
@@ -332,9 +333,13 @@ class ScreenView extends StatelessWidget {
                             child: SingleChildScrollView(
                               key: ValueKey('scroll:$id'),
                               padding: EdgeInsets.fromLTRB(
-                                wide ? 30 : 20,
-                                root != null ? (id == 'P01' ? 13 : 16) : 8,
-                                wide ? 30 : 20,
+                                wide ? 30 : (compactHome ? 14 : 20),
+                                root != null
+                                    ? (id == 'P01'
+                                          ? 13
+                                          : (compactHome ? 10 : 16))
+                                    : 8,
+                                wide ? 30 : (compactHome ? 14 : 20),
                                 20,
                               ),
                               child: Column(
@@ -357,7 +362,9 @@ class ScreenView extends StatelessWidget {
                                                 ? ink
                                                 : skinOf(context).onBackground),
                                             size: root != null
-                                                ? (id == 'P01' ? 28 : 30)
+                                                ? (id == 'P01'
+                                                      ? 28
+                                                      : (compactHome ? 25 : 30))
                                                 : 25,
                                             bold: true,
                                           ),
@@ -441,22 +448,17 @@ class ScreenView extends StatelessWidget {
                                       padding: EdgeInsets.only(bottom: 12),
                                       child: OperationProgress(),
                                     ),
-                                  if (error != null) ...[
-                                    blocks([
-                                      [
-                                        'status',
-                                        'Could not complete this operation',
-                                        localizedError(context, error!),
-                                        'error',
-                                      ],
-                                    ]),
-                                    ActionButton(
-                                      'Dismiss error',
-                                      style: 'secondary',
-                                      onPressed: () =>
-                                          onAction('Dismiss error'),
+                                  if (error != null)
+                                    FeedbackNotice(
+                                      title:
+                                          'Could not complete this operation',
+                                      message: LiteralText(
+                                        friendlyError(context, error!),
+                                      ),
+                                      warning: true,
+                                      actionLabel: 'Dismiss',
+                                      onAction: () => onAction('Dismiss error'),
                                     ),
-                                  ],
                                   if (wide && id == 'W02')
                                     Row(
                                       crossAxisAlignment:
@@ -511,7 +513,7 @@ class ScreenView extends StatelessWidget {
                 Container(
                   color: root != null
                       ? (skinOf(context).isSky
-                            ? const Color(0xdd285f7f)
+                            ? const Color(0xaa205577)
                             : const Color(0xfff6f2ea))
                       : null,
                   height: 20,
@@ -678,7 +680,7 @@ class ScreenView extends StatelessWidget {
 
   Widget _nav(String root, BuildContext context) => Container(
     color: skinOf(context).isSky
-        ? const Color(0xdd285f7f)
+        ? const Color(0xaa205577)
         : const Color(0xfff6f2ea),
     constraints: const BoxConstraints(minHeight: 58),
     height: MediaQuery.textScalerOf(context).scale(11) > 11 ? null : 58,
@@ -687,7 +689,7 @@ class ScreenView extends StatelessWidget {
         const labels = ['Devices', 'Platforms', 'Settings'],
             icons = ['home', 'platform', 'settings'];
         final color = skinOf(context).isSky
-            ? (root == labels[i] ? Colors.white : const Color(0xffc1deed))
+            ? (root == labels[i] ? Colors.white : const Color(0xffe3f1fa))
             : (root == labels[i] ? skinAccent(context) : muted);
         return Expanded(
           child: Semantics(

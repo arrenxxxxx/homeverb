@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'controller.dart';
 import 'native_client.dart';
 import 'skin.dart';
+import 'feedback.dart';
 
 String credentialLabel(dynamic state) => switch (state) {
   'stored' => 'Saved authorization · not checked',
@@ -298,30 +299,35 @@ List<dynamic> savedInventoryBlocks(HomeController c) {
   ];
 }
 
+/// A report belongs to one selected account; stale reports are not authority.
+bool accountRequiresSignIn(HomeController c) =>
+    c.accountReport?['account']['id'] == c.selectedAccount &&
+    c.accountReport?['retrieval']['status'] != 'complete' &&
+    c.accountReport?['retrieval']['error']?['code'] == 'AUTH_REQUIRED';
+
 List<dynamic> accountRefreshBlocks(HomeController c) {
   final retrieval = c.accountReport!['retrieval'] as Json;
   final status = retrieval['status'];
   if (status == 'complete')
     return [
-      ['note', 'Device list updated'],
+      ['note', 'Last device list refresh completed'],
       if ((retrieval['device_ids'] as List).isEmpty)
         [
           'note',
           'Check that your appliances are added to this account in Meiju.',
         ],
     ];
+  // Legacy catalog callers retain a readable status without raw provider codes.
   return [
     [
-      'status',
-      status == 'partial'
-          ? 'Some devices could not be updated'
-          : 'Could not update devices',
-      'Your saved devices are still here. Try again or sign in again.',
-      'warning',
+      'note',
+      accountRequiresSignIn(c)
+          ? 'Your authorization has expired. Sign in again to update devices. Your saved devices are kept.'
+          : 'Your saved devices are kept. Check your connection and refresh when ready.',
     ],
-    if (retrieval['error'] != null)
-      ['note', UiError(retrieval['error']['code'])],
-    if (c.account?['credential_state'] == 'stored' && c.canSignIn)
+    if (accountRequiresSignIn(c) &&
+        c.account?['credential_state'] == 'stored' &&
+        c.canSignIn)
       ['button', 'Reauthorize', 'secondary'],
   ];
 }
@@ -334,7 +340,9 @@ List<dynamic> accountBlocks(
   final account = c.account;
   final state = account?['credential_state'];
   final actions = <dynamic>[
-    if (state == 'stored' && c.supports('refresh_account'))
+    if (state == 'stored' &&
+        !accountRequiresSignIn(c) &&
+        c.supports('refresh_account'))
       ['button', 'Refresh Devices'],
     if (state == 'pending' && c.supports('recover_account')) ...[
       [
@@ -460,7 +468,9 @@ List<dynamic> accountBlocks(
             'note',
             'No devices yet. Update the list after adding appliances in Meiju.',
           ],
-        if (state == 'stored' && c.supports('refresh_account'))
+        if (state == 'stored' &&
+            !accountRequiresSignIn(c) &&
+            c.supports('refresh_account'))
           [
             'button',
             'Refresh Devices',
@@ -484,10 +494,7 @@ List<dynamic> accountBlocks(
                       accountDisplayName(c, account),
                       'Rename Account',
                     ],
-                  if (c.canSignIn &&
-                      (c.accountReport == null ||
-                          c.accountReport?['retrieval']['status'] ==
-                              'complete'))
+                  if (c.canSignIn && !accountRequiresSignIn(c))
                     ['Reauthorize', '', 'Reauthorize'],
                   if (c.supports('remove_account'))
                     ['Remove From This Device', '', 'Remove From This Device'],
@@ -875,35 +882,26 @@ class _AccountSignInState extends State<AccountSignIn>
                     onPressed: checkReadiness,
                   ),
               ],
-              if (error != null || widget.externalError != null)
+              if (!widget.needsReload &&
+                  (error != null || widget.externalError != null))
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16),
-                  child: Semantics(
-                    liveRegion: true,
-                    child: Surface(
-                      radius: 14,
-                      backgroundColor: skinOf(context).secondaryColor,
-                      padding: const EdgeInsets.all(14),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Copy('Unable to connect', bold: true),
-                          const SizedBox(height: 6),
-                          Copy(
-                            error ??
-                                'Check your account, password and network, then try again. Your saved devices have not been removed.',
-                            color: muted,
-                          ),
-                        ],
-                      ),
-                    ),
+                  child: FeedbackNotice(
+                    title: 'Unable to connect',
+                    message:
+                        error ??
+                        'Check your account, password and network, then try again. Your saved devices have not been removed.',
+                    warning: true,
                   ),
                 ),
               if (widget.needsReload && !working) ...[
-                const Copy(
-                  'Reload saved accounts before starting another connection. An interrupted sign-in may have saved authorization.',
+                FeedbackNotice(
+                  message:
+                      'Reload saved accounts before starting another connection. An interrupted sign-in may have saved authorization.',
+                  warning: true,
+                  actionLabel: 'Reload Accounts',
+                  onAction: widget.onReload,
                 ),
-                ActionButton('Reload Accounts', onPressed: widget.onReload),
               ] else if (canEnter)
                 ActionButton(
                   working
