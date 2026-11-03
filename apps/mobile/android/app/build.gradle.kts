@@ -31,11 +31,27 @@ android {
         }
     }
 
+    signingConfigs {
+        if (System.getenv("HOMEVERB_TEST_BUILD") == "true") {
+            create("ciTest") {
+                storeFile = file(requireNotNull(System.getenv("HOMEVERB_TEST_KEYSTORE")))
+                storePassword = requireNotNull(System.getenv("HOMEVERB_TEST_STORE_PASSWORD"))
+                keyAlias = "homeverb-test"
+                keyPassword = storePassword
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // CI test builds are isolated from the eventual production package.
+            if (System.getenv("HOMEVERB_TEST_BUILD") == "true") {
+                applicationIdSuffix = ".test"
+            }
+            // Test CI fails closed if its dedicated signing configuration is absent.
+            signingConfig = signingConfigs.getByName(
+                if (System.getenv("HOMEVERB_TEST_BUILD") == "true") "ciTest" else "debug"
+            )
         }
     }
 

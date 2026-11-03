@@ -316,6 +316,23 @@ approved atlas before claiming visual equivalence.
 - Diagnostics show the loaded report in summary cards. Select the review note to inspect the complete report, including all retained receipts. Export saves that same snapshot; failed or cancelled reloads cannot expose an old or late report. Android uses the system Create Document picker restricted to local providers; cancellation writes nothing. The picker grants access to the selected document without broad storage permissions. Desktop builds use the file selector. iOS document export remains unverified.
 - Modal focus stays above the inactive backdrop; Tab/Enter and Escape support keyboard navigation. Fields, sliders and switches expose their purpose. Busy activity becomes static when the system requests reduced motion. System high contrast uses solid surfaces, stronger outlines and larger semibold text; disabling it restores the original Window Light appearance.
 
+## Android CI test APK
+
+The Android test workflow builds a universal arm64-v8a/x86_64 Meiju APK from
+`main`, stores it as a GitHub Actions artifact for 30 days, and publishes a
+separately tagged GitHub prerelease. It can also be started manually on `main`.
+For a public repository, both the prerelease and its APK are public. The APK uses `dev.homeverb.homeverb_mobile.test` and
+version name `0.2.0-test`, separate from the production application ID. It is
+signed using a dedicated persistent test key supplied through GitHub Actions
+Secrets; it is not a production key. Keep a secure backup of the key and its
+password: replacing or losing the key prevents in-place updates and may require
+uninstalling the old test app, deleting its local data. The test app cannot
+upgrade the production app because its application ID is separate. Do not use
+this APK as an official release.
+When the two test-signing Secrets are absent, the workflow reports a skipped
+build in its summary rather than publishing an unsigned APK. A successful build
+is not evidence of physical-device acceptance.
+
 ## Android development build
 
 The Android application includes the matching local Core AAR for `arm64-v8a` and
