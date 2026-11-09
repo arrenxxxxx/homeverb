@@ -417,6 +417,7 @@ class Blocks extends StatelessWidget {
           onAction: onAction,
           freshness: b.length > 1 ? b[1] : 'Updated just now',
           enabled: b.length <= 2 || b[2] == true,
+          loading: b.length > 3 && b[3] == true,
           target: values['observed_target'] ?? 24,
           mode: fields['observed_mode']?.text ?? 'Cooling · Room 26°C',
         );
@@ -885,7 +886,11 @@ class Rows extends StatelessWidget {
                     ['On', 'Off'].contains(value);
                 final stepper =
                     ['Target', 'Speed'].contains(label) && value.contains('+');
-                final inline = stepper || trailing.containsKey(i);
+                final rowTrailing = items[i].length > 3 && items[i][3] is Widget
+                    ? items[i][3] as Widget
+                    : null;
+                final inline =
+                    stepper || trailing.containsKey(i) || rowTrailing != null;
                 return InkWell(
                   canRequestFocus: !toggle,
                   excludeFromSemantics: toggle,
@@ -933,6 +938,7 @@ class Rows extends StatelessWidget {
                           final leading = Copy(items[i][0], control: true);
                           final trailing =
                               this.trailing[i] ??
+                              rowTrailing ??
                               (stepper
                                   ? InlineStepper(
                                       label: label,
@@ -1066,12 +1072,13 @@ class Climate extends StatelessWidget {
     this.mode = 'Cooling · Room 26°C',
     this.freshness = 'Updated just now',
     this.enabled = true,
+    this.loading = false,
     super.key,
   });
   final ActionHandler onAction;
   final double target;
   final String mode, freshness;
-  final bool enabled;
+  final bool enabled, loading;
   @override
   Widget build(BuildContext context) {
     if (MediaQuery.textScalerOf(context).scale(13) <= 13) {
@@ -1103,14 +1110,24 @@ class Climate extends StatelessWidget {
                     onTap: enabled
                         ? () => onAction('Target temperature')
                         : null,
-                    child: Copy(
-                      target.isNaN
-                          ? '—'
-                          : '${target == target.roundToDouble() ? target.toInt() : target}°',
-                      size: 68,
-                      color: const Color(0xfffffaf2),
-                      center: true,
-                    ),
+                    child: loading
+                        ? const Center(
+                            child: SizedBox.square(
+                              dimension: 24,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            ),
+                          )
+                        : Copy(
+                            !target.isFinite
+                                ? '—'
+                                : '${target == target.roundToDouble() ? target.toInt() : target}°',
+                            size: 68,
+                            color: const Color(0xfffffaf2),
+                            center: true,
+                          ),
                   ),
                 ),
                 Positioned(
@@ -1175,14 +1192,22 @@ class Climate extends StatelessWidget {
             const SizedBox(height: 15),
             InkWell(
               onTap: enabled ? () => onAction('Target temperature') : null,
-              child: Copy(
-                target.isNaN
-                    ? '—'
-                    : '${target == target.roundToDouble() ? target.toInt() : target}°',
-                size: 68,
-                color: const Color(0xfffffaf2),
-                center: true,
-              ),
+              child: loading
+                  ? const SizedBox.square(
+                      dimension: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : Copy(
+                      !target.isFinite
+                          ? '—'
+                          : '${target == target.roundToDouble() ? target.toInt() : target}°',
+                      size: 68,
+                      color: const Color(0xfffffaf2),
+                      center: true,
+                    ),
             ),
             const SizedBox(height: 10),
             Copy(mode, size: 14, color: const Color(0xffe0ddd5), center: true),

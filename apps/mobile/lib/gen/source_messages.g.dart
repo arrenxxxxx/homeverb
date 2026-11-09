@@ -1875,6 +1875,11 @@ String? translateSource(
   "Your last readings are kept. Check your connection and try again." =>
     t.mobileAuthRefreshYourLastReadingsAreKeptCheckYourConnectionAnd,
   "Refreshing devices\u2026" => t.mobileAuthRefreshRefreshingDevices,
+  "Pull to refresh" => t.mobileInteractionPullToRefresh,
+  "Release to refresh" => t.mobileInteractionReleaseToRefresh,
+  "Could not load readings." => t.mobileInteractionReadingsUnavailable,
+  "Indoor" => t.mobileInteractionIndoor,
+  "Loading" => t.mobileInteractionLoading,
   "Sign in again" => t.feedbackSignInAgain,
   "Go to sign in" => t.feedbackGoSignIn,
   "Your authorization has expired. Sign in again to update devices. Your saved devices are kept." =>
@@ -3700,6 +3705,11 @@ String? sourceForKey(String key) => switch (key) {
   "mobile.authRefreshYourLastReadingsAreKeptCheckYourConnectionAnd" =>
     "Your last readings are kept. Check your connection and try again.",
   "mobile.authRefreshRefreshingDevices" => "Refreshing devices\u2026",
+  "mobile.interactionPullToRefresh" => "Pull to refresh",
+  "mobile.interactionReleaseToRefresh" => "Release to refresh",
+  "mobile.interactionReadingsUnavailable" => "Could not load readings.",
+  "mobile.interactionIndoor" => "Indoor",
+  "mobile.interactionLoading" => "Loading",
   "feedback.signInAgain" => "Sign in again",
   "feedback.goSignIn" => "Go to sign in",
   "feedback.authorizationExpired" =>

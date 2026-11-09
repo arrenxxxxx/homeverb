@@ -166,7 +166,8 @@ class RefrigeratorModes extends StatelessWidget {
       for (final cap in caps)
         for (final entry in (cap['properties'] as Json).entries)
           if (entry.value['readable'] == true &&
-              readings['${cap['id']}.${entry.key}']?['value'] != null)
+              (readings['${cap['id']}.${entry.key}']?['value'] != null ||
+                  controller.readingLoading('fridge')))
             '${cap['id']}.${entry.key}': entry.value as Json,
     };
     Widget section(
@@ -191,17 +192,20 @@ class RefrigeratorModes extends StatelessWidget {
               DeviceReadingRow(
                 controlLabel(property),
                 propertyValue(
-                  readings[property]['value'],
+                  readings[property]?['value'],
                   entries[property]!,
                   propertyId: property,
                 ),
                 key: ValueKey('refrigerator-reading:$property'),
-                valueColor: readings[property]['value'] == true
+                loading:
+                    controller.readingLoading('fridge') &&
+                    readings[property]?['value'] == null,
+                valueColor: readings[property]?['value'] == true
                     ? skinAccent(context)
                     : null,
                 progress:
                     property == '$_details.e_cleaning_percentage' &&
-                        readings[property]['value'] is num &&
+                        readings[property]?['value'] is num &&
                         (readings[property]['value'] as num) >= 0 &&
                         (readings[property]['value'] as num) <= 100
                     ? (readings[property]['value'] as num).toDouble() / 100
@@ -351,6 +355,7 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
         c.snapshot?['observations']?['$id.$key'] as Json?;
     Object display(String key) {
       final value = observation(key)?['value'];
+      if (value == null) return '—';
       if (key == 'remaining_minutes' && value is num)
         return UiMessage('{value} min', {'value': value});
       final label = sourceForKey(
@@ -462,11 +467,12 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
           Expanded(
             child: Align(
               alignment: Alignment.centerRight,
-              child: Copy(
+              child: ReadingValue(
                 display(key),
                 size: DeviceTypography.body,
-                lineHeight: DeviceTypography.lineHeight,
                 bold: true,
+                loading:
+                    observation(key) == null && c.readingLoading(c.component),
               ),
             ),
           ),
@@ -594,13 +600,6 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
       );
     }
 
-    final timestamps =
-        (c.snapshot?['observations'] as Json? ?? {}).values
-            .whereType<Map>()
-            .map((o) => o['received_at'])
-            .whereType<String>()
-            .toList()
-          ..sort();
     final receipt = c.receipt;
     final mainReadings = [
       'temperature',
@@ -677,33 +676,23 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
                 ),
                 const SizedBox(width: 12),
                 Flexible(
-                  child: Copy(
-                    known ? display('work_status') : 'Unknown',
+                  child: ReadingValue(
+                    status == null
+                        ? '—'
+                        : known
+                        ? display('work_status')
+                        : 'Unknown',
+                    loading: status == null && c.readingLoading(c.component),
                     color:
                         skinOf(context).isSky &&
                             !MediaQuery.highContrastOf(context)
                         ? Colors.white
                         : ink,
                     size: DeviceTypography.body,
-                    lineHeight: DeviceTypography.lineHeight,
                     bold: true,
                   ),
                 ),
               ],
-            ),
-          ),
-        if ((c.snapshot?['observations'] as Json? ?? {}).values
-            .whereType<Map>()
-            .any((o) => o['stale'] == true))
-          Padding(
-            padding: const EdgeInsets.only(top: 12),
-            child: Copy(
-              'Readings may be out of date; the measurement time is unverified.',
-              size: DeviceTypography.secondary,
-              color:
-                  skinOf(context).isSky && !MediaQuery.highContrastOf(context)
-                  ? Colors.white
-                  : muted,
             ),
           ),
         if (running || paused)
@@ -848,24 +837,6 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
             ])
               if (properties.containsKey(key)) reading(key),
           ],
-        ),
-        if (timestamps.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Copy(
-              UiMessage('Latest read: {time}', {
-                'time': receiptTime(timestamps.last, compact: true),
-              }),
-              size: DeviceTypography.secondary,
-              color: muted,
-            ),
-          ),
-        ActionButton(
-          'Refresh State',
-          style: 'secondary',
-          onPressed: c.busy || !c.isForeground
-              ? null
-              : () => widget.onAction('Refresh State'),
         ),
         ExpansionTile(
           title: const Copy(

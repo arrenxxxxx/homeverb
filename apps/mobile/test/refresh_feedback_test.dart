@@ -72,6 +72,18 @@ void main() {
     return (core, c, key);
   }
 
+  Future<void> pullHome(WidgetTester tester) async {
+    final scroll = find.byKey(const ValueKey('scroll:D01'));
+    final gesture = await tester.startGesture(tester.getCenter(scroll));
+    await gesture.moveBy(const Offset(0, 25));
+    await tester.pump();
+    await gesture.moveBy(const Offset(0, 360));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+  }
+
   testWidgets(
     'refresh keeps cards, disables repeated requests and offers safe retry',
     (tester) async {
@@ -79,17 +91,16 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
-      final (core, c, key) = await start(tester);
+      final (core, c, _) = await start(tester);
       final cards = c.cards;
       core.fail = true;
       core.gate = Completer<void>();
-      final pending = key.currentState!.action('Refresh State');
-      await tester.pump();
+      await pullHome(tester);
+      expect(find.text('Refreshing devices…'), findsOneWidget);
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      await key.currentState!.action('Refresh State');
+      await pullHome(tester);
       expect(core.refreshes, 1);
       core.gate!.complete();
-      await pending;
       await tester.pumpAndSettle();
       expect(c.cards, same(cards));
       expect(find.byType(RefreshFeedback), findsOneWidget);

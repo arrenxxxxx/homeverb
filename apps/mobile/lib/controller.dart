@@ -534,6 +534,8 @@ class HomeController extends ChangeNotifier {
   bool deviceLayoutLoading = false;
   bool deviceControlsPreparing = false;
   final Set<String> openingComponents = {};
+  Object? openingReadFailure;
+  int openingReadFailureSerial = 0;
   final Map<String, Json> snapshots = {};
   final Map<(String, String), Json> _componentSnapshots = {};
   final Map<(String, String), Object> _componentReadErrors = {};
@@ -681,6 +683,9 @@ class HomeController extends ChangeNotifier {
       _componentSnapshots[(selectedDevice, id)];
   Object? componentReadError(String id) =>
       _componentReadErrors[(selectedDevice, id)];
+  bool readingLoading(String componentId) =>
+      openingComponents.contains(componentId) &&
+      _componentSnapshots[(selectedDevice, componentId)] == null;
   bool get hasCompartmentOverview =>
       components
           .where((part) => componentCapability(part['id'], 'climate') != null)
@@ -703,6 +708,7 @@ class HomeController extends ChangeNotifier {
     deviceLayoutLoading = description == null;
     deviceControlsPreparing = true;
     openingComponents.clear();
+    openingReadFailure = null;
     error = null;
     if (!_disposed) notifyListeners();
 
@@ -727,11 +733,19 @@ class HomeController extends ChangeNotifier {
           if (components.isEmpty) return;
           component = components.first['id'] as String;
           snapshot = _componentSnapshots[(id, component)];
+          openingComponents.addAll(
+            components
+                .where(
+                  (part) => (part['capabilities'] as List? ?? []).isNotEmpty,
+                )
+                .map((part) => part['id'] as String),
+          );
           if (!_disposed) notifyListeners();
           if (local['device']['support_status'] == 'unsupported') return;
           for (final part in components) {
             try {
               await readComponent(part['id'], cached: true);
+              openingComponents.remove(part['id']);
             } on NativeFailure catch (error) {
               if (!['STATE_UNAVAILABLE', 'CACHE_MISS'].contains(error.code)) {
                 rethrow;
@@ -742,18 +756,31 @@ class HomeController extends ChangeNotifier {
           }
           // Opening is explicit foreground work. Read before any control-session
           // replacement so a slow permission inspection cannot delay observations.
+          Object? firstFailure;
           for (final part in components) {
             if ((part['capabilities'] as List? ?? []).isEmpty) continue;
-            openingComponents.add(part['id'] as String);
-            notifyListeners();
+            final firstRead = _componentSnapshots[(id, part['id'])] == null;
             try {
               await readComponent(part['id']);
-            } on NativeFailure catch (error) {
-              if (error.code == 'CANCELLED') rethrow;
+            } catch (error) {
+              if (error is NativeFailure && error.code == 'CANCELLED') rethrow;
+              _requireCurrentDevice(id, operationEpoch);
+              if (client != core) {
+                throw NativeFailure(
+                  'CANCELLED',
+                  'Device reading was cancelled.',
+                );
+              }
               _componentReadErrors[(id, part['id'] as String)] = error;
+              if (firstRead) firstFailure ??= error;
             }
             _requireCurrentDevice(id, operationEpoch);
             openingComponents.remove(part['id']);
+            notifyListeners();
+          }
+          if (firstFailure != null) {
+            openingReadFailure = firstFailure;
+            openingReadFailureSerial++;
             notifyListeners();
           }
           await _prepareDeviceControls(id);
@@ -832,6 +859,7 @@ class HomeController extends ChangeNotifier {
       final id = part['id'] as String;
       try {
         await readComponent(id);
+        notifyListeners();
       } catch (error) {
         if (error is NativeFailure && error.code == 'CANCELLED') rethrow;
         _componentReadErrors[(selectedDevice!, id)] = error;
@@ -869,35 +897,54 @@ class HomeController extends ChangeNotifier {
     }
   });
   Future<bool> refreshCards() => perform(() async {
-    final epoch = _readEpoch;
-    for (final c in visibleCards) {
+    final epoch = _readEpoch, client = core;
+    Object? failure;
+    for (final c in visibleCards.toList()) {
       final d = c['device'] as Json;
       if (d['support_status'] == 'unsupported') continue;
-      final result =
-          await core.call('read_state', {
-                'device': d['id'],
-                'component': d['components'][0]['id'],
-                'connection': preferences.route(d['id']),
-                'cached': false,
-              })
-              as Json;
-      if (epoch != _readEpoch || !_foreground) {
-        throw NativeFailure('CANCELLED', 'Device refresh was cancelled.');
-      }
-      snapshots[d['id']] = result;
-      _componentReadErrors.remove((
-        d['id'] as String,
-        d['components'][0]['id'] as String,
-      ));
-      _componentSnapshots[(
-            d['id'] as String,
-            d['components'][0]['id'] as String,
-          )] =
-          result;
-      if (selectedDevice == d['id'] && component == d['components'][0]['id']) {
-        snapshot = result;
+      final device = d['id'] as String;
+      final parts = d['components'] as List? ?? [];
+      for (final part in parts) {
+        if ((part['capabilities'] as List? ?? []).isEmpty) continue;
+        final componentId = part['id'] as String;
+        try {
+          final result =
+              await client.call('read_state', {
+                    'device': device,
+                    'component': componentId,
+                    'connection': preferences.route(device),
+                    'cached': false,
+                  })
+                  as Json;
+          if (epoch != _readEpoch ||
+              !_foreground ||
+              client != core ||
+              !cards.any((card) => card['device']['id'] == device)) {
+            throw NativeFailure('CANCELLED', 'Device refresh was cancelled.');
+          }
+          if (result['device_id'] != device ||
+              result['component_id'] != componentId) {
+            throw NativeFailure(
+              'STATE_UNAVAILABLE',
+              'Device reading did not match.',
+            );
+          }
+          _componentSnapshots[(device, componentId)] = result;
+          _componentReadErrors.remove((device, componentId));
+          if (componentId == parts.first['id']) snapshots[device] = result;
+          if (selectedDevice == device && component == componentId)
+            snapshot = result;
+          notifyListeners();
+        } catch (error) {
+          if (error is NativeFailure && error.code == 'CANCELLED') rethrow;
+          if (epoch != _readEpoch || !_foreground || client != core) {
+            throw NativeFailure('CANCELLED', 'Device refresh was cancelled.');
+          }
+          failure ??= error;
+        }
       }
     }
+    if (failure != null) throw failure;
   });
   Future<bool> saveRoom(String name, {String? id}) => perform(() async {
     await core.call(id == null ? 'create_room' : 'rename_room', {

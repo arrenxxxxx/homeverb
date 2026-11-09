@@ -4242,6 +4242,21 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	/// en-US: 'Refreshing devices\u2026'
 	String get mobileAuthRefreshRefreshingDevices => 'Refreshing devices\u2026';
 
+	/// en-US: 'Pull to refresh'
+	String get mobileInteractionPullToRefresh => 'Pull to refresh';
+
+	/// en-US: 'Release to refresh'
+	String get mobileInteractionReleaseToRefresh => 'Release to refresh';
+
+	/// en-US: 'Could not load readings.'
+	String get mobileInteractionReadingsUnavailable => 'Could not load readings.';
+
+	/// en-US: 'Indoor'
+	String get mobileInteractionIndoor => 'Indoor';
+
+	/// en-US: 'Loading'
+	String get mobileInteractionLoading => 'Loading';
+
 	/// en-US: 'Sign in again'
 	String get feedbackSignInAgain => 'Sign in again';
 

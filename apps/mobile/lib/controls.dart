@@ -2,7 +2,7 @@ import 'localization.dart';
 import 'package:flutter/material.dart';
 import 'controller.dart';
 import 'client_contract.dart';
-import 'receipts.dart';
+import 'device_readings.dart';
 import 'skin.dart';
 
 String controlLabel(String id) {
@@ -17,6 +17,7 @@ String controlUnit(dynamic unit) =>
     (unit?.toString() ?? '');
 
 String propertyValue(dynamic value, Json property, {String? propertyId}) {
+  if (value == null || (value is num && !value.isFinite)) return '—';
   final label = propertyId == null ? null : sourceForKey('$propertyId.$value');
   if (label != null) return label;
   if (const {
@@ -25,7 +26,6 @@ String propertyValue(dynamic value, Json property, {String? propertyId}) {
     'vendor.midea.refrigerator.details.flexzone_door_state',
   }.contains(propertyId))
     return 'Unknown';
-  if (value == null) return 'Unknown';
   final text = value is bool ? (value ? 'On' : 'Off') : '$value';
   final unit = controlUnit(property['unit']);
   return '$text${unit.isEmpty
@@ -129,22 +129,17 @@ List<dynamic> describedControls(
           if (entry.value['readable'] == true)
             [
               controlLabel(entry.key),
-              UiMessage('{value}{stale}', {
-                'value': UiMessage(
-                  propertyValue(
-                    c.observed('$id.${entry.key}'),
-                    entry.value as Json,
-                    propertyId: '$id.${entry.key}',
-                  ),
+              UiMessage(
+                propertyValue(
+                  c.observed('$id.${entry.key}'),
+                  entry.value as Json,
+                  propertyId: '$id.${entry.key}',
                 ),
-                'stale': UiMessage(
-                  c.snapshot?['observations']?['$id.${entry.key}']?['stale'] ==
-                          true
-                      ? ' · Stale'
-                      : '',
-                ),
-              }),
+              ),
               null,
+              if (c.readingLoading(c.component) &&
+                  c.observed('$id.${entry.key}') == null)
+                const ReadingValue('—', loading: true),
             ],
         for (final entry in visibleActions)
           [
@@ -372,20 +367,6 @@ class _CapabilityActionFormState extends State<CapabilityActionForm> {
               size: 12,
               color: muted,
             ),
-            if (observation != null)
-              Copy(
-                UiMessage('Read: {time}{stale}', {
-                  'time': receiptTime(
-                    observation['received_at'],
-                    compact: true,
-                  ),
-                  'stale': UiMessage(
-                    observation['stale'] == true ? ' · Stale' : '',
-                  ),
-                }),
-                size: 12,
-                color: muted,
-              ),
             if (numeric)
               Copy(
                 [

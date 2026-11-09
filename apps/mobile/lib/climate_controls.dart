@@ -6,6 +6,7 @@ import 'climate_panel.dart';
 import 'controller.dart';
 import 'controls.dart';
 import 'device_typography.dart';
+import 'device_readings.dart';
 import 'device_option_grid.dart';
 import 'localization.dart';
 import 'client_contract.dart';
@@ -224,24 +225,26 @@ class _ClimateControlsState extends State<ClimateControls>
             icon: const Icon(Icons.remove),
           ),
           Expanded(
-            child: Copy(
-              choice.numeric
-                  ? UiMessage('Value {value}', {
-                      'value': propertyValue(
+            child: Center(
+              child: ReadingValue(
+                choice.numeric
+                    ? UiMessage('Value {value}', {
+                        'value': propertyValue(
+                          observed,
+                          property,
+                          propertyId: choice.property,
+                        ),
+                      })
+                    : propertyValue(
                         observed,
                         property,
                         propertyId: choice.property,
                       ),
-                    })
-                  : propertyValue(
-                      observed,
-                      property,
-                      propertyId: choice.property,
-                    ),
-              center: true,
-              bold: true,
-              size: DeviceTypography.body,
-              lineHeight: DeviceTypography.lineHeight,
+                center: true,
+                bold: true,
+                size: DeviceTypography.body,
+                loading: observed == null && c.readingLoading(c.component),
+              ),
             ),
           ),
           IconButton.filled(
@@ -375,11 +378,13 @@ class _ClimateControlsState extends State<ClimateControls>
       ),
       if (choiceValue(choice) case final value?) ...[
         const SizedBox(height: 4),
-        Copy(
+        ReadingValue(
           value,
+          loading:
+              c.observed(choice.property) == null &&
+              c.readingLoading(c.component),
           size: DeviceTypography.secondary,
           color: muted,
-          lineHeight: DeviceTypography.lineHeight,
         ),
       ],
       if (!isSwitch(choice)) ...[
@@ -425,11 +430,13 @@ class _ClimateControlsState extends State<ClimateControls>
           ],
         ),
         if (choiceValue(choice) case final value?)
-          Copy(
+          ReadingValue(
             value,
+            loading:
+                c.observed(choice.property) == null &&
+                c.readingLoading(c.component),
             size: DeviceTypography.secondary,
             color: muted,
-            lineHeight: DeviceTypography.lineHeight,
           ),
         if (swing != null && c.observed(swing.property) != false)
           Copy(
@@ -488,22 +495,23 @@ class _ClimateControlsState extends State<ClimateControls>
           : null,
       icon: const Icon(Icons.add),
     );
-    final number = FittedBox(
-      fit: BoxFit.scaleDown,
-      child: Text(
-        (target is num
-                ? target.toString().replaceFirst(RegExp(r'\.0$'), '')
-                : '—') +
-            '°C',
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: 64,
-          fontWeight: FontWeight.w600,
-          height: DeviceTypography.lineHeight,
-          color: white,
-        ),
-      ),
-    );
+    final number = target == null && c.readingLoading(c.component)
+        ? Center(child: ReadingValue('—', loading: true, color: white))
+        : FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              target is num && target.isFinite
+                  ? '${target.toString().replaceFirst(RegExp(r'\.0$'), '')}°C'
+                  : '—',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 64,
+                fontWeight: FontWeight.w600,
+                height: DeviceTypography.lineHeight,
+                color: white,
+              ),
+            ),
+          );
     return card(
       Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -520,17 +528,17 @@ class _ClimateControlsState extends State<ClimateControls>
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: Copy(
+                child: ReadingValue(
                   updating(powerChoice)
                       ? (pending!.$2 == true ? 'Turning on…' : 'Turning off…')
                       : power == true
                       ? 'Powered on'
                       : power == false
                       ? 'Powered off'
-                      : 'Power unknown',
+                      : '—',
+                  loading: power == null && c.readingLoading(c.component),
                   size: DeviceTypography.secondary,
                   color: soft,
-                  lineHeight: DeviceTypography.lineHeight,
                 ),
               ),
               if (updating(powerChoice)) const OperationPulse(size: 20),
@@ -585,19 +593,30 @@ class _ClimateControlsState extends State<ClimateControls>
             scalar(targetChoice),
           ],
           const SizedBox(height: 8),
-          Copy(
-            UiMessage('Indoor {temperature}', {
-              'temperature': UiMessage(
-                propertyValue(c.observed('climate.current_temperature'), {
-                  'unit': 'celsius',
-                }),
-              ),
-            }),
-            color: soft,
-            size: 14,
-            center: true,
-            lineHeight: DeviceTypography.lineHeight,
-          ),
+          if (c.observed('climate.current_temperature') == null &&
+              c.readingLoading(c.component))
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Copy('Indoor', color: soft, size: 14),
+                const SizedBox(width: 6),
+                ReadingValue('—', loading: true, color: soft),
+              ],
+            )
+          else
+            Copy(
+              UiMessage('Indoor {temperature}', {
+                'temperature': UiMessage(
+                  propertyValue(c.observed('climate.current_temperature'), {
+                    'unit': 'celsius',
+                  }),
+                ),
+              }),
+              color: soft,
+              size: 14,
+              center: true,
+              lineHeight: DeviceTypography.lineHeight,
+            ),
         ],
       ),
     );
@@ -605,7 +624,6 @@ class _ClimateControlsState extends State<ClimateControls>
 
   @override
   Widget build(BuildContext context) {
-    final epoch = c.controlEpoch, lifecycle = selectionEpoch;
     final mode = climateChoice(c, {'mode'});
     final fan = climateChoice(c, {'wind_speed', 'fan_speed', 'speed'});
     final horizontal = climateChoice(c, {
@@ -800,21 +818,6 @@ class _ClimateControlsState extends State<ClimateControls>
           ),
         ],
         const SizedBox(height: 16),
-        ActionButton(
-          'Refresh State',
-          key: const ValueKey('climate-refresh'),
-          style: 'secondary',
-          onPressed: !enabled
-              ? null
-              : () {
-                  if (!mounted ||
-                      !enabled ||
-                      epoch != c.controlEpoch ||
-                      lifecycle != selectionEpoch)
-                    return;
-                  widget.onAction('Refresh State');
-                },
-        ),
         if (remaining.isNotEmpty) ...[
           const SizedBox(height: 16),
           Blocks(

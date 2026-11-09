@@ -1,6 +1,46 @@
 import 'package:flutter/material.dart';
+import 'localization.dart';
 import 'skin.dart';
 import 'device_typography.dart';
+
+/// Keeps each unresolved reading local to its value position.
+class ReadingValue extends StatelessWidget {
+  const ReadingValue(
+    this.value, {
+    this.loading = false,
+    this.size = DeviceTypography.reading,
+    this.color,
+    this.bold = false,
+    this.center = false,
+    super.key,
+  });
+  final Object value;
+  final bool loading, bold, center;
+  final double size;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) => loading
+      ? Semantics(
+          label: localize(context, 'Loading'),
+          child: SizedBox(
+            width: 18,
+            height: 18,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: color ?? skinAccent(context),
+            ),
+          ),
+        )
+      : Copy(
+          value,
+          size: size,
+          color: color ?? ink,
+          bold: bold,
+          center: center,
+          lineHeight: DeviceTypography.lineHeight,
+        );
+}
 
 /// Read-only evidence has no elevation, gesture handler or control semantics.
 class DeviceReadingRow extends StatelessWidget {
@@ -9,10 +49,12 @@ class DeviceReadingRow extends StatelessWidget {
     this.value, {
     this.valueColor,
     this.progress,
+    this.loading = false,
     super.key,
   });
   final Color? valueColor;
   final double? progress;
+  final bool loading;
   final Object label, value;
 
   @override
@@ -34,10 +76,10 @@ class DeviceReadingRow extends StatelessWidget {
                     color: muted,
                   ),
                   const SizedBox(height: 6),
-                  Copy(
+                  ReadingValue(
                     value,
                     size: DeviceTypography.reading,
-                    lineHeight: DeviceTypography.lineHeight,
+                    loading: loading,
                     bold: true,
                     color: valueColor ?? ink,
                   ),
@@ -60,11 +102,11 @@ class DeviceReadingRow extends StatelessWidget {
                     flex: 2,
                     child: Align(
                       alignment: AlignmentDirectional.centerEnd,
-                      child: progress == null
-                          ? Copy(
+                      child: progress == null || loading
+                          ? ReadingValue(
                               value,
                               size: DeviceTypography.reading,
-                              lineHeight: DeviceTypography.lineHeight,
+                              loading: loading,
                               bold: true,
                               color: valueColor ?? ink,
                             )

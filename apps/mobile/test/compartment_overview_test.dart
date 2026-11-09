@@ -55,13 +55,13 @@ void main() {
         core.calls
             .where((call) => call['method'] == 'read_state')
             .map((call) => call['component']),
-        ['fridge', 'freezer'],
+        ['fridge', 'freezer', 'fridge', 'freezer'],
       );
       expect(
         core.calls
             .where((call) => call['method'] == 'read_state')
-            .every((call) => call['cached'] == true),
-        true,
+            .map((call) => call['cached']),
+        [true, true, false, false],
       );
       expect(c.component, 'fridge');
       expect(
@@ -164,7 +164,10 @@ void main() {
         debugDisableShadows = false;
         WidgetController.hitTestWarningShouldBeFatal = true;
         final core = OverviewFixture();
-        if (missing) core.missingCaches.add('freezer');
+        if (missing) {
+          core.missingCaches.add('freezer');
+          core.failedReads.add('freezer');
+        }
         final c = HomeController(
           core,
           LocalPreferences(File('/unused/overview.json')),
@@ -229,22 +232,24 @@ void main() {
           await tester.pumpAndSettle();
           await capture(missing ? 'missing' : 'initial');
           if (missing) {
-            expect(stepper('freezer').value, 'Unknown');
+            expect(stepper('freezer').value, '—');
             expect(stepper('freezer').onIncrease, isNull);
             expect(stepper('freezer').onDecrease, isNull);
             core.targets['fridge'] = 5;
             core.failedReads.add('freezer');
-            await tap(find.text('Refresh State'));
+            await c.refreshComponents();
+            await tester.pumpAndSettle();
             expect(stepper('fridge').value, '5°C');
-            expect(stepper('freezer').value, 'Unknown');
+            expect(stepper('freezer').value, '—');
             expect(
               find.textContaining('Freezer could not be read:'),
-              findsOneWidget,
+              findsNothing,
             );
             expect(core.receipts, isEmpty);
             await capture('partial-read');
             core.failedReads.clear();
-            await tap(find.text('Refresh State'));
+            await c.refreshComponents();
+            await tester.pumpAndSettle();
             expect(c.error, isNull);
             expect(stepper('freezer').value, '-18°C');
             expect(
@@ -288,7 +293,8 @@ void main() {
               'target_temperature': 4.5,
             });
             await back();
-            await tap(find.text('Refresh State'));
+            await c.refreshComponents();
+            await tester.pumpAndSettle();
             expect(stepper('fridge').value, '4.5°C');
             expect(stepper('freezer').value, '-17°C');
             await capture('refreshed');

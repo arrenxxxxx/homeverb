@@ -1,6 +1,8 @@
 import 'feedback.dart';
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'blocks.dart';
@@ -35,6 +37,109 @@ class ScreenCatalog {
   Json ui(String id) => screens[id]!['ui'] as Json;
 }
 
+/// Wraps the production device list's actual scrollable, including empty lists.
+class HomePullRefresh extends StatefulWidget {
+  const HomePullRefresh({
+    required this.onRefresh,
+    required this.child,
+    super.key,
+  });
+  final Future<void> Function() onRefresh;
+  final Widget child;
+
+  @override
+  State<HomePullRefresh> createState() => _HomePullRefreshState();
+}
+
+class _HomePullRefreshState extends State<HomePullRefresh> {
+  RefreshIndicatorStatus? status;
+  Future<void>? active;
+
+  Future<void> refresh() {
+    if (active case final work?) return work;
+    final work = Future<void>.sync(widget.onRefresh);
+    active = work;
+    setState(() {});
+    return work.whenComplete(() {
+      if (identical(active, work)) {
+        active = null;
+        if (mounted) setState(() {});
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pending =
+        active != null ||
+        status == RefreshIndicatorStatus.snap ||
+        status == RefreshIndicatorStatus.refresh;
+    final label = pending
+        ? 'Refreshing devices…'
+        : switch (status) {
+            RefreshIndicatorStatus.drag => 'Pull to refresh',
+            RefreshIndicatorStatus.armed => 'Release to refresh',
+            _ => null,
+          };
+    return Semantics(
+      customSemanticsActions: {
+        CustomSemanticsAction(label: localize(context, 'Refresh State')): () {
+          unawaited(refresh());
+        },
+      },
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          RefreshIndicator.noSpinner(
+            onRefresh: refresh,
+            notificationPredicate: (notification) =>
+                notification.depth == 0 &&
+                notification.metrics.axis == Axis.vertical,
+            onStatusChange: (value) {
+              if (status != value && mounted) setState(() => status = value);
+            },
+            child: SizedBox.expand(child: widget.child),
+          ),
+          if (label != null)
+            Positioned(
+              top: 4,
+              left: 0,
+              right: 0,
+              child: IgnorePointer(
+                child: Center(
+                  child: Material(
+                    color: skinOf(context).cardColor,
+                    borderRadius: BorderRadius.circular(12),
+                    elevation: 2,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (pending) ...[
+                            const SizedBox.square(
+                              dimension: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                          Copy(label, size: 12),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
 class ScreenView extends StatelessWidget {
   const ScreenView({
     required this.id,
@@ -52,6 +157,7 @@ class ScreenView extends StatelessWidget {
     this.preview = false,
     this.busy = false,
     this.showOperationProgress = true,
+    this.onHomeRefresh,
     this.error,
     super.key,
   });
@@ -62,6 +168,7 @@ class ScreenView extends StatelessWidget {
   final Map<String, int> choices;
   final Map<String, double> values;
   final VoidCallback? onChanged;
+  final Future<void> Function()? onHomeRefresh;
   final Json? screenOverride;
   final Widget? home;
   final Json Function(String id)? resolveScreen;
@@ -115,6 +222,12 @@ class ScreenView extends StatelessWidget {
         root = ui['root'] as String?,
         base = ui['base'] as String?;
     final compactHome = skinOf(context).compactDeviceCards && root == 'Devices';
+    final refreshable =
+        onHomeRefresh != null &&
+        const {'D01', 'D03', 'D11', 'D12'}.contains(id);
+    Widget wrapRefresh(Widget child) => refreshable
+        ? HomePullRefresh(onRefresh: onHomeRefresh!, child: child)
+        : child;
     return LightBackground(
       child: LayoutBuilder(
         builder: (context, c) {
@@ -330,175 +443,192 @@ class ScreenView extends StatelessWidget {
                               ],
                             ),
                           Expanded(
-                            child: SingleChildScrollView(
-                              key: ValueKey('scroll:$id'),
-                              padding: EdgeInsets.fromLTRB(
-                                wide ? 30 : (compactHome ? 14 : 20),
-                                root != null
-                                    ? (id == 'P01'
-                                          ? 13
-                                          : (compactHome ? 10 : 16))
-                                    : 8,
-                                wide ? 30 : (compactHome ? 14 : 20),
-                                20,
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        child: Semantics(
-                                          header: true,
-                                          namesRoute: true,
-                                          child: Copy(
-                                            header,
-                                            color:
-                                                (MediaQuery.highContrastOf(
-                                                  context,
-                                                )
-                                                ? ink
-                                                : skinOf(context).onBackground),
-                                            size: root != null
-                                                ? (id == 'P01'
-                                                      ? 28
-                                                      : (compactHome ? 25 : 30))
-                                                : 25,
-                                            bold: true,
-                                          ),
-                                        ),
-                                      ),
-                                      if (root == 'Devices') ...[
-                                        SizedBox(
-                                          height: 36,
-                                          width: 45,
-                                          child: Transform.translate(
-                                            offset: const Offset(8.5, -2),
-                                            child: IconAction(
-                                              'search',
-                                              'Search',
-                                              () => onAction('Search'),
-                                              color:
-                                                  MediaQuery.highContrastOf(
-                                                    context,
-                                                  )
-                                                  ? ink
-                                                  : skinOf(
-                                                      context,
-                                                    ).onBackground,
-                                              size: 22,
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: 36,
-                                          width: 45,
-                                          child: Transform.translate(
-                                            offset: const Offset(9, -2.5),
-                                            child: IconAction(
-                                              'plus',
-                                              'Add device',
-                                              () => onAction('Add device'),
-                                              color:
-                                                  MediaQuery.highContrastOf(
-                                                    context,
-                                                  )
-                                                  ? ink
-                                                  : skinOf(
-                                                      context,
-                                                    ).onBackground,
-                                              size: 23,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: root == 'Devices'
-                                        ? ((ui['blocks'] as List)
-                                                          .firstOrNull?[0] ==
-                                                      'home' ||
-                                                  home is DeviceHome
-                                              ? 8
-                                              : 16)
-                                        : root == 'Settings'
-                                        ? 16
-                                        : root == 'Platforms'
-                                        ? (MediaQuery.textScalerOf(
-                                                    context,
-                                                  ).scale(13) <=
-                                                  13
-                                              ? 22.4
-                                              : 23)
-                                        : 22,
-                                  ),
-                                  if (ui['subtitle'] != '' &&
-                                      ui['subtitle'] != null) ...[
-                                    Transform.translate(
-                                      offset: const Offset(0, -9),
-                                      child: Copy(ui['subtitle'], color: muted),
-                                    ),
-                                    const SizedBox(height: 9),
-                                  ],
-                                  if (busy && showOperationProgress)
-                                    const Padding(
-                                      padding: EdgeInsets.only(bottom: 12),
-                                      child: OperationProgress(),
-                                    ),
-                                  if (error != null)
-                                    FeedbackNotice(
-                                      title:
-                                          'Could not complete this operation',
-                                      message: LiteralText(
-                                        friendlyError(context, error!),
-                                      ),
-                                      warning: true,
-                                      actionLabel: 'Dismiss',
-                                      onAction: () => onAction('Dismiss error'),
-                                    ),
-                                  if (wide && id == 'W02')
+                            child: wrapRefresh(
+                              SingleChildScrollView(
+                                key: ValueKey('scroll:$id'),
+                                physics: refreshable
+                                    ? const AlwaysScrollableScrollPhysics()
+                                    : null,
+                                padding: EdgeInsets.fromLTRB(
+                                  wide ? 30 : (compactHome ? 14 : 20),
+                                  root != null
+                                      ? (id == 'P01'
+                                            ? 13
+                                            : (compactHome ? 10 : 16))
+                                      : 8,
+                                  wide ? 30 : (compactHome ? 14 : 20),
+                                  20,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
                                     Row(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        SizedBox(
-                                          width: 276,
-                                          child: Rows(const [
-                                            ['Bedroom AC', 'Selected'],
-                                            ['Floor lamp', 'Living Room'],
-                                            ['Living room TV', 'Living Room'],
-                                            ['Air sensor', 'Living Room'],
-                                          ], onAction: onAction),
-                                        ),
-                                        const SizedBox(width: 36),
                                         Expanded(
-                                          child: Column(
-                                            children: [
-                                              Climate(onAction: onAction),
-                                              Rows(const [
-                                                ['Power', 'On'],
-                                                ['Mode', 'Cool  ›'],
-                                                ['Fan', 'Auto  ›'],
-                                              ], onAction: onAction),
-                                              ActionButton(
-                                                'Refresh State',
-                                                style: 'secondary',
-                                                onPressed: () =>
-                                                    onAction('Refresh State'),
-                                              ),
-                                            ],
+                                          child: Semantics(
+                                            header: true,
+                                            namesRoute: true,
+                                            child: Copy(
+                                              header,
+                                              color:
+                                                  (MediaQuery.highContrastOf(
+                                                    context,
+                                                  )
+                                                  ? ink
+                                                  : skinOf(
+                                                      context,
+                                                    ).onBackground),
+                                              size: root != null
+                                                  ? (id == 'P01'
+                                                        ? 28
+                                                        : (compactHome
+                                                              ? 25
+                                                              : 30))
+                                                  : 25,
+                                              bold: true,
+                                            ),
                                           ),
                                         ),
+                                        if (root == 'Devices') ...[
+                                          SizedBox(
+                                            height: 36,
+                                            width: 45,
+                                            child: Transform.translate(
+                                              offset: const Offset(8.5, -2),
+                                              child: IconAction(
+                                                'search',
+                                                'Search',
+                                                () => onAction('Search'),
+                                                color:
+                                                    MediaQuery.highContrastOf(
+                                                      context,
+                                                    )
+                                                    ? ink
+                                                    : skinOf(
+                                                        context,
+                                                      ).onBackground,
+                                                size: 22,
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height: 36,
+                                            width: 45,
+                                            child: Transform.translate(
+                                              offset: const Offset(9, -2.5),
+                                              child: IconAction(
+                                                'plus',
+                                                'Add device',
+                                                () => onAction('Add device'),
+                                                color:
+                                                    MediaQuery.highContrastOf(
+                                                      context,
+                                                    )
+                                                    ? ink
+                                                    : skinOf(
+                                                        context,
+                                                      ).onBackground,
+                                                size: 23,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ],
-                                    )
-                                  else if (id == 'W01')
-                                    DeviceHome(mode: 'all', onAction: onAction)
-                                  else
-                                    content,
-                                ],
+                                    ),
+                                    SizedBox(
+                                      height: root == 'Devices'
+                                          ? ((ui['blocks'] as List)
+                                                            .firstOrNull?[0] ==
+                                                        'home' ||
+                                                    home is DeviceHome
+                                                ? 8
+                                                : 16)
+                                          : root == 'Settings'
+                                          ? 16
+                                          : root == 'Platforms'
+                                          ? (MediaQuery.textScalerOf(
+                                                      context,
+                                                    ).scale(13) <=
+                                                    13
+                                                ? 22.4
+                                                : 23)
+                                          : 22,
+                                    ),
+                                    if (ui['subtitle'] != '' &&
+                                        ui['subtitle'] != null) ...[
+                                      Transform.translate(
+                                        offset: const Offset(0, -9),
+                                        child: Copy(
+                                          ui['subtitle'],
+                                          color: muted,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 9),
+                                    ],
+                                    if (busy && showOperationProgress)
+                                      const Padding(
+                                        padding: EdgeInsets.only(bottom: 12),
+                                        child: OperationProgress(),
+                                      ),
+                                    if (error != null)
+                                      FeedbackNotice(
+                                        title:
+                                            'Could not complete this operation',
+                                        message: LiteralText(
+                                          friendlyError(context, error!),
+                                        ),
+                                        warning: true,
+                                        actionLabel: 'Dismiss',
+                                        onAction: () =>
+                                            onAction('Dismiss error'),
+                                      ),
+                                    if (wide && id == 'W02')
+                                      Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          SizedBox(
+                                            width: 276,
+                                            child: Rows(const [
+                                              ['Bedroom AC', 'Selected'],
+                                              ['Floor lamp', 'Living Room'],
+                                              ['Living room TV', 'Living Room'],
+                                              ['Air sensor', 'Living Room'],
+                                            ], onAction: onAction),
+                                          ),
+                                          const SizedBox(width: 36),
+                                          Expanded(
+                                            child: Column(
+                                              children: [
+                                                Climate(onAction: onAction),
+                                                Rows(const [
+                                                  ['Power', 'On'],
+                                                  ['Mode', 'Cool  ›'],
+                                                  ['Fan', 'Auto  ›'],
+                                                ], onAction: onAction),
+                                                ActionButton(
+                                                  'Refresh State',
+                                                  style: 'secondary',
+                                                  onPressed: () =>
+                                                      onAction('Refresh State'),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    else if (id == 'W01')
+                                      DeviceHome(
+                                        mode: 'all',
+                                        onAction: onAction,
+                                      )
+                                    else
+                                      content,
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -966,32 +1096,6 @@ class DeviceHome extends StatelessWidget {
                       ),
                     ),
                   ),
-                Positioned(
-                  right: -15,
-                  top: -17,
-                  width: 48,
-                  height: 48,
-                  child: IconButton(
-                    tooltip: localize(context, 'Refresh State'),
-                    onPressed: refreshing || !refreshEnabled
-                        ? null
-                        : () => onAction('Refresh State'),
-                    icon: refreshing
-                        ? SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: secondary,
-                              semanticsLabel: localize(
-                                context,
-                                'Refreshing devices…',
-                              ),
-                            ),
-                          )
-                        : Glyph('refresh', size: 16, color: secondary),
-                  ),
-                ),
               ],
             ),
           ),
@@ -1107,31 +1211,6 @@ class DeviceHome extends StatelessWidget {
                   ),
                 ),
               ),
-            SizedBox(
-              width: 26,
-              height: 26,
-              child: IconButton(
-                padding: EdgeInsets.zero,
-                tooltip: localize(context, 'Refresh State'),
-                onPressed: refreshing || !refreshEnabled
-                    ? null
-                    : () => onAction('Refresh State'),
-                icon: refreshing
-                    ? SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: secondary,
-                          semanticsLabel: localize(
-                            context,
-                            'Refreshing devices…',
-                          ),
-                        ),
-                      )
-                    : Glyph('refresh', size: 16, color: secondary),
-              ),
-            ),
           ],
         ),
         const SizedBox(height: 10),

@@ -76,3 +76,22 @@ session replacement without overlap, fictional restart/cache isolation, rapid
 device switching, backgrounding and removal. No real account or appliance was
 used. Reading-state feedback, partial manual refresh and final visual and
 performance acceptance remain work for M2 and M6.
+
+## M2 reading and refresh states
+
+Opening reads distinguish unresolved components from completed snapshots. An
+initial failure without a saved snapshot produces one localized notice; cached
+values survive later failures. Manual refresh continues across component errors
+and publishes each completed result. Home and search use one pull-to-refresh
+operation and an accessible action, while ordinary device refresh buttons and
+reading-time captions are removed. The initial read is explicit user work;
+the next automatic three-second interval starts after that work drains.
+
+The integrated focused Flutter selection passed 82 tests, with two opt-in
+CJK-font capture tests skipped. After extending the generic climate fallback,
+the generic controls and reading-state selection passed 11 tests. Tests cover
+five-second holds, initial and partial failures, cached reopening, progressive
+publication, repeated pulls, the 2,999/3,000 ms boundary, ten silent failures,
+background/resume, localization and uncertain-receipt retention. Flutter
+analysis, catalog checks and documentation/repository/contract validators
+passed. These are fictional tests; final screenshots and performance remain M6.

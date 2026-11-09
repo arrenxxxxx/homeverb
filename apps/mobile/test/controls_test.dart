@@ -263,7 +263,7 @@ void main() {
       ),
       contains('not supported'),
     );
-    expect(propertyValue(null, {'unit': 'percent'}), 'Unknown');
+    expect(propertyValue(null, {'unit': 'percent'}), '—');
   });
   testWidgets(
     'click described light, fan and media controls with validation and no optimistic observations',
@@ -344,7 +344,7 @@ void main() {
         );
         await tester.pumpAndSettle();
         await tap(find.text('Controls fixture').first);
-        expect(find.text('Unknown'), findsWidgets);
+        expect(find.text('—'), findsWidgets);
         expect(find.text('Trusted approval is unavailable.'), findsOneWidget);
         expect(find.byKey(const ValueKey('control:4:start')), findsNothing);
         await open(0, 'set');

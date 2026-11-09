@@ -159,6 +159,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   bool _disposed = false;
   int navigation = 0;
   int activityEpoch = 0;
+  int lastOpeningFailure = 0;
   @override
   void initState() {
     super.initState();
@@ -177,7 +178,33 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       : StateRefreshView.none;
 
   void changed() {
-    if (!_disposed && mounted) setState(() {});
+    if (_disposed || !mounted) return;
+    setState(() {});
+    final serial = c.openingReadFailureSerial;
+    if (c.openingReadFailure == null || serial == lastOpeningFailure) return;
+    lastOpeningFailure = serial;
+    final epoch = navigation,
+        activity = activityEpoch,
+        device = c.selectedDevice;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted ||
+          _disposed ||
+          epoch != navigation ||
+          activity != activityEpoch ||
+          !c.isForeground ||
+          device != c.selectedDevice ||
+          serial != c.openingReadFailureSerial ||
+          !['C01', 'C08'].contains(id))
+        return;
+      final context = navigator.currentContext;
+      if (context != null) {
+        feedback.show(
+          context,
+          key: 'opening-read-failure',
+          content: const FeedbackToast(message: 'Could not load readings.'),
+        );
+      }
+    });
   }
 
   @override
@@ -725,12 +752,9 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       return;
     }
     if (label == 'Refresh State') {
-      if (['D01', 'D11', 'D12'].contains(id)) {
+      if (['D01', 'D03', 'D11', 'D12'].contains(id)) {
         if (c.busy) return;
         final epoch = navigation, activity = activityEpoch;
-        final hasReadableTargets = c.visibleCards.any(
-          (card) => card['device']['support_status'] != 'unsupported',
-        );
         feedback.clear();
         setState(() {
           homeRefreshEpoch = epoch;
@@ -752,18 +776,6 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           }
         });
         final context = navigator.currentContext;
-        if (success && hasReadableTargets && current && context != null) {
-          feedback.show(
-            context,
-            key: 'home-refresh-success',
-            aboveNavigation: true,
-            content: const FeedbackToast(
-              message: 'Readings updated',
-              iconColor: Color(0xffa4ded0),
-              icon: Icons.check_circle_outline_rounded,
-            ),
-          );
-        }
         if (homeRefreshFailure != null && current && context != null) {
           feedback.show(
             context,
@@ -1411,7 +1423,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         fields
                 .putIfAbsent('observed_mode', () => TextEditingController())
                 .text =
-            '${c.observed('climate.mode') ?? 'Not available'}';
+            '${c.observed('climate.mode') ?? '—'}';
         b = [
           if (c.components.length > 1)
             [
@@ -1423,17 +1435,10 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           if (c.capability('climate') != null)
             [
               'climate',
-              c.snapshot == null
-                  ? 'No reading'
-                  : localize(
-                      context,
-                      UiMessage('{source} observation', {
-                        'source': UiMessage(
-                          c.snapshot!['from_cache'] == true ? 'Cached' : 'Read',
-                        ),
-                      }),
-                    ),
+              '',
               canEditTarget,
+              c.observed('climate.target_temperature') == null &&
+                  c.readingLoading(c.component),
             ],
           if (c.capability('climate') != null && !canEditTarget)
             ['note', 'Temperature is read-only here.'],
@@ -1450,11 +1455,17 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                   [
                     'Power',
                     c.observed('power.state') == null
-                        ? 'Unknown'
+                        ? '—'
                         : c.observed('power.state') == true
                         ? 'On'
                         : 'Off',
                     canEditPower ? 'Power' : null,
+                    if (c.observed('power.state') == null &&
+                        c.readingLoading(c.component))
+                      const SizedBox.square(
+                        dimension: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
                   ],
                 if (c.capability(
                       'climate',
@@ -1464,12 +1475,16 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                     'Mode',
                     UiMessage('{mode}  ›', {
                       'mode': UiMessage(
-                        controlLabel(
-                          '${c.observed('climate.mode') ?? 'Unknown'}',
-                        ),
+                        controlLabel('${c.observed('climate.mode') ?? '—'}'),
                       ),
                     }),
                     targetAction?['risk'] == 'low' ? 'Mode' : null,
+                    if (c.observed('climate.mode') == null &&
+                        c.readingLoading(c.component))
+                      const SizedBox.square(
+                        dimension: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
                   ],
                 if (c.capability(
                       'climate',
@@ -1484,11 +1499,16 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                       )!['properties']['current_temperature'],
                     ),
                     null,
+                    if (c.observed('climate.current_temperature') == null &&
+                        c.readingLoading(c.component))
+                      const SizedBox.square(
+                        dimension: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
                   ],
               ],
             ],
           ...describedControls(c),
-          ['button', 'Refresh State', 'secondary'],
           ['button', 'Device information', 'secondary'],
           ['button', 'Recent Operations', 'secondary'],
         ];
@@ -2590,6 +2610,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                   resolveScreen: screenFor,
                   resolveHome: specialFor,
                   onAction: action,
+                  onHomeRefresh: () => action('Refresh State'),
                   fields: fields,
                   choices: choices,
                   values: values,

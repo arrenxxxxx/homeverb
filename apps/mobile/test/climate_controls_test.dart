@@ -113,33 +113,19 @@ void main() {
     expect(tester.takeException(), isNull);
   }
 
-  testWidgets(
-    'refresh reads without executing and rejects background callbacks',
-    (tester) async {
-      final (core, c, _) = await open(tester);
-      core.calls.clear();
-      final refresh = find.byKey(const ValueKey('climate-refresh'));
-      await tap(tester, refresh);
-      expect(
-        core.calls.where((v) => v['method'] == 'read_state'),
-        hasLength(1),
-      );
-      expect(core.calls.where((v) => v['method'] == 'execute'), isEmpty);
-      final callback = tester.widget<ActionButton>(refresh).onPressed!;
-      core.calls.clear();
-      c.setForeground(false);
-      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-      await tester.pumpAndSettle();
-      expect(tester.widget<ActionButton>(refresh).onPressed, isNull);
-      callback();
-      await tester.pumpAndSettle();
-      expect(core.calls, isEmpty);
-      c.setForeground(true);
-      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-      await tester.pumpAndSettle();
-      await tester.pumpWidget(const SizedBox());
-    },
-  );
+  testWidgets('device page has no routine refresh button', (tester) async {
+    final (core, c, _) = await open(tester);
+    core.calls.clear();
+    expect(find.byKey(const ValueKey('climate-refresh')), findsNothing);
+    expect(find.text('Refresh State'), findsNothing);
+    c.setForeground(false);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    await tester.pump();
+    expect(core.calls.where((call) => call['method'] == 'read_state'), isEmpty);
+    c.setForeground(true);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpWidget(const SizedBox());
+  });
 
   testWidgets('power is a switch and selected mode has a checkmark', (
     tester,

@@ -274,9 +274,9 @@ void main() {
           find.text(
             'Readings may be out of date; the measurement time is unverified.',
           ),
-          findsOneWidget,
+          findsNothing,
         );
-        expect(find.text('Unknown'), findsWidgets);
+        expect(find.text('—'), findsWidgets);
         await tap(find.byKey(const ValueKey('cycle-readings')));
         await capture(allowed ? 'dishwasher-status' : 'dishwasher-read-only');
         final start = find.byKey(const ValueKey('control:0:start_cycle'));

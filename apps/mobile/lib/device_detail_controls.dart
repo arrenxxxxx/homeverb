@@ -3,6 +3,7 @@ import 'blocks.dart';
 import 'controller.dart';
 import 'controls.dart';
 import 'device_presentation.dart';
+import 'device_readings.dart';
 import 'localization.dart';
 import 'native_client.dart';
 import 'skin.dart';
@@ -170,22 +171,18 @@ class DeviceDetailControls extends StatelessWidget {
                     [
                       sourceForKey('${capability['id']}.${entry.key}') ??
                           controlLabel(entry.key),
-                      UiMessage('{value}{stale}', {
-                        'value': UiMessage(
-                          propertyValue(
-                            c.observed('${capability['id']}.${entry.key}'),
-                            entry.value as Json,
-                            propertyId: '${capability['id']}.${entry.key}',
-                          ),
+                      UiMessage(
+                        propertyValue(
+                          c.observed('${capability['id']}.${entry.key}'),
+                          entry.value as Json,
+                          propertyId: '${capability['id']}.${entry.key}',
                         ),
-                        'stale': UiMessage(
-                          c.snapshot?['observations']?['${capability['id']}.${entry.key}']?['stale'] ==
-                                  true
-                              ? ' · Stale'
-                              : '',
-                        ),
-                      }),
+                      ),
                       null,
+                      if (c.readingLoading(c.component) &&
+                          c.observed('${capability['id']}.${entry.key}') ==
+                              null)
+                        const ReadingValue('—', loading: true),
                     ],
               ],
               title: c.capabilities.length == 1
@@ -193,13 +190,6 @@ class DeviceDetailControls extends StatelessWidget {
                   : controlLabel(capability['id'] as String),
               onAction: onAction,
             ),
-        ActionButton(
-          'Refresh State',
-          style: 'secondary',
-          onPressed: c.busy || !c.isForeground
-              ? null
-              : () => onAction('Refresh State'),
-        ),
         ActionButton(
           'Device information',
           style: 'secondary',

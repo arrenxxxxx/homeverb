@@ -5,7 +5,6 @@ import 'controller.dart';
 import 'controls.dart';
 import 'appliance_panels.dart';
 import 'native_client.dart';
-import 'receipts.dart';
 import 'skin.dart';
 import 'device_readings.dart';
 import 'device_typography.dart';
@@ -55,13 +54,6 @@ class CompartmentControls extends StatelessWidget {
             for (final part in controller.components)
               compartment(context, part),
             RefrigeratorModes(controller: controller),
-            ActionButton(
-              'Refresh State',
-              style: 'secondary',
-              onPressed: controller.busy
-                  ? null
-                  : () => onAction('Refresh State'),
-            ),
             for (final label in ['Device information', 'Recent Operations'])
               ActionButton(
                 label,
@@ -169,41 +161,6 @@ class CompartmentControls extends StatelessWidget {
         },
       ),
       RefrigeratorModes(controller: controller, compact: true),
-      if (controller.components.any((part) {
-        final snapshot = controller.componentSnapshot(part['id'] as String);
-        return snapshot?['from_cache'] == true ||
-            (snapshot?['observations'] as Json? ?? {}).values
-                .whereType<Map>()
-                .any((value) => value['stale'] == true);
-      }))
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 8),
-          child: Copy(
-            'Readings may be out of date; the measurement time is unverified.',
-            size: DeviceTypography.secondary,
-            color: muted,
-          ),
-        ),
-      OutlinedButton(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: skinAccent(context),
-          side: BorderSide(color: skinAccent(context)),
-          minimumSize: const Size(double.infinity, 44),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        onPressed: controller.busy || !controller.isForeground
-            ? null
-            : () => onAction('Refresh State'),
-        child: Copy(
-          'Refresh State',
-          size: DeviceTypography.body,
-          lineHeight: DeviceTypography.lineHeight,
-          bold: true,
-          color: skinAccent(context),
-        ),
-      ),
       for (final label in ['Device information', 'Recent Operations'])
         TextButton(
           onPressed: controller.busy || !controller.isForeground
@@ -236,7 +193,7 @@ class CompartmentControls extends StatelessWidget {
       final observed = observations['climate.$property']?['value'];
       return UiMessage(
         observed == null
-            ? 'Not received'
+            ? '—'
             : propertyValue(
                 observed,
                 climate?['properties']?[property] as Json? ?? {},
@@ -244,7 +201,6 @@ class CompartmentControls extends StatelessWidget {
       );
     }
 
-    final error = controller.componentReadError(id);
     return Padding(
       key: ValueKey('readonly-zone:$id'),
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -261,33 +217,35 @@ class CompartmentControls extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child: Copy(
-                  value('target_temperature'),
-                  size: 24,
-                  lineHeight: DeviceTypography.lineHeight,
-                  bold: true,
-                  center: true,
+                child: Center(
+                  child: ReadingValue(
+                    value('target_temperature'),
+                    size: 24,
+                    bold: true,
+                    center: true,
+                    loading:
+                        controller.readingLoading(id) &&
+                        observations['climate.target_temperature']?['value'] ==
+                            null,
+                  ),
                 ),
               ),
               Expanded(
-                child: Copy(
-                  value('current_temperature'),
-                  size: DeviceTypography.reading,
-                  lineHeight: DeviceTypography.lineHeight,
-                  color: muted,
-                  center: true,
+                child: Center(
+                  child: ReadingValue(
+                    value('current_temperature'),
+                    size: DeviceTypography.reading,
+                    color: muted,
+                    center: true,
+                    loading:
+                        controller.readingLoading(id) &&
+                        observations['climate.current_temperature']?['value'] ==
+                            null,
+                  ),
                 ),
               ),
             ],
           ),
-          if (error != null)
-            Copy(
-              UiMessage('{component} could not be read: {error}', {
-                'component': UiMessage(controlLabel(id)),
-                'error': localizedError(context, error),
-              }),
-              color: const Color(0xff9e3421),
-            ),
           for (final cap in controller.capabilitiesFor(id))
             if (cap['id'] != 'climate' &&
                 cap['id'] != 'vendor.midea.refrigerator' &&
@@ -303,6 +261,10 @@ class CompartmentControls extends StatelessWidget {
                         propertyId: '${cap['id']}.${entry.key}',
                       ),
                     ),
+                    loading:
+                        controller.readingLoading(id) &&
+                        observations['${cap['id']}.${entry.key}']?['value'] ==
+                            null,
                   ),
         ],
       ),
@@ -318,7 +280,7 @@ class CompartmentControls extends StatelessWidget {
       final observed = observations['climate.$property']?['value'];
       return UiMessage(
         observed == null
-            ? 'Not received'
+            ? '—'
             : propertyValue(
                 observed,
                 climate?['properties']?[property] as Json? ?? {},
@@ -326,7 +288,6 @@ class CompartmentControls extends StatelessWidget {
       );
     }
 
-    final error = controller.componentReadError(id);
     return Padding(
       key: ValueKey('readonly-zone:$id'),
       padding: const EdgeInsets.symmetric(vertical: 14),
@@ -334,8 +295,20 @@ class CompartmentControls extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Copy(controlLabel(id), bold: true, size: 18),
-          DeviceReadingRow('Set temperature', value('target_temperature')),
-          DeviceReadingRow('Current temperature', value('current_temperature')),
+          DeviceReadingRow(
+            'Set temperature',
+            value('target_temperature'),
+            loading:
+                controller.readingLoading(id) &&
+                observations['climate.target_temperature']?['value'] == null,
+          ),
+          DeviceReadingRow(
+            'Current temperature',
+            value('current_temperature'),
+            loading:
+                controller.readingLoading(id) &&
+                observations['climate.current_temperature']?['value'] == null,
+          ),
           for (final cap in controller.capabilitiesFor(id))
             if (cap['id'] != 'climate' &&
                 cap['id'] != 'vendor.midea.refrigerator' &&
@@ -351,15 +324,11 @@ class CompartmentControls extends StatelessWidget {
                         propertyId: '${cap['id']}.${entry.key}',
                       ),
                     ),
+                    loading:
+                        controller.readingLoading(id) &&
+                        observations['${cap['id']}.${entry.key}']?['value'] ==
+                            null,
                   ),
-          if (error != null)
-            Copy(
-              UiMessage('{component} could not be read: {error}', {
-                'component': UiMessage(controlLabel(id)),
-                'error': localizedError(context, error),
-              }),
-              color: const Color(0xff9e3421),
-            ),
         ],
       ),
     );
@@ -435,6 +404,8 @@ class CompartmentControls extends StatelessWidget {
               : controlLabel(entry.key),
           propertyValue(observed?['value'], entry.value as Json),
           null,
+          if (observed == null && controller.readingLoading(id))
+            const ReadingValue('—', loading: true),
         ]);
         if (capability['id'] != 'climate' && capability['id'] != 'power') {
           extraRows.add(rows.last);
@@ -464,12 +435,6 @@ class CompartmentControls extends StatelessWidget {
                     )),
           ),
         );
-    final readError = controller.componentReadError(id);
-    final observations = (snapshot?['observations'] as Json? ?? {}).values
-        .whereType<Map>();
-    final times =
-        observations.map((o) => o['received_at']).whereType<String>().toList()
-          ..sort((a, b) => DateTime.parse(a).compareTo(DateTime.parse(b)));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -490,34 +455,48 @@ class CompartmentControls extends StatelessWidget {
                     const SizedBox(width: 10),
                     Expanded(child: Copy(label, bold: true, size: 18)),
                     if (controller.componentCapability(id, 'power') != null)
-                      Copy(
+                      ReadingValue(
                         propertyValue(observation('power.state')?['value'], {}),
                         size: 13,
                         color: muted,
+                        loading:
+                            observation('power.state') == null &&
+                            controller.readingLoading(id),
                       ),
                   ],
                 ),
                 const SizedBox(height: 18),
                 const Copy('Target', size: 13, color: muted),
-                Copy(
+                ReadingValue(
                   propertyValue(target, targetProperty ?? {}),
                   size: 42,
                   bold: true,
+                  loading: target == null && controller.readingLoading(id),
                 ),
                 const SizedBox(height: 8),
-                Copy(
-                  UiMessage('Current: {value}', {
-                    'value': UiMessage(
-                      propertyValue(
-                        observation('climate.current_temperature')?['value'],
-                        climate?['properties']?['current_temperature']
-                                as Json? ??
-                            {},
+                if (observation('climate.current_temperature') == null &&
+                    controller.readingLoading(id))
+                  Row(
+                    children: [
+                      const Copy('Current', color: muted),
+                      const SizedBox(width: 6),
+                      const ReadingValue('—', loading: true),
+                    ],
+                  )
+                else
+                  Copy(
+                    UiMessage('Current: {value}', {
+                      'value': UiMessage(
+                        propertyValue(
+                          observation('climate.current_temperature')?['value'],
+                          climate?['properties']?['current_temperature']
+                                  as Json? ??
+                              {},
+                        ),
                       ),
-                    ),
-                  }),
-                  color: muted,
-                ),
+                    }),
+                    color: muted,
+                  ),
                 for (final stepper in trailing.values)
                   Padding(
                     padding: const EdgeInsets.only(top: 12),
@@ -549,36 +528,6 @@ class CompartmentControls extends StatelessWidget {
                 ? null
                 : () => onAction('open-component:${Uri.encodeComponent(id)}'),
           ),
-        if (readError != null)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Copy(
-              UiMessage('{component} could not be read: {error}', {
-                'component': UiMessage(label),
-                'error': localizedError(context, readError),
-              }),
-              color: const Color(0xff9e3421),
-            ),
-          ),
-        Padding(
-          padding: const EdgeInsets.only(left: 2, bottom: 12),
-          child: Copy(
-            times.isEmpty
-                ? UiMessage('{component} · No saved reading', {
-                    'component': UiMessage(label),
-                  })
-                : UiMessage('{component} · {source} {time}{stale}', {
-                    'component': UiMessage(label),
-                    'source': UiMessage(
-                      snapshot?['from_cache'] == true ? 'Cached' : 'Read',
-                    ),
-                    'time': receiptTime(times.last, compact: true),
-                    'stale': '',
-                  }),
-            size: 12,
-            color: muted,
-          ),
-        ),
         if (targetProperty != null && !editable)
           Padding(
             padding: const EdgeInsets.only(bottom: 12),

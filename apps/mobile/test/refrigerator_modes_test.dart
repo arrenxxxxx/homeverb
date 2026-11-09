@@ -368,7 +368,7 @@ void main() {
         find.text('Current temperature'),
         findsNWidgets(scale == 1 ? 1 : 3),
       );
-      expect(find.text('Not received'), findsNWidgets(3));
+      expect(find.text('—'), findsWidgets);
       expect(find.text('4°C'), findsOneWidget);
       expect(find.text('-18°C'), findsOneWidget);
       expect(find.text('6°C'), findsOneWidget);
