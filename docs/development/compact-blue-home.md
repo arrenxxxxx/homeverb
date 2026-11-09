@@ -35,6 +35,21 @@ phone or provider acceptance. The uploaded owner screenshot is reference input
 only and must not be published in the repository or included in preview assets.
 Publication, APK generation and real-device actions are separate tasks.
 
+## November 9 power presentation
+
+At the owner's request, home cards render missing power observations with the
+same off icon, colors, tooltip and accessibility state as an off observation.
+There is no third power appearance or added unknown-state caption. This display
+fallback does not change the nullable Core observation, shortcut eligibility,
+command arguments or execution receipts. A shortcut that was disabled remains
+disabled until the existing control conditions are met.
+
+Local verification passed: all eleven compact-card cases, including four captures
+across both skins; Flutter analysis; documentation, repository and contract
+validators; and diff checks. The updated captures use fictional data. Physical
+phone verification remains blocked pending selection and setup of the owner's
+test phone; no APK or iOS package was built for this change.
+
 ## Executed checks: October 31, 2026
 
 - Flutter 3.47.7 analyze: no issues. Full Flutter suite: 233 passed and 17

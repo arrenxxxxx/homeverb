@@ -277,7 +277,17 @@ void main() {
       expect(data.label, isNot(contains('Open Guest AC')));
       expect(data.flagsCollection.isEnabled, ui.Tristate.isFalse);
       expect(data.flagsCollection.isButton, isTrue);
-      expect(data.value, 'Power unknown');
+      expect(data.value, 'Powered off');
+      expect(data.flagsCollection.isToggled, ui.Tristate.isFalse);
+      final shortcut = find.byKey(const ValueKey('card-power:ac-unknown'));
+      expect(
+        find.descendant(
+          of: shortcut,
+          matching: find.byIcon(Icons.power_off_outlined),
+        ),
+        findsOneWidget,
+      );
+      expect(find.byTooltip('Power unknown'), findsNothing);
       expect(tester.takeException(), isNull);
     } finally {
       handle.dispose();

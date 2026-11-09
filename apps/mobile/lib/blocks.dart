@@ -1329,14 +1329,10 @@ class DeviceTile extends StatelessWidget {
     final scale = MediaQuery.textScalerOf(context).scale(13) / 13;
     final largeText = scale > 1.3;
     final active = kind != 'tv' && !cached;
-    final state = presentation?.power;
+    final state = presentation?.power ?? false;
     final updating = presentation?.updating ?? false;
     final powerEnabled = (presentation?.powerEnabled ?? true) && !updating;
-    final powerAction = state == null
-        ? 'Power unknown'
-        : state
-        ? 'Turn Off'
-        : 'Turn On';
+    final powerAction = state ? 'Turn Off' : 'Turn On';
     final powerColor = compact && !highContrast
         ? ((presentation == null ? active : state == true)
               ? skin.cardPowerOn
@@ -1356,7 +1352,7 @@ class DeviceTile extends StatelessWidget {
       label: localize(context, UiMessage('Power {name}', {'name': d[0]})),
       button: true,
       enabled: powerEnabled,
-      toggled: state,
+      toggled: presentation == null ? null : state,
       liveRegion: updating,
       value: presentation == null
           ? null
@@ -1364,8 +1360,6 @@ class DeviceTile extends StatelessWidget {
               context,
               updating
                   ? 'Updating device…'
-                  : state == null
-                  ? 'Power unknown'
                   : state
                   ? 'Powered on'
                   : 'Powered off',
@@ -1400,9 +1394,7 @@ class DeviceTile extends StatelessWidget {
                       ? OperationPulse(color: powerInk, size: large ? 24 : 22)
                       : presentation != null && state != true
                       ? Icon(
-                          state == false
-                              ? Icons.power_off_outlined
-                              : Icons.power_settings_new,
+                          Icons.power_off_outlined,
                           size: large ? 24 : 22,
                           color: powerInk,
                         )

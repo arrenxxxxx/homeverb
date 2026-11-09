@@ -1,5 +1,12 @@
 # Platform and device compatibility matrix
 
+## November 9 home-card power presentation
+
+Home cards display missing power observations as off at the owner's request,
+without an additional unknown-state icon or label. This is a presentation fallback
+only: Core observations, command eligibility, receipts, native API and storage
+formats are unchanged. It adds no device support or physical acceptance evidence.
+
 ## October 22 existing-session read experiment
 
 The owner signed in directly in the isolated API 35 arm64 emulator. Existing
