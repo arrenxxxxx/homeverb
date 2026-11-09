@@ -6,7 +6,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 
 import 'controller.dart';
-import 'native_client.dart';
+import 'client_contract.dart';
 import 'skin.dart';
 import 'feedback.dart';
 

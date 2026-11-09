@@ -3598,3 +3598,17 @@ captions/feature cards without expiry labels. No app data was cleared, appliance
 write sent, physical-phone test run, artifact uploaded or remote push performed.
 Only foreground reads remain permitted; rendering cached values is not proof of
 fresh physical measurements.
+
+## Interaction optimization integration — November 9, 2026
+
+The M0–M5 interaction changes have local phase commits. M6 integrated fictional
+device, lifecycle, approval and outcome checks, production-route captures and
+Android emulator profile measurements are recorded in the
+[interaction evidence](../../docs/development/interaction-implementation-evidence.md#m6-integration-and-remaining-gate).
+The final full Flutter run has 343 passes, 40 skips and four previously recorded
+macOS glyph-pixel failures, so the full regression exit gate remains open. The
+app was profiled on an isolated Android emulator before a subsequent import-only
+web preview fix; no physical-phone, real provider or real-write acceptance is
+implied. The local
+capture and performance artifacts under `build/verification/` are reproducible
+but are not versioned.

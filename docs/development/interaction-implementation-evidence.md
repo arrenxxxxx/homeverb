@@ -146,3 +146,89 @@ The current retained receipt contract has no original action field, so history
 uses the truthful generic label `Operation` rather than inferring an action from
 returned data; raw evidence remains available. Physical and M6 acceptance remain
 separate.
+
+## M6 integration and remaining gate
+
+Integration review extended the loading, failure and retained-outcome treatment to
+the specialized appliance pages and generic action forms. Lifecycle and navigation
+fences now cover pending reads, account and receipt lookup, plans, batches and
+trusted approvals. A cancelled plan cannot send after navigation or backgrounding;
+an interrupted approval must be resolved against its original receipt before a
+new preview is prepared. The tests use fictional clients and never send a real
+device command. Core contracts, storage schemas and provider authority are
+unchanged. M0 through M5 are recorded in local commits `6613530`, `db96c4a`,
+`03b749d`, `8ae87bf`, `adee987` and `25e881c`, respectively.
+
+The final `fvm flutter analyze` passed. The final full
+`fvm flutter test --no-pub --reporter expanded` run had 343 passes, 40 skips and
+four failures: the existing macOS glyph-pixel cases in `button_labels_test.dart`,
+two cases in `control_labels_test.dart`, and `field_alignment_test.dart`.
+Their strict assertions remain intact; see [testing](../testing.md#merged-flutter-verification-on-macos).
+The output is `apps/mobile/build/verification/interaction-full-suite-import-fix.log`.
+The prior run also found a stale cancellation-error assertion; after updating it
+to require no late error while preserving the no-send assertion, that case passed
+in the final run. These four failures leave the M6 regression exit gate open.
+
+The actual `NativeApp` capture fixture uses production routes and fictional
+clients. A matrix covers both `window_light` and `sky_blue`, `en-US` and `zh-CN`,
+320/390/430 logical-pixel widths and 100%/200% text. Each configuration captures
+20 scenes, including first load/failure, cached reopen, partial refresh and
+pending/unknown commands. Additional 320-pixel, 200% Chinese captures exercise
+high contrast and top/bottom safe areas; English and Chinese 390-pixel captures
+exercise a simulated 300-pixel keyboard inset. Complete-content captures use a
+taller test viewport; interaction tests separately exercise scrolling. The
+keyboard inset does not render or verify an operating-system keyboard. The
+Chinese test fallback was the local Hiragino Sans GB font, not a phone font.
+Captures and per-configuration logs are local build artifacts under
+`apps/mobile/build/verification/interaction/` and
+`apps/mobile/build/verification/interaction-final-*.log`; build artifacts are not
+versioned and can be regenerated with `test/interaction_capture_test.dart`:
+
+```sh
+cd apps/mobile
+fvm flutter test --no-pub test/interaction_capture_test.dart --reporter expanded \
+  --dart-define=HOMEVERB_INTERACTION_CAPTURE=true \
+  --dart-define=HOMEVERB_CAPTURE_SKIN=window_light \
+  --dart-define=HOMEVERB_CAPTURE_LOCALE=zh-CN \
+  --dart-define=HOMEVERB_CAPTURE_WIDTH=320 \
+  --dart-define=HOMEVERB_CAPTURE_TEXT_PERCENT=200 \
+  '--dart-define=HOMEVERB_CJK_FONT=/System/Library/Fonts/Hiragino Sans GB.ttc' \
+  '--dart-define=HOMEVERB_CJK_BOLD_FONT=/System/Library/Fonts/Hiragino Sans GB.ttc'
+```
+
+Vary the skin, locale, width and text percentage for the matrix. The fixture also
+accepts `HOMEVERB_CAPTURE_HIGH_CONTRAST`, `HOMEVERB_CAPTURE_SAFE_TOP`,
+`HOMEVERB_CAPTURE_SAFE_BOTTOM` and `HOMEVERB_CAPTURE_KEYBOARD_INSET` defines.
+
+Profile measurements used Flutter 3.47.7 on a disposable Android 15 API 35 arm64
+Pixel 7 emulator, Apple M1 Pro and the emulator's OpenGL ES translator on Metal.
+The measured source's visible detail shell took 36.273 ms p95 for 20 warm cached
+transitions and 52.714 ms p95 for 20 transitions with reads held for at least
+five seconds; one cold transition took 35.991 ms. All were under the proposed
+150 ms p95 target. In one before/after scroll run, build p95 was 1.063/0.864 ms
+and raster p95 was 5.178/4.062 ms; neither run had a build or raster frame over
+16.667 ms. The single-run difference does not establish a cause. Raw durations,
+distributions, commands and source identity are in
+`apps/mobile/build/verification/interaction-profile-final/`; the baseline and
+earlier intermediate measurements are in the adjacent `interaction-profile/`.
+After measurement, seven view files changed only their import from the native
+client implementation to its shared contract, allowing the web preview to
+compile. The benchmark did not rerun after those import-only changes. These
+results do not establish physical-phone performance.
+
+On this macOS host `cargo fmt --all -- --check` and the offline workspace build
+passed. The workspace test run outside the sandbox stopped at 14 existing Midea
+LAN tests because `127.0.0.2` was unavailable; the sandboxed attempt also denied
+local sockets. Clippy with Rust 1.99.1 and `-D warnings` stopped on four existing
+`chunks_exact_to_as_chunks` warnings in Midea code. `verify_mvp.py` passed with
+seven Linux-only skips, `verify_native_contract.py` passed, and Python unit tests
+passed 70 cases. Documentation, contract, repository and presentation catalog
+validators passed after the evidence update.
+The documented `fvm flutter build web -t lib/main_preview.dart --no-pub` first
+failed because the existing preview import chain reached `dart:ffi`. Replacing
+unneeded native implementation imports with the shared client contract made the
+rerun pass. Both logs are in `apps/mobile/build/verification/`; this preview build
+is not the source of the mobile captures or profile measurements.
+Linux Flutter integration/builds, physical Android/iOS accessibility and keyboard
+behavior, real provider acceptance and appliance writes remain unverified here.
+No physical device, live account, publication or real device write was used.

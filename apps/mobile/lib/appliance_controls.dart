@@ -1,11 +1,13 @@
 import 'localization.dart';
 import 'package:flutter/material.dart';
 import 'blocks.dart';
+import 'appliance_panels.dart' show InlineDeviceInformation;
 import 'controller.dart';
 import 'controls.dart';
+import 'device_readings.dart';
 import 'device_option_grid.dart';
 import 'device_typography.dart';
-import 'native_client.dart';
+import 'client_contract.dart';
 import 'receipts.dart';
 import 'skin.dart';
 
@@ -39,7 +41,13 @@ class ApplianceControls extends StatefulWidget {
 class _ApplianceControlsState extends State<ApplianceControls> {
   final drafts = <String, num>{};
   final handled = <String>{};
+  String? pendingAction, pendingProperty;
+  bool pendingFor(String? action, String property) =>
+      action != null &&
+      pendingAction == action &&
+      (pendingProperty == null || pendingProperty == property);
   HomeController get c => widget.controller;
+  bool get busy => pendingAction != null || c.busy || !c.isForeground;
   Json get capability => c.capability(widget.family)!;
   Json get properties => capability['properties'] as Json;
   Json get actions => capability['actions'] as Json;
@@ -55,9 +63,31 @@ class _ApplianceControlsState extends State<ApplianceControls> {
     values: {},
   );
 
-  void open(String action) => widget.onAction(
-    'control:${c.capabilities.indexOf(capability)}:${Uri.encodeComponent(action)}',
-  );
+  void open(String action) {
+    if (!mounted ||
+        busy ||
+        !c.isForeground ||
+        !c.hasControlAction(widget.family, action))
+      return;
+    final definition = actions[action] as Json?;
+    final fields = definition?['parameters']?['properties'] as Map? ?? {};
+    if (definition == null ||
+        actionUnavailable(
+              capability,
+              definition,
+              trustedApproval: c.supportsTrustedApproval,
+            ) !=
+            null ||
+        fields.keys.any(
+          (name) =>
+              properties[name]?['control_requires_observation'] == true &&
+              observed(name) == null,
+        ))
+      return;
+    widget.onAction(
+      'control:${c.capabilities.indexOf(capability)}:${Uri.encodeComponent(action)}',
+    );
+  }
 
   String? setter(String property) {
     if (properties[property]?['writable'] != true) return null;
@@ -75,6 +105,10 @@ class _ApplianceControlsState extends State<ApplianceControls> {
       final action = entry.value as Json;
       final schema = action['parameters'] as Json;
       if (entry.key != expected || action['idempotency'] != 'set_value')
+        continue;
+      if (!c.hasControlAction(widget.family, entry.key) ||
+          (properties[property]?['control_requires_observation'] == true &&
+              observed(property) == null))
         continue;
       if (schema.keys.any(
             (key) => !const {
@@ -100,18 +134,70 @@ class _ApplianceControlsState extends State<ApplianceControls> {
   }
 
   Future<void> send(String action, Json arguments) async {
-    if (c.busy) return;
-    await widget.onExecute(widget.family, action, arguments);
+    if (pendingAction != null ||
+        busy ||
+        !c.isForeground ||
+        !c.hasControlAction(widget.family, action))
+      return;
+    final definition = actions[action] as Json?;
+    if (definition == null || actionUnavailable(capability, definition) != null)
+      return;
+    if (arguments.length == 1) {
+      final entry = arguments.entries.single;
+      if (entry.value is! Object ||
+          !c.canControlValue(
+            widget.family,
+            action,
+            entry.key,
+            entry.value as Object,
+          ))
+        return;
+    }
+    setState(() {
+      drafts.clear();
+      pendingAction = action;
+      pendingProperty = arguments.length == 1 ? arguments.keys.single : null;
+    });
+    try {
+      await widget.onExecute(widget.family, action, arguments);
+    } finally {
+      if (mounted)
+        setState(() {
+          pendingAction = null;
+          pendingProperty = null;
+        });
+    }
   }
 
-  Object display(String property) => UiMessage('{value}{stale}', {
-    'value': UiMessage(
-      propertyValue(observed(property), properties[property] as Json),
-    ),
-    'stale': UiMessage(
-      observation(property)?['stale'] == true ? ' · Stale' : '',
-    ),
-  });
+  Future<void> sendPower() async {
+    final value = c.observed('power.state');
+    final power = c.capability('power');
+    final action = power?['actions']?['set'] as Json?;
+    final schema = action?['parameters']?['properties']?['state'] as Json?;
+    if (pendingAction != null ||
+        busy ||
+        !c.isForeground ||
+        value is! bool ||
+        action == null ||
+        schema == null ||
+        actionUnavailable(power!, action) != null ||
+        validateValue(!value, schema) != null ||
+        (action['parameters']['required'] as List? ?? []).any(
+          (name) => name != 'state',
+        ) ||
+        !c.canControlValue('power', 'set', 'state', !value))
+      return;
+    setState(() => pendingAction = 'power.set');
+    try {
+      await widget.onExecute('power', 'set', {'state': !value});
+    } finally {
+      if (mounted) setState(() => pendingAction = null);
+    }
+  }
+
+  Object display(String property) => UiMessage(
+    propertyValue(observed(property), properties[property] as Json),
+  );
 
   Widget propertyControl(String name) {
     final property = properties[name] as Json;
@@ -120,6 +206,7 @@ class _ApplianceControlsState extends State<ApplianceControls> {
         ? <String, dynamic>{}
         : actions[action]['parameters']['properties'][name] as Json;
     final value = observed(name);
+    if (value == null) return Rows([propertyRow(name)], onAction: rowAction);
     final lower = schema['minimum'], upper = schema['maximum'];
     if (action != null &&
         ['number', 'integer'].contains(schema['type']) &&
@@ -139,23 +226,35 @@ class _ApplianceControlsState extends State<ApplianceControls> {
         return validateValue(next, schema) == null ? next : null;
       }
 
+      if (!usable) return Rows([propertyRow(name)], onAction: rowAction);
       final numericFan =
           widget.family == 'fan' && name == 'speed' && step != null;
       Widget speedButtons() => InlineStepper(
         label: 'Speed',
         value: propertyValue(current, property),
         onIncrease:
-            c.busy || !usable || validateValue(current + step!, schema) != null
+            busy ||
+                !usable ||
+                validateValue(current + step!, schema) != null ||
+                !c.canControlValue(widget.family, action, name, current + step)
             ? null
             : () => send(action, {name: current + step}),
         onDecrease:
-            c.busy || !usable || validateValue(current - step!, schema) != null
+            busy ||
+                !usable ||
+                validateValue(current - step!, schema) != null ||
+                !c.canControlValue(widget.family, action, name, current - step)
             ? null
             : () => send(action, {name: current - step}),
       );
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (pendingFor(action, name))
+            const Align(
+              alignment: Alignment.centerRight,
+              child: OperationPulse(size: 20),
+            ),
           if (numericFan)
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
@@ -188,20 +287,28 @@ class _ApplianceControlsState extends State<ApplianceControls> {
               max: upper.toDouble(),
               formatValue: (v) =>
                   '${controlLabel(name)} ${propertyValue(usable ? snap(v) ?? v : current, property)}',
-              onChanged: c.busy || !usable
+              onChanged: busy || !usable
                   ? null
                   : (v) {
                       final next = snap(v);
-                      if (next != null) setState(() => drafts[name] = next);
+                      if (next != null &&
+                          c.canControlValue(
+                            widget.family,
+                            action,
+                            name,
+                            next,
+                          )) {
+                        setState(() => drafts[name] = next);
+                      }
                     },
-              onChangeEnd: c.busy || !usable
+              onChangeEnd: busy || !usable
                   ? null
                   : (_) {
                       final next = drafts[name];
                       if (next != null) send(action, {name: next});
                     },
             ),
-          if (draft != null || observation(name)?['stale'] == true)
+          if (draft != null)
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: Copy(
@@ -219,7 +326,7 @@ class _ApplianceControlsState extends State<ApplianceControls> {
                 }),
               ),
               style: 'secondary',
-              onPressed: c.busy ? null : () => open(action),
+              onPressed: busy ? null : () => open(action),
             ),
         ],
       );
@@ -234,6 +341,11 @@ class _ApplianceControlsState extends State<ApplianceControls> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (pendingFor(action, name))
+              const Align(
+                alignment: Alignment.centerRight,
+                child: OperationPulse(size: 20),
+              ),
             Rows([
               [controlLabel(name), display(name), null],
             ], onAction: widget.onAction),
@@ -275,7 +387,15 @@ class _ApplianceControlsState extends State<ApplianceControls> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    onSelected: c.busy
+                    onSelected:
+                        busy ||
+                            !c.isForeground ||
+                            !c.canControlValue(
+                              widget.family,
+                              action,
+                              name,
+                              option,
+                            )
                         ? null
                         : (_) => send(action, {name: option}),
                   ),
@@ -295,12 +415,33 @@ class _ApplianceControlsState extends State<ApplianceControls> {
     return [
       controlLabel(name),
       value is bool ? propertyValue(value, properties[name]) : display(name),
-      action == null || c.busy ? null : 'property:$name',
+      action == null ||
+              busy ||
+              !c.isForeground ||
+              (value is bool &&
+                  !c.canControlValue(widget.family, action, name, !value))
+          ? null
+          : 'property:$name',
+      if (pendingFor(action, name))
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Copy(display(name)),
+            const SizedBox(width: 8),
+            const OperationPulse(size: 20),
+          ],
+        )
+      else if (value == null && c.readingLoading(c.component))
+        const ReadingValue('—', loading: true),
     ];
   }
 
   void rowAction(String label) {
-    if (c.busy) return;
+    if (busy) return;
+    if (label == 'Power') {
+      sendPower();
+      return;
+    }
     if (!label.startsWith('property:')) {
       widget.onAction(label);
       return;
@@ -326,11 +467,13 @@ class _ApplianceControlsState extends State<ApplianceControls> {
     final powerSchema =
         powerAction?['parameters']?['properties']?['state'] as Json?;
     final canSetPower =
-        !c.busy &&
+        !busy &&
+        c.isForeground &&
         power is bool &&
         powerSchema != null &&
         powerAction != null &&
         actionUnavailable(powerCapability!, powerAction) == null &&
+        c.canControlValue('power', 'set', 'state', !power) &&
         validateValue(!power, powerSchema) == null &&
         (powerAction['parameters']['minProperties'] as num? ?? 0) <= 1 &&
         (powerAction['parameters']['required'] as List? ?? []).every(
@@ -341,18 +484,25 @@ class _ApplianceControlsState extends State<ApplianceControls> {
       (name) => properties[name]['readable'] == true && observed(name) != null,
     );
     final state = family == 'sensor'
-        ? (readings ? 'Observed readings' : 'No current reading')
+        ? (readings ? 'Observed readings' : '—')
         : family == 'media'
         ? propertyValue(observed('playback_state'), {})
         : family == 'appliance_cycle'
         ? (observed('running') is bool
               ? (observed('running') == true ? 'Running' : 'Not running')
-              : 'Unknown')
+              : '—')
         : (power is bool
               ? (power ? 'Power on' : 'Power off')
-              : (c.capability('power') == null
-                    ? controlLabel(family)
-                    : 'Power unknown'));
+              : (c.capability('power') == null ? controlLabel(family) : '—'));
+    final heroLoading =
+        c.readingLoading(c.component) &&
+        (family == 'sensor'
+            ? !readings
+            : family == 'media'
+            ? observed('playback_state') == null
+            : family == 'appliance_cycle'
+            ? observed('running') == null
+            : powerCapability != null && power == null);
     final specialNames = switch (family) {
       'light' => ['brightness', 'color_temperature'],
       'fan' => ['speed'],
@@ -371,55 +521,80 @@ class _ApplianceControlsState extends State<ApplianceControls> {
       if (c.capability('power') != null)
         [
           'Power',
-          power is bool ? (power ? 'On' : 'Off') : 'Unknown',
+          power is bool ? (power ? 'On' : 'Off') : '—',
           canSetPower ? 'Power' : null,
+          if (pendingAction == 'power.set')
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Copy(
+                  power == true
+                      ? 'On'
+                      : power == false
+                      ? 'Off'
+                      : '—',
+                ),
+                const SizedBox(width: 8),
+                const OperationPulse(size: 20),
+              ],
+            )
+          else if (power == null && c.readingLoading(c.component))
+            const ReadingValue('—', loading: true),
         ],
     ];
-    final times = [
-      for (final name in properties.keys)
-        if (observation(name)?['received_at'] is String)
-          observation(name)!['received_at'] as String,
-    ]..sort();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (c.components.length > 1)
-          blocks([
-            [
-              'tabs',
-              c.components.map((p) => '${p['id']}').toList(),
-              c.components.indexWhere((p) => p['id'] == c.component),
-              c.components.map((p) => 'component:${p['id']}').toList(),
-            ],
-          ]),
-        blocks([
-          [
-            'hero',
-            const {
-              'light': 'lamp',
-              'fan': 'fan',
-              'media': 'tv',
-              'sensor': 'sensor',
-              'appliance_cycle': 'washer',
-            }[family],
-            state,
-            c.roomName(c.currentCard?['preferences']['room_id']),
-          ],
-        ]),
-        if (family != 'media') ...controls,
-        if (rows.isNotEmpty) Rows(rows, onAction: rowAction),
-        if (properties.keys.any(
-          (name) =>
-              observed(name) is bool && observation(name)?['stale'] == true,
-        ))
-          const Padding(
-            padding: EdgeInsets.only(bottom: 12),
-            child: Copy(
-              'Saved states may be out of date.',
-              size: 12,
-              color: muted,
+        Padding(
+          padding: const EdgeInsets.only(bottom: 14),
+          child: Surface(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 13, 20, 20),
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 87,
+                    child: product(
+                      const {
+                        'light': 'lamp',
+                        'fan': 'fan',
+                        'media': 'tv',
+                        'sensor': 'sensor',
+                        'appliance_cycle': 'washer',
+                      }[family]!,
+                      size: 87,
+                    ),
+                  ),
+                  const SizedBox(height: 19),
+                  ReadingValue(
+                    state,
+                    loading: heroLoading,
+                    size: 23,
+                    bold: true,
+                    center: true,
+                  ),
+                  const SizedBox(height: 13),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Copy(
+                      c.currentCard?['preferences']['room_id'] == null
+                          ? 'Unassigned'
+                          : LiteralText(
+                              c.roomName(
+                                c.currentCard!['preferences']['room_id'],
+                              ),
+                            ),
+                      size: 12,
+                      color: muted,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
+        ),
+        if (family != 'media') ...controls,
+        if (rows.isNotEmpty) Rows(rows, onAction: rowAction),
         if (family != 'sensor')
           for (final entry in actions.entries)
             if (!handled.contains(entry.key) ||
@@ -430,32 +605,54 @@ class _ApplianceControlsState extends State<ApplianceControls> {
                           properties[name]?['readable'] != true ||
                           setter(name) != entry.key,
                     ))
-              ActionButton(
-                family == 'appliance_cycle' && entry.key == 'start'
-                    ? 'Start Cycle'
-                    : controlLabel(entry.key),
-                style: 'secondary',
-                onPressed:
-                    c.busy ||
-                        actionUnavailable(
-                              capability,
-                              entry.value as Json,
-                              trustedApproval: c.supportsTrustedApproval,
-                            ) !=
-                            null
-                    ? null
-                    : () {
-                        if (entry.value['risk'] == 'elevated') {
-                          open(entry.key);
-                        } else if ((entry.value['parameters']['properties']
-                                    as Map?)
-                                ?.isEmpty ==
-                            true) {
-                          send(entry.key, {});
-                        } else {
-                          open(entry.key);
-                        }
-                      },
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  ActionButton(
+                    family == 'appliance_cycle' && entry.key == 'start'
+                        ? 'Start Cycle'
+                        : controlLabel(entry.key),
+                    style: 'secondary',
+                    onPressed:
+                        busy ||
+                            !c.isForeground ||
+                            !c.hasControlAction(family, entry.key) ||
+                            ((entry.value['parameters']['properties']
+                                        as Map?) ??
+                                    {})
+                                .keys
+                                .any(
+                                  (name) =>
+                                      properties[name]?['control_requires_observation'] ==
+                                          true &&
+                                      observed(name) == null,
+                                ) ||
+                            actionUnavailable(
+                                  capability,
+                                  entry.value as Json,
+                                  trustedApproval: c.supportsTrustedApproval,
+                                ) !=
+                                null
+                        ? null
+                        : () {
+                            if (entry.value['risk'] == 'elevated') {
+                              open(entry.key);
+                            } else if ((entry.value['parameters']['properties']
+                                        as Map?)
+                                    ?.isEmpty ==
+                                true) {
+                              send(entry.key, {});
+                            } else {
+                              open(entry.key);
+                            }
+                          },
+                  ),
+                  if (pendingAction == entry.key && pendingProperty == null)
+                    const Align(
+                      alignment: Alignment.centerRight,
+                      child: OperationPulse(size: 20),
+                    ),
+                ],
               ),
         if (family == 'media') ...controls,
         for (final entry in actions.entries)
@@ -475,46 +672,25 @@ class _ApplianceControlsState extends State<ApplianceControls> {
                 color: muted,
               ),
             ),
-        if (times.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Copy(
-              UiMessage('Latest read: {time}', {
-                'time': receiptTime(times.last, compact: true),
-              }),
-              size: 12,
-              color: muted,
-            ),
-          ),
-        if (family == 'sensor')
-          const Padding(
-            padding: EdgeInsets.only(bottom: 12),
-            child: Copy(
-              'This device is read-only. Missing readings are not zero.',
-              color: muted,
-            ),
-          ),
         blocks(describedControls(c, exclude: {family})),
-        ActionButton(
-          'Refresh State',
-          style: 'secondary',
-          onPressed: c.busy
-              ? null
-              : () {
-                  drafts.clear();
-                  widget.onAction('Refresh State');
-                },
-        ),
-        ActionButton(
-          'Device information',
-          style: 'secondary',
-          onPressed: () => widget.onAction('Device information'),
-        ),
-        ActionButton(
-          'Recent Operations',
-          style: 'secondary',
-          onPressed: () => widget.onAction('Recent Operations'),
-        ),
+        if (c.receipt case final Json receipt)
+          if (receipt['device_id'] == c.selectedDevice &&
+              pendingAction == null &&
+              (['unknown', 'failed', 'partial'].contains(receipt['status']) ||
+                  (receipt['status'] == 'accepted' && c.error != null)))
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Copy(outcomeSummary(receipt['status']), color: muted),
+                TextButton(
+                  onPressed: busy
+                      ? null
+                      : () => widget.onAction('View Details'),
+                  child: const Copy('View Details'),
+                ),
+              ],
+            ),
+        InlineDeviceInformation(controller: c, onAction: widget.onAction),
       ],
     );
   }

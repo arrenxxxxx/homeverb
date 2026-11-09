@@ -1460,6 +1460,7 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get mobileInteractionHistoryFailed => '\u6682\u65f6\u65e0\u6cd5\u52a0\u8f7d\u64cd\u4f5c\u8bb0\u5f55\u3002';
 	@override String get mobileInteractionHistoryHint => '\u9009\u62e9\u4e00\u9879\u64cd\u4f5c\u4ee5\u67e5\u770b\u4fdd\u5b58\u7684\u8bc1\u636e\u3002';
 	@override String mobileInteractionHistoryRow({required Object action, required Object outcome, required Object time}) => '${action} \u00b7 ${outcome} \u00b7 ${time}';
+	@override String get mobileInteractionAutomatic => '\u81ea\u52a8';
 	@override String get feedbackSignInAgain => '\u9700\u8981\u91cd\u65b0\u767b\u5f55';
 	@override String get feedbackGoSignIn => '\u53bb\u767b\u5f55';
 	@override String get feedbackAuthorizationExpired => '\u6388\u6743\u5df2\u5931\u6548\uff0c\u91cd\u65b0\u767b\u5f55\u540e\u53ef\u7ee7\u7eed\u540c\u6b65\u8bbe\u5907\u3002\u5df2\u4fdd\u5b58\u7684\u8bbe\u5907\u4ecd\u4f1a\u4fdd\u7559\u3002';

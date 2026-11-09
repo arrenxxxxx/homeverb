@@ -138,7 +138,7 @@ void main() {
         }
         core.readGate!.complete();
         expect(await refresh, false);
-        expect((c.error as NativeFailure).code, 'CANCELLED');
+        expect(c.error, isNull);
         expect(
           core.calls.where((call) => call['method'] == 'read_state').length,
           before + 1,
@@ -181,7 +181,6 @@ void main() {
           expect(tester.takeException(), isNull);
         }
 
-        Future<void> back() => tap(find.byTooltip('Back'));
         InlineStepper stepper(String component) => tester.widget<InlineStepper>(
           find.byKey(ValueKey('component-stepper:$component')),
         );
@@ -375,13 +374,18 @@ void main() {
             );
             await tap(find.byKey(const ValueKey('parameter:mode:eco')));
             await tap(find.text('Apply'));
-            expect(core.calls.last['command']['component_id'], 'fridge');
-            expect(core.calls.last['command']['arguments'], {
-              'target_temperature': 6,
-              'mode': 'eco',
-            });
-            await back();
-            await tap(find.text('Cancel'));
+            expect(
+              core.calls.lastWhere(
+                (call) => call['method'] == 'execute',
+              )['command']['component_id'],
+              'fridge',
+            );
+            expect(
+              core.calls.lastWhere(
+                (call) => call['method'] == 'execute',
+              )['command']['arguments'],
+              {'target_temperature': 6, 'mode': 'eco'},
+            );
             expect(app.currentState!.id, 'C08');
             expect(find.text('More controls'), findsNothing);
             expect(find.byType(ExpansionTile), findsNothing);

@@ -1426,6 +1426,7 @@
   "mobile.interactionHistoryFailed": "暂时无法加载操作记录。",
   "mobile.interactionHistoryHint": "选择一项操作以查看保存的证据。",
   "mobile.interactionHistoryRow": "{action} · {outcome} · {time}",
+  "mobile.interactionAutomatic": "自动",
   "feedback.signInAgain": "需要重新登录",
   "feedback.goSignIn": "去登录",
   "feedback.authorizationExpired": "授权已失效，重新登录后可继续同步设备。已保存的设备仍会保留。",

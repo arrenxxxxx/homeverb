@@ -1913,6 +1913,7 @@ String? translateSource(
     outcome: args["outcome"] ?? "{outcome}",
     time: args["time"] ?? "{time}",
   ),
+  "Automatic" => t.mobileInteractionAutomatic,
   "Sign in again" => t.feedbackSignInAgain,
   "Go to sign in" => t.feedbackGoSignIn,
   "Your authorization has expired. Sign in again to update devices. Your saved devices are kept." =>
@@ -3764,6 +3765,7 @@ String? sourceForKey(String key) => switch (key) {
   "mobile.interactionHistoryHint" =>
     "Select an operation to inspect its retained evidence.",
   "mobile.interactionHistoryRow" => "{action} \u00b7 {outcome} \u00b7 {time}",
+  "mobile.interactionAutomatic" => "Automatic",
   "feedback.signInAgain" => "Sign in again",
   "feedback.goSignIn" => "Go to sign in",
   "feedback.authorizationExpired" =>

@@ -4,7 +4,7 @@ import 'blocks.dart';
 import 'controller.dart';
 import 'controls.dart';
 import 'appliance_panels.dart';
-import 'native_client.dart';
+import 'client_contract.dart';
 import 'receipts.dart';
 import 'skin.dart';
 import 'device_readings.dart';

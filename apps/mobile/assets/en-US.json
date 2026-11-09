@@ -1426,6 +1426,7 @@
   "mobile.interactionHistoryFailed": "Could not load operations.",
   "mobile.interactionHistoryHint": "Select an operation to inspect its retained evidence.",
   "mobile.interactionHistoryRow": "{action} · {outcome} · {time}",
+  "mobile.interactionAutomatic": "Automatic",
   "feedback.signInAgain": "Sign in again",
   "feedback.goSignIn": "Go to sign in",
   "feedback.authorizationExpired": "Your authorization has expired. Sign in again to update devices. Your saved devices are kept.",

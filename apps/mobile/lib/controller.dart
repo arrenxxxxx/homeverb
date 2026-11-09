@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'client_contract.dart';
 import 'preferences.dart';
@@ -59,6 +60,13 @@ class HomeController extends ChangeNotifier {
   void setAutomaticRefreshView(StateRefreshView view) {
     if (view != _automaticRefreshView) _pauseAutomaticRefresh();
     _automaticRefreshView = view;
+    _scheduleAutomaticRefresh();
+  }
+
+  /// Changing the visible cards invalidates any in-flight automatic cycle.
+  void visibleCardsChanged() {
+    if (_automaticRefreshView != StateRefreshView.cards) return;
+    _pauseAutomaticRefresh();
     _scheduleAutomaticRefresh();
   }
 
@@ -614,10 +622,14 @@ class HomeController extends ChangeNotifier {
   }
 
   Future<void> loadLocal() async {
+    final epoch = _readEpoch, client = core;
     final results = await Future.wait([
-      core.call('list_rooms'),
-      core.call('list_device_cards'),
+      client.call('list_rooms'),
+      client.call('list_device_cards'),
     ]);
+    if (_disposed || !_foreground || epoch != _readEpoch || client != core) {
+      throw NativeFailure('CANCELLED', 'Local device loading was cancelled.');
+    }
     rooms = (results[0] as List).cast<Json>();
     cards = (results[1] as List).cast<Json>();
     await _loadCardPower();
@@ -634,7 +646,12 @@ class HomeController extends ChangeNotifier {
     }
     await loadLocal();
     if (accountClient != null && supports('list_accounts')) {
-      accounts = (await core.call('list_accounts') as List).cast<Json>();
+      final epoch = _readEpoch, client = core;
+      final result = await client.call('list_accounts') as List;
+      if (_disposed || !_foreground || epoch != _readEpoch || client != core) {
+        throw NativeFailure('CANCELLED', 'Account loading was cancelled.');
+      }
+      accounts = result.cast<Json>();
     }
   });
   Future<bool> discover() => perform(() async {
@@ -710,6 +727,8 @@ class HomeController extends ChangeNotifier {
         (description?['device']?['components'] as List?) ??
         (currentCard?['device']?['components'] as List?) ??
         [];
+    // Clear prior attempt errors before rebuilding this device's reading state.
+    _componentReadErrors.removeWhere((key, _) => key.$1 == id);
     component = parts.isEmpty ? 'main' : parts.first['id'] as String;
     snapshot = _componentSnapshots[(id, component)];
     deviceLayoutLoading = description == null;
@@ -860,62 +879,92 @@ class HomeController extends ChangeNotifier {
     if (componentId == components.first['id']) snapshots[device] = next;
   }
 
-  Future<bool> refresh() => perform(() => read());
-  Future<bool> refreshComponents() => perform(() async {
-    Object? failure;
-    for (final part in components) {
-      final id = part['id'] as String;
-      try {
-        await readComponent(id);
-        notifyListeners();
-      } catch (error) {
-        if (error is NativeFailure && error.code == 'CANCELLED') rethrow;
-        _componentReadErrors[(selectedDevice!, id)] = error;
-        failure ??= error;
-      }
+  Future<bool> refresh() {
+    final device = selectedDevice, epoch = _readEpoch, client = core;
+    return perform(
+      () => read(),
+      publishError: () =>
+          !_disposed &&
+          _foreground &&
+          epoch == _readEpoch &&
+          client == core &&
+          selectedDevice == device,
+    );
+  }
+
+  Future<bool> refreshComponents() {
+    final device = selectedDevice, epoch = _readEpoch, client = core;
+    return perform(
+      () async {
+        if (device == null)
+          throw NativeFailure('STATE_UNAVAILABLE', 'Select a device.');
+        Object? failure;
+        for (final part in components.toList()) {
+          final id = part['id'] as String;
+          try {
+            await readComponent(id);
+            notifyListeners();
+          } catch (error) {
+            if (error is NativeFailure && error.code == 'CANCELLED') rethrow;
+            if (!_foreground ||
+                epoch != _readEpoch ||
+                client != core ||
+                selectedDevice != device) {
+              throw NativeFailure('CANCELLED', 'Device refresh was cancelled.');
+            }
+            _componentReadErrors[(device, id)] = error;
+            failure ??= error;
+          }
+        }
+        if (failure != null) throw failure;
+      },
+      publishError: () =>
+          !_disposed &&
+          _foreground &&
+          epoch == _readEpoch &&
+          client == core &&
+          selectedDevice == device,
+    );
+  }
+
+  Future<bool> refreshReceipt() {
+    final original = receipt, epoch = _readEpoch, client = core;
+    final device = original?['device_id'] as String?;
+    bool current() =>
+        !_disposed &&
+        _foreground &&
+        epoch == _readEpoch &&
+        client == core &&
+        identical(receipt, original) &&
+        device != null &&
+        cards.any((card) => card['device']['id'] == device);
+    void requireCurrent() {
+      if (!current())
+        throw NativeFailure('CANCELLED', 'Receipt reading was cancelled.');
     }
-    if (failure != null) throw failure;
-  });
-  Future<bool> refreshReceipt() => perform(() async {
-    final device = receipt?['device_id'] as String?;
-    if (device == null) {
-      throw NativeFailure(
-        'STATE_UNAVAILABLE',
-        'Select a device receipt to refresh.',
-      );
-    }
-    final descriptor =
-        await core.call('describe_device', {'device': device}) as Json;
-    for (final part in descriptor['device']['components'] as List) {
-      final result =
-          await core.call('read_state', {
-                'device': device,
-                'component': part['id'],
-                'connection': preferences.route(device),
-                'cached': false,
-              })
-              as Json;
-      _componentSnapshots[(device, part['id'] as String)] = result;
-      _componentReadErrors.remove((device, part['id'] as String));
-      if (part['id'] == descriptor['device']['components'][0]['id']) {
-        snapshots[device] = result;
-      }
-      if (selectedDevice == device && component == part['id'])
-        snapshot = result;
-    }
-  });
-  Future<bool> refreshCards() => perform(() async {
-    final epoch = _readEpoch, client = core;
-    Object? failure;
-    for (final c in visibleCards.toList()) {
-      final d = c['device'] as Json;
-      if (d['support_status'] == 'unsupported') continue;
-      final device = d['id'] as String;
-      final parts = d['components'] as List? ?? [];
-      for (final part in parts) {
-        if ((part['capabilities'] as List? ?? []).isEmpty) continue;
-        final componentId = part['id'] as String;
-        try {
+
+    return perform(
+      () async {
+        if (device == null) {
+          throw NativeFailure(
+            'STATE_UNAVAILABLE',
+            'Select a device receipt to refresh.',
+          );
+        }
+        requireCurrent();
+        final descriptor =
+            await client.call('describe_device', {'device': device}) as Json;
+        requireCurrent();
+        if (descriptor['device']?['id'] != device) {
+          throw NativeFailure(
+            'STATE_UNAVAILABLE',
+            'Device metadata did not match.',
+          );
+        }
+        final parts = descriptor['device']['components'] as List;
+        for (final part in parts) {
+          requireCurrent();
+          final componentId = part['id'] as String;
           final result =
               await client.call('read_state', {
                     'device': device,
@@ -924,12 +973,7 @@ class HomeController extends ChangeNotifier {
                     'cached': false,
                   })
                   as Json;
-          if (epoch != _readEpoch ||
-              !_foreground ||
-              client != core ||
-              !cards.any((card) => card['device']['id'] == device)) {
-            throw NativeFailure('CANCELLED', 'Device refresh was cancelled.');
-          }
+          requireCurrent();
           if (result['device_id'] != device ||
               result['component_id'] != componentId) {
             throw NativeFailure(
@@ -943,17 +987,89 @@ class HomeController extends ChangeNotifier {
           if (selectedDevice == device && component == componentId)
             snapshot = result;
           notifyListeners();
-        } catch (error) {
-          if (error is NativeFailure && error.code == 'CANCELLED') rethrow;
-          if (epoch != _readEpoch || !_foreground || client != core) {
-            throw NativeFailure('CANCELLED', 'Device refresh was cancelled.');
-          }
-          failure ??= error;
         }
+      },
+      publishError: () =>
+          !_disposed &&
+          _foreground &&
+          epoch == _readEpoch &&
+          client == core &&
+          identical(receipt, original) &&
+          (device == null ||
+              cards.any((card) => card['device']['id'] == device)),
+    );
+  }
+
+  Future<bool> refreshCards() {
+    final epoch = _readEpoch, client = core;
+    void requireCurrent() {
+      if (_disposed || !_foreground || epoch != _readEpoch || client != core) {
+        throw NativeFailure('CANCELLED', 'Device refresh was cancelled.');
       }
     }
-    if (failure != null) throw failure;
-  });
+
+    return perform(
+      () async {
+        Object? failure;
+        for (final c in visibleCards.toList()) {
+          final d = c['device'] as Json;
+          if (d['support_status'] == 'unsupported') continue;
+          final device = d['id'] as String;
+          final parts = d['components'] as List? ?? [];
+          for (final part in parts) {
+            if ((part['capabilities'] as List? ?? []).isEmpty) continue;
+            final componentId = part['id'] as String;
+            try {
+              requireCurrent();
+              final result =
+                  await client.call('read_state', {
+                        'device': device,
+                        'component': componentId,
+                        'connection': preferences.route(device),
+                        'cached': false,
+                      })
+                      as Json;
+              if (epoch != _readEpoch ||
+                  !_foreground ||
+                  client != core ||
+                  !cards.any((card) => card['device']['id'] == device)) {
+                throw NativeFailure(
+                  'CANCELLED',
+                  'Device refresh was cancelled.',
+                );
+              }
+              if (result['device_id'] != device ||
+                  result['component_id'] != componentId) {
+                throw NativeFailure(
+                  'STATE_UNAVAILABLE',
+                  'Device reading did not match.',
+                );
+              }
+              _componentSnapshots[(device, componentId)] = result;
+              _componentReadErrors.remove((device, componentId));
+              if (componentId == parts.first['id']) snapshots[device] = result;
+              if (selectedDevice == device && component == componentId)
+                snapshot = result;
+              notifyListeners();
+            } catch (error) {
+              if (error is NativeFailure && error.code == 'CANCELLED') rethrow;
+              if (epoch != _readEpoch || !_foreground || client != core) {
+                throw NativeFailure(
+                  'CANCELLED',
+                  'Device refresh was cancelled.',
+                );
+              }
+              failure ??= error;
+            }
+          }
+        }
+        if (failure != null) throw failure;
+      },
+      publishError: () =>
+          !_disposed && _foreground && epoch == _readEpoch && client == core,
+    );
+  }
+
   Future<bool> saveRoom(String name, {String? id}) => perform(() async {
     await core.call(id == null ? 'create_room' : 'rename_room', {
       'name': name.trim(),
@@ -1053,107 +1169,206 @@ class HomeController extends ChangeNotifier {
     String action,
     Json arguments,
     String route,
-  ) => perform(() async {
-    discardApproval();
-    final epoch = _readEpoch;
-    if (!supportsTrustedApproval ||
-        capability(capabilityId)?['actions']?[action]?['risk'] != 'elevated') {
-      throw NativeFailure(
-        'APPROVAL_UNAVAILABLE',
-        'This action has no trusted confirmation path.',
-      );
-    }
-    if (!['lan', 'cloud'].contains(route)) {
-      throw NativeFailure(
-        'INVALID_ARGUMENT',
-        'Choose one explicit connection.',
-      );
-    }
-    final preview = await approvalClient!.prepareApproval({
-      'schema_version': '1.0',
-      'request_id': uniqueId(),
-      'device_id': selectedDevice,
-      'component_id': component,
-      'capability': capabilityId,
-      'action': action,
-      'arguments': arguments,
-      'connection': route,
-      'timeout_ms': 10000,
-      'wait_for': 'verified',
-    });
-    if (epoch != _readEpoch) {
-      await approvalClient!.discardApproval(preview);
-      throw NativeFailure('CANCELLED', 'The confirmation was cancelled.');
-    }
-    approvalNeedsReceipt = false;
-    approvalPreview = preview;
-    approvalRequestId = preview.command['request_id'] as String;
-    _approvalTimer = Timer(preview.remaining, () {
-      discardApproval();
-      error = NativeFailure(
-        'APPROVAL_EXPIRED',
-        'Review the command again before confirming.',
-      );
+  ) {
+    if (approvalNeedsReceipt) {
+      error = NativeFailure('STATE_UNAVAILABLE', 'Look up the interrupted confirmation first.');
       notifyListeners();
-    });
-  });
-
-  Future<bool> confirmApproval() => perform(() async {
-    final preview = approvalPreview;
-    if (preview == null || preview.remaining == Duration.zero) {
+      return Future.value(false);
+    }
+    final epoch = _readEpoch,
+        client = core,
+        device = selectedDevice,
+        part = component;
+    bool current() =>
+        !_disposed &&
+        _foreground &&
+        epoch == _readEpoch &&
+        client == core &&
+        selectedDevice == device &&
+        component == part;
+    return perform(() async {
       discardApproval();
-      throw NativeFailure('APPROVAL_INVALID', 'Review a new confirmation.');
-    }
-    // Consume UI consent before awaiting. A failed/uncertain call is never replayed.
-    approvalPreview = null;
-    _approvalTimer?.cancel();
-    _approvalTimer = null;
-    receipt = null;
-    try {
-      receipt = await approvalClient!.executeApproved(preview);
+      final trusted = approvalClient;
+      if (!supportsTrustedApproval ||
+          trusted == null ||
+          capability(capabilityId)?['actions']?[action]?['risk'] !=
+              'elevated') {
+        throw NativeFailure(
+          'APPROVAL_UNAVAILABLE',
+          'This action has no trusted confirmation path.',
+        );
+      }
+      if (!['lan', 'cloud'].contains(route)) {
+        throw NativeFailure(
+          'INVALID_ARGUMENT',
+          'Choose one explicit connection.',
+        );
+      }
+      final frozenArguments = jsonDecode(jsonEncode(arguments)) as Json;
+      final preview = await trusted.prepareApproval({
+        'schema_version': '1.0',
+        'request_id': uniqueId(),
+        'device_id': device,
+        'component_id': part,
+        'capability': capabilityId,
+        'action': action,
+        'arguments': frozenArguments,
+        'connection': route,
+        'timeout_ms': 10000,
+        'wait_for': 'verified',
+      });
+      if (!current()) {
+        await trusted.discardApproval(preview);
+        throw NativeFailure('CANCELLED', 'The confirmation was cancelled.');
+      }
       approvalNeedsReceipt = false;
-    } catch (_) {
+      approvalPreview = preview;
+      approvalRequestId = preview.command['request_id'] as String;
+      _approvalTimer = Timer(preview.remaining, () {
+        discardApproval();
+        error = NativeFailure(
+          'APPROVAL_EXPIRED',
+          'Review the command again before confirming.',
+        );
+        notifyListeners();
+      });
+    }, publishError: current);
+  }
+
+  Future<bool> confirmApproval() {
+    final epoch = _readEpoch,
+        client = core,
+        device = selectedDevice,
+        part = component;
+    final request = approvalRequestId;
+    bool current() =>
+        !_disposed &&
+        _foreground &&
+        epoch == _readEpoch &&
+        client == core &&
+        selectedDevice == device &&
+        component == part &&
+        approvalRequestId == request;
+    return perform(() async {
+      final preview = approvalPreview;
+      final trusted = approvalClient;
+      if (preview == null ||
+          preview.remaining == Duration.zero ||
+          trusted == null ||
+          preview.command['request_id'] != request ||
+          preview.command['device_id'] != device ||
+          preview.command['component_id'] != part) {
+        discardApproval();
+        throw NativeFailure('APPROVAL_INVALID', 'Review a new confirmation.');
+      }
+      // Consume UI consent before awaiting. A failed/uncertain call is never replayed.
+      approvalPreview = null;
+      _approvalTimer?.cancel();
+      _approvalTimer = null;
+      receipt = null;
       approvalNeedsReceipt = true;
-      rethrow;
-    }
-  });
+      try {
+        final result = await trusted.executeApproved(preview);
+        if (!current())
+          throw NativeFailure(
+            'CANCELLED',
+            'Confirmation result was interrupted.',
+          );
+        if (result['request_id'] != request || result['device_id'] != device) {
+          throw NativeFailure(
+            'STATE_UNAVAILABLE',
+            'Confirmation result did not match.',
+          );
+        }
+        receipt = result;
+        approvalNeedsReceipt = false;
+      } catch (_) {
+        rethrow;
+      }
+    }, publishError: current);
+  }
 
   Future<bool> execute(
     String capabilityId,
     String action,
     Json arguments, {
     String? componentId,
-  }) => perform(() async {
-    final target = componentId ?? component;
-    final descriptor =
-        componentCapability(target, capabilityId)?['actions']?[action] as Json?;
-    if (descriptor == null)
-      throw NativeFailure(
-        'CAPABILITY_UNSUPPORTED',
-        'This action is not available.',
-      );
-    if (descriptor['risk'] != 'low') {
-      throw NativeFailure(
-        'APPROVAL_UNAVAILABLE',
-        'Trusted approval is not available in this host.',
-      );
-    }
-    final command = {
-      'schema_version': '1.0',
-      'request_id': uniqueId(),
-      'device_id': selectedDevice,
-      'component_id': target,
-      'capability': capabilityId,
-      'action': action,
-      'arguments': arguments,
-      'connection': preferences.route(selectedDevice),
-      'timeout_ms': 10000,
-      'wait_for': 'verified',
-    };
-    await core.call('plan', {'command': command});
-    receipt = await core.call('execute', {'command': command}) as Json;
-    // Observations only change after an explicit read, never from a requested value.
-  });
+  }) {
+    int? operationEpoch;
+    CoreClient? operationClient;
+    String? operationDevice;
+    String? operationPart;
+    bool current() =>
+        operationEpoch != null &&
+        !_disposed &&
+        _foreground &&
+        operationEpoch == _readEpoch &&
+        operationClient == core &&
+        operationDevice == selectedDevice &&
+        operationPart == component;
+    return perform(() async {
+      final target = componentId ?? component;
+      operationEpoch = _readEpoch;
+      operationClient = core;
+      operationDevice = selectedDevice;
+      operationPart = component;
+      final client = operationClient!;
+      final descriptor =
+          componentCapability(target, capabilityId)?['actions']?[action]
+              as Json?;
+      if (descriptor == null)
+        throw NativeFailure(
+          'CAPABILITY_UNSUPPORTED',
+          'This action is not available.',
+        );
+      if (descriptor['risk'] != 'low') {
+        throw NativeFailure(
+          'APPROVAL_UNAVAILABLE',
+          'Trusted approval is not available in this host.',
+        );
+      }
+      final command = {
+        'schema_version': '1.0',
+        'request_id': uniqueId(),
+        'device_id': operationDevice,
+        'component_id': target,
+        'capability': capabilityId,
+        'action': action,
+        'arguments': jsonDecode(jsonEncode(arguments)) as Json,
+        'connection': preferences.route(operationDevice),
+        'timeout_ms': 10000,
+        'wait_for': 'verified',
+      };
+      final plannedCommand = jsonEncode(command);
+      await client.call('plan', {'command': command});
+      if (!current() ||
+          jsonEncode(command) != plannedCommand ||
+          preferences.route(operationDevice) != command['connection'] ||
+          descriptor['risk'] != 'low' ||
+          !identical(
+            componentCapability(target, capabilityId)?['actions']?[action],
+            descriptor,
+          )) {
+        throw NativeFailure(
+          'CANCELLED',
+          'Command was cancelled before sending.',
+        );
+      }
+      final result = await client.call('execute', {'command': command}) as Json;
+      if (!current())
+        throw NativeFailure('CANCELLED', 'Command result was interrupted.');
+      if (result['request_id'] != command['request_id'] ||
+          result['device_id'] != operationDevice) {
+        throw NativeFailure(
+          'STATE_UNAVAILABLE',
+          'Command result did not match.',
+        );
+      }
+      receipt = result;
+      // Observations only change after an explicit read, never from a requested value.
+    }, publishError: current);
+  }
+
   List<Json> accounts = [];
   Json? accountDetails, accountReport, accountRemoval, accountInventory;
   String? selectedAccount;
@@ -1193,19 +1408,36 @@ class HomeController extends ChangeNotifier {
       .toList();
 
   Future<void> reloadAccountViews() async {
+    final epoch = _readEpoch, client = core;
+    void requireCurrent() {
+      if (_disposed || !_foreground || epoch != _readEpoch || client != core) {
+        throw NativeFailure('CANCELLED', 'Account loading was cancelled.');
+      }
+    }
+
     accountInventory = null;
     accountConflicts = null;
     routeInspection = null;
-    accounts = (await core.call('list_accounts') as List).cast<Json>();
+    final loaded = await client.call('list_accounts') as List;
+    requireCurrent();
+    accounts = loaded.cast<Json>();
     await preferences.retainAccountLoginLabels(
       accounts.map((account) => account['id'] as String).toSet(),
     );
+    requireCurrent();
     await loadLocal();
+    requireCurrent();
     if (selectedAccount != null) {
       if (accounts.any((a) => a['id'] == selectedAccount)) {
-        accountDetails =
-            await core.call('get_account', {'account_id': selectedAccount})
-                as Json;
+        final accountId = selectedAccount;
+        final details =
+            await client.call('get_account', {'account_id': accountId}) as Json;
+        requireCurrent();
+        if (selectedAccount != accountId ||
+            details['account']?['id'] != accountId) {
+          throw NativeFailure('CANCELLED', 'Account selection changed.');
+        }
+        accountDetails = details;
       } else {
         selectedAccount = null;
         accountDetails = null;
@@ -1633,53 +1865,113 @@ class HomeController extends ChangeNotifier {
     return success;
   }
 
-  Future<bool> executeSelectedPower(bool on) => perform(() async {
-    if (selection.isEmpty || selection.length > 32) {
-      throw NativeFailure('INVALID_ARGUMENT', 'Select 1–32 distinct devices.');
+  Future<bool> executeSelectedPower(bool on) {
+    int? operationEpoch;
+    CoreClient? operationClient;
+    Set<String>? requested;
+    bool current() =>
+        operationEpoch != null &&
+        !_disposed &&
+        _foreground &&
+        operationEpoch == _readEpoch &&
+        operationClient == core &&
+        requested != null &&
+        setEquals(selection, requested);
+    void requireCurrent() {
+      if (!current())
+        throw NativeFailure('CANCELLED', 'Batch was cancelled before sending.');
     }
-    final commands = <Json>[];
-    for (final device in selection) {
-      final descriptor =
-          await core.call('describe_device', {'device': device}) as Json;
-      final candidates = <Json>[];
-      for (final part in descriptor['device']['components'] as List) {
-        for (final capability in descriptor['capabilities'] as List) {
-          if (capability['id'] == 'power' &&
-              (capability['component_id'] == null ||
-                  capability['component_id'] == part['id']) &&
-              capability['actions']?['set']?['risk'] == 'low' &&
-              capability['actions']?['set']?['parameters']?['properties']?['state']?['type'] ==
-                  'boolean') {
-            candidates.add({'component': part['id']});
-          }
-        }
-      }
-      if (candidates.length != 1) {
+
+    return perform(() async {
+      operationEpoch = _readEpoch;
+      operationClient = core;
+      final client = operationClient!;
+      requested = Set.of(selection);
+      if (requested!.isEmpty || requested!.length > 32) {
         throw NativeFailure(
-          'CAPABILITY_UNSUPPORTED',
-          'Selection requires one unambiguous low-risk power control per device.',
+          'INVALID_ARGUMENT',
+          'Select 1–32 distinct devices.',
         );
       }
-      commands.add({
-        'schema_version': '1.0',
-        'request_id': uniqueId(),
-        'device_id': device,
-        'component_id': candidates.single['component'],
-        'capability': 'power',
-        'action': 'set',
-        'arguments': {'state': on},
-        'connection': preferences.route(device),
-        'timeout_ms': 10000,
-        'wait_for': 'verified',
-      });
-    }
-    final batch = {'schema_version': '1.0', 'commands': commands};
-    await core.call('plan_batch', {'batch': batch});
-    batchResult = await core.call('execute_batch', {'batch': batch}) as Json;
-  });
-  Future<bool> loadReceipt(String id) => perform(() async {
-    receipt = await core.call('get_execution', {'request_id': id}) as Json;
-  });
+      final commands = <Json>[];
+      for (final device in requested!) {
+        requireCurrent();
+        final descriptor =
+            await client.call('describe_device', {'device': device}) as Json;
+        requireCurrent();
+        if (descriptor['device']?['id'] != device) {
+          throw NativeFailure(
+            'STATE_UNAVAILABLE',
+            'Device metadata did not match.',
+          );
+        }
+        final candidates = <Json>[];
+        for (final part in descriptor['device']['components'] as List) {
+          for (final capability in descriptor['capabilities'] as List) {
+            if (capability['id'] == 'power' &&
+                (capability['component_id'] == null ||
+                    capability['component_id'] == part['id']) &&
+                capability['actions']?['set']?['risk'] == 'low' &&
+                capability['actions']?['set']?['parameters']?['properties']?['state']?['type'] ==
+                    'boolean') {
+              candidates.add({'component': part['id']});
+            }
+          }
+        }
+        if (candidates.length != 1) {
+          throw NativeFailure(
+            'CAPABILITY_UNSUPPORTED',
+            'Selection requires one unambiguous low-risk power control per device.',
+          );
+        }
+        commands.add({
+          'schema_version': '1.0',
+          'request_id': uniqueId(),
+          'device_id': device,
+          'component_id': candidates.single['component'],
+          'capability': 'power',
+          'action': 'set',
+          'arguments': {'state': on},
+          'connection': preferences.route(device),
+          'timeout_ms': 10000,
+          'wait_for': 'verified',
+        });
+      }
+      final batch = {'schema_version': '1.0', 'commands': commands};
+      final plannedBatch = jsonEncode(batch);
+      await client.call('plan_batch', {'batch': batch});
+      requireCurrent();
+      if (jsonEncode(batch) != plannedBatch ||
+          commands.any(
+            (command) =>
+                preferences.route(command['device_id'] as String) !=
+                command['connection'],
+          )) {
+        throw NativeFailure('CANCELLED', 'Batch changed before sending.');
+      }
+      final result =
+          await client.call('execute_batch', {'batch': batch}) as Json;
+      if (!current())
+        throw NativeFailure('CANCELLED', 'Batch result was interrupted.');
+      batchResult = result;
+    }, publishError: current);
+  }
+
+  Future<bool> loadReceipt(String id) {
+    final epoch = _readEpoch, client = core;
+    bool current() =>
+        !_disposed && _foreground && epoch == _readEpoch && client == core;
+    return perform(() async {
+      final result =
+          await client.call('get_execution', {'request_id': id}) as Json;
+      if (!current())
+        throw NativeFailure('CANCELLED', 'Receipt loading was cancelled.');
+      if (result['request_id'] != id)
+        throw NativeFailure('STATE_UNAVAILABLE', 'Receipt did not match.');
+      receipt = result;
+    }, publishError: current);
+  }
+
   Future<bool> loadDiagnostics() async {
     final epoch = _readEpoch, client = core;
     Object? failure;

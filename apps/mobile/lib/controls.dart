@@ -322,9 +322,19 @@ class _CapabilityActionFormState extends State<CapabilityActionForm> {
         ),
         const SizedBox(height: 16),
       ],
-      ActionButton(
-        descriptor['risk'] == 'elevated' ? 'Review Command' : 'Apply',
-        onPressed: saving ? null : submit,
+      Row(
+        children: [
+          Expanded(
+            child: ActionButton(
+              descriptor['risk'] == 'elevated' ? 'Review Command' : 'Apply',
+              onPressed: saving ? null : submit,
+            ),
+          ),
+          if (saving) ...[
+            const SizedBox(width: 12),
+            const OperationPulse(size: 20),
+          ],
+        ],
       ),
       ActionButton('Cancel', style: 'secondary', onPressed: widget.onCancel),
     ],

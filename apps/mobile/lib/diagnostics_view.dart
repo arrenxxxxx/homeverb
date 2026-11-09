@@ -1,5 +1,5 @@
 import 'localization.dart';
-import 'native_client.dart';
+import 'client_contract.dart';
 import 'receipts.dart';
 
 const diagnosticReviewNote =

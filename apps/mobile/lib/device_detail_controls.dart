@@ -5,7 +5,8 @@ import 'controls.dart';
 import 'device_presentation.dart';
 import 'device_readings.dart';
 import 'localization.dart';
-import 'native_client.dart';
+import 'client_contract.dart';
+import 'receipts.dart';
 import 'skin.dart';
 import 'appliance_panels.dart';
 
@@ -55,10 +56,12 @@ class DeviceDetailControls extends StatelessWidget {
   const DeviceDetailControls({
     required this.controller,
     required this.onAction,
+    this.outcomeComponent,
     super.key,
   });
   final HomeController controller;
   final ActionHandler onAction;
+  final String? outcomeComponent;
 
   @override
   Widget build(BuildContext context) {
@@ -68,6 +71,12 @@ class DeviceDetailControls extends StatelessWidget {
       return DishwasherPanel(controller: c, onAction: onAction);
     }
     final groups = <Widget>[];
+    final receipt = c.receipt;
+    final showReceipt =
+        receipt != null &&
+        receipt['device_id'] == c.selectedDevice &&
+        (['unknown', 'failed', 'partial'].contains(receipt['status']) ||
+            (receipt['status'] == 'accepted' && c.error != null));
     var anyControl = false;
     for (final part in c.components) {
       final component = part['id'] as String;
@@ -165,6 +174,20 @@ class DeviceDetailControls extends StatelessWidget {
             },
           ),
         ],
+        if (showReceipt && component == (outcomeComponent ?? c.component))
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Copy(outcomeSummary(receipt['status']), color: muted),
+                TextButton(
+                  onPressed: c.busy ? null : () => onAction('View Details'),
+                  child: const Copy('View Details'),
+                ),
+              ],
+            ),
+          ),
         for (final reason in unavailableReasons)
           Padding(
             padding: const EdgeInsets.only(bottom: 12),

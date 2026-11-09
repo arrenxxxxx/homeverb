@@ -2,7 +2,7 @@ import 'localization.dart';
 import 'receipts.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'native_client.dart';
+import 'client_contract.dart';
 import 'skin.dart';
 
 /// Only the immutable native preview supplies the confirmation scope.

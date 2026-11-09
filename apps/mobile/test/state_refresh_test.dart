@@ -266,7 +266,7 @@ void main() {
       core.liveGate!.complete();
       await tester.pump();
       expect(await command, false);
-      expect((c.error as NativeFailure).code, 'CANCELLED');
+      expect(c.error, isNull);
       expect(
         core.calls.any((call) => ['plan', 'execute'].contains(call['method'])),
         false,

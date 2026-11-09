@@ -431,12 +431,14 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     }
     if (label == 'Clear Search') {
       c.search = savedSearch = '';
+      c.visibleCardsChanged();
       fields['Search devices']?.clear();
       changed();
       return;
     }
     if (label == 'View all devices') {
       c.filter = 'All';
+      c.visibleCardsChanged();
       changed();
       return;
     }
@@ -832,6 +834,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       c.filter = name == 'All' || name == 'Unassigned'
           ? name
           : c.rooms.firstWhere((r) => r['name'] == name)['id'];
+      c.visibleCardsChanged();
       changed();
       return;
     }
@@ -2352,7 +2355,15 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     if (id == 'C01' &&
         c.components.length > 1 &&
         c.currentCard?['device']['support_status'] != 'unsupported') {
-      return DeviceDetailControls(controller: c, onAction: action);
+      return DeviceDetailControls(
+        controller: c,
+        onAction: action,
+        outcomeComponent:
+            outcomeDevice == c.selectedDevice &&
+                outcomeRequest == c.receipt?['request_id']
+            ? outcomeComponent
+            : null,
+      );
     }
     if (id == 'C01' &&
         c.capability('climate') != null &&
@@ -2366,7 +2377,6 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       );
     }
     if (id == 'C01' && applianceFamily(c) != null) {
-      final epoch = navigation;
       return ApplianceControls(
         key: ValueKey(
           '${c.selectedDevice}:${c.component}:${applianceFamily(c)}',
@@ -2374,17 +2384,21 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         controller: c,
         family: applianceFamily(c)!,
         onAction: action,
-        onExecute: (capability, action, arguments) async {
-          final success = await c.execute(capability, action, arguments);
-          if (success && mounted && epoch == navigation) await go('S06');
-          return success;
-        },
+        onExecute: executeOnDevice,
       );
     }
     if (id == 'C01' &&
         c.capability('climate') == null &&
         c.currentCard?['device']['support_status'] != 'unsupported') {
-      return DeviceDetailControls(controller: c, onAction: action);
+      return DeviceDetailControls(
+        controller: c,
+        onAction: action,
+        outcomeComponent:
+            outcomeDevice == c.selectedDevice &&
+                outcomeRequest == c.receipt?['request_id']
+            ? outcomeComponent
+            : null,
+      );
     }
     if (id == 'C10' && actionCapability != null && actionName != null) {
       final epoch = navigation;
@@ -2450,12 +2464,28 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         error: () => c.error,
         onCancel: () => action('Cancel'),
         onSubmit: (arguments) async {
-          final success = await c.execute(
-            actionCapability!['id'],
-            actionName!,
-            arguments,
-          );
-          if (success && mounted && epoch == navigation) await go('S06');
+          final device = c.selectedDevice, part = c.component;
+          final capability = actionCapability!['id'] as String;
+          final command = actionName!;
+          final parent = history.isNotEmpty && history.last == 'C08'
+              ? 'C08'
+              : 'C01';
+          final success = await executeOnDevice(capability, command, arguments);
+          if (success &&
+              mounted &&
+              epoch == navigation &&
+              c.isForeground &&
+              c.selectedDevice == device &&
+              c.component == part) {
+            outcomeComponent = part;
+            outcomeDevice = device;
+            outcomeRequest = c.receipt?['request_id'] as String?;
+            if (history.isNotEmpty && history.last == parent) {
+              await go(history.removeLast(), back: true);
+            } else {
+              await go(parent);
+            }
+          }
           return success;
         },
       );
@@ -2471,6 +2501,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             values: values,
             onChanged: () {
               c.search = input('Search devices');
+              c.visibleCardsChanged();
               changed();
             },
           ),
@@ -2838,6 +2869,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                       quickPowerDevice == null &&
                       !accountRefreshing &&
                       !homeRefreshing &&
+                      id != 'C10' &&
                       id != 'S05' &&
                       id != 'S07' &&
                       !showingSignIn,

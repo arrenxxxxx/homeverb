@@ -242,6 +242,16 @@ void main({bool deviceRun = false}) {
         expect(state.approvalPreview, isNull);
         expect(await state.confirmApproval(), false);
         expect(core.sends, 1);
+        expect(
+          await state.prepareApproval(cycle, 'start', {
+            'program': 'normal',
+          }, 'cloud'),
+          false,
+        );
+        expect(state.approvalRequestId, request);
+        expect(state.approvalNeedsReceipt, true);
+        expect(state.approvalPreview, isNull);
+        expect(core.sends, 1);
         expect(await state.loadReceipt(request), true);
         expect(state.receipt!['status'], 'accepted');
         expect(core.sends, 1);
@@ -393,11 +403,22 @@ void main({bool deviceRun = false}) {
         expect(find.text('Look Up Receipt'), findsOneWidget);
         expect(find.text('Confirm Command'), findsNothing);
         expect(bridge.sends, 2);
+        expect(
+          await state.prepareApproval(cycle, 'start', {
+            'program': 'normal',
+          }, 'cloud'),
+          false,
+        );
+        expect(state.approvalRequestId, lostRequest);
+        expect(state.approvalNeedsReceipt, true);
+        expect(state.approvalPreview, isNull);
+        expect(bridge.sends, 2);
         await capture('lost-reply');
         await tap('Look Up Receipt');
         expect(app.currentState!.id, 'S06');
         expect(state.receipt!['request_id'], lostRequest);
         expect(state.receipt!['status'], 'accepted');
+        expect(state.approvalNeedsReceipt, false);
         expect(bridge.sends, 2);
         await tester.runAsync(
           () async => expect(

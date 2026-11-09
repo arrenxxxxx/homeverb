@@ -4,7 +4,7 @@ import 'blocks.dart';
 import 'controller.dart';
 import 'controls.dart';
 import 'localization.dart';
-import 'native_client.dart';
+import 'client_contract.dart';
 import 'receipts.dart';
 import 'skin.dart';
 import 'device_readings.dart';
@@ -43,9 +43,11 @@ class InlineDeviceInformation extends StatelessWidget {
             ['Model', LiteralText(device['model'] ?? '—'), null],
             [
               'Connection',
-              controlLabel(
-                controller.preferences.route(controller.selectedDevice),
-              ),
+              switch (controller.preferences.route(controller.selectedDevice)) {
+                'lan' => 'Local network',
+                'cloud' => 'Provider cloud',
+                _ => 'Automatic',
+              },
               null,
             ],
           ],

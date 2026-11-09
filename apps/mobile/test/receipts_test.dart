@@ -46,6 +46,7 @@ class ReceiptFixture implements CoreClient {
       case 'describe_device':
         return {
           'device': {
+            'id': fields['device'],
             'components': [
               {'id': 'main'},
             ],

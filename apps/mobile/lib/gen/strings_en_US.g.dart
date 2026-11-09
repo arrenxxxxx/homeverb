@@ -4317,6 +4317,9 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	/// en-US: '{action} \u00b7 {outcome} \u00b7 {time}'
 	String mobileInteractionHistoryRow({required Object action, required Object outcome, required Object time}) => '${action} \u00b7 ${outcome} \u00b7 ${time}';
 
+	/// en-US: 'Automatic'
+	String get mobileInteractionAutomatic => 'Automatic';
+
 	/// en-US: 'Sign in again'
 	String get feedbackSignInAgain => 'Sign in again';
 

@@ -5,6 +5,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:homeverb_mobile/appliance_controls.dart';
+import 'package:homeverb_mobile/appliance_panels.dart'
+    show InlineDeviceInformation;
 import 'package:homeverb_mobile/controller.dart';
 import 'package:homeverb_mobile/main.dart';
 import 'package:homeverb_mobile/preferences.dart';
@@ -176,14 +178,14 @@ void main() {
             expect(c.observed('light.brightness'), 35);
             final retained = tester.widget<Slider>(slider).value;
             expect(retained % 5, 0);
-            expect(retained, isNot(35));
-            expect(find.textContaining('Observed: 35%'), findsOneWidget);
+            expect(retained, 35);
+            expect(find.textContaining('Observed: 35%'), findsNothing);
             await capture('denied');
             core.denyPlan = false;
             await tester.ensureVisible(slider);
             await tester.drag(slider, const Offset(-15, 0));
             await tester.pumpAndSettle();
-            expect(app.currentState!.id, 'S06');
+            expect(app.currentState!.id, 'C01');
             final command = core.calls.lastWhere(
               (call) => call['method'] == 'execute',
             )['command'];
@@ -192,31 +194,14 @@ void main() {
             expect(command['arguments']['brightness'] % 5, 0);
             expect(c.observed('light.brightness'), 35);
             await returnToDevice();
-            final temperature = find.descendant(
-              of: find.byKey(
+            expect(
+              find.byKey(
                 const ValueKey('appliance-slider:light:color_temperature'),
               ),
-              matching: find.byType(Slider),
+              findsNothing,
             );
-            expect(tester.widget<Slider>(temperature).onChanged, isNull);
-            final semantics = tester.ensureSemantics();
-            await tester.ensureVisible(temperature);
-            await tester.pumpAndSettle();
-            final values = <String>[];
-            void collectValues(SemanticsNode node) {
-              values.add(node.value);
-              node.visitChildren((child) {
-                collectValues(child);
-                return true;
-              });
-            }
-
-            collectValues(tester.getSemantics(temperature));
-            expect(values, contains('Color temperature Unknown'));
-            expect(values.any((value) => value.contains('2200')), false);
-            semantics.dispose();
-
-            await tap(find.text('Set color temperature'));
+            expect(find.text('—'), findsWidgets);
+            await tap(find.byKey(const ValueKey('property:color_temperature')));
             expect(app.currentState!.id, 'C10');
             expect(
               find.byKey(const ValueKey('parameter:color_temperature')),
@@ -332,7 +317,7 @@ void main() {
             expect(presets[4].top, presets[3].top);
             expect(presets[5].top, presets[3].top);
             expect(presets[1].left - presets[0].right, closeTo(8, 0.1));
-            expect(find.text('quiet'), findsOneWidget);
+            expect(find.text('quiet'), findsNWidgets(2));
             expect(find.text('boost'), findsOneWidget);
             await tap(
               find.byKey(const ValueKey('appliance-option:speed:boost')),
@@ -432,17 +417,19 @@ void main() {
               'pause',
             );
           } else if (family == 'sensor') {
-            expect(find.text('No current reading'), findsOneWidget);
-            expect(find.text('Unknown'), findsOneWidget);
+            expect(find.text('No current reading'), findsNothing);
+            expect(find.text('—'), findsWidgets);
             expect(find.byType(Slider), findsNothing);
             expect(
               core.calls.where((call) => call['method'] == 'execute'),
               isEmpty,
             );
             core.observations['sensor.humidity'] = 0;
-            await tap(find.text('Refresh State'));
+            expect(find.text('Refresh State'), findsNothing);
+            await c.refresh();
+            await tester.pumpAndSettle();
             expect(find.text('No current reading'), findsNothing);
-            expect(find.text('0% · Stale'), findsOneWidget);
+            expect(find.text('0%'), findsOneWidget);
             expect(
               core.calls.where((call) => call['method'] == 'execute'),
               isEmpty,
@@ -459,9 +446,8 @@ void main() {
             );
           }
           await returnToDevice();
-          await tap(find.text('Device information'));
-          expect(app.currentState!.id, 'D06');
-          await returnToDevice();
+          expect(find.byType(InlineDeviceInformation), findsOneWidget);
+          expect(find.text('Device information'), findsOneWidget);
           await tap(find.text('Recent Operations'));
           expect(app.currentState!.id, 'S05');
           expect(
