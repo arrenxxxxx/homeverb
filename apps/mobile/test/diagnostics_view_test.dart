@@ -105,7 +105,7 @@ void main() {
         core.fail = true;
         expect(await controller.loadDiagnostics(), isFalse);
         expect(controller.diagnostics, isNull);
-        expect((controller.error as NativeFailure).code, 'STORAGE_ERROR');
+        expect((controller.diagnosticsLoadError as NativeFailure).code, 'STORAGE_ERROR');
         core.fail = false;
         for (final background in [false, true]) {
           for (final fail in [false, true]) {

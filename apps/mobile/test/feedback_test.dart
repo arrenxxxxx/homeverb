@@ -4,6 +4,80 @@ import 'package:homeverb_mobile/feedback.dart';
 import 'package:homeverb_mobile/skin.dart';
 
 void main() {
+  for (final width in [320.0, 390.0, 430.0]) {
+    for (final scale in [1.0, 2.0]) {
+      testWidgets('toast fits and centers at $width with $scale text', (
+        tester,
+      ) async {
+        tester.view.physicalSize = Size(width, 900);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        final queue = FeedbackQueue();
+        late BuildContext context;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: MediaQuery(
+              data: MediaQueryData(
+                size: Size(width, 900),
+                textScaler: TextScaler.linear(scale),
+              ),
+              child: Scaffold(
+                body: Builder(
+                  builder: (c) {
+                    context = c;
+                    return const SizedBox();
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+        queue.show(
+          context,
+          key: 'short',
+          content: const FeedbackToast(message: 'Saved'),
+        );
+        await tester.pumpAndSettle();
+        final surface = find.byKey(const ValueKey('feedback-toast-surface'));
+        final message = find.descendant(
+          of: find.byType(FeedbackToast),
+          matching: find.byType(Copy),
+        );
+        final rect = tester.getRect(surface);
+        expect(rect.center.dx, closeTo(width / 2, 1));
+        expect(
+          rect.width,
+          closeTo(tester.getSize(message).width + 22 + 12 + 28, 1),
+        );
+        expect(rect.width, lessThan(width - 48));
+        queue.clear();
+        await tester.pumpAndSettle();
+        queue.show(
+          context,
+          key: 'long',
+          hasAction: true,
+          content: FeedbackToast(
+            message:
+                'A long message wraps while keeping the action available and the reading visible.',
+            actionLabel: 'Retry',
+            onAction: () {},
+          ),
+        );
+        await tester.pumpAndSettle();
+        final longRect = tester.getRect(surface);
+        expect(longRect.center.dx, closeTo(width / 2, 1));
+        expect(longRect.left, greaterThanOrEqualTo(24));
+        expect(longRect.right, lessThanOrEqualTo(width - 24));
+        expect(longRect.height, greaterThan(rect.height));
+        expect(find.text('Retry'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+        queue.clear();
+        await tester.pumpWidget(const SizedBox());
+      });
+    }
+  }
+
   for (final contrast in [false, true]) {
     for (final skin in ['window_light', 'sky_blue']) {
       testWidgets(

@@ -130,11 +130,12 @@ class FeedbackToast extends StatelessWidget {
   Widget build(BuildContext context) => Semantics(
     liveRegion: true,
     child: Row(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         ExcludeSemantics(child: Icon(icon, color: iconColor, size: 22)),
         const SizedBox(width: 12),
-        Expanded(child: Copy(message, color: Colors.white, size: 14)),
+        Flexible(child: Copy(message, color: Colors.white, size: 14)),
         if (actionLabel != null) ...[
           const SizedBox(width: 12),
           Container(width: 1, height: 30, color: const Color(0xff687383)),
@@ -189,19 +190,42 @@ class FeedbackQueue {
     messenger
         .showSnackBar(
           SnackBar(
-            backgroundColor: const Color(0xff263241),
-            elevation: 10,
+            backgroundColor: Colors.transparent,
+            elevation: 0,
             behavior: SnackBarBehavior.floating,
-            margin: EdgeInsets.fromLTRB(14, 8, 14, navigationInset),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
+            margin: EdgeInsets.fromLTRB(24, 8, 24, navigationInset),
+            padding: EdgeInsets.zero,
             duration: Duration(seconds: features.accessibleNavigation ? 30 : 8),
             // Keep actionable feedback available until explicitly dismissed by a
             // screen-reader user; do not race the spoken announcement.
             persist: hasAction && features.accessibleNavigation,
-            content: content,
+            content: LayoutBuilder(
+              builder: (context, constraints) => UnconstrainedBox(
+                constrainedAxis: Axis.vertical,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: constraints.maxWidth),
+                  child: Container(
+                    key: const ValueKey('feedback-toast-surface'),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xff263241),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x33000000),
+                          blurRadius: 10,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: content,
+                  ),
+                ),
+              ),
+            ),
           ),
           snackBarAnimationStyle: features.disableAnimations
               ? AnimationStyle.noAnimation

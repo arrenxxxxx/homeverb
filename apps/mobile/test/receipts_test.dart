@@ -94,6 +94,36 @@ void main() {
     );
     expect(receiptTime(null), 'Not provided');
   });
+  test('history formats local time without guessing retained actions', () {
+    final local = DateTime(2026, 1, 2, 3, 4);
+    expect(
+      receiptLocalTime(local.toUtc().toIso8601String()),
+      '2026-01-02 03:04',
+    );
+    expect(
+      receiptLocalTime('2026-10-14T13:00:00+08:00'),
+      receiptLocalTime('2026-10-14T05:00:00Z'),
+    );
+    expect(receiptLocalTime(null), 'Not provided');
+    expect(receiptLocalTime('not-a-time'), 'Not provided');
+    for (final data in [
+      null,
+      {'state': true},
+      {'target_temperature': 24},
+      {'program': 'fictional-vendor-value'},
+    ]) {
+      final receipt = {...fixture('command-result.accepted'), 'data': data};
+      final before = jsonEncode(receipt);
+      expect(receiptActionLabel(receipt), 'Operation');
+      expect(jsonEncode(receipt), before);
+      final rows = receiptBlocks(receipt, 'Fictional device')[1][1] as List;
+      expect(rows.where((row) => row[0] == 'Action').single[1], 'Operation');
+      expect(
+        rows.where((row) => row[0] == 'Recorded').single[1],
+        receiptTime(receipt['completed_at']),
+      );
+    }
+  });
   testWidgets(
     'duplicate names open exact history and nested batch evidence without replay',
     (tester) async {

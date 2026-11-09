@@ -12,6 +12,21 @@ String outcomeLabel(dynamic status) =>
     }[status] ??
     'Unknown';
 
+/// Native receipts do not expose their original command or action. Returned
+/// data describes results, so its keys must not be used to guess an action.
+String receiptActionLabel(Json receipt) => 'Operation';
+
+/// History is presented in the device's current time zone. Detailed evidence
+/// continues to use its explicit UTC representation below.
+String receiptLocalTime(dynamic value) {
+  final parsed = value is String ? DateTime.tryParse(value) : null;
+  if (parsed == null) return 'Not provided';
+  final time = parsed.toLocal();
+  String two(int value) => value.toString().padLeft(2, '0');
+  final year = time.year.toString().padLeft(4, '0');
+  return '$year-${two(time.month)}-${two(time.day)} ${two(time.hour)}:${two(time.minute)}';
+}
+
 String receiptTime(dynamic value, {bool compact = false}) {
   final time = value is String ? DateTime.tryParse(value)?.toUtc() : null;
   if (time == null) return 'Not provided';
@@ -62,6 +77,7 @@ List<dynamic> receiptBlocks(Json receipt, String deviceName) {
       'rows',
       [
         ['Device', LiteralText(deviceName), null],
+        ['Action', receiptActionLabel(receipt), null],
         ['Started', receiptTime(receipt['started_at']), null],
         ['Recorded', receiptTime(receipt['completed_at']), null],
       ],

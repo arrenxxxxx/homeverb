@@ -68,7 +68,7 @@ void main() {
         tester.element(find.byType(ScreenView)),
       );
       await tester.pumpAndSettle();
-      final scroll = find.byKey(const ValueKey('scroll:D01'));
+      final scroll = find.byKey(const PageStorageKey('scroll:D01'));
       Future<void> sweep() async {
         for (final distance in [-600.0, 600.0, -600.0, 600.0]) {
           await tester.fling(scroll, Offset(0, distance), 1800);

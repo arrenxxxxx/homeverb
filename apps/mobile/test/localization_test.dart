@@ -118,7 +118,7 @@ void main() {
       expect(find.text('HOME'), findsNothing);
       expect(find.text('PREFERENCES'), findsNothing);
       expect(
-        find.text(AppLocale.zhCn.translations.mobileSectionHome),
+        find.text(AppLocale.zhCn.translations.mobileInteractionManagement),
         findsOneWidget,
       );
       expect(

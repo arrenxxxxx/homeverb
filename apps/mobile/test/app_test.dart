@@ -189,7 +189,10 @@ void main({bool deviceRun = false}) {
         });
         await tester.pumpAndSettle();
         await capture('Initial native launch');
-        expect(find.text('Your home, together'), findsOneWidget);
+        expect(
+          find.text('No devices yet. Start discovery to add a device.'),
+          findsOneWidget,
+        );
         controller.busy = true;
         controller.notifyListeners();
         await tester.pump();
@@ -215,8 +218,8 @@ void main({bool deviceRun = false}) {
         await tester.runAsync(() => tester.tap(find.text('mock-ac').first));
         await settle();
         expect(app.currentState!.id, 'C01');
-        await tap('Refresh State');
         expect(controller.snapshot, isNotNull);
+        expect(find.text('Refresh State'), findsNothing);
         await route('D01');
         await tester.runAsync(() => tester.tap(quickPower));
         await settle();
@@ -287,10 +290,18 @@ void main({bool deviceRun = false}) {
         expect(controller.currentCard!['device']['alias'], 'Quiet AC');
         await tap('Room');
         expect(
-          tester.widget<ChoiceTile>(find.byType(ChoiceTile).first).selected,
+          tester
+              .widget<ChoiceTile>(
+                find.ancestor(
+                  of: find.text('Unassigned'),
+                  matching: find.byType(ChoiceTile),
+                ),
+              )
+              .selected,
           true,
         );
         expect(controller.selection, {controller.selectedDevice});
+        await tap('Study');
         await tap('Move Devices');
         expect(
           controller.currentCard!['preferences']['room_id'],
@@ -337,6 +348,19 @@ void main({bool deviceRun = false}) {
         );
         await route('D01');
         expect(controller.search, isEmpty);
+        await route('D03');
+        expect(
+          tester
+              .widget<TextField>(
+                find.byKey(const ValueKey('field:Search devices')),
+              )
+              .controller!
+              .text,
+          'missing',
+        );
+        expect(find.text('No matching devices'), findsOneWidget);
+        await tap('Clear Search');
+        expect(controller.visibleCards.length, 1);
         await route('D08');
         await tap('Local network only — no cloud fallback');
         await tap('Save Preference');
@@ -360,7 +384,7 @@ void main({bool deviceRun = false}) {
           'Bedroom',
         );
         await tap('Save Room');
-        final handle = find.byTooltip('Room actions Bedroom');
+        final handle = find.byTooltip('Reorder Bedroom');
         await tester.ensureVisible(handle);
         final drag = await tester.startGesture(tester.getCenter(handle));
         await tester.pump();
@@ -385,8 +409,17 @@ void main({bool deviceRun = false}) {
         await tester.pumpAndSettle();
         await tap('Move devices');
         expect(app.currentState!.choices.values.single, 1);
-        await tap('Move Devices');
-        expect((controller.error as NativeFailure).code, 'INVALID_ARGUMENT');
+        expect(
+          tester
+              .widget<FilledButton>(
+                find.ancestor(
+                  of: find.text('Move Devices'),
+                  matching: find.byType(FilledButton),
+                ),
+              )
+              .onPressed,
+          isNull,
+        );
         expect(app.currentState!.id, 'R03');
         await tester.tap(
           find.byKey(
@@ -406,13 +439,10 @@ void main({bool deviceRun = false}) {
         await tap('Delete Room');
         expect(controller.rooms.length, 1);
         expect(controller.currentCard!['preferences']['room_id'], isNull);
-        await route('S10');
-        await tester.enterText(
-          find.byKey(const ValueKey('field:Sharing name')),
-          'Study phone',
-        );
-        await tap('Save Name');
-        expect(controller.preferences.sharingName, 'Study phone');
+        await route('S01');
+        expect(find.text('Send Authorization'), findsNothing);
+        expect(find.text('Receive Authorization'), findsNothing);
+        expect(find.text('This Device'), findsNothing);
         await route('S05');
         expect(controller.history, isNotEmpty);
         await tester.runAsync(
@@ -511,9 +541,7 @@ void main({bool deviceRun = false}) {
             ),
           );
         });
-        await tap('Remove Local Data');
-        expect(find.text('Full cleanup unavailable'), findsOneWidget);
-        expect(find.text('Confirm Clear'), findsNothing);
+        expect(find.text('Remove Local Data'), findsNothing);
         await route('P02');
         expect(find.text('Add a platform account'), findsOneWidget);
         expect(find.text('Meiju'), findsOneWidget);
@@ -521,7 +549,7 @@ void main({bool deviceRun = false}) {
         expect(find.text('View linked accounts'), findsOneWidget);
         expect(find.text('Xiaomi'), findsNothing);
         expect(find.text('Hisense'), findsNothing);
-        for (final id in ['P01', 'H01', 'H05', 'S09']) {
+        for (final id in ['P01']) {
           await route(id);
           expect(
             find

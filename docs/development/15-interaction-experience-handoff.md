@@ -158,7 +158,7 @@ or physical-phone acceptance.
 | M2 | Complete | M1 | First-reading states, partial refresh, pull-to-refresh and 3-second integration; state/feedback/lifecycle matrix passes |
 | M3 | Complete | M0; integrate after M2 | Icon cards and capability-specific summaries; all card variants and hit regions pass visual/behavior checks |
 | M4 | Complete | M1, M2 | All device groups expanded, local command feedback and truthful outcomes; all device-family and approval tests pass |
-| M5 | Pending | M1, M2 | Secondary flows, centered Cancel and content-width Toast; route/geometry/empty/error tests pass |
+| M5 | Complete | M1, M2 | Secondary flows, centered Cancel and content-width Toast; route/geometry/empty/error tests pass |
 | M6 | Pending | M1-M5 | Integrated production captures, regressions and measured performance; evidence and unresolved physical acceptance explicitly recorded |
 
 M3 presentation work may run alongside M1/M2. M4 device-widget work and M5

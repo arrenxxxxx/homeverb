@@ -9,6 +9,8 @@ enum LocalCleanup { cachedState, executionHistory }
 
 enum StateRefreshView { none, cards, device }
 
+enum LocalLoadState { idle, loading, ready, failed }
+
 // The compiled native hosts currently expose exact const grants or an object
 // grant for Mock. Unknown schema constraints hide quick controls conservatively;
 // they never become a broader permission or bypass Core's JSON Schema validator.
@@ -525,6 +527,9 @@ class HomeController extends ChangeNotifier {
 
   final LocalPreferences preferences;
   List<Json> rooms = [], cards = [], history = [];
+  LocalLoadState historyState = LocalLoadState.idle;
+  LocalLoadState diagnosticsState = LocalLoadState.idle;
+  Object? historyLoadError, diagnosticsLoadError;
   Json? description, snapshot, receipt, diagnostics, batchResult;
   Json? accountConflicts, routeInspection;
   final Map<String, Json> _deviceDescriptions = {};
@@ -1590,15 +1595,44 @@ class HomeController extends ChangeNotifier {
     cleanupNeedsReload = false;
   }
 
-  Future<bool> loadHistory({bool deviceOnly = false}) => perform(() async {
-    history =
-        (await core.call(
+  Future<bool> loadHistory({bool deviceOnly = false}) async {
+    final epoch = _readEpoch, client = core, device = selectedDevice;
+    Object? failure;
+    historyState = LocalLoadState.loading;
+    historyLoadError = null;
+    notifyListeners();
+    final success = await perform(() async {
+      try {
+        final result =
+            await client.call(
                   deviceOnly ? 'device_executions' : 'recent_executions',
-                  deviceOnly ? {'device_id': selectedDevice} : {},
+                  deviceOnly ? {'device_id': device} : {},
                 )
-                as List)
-            .cast<Json>();
-  });
+                as List;
+        if (!_foreground ||
+            epoch != _readEpoch ||
+            client != core ||
+            (deviceOnly && selectedDevice != device)) {
+          throw NativeFailure('CANCELLED', 'History loading was cancelled.');
+        }
+        history = result.cast<Json>();
+      } catch (error) {
+        failure = error;
+        rethrow;
+      }
+    }, publishError: () => false);
+    if (!_disposed &&
+        _foreground &&
+        epoch == _readEpoch &&
+        client == core &&
+        (!deviceOnly || selectedDevice == device)) {
+      historyState = success ? LocalLoadState.ready : LocalLoadState.failed;
+      historyLoadError = failure;
+      notifyListeners();
+    }
+    return success;
+  }
+
   Future<bool> executeSelectedPower(bool on) => perform(() async {
     if (selection.isEmpty || selection.length > 32) {
       throw NativeFailure('INVALID_ARGUMENT', 'Select 1–32 distinct devices.');
@@ -1646,16 +1680,36 @@ class HomeController extends ChangeNotifier {
   Future<bool> loadReceipt(String id) => perform(() async {
     receipt = await core.call('get_execution', {'request_id': id}) as Json;
   });
-  Future<bool> loadDiagnostics() => perform(() async {
+  Future<bool> loadDiagnostics() async {
+    final epoch = _readEpoch, client = core;
+    Object? failure;
     diagnostics = null;
-    final epoch = _readEpoch;
-    try {
-      final report = await core.call('diagnostics') as Json;
-      if (epoch == _readEpoch) diagnostics = report;
-    } catch (_) {
-      if (epoch == _readEpoch) rethrow;
+    diagnosticsState = LocalLoadState.loading;
+    diagnosticsLoadError = null;
+    notifyListeners();
+    final success = await perform(() async {
+      try {
+        final report = await client.call('diagnostics') as Json;
+        if (!_foreground || epoch != _readEpoch || client != core) {
+          throw NativeFailure(
+            'CANCELLED',
+            'Diagnostics loading was cancelled.',
+          );
+        }
+        diagnostics = report;
+      } catch (error) {
+        failure = error;
+        rethrow;
+      }
+    }, publishError: () => false);
+    if (!_disposed && _foreground && epoch == _readEpoch && client == core) {
+      diagnosticsState = success ? LocalLoadState.ready : LocalLoadState.failed;
+      diagnosticsLoadError = failure;
+      notifyListeners();
     }
-  });
+    return success;
+  }
+
   Future<bool> savePreferences(Json changes) =>
       perform(() => preferences.save(changes));
 

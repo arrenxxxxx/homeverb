@@ -55,7 +55,7 @@ void main() {
         },
       );
       expect(find.byTooltip('Refresh State'), findsNothing);
-      final scroll = find.byKey(ValueKey('scroll:$id'));
+      final scroll = find.byKey(PageStorageKey('scroll:$id'));
       expect(tester.getSize(scroll).height, greaterThan(600));
       expect(
         tester.widget<SingleChildScrollView>(scroll).physics,

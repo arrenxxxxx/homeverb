@@ -445,7 +445,7 @@ class ScreenView extends StatelessWidget {
                           Expanded(
                             child: wrapRefresh(
                               SingleChildScrollView(
-                                key: ValueKey('scroll:$id'),
+                                key: PageStorageKey('scroll:$id'),
                                 physics: refreshable
                                     ? const AlwaysScrollableScrollPhysics()
                                     : null,

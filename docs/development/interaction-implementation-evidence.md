@@ -128,3 +128,21 @@ mixed-component layouts, observation and permission gates, navigation races,
 duplicate input, retained outcomes, native fictional receipt recovery and trusted
 confirmation. `fvm flutter analyze` passed. These results do not establish a new
 physical device capability or authorize a real appliance write.
+
+## M5 secondary journeys and feedback
+
+Account sign-in Cancel and floating feedback are centered; Toast surfaces size
+to their contents with bounded wrapping. Search and room empty states, move
+selection, room actions, settings destinations, and history/diagnostics loading
+and retry now have distinct paths. Returning from a newly created room preserves
+the in-progress move. Device route options are limited to saved connections.
+
+The focused Flutter selection passed 96 tests; two opt-in font-dependent captures
+were skipped. It includes 320/390/430 logical-pixel Toast and Cancel geometry,
+both locales, large text, screen-reader feedback, exact diagnostic export,
+local cleanup and fictional native request-retirement checks. Documentation,
+repository and contract validators, catalog tests and Flutter analysis passed.
+The current retained receipt contract has no original action field, so history
+uses the truthful generic label `Operation` rather than inferring an action from
+returned data; raw evidence remains available. Physical and M6 acceptance remain
+separate.

@@ -201,7 +201,7 @@ void main() {
         expect(state.snapshot, isNull);
         expect(state.snapshots, isEmpty);
         expect(state.componentSnapshot('main'), isNull);
-        expect(await state.selectDevice(device), true);
+        expect(await state.selectDevice(device, readOnOpen: false), true);
         expect(state.snapshot, isNull);
         expect(state.cards.single['preferences']['alias'], 'Desk');
         expect(state.cards.single['preferences']['favorite'], true);

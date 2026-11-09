@@ -129,6 +129,6 @@ void main() {
     };
     final result = deviceSummary(context, device, (id) => values[id]);
     expect(localize(context, result.value), '4°C');
-    expect(localize(context, result.caption), '冷藏室目标值 · 冷冻室当前 -18°C');
+    expect(localize(context, result.caption), '\u51b7\u85cf\u5ba4\u76ee\u6807\u503c · \u51b7\u51bb\u5ba4\u5f53\u524d -18°C');
   });
 }

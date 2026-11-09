@@ -4272,6 +4272,51 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	/// en-US: 'Light and sound'
 	String get mobileInteractionLightSound => 'Light and sound';
 
+	/// en-US: 'Operation'
+	String get mobileInteractionOperation => 'Operation';
+
+	/// en-US: 'Action'
+	String get mobileInteractionAction => 'Action';
+
+	/// en-US: 'MANAGEMENT'
+	String get mobileInteractionManagement => 'MANAGEMENT';
+
+	/// en-US: 'HELP'
+	String get mobileInteractionHelp => 'HELP';
+
+	/// en-US: 'No devices in this room'
+	String get mobileInteractionEmptyRoom => 'No devices in this room';
+
+	/// en-US: 'No matching devices'
+	String get mobileInteractionNoMatches => 'No matching devices';
+
+	/// en-US: 'Clear Search'
+	String get mobileInteractionClearSearch => 'Clear Search';
+
+	/// en-US: 'View all devices'
+	String get mobileInteractionViewAllDevices => 'View all devices';
+
+	/// en-US: 'Retry History'
+	String get mobileInteractionRetryHistory => 'Retry History';
+
+	/// en-US: 'Retry Diagnostics'
+	String get mobileInteractionRetryDiagnostics => 'Retry Diagnostics';
+
+	/// en-US: 'Loading diagnostics\u2026'
+	String get mobileInteractionLoadingDiagnostics => 'Loading diagnostics\u2026';
+
+	/// en-US: 'Could not load diagnostics.'
+	String get mobileInteractionDiagnosticsFailed => 'Could not load diagnostics.';
+
+	/// en-US: 'Could not load operations.'
+	String get mobileInteractionHistoryFailed => 'Could not load operations.';
+
+	/// en-US: 'Select an operation to inspect its retained evidence.'
+	String get mobileInteractionHistoryHint => 'Select an operation to inspect its retained evidence.';
+
+	/// en-US: '{action} \u00b7 {outcome} \u00b7 {time}'
+	String mobileInteractionHistoryRow({required Object action, required Object outcome, required Object time}) => '${action} \u00b7 ${outcome} \u00b7 ${time}';
+
 	/// en-US: 'Sign in again'
 	String get feedbackSignInAgain => 'Sign in again';
 

@@ -1,5 +1,6 @@
 import 'device_page.dart';
 import 'device_summary.dart';
+import 'room_row.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -164,6 +165,9 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   int navigation = 0;
   int activityEpoch = 0;
   int lastOpeningFailure = 0;
+  bool historyForDevice = false;
+  bool returnToMoveAfterRoom = false;
+  String savedSearch = '';
   @override
   void initState() {
     super.initState();
@@ -264,6 +268,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     if (!mounted) return;
     feedback.clear();
     final deviceHistory = ['C01', 'C08', 'D06'].contains(id);
+    if (id == 'D03') savedSearch = c.search;
     c.cancelPending();
     setState(() {
       navigation++;
@@ -273,14 +278,17 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       homeRefreshFailure = null;
       accountEditor = null;
       clearFields();
-      if (target != 'D03') c.search = '';
+      c.search = target == 'D03' ? savedSearch : '';
     });
     c.setAutomaticRefreshView(refreshView(target));
     if (['D01', 'P01', 'S01'].contains(target)) {
       unawaited(c.saveRootPreference(target));
     }
     if (target == 'P01' && c.supports('list_accounts')) await c.loadAccounts();
-    if (target == 'S05') await c.loadHistory(deviceOnly: deviceHistory);
+    if (target == 'S05') {
+      historyForDevice = deviceHistory;
+      await c.loadHistory(deviceOnly: historyForDevice);
+    }
     if (target == 'S07') await c.loadDiagnostics();
     if (target == 'S04' && c.cleanupNeedsReload) await c.initialize();
   }
@@ -393,8 +401,53 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
 
   String input(String label) => fields[label]?.text ?? '';
   int choice() => choices.values.firstOrNull ?? 0;
-  String get selectedRoute => ['auto', 'lan', 'cloud'][choice().clamp(0, 2)];
+  List<String> routeChoices(String screen) {
+    final devices = screen == 'D08'
+        ? [if (c.currentCard?['device'] case final Json device) device]
+        : c.cards.map((card) => card['device'] as Json).toList();
+    final transports = {
+      for (final device in devices)
+        for (final connection in device['connections'] as List? ?? [])
+          connection['transport'],
+    };
+    return [
+      'auto',
+      if (transports.contains('lan')) 'lan',
+      if (transports.contains('cloud')) 'cloud',
+    ];
+  }
+
+  String get selectedRoute {
+    final routes = routeChoices(id);
+    return routes[choice().clamp(0, routes.length - 1)];
+  }
+
   Future<void> action(String label) async {
+    if (label == 'Search') {
+      savedSearch = '';
+      c.search = '';
+      await go('D03');
+      return;
+    }
+    if (label == 'Clear Search') {
+      c.search = savedSearch = '';
+      fields['Search devices']?.clear();
+      changed();
+      return;
+    }
+    if (label == 'View all devices') {
+      c.filter = 'All';
+      changed();
+      return;
+    }
+    if (label == 'Retry History') {
+      await c.loadHistory(deviceOnly: historyForDevice);
+      return;
+    }
+    if (label == 'Retry Diagnostics') {
+      await c.loadDiagnostics();
+      return;
+    }
     if (label == 'Retry device details') {
       final device = c.selectedDevice;
       if (device != null && !c.busy) await c.selectDevice(device);
@@ -910,7 +963,22 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         );
         return;
       }
-      await finish(c.saveRoom(name, id: c.editingRoom), 'R01');
+      final moving = returnToMoveAfterRoom && c.editingRoom == null;
+      final epoch = navigation;
+      if (await c.saveRoom(name, id: c.editingRoom) &&
+          mounted &&
+          epoch == navigation) {
+        if (moving) {
+          c.selectedRoom =
+              c.rooms.where((room) => room['name'] == name).firstOrNull?['id']
+                  as String?;
+          returnToMoveAfterRoom = false;
+          if (history.isNotEmpty && history.last == 'R03') history.removeLast();
+          await go('R03', back: true);
+        } else {
+          await go('R01');
+        }
+      }
       return;
     }
     if (label == 'Delete Room' && c.editingRoom != null) {
@@ -1129,6 +1197,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     }
     if (label == 'Add Room') {
       c.editingRoom = null;
+      returnToMoveAfterRoom = id == 'R03';
       await go('R02');
       return;
     }
@@ -1335,7 +1404,11 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                   ['note', 'The local device list could not be loaded.'],
                   ['button', 'Reload local data', 'secondary'],
                 ]
-              : widget.catalog.ui('D04')['blocks'] as List;
+              : [
+                  ['note', 'No devices yet. Start discovery to add a device.'],
+                  ['button', 'Add Platform'],
+                  if (c.isMock) ['button', 'Discover Mock device', 'secondary'],
+                ];
         }
         break;
       case 'D03':
@@ -1399,20 +1472,25 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         break;
       case 'D08':
       case 'S03':
+        final routeOptions = routeChoices(id);
+        final configuredRoute = c.preferences.route(
+          id == 'D08' ? c.selectedDevice : null,
+        );
+        const routeCopy = {
+          'auto': 'Auto — prefer local when available',
+          'lan': 'Local network only — no cloud fallback',
+          'cloud': 'Platform cloud — requires internet',
+        };
         final connections = (device?['connections'] as List? ?? [])
             .map((v) => v['transport'])
             .toSet();
         b = [
           [
             'choices',
-            [
-              'Auto — prefer local when available',
-              'Local network only — no cloud fallback',
-              'Platform cloud — requires internet',
-            ],
-            ['auto', 'lan', 'cloud'].indexOf(
-              c.preferences.route(id == 'D08' ? c.selectedDevice : null),
-            ),
+            [for (final route in routeOptions) routeCopy[route]!],
+            routeOptions.contains(configuredRoute)
+                ? routeOptions.indexOf(configuredRoute)
+                : 0,
           ],
           [
             'note',
@@ -1455,6 +1533,9 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         });
         break;
       case 'R03':
+        final currentRoomIndex = c.rooms.indexWhere(
+          (room) => room['id'] == c.selectedRoom,
+        );
         b = [
           [
             'note',
@@ -1463,13 +1544,17 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           [
             'choices',
             [...c.rooms.map((r) => LiteralText(r['name'])), 'Unassigned'],
-            c.selectedRoom == null
-                ? 0
-                : c.rooms
-                      .indexWhere((room) => room['id'] == c.selectedRoom)
-                      .clamp(0, c.rooms.length),
+            c.selectedRoom == null || currentRoomIndex < 0
+                ? c.rooms.length
+                : currentRoomIndex,
           ],
-          ['button', 'Move Devices'],
+          [
+            'note',
+            UiMessage('Selected devices: {count}', {
+              'count': c.selection.length,
+            }),
+          ],
+          ['button', 'Move Devices', c.selection.isEmpty ? 'disabled' : ''],
           ['button', 'Add Room', 'secondary'],
         ];
         break;
@@ -1804,11 +1889,6 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             ],
             ['button', 'Reload local data', 'secondary'],
           ],
-          ['button', 'Remove Local Data', 'secondary'],
-          [
-            'note',
-            'Full-profile deletion is unavailable. Backups and storage pages are not securely erased.',
-          ],
         ];
         break;
       case 'S09':
@@ -1873,7 +1953,20 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             : receiptBlocks(r, receiptDeviceName(r));
         break;
       case 'S07':
-        b = diagnosticsBlocks(c.diagnostics, exporting: exporting || c.busy);
+        b = switch (c.diagnosticsState) {
+          LocalLoadState.idle || LocalLoadState.loading => [
+            ['widget', const Center(child: CircularProgressIndicator())],
+            ['note', 'Loading diagnostics…'],
+          ],
+          LocalLoadState.failed => [
+            ['note', 'Could not load diagnostics.'],
+            ['button', 'Retry Diagnostics'],
+          ],
+          LocalLoadState.ready => diagnosticsBlocks(
+            c.diagnostics,
+            exporting: exporting || c.busy,
+          ),
+        };
         break;
       case 'S08':
         b = [
@@ -1911,26 +2004,36 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     }
     if (b != null) ui['blocks'] = b;
     if (id == 'S01') {
-      // Copy only presentation rows; never mutate the shared screen catalog.
       ui['blocks'] = [
-        for (final block in ui['blocks'] as List)
-          if (block[0] == 'rows')
-            [
-              'rows',
-              [
-                for (final row in block[1] as List)
-                  if (row[0] == 'Appearance')
-                    [
-                      'Appearance',
-                      skinLabels[c.preferences.skin]!,
-                      'Appearance',
-                    ]
-                  else
-                    row,
-              ],
-            ]
-          else
-            block,
+        ['section', 'PREFERENCES'],
+        [
+          'rows',
+          [
+            ['Language', c.preferences.locale ?? 'System default', 'Language'],
+            ['Appearance', skinLabels[c.preferences.skin]!, 'Appearance'],
+            ['Connections', '›'],
+          ],
+        ],
+        ['section', 'MANAGEMENT'],
+        [
+          'rows',
+          [
+            ['Rooms', '›'],
+            ['Platforms', '›'],
+            ['Recent Operations', '›'],
+            ['Local Data', '›'],
+          ],
+        ],
+        ['section', 'HELP'],
+        [
+          'rows',
+          [
+            ['Diagnostics', '›'],
+            ['About', '›'],
+            ['Privacy', '›'],
+            ['Licenses', '›'],
+          ],
+        ],
       ];
     }
     if (formError != null && id == this.id)
@@ -2202,7 +2305,17 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       return DeviceHome(
         mode: 'all',
         onAction: action,
-        cards: deviceCards(),
+        cards: c.visibleCards.isEmpty
+            ? Column(
+                children: [
+                  const Copy('No devices in this room'),
+                  ActionButton(
+                    'View all devices',
+                    onPressed: () => action('View all devices'),
+                  ),
+                ],
+              )
+            : deviceCards(),
         refreshing: homeRefreshing,
         refreshEnabled: !c.busy,
         roomNames: [
@@ -2362,7 +2475,20 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             },
           ),
           const SizedBox(height: 12),
-          deviceCards(),
+          if (c.cards.isEmpty) ...[
+            const Copy('No devices yet. Start discovery to add a device.'),
+            ActionButton(
+              'Add Platform',
+              onPressed: () => action('Add Platform'),
+            ),
+          ] else if (c.visibleCards.isEmpty) ...[
+            const Copy('No matching devices'),
+            ActionButton(
+              'Clear Search',
+              onPressed: () => action('Clear Search'),
+            ),
+          ] else
+            deviceCards(),
         ],
       );
     if (id == 'R01')
@@ -2400,84 +2526,37 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                             color: Color(0xffdeded7),
                           ),
                         ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 16, right: 6),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Copy(
-                                LiteralText(r['name']),
-                                control: true,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Copy(
-                              roomDeviceCount(r['id']),
-                              control: true,
-                              size: 12,
-                              color: muted,
-                            ),
-                            ReorderableDragStartListener(
-                              index: index,
-                              child: SizedBox(
-                                width: 34,
-                                height: 44,
-                                child: PopupMenuButton<String>(
-                                  tooltip: localize(
-                                    context,
-                                    UiMessage('Room actions {name}', {
-                                      'name': r['name'],
-                                    }),
-                                  ),
-                                  padding: EdgeInsets.zero,
-                                  icon: const Glyph(
-                                    'drag',
-                                    size: 11,
-                                    color: muted,
-                                  ),
-                                  onSelected: (v) async {
-                                    c.editingRoom = r['id'];
-                                    if (v == 'Rename')
-                                      await go('R05');
-                                    else if (v == 'Delete')
-                                      await go('R04');
-                                    else if (v == 'Move devices') {
-                                      c.selection.clear();
-                                      c.selectedRoom = r['id'];
-                                      await go('R03');
-                                    } else {
-                                      final ids = c.rooms
-                                              .map((e) => e['id'] as String)
-                                              .toList(),
-                                          i = c.rooms.indexOf(r),
-                                          j = v == 'Move up' ? i - 1 : i + 1;
-                                      if (j >= 0 && j < ids.length) {
-                                        ids.removeAt(i);
-                                        ids.insert(j, r['id']);
-                                        await c.reorderRooms(ids);
-                                      }
-                                    }
-                                  },
-                                  itemBuilder: (_) =>
-                                      [
-                                            'Rename',
-                                            'Delete',
-                                            'Move devices',
-                                            'Move up',
-                                            'Move down',
-                                          ]
-                                          .map(
-                                            (v) => PopupMenuItem(
-                                              value: v,
-                                              child: Text(localize(context, v)),
-                                            ),
-                                          )
-                                          .toList(),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                      RoomRow(
+                        id: r['id'] as String,
+                        name: r['name'] as String,
+                        deviceCount: roomDeviceCount(r['id']),
+                        index: index,
+                        enabled: !c.busy,
+                        canMoveUp: index > 0,
+                        canMoveDown: index + 1 < c.rooms.length,
+                        onAction: (v) async {
+                          c.editingRoom = r['id'];
+                          if (v == 'Rename') {
+                            await go('R05');
+                          } else if (v == 'Delete') {
+                            await go('R04');
+                          } else if (v == 'Move devices') {
+                            c.selection.clear();
+                            c.selectedRoom = r['id'];
+                            await go('R03');
+                          } else {
+                            final ids = c.rooms
+                                .map((e) => e['id'] as String)
+                                .toList();
+                            final i = c.rooms.indexOf(r),
+                                j = v == 'Move up' ? i - 1 : i + 1;
+                            if (j >= 0 && j < ids.length) {
+                              ids.removeAt(i);
+                              ids.insert(j, r['id']);
+                              await c.reorderRooms(ids);
+                            }
+                          }
+                        },
                       ),
                     ],
                   );
@@ -2651,7 +2730,16 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (c.history.isEmpty)
+          if (c.historyState == LocalLoadState.loading ||
+              c.historyState == LocalLoadState.idle)
+            const Center(child: CircularProgressIndicator())
+          else if (c.historyState == LocalLoadState.failed) ...[
+            const Copy('Could not load operations.'),
+            ActionButton(
+              'Retry History',
+              onPressed: () => action('Retry History'),
+            ),
+          ] else if (c.history.isEmpty)
             const Copy(
               'No retained operations. This does not prove that no past action occurred.',
             )
@@ -2660,17 +2748,19 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
               for (final receipt in c.history)
                 [
                   LiteralText(receiptDeviceName(receipt)),
-                  UiMessage('{outcome} · {time}', {
+                  UiMessage('{action} · {outcome} · {time}', {
+                    'action': UiMessage(receiptActionLabel(receipt)),
                     'outcome': UiMessage(outcomeLabel(receipt['status'])),
-                    'time': receiptTime(receipt['completed_at'], compact: true),
+                    'time': receiptLocalTime(receipt['completed_at']),
                   }),
                   'receipt:${receipt['request_id']}',
                 ],
             ], onAction: action),
-          const Copy(
-            'Select an operation to inspect its retained evidence. Sharing history is unavailable.',
-            color: muted,
-          ),
+          if (c.historyState == LocalLoadState.ready && c.history.isNotEmpty)
+            const Copy(
+              'Select an operation to inspect its retained evidence.',
+              color: muted,
+            ),
         ],
       );
     return null;
@@ -2748,9 +2838,13 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                       quickPowerDevice == null &&
                       !accountRefreshing &&
                       !homeRefreshing &&
+                      id != 'S05' &&
+                      id != 'S07' &&
                       !showingSignIn,
                   error:
                       (id == 'C10' && actionCapability != null) ||
+                          id == 'S05' ||
+                          id == 'S07' ||
                           showingSignIn ||
                           (id == 'C01' &&
                               c.receipt?['device_id'] == c.selectedDevice &&

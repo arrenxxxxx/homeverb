@@ -11,6 +11,7 @@ import 'package:homeverb_mobile/skin.dart';
 import 'credential_access_test.dart' show FixtureAccess, enter;
 
 void main() {
+  tearDown(() => LocaleSettings.setLocale(AppLocale.enUs));
   Widget page({
     bool busy = false,
     bool reauthorizing = false,
@@ -122,5 +123,31 @@ void main() {
       await tester.ensureVisible(find.text('Cancel'));
       expect(tester.takeException(), isNull);
     });
+  }
+
+  for (final width in [320.0, 390.0, 430.0]) {
+    for (final locale in [AppLocale.enUs, AppLocale.zhCn]) {
+      testWidgets('cancel is centered at $width in ${locale.name}', (
+        tester,
+      ) async {
+        tester.view.physicalSize = Size(width, 1000);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        LocaleSettings.setLocale(locale);
+        await tester.pumpWidget(TranslationProvider(child: page()));
+        await tester.pumpAndSettle();
+        final cancel = find.byKey(const ValueKey('account-signin-cancel'));
+        await tester.ensureVisible(cancel);
+        await tester.pumpAndSettle();
+        final form = find.byKey(const ValueKey('account-signin-card'));
+        final text = find.descendant(of: cancel, matching: find.byType(Text));
+        final center = tester.getCenter(form).dx;
+        expect(tester.getCenter(cancel).dx, closeTo(center, 1));
+        expect(tester.getCenter(text).dx, closeTo(center, 1));
+        expect(tester.getSize(cancel).height, greaterThanOrEqualTo(48));
+        expect(tester.takeException(), isNull);
+      });
+    }
   }
 }

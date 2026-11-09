@@ -947,14 +947,25 @@ class _AccountSignInState extends State<AccountSignIn>
           ),
         ),
         const SizedBox(height: 24),
-        ActionButton(
-          'Cancel',
-          style: 'secondary',
-          onPressed: () {
-            checkEpoch++;
-            clear();
-            widget.onCancel();
-          },
+        SizedBox(
+          width: double.infinity,
+          child: TextButton(
+            key: const ValueKey('account-signin-cancel'),
+            style: TextButton.styleFrom(
+              minimumSize: const Size(48, 48),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+              foregroundColor: readableInk(context, muted),
+            ),
+            onPressed: () {
+              checkEpoch++;
+              clear();
+              widget.onCancel();
+            },
+            child: Text(
+              localize(context, 'Cancel'),
+              textAlign: TextAlign.center,
+            ),
+          ),
         ),
       ],
     );

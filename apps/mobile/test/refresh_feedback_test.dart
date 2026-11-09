@@ -73,7 +73,7 @@ void main() {
   }
 
   Future<void> pullHome(WidgetTester tester) async {
-    final scroll = find.byKey(const ValueKey('scroll:D01'));
+    final scroll = find.byKey(const PageStorageKey('scroll:D01'));
     final gesture = await tester.startGesture(tester.getCenter(scroll));
     await gesture.moveBy(const Offset(0, 25));
     await tester.pump();
