@@ -1,9 +1,9 @@
 # Interaction experience implementation handoff
 
-Status: **design approved; implementation pending**. Owner review: November 9,
-2026. Audited source baseline: `8cf791b`. This document defines work for another
-implementation session; it does not claim that the Flutter App already behaves
-like the approved preview. All milestones below start **pending**.
+Status: **design approved; implementation in progress**. Owner review: November 9,
+2026. Audited source baseline: `8cf791b`. Milestone evidence is tracked in the
+[implementation record](interaction-implementation-evidence.md); pending stages
+do not claim that the Flutter App already behaves like the approved preview.
 
 ## Scope and source of truth
 
@@ -153,7 +153,7 @@ or physical-phone acceptance.
 
 | Milestone | Status | Depends on | Deliverable and exit gate |
 | --- | --- | --- | --- |
-| M0 | Pending | None | Baseline and deterministic delayed/error fixtures; requirement-to-test map and screen inventory recorded |
+| M0 | Complete | None | Baseline and deterministic delayed/error fixtures; requirement-to-test map and screen inventory recorded |
 | M1 | Pending | M0 | Immediate device/account entry, local restoration and independent readiness; delayed navigation and restart/cache isolation tests pass |
 | M2 | Pending | M1 | First-reading states, partial refresh, pull-to-refresh and 3-second integration; state/feedback/lifecycle matrix passes |
 | M3 | Pending | M0; integrate after M2 | Icon cards and capability-specific summaries; all card variants and hit regions pass visual/behavior checks |
