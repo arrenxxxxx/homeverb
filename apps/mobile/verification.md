@@ -3605,7 +3605,7 @@ The M0–M5 interaction changes have local phase commits. M6 integrated fictiona
 device, lifecycle, approval and outcome checks, production-route captures and
 Android emulator profile measurements are recorded in the
 [interaction evidence](../../docs/development/interaction-implementation-evidence.md#m6-integration-and-remaining-gate).
-The final full Flutter run has 343 passes, 40 skips and four previously recorded
+The latest full Flutter run has 347 passes, 40 skips and four previously recorded
 macOS glyph-pixel failures, so the full regression exit gate remains open. The
 app was profiled on an isolated Android emulator before a subsequent import-only
 web preview fix; no physical-phone, real provider or real-write acceptance is

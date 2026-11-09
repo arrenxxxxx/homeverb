@@ -159,12 +159,20 @@ device command. Core contracts, storage schemas and provider authority are
 unchanged. M0 through M5 are recorded in local commits `6613530`, `db96c4a`,
 `03b749d`, `8ae87bf`, `adee987` and `25e881c`, respectively.
 
+Additional fictional tests explicitly exercise changed descriptors and cache
+clearing (`descriptor_cache_invalidation_test.dart`), revoked native session
+grants with saved observations (`grant_revoke_cache_test.dart`), and recovery of
+an unknown receipt after recreating the Flutter App and native session over the
+same isolated profile (`unknown_restart_recovery_test.dart`). The recovery test
+asserts no new plan or execute call; it does not claim an OS process restart.
+Those three suites and `outcome_click_test.dart` passed seven tests together.
+
 The final `fvm flutter analyze` passed. The final full
-`fvm flutter test --no-pub --reporter expanded` run had 343 passes, 40 skips and
+`fvm flutter test --no-pub --reporter expanded` run had 347 passes, 40 skips and
 four failures: the existing macOS glyph-pixel cases in `button_labels_test.dart`,
 two cases in `control_labels_test.dart`, and `field_alignment_test.dart`.
 Their strict assertions remain intact; see [testing](../testing.md#merged-flutter-verification-on-macos).
-The output is `apps/mobile/build/verification/interaction-full-suite-import-fix.log`.
+The output is `apps/mobile/build/verification/interaction-scenarios-full-suite.log`.
 The prior run also found a stale cancellation-error assertion; after updating it
 to require no late error while preserving the no-send assertion, that case passed
 in the final run. These four failures leave the M6 regression exit gate open.
@@ -220,7 +228,9 @@ On this macOS host `cargo fmt --all -- --check` and the offline workspace build
 passed. The workspace test run outside the sandbox stopped at 14 existing Midea
 LAN tests because `127.0.0.2` was unavailable; the sandboxed attempt also denied
 local sockets. Clippy with Rust 1.99.1 and `-D warnings` stopped on four existing
-`chunks_exact_to_as_chunks` warnings in Midea code. `verify_mvp.py` passed with
+`chunks_exact_to_as_chunks` warnings in Midea code. The CI-pinned
+`cargo +1.96.0 clippy --workspace --all-targets --offline --locked -- -D warnings`
+subsequently passed. `verify_mvp.py` passed with
 seven Linux-only skips, `verify_native_contract.py` passed, and Python unit tests
 passed 70 cases. Documentation, contract, repository and presentation catalog
 validators passed after the evidence update.
