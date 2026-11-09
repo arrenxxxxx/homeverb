@@ -159,7 +159,7 @@ or physical-phone acceptance.
 | M3 | Complete | M0; integrate after M2 | Icon cards and capability-specific summaries; all card variants and hit regions pass visual/behavior checks |
 | M4 | Complete | M1, M2 | All device groups expanded, local command feedback and truthful outcomes; all device-family and approval tests pass |
 | M5 | Complete | M1, M2 | Secondary flows, centered Cancel and content-width Toast; route/geometry/empty/error tests pass |
-| M6 | In progress | M1-M5 | Integrated production captures and profile measurements are recorded; the full regression exit gate remains open because four strict macOS glyph-pixel assertions fail |
+| M6 | Complete | M1-M5 | Integrated production captures, scenario regressions and profile measurements are recorded; platform-specific limitations remain explicit |
 
 M3 presentation work may run alongside M1/M2. M4 device-widget work and M5
 account/feedback work can be assigned separately after their common state

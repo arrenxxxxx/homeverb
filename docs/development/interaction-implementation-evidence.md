@@ -147,7 +147,7 @@ uses the truthful generic label `Operation` rather than inferring an action from
 returned data; raw evidence remains available. Physical and M6 acceptance remain
 separate.
 
-## M6 integration and remaining gate
+## M6 integration and verification
 
 Integration review extended the loading, failure and retained-outcome treatment to
 the specialized appliance pages and generic action forms. Lifecycle and navigation
@@ -184,7 +184,7 @@ under `apps/mobile/test/`; the tests use fictional data unless stated otherwise.
 | Search, rooms, settings, account, history and diagnostic recovery | `secondary_journeys_test.dart`, `account_surfaces_test.dart` |
 | Production-route width, language, skin and text-size captures | `interaction_capture_test.dart` and the opt-in matrix below |
 
-The final `fvm flutter analyze` passed. The final full
+`fvm flutter analyze` passed. The latest macOS full
 `fvm flutter test --no-pub --reporter expanded` run had 347 passes, 40 skips and
 four failures: the existing macOS glyph-pixel cases in `button_labels_test.dart`,
 two cases in `control_labels_test.dart`, and `field_alignment_test.dart`.
@@ -192,7 +192,23 @@ Their strict assertions remain intact; see [testing](../testing.md#merged-flutte
 The output is `apps/mobile/build/verification/interaction-scenarios-full-suite.log`.
 The prior run also found a stale cancellation-error assertion; after updating it
 to require no late error while preserving the no-send assertion, that case passed
-in the final run. These four failures leave the M6 regression exit gate open.
+in that run. The unmodified strict glyph tests were then verified on Linux as
+described below; the macOS failures remain failures on that host.
+
+A separate Debian 12 x86_64 guest under QEMU TCG ran the unmodified Flutter
+3.47.7 suite with a locally built x86_64 FFI library and Rust 1.96.0. The first
+full run with default timeouts had 337 passes, 40 skips and 14 failures: two
+large tests exceeded Flutter's ten-minute limit, and the subsequent cases in
+one file failed after the timeout. A single-concurrency retry of the two files
+with `--ignore-timeouts` passed all 14 tests. A subsequent complete run of
+`flutter test --no-pub --reporter expanded --ignore-timeouts` passed 351 tests,
+skipped 40 opt-in tests, and exited 0 after 53 minutes 26 seconds. The timeout
+setting accommodates software emulation and does not erase the first failure.
+The unchanged independent glyph tests also passed separately, five out of five.
+The 24 opt-in production capture configurations were run separately as below;
+skipped tests in the full run are not counted as passes. Original logs, source
+identity and environment details are in
+`apps/mobile/build/verification/linux-vm-attempt/qemu-x86/`.
 
 An isolated Ubuntu 24.04 ARM64 virtual machine was also attempted on this host
 with the existing Linux Rosetta support, a read-only source snapshot and separate

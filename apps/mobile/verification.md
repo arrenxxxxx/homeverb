@@ -3604,11 +3604,12 @@ fresh physical measurements.
 The M0–M5 interaction changes have local phase commits. M6 integrated fictional
 device, lifecycle, approval and outcome checks, production-route captures and
 Android emulator profile measurements are recorded in the
-[interaction evidence](../../docs/development/interaction-implementation-evidence.md#m6-integration-and-remaining-gate).
-The latest full Flutter run has 347 passes, 40 skips and four previously recorded
-macOS glyph-pixel failures, so the full regression exit gate remains open. The
-app was profiled on an isolated Android emulator before a subsequent import-only
+[interaction evidence](../../docs/development/interaction-implementation-evidence.md#m6-integration-and-verification).
+The macOS full Flutter run has 347 passes, 40 skips and four previously recorded
+glyph-pixel failures. On a separate Debian x86_64 QEMU TCG guest the unchanged
+glyph tests passed, and the complete suite passed 351 tests with 40 skips using
+`--ignore-timeouts`; the initial default-timeout run failed and remains recorded.
+The app was profiled on an isolated Android emulator before a subsequent import-only
 web preview fix; no physical-phone, real provider or real-write acceptance is
-implied. The local
-capture and performance artifacts under `build/verification/` are reproducible
+implied. The local capture and performance artifacts under `build/verification/` are reproducible
 but are not versioned.
