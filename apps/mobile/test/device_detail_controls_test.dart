@@ -266,10 +266,9 @@ void main() {
         });
         await tester.pumpAndSettle();
         expect(find.byType(DeviceDetailControls), findsOneWidget);
-        await tap(find.byKey(const ValueKey('cycle-readings')));
         expect(find.text('42°C'), findsOneWidget);
         expect(find.text('One extra rinse'), findsWidgets);
-        expect(find.text('35 min'), findsNothing);
+        expect(find.text('35 min'), findsOneWidget);
         expect(
           find.text(
             'Readings may be out of date; the measurement time is unverified.',
@@ -277,7 +276,6 @@ void main() {
           findsNothing,
         );
         expect(find.text('—'), findsWidgets);
-        await tap(find.byKey(const ValueKey('cycle-readings')));
         await capture(allowed ? 'dishwasher-status' : 'dishwasher-read-only');
         final start = find.byKey(const ValueKey('control:0:start_cycle'));
         if (allowed) {

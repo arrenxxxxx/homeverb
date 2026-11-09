@@ -278,21 +278,34 @@ void main() {
             expect(stepper('fridge').value, '4°C');
             expect(stepper('freezer').value, '-18°C');
             await tap(find.bySemanticsLabel('Increase Freezer target'));
-            expect(app.currentState!.id, 'S06');
-            expect(core.calls.last['command']['component_id'], 'freezer');
-            expect(core.calls.last['command']['arguments'], {
-              'target_temperature': -17,
-            });
-            expect(c.component, 'fridge');
-            await back();
             expect(app.currentState!.id, 'C08');
-            expect(stepper('freezer').value, '-18°C');
+            expect(
+              core.calls.lastWhere(
+                (call) => call['method'] == 'execute',
+              )['command']['component_id'],
+              'freezer',
+            );
+            expect(
+              core.calls.lastWhere(
+                (call) => call['method'] == 'execute',
+              )['command']['arguments'],
+              {'target_temperature': -17},
+            );
+            expect(c.component, 'fridge');
+            expect(stepper('freezer').value, '-17°C');
             await tap(find.bySemanticsLabel('Increase Fridge target'));
-            expect(core.calls.last['command']['component_id'], 'fridge');
-            expect(core.calls.last['command']['arguments'], {
-              'target_temperature': 4.5,
-            });
-            await back();
+            expect(
+              core.calls.lastWhere(
+                (call) => call['method'] == 'execute',
+              )['command']['component_id'],
+              'fridge',
+            );
+            expect(
+              core.calls.lastWhere(
+                (call) => call['method'] == 'execute',
+              )['command']['arguments'],
+              {'target_temperature': 4.5},
+            );
             await c.refreshComponents();
             await tester.pumpAndSettle();
             expect(stepper('fridge').value, '4.5°C');
@@ -310,18 +323,28 @@ void main() {
             expect(core.receipts, hasLength(2));
             await tester.enterText(field, '-20');
             await tap(find.text('Save target'));
-            expect(core.calls.last['command']['component_id'], 'freezer');
-            await back();
-            await tap(find.text('Cancel'));
+            expect(
+              core.calls.lastWhere(
+                (call) => call['method'] == 'execute',
+              )['command']['component_id'],
+              'freezer',
+            );
             expect(app.currentState!.id, 'C08');
             expect(c.component, 'freezer');
             await tap(find.bySemanticsLabel('Decrease Fridge target'));
-            expect(core.calls.last['command']['component_id'], 'fridge');
-            expect(core.calls.last['command']['arguments'], {
-              'target_temperature': 4.0,
-            });
+            expect(
+              core.calls.lastWhere(
+                (call) => call['method'] == 'execute',
+              )['command']['component_id'],
+              'fridge',
+            );
+            expect(
+              core.calls.lastWhere(
+                (call) => call['method'] == 'execute',
+              )['command']['arguments'],
+              {'target_temperature': 4.0},
+            );
             expect(c.component, 'freezer');
-            await back();
             core
                     .capabilities
                     .first['actions']['set']['parameters']['properties']['mode'] =
@@ -360,11 +383,8 @@ void main() {
             await back();
             await tap(find.text('Cancel'));
             expect(app.currentState!.id, 'C08');
-            await tap(find.byKey(const ValueKey('open-component:fridge')));
-            expect(app.currentState!.id, 'C01');
-            expect(c.component, 'fridge');
-            await back();
-            expect(app.currentState!.id, 'C08');
+            expect(find.text('More controls'), findsNothing);
+            expect(find.byType(ExpansionTile), findsNothing);
           }
           tester.view.physicalSize = const Size(640, 1688);
           tester.platformDispatcher.textScaleFactorTestValue = 2;

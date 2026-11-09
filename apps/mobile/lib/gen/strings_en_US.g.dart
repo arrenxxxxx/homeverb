@@ -4266,6 +4266,12 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	/// en-US: '{component} current'
 	String mobileCardComponentCurrentLabel({required Object component}) => '${component} current';
 
+	/// en-US: 'Comfort and energy'
+	String get mobileInteractionComfortEnergy => 'Comfort and energy';
+
+	/// en-US: 'Light and sound'
+	String get mobileInteractionLightSound => 'Light and sound';
+
 	/// en-US: 'Sign in again'
 	String get feedbackSignInAgain => 'Sign in again';
 

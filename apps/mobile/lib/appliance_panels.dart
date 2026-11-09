@@ -10,6 +10,60 @@ import 'skin.dart';
 import 'device_readings.dart';
 import 'device_typography.dart';
 
+/// Local card metadata only; protected provider identities and endpoints stay
+/// outside the ordinary device view.
+class InlineDeviceInformation extends StatelessWidget {
+  const InlineDeviceInformation({
+    required this.controller,
+    required this.onAction,
+    super.key,
+  });
+
+  final HomeController controller;
+  final ActionHandler onAction;
+
+  @override
+  Widget build(BuildContext context) {
+    final device = controller.currentCard?['device'] as Json?;
+    final preferences = controller.currentCard?['preferences'] as Json?;
+    if (device == null) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Rows(
+          [
+            ['Name', LiteralText(device['alias'] ?? '—'), null],
+            [
+              'Room',
+              preferences?['room_id'] == null
+                  ? 'Unassigned'
+                  : LiteralText(controller.roomName(preferences!['room_id'])),
+              null,
+            ],
+            ['Model', LiteralText(device['model'] ?? '—'), null],
+            [
+              'Connection',
+              controlLabel(
+                controller.preferences.route(controller.selectedDevice),
+              ),
+              null,
+            ],
+          ],
+          title: 'Device information',
+          onAction: onAction,
+        ),
+        ActionButton(
+          'Recent Operations',
+          style: 'secondary',
+          onPressed: controller.busy || !controller.isForeground
+              ? null
+              : () => onAction('Recent Operations'),
+        ),
+      ],
+    );
+  }
+}
+
 /// Presentation for explicitly named capabilities, never a brand or model guess.
 class ApplianceGrid extends StatelessWidget {
   const ApplianceGrid({required this.children, super.key});
@@ -248,20 +302,11 @@ class RefrigeratorModes extends StatelessWidget {
               doors,
             ),
           if (secondary.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 10),
-              child: ExpansionTile(
-                title: const Copy('Other readings', size: 13),
-                tilePadding: EdgeInsets.zero,
-                children: [
-                  section(
-                    'other',
-                    'Other readings',
-                    Icons.sensors_outlined,
-                    secondary,
-                  ),
-                ],
-              ),
+            section(
+              'other',
+              'Other readings',
+              Icons.sensors_outlined,
+              secondary,
             ),
           const SizedBox(height: 8),
         ],
@@ -302,10 +347,14 @@ class DishwasherPanel extends StatefulWidget {
   const DishwasherPanel({
     required this.controller,
     required this.onAction,
+    this.componentId,
+    this.showInformation = true,
     super.key,
   });
   final HomeController controller;
   final ActionHandler onAction;
+  final String? componentId;
+  final bool showInformation;
   static const id = 'vendor.midea.dishwasher';
   @override
   State<DishwasherPanel> createState() => _DishwasherPanelState();
@@ -313,28 +362,35 @@ class DishwasherPanel extends StatefulWidget {
 
 class _DishwasherPanelState extends State<DishwasherPanel> {
   Object? _program, _additional;
-  String? _device;
+  (String?, String)? _view;
   static const id = DishwasherPanel.id;
   @override
   Widget build(BuildContext context) {
-    final c = widget.controller, cap = c.capability(id)!;
-    if (_device != c.selectedDevice) {
-      _device = c.selectedDevice;
+    final c = widget.controller;
+    final component = widget.componentId ?? c.component;
+    final cap = c.componentCapability(component, id)!;
+    final currentIdentity = (c.selectedDevice, component);
+    if (_view != currentIdentity) {
+      _view = currentIdentity;
       _program = _additional = null;
     }
     final properties = cap['properties'] as Json,
         actions = cap['actions'] as Json;
-    final index = c.capabilities.indexOf(cap);
-    final renderedDevice = c.selectedDevice, renderedComponent = c.component;
+    final index = c.capabilitiesFor(component).indexOf(cap);
+    final renderedDevice = c.selectedDevice, renderedSelection = c.component;
     final renderedEpoch = c.controlEpoch;
     bool sameView() =>
         c.controlEpoch == renderedEpoch &&
         c.selectedDevice == renderedDevice &&
-        c.component == renderedComponent &&
-        identical(c.capability(id), cap);
+        c.component == renderedSelection &&
+        identical(c.componentCapability(component, id), cap);
     bool currentStateAllows(String action) {
-      final work = c.snapshot?['observations']?['$id.work_status']?['value'];
-      final operation = c.snapshot?['observations']?['$id.operator']?['value'];
+      final work = c.componentSnapshot(
+        component,
+      )?['observations']?['$id.work_status']?['value'];
+      final operation = c.componentSnapshot(
+        component,
+      )?['observations']?['$id.operator']?['value'];
       final isPaused = work == 'work' && operation == 'pause';
       final isRunning =
           work == 'work' &&
@@ -352,7 +408,7 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
     }
 
     Json? observation(String key) =>
-        c.snapshot?['observations']?['$id.$key'] as Json?;
+        c.componentSnapshot(component)?['observations']?['$id.$key'] as Json?;
     Object display(String key) {
       final value = observation(key)?['value'];
       if (value == null) return '—';
@@ -379,7 +435,8 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
     }
 
     bool admitted(String action) =>
-        actions[action] != null && c.hasControlAction(id, action);
+        actions[action] != null &&
+        c.hasControlAction(id, action, componentId: component);
     bool allowed(String action) =>
         sameView() &&
         !c.busy &&
@@ -394,8 +451,13 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
     void open(String action, [Json? selection]) {
       // Recheck foreground, exact view, permission and state at tap time.
       if (!allowed(action) || !currentStateAllows(action)) return;
+      final suffix = selection == null
+          ? ''
+          : ':${Uri.encodeComponent(jsonEncode(selection))}';
       widget.onAction(
-        'control:$index:${Uri.encodeComponent(action)}${selection == null ? '' : ':${Uri.encodeComponent(jsonEncode(selection))}'}',
+        component == c.component
+            ? 'control:$index:${Uri.encodeComponent(action)}$suffix'
+            : 'control-component:${Uri.encodeComponent(component)}:${Uri.encodeComponent(id)}:${Uri.encodeComponent(action)}$suffix',
       );
     }
 
@@ -472,7 +534,7 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
                 size: DeviceTypography.body,
                 bold: true,
                 loading:
-                    observation(key) == null && c.readingLoading(c.component),
+                    observation(key) == null && c.readingLoading(component),
               ),
             ),
           ),
@@ -513,15 +575,6 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
         ),
       ),
     );
-    // Prioritize familiar programs only when the exact descriptor admits them.
-    final primaryPrograms = [
-      for (final value in ['standard_wash', 'eco_wash', 'fast_wash'])
-        if (programs.contains(value)) value,
-    ];
-    for (final value in programs) {
-      if (primaryPrograms.length >= 3) break;
-      if (!primaryPrograms.contains(value)) primaryPrograms.add(value);
-    }
     Widget choices(String parameter, List options, Object? selected) {
       Widget tile(Object value) => RadioListTile<Object>(
         key: ValueKey(
@@ -551,10 +604,6 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
           bold: selected == value,
         ),
       );
-      final primary = parameter == 'program'
-          ? primaryPrograms
-          : options.take(2).toList();
-      final rest = options.where((value) => !primary.contains(value)).toList();
       return RadioGroup<Object>(
         groupValue: selected,
         onChanged: (value) {
@@ -568,35 +617,7 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
             }
           });
         },
-        child: Column(
-          children: [
-            for (final value in primary) tile(value),
-            if (rest.isNotEmpty)
-              ExpansionTile(
-                key: ValueKey('more-wash-$parameter'),
-                tilePadding: const EdgeInsets.symmetric(horizontal: 8),
-                title: Copy(
-                  parameter == 'program' ? 'More programs' : 'More options',
-                  size: DeviceTypography.secondary,
-                  color: muted,
-                ),
-                subtitle: rest.contains(selected)
-                    ? Copy(
-                        parameter == 'program'
-                            ? controlLabel('$id.program.$selected')
-                            : propertyValue(
-                                selected,
-                                additionalSchema!,
-                                propertyId: '$id.additional',
-                              ),
-                        color: skinAccent(context),
-                        size: DeviceTypography.secondary,
-                      )
-                    : null,
-                children: [for (final value in rest) tile(value)],
-              ),
-          ],
-        ),
+        child: Column(children: [for (final value in options) tile(value)]),
       );
     }
 
@@ -682,7 +703,7 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
                         : known
                         ? display('work_status')
                         : 'Unknown',
-                    loading: status == null && c.readingLoading(c.component),
+                    loading: status == null && c.readingLoading(component),
                     color:
                         skinOf(context).isSky &&
                             !MediaQuery.highContrastOf(context)
@@ -717,27 +738,24 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
             'No controls are allowed for this device on this connection.',
             color: muted,
           )
-        else if (!known)
-          const Copy(
-            'Cycle state is unknown. Refresh before choosing a wash action.',
-            color: muted,
-          )
-        else ...[
-          if (idle && admitted('start_cycle')) ...[
+        else if (!known && !c.readingLoading(component))
+          const Copy('Control unavailable.', color: muted),
+        if (actions['start_cycle'] != null && programs.isNotEmpty) ...[
+          card([
+            heading('Next wash program (choose one)'),
+            choices('program', programs, _program),
+          ]),
+          if (additional.isNotEmpty)
             card([
-              heading('Next wash program (choose one)'),
-              choices('program', programs, _program),
+              heading('Additional option (choose one)'),
+              const Copy(
+                'This device accepts one additional option, not a combination.',
+                size: DeviceTypography.secondary,
+                color: muted,
+              ),
+              choices('additional', additional, _additional),
             ]),
-            if (additional.isNotEmpty)
-              card([
-                heading('Additional option (choose one)'),
-                const Copy(
-                  'This device accepts one additional option, not a combination.',
-                  size: DeviceTypography.secondary,
-                  color: muted,
-                ),
-                choices('additional', additional, _additional),
-              ]),
+          if (idle && admitted('start_cycle')) ...[
             const SizedBox(height: 10),
             const Copy(
               'Selecting options does not start the appliance.',
@@ -757,104 +775,99 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
                     }),
             ),
           ],
-          if (running && admitted('pause_cycle')) action('pause_cycle'),
-          if (paused && admitted('resume_cycle')) action('resume_cycle'),
-          if ((running || paused) && admitted('cancel_cycle')) ...[
-            action('cancel_cycle', secondary: true),
-            const Padding(
-              padding: EdgeInsets.only(top: 6),
-              child: Copy(
-                'Review and confirmation are required. Cancellation is not a physical rollback.',
-                size: DeviceTypography.secondary,
-                color: muted,
-              ),
-            ),
-          ],
-          if (running || paused) ...[
-            const SizedBox(height: 16),
-            card([
-              const Row(
-                children: [
-                  Icon(Icons.lock_outline, color: muted),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Copy(
-                      'Program and options are locked during a cycle.',
-                      color: muted,
-                    ),
-                  ),
-                ],
-              ),
-            ], subdued: true),
-          ],
-          if (idle &&
-              admitted(status == 'power_off' ? 'power_on' : 'power_off'))
-            ExpansionTile(
-              title: const Copy(
-                'Power controls',
-                size: DeviceTypography.secondary,
-                lineHeight: DeviceTypography.lineHeight,
-              ),
-              children: [
-                action(
-                  status == 'power_off' ? 'power_on' : 'power_off',
-                  secondary: true,
-                ),
-              ],
-            ),
         ],
-        if (c.busy)
+        if (running && admitted('pause_cycle')) action('pause_cycle'),
+        if (paused && admitted('resume_cycle')) action('resume_cycle'),
+        if ((running || paused) && admitted('cancel_cycle')) ...[
+          action('cancel_cycle', secondary: true),
           const Padding(
-            padding: EdgeInsets.only(top: 12),
+            padding: EdgeInsets.only(top: 6),
             child: Copy(
-              'Operation in progress; reported state has not been replaced.',
+              'Review and confirmation are required. Cancellation is not a physical rollback.',
+              size: DeviceTypography.secondary,
               color: muted,
             ),
           ),
-        if (receipt != null && receipt['device_id'] == c.selectedDevice)
+        ],
+        if (running || paused) ...[
+          const SizedBox(height: 16),
+          card([
+            const Row(
+              children: [
+                Icon(Icons.lock_outline, color: muted),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Copy(
+                    'Program and options are locked during a cycle.',
+                    color: muted,
+                  ),
+                ),
+              ],
+            ),
+          ], subdued: true),
+        ],
+        if (idle && admitted(status == 'power_off' ? 'power_on' : 'power_off'))
+          action(
+            status == 'power_off' ? 'power_on' : 'power_off',
+            secondary: true,
+          ),
+        if (receipt != null &&
+            receipt['device_id'] == c.selectedDevice &&
+            (['unknown', 'failed', 'partial'].contains(receipt['status']) ||
+                (receipt['status'] == 'accepted' && c.error != null)))
           Padding(
             padding: const EdgeInsets.only(top: 12),
-            child: Copy(outcomeSummary(receipt['status']), color: muted),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Copy(outcomeSummary(receipt['status']), color: muted),
+                TextButton(
+                  onPressed: c.busy
+                      ? null
+                      : () => widget.onAction('View Details'),
+                  child: const Copy('View Details'),
+                ),
+              ],
+            ),
           ),
-        ExpansionTile(
+        Column(
           key: const ValueKey('cycle-readings'),
-          title: const Copy(
-            'Supplies and reminders',
-            size: DeviceTypography.secondary,
-            lineHeight: DeviceTypography.lineHeight,
-          ),
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            heading('Supplies and reminders'),
             for (final key in [
               if (!running && !paused) ...[
                 'mode',
                 'temperature',
                 'doorswitch',
                 'additional',
+                'remaining_minutes',
               ],
+              'operator',
               'water_lack',
               'softwater_lack',
               'bright_lack',
             ])
               if (properties.containsKey(key)) reading(key),
+            for (final entry in properties.entries)
+              if (entry.value['readable'] == true &&
+                  !{
+                    'work_status',
+                    'mode',
+                    'temperature',
+                    'doorswitch',
+                    'additional',
+                    'remaining_minutes',
+                    'operator',
+                    'water_lack',
+                    'softwater_lack',
+                    'bright_lack',
+                  }.contains(entry.key))
+                reading(entry.key),
           ],
         ),
-        ExpansionTile(
-          title: const Copy(
-            'Device details',
-            size: DeviceTypography.secondary,
-            lineHeight: DeviceTypography.lineHeight,
-          ),
-          children: [
-            for (final label in ['Device information', 'Recent Operations'])
-              ActionButton(
-                label,
-                style: 'secondary',
-                onPressed: c.busy || !c.isForeground
-                    ? null
-                    : () => widget.onAction(label),
-              ),
-          ],
-        ),
+        if (widget.showInformation)
+          InlineDeviceInformation(controller: c, onAction: widget.onAction),
       ],
     );
   }

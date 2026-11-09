@@ -76,14 +76,17 @@ void main() {
         await settle();
         await tap('Discover Mock device');
         await tap('mock-ac');
-        await tap('Refresh State');
         final before = controller.observed('power.state');
         final power = find.byKey(const ValueKey('climate-power'));
         expect(tester.widget<Switch>(power).value, before);
         await tester.runAsync(() => tester.tap(power));
         await settle();
         expect(app.currentState!.id, 'C01');
-        expect(find.text(outcomeLabel(scenario.value)), findsOneWidget);
+        if (scenario.value == 'accepted') {
+          expect(find.text('Accepted'), findsNothing);
+        } else {
+          expect(find.text(outcomeLabel(scenario.value)), findsOneWidget);
+        }
         expect(controller.receipt!['status'], scenario.value);
         expect(
           controller.observed('power.state'),
@@ -93,12 +96,20 @@ void main() {
         await tester.runAsync(() => controller.loadHistory());
         final count = controller.history.length;
         expect(count, 1);
+        if (scenario.value == 'accepted') {
+          await tap('Recent Operations');
+          final entry = find.textContaining(outcomeLabel(scenario.value)).last;
+          await tester.ensureVisible(entry);
+          await tester.runAsync(() => tester.tap(entry));
+          await settle();
+        } else {
+          await tap('View Details');
+        }
+        expect(app.currentState!.id, 'S06');
         await tap('Refresh State');
         expect(controller.error, isNull);
         expect(controller.receipt!['request_id'], request);
         expect(controller.receipt!['status'], scenario.value);
-        await tap('View Details');
-        expect(app.currentState!.id, 'S06');
         await tap('View Operations');
         expect(controller.history.length, count);
         expect(

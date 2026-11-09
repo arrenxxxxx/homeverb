@@ -284,8 +284,8 @@ void main() {
       expect(find.text('Powered off'), findsOneWidget);
       expect(tester.widget<Switch>(power).value, false);
       expect(c.receipt!['status'], 'accepted');
-      expect(find.text('Accepted'), findsOneWidget);
-      expect(find.text('View Details'), findsOneWidget);
+      expect(find.text('Accepted'), findsNothing);
+      expect(find.text('View Details'), findsNothing);
       expect(core.calls.where((v) => v['method'] == 'execute').length, 1);
       expect(core.calls.where((v) => v['method'] == 'read_state').length, 1);
       await tester.pumpWidget(const SizedBox());

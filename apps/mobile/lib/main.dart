@@ -12,6 +12,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:file_selector/file_selector.dart';
 import 'blocks.dart';
 import 'appliance_controls.dart';
+import 'appliance_panels.dart' show InlineDeviceInformation;
 import 'climate_controls.dart';
 import 'account_views.dart';
 import 'account_surfaces.dart';
@@ -156,6 +157,8 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       id == 'P04' || (onAccountDetails && accountEditor == 'signin');
   bool exporting = false;
   String? quickPowerDevice;
+  String? pendingComponent;
+  String? outcomeComponent, outcomeDevice, outcomeRequest;
   String connectionLabel = '';
   bool _disposed = false;
   int navigation = 0;
@@ -347,17 +350,44 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   }
 
   Future<void> executeClimateEdit(Json arguments) async {
-    if (c.capability('power') == null) {
-      await finish(c.execute('climate', 'set', arguments), 'S06');
-      return;
-    }
     final epoch = navigation;
     if (await executeOnDevice('climate', 'set', arguments) &&
         mounted &&
         epoch == navigation &&
         c.isForeground &&
         id != 'C01') {
-      await go('C01');
+      if (history.isNotEmpty && history.last == 'C08') {
+        await go(history.removeLast(), back: true);
+      } else {
+        await go('C01');
+      }
+    }
+  }
+
+  Future<void> executeComponentTarget(String component, num target) async {
+    if (pendingComponent != null || c.busy || !c.isForeground) return;
+    final epoch = navigation,
+        activity = activityEpoch,
+        device = c.selectedDevice;
+    setState(() => pendingComponent = component);
+    try {
+      final success = await c.execute('climate', 'set', {
+        'target_temperature': target,
+      }, componentId: component);
+      if (!success ||
+          !mounted ||
+          epoch != navigation ||
+          activity != activityEpoch ||
+          !c.isForeground ||
+          device != c.selectedDevice)
+        return;
+      outcomeComponent = component;
+      outcomeDevice = device;
+      outcomeRequest = c.receipt?['request_id'] as String?;
+      // Read back only; a retained accepted or unknown receipt is never replayed.
+      await c.perform(() => c.readComponent(component));
+    } finally {
+      if (mounted) setState(() => pendingComponent = null);
     }
   }
 
@@ -641,6 +671,66 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     }
     if (label == 'Reload local data') {
       await c.initialize();
+      return;
+    }
+    if (label.startsWith('control-component:')) {
+      if (c.busy || !c.isForeground) return;
+      final parts = label.split(':');
+      if (parts.length != 4 && parts.length != 5) return;
+      String componentId, capabilityId, actionId;
+      Json initial = {};
+      try {
+        componentId = Uri.decodeComponent(parts[1]);
+        capabilityId = Uri.decodeComponent(parts[2]);
+        actionId = Uri.decodeComponent(parts[3]);
+        if (parts.length == 5) {
+          final decoded = jsonDecode(Uri.decodeComponent(parts[4]));
+          if (decoded is! Json) return;
+          initial = decoded;
+        }
+      } on FormatException {
+        return;
+      }
+      final epoch = navigation,
+          activity = activityEpoch,
+          device = c.selectedDevice;
+      if (device == null ||
+          !await c.selectComponent(componentId) ||
+          !mounted ||
+          epoch != navigation ||
+          activity != activityEpoch ||
+          !c.isForeground ||
+          c.selectedDevice != device ||
+          c.component != componentId)
+        return;
+      final capability = c.componentCapability(componentId, capabilityId);
+      final definition = capability?['actions']?[actionId] as Json?;
+      if (capability == null ||
+          definition == null ||
+          !c.hasControlAction(
+            capabilityId,
+            actionId,
+            componentId: componentId,
+          ) ||
+          actionUnavailable(
+                capability,
+                definition,
+                trustedApproval: c.supportsTrustedApproval,
+              ) !=
+              null)
+        return;
+      final properties = definition['parameters']?['properties'] as Map? ?? {};
+      if (properties.keys.any(
+        (name) =>
+            capability['properties']?[name]?['control_requires_observation'] ==
+                true &&
+            c.observed('$capabilityId.$name') == null,
+      ))
+        return;
+      actionCapability = capability;
+      actionName = actionId;
+      actionInitialSelection = initial;
+      await go('C10');
       return;
     }
     if (label.startsWith('control:')) {
@@ -1395,7 +1485,10 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
               'This device was retrieved from the platform, but this model has no admitted readings or controls.',
               'warning',
             ],
-            ['button', 'Device Information', 'secondary'],
+            [
+              'widget',
+              InlineDeviceInformation(controller: c, onAction: action),
+            ],
           ];
           break;
         }
@@ -1510,8 +1603,24 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
               ],
             ],
           ...describedControls(c),
-          ['button', 'Device information', 'secondary'],
-          ['button', 'Recent Operations', 'secondary'],
+          if (c.receipt?['device_id'] == c.selectedDevice &&
+              ([
+                    'unknown',
+                    'failed',
+                    'partial',
+                  ].contains(c.receipt?['status']) ||
+                  (c.receipt?['status'] == 'accepted' && c.error != null)))
+            [
+              'widget',
+              FeedbackNotice(
+                title: outcomeLabel(c.receipt?['status']),
+                message: outcomeSummary(c.receipt?['status']),
+                warning: true,
+                actionLabel: 'View Details',
+                onAction: () => action('View Details'),
+              ),
+            ],
+          ['widget', InlineDeviceInformation(controller: c, onAction: action)],
         ];
         break;
       case 'C08':
@@ -2117,13 +2226,20 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       return CompartmentControls(
         controller: c,
         onAction: action,
-        onTarget: (component, value) => finish(
-          c.execute('climate', 'set', {
-            'target_temperature': value,
-          }, componentId: component),
-          'S06',
-        ),
+        onTarget: executeComponentTarget,
+        pendingComponent: pendingComponent,
+        outcomeComponent:
+            outcomeDevice == c.selectedDevice &&
+                outcomeRequest != null &&
+                outcomeRequest == c.receipt?['request_id']
+            ? outcomeComponent
+            : null,
       );
+    }
+    if (id == 'C01' &&
+        c.components.length > 1 &&
+        c.currentCard?['device']['support_status'] != 'unsupported') {
+      return DeviceDetailControls(controller: c, onAction: action);
     }
     if (id == 'C01' &&
         c.capability('climate') != null &&
@@ -2598,9 +2714,15 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
               ? DevicePage(
                   title: screen['header'] as Object,
                   onAction: action,
-                  busy:
-                      c.busy && !c.openingDevice && content is! ClimateControls,
-                  error: identical(c.error, hiddenTransientError)
+                  busy: false,
+                  error:
+                      identical(c.error, hiddenTransientError) ||
+                          (c.receipt?['device_id'] == c.selectedDevice &&
+                              [
+                                'accepted',
+                                'unknown',
+                              ].contains(c.receipt?['status']) &&
+                              c.error != null)
                       ? null
                       : c.error,
                   child: content!,
@@ -2630,6 +2752,13 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                   error:
                       (id == 'C10' && actionCapability != null) ||
                           showingSignIn ||
+                          (id == 'C01' &&
+                              c.receipt?['device_id'] == c.selectedDevice &&
+                              [
+                                'accepted',
+                                'unknown',
+                              ].contains(c.receipt?['status']) &&
+                              c.error != null) ||
                           identical(c.error, hiddenTransientError)
                       ? null
                       : c.error,

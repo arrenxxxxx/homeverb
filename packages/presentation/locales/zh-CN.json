@@ -1409,6 +1409,8 @@
   "mobile.cardComponentTarget": "{component}设定 {value}",
   "mobile.cardComponentCurrent": "{component}当前 {value}",
   "mobile.cardComponentCurrentLabel": "{component}当前",
+  "mobile.interactionComfortEnergy": "舒适与节能",
+  "mobile.interactionLightSound": "灯光与声音",
   "feedback.signInAgain": "需要重新登录",
   "feedback.goSignIn": "去登录",
   "feedback.authorizationExpired": "授权已失效，重新登录后可继续同步设备。已保存的设备仍会保留。",

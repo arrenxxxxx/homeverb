@@ -127,6 +127,8 @@ class Blocks extends StatelessWidget {
         return Rows(b[1] as List, onAction: onAction);
       case 'card':
         return Rows(b[2] as List, title: b[1], onAction: onAction);
+      case 'widget':
+        return b[1] as Widget;
       case 'button':
         return ActionButton(
           b[1],

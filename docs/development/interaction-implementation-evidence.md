@@ -113,3 +113,18 @@ dishwasher clients. Files are under
 The capture uses production refresh to obtain fictional observations; it does
 not establish physical-device or M6 cross-width acceptance. The screenshot
 fixture also contains other scenes that have not yet been accepted in M3.
+
+## M4 expanded device controls and outcomes
+
+Eligible AC extras, refrigerator information and component actions, dishwasher
+choices and readings, and generic multi-component information now appear inline.
+Running dishwasher choices remain visible but disabled. Component actions still
+enter the existing reviewed form, with current descriptor, observation, grant
+and lifecycle checks. Temperature adjustments retain observations during local
+progress and preserve accepted or uncertain receipts if a readback fails.
+
+The integrated Flutter selection passed 72 tests, including device-family and
+mixed-component layouts, observation and permission gates, navigation races,
+duplicate input, retained outcomes, native fictional receipt recovery and trusted
+confirmation. `fvm flutter analyze` passed. These results do not establish a new
+physical device capability or authorize a real appliance write.

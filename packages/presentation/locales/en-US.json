@@ -1409,6 +1409,8 @@
   "mobile.cardComponentTarget": "{component} target {value}",
   "mobile.cardComponentCurrent": "{component} current {value}",
   "mobile.cardComponentCurrentLabel": "{component} current",
+  "mobile.interactionComfortEnergy": "Comfort and energy",
+  "mobile.interactionLightSound": "Light and sound",
   "feedback.signInAgain": "Sign in again",
   "feedback.goSignIn": "Go to sign in",
   "feedback.authorizationExpired": "Your authorization has expired. Sign in again to update devices. Your saved devices are kept.",

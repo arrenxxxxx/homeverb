@@ -1891,6 +1891,8 @@ String? translateSource(
   "{component} current" => t.mobileCardComponentCurrentLabel(
     component: args["component"] ?? "{component}",
   ),
+  "Comfort and energy" => t.mobileInteractionComfortEnergy,
+  "Light and sound" => t.mobileInteractionLightSound,
   "Sign in again" => t.feedbackSignInAgain,
   "Go to sign in" => t.feedbackGoSignIn,
   "Your authorization has expired. Sign in again to update devices. Your saved devices are kept." =>
@@ -3724,6 +3726,8 @@ String? sourceForKey(String key) => switch (key) {
   "mobile.cardComponentTarget" => "{component} target {value}",
   "mobile.cardComponentCurrent" => "{component} current {value}",
   "mobile.cardComponentCurrentLabel" => "{component} current",
+  "mobile.interactionComfortEnergy" => "Comfort and energy",
+  "mobile.interactionLightSound" => "Light and sound",
   "feedback.signInAgain" => "Sign in again",
   "feedback.goSignIn" => "Go to sign in",
   "feedback.authorizationExpired" =>

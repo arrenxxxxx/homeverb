@@ -63,79 +63,88 @@ class DeviceDetailControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = controller;
-    if (c.capability('vendor.midea.dishwasher') != null) {
+    if (c.components.length == 1 &&
+        c.capability('vendor.midea.dishwasher') != null) {
       return DishwasherPanel(controller: c, onAction: onAction);
     }
-    final controls = <Widget>[];
-    final unavailableReasons = <String>{};
-    for (var i = 0; i < c.capabilities.length; i++) {
-      final capability = c.capabilities[i], id = capability['id'] as String;
-      for (final entry in (capability['actions'] as Json).entries) {
-        final action = entry.value as Json;
-        if (!c.hasControlAction(id, entry.key)) continue;
-        final reason = actionUnavailable(
-          capability,
-          action,
-          trustedApproval: c.supportsTrustedApproval,
-        );
-        if (reason != null) {
-          unavailableReasons.add(reason);
-          continue;
-        }
-        if (((action['parameters']['properties'] as Map?) ?? {}).keys.any(
-          (name) =>
-              capability['properties'][name]?['control_requires_observation'] ==
-                  true &&
-              c.observed('$id.$name') == null,
-        ))
-          continue;
-        final label =
-            sourceForKey('$id.${entry.key}') ?? controlLabel(entry.key);
-        controls.add(
-          ActionButton(
-            label,
-            key: ValueKey('control:$i:${Uri.encodeComponent(entry.key)}'),
-            style: 'secondary',
-            onPressed: c.busy || !c.isForeground
-                ? null
-                : () =>
-                      onAction('control:$i:${Uri.encodeComponent(entry.key)}'),
-          ),
-        );
-      }
-    }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        DeviceDetailHeader(controller: c),
-        if (c.components.length > 1)
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final part in c.components)
-                ChoiceChip(
-                  label: Copy(controlLabel(part['id'] as String)),
-                  selected: c.component == part['id'],
-                  onSelected: c.busy || !c.isForeground
-                      ? null
-                      : (_) => onAction('component:${part['id']}'),
-                ),
-            ],
-          ),
-        const Padding(
-          padding: EdgeInsets.fromLTRB(2, 4, 2, 12),
-          child: Copy('Available controls', bold: true),
-        ),
-        if (controls.isEmpty)
-          const Padding(
-            padding: EdgeInsets.only(bottom: 16),
-            child: Copy(
-              'No controls are allowed for this device on this connection.',
-              color: muted,
+    final groups = <Widget>[];
+    var anyControl = false;
+    for (final part in c.components) {
+      final component = part['id'] as String;
+      final capabilities = c.capabilitiesFor(component);
+      final dishwasher = capabilities.any(
+        (capability) => capability['id'] == DishwasherPanel.id,
+      );
+      final genericCapabilities = capabilities
+          .where((capability) => capability['id'] != DishwasherPanel.id)
+          .toList();
+      final snapshot = c.componentSnapshot(component);
+      dynamic observed(String property) =>
+          snapshot?['observations']?[property]?['value'];
+      final controls = <Widget>[];
+      final unavailableReasons = <String>{};
+      for (final capability in genericCapabilities) {
+        final i = capabilities.indexOf(capability),
+            id = capability['id'] as String;
+        for (final entry in (capability['actions'] as Json).entries) {
+          final action = entry.value as Json;
+          if (!c.hasControlAction(id, entry.key, componentId: component))
+            continue;
+          final reason = actionUnavailable(
+            capability,
+            action,
+            trustedApproval: c.supportsTrustedApproval,
+          );
+          if (reason != null) {
+            unavailableReasons.add(reason);
+            continue;
+          }
+          if (((action['parameters']['properties'] as Map?) ?? {}).keys.any(
+            (name) =>
+                capability['properties'][name]?['control_requires_observation'] ==
+                    true &&
+                observed('$id.$name') == null,
+          ))
+            continue;
+          final label =
+              sourceForKey('$id.${entry.key}') ?? controlLabel(entry.key);
+          final token = component == c.component
+              ? 'control:$i:${Uri.encodeComponent(entry.key)}'
+              : 'control-component:${Uri.encodeComponent(component)}:${Uri.encodeComponent(id)}:${Uri.encodeComponent(entry.key)}';
+          controls.add(
+            ActionButton(
+              label,
+              key: ValueKey(token),
+              style: 'secondary',
+              onPressed: c.busy || !c.isForeground
+                  ? null
+                  : () => onAction(token),
             ),
+          );
+        }
+      }
+      anyControl = anyControl || controls.isNotEmpty || dishwasher;
+      if (capabilities.isEmpty) continue;
+      groups.addAll([
+        if (c.components.length > 1)
+          Padding(
+            key: ValueKey('component-group:$component'),
+            padding: const EdgeInsets.fromLTRB(2, 12, 2, 12),
+            child: Copy(controlLabel(component), bold: true, size: 18),
           ),
-        if (controls.isNotEmpty)
+        if (dishwasher)
+          DishwasherPanel(
+            key: ValueKey('component-dishwasher:$component'),
+            controller: c,
+            onAction: onAction,
+            componentId: component,
+            showInformation: false,
+          ),
+        if (controls.isNotEmpty) ...[
+          const Padding(
+            padding: EdgeInsets.fromLTRB(2, 4, 2, 12),
+            child: Copy('Available controls', bold: true),
+          ),
           LayoutBuilder(
             builder: (context, constraints) {
               final columns =
@@ -155,12 +164,13 @@ class DeviceDetailControls extends StatelessWidget {
               );
             },
           ),
+        ],
         for (final reason in unavailableReasons)
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: Copy(reason, color: muted),
           ),
-        for (final capability in c.capabilities)
+        for (final capability in genericCapabilities)
           if ((capability['properties'] as Json).values.any(
             (p) => p['readable'] == true,
           ))
@@ -173,37 +183,38 @@ class DeviceDetailControls extends StatelessWidget {
                           controlLabel(entry.key),
                       UiMessage(
                         propertyValue(
-                          c.observed('${capability['id']}.${entry.key}'),
+                          observed('${capability['id']}.${entry.key}'),
                           entry.value as Json,
                           propertyId: '${capability['id']}.${entry.key}',
                         ),
                       ),
                       null,
-                      if (c.readingLoading(c.component) &&
-                          c.observed('${capability['id']}.${entry.key}') ==
-                              null)
+                      if (c.readingLoading(component) &&
+                          observed('${capability['id']}.${entry.key}') == null)
                         const ReadingValue('—', loading: true),
                     ],
               ],
-              title: c.capabilities.length == 1
+              title: capabilities.length == 1
                   ? 'Observed readings'
                   : controlLabel(capability['id'] as String),
               onAction: onAction,
             ),
-        ActionButton(
-          'Device information',
-          style: 'secondary',
-          onPressed: c.busy || !c.isForeground
-              ? null
-              : () => onAction('Device information'),
-        ),
-        ActionButton(
-          'Recent Operations',
-          style: 'secondary',
-          onPressed: c.busy || !c.isForeground
-              ? null
-              : () => onAction('Recent Operations'),
-        ),
+      ]);
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        DeviceDetailHeader(controller: c),
+        if (!anyControl)
+          const Padding(
+            padding: EdgeInsets.only(bottom: 16),
+            child: Copy(
+              'No controls are allowed for this device on this connection.',
+              color: muted,
+            ),
+          ),
+        ...groups,
+        InlineDeviceInformation(controller: c, onAction: onAction),
       ],
     );
   }

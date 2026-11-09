@@ -5,6 +5,7 @@ import 'controller.dart';
 import 'controls.dart';
 import 'appliance_panels.dart';
 import 'native_client.dart';
+import 'receipts.dart';
 import 'skin.dart';
 import 'device_readings.dart';
 import 'device_typography.dart';
@@ -35,11 +36,37 @@ class CompartmentControls extends StatelessWidget {
     required this.controller,
     required this.onAction,
     required this.onTarget,
+    this.pendingComponent,
+    this.outcomeComponent,
     super.key,
   });
   final HomeController controller;
   final ActionHandler onAction;
   final void Function(String component, num target) onTarget;
+  final String? pendingComponent, outcomeComponent;
+
+  bool get _showReceipt {
+    final receipt = controller.receipt;
+    return pendingComponent == null &&
+        receipt != null &&
+        receipt['device_id'] == controller.selectedDevice &&
+        (['unknown', 'failed', 'partial'].contains(receipt['status']) ||
+            (receipt['status'] == 'accepted' && controller.error != null));
+  }
+
+  Widget _receiptFeedback() => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Copy(outcomeSummary(controller.receipt!['status']), color: muted),
+        TextButton(
+          onPressed: controller.busy ? null : () => onAction('View Details'),
+          child: const Copy('View Details'),
+        ),
+      ],
+    ),
+  );
 
   @override
   Widget build(BuildContext context) => _readOnly
@@ -54,12 +81,7 @@ class CompartmentControls extends StatelessWidget {
             for (final part in controller.components)
               compartment(context, part),
             RefrigeratorModes(controller: controller),
-            for (final label in ['Device information', 'Recent Operations'])
-              ActionButton(
-                label,
-                style: 'secondary',
-                onPressed: controller.busy ? null : () => onAction(label),
-              ),
+            InlineDeviceInformation(controller: controller, onAction: onAction),
           ],
         );
 
@@ -161,26 +183,8 @@ class CompartmentControls extends StatelessWidget {
         },
       ),
       RefrigeratorModes(controller: controller, compact: true),
-      for (final label in ['Device information', 'Recent Operations'])
-        TextButton(
-          onPressed: controller.busy || !controller.isForeground
-              ? null
-              : () => onAction(label),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(
-                child: Copy(
-                  label,
-                  size: DeviceTypography.body,
-                  lineHeight: DeviceTypography.lineHeight,
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Icon(Icons.chevron_right, size: 20),
-            ],
-          ),
-        ),
+      if (_showReceipt) _receiptFeedback(),
+      InlineDeviceInformation(controller: controller, onAction: onAction),
     ],
   );
 
@@ -412,29 +416,33 @@ class CompartmentControls extends StatelessWidget {
         }
       }
     }
-    final extraActions = controller
-        .capabilitiesFor(id)
-        .any(
-          (capability) => (capability['actions'] as Json).entries.any(
-            (entry) =>
-                controller.hasControlAction(
-                  capability['id'] as String,
-                  entry.key,
-                  componentId: id,
-                ) &&
-                actionUnavailable(
-                      capability,
-                      entry.value as Json,
-                      trustedApproval: controller.supportsTrustedApproval,
-                    ) ==
-                    null &&
-                (capability['id'] != 'climate' ||
-                    entry.key != 'set' ||
-                    (entry.value['parameters']['properties'] as Map).keys.any(
-                      (name) => name != 'target_temperature',
-                    )),
-          ),
-        );
+    final extraActions = <(Json, String)>[];
+    for (final capability in controller.capabilitiesFor(id)) {
+      for (final entry in (capability['actions'] as Json).entries) {
+        final action = entry.value as Json;
+        if (capability['id'] == 'climate' && entry.key == 'set' && editable)
+          continue;
+        if (!controller.hasControlAction(
+              capability['id'] as String,
+              entry.key,
+              componentId: id,
+            ) ||
+            actionUnavailable(
+                  capability,
+                  action,
+                  trustedApproval: controller.supportsTrustedApproval,
+                ) !=
+                null ||
+            ((action['parameters']?['properties'] as Map?) ?? {}).keys.any(
+              (name) =>
+                  capability['properties']?[name]?['control_requires_observation'] ==
+                      true &&
+                  observation('${capability['id']}.$name') == null,
+            ))
+          continue;
+        extraActions.add((capability, entry.key));
+      }
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -454,6 +462,11 @@ class CompartmentControls extends StatelessWidget {
                     ),
                     const SizedBox(width: 10),
                     Expanded(child: Copy(label, bold: true, size: 18)),
+                    if (pendingComponent == id)
+                      OperationPulse(
+                        key: ValueKey('component-pending:$id'),
+                        size: 20,
+                      ),
                     if (controller.componentCapability(id, 'power') != null)
                       ReadingValue(
                         propertyValue(observation('power.state')?['value'], {}),
@@ -506,6 +519,8 @@ class CompartmentControls extends StatelessWidget {
             ),
           ),
         ),
+        if (_showReceipt && (outcomeComponent ?? controller.component) == id)
+          _receiptFeedback(),
         if (extraRows.isNotEmpty) Rows(extraRows, onAction: onAction),
         if (editable)
           ActionButton(
@@ -519,14 +534,19 @@ class CompartmentControls extends StatelessWidget {
                 ? null
                 : () => onAction('edit-component:${Uri.encodeComponent(id)}'),
           ),
-        if (extraActions)
+        for (final entry in extraActions)
           ActionButton(
-            'More controls',
-            key: ValueKey('open-component:$id'),
+            sourceForKey('${entry.$1['id']}.${entry.$2}') ??
+                controlLabel(entry.$2),
+            key: ValueKey(
+              'component-control:$id:${entry.$1['id']}:${entry.$2}',
+            ),
             style: 'secondary',
-            onPressed: controller.busy
+            onPressed: controller.busy || !controller.isForeground
                 ? null
-                : () => onAction('open-component:${Uri.encodeComponent(id)}'),
+                : () => onAction(
+                    'control-component:${Uri.encodeComponent(id)}:${Uri.encodeComponent(entry.$1['id'] as String)}:${Uri.encodeComponent(entry.$2)}',
+                  ),
           ),
         if (targetProperty != null && !editable)
           Padding(

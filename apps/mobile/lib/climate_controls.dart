@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'blocks.dart';
+import 'appliance_panels.dart' show InlineDeviceInformation;
 import 'climate_capabilities.dart';
 import 'climate_panel.dart';
 import 'controller.dart';
@@ -709,8 +710,36 @@ class _ClimateControlsState extends State<ClimateControls>
       if (verticalDirection != null)
         airflow('Vertical swing', Icons.swap_vert, vertical, verticalDirection),
       if (direction != null) row('Air direction', Icons.air, direction),
-      for (final f in extras) row(f.$1, f.$2, f.$3),
     ];
+    const lightAndSound = {
+      'light_sensing',
+      'display',
+      'display_light',
+      'button_sound',
+      'sound',
+      'buzzer',
+    };
+    final comfort = extras
+        .where((feature) => !lightAndSound.contains(feature.$3.parameter))
+        .toList();
+    final utilities = extras
+        .where((feature) => lightAndSound.contains(feature.$3.parameter))
+        .toList();
+    Widget featureGroup(
+      String title,
+      List<(String, IconData, ClimateChoice)> features,
+    ) => card(
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Copy(title, bold: true, size: DeviceTypography.section),
+          for (var i = 0; i < features.length; i++) ...[
+            if (i > 0) const Divider(height: 24),
+            row(features[i].$1, features[i].$2, features[i].$3),
+          ],
+        ],
+      ),
+    );
     final receipt = c.receipt;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -728,11 +757,6 @@ class _ClimateControlsState extends State<ClimateControls>
                       : (_) => widget.onAction('component:' + part['id']),
                 ),
             ],
-          ),
-        if (c.busy && pending == null)
-          const Padding(
-            padding: EdgeInsets.only(bottom: 12),
-            child: OperationProgress(label: 'Updating device…'),
           ),
         temperature(target, power),
         if (mode != null) ...[
@@ -780,8 +804,18 @@ class _ClimateControlsState extends State<ClimateControls>
           const SizedBox(height: 8),
           card(control),
         ],
+        if (comfort.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          featureGroup('Comfort and energy', comfort),
+        ],
+        if (utilities.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          featureGroup('Light and sound', utilities),
+        ],
         if (receipt != null &&
             receipt['device_id'] == c.selectedDevice &&
+            (['unknown', 'failed', 'partial'].contains(receipt['status']) ||
+                (receipt['status'] == 'accepted' && c.error != null)) &&
             pending == null) ...[
           const SizedBox(height: 16),
           Semantics(
@@ -828,6 +862,7 @@ class _ClimateControlsState extends State<ClimateControls>
             values: {},
           ),
         ],
+        InlineDeviceInformation(controller: c, onAction: widget.onAction),
       ],
     );
   }

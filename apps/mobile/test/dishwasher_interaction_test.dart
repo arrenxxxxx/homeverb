@@ -11,6 +11,44 @@ import 'package:homeverb_mobile/skin.dart';
 import 'device_detail_controls_test.dart' show DishwasherFixture, dishwasher;
 
 void main() {
+  testWidgets('expanded cycle choices remain usable at large text', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final core = DishwasherFixture();
+    final controller = HomeController(
+      core,
+      LocalPreferences(File('/unused/cycle-large.json')),
+    );
+    addTearDown(controller.dispose);
+    await controller.initialize();
+    await controller.selectDevice(core.device['id']);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MediaQuery(
+            data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+            child: SingleChildScrollView(
+              child: DishwasherPanel(controller: controller, onAction: (_) {}),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(ExpansionTile), findsNothing);
+    expect(find.byKey(const ValueKey('wash-program:eco_wash')), findsOneWidget);
+    expect(find.byKey(const ValueKey('wash-additional:9')), findsOneWidget);
+    final option = find.byKey(const ValueKey('wash-additional:9'));
+    await tester.ensureVisible(option);
+    expect(tester.getSize(option).height, greaterThanOrEqualTo(44));
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
+  });
+
   for (final scenario in [
     ('work', null, 'pause_cycle'),
     ('work', 'pause', 'resume_cycle'),
@@ -49,6 +87,26 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      expect(find.byType(ExpansionTile), findsNothing);
+      final schema = controller.capability(
+        dishwasher,
+      )!['actions']['start_cycle']['parameters']['properties'];
+      for (final parameter in ['program', 'additional']) {
+        for (final value in schema[parameter]['enum'] as List) {
+          final key = parameter == 'program'
+              ? 'wash-program:$value'
+              : 'wash-additional:$value';
+          expect(find.byKey(ValueKey(key)), findsOneWidget);
+          if (scenario.$3 != 'start_cycle') {
+            expect(
+              tester
+                  .widget<RadioListTile<Object>>(find.byKey(ValueKey(key)))
+                  .enabled,
+              false,
+            );
+          }
+        }
+      }
       for (final action in ['start_cycle', 'pause_cycle', 'resume_cycle']) {
         expect(
           find.byKey(ValueKey('control:0:$action')),
@@ -60,7 +118,15 @@ void main() {
           find.byKey(const ValueKey('control:0:cancel_cycle')),
           findsOneWidget,
         );
-        expect(find.byType(RadioListTile<Object>), findsNothing);
+        expect(find.byType(RadioListTile<Object>), findsWidgets);
+        expect(
+          tester
+              .widgetList<RadioListTile<Object>>(
+                find.byType(RadioListTile<Object>),
+              )
+              .every((tile) => tile.enabled == false),
+          isTrue,
+        );
         expect(find.byIcon(Icons.thermostat_outlined), findsOneWidget);
         expect(find.byIcon(Icons.door_front_door_outlined), findsOneWidget);
         expect(find.byIcon(Icons.tune), findsOneWidget);
@@ -84,24 +150,13 @@ void main() {
           reason: 'The panel opens review; it never consumes trusted approval.',
         );
       } else if (scenario.$3 == null) {
-        expect(
-          find.text(
-            'Cycle state is unknown. Refresh before choosing a wash action.',
-          ),
-          findsOneWidget,
-        );
+        expect(find.text('Control unavailable.'), findsOneWidget);
       } else {
         final start = find.byKey(const ValueKey('control:0:start_cycle'));
         expect(tester.widget<ActionButton>(start).onPressed, isNull);
-        expect(find.byType(RadioListTile<Object>), findsNWidgets(5));
-        expect(find.text('42°C'), findsNothing);
-        // Collapsed groups preserve every descriptor option without flooding
-        // the initial view, and selections remain drafts only.
+        expect(find.byType(RadioListTile<Object>), findsWidgets);
+        expect(find.byType(ExpansionTile), findsNothing);
         for (final parameter in ['program', 'additional']) {
-          final more = find.byKey(ValueKey('more-wash-$parameter'));
-          await tester.ensureVisible(more);
-          await tester.tap(more);
-          await tester.pumpAndSettle();
           final schema = controller.capability(
             dishwasher,
           )!['actions']['start_cycle']['parameters']['properties'][parameter];
@@ -117,9 +172,6 @@ void main() {
               findsOneWidget,
             );
           }
-          await tester.ensureVisible(more);
-          await tester.tap(more);
-          await tester.pumpAndSettle();
         }
         expect(dispatched, isEmpty);
 
