@@ -1273,6 +1273,146 @@ const sampleNames = {
   'sensor': ['Air sensor', 'Living Room', '22°C', '46% humidity'],
 };
 
+/// Decorative outlined appliance symbol. Device capabilities, never this
+/// symbol, determine which controls are offered.
+class CardDeviceIcon extends StatelessWidget {
+  const CardDeviceIcon(this.kind, {super.key});
+  final String kind;
+
+  @override
+  Widget build(BuildContext context) => ExcludeSemantics(
+    child: Center(
+      child: SizedBox.square(
+        dimension: 42,
+        child: CustomPaint(
+          painter: _CardDeviceIconPainter(
+            kind,
+            MediaQuery.highContrastOf(context) ? Colors.black : muted,
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+class _CardDeviceIconPainter extends CustomPainter {
+  const _CardDeviceIconPainter(this.kind, this.color);
+  final String kind;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.save();
+    canvas.scale(size.width / 24, size.height / 24);
+    final pen = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+    void line(double x1, double y1, double x2, double y2) =>
+        canvas.drawLine(Offset(x1, y1), Offset(x2, y2), pen);
+    void rounded(double x, double y, double w, double h, double r) =>
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromLTWH(x, y, w, h),
+            Radius.circular(r),
+          ),
+          pen,
+        );
+    void circle(double x, double y, double r) =>
+        canvas.drawCircle(Offset(x, y), r, pen);
+    void path(void Function(Path) draw) {
+      final shape = Path();
+      draw(shape);
+      canvas.drawPath(shape, pen);
+    }
+
+    switch (kind) {
+      case 'ac':
+        rounded(2, 4, 20, 11, 2);
+        line(6, 8, 18, 8);
+        line(6, 12, 18, 12);
+        path(
+          (p) => p
+            ..moveTo(8, 15)
+            ..cubicTo(8, 17, 6, 17, 6, 19),
+        );
+        path(
+          (p) => p
+            ..moveTo(12, 15)
+            ..lineTo(12, 21),
+        );
+        path(
+          (p) => p
+            ..moveTo(16, 15)
+            ..cubicTo(16, 17, 18, 17, 18, 19),
+        );
+      case 'refrigerator':
+        rounded(5, 2, 14, 20, 2);
+        line(5, 10, 19, 10);
+        line(9, 5, 9, 7);
+        line(9, 13, 9, 17);
+      case 'dishwasher':
+        rounded(3, 2, 18, 20, 2);
+        line(3, 7, 21, 7);
+        circle(7, 4.5, .5);
+        circle(10, 4.5, .5);
+        circle(12, 14, 4);
+      case 'fan':
+        circle(12, 12, 9);
+        circle(12, 12, 1.4);
+        path(
+          (p) => p
+            ..moveTo(12, 10.6)
+            ..cubicTo(8, 5, 14, 4, 14, 8)
+            ..lineTo(13, 11),
+        );
+        path(
+          (p) => p
+            ..moveTo(13.2, 12.7)
+            ..cubicTo(20, 11, 19, 17, 15, 16)
+            ..lineTo(12.8, 13.3),
+        );
+        path(
+          (p) => p
+            ..moveTo(11, 13)
+            ..cubicTo(10, 20, 5, 17, 8, 14)
+            ..lineTo(10.6, 12),
+        );
+      case 'lamp':
+        path(
+          (p) => p
+            ..moveTo(8, 15)
+            ..cubicTo(8, 13, 5, 12, 5, 9)
+            ..cubicTo(5, 5, 8, 2, 12, 2)
+            ..cubicTo(16, 2, 19, 5, 19, 9)
+            ..cubicTo(19, 12, 16, 13, 16, 15)
+            ..close(),
+        );
+        line(9, 18, 15, 18);
+        line(10, 21, 14, 21);
+      case 'tv':
+        rounded(2, 4, 20, 14, 2);
+        line(8, 22, 16, 22);
+        line(12, 18, 12, 22);
+      case 'sensor':
+        rounded(4, 3, 16, 18, 3);
+        circle(12, 10, 3);
+        line(9, 17, 15, 17);
+      default:
+        rounded(4, 3, 16, 18, 2);
+        line(8, 7, 16, 7);
+        circle(12, 15, 3);
+    }
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant _CardDeviceIconPainter oldDelegate) =>
+      oldDelegate.kind != kind || oldDelegate.color != color;
+}
+
 class DeviceGrid extends StatelessWidget {
   const DeviceGrid({
     required this.keys,
@@ -1456,7 +1596,11 @@ class DeviceTile extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        SizedBox(width: 56, height: 48, child: product(kind)),
+                        SizedBox(
+                          width: 56,
+                          height: 48,
+                          child: CardDeviceIcon(kind),
+                        ),
                         const Spacer(),
                         if (showPower)
                           GestureDetector(
@@ -1500,7 +1644,7 @@ class DeviceTile extends StatelessWidget {
                                   cached ? 'Cached · 2h ago' : d[3],
                                   size: 10,
                                   color: secondary,
-                                  maxLines: largeText ? null : 1,
+                                  maxLines: largeText ? null : 3,
                                 ),
                             ],
                           ),
@@ -1537,10 +1681,7 @@ class DeviceTile extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          SizedBox(
-                            height: 98,
-                            child: Center(child: product(kind)),
-                          ),
+                          SizedBox(height: 98, child: CardDeviceIcon(kind)),
                           const SizedBox(height: 12),
                           Copy(
                             data == null ? d[0] : LiteralText(d[0]),
@@ -1561,7 +1702,7 @@ class DeviceTile extends StatelessWidget {
                       ),
                     )
                   : SizedBox(
-                      height: large ? 197 : compactHeight,
+                      height: large ? 197 : compactHeight + 8,
                       child: Stack(
                         children: [
                           Positioned(
@@ -1570,7 +1711,7 @@ class DeviceTile extends StatelessWidget {
                             width: large ? 100 : null,
                             right: large ? null : 15,
                             height: large ? 95 : 98,
-                            child: product(kind),
+                            child: CardDeviceIcon(kind),
                           ),
                           if (large) ...[
                             Positioned(
@@ -1617,7 +1758,7 @@ class DeviceTile extends StatelessWidget {
                                   d[3],
                                   size: 14,
                                   color: secondary,
-                                  maxLines: 1,
+                                  maxLines: 2,
                                 ),
                               ),
                           ] else ...[
@@ -1641,7 +1782,7 @@ class DeviceTile extends StatelessWidget {
                               ),
                             ),
                             textAt(
-                              compactHeight - 59,
+                              compactHeight - 69,
                               Copy(
                                 d[2],
                                 size: 24,
@@ -1649,14 +1790,18 @@ class DeviceTile extends StatelessWidget {
                                 color: color,
                                 maxLines: 1,
                               ),
-                              right: 50,
+                              right:
+                                  (presentation?.showPower ??
+                                      (kind != 'sensor'))
+                                  ? 50
+                                  : 14,
                             ),
                             if (hasCaption)
                               textAt(
-                                compactHeight - 26,
+                                compactHeight - 36,
                                 Copy(
                                   cached ? 'Cached · 2h ago' : d[3],
-                                  maxLines: 1,
+                                  maxLines: 3,
                                   size: 10,
                                   color: secondary,
                                 ),

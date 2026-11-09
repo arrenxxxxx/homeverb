@@ -1,4 +1,5 @@
 import 'device_page.dart';
+import 'device_summary.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -729,7 +730,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         return;
       }
       try {
-        if (!await c.selectDevice(device)) return;
+        if (!await c.selectDevice(device, readOnOpen: false)) return;
         if (!mounted ||
             epoch != navigation ||
             foreground != activityEpoch ||
@@ -1834,16 +1835,19 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   Widget deviceCards() => DeviceGrid(
     keys: c.visibleCards.map((v) => v['device']['id'] as String).toList(),
     data: c.visibleCards.map((v) {
-      final d = v['device'] as Json,
-          p = v['preferences'] as Json,
-          s = c.snapshots[d['id']];
+      final d = v['device'] as Json, p = v['preferences'] as Json;
+      final summary = deviceSummary(
+        context,
+        d,
+        (component) => c.deviceComponentSnapshot(d['id'] as String, component),
+      );
       return [
         '${d['alias']}',
         roomPresentation(c, p['room_id']),
-        s?['observations']?['climate.target_temperature']?['value'] == null
-            ? '—'
-            : '${s!['observations']['climate.target_temperature']['value']}°C',
-        d['support_status'] == 'unsupported' ? 'Unsupported model' : '',
+        summary.value,
+        d['support_status'] == 'unsupported'
+            ? 'Unsupported model'
+            : summary.caption,
       ];
     }).toList(),
     presentations: {

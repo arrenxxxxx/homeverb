@@ -156,7 +156,7 @@ or physical-phone acceptance.
 | M0 | Complete | None | Baseline and deterministic delayed/error fixtures; requirement-to-test map and screen inventory recorded |
 | M1 | Complete | M0 | Immediate device/account entry, local restoration and independent readiness; delayed navigation and restart/cache isolation tests pass |
 | M2 | Complete | M1 | First-reading states, partial refresh, pull-to-refresh and 3-second integration; state/feedback/lifecycle matrix passes |
-| M3 | Pending | M0; integrate after M2 | Icon cards and capability-specific summaries; all card variants and hit regions pass visual/behavior checks |
+| M3 | Complete | M0; integrate after M2 | Icon cards and capability-specific summaries; all card variants and hit regions pass visual/behavior checks |
 | M4 | Pending | M1, M2 | All device groups expanded, local command feedback and truthful outcomes; all device-family and approval tests pass |
 | M5 | Pending | M1, M2 | Secondary flows, centered Cancel and content-width Toast; route/geometry/empty/error tests pass |
 | M6 | Pending | M1-M5 | Integrated production captures, regressions and measured performance; evidence and unresolved physical acceptance explicitly recorded |

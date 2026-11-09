@@ -1440,6 +1440,9 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get mobileInteractionReadingsUnavailable => '\u6682\u65f6\u65e0\u6cd5\u8bfb\u53d6\u72b6\u6001\u3002';
 	@override String get mobileInteractionIndoor => '\u5ba4\u5185';
 	@override String get mobileInteractionLoading => '\u6b63\u5728\u52a0\u8f7d';
+	@override String mobileCardComponentTarget({required Object component, required Object value}) => '${component}\u8bbe\u5b9a ${value}';
+	@override String mobileCardComponentCurrent({required Object component, required Object value}) => '${component}\u5f53\u524d ${value}';
+	@override String mobileCardComponentCurrentLabel({required Object component}) => '${component}\u5f53\u524d';
 	@override String get feedbackSignInAgain => '\u9700\u8981\u91cd\u65b0\u767b\u5f55';
 	@override String get feedbackGoSignIn => '\u53bb\u767b\u5f55';
 	@override String get feedbackAuthorizationExpired => '\u6388\u6743\u5df2\u5931\u6548\uff0c\u91cd\u65b0\u767b\u5f55\u540e\u53ef\u7ee7\u7eed\u540c\u6b65\u8bbe\u5907\u3002\u5df2\u4fdd\u5b58\u7684\u8bbe\u5907\u4ecd\u4f1a\u4fdd\u7559\u3002';

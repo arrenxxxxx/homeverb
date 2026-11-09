@@ -4257,6 +4257,15 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	/// en-US: 'Loading'
 	String get mobileInteractionLoading => 'Loading';
 
+	/// en-US: '{component} target {value}'
+	String mobileCardComponentTarget({required Object component, required Object value}) => '${component} target ${value}';
+
+	/// en-US: '{component} current {value}'
+	String mobileCardComponentCurrent({required Object component, required Object value}) => '${component} current ${value}';
+
+	/// en-US: '{component} current'
+	String mobileCardComponentCurrentLabel({required Object component}) => '${component} current';
+
 	/// en-US: 'Sign in again'
 	String get feedbackSignInAgain => 'Sign in again';
 

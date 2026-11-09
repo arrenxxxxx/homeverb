@@ -1880,6 +1880,17 @@ String? translateSource(
   "Could not load readings." => t.mobileInteractionReadingsUnavailable,
   "Indoor" => t.mobileInteractionIndoor,
   "Loading" => t.mobileInteractionLoading,
+  "{component} target {value}" => t.mobileCardComponentTarget(
+    component: args["component"] ?? "{component}",
+    value: args["value"] ?? "{value}",
+  ),
+  "{component} current {value}" => t.mobileCardComponentCurrent(
+    component: args["component"] ?? "{component}",
+    value: args["value"] ?? "{value}",
+  ),
+  "{component} current" => t.mobileCardComponentCurrentLabel(
+    component: args["component"] ?? "{component}",
+  ),
   "Sign in again" => t.feedbackSignInAgain,
   "Go to sign in" => t.feedbackGoSignIn,
   "Your authorization has expired. Sign in again to update devices. Your saved devices are kept." =>
@@ -3710,6 +3721,9 @@ String? sourceForKey(String key) => switch (key) {
   "mobile.interactionReadingsUnavailable" => "Could not load readings.",
   "mobile.interactionIndoor" => "Indoor",
   "mobile.interactionLoading" => "Loading",
+  "mobile.cardComponentTarget" => "{component} target {value}",
+  "mobile.cardComponentCurrent" => "{component} current {value}",
+  "mobile.cardComponentCurrentLabel" => "{component} current",
   "feedback.signInAgain" => "Sign in again",
   "feedback.goSignIn" => "Go to sign in",
   "feedback.authorizationExpired" =>

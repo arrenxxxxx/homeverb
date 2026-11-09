@@ -473,18 +473,12 @@ void main() {
             (tester.widget<Container>(off).decoration as BoxDecoration).color,
           ),
         );
-        final assets = tester.widgetList<Image>(find.byType(Image)).map((w) {
-          final provider = w.image is ResizeImage
-              ? (w.image as ResizeImage).imageProvider
-              : w.image;
-          return (provider as AssetImage).assetName;
-        });
+        expect(find.byType(Image), findsNothing);
         expect(
-          assets,
-          containsAll([
-            'assets/refrigerator-v1.png',
-            'assets/dishwasher-v1.png',
-          ]),
+          tester
+              .widgetList<CardDeviceIcon>(find.byType(CardDeviceIcon))
+              .map((icon) => icon.kind),
+          containsAll(['ac', 'refrigerator', 'dishwasher']),
         );
         const path = String.fromEnvironment('HOMEVERB_CARD_CAPTURE');
         if (path.isNotEmpty && scale == 1) {

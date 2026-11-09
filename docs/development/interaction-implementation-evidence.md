@@ -95,3 +95,21 @@ publication, repeated pulls, the 2,999/3,000 ms boundary, ten silent failures,
 background/resume, localization and uncertain-receipt retention. Flutter
 analysis, catalog checks and documentation/repository/contract validators
 passed. These are fictional tests; final screenshots and performance remain M6.
+
+## M3 card icons and summaries
+
+Home, search and room cards render locally drawn outlined appliance symbols.
+Card summaries use the available component observations: AC target and mode,
+refrigerator zone targets or current temperatures with their meanings retained,
+and dishwasher program, phase and remaining time. Missing observations remain
+missing, and the separate quick-power path still checks existing grants.
+
+`device_summary_test.dart`, `device_cards_test.dart` and
+`compact_device_cards_test.dart` passed 22 tests; four opt-in font-dependent
+captures were skipped. The actual `NativeApp` home capture ran for both skins
+at 390 logical pixels and 100%/200% text using fictional AC, refrigerator and
+dishwasher clients. Files are under
+`apps/mobile/build/verification/interaction/<skin>/en-US/390px-<scale>pct/`.
+The capture uses production refresh to obtain fictional observations; it does
+not establish physical-device or M6 cross-width acceptance. The screenshot
+fixture also contains other scenes that have not yet been accepted in M3.

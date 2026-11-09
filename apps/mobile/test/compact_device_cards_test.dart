@@ -145,7 +145,7 @@ void main() {
   }
 
   testWidgets(
-    'blue cards fit three compact rows and keep warm layout unchanged',
+    'blue cards fit three compact rows and warm cards retain summary space',
     (tester) async {
       await grid(tester);
       final cards = find.byType(DeviceTile);
@@ -159,10 +159,41 @@ void main() {
       expect(find.text('—'), findsOneWidget);
       expect(tester.takeException(), isNull);
       await grid(tester, skin: 'window_light');
-      expect(tester.getSize(find.byType(DeviceTile).first).height, 233);
+      expect(tester.getSize(find.byType(DeviceTile).first).height, 241);
       expect(tester.takeException(), isNull);
     },
   );
+
+  for (final skin in ['sky_blue', 'window_light']) {
+    for (final scale in [1.0, 2.0]) {
+      testWidgets('card artwork uses local outlines for $skin at $scale text', (
+        tester,
+      ) async {
+        await grid(tester, skin: skin, scale: scale);
+        for (final id in _ids) {
+          final tile = find.byWidgetPredicate(
+            (widget) => widget is DeviceTile && widget.deviceKey == id,
+          );
+          expect(
+            find.descendant(of: tile, matching: find.byType(Image)),
+            findsNothing,
+          );
+          final icon = tester.widget<CardDeviceIcon>(
+            find.descendant(of: tile, matching: find.byType(CardDeviceIcon)),
+          );
+          expect(
+            icon.kind,
+            id == 'fridge'
+                ? 'refrigerator'
+                : id == 'washer'
+                ? 'dishwasher'
+                : 'ac',
+          );
+        }
+        expect(tester.takeException(), isNull);
+      });
+    }
+  }
 
   testWidgets('compact card opens directly and has no extra menu gestures', (
     tester,

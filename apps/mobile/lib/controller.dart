@@ -681,6 +681,8 @@ class HomeController extends ChangeNotifier {
   Json? capability(String id) => componentCapability(component, id);
   Json? componentSnapshot(String id) =>
       _componentSnapshots[(selectedDevice, id)];
+  Json? deviceComponentSnapshot(String device, String component) =>
+      _componentSnapshots[(device, component)];
   Object? componentReadError(String id) =>
       _componentReadErrors[(selectedDevice, id)];
   bool readingLoading(String componentId) =>
@@ -691,7 +693,7 @@ class HomeController extends ChangeNotifier {
           .where((part) => componentCapability(part['id'], 'climate') != null)
           .length >
       1;
-  Future<bool> selectDevice(String id) {
+  Future<bool> selectDevice(String id, {bool readOnOpen = true}) {
     final previous = _deviceOpeningWork;
     final epoch = _readEpoch;
     final generation = _deviceOpeningGeneration;
@@ -758,6 +760,7 @@ class HomeController extends ChangeNotifier {
           // replacement so a slow permission inspection cannot delay observations.
           Object? firstFailure;
           for (final part in components) {
+            if (!readOnOpen) break;
             if ((part['capabilities'] as List? ?? []).isEmpty) continue;
             final firstRead = _componentSnapshots[(id, part['id'])] == null;
             try {
