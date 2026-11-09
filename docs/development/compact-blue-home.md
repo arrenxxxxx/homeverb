@@ -1,5 +1,11 @@
 # Compact Sky Blue device home
 
+The November 9 [interaction handoff](15-interaction-experience-handoff.md)
+specifies a pending replacement of product artwork with the approved outlined
+icons across both skins and all home-card variants. The layout and verification
+below describe the earlier implementation; the separate November 9 missing-power
+appearance fallback remains required.
+
 The October 31 owner phone review showed that the Sky Blue homepage retained the
 original tall device-card composition. A large product image, separate room line,
 and bottom power row allowed only two complete rows on the reviewed phone. This

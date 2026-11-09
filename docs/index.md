@@ -20,6 +20,7 @@ Start with the progressive development path. Reference documents define invarian
 ## Reference
 
 - [Device interaction design](development/14-device-interaction-design.md): reusable status, choice, switch and action rules for all providers.
+- [November 9 interaction implementation handoff](development/15-interaction-experience-handoff.md): approved icon cards, expanded device groups, loading/cache/refresh behavior and verifiable pending milestones across the App.
 
 - Product: [requirements](product-requirements.md), [architecture](architecture.md), [lifecycle](process-lifecycle.md).
 - Contracts: [domain](domain-model.md), [capabilities](capabilities.md), [adapters](adapter-contract.md), [routing/execution](routing-and-execution.md), [errors](errors.md), [schemas](../schemas/README.md).

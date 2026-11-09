@@ -1,5 +1,11 @@
 # Account connection and foreground refresh experience
 
+The November 9 [interaction handoff](15-interaction-experience-handoff.md)
+defines pending follow-up changes to immediate account navigation, centered
+Cancel, pull-to-refresh and compact feedback. Its requirements supersede the
+conflicting refresh presentation here; the historical checks below do not prove
+implementation of that follow-up.
+
 ## Scope
 
 The mobile app separates adding a supported platform from viewing locally saved

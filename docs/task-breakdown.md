@@ -1,5 +1,23 @@
 # Implementation status and next tasks
 
+## November 9 interaction experience handoff
+
+The owner approved an interaction preview and requested a development handoff
+for a separate implementation session. The
+[implementation specification](development/15-interaction-experience-handoff.md)
+defines pending milestones M0-M6 and measurable acceptance for immediate
+navigation, local restoration, first-read loading/failure, the existing silent
+three-second schedule, pull-to-refresh, icon-only home cards, fully expanded
+device groups, centered sign-in cancellation and compact Toasts. Secondary
+account/organization/settings/history/diagnostics journeys are included.
+
+This phase supplies documentation only. Flutter implementation and production
+captures for this revision remain pending; the fictional HTML preview is not App
+or physical-device acceptance. Existing authority, lifecycle, write outcomes and
+compatibility are unchanged. The specification explicitly replaces conflicting
+older artwork, folding and refresh presentation requirements without rewriting
+their historical verification evidence.
+
 The October 23 refrigerator presentation removes repetitive Stale labels from
 feature cards and temperature-zone captions at the owner's request. Core freshness
 flags, timestamps, missing/error states and foreground refresh remain unchanged.
