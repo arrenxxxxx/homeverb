@@ -122,9 +122,9 @@ void main() {
       expect(controller.observed('climate.target_temperature'), -18);
       expect(
         core.calls
-            .where((c) => c['method'] == 'read_state')
-            .every((c) => c['cached'] == true),
-        true,
+            .where((c) => c['method'] == 'read_state' && c['cached'] == false)
+            .map((c) => c['component']),
+        ['fridge', 'freezer'],
       );
       expect(await controller.execute('power', 'set', {'state': true}), false);
       expect(core.calls.where((c) => c['method'] == 'plan'), isEmpty);

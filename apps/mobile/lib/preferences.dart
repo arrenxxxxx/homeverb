@@ -8,6 +8,7 @@ class LocalPreferences {
   LocalPreferences.memory() : file = null;
   final File? file;
   Json values = {};
+  Future<void> _saveTail = Future.value();
   static const supportedSkins = {'window_light', 'sky_blue'};
   String get skin => supportedSkins.contains(values['skin_id'])
       ? values['skin_id'] as String
@@ -85,7 +86,16 @@ class LocalPreferences {
     }
   }
 
-  Future<void> save(Json changes) async {
+  Future<void> save(Json changes) {
+    final operation = _saveTail.then((_) => _save(changes));
+    _saveTail = operation.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace __) {},
+    );
+    return operation;
+  }
+
+  Future<void> _save(Json changes) async {
     final next = {...values, ...changes, 'schema_version': 1};
     if (!supportedSkins.contains(next['skin_id']))
       next['skin_id'] = 'window_light';

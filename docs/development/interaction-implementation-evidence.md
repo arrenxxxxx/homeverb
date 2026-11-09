@@ -55,3 +55,24 @@ above. `python3 scripts/validate_docs.py`, `python3 scripts/validate_repository.
 temporary Python environment, and `node packages/presentation/test/i18n.test.mjs`
 passed. No emulator or Simulator was booted when checked. Performance remains
 unmeasured; the existing screenshots do not satisfy M6.
+
+## M1 navigation and local restoration
+
+Device and account destinations now render before local descriptor or account
+detail work completes. Device descriptions and Core component snapshots are
+restored locally; current control authority is inspected separately. Opening
+reads run before any required control-session replacement, and native work is
+cancelled and drained before reusing or replacing a session. Local root
+preference writes are serialized without occupying the native operation lock.
+Device, session and lifecycle checks fence asynchronous results.
+
+`fvm flutter analyze` passed. The combined focused run of
+`device_opening_test.dart`, `current_contract_test.dart`,
+`session_permissions_test.dart`, `device_detail_controls_test.dart`,
+`state_refresh_test.dart`, `component_test.dart` and
+`account_surfaces_test.dart` passed 40 tests. These include held local metadata,
+account details and preferences, reading before held control preparation,
+session replacement without overlap, fictional restart/cache isolation, rapid
+device switching, backgrounding and removal. No real account or appliance was
+used. Reading-state feedback, partial manual refresh and final visual and
+performance acceptance remain work for M2 and M6.

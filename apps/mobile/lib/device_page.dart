@@ -6,6 +6,27 @@ import 'localization.dart';
 import 'skin.dart';
 import 'device_typography.dart';
 
+/// Local metadata is still loading; the enclosing page keeps Back available.
+class DeviceLoading extends StatelessWidget {
+  const DeviceLoading({
+    required this.loading,
+    required this.onRetry,
+    super.key,
+  });
+  final bool loading;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.all(32),
+    child: Center(
+      child: loading
+          ? const CircularProgressIndicator()
+          : ActionButton('Retry', onPressed: onRetry),
+    ),
+  );
+}
+
 /// The real device-detail shell shared by capability-specific appliance panels.
 /// Connectivity is not inferred from a cached reading or a successful render.
 class DevicePage extends StatelessWidget {

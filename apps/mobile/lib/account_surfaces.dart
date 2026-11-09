@@ -128,6 +128,25 @@ class AccountDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = controller, account = controller.account;
     if (account == null) return _blocks(accountBlocks(c, 'P09'));
+    if (c.accountDetails == null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Copy(accountDisplayName(c, account), size: 24, bold: true),
+          Padding(
+            padding: const EdgeInsets.all(32),
+            child: Center(
+              child: c.busy
+                  ? const CircularProgressIndicator()
+                  : ActionButton(
+                      'Retry',
+                      onPressed: () => onAction('Retry account details'),
+                    ),
+            ),
+          ),
+        ],
+      );
+    }
     final stored = account['credential_state'] == 'stored';
     final report = c.accountReport?['account']['id'] == c.selectedAccount
         ? c.accountReport

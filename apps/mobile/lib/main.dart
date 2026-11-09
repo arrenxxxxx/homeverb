@@ -1,4 +1,5 @@
 import 'device_page.dart';
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -244,8 +245,9 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       if (target != 'D03') c.search = '';
     });
     c.setAutomaticRefreshView(refreshView(target));
-    if (['D01', 'P01', 'S01'].contains(target))
-      await c.savePreferences({'root': target});
+    if (['D01', 'P01', 'S01'].contains(target)) {
+      unawaited(c.saveRootPreference(target));
+    }
     if (target == 'P01' && c.supports('list_accounts')) await c.loadAccounts();
     if (target == 'S05') await c.loadHistory(deviceOnly: deviceHistory);
     if (target == 'S07') await c.loadDiagnostics();
@@ -335,6 +337,16 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   int choice() => choices.values.firstOrNull ?? 0;
   String get selectedRoute => ['auto', 'lan', 'cloud'][choice().clamp(0, 2)];
   Future<void> action(String label) async {
+    if (label == 'Retry device details') {
+      final device = c.selectedDevice;
+      if (device != null && !c.busy) await c.selectDevice(device);
+      return;
+    }
+    if (label == 'Retry account details') {
+      final account = c.selectedAccount;
+      if (account != null && !c.busy) await c.selectAccount(account);
+      return;
+    }
     if (label == 'Back' ||
         label == 'Cancel' ||
         label == 'Close' ||
@@ -352,7 +364,9 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       return;
     }
     if (label.startsWith('account:')) {
-      await finish(c.selectAccount(label.substring('account:'.length)), 'P09');
+      final account = label.substring('account:'.length);
+      await go('P09');
+      if (mounted && c.isForeground) await c.selectAccount(account);
       return;
     }
     if (label.startsWith('rename-account:')) {
@@ -653,7 +667,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     if (label.startsWith('open:') ||
         label.startsWith('power:') ||
         label.startsWith('menu:')) {
-      if (c.busy || quickPowerDevice != null) return;
+      if ((c.busy && !c.openingDevice) || quickPowerDevice != null) return;
       final epoch = navigation,
           foreground = activityEpoch,
           device = label.substring(label.indexOf(':') + 1),
@@ -665,6 +679,28 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           return;
         setState(() => quickPowerDevice = device);
       }
+      if (!power) {
+        final card = c.cards
+            .where((item) => item['device']['id'] == device)
+            .firstOrNull;
+        final parts = card?['device']['components'] as List? ?? [];
+        final climateParts = parts
+            .where(
+              (part) =>
+                  (part['capabilities'] as List? ?? []).contains('climate'),
+            )
+            .length;
+        await go(
+          label.startsWith('menu:')
+              ? 'D05'
+              : climateParts > 1
+              ? 'C08'
+              : 'C01',
+        );
+        if (!mounted || !c.isForeground) return;
+        await c.selectDevice(device);
+        return;
+      }
       try {
         if (!await c.selectDevice(device)) return;
         if (!mounted ||
@@ -672,16 +708,6 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             foreground != activityEpoch ||
             !c.isForeground)
           return;
-        if (!power) {
-          await go(
-            label.startsWith('menu:')
-                ? 'D05'
-                : c.hasCompartmentOverview
-                ? 'C08'
-                : 'C01',
-          );
-          return;
-        }
         final state = c.observed('power.state');
         if (state is! bool) {
           c.error = NativeFailure(
@@ -2055,6 +2081,14 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             ? c.filter
             : c.roomName(c.filter),
       );
+    if (['C01', 'C08'].contains(id) &&
+        c.description == null &&
+        c.currentCard?['device']['support_status'] != 'unsupported') {
+      return DeviceLoading(
+        loading: c.busy || c.openingDevice,
+        onRetry: () => action('Retry device details'),
+      );
+    }
     if (id == 'C08') {
       return CompartmentControls(
         controller: c,
@@ -2532,14 +2566,16 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         },
         child: Scaffold(
           body:
-              content is ClimateControls ||
+              content is DeviceLoading ||
+                  content is ClimateControls ||
                   content is CompartmentControls ||
                   (content is DeviceDetailControls &&
                       c.capability('vendor.midea.dishwasher') != null)
               ? DevicePage(
                   title: screen['header'] as Object,
                   onAction: action,
-                  busy: c.busy && content is! ClimateControls,
+                  busy:
+                      c.busy && !c.openingDevice && content is! ClimateControls,
                   error: identical(c.error, hiddenTransientError)
                       ? null
                       : c.error,
@@ -2561,6 +2597,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                   busy: c.busy,
                   showOperationProgress:
                       content is! ClimateControls &&
+                      !c.openingDevice &&
                       quickPowerDevice == null &&
                       !accountRefreshing &&
                       !homeRefreshing &&

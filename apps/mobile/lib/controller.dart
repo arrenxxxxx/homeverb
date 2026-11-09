@@ -33,6 +33,7 @@ class HomeController extends ChangeNotifier {
   final Future<CoreClient> Function(List<SessionPermission>)? reopen;
   List<SessionPermission> _controlPermissions = const [];
   bool _foreground = true;
+  bool _disposed = false;
   bool get isForeground => _foreground;
   int get controlEpoch => _readEpoch;
   List<Json>? _controlPolicies;
@@ -142,6 +143,9 @@ class HomeController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
+    _readEpoch++;
+    _deviceOpeningGeneration++;
     stopAutomaticRefresh();
     super.dispose();
   }
@@ -500,7 +504,7 @@ class HomeController extends ChangeNotifier {
   }
 
   Future<void> _replaceControlSession(List<SessionPermission> next) async {
-    cancelPending();
+    cancelPending(preserveDeviceOpening: true);
     final epoch = _readEpoch;
     _coreNeedsReopen = true;
     _controlPermissions = const [];
@@ -523,6 +527,13 @@ class HomeController extends ChangeNotifier {
   List<Json> rooms = [], cards = [], history = [];
   Json? description, snapshot, receipt, diagnostics, batchResult;
   Json? accountConflicts, routeInspection;
+  final Map<String, Json> _deviceDescriptions = {};
+  Future<bool>? _deviceOpeningWork;
+  bool get openingDevice => _deviceOpeningWork != null;
+  int _deviceOpeningGeneration = 0;
+  bool deviceLayoutLoading = false;
+  bool deviceControlsPreparing = false;
+  final Set<String> openingComponents = {};
   final Map<String, Json> snapshots = {};
   final Map<(String, String), Json> _componentSnapshots = {};
   final Map<(String, String), Object> _componentReadErrors = {};
@@ -530,10 +541,11 @@ class HomeController extends ChangeNotifier {
   String component = 'main', filter = 'All', search = '';
   final Set<String> selection = {};
   int _readEpoch = 0;
-  void cancelPending() {
+  void cancelPending({bool preserveDeviceOpening = false}) {
     _pauseAutomaticRefresh(cancelRead: false);
     discardApproval();
     _readEpoch++;
+    if (!preserveDeviceOpening) _deviceOpeningGeneration++;
     accountInventory = null;
     accountConflicts = null;
     routeInspection = null;
@@ -546,6 +558,7 @@ class HomeController extends ChangeNotifier {
       _pauseAutomaticRefresh(cancelRead: false);
       discardApproval();
       _readEpoch++;
+      _deviceOpeningGeneration++;
       accountInventory = null;
       accountConflicts = null;
       routeInspection = null;
@@ -558,7 +571,10 @@ class HomeController extends ChangeNotifier {
   bool busy = false;
   Object? error;
 
-  Future<bool> perform(Future<void> Function() work) async {
+  Future<bool> perform(
+    Future<void> Function() work, {
+    bool Function()? publishError,
+  }) async {
     if (busy) return false;
     busy = true;
     error = null;
@@ -581,12 +597,12 @@ class HomeController extends ChangeNotifier {
       await work();
       return true;
     } catch (e) {
-      error = e;
+      if (publishError?.call() ?? true) error = e;
       return false;
     } finally {
       busy = false;
       _scheduleAutomaticRefresh();
-      notifyListeners();
+      if (!_disposed) notifyListeners();
     }
   }
 
@@ -670,31 +686,103 @@ class HomeController extends ChangeNotifier {
           .where((part) => componentCapability(part['id'], 'climate') != null)
           .length >
       1;
-  Future<bool> selectDevice(String id) => perform(() async {
+  Future<bool> selectDevice(String id) {
+    final previous = _deviceOpeningWork;
+    final epoch = _readEpoch;
+    final generation = _deviceOpeningGeneration;
     selectedDevice = id;
     routeInspection = null;
-    description = null;
+    description = _deviceDescriptions[id];
     _controlPolicies = null;
-    snapshot = null;
-    final epoch = _readEpoch;
-    description = await core.call('describe_device', {'device': id}) as Json;
-    _requireCurrentDevice(id, epoch);
-    await _prepareDeviceControls(id);
-    component = components.first['id'] as String;
-    if (description!['device']['support_status'] == 'unsupported') return;
-    await _inspectControlPolicies();
-    await _loadComponentCache();
-    if (hasCompartmentOverview) {
-      for (final part in components.where((part) => part['id'] != component)) {
-        try {
-          await readComponent(part['id'], cached: true);
-        } on NativeFailure catch (error) {
-          if (!['STATE_UNAVAILABLE', 'CACHE_MISS'].contains(error.code))
-            rethrow;
-        }
+    final parts =
+        (description?['device']?['components'] as List?) ??
+        (currentCard?['device']?['components'] as List?) ??
+        [];
+    component = parts.isEmpty ? 'main' : parts.first['id'] as String;
+    snapshot = _componentSnapshots[(id, component)];
+    deviceLayoutLoading = description == null;
+    deviceControlsPreparing = true;
+    openingComponents.clear();
+    error = null;
+    if (!_disposed) notifyListeners();
+
+    Future<bool> open() async {
+      if (previous != null) await previous;
+      if (!_foreground || epoch != _readEpoch || selectedDevice != id) {
+        return false;
       }
+      return perform(
+        () async {
+          final operationEpoch = _readEpoch;
+          final client = core;
+          final local =
+              await client.call('describe_device', {'device': id}) as Json;
+          _requireCurrentDevice(id, operationEpoch);
+          if (client != core || local['device']?['id'] != id) {
+            throw NativeFailure('CANCELLED', 'Device metadata changed.');
+          }
+          description = local;
+          _deviceDescriptions[id] = local;
+          deviceLayoutLoading = false;
+          if (components.isEmpty) return;
+          component = components.first['id'] as String;
+          snapshot = _componentSnapshots[(id, component)];
+          if (!_disposed) notifyListeners();
+          if (local['device']['support_status'] == 'unsupported') return;
+          for (final part in components) {
+            try {
+              await readComponent(part['id'], cached: true);
+            } on NativeFailure catch (error) {
+              if (!['STATE_UNAVAILABLE', 'CACHE_MISS'].contains(error.code)) {
+                rethrow;
+              }
+            }
+            _requireCurrentDevice(id, operationEpoch);
+            notifyListeners();
+          }
+          // Opening is explicit foreground work. Read before any control-session
+          // replacement so a slow permission inspection cannot delay observations.
+          for (final part in components) {
+            if ((part['capabilities'] as List? ?? []).isEmpty) continue;
+            openingComponents.add(part['id'] as String);
+            notifyListeners();
+            try {
+              await readComponent(part['id']);
+            } on NativeFailure catch (error) {
+              if (error.code == 'CANCELLED') rethrow;
+              _componentReadErrors[(id, part['id'] as String)] = error;
+            }
+            _requireCurrentDevice(id, operationEpoch);
+            openingComponents.remove(part['id']);
+            notifyListeners();
+          }
+          await _prepareDeviceControls(id);
+          _deviceDescriptions[id] = description!;
+          await _inspectControlPolicies();
+        },
+        publishError: () =>
+            _foreground &&
+            selectedDevice == id &&
+            generation == _deviceOpeningGeneration,
+      );
     }
-  });
+
+    final work = open();
+    _deviceOpeningWork = work;
+    unawaited(
+      work.whenComplete(() {
+        if (identical(_deviceOpeningWork, work)) {
+          _deviceOpeningWork = null;
+          deviceLayoutLoading = false;
+          deviceControlsPreparing = false;
+          openingComponents.clear();
+          if (!_disposed) notifyListeners();
+        }
+      }),
+    );
+    return work;
+  }
+
   Future<bool> selectComponent(String id) => perform(() async {
     if (!components.any((part) => part['id'] == id)) {
       throw NativeFailure('INVALID_ARGUMENT', 'Select an available component.');
@@ -714,16 +802,21 @@ class HomeController extends ChangeNotifier {
   Future<void> read({bool cached = false}) =>
       readComponent(component, cached: cached);
   Future<void> readComponent(String componentId, {bool cached = false}) async {
-    final device = selectedDevice!, epoch = _readEpoch;
+    final device = selectedDevice!, epoch = _readEpoch, client = core;
     final next =
-        await core.call('read_state', {
+        await client.call('read_state', {
               'device': device,
               'component': componentId,
               'connection': preferences.route(device),
               'cached': cached,
             })
             as Json;
-    if (epoch != _readEpoch) {
+    if (!_foreground ||
+        epoch != _readEpoch ||
+        client != core ||
+        selectedDevice != device ||
+        next['device_id'] != device ||
+        next['component_id'] != componentId) {
       throw NativeFailure('CANCELLED', 'Component reading was cancelled.');
     }
     _componentSnapshots[(device, componentId)] = next;
@@ -1014,7 +1107,9 @@ class HomeController extends ChangeNotifier {
   AccountClient? get accountClient =>
       core is AccountClient ? core as AccountClient : null;
   bool get isMock => accountClient?.adapter != 'midea.meiju';
-  Json? get account => accountDetails?['account'] as Json?;
+  Json? get account =>
+      accountDetails?['account'] as Json? ??
+      accounts.where((item) => item['id'] == selectedAccount).firstOrNull;
   String accountRemark(Json account) {
     final label = account['label'] as String? ?? '';
     return label == 'Meiju account' ||
@@ -1063,6 +1158,7 @@ class HomeController extends ChangeNotifier {
     }
     final currentIds = cards.map((card) => card['device']['id']).toSet();
     snapshots.removeWhere((id, _) => !currentIds.contains(id));
+    _deviceDescriptions.removeWhere((id, _) => !currentIds.contains(id));
     _componentSnapshots.removeWhere((key, _) => !currentIds.contains(key.$1));
     _componentReadErrors.removeWhere((key, _) => !currentIds.contains(key.$1));
     selection.removeWhere((id) => !currentIds.contains(id));
@@ -1076,7 +1172,8 @@ class HomeController extends ChangeNotifier {
   }
 
   Future<bool> loadAccounts() => perform(reloadAccountViews);
-  Future<bool> selectAccount(String id) => perform(() async {
+  Future<bool> selectAccount(String id) async {
+    final previous = _deviceOpeningWork;
     selectedAccount = id;
     accountInventory = null;
     accountConflicts = null;
@@ -1085,9 +1182,30 @@ class HomeController extends ChangeNotifier {
     accountReport = null;
     accountRemoval = null;
     removalScope = null;
-    accountDetails = await core.call('get_account', {'account_id': id}) as Json;
-    await loadLocal();
-  });
+    notifyListeners();
+    final epoch = _readEpoch;
+    if (previous != null) await previous;
+    if (!_foreground || epoch != _readEpoch || selectedAccount != id) {
+      return false;
+    }
+    return perform(
+      () async {
+        final client = core;
+        final details =
+            await client.call('get_account', {'account_id': id}) as Json;
+        if (!_foreground ||
+            epoch != _readEpoch ||
+            client != core ||
+            selectedAccount != id ||
+            details['account']?['id'] != id) {
+          throw NativeFailure('CANCELLED', 'Account selection was cancelled.');
+        }
+        accountDetails = details;
+      },
+      publishError: () =>
+          _foreground && epoch == _readEpoch && selectedAccount == id,
+    );
+  }
 
   Future<bool> inspectAccountInventory() => perform(() async {
     accountInventory = null;
@@ -1490,6 +1608,17 @@ class HomeController extends ChangeNotifier {
   });
   Future<bool> savePreferences(Json changes) =>
       perform(() => preferences.save(changes));
+
+  Future<void> saveRootPreference(String root) async {
+    try {
+      await preferences.save({'root': root});
+    } catch (failure) {
+      if (!_disposed && _foreground) {
+        error = failure;
+        notifyListeners();
+      }
+    }
+  }
 }
 
 String? validateValue(dynamic value, Json schema) {
