@@ -167,6 +167,23 @@ same isolated profile (`unknown_restart_recovery_test.dart`). The recovery test
 asserts no new plan or execute call; it does not claim an OS process restart.
 Those three suites and `outcome_click_test.dart` passed seven tests together.
 
+The final scenario audit maps the handoff to the following tests. All paths are
+under `apps/mobile/test/`; the tests use fictional data unless stated otherwise.
+
+| Acceptance area | Direct evidence |
+| --- | --- |
+| Immediate device/account entry and isolated disk restoration | `device_opening_test.dart` |
+| First reading, failure Toast, partial results and ten silent failures | `interaction_reading_test.dart`, `appliance_reading_states_test.dart` |
+| Three-second cadence, slow reads, cancellation and foreground transitions | `state_refresh_test.dart`, `interaction_fencing_test.dart` |
+| Pull feedback, repeated pulls and accessibility action | `home_pull_refresh_test.dart` |
+| Expanded options, disabled cycle choices and observation prerequisites | `device_expanded_test.dart`, `dishwasher_interaction_test.dart`, `dishwasher_permissions_test.dart` |
+| Outlined cards, separate hit targets and observed summaries | `compact_device_cards_test.dart`, `device_cards_test.dart`, `device_summary_test.dart` |
+| Local command progress, accepted/unknown outcomes and no replay | `generic_command_feedback_test.dart`, `write_fencing_test.dart`, `unknown_restart_recovery_test.dart` |
+| Current grants, descriptor change and cache clearing | `grant_revoke_cache_test.dart`, `descriptor_cache_invalidation_test.dart` |
+| Centered sign-in Cancel and bounded Toast | `auth_experience_test.dart`, `feedback_test.dart` |
+| Search, rooms, settings, account, history and diagnostic recovery | `secondary_journeys_test.dart`, `account_surfaces_test.dart` |
+| Production-route width, language, skin and text-size captures | `interaction_capture_test.dart` and the opt-in matrix below |
+
 The final `fvm flutter analyze` passed. The final full
 `fvm flutter test --no-pub --reporter expanded` run had 347 passes, 40 skips and
 four failures: the existing macOS glyph-pixel cases in `button_labels_test.dart`,
@@ -176,6 +193,23 @@ The output is `apps/mobile/build/verification/interaction-scenarios-full-suite.l
 The prior run also found a stale cancellation-error assertion; after updating it
 to require no late error while preserving the no-send assertion, that case passed
 in the final run. These four failures leave the M6 regression exit gate open.
+
+An isolated Ubuntu 24.04 ARM64 virtual machine was also attempted on this host
+with the existing Linux Rosetta support, a read-only source snapshot and separate
+temporary data. The guest booted and reached its package sources, but its 6.8
+kernel twice faulted in `seccomp_run_filters` during dependency installation;
+the guest could not disable its fixed BPF JIT. No HomeVerb test ran in that
+guest. Logs are retained in `apps/mobile/build/verification/linux-vm-attempt/`;
+the temporary VM was stopped and removed. This is an environment failure, not a
+passing or failing product test.
+
+A second isolated guest used Debian 12 with its different 6.1 ARM64 kernel.
+Its official image passed the published SHA-512 check; its source snapshot was
+`4a57eb9`. It booted, installed initial dependencies and registered Rosetta, but
+reported an illegal instruction and corrupted shared-library errors during Rust
+toolchain setup. It likewise ran no HomeVerb tests. Its logs are in the `debian/`
+subdirectory of the same artifact directory. The guest and downloaded files were
+removed; neither attempt changed the host configuration.
 
 The actual `NativeApp` capture fixture uses production routes and fictional
 clients. A matrix covers both `window_light` and `sky_blue`, `en-US` and `zh-CN`,
