@@ -73,6 +73,8 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get climateModeFan => '\u9001\u98ce';
 	@override String get climateModeDry => '\u9664\u6e7f';
 	@override String get climateModeAuto => '\u81ea\u52a8';
+	@override String get climateModeNormal => '\u6807\u51c6';
+	@override String get climateModeEco => '\u8282\u80fd';
 	@override String get roomAll => '\u5168\u90e8';
 	@override String get roomUnassigned => '\u672a\u5206\u914d';
 	@override String get roomManage => '\u7ba1\u7406\u623f\u95f4';

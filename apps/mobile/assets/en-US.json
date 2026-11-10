@@ -39,6 +39,8 @@
   "climate.mode.fan": "Fan",
   "climate.mode.dry": "Dry",
   "climate.mode.auto": "Auto",
+  "climate.mode.normal": "Normal",
+  "climate.mode.eco": "Eco",
   "room.all": "All",
   "room.unassigned": "Unassigned",
   "room.manage": "Manage rooms",

@@ -39,6 +39,8 @@
   "climate.mode.fan": "送风",
   "climate.mode.dry": "除湿",
   "climate.mode.auto": "自动",
+  "climate.mode.normal": "标准",
+  "climate.mode.eco": "节能",
   "room.all": "全部",
   "room.unassigned": "未分配",
   "room.manage": "管理房间",

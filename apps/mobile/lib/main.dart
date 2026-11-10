@@ -1207,6 +1207,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           builder: (context) => AlertDialog(
             title: Text(localize(context, 'Privacy')),
             scrollable: true,
+            clipBehavior: Clip.antiAlias,
             content: Text(
               localize(
                 context,
@@ -2837,6 +2838,22 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final content = special();
+    Widget withRecovery(Widget child) =>
+        c.deviceControlsRecoveryNeeded && ['C01', 'C08'].contains(id)
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ActionButton(
+                'Retry',
+                key: const ValueKey('device-control-retry'),
+                onPressed: c.busy || !c.isForeground
+                    ? null
+                    : () => action('Retry device details'),
+              ),
+              child,
+            ],
+          )
+        : child;
     return MaterialApp(
       navigatorKey: navigator,
       locale: translationsOf(context).$meta.locale.flutterLocale,
@@ -2875,14 +2892,14 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                               !c.isCommandError)
                       ? null
                       : c.error,
-                  child: content!,
+                  child: withRecovery(content!),
                 )
               : ScreenView(
                   key: id == 'S06' ? ObjectKey(c.receipt) : null,
                   id: id,
                   catalog: widget.catalog,
                   screenOverride: screen,
-                  home: content,
+                  home: content == null ? null : withRecovery(content),
                   resolveScreen: screenFor,
                   resolveHome: specialFor,
                   onAction: action,

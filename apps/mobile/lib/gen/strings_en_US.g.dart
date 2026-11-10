@@ -156,6 +156,12 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	/// en-US: 'Auto'
 	String get climateModeAuto => 'Auto';
 
+	/// en-US: 'Normal'
+	String get climateModeNormal => 'Normal';
+
+	/// en-US: 'Eco'
+	String get climateModeEco => 'Eco';
+
 	/// en-US: 'All'
 	String get roomAll => 'All';
 

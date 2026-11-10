@@ -3613,3 +3613,12 @@ The app was profiled on an isolated Android emulator before a subsequent import-
 web preview fix; no physical-phone, real provider or real-write acceptance is
 implied. The local capture and performance artifacts under `build/verification/` are reproducible
 but are not versioned.
+
+## Interaction review corrections — November 10, 2026
+
+The eight review corrections and their before/after fictional regressions are
+recorded in [interaction review fixes](../../docs/development/interaction-review-fixes.md).
+The final macOS Flutter suite reported 369 passes, 51 skips and the four existing
+glyph-pixel failures; it did not pass as a whole. The opt-in production-route
+review captures and their command are recorded separately. These results do not
+establish physical-phone, live provider or real appliance-write acceptance.

@@ -25,14 +25,13 @@ void main() {
       final refresh = app.currentState!.action('Refresh State');
       await tester.pump();
       expect(inner.activeReads, 1);
-      final opening = app.currentState!.action('open:$deviceA');
+      await tester.tap(find.text('Opening fridge A').first);
       await tester.pump();
       expect(app.currentState!.id, anyOf('C01', 'C08'));
       expect(inner.activeReads, 1);
       expect(inner.maxActiveReads, 1);
       gate.complete();
       await refresh;
-      await opening;
       await tester.pumpAndSettle();
       expect(controller.selectedDevice, deviceA);
       expect(inner.maxActiveReads, 1);

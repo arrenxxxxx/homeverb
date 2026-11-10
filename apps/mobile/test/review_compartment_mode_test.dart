@@ -49,7 +49,69 @@ class ModeCompartment extends CompartmentFixture {
   }
 }
 
+class RestrictedModeCompartment extends ModeCompartment
+    implements NativeSessionClient {
+  @override
+  Set<String> get methods => {'inspect_session_grants'};
+  @override
+  bool apiAtLeast(int minor) => true;
+  @override
+  Future<dynamic> call(String method, [Json fields = const {}]) async {
+    if (method == 'inspect_session_grants') {
+      final connection = (device['connections'] as List).firstWhere(
+        (item) => item['id'] == fields['connection_id'],
+      );
+      return {
+        'device_id': fields['device_id'],
+        'connection_id': fields['connection_id'],
+        'transport': connection['transport'],
+        'source': 'session_policy',
+        'provider_authorization': 'not_checked',
+        'grants': [
+          {
+            'component_id': 'fridge',
+            'capability': 'climate',
+            'action': 'set',
+            'argument_schema': {
+              'const': {'target_temperature': 4.5},
+            },
+          },
+        ],
+      };
+    }
+    return super.call(method, fields);
+  }
+}
+
 void main() {
+  testWidgets('zone mode does not bypass an unrelated exact grant', (
+    tester,
+  ) async {
+    final core = RestrictedModeCompartment();
+    final c = HomeController(core, LocalPreferences.memory());
+    final app = GlobalKey<NativeAppState>();
+    final catalog = (await tester.runAsync(ScreenCatalog.load))!;
+    await tester.pumpWidget(
+      NativeApp(key: app, catalog: catalog, controller: c),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Example refrigerator').first);
+    await tester.pumpAndSettle();
+    final option = find.byKey(
+      const ValueKey('component-option:fridge:mode:eco'),
+    );
+    expect(option, findsOneWidget);
+    expect(tester.widget<ChoiceChip>(option).onSelected, isNull);
+    expect(
+      c.canControlValue('climate', 'set', 'mode', 'eco', componentId: 'fridge'),
+      false,
+    );
+    expect(
+      core.calls.where((call) => ['plan', 'execute'].contains(call['method'])),
+      isEmpty,
+    );
+    await tester.pumpWidget(const SizedBox());
+  });
   testWidgets('zone mode remains visible and independently selectable', (
     tester,
   ) async {
@@ -74,6 +136,12 @@ void main() {
     final eco = find.byKey(const ValueKey('component-option:fridge:mode:eco'));
     expect(normal, findsOneWidget);
     expect(eco, findsOneWidget);
+    expect(find.text('Mode'), findsWidgets);
+    expect(
+      find.descendant(of: normal, matching: find.text('Normal')),
+      findsOneWidget,
+    );
+    expect(find.textContaining('{mode}'), findsNothing);
     expect(tester.widget<ChoiceChip>(normal).selected, true);
     await tester.ensureVisible(eco);
     await tester.tap(eco);

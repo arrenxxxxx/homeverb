@@ -229,7 +229,9 @@ class DeviceDetailControls extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         DeviceDetailHeader(controller: c),
-        if (!anyControl)
+        if (!anyControl &&
+            !c.deviceControlsPreparing &&
+            !c.deviceControlsRecoveryNeeded)
           const Padding(
             padding: EdgeInsets.only(bottom: 16),
             child: Copy(

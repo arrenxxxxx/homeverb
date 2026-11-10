@@ -547,6 +547,7 @@ class HomeController extends ChangeNotifier {
   int _deviceOpeningGeneration = 0;
   bool deviceLayoutLoading = false;
   bool deviceControlsPreparing = false;
+  bool deviceControlsRecoveryNeeded = false;
   final Set<String> openingComponents = {};
   Object? openingReadFailure;
   int openingReadFailureSerial = 0;
@@ -565,6 +566,8 @@ class HomeController extends ChangeNotifier {
     if (!preserveDeviceOpening) {
       _deviceOpeningGeneration++;
       _interruptedOpeningDevice = null;
+      deviceControlsRecoveryNeeded = false;
+      _interruptLocalLoads();
     }
     accountInventory = null;
     accountConflicts = null;
@@ -575,22 +578,11 @@ class HomeController extends ChangeNotifier {
   void setForeground(bool foreground) {
     _foreground = foreground;
     if (!foreground) {
-      if (_deviceOpeningWork != null)
+      if (_deviceOpeningWork != null) {
         _interruptedOpeningDevice = selectedDevice;
-      if (historyState == LocalLoadState.loading) {
-        historyState = LocalLoadState.failed;
-        historyLoadError = NativeFailure(
-          'CANCELLED',
-          'History loading was cancelled.',
-        );
+        deviceControlsRecoveryNeeded = selectedDevice != null;
       }
-      if (diagnosticsState == LocalLoadState.loading) {
-        diagnosticsState = LocalLoadState.failed;
-        diagnosticsLoadError = NativeFailure(
-          'CANCELLED',
-          'Diagnostics loading was cancelled.',
-        );
-      }
+      _interruptLocalLoads();
       _pauseAutomaticRefresh(cancelRead: false);
       discardApproval();
       _readEpoch++;
@@ -621,6 +613,23 @@ class HomeController extends ChangeNotifier {
       }
     }
     if (!foreground) notifyListeners();
+  }
+
+  void _interruptLocalLoads() {
+    if (historyState == LocalLoadState.loading) {
+      historyState = LocalLoadState.failed;
+      historyLoadError = NativeFailure(
+        'CANCELLED',
+        'History loading was cancelled.',
+      );
+    }
+    if (diagnosticsState == LocalLoadState.loading) {
+      diagnosticsState = LocalLoadState.failed;
+      diagnosticsLoadError = NativeFailure(
+        'CANCELLED',
+        'Diagnostics loading was cancelled.',
+      );
+    }
   }
 
   bool busy = false;
@@ -792,7 +801,7 @@ class HomeController extends ChangeNotifier {
       if (!_foreground || epoch != _readEpoch || selectedDevice != id) {
         return false;
       }
-      return perform(
+      final succeeded = await perform(
         () async {
           final operationEpoch = _readEpoch;
           final client = core;
@@ -868,6 +877,13 @@ class HomeController extends ChangeNotifier {
             selectedDevice == id &&
             generation == _deviceOpeningGeneration,
       );
+      if (succeeded &&
+          selectedDevice == id &&
+          generation == _deviceOpeningGeneration) {
+        deviceControlsRecoveryNeeded = false;
+        if (!_disposed) notifyListeners();
+      }
+      return succeeded;
     }
 
     final work = open();
@@ -1904,7 +1920,17 @@ class HomeController extends ChangeNotifier {
   }
 
   Future<bool> loadHistory({bool deviceOnly = false}) async {
-    if (busy || !_foreground) return false;
+    if (busy || !_foreground) {
+      if (historyState != LocalLoadState.loading) {
+        historyState = LocalLoadState.failed;
+        historyLoadError = NativeFailure(
+          'STATE_UNAVAILABLE',
+          'History is not ready.',
+        );
+        if (!_disposed) notifyListeners();
+      }
+      return false;
+    }
     final device = selectedDevice;
     final generation = _deviceOpeningGeneration;
     final request = ++_historyLoadGeneration;
@@ -2064,7 +2090,17 @@ class HomeController extends ChangeNotifier {
   }
 
   Future<bool> loadDiagnostics() async {
-    if (busy || !_foreground) return false;
+    if (busy || !_foreground) {
+      if (diagnosticsState != LocalLoadState.loading) {
+        diagnosticsState = LocalLoadState.failed;
+        diagnosticsLoadError = NativeFailure(
+          'STATE_UNAVAILABLE',
+          'Diagnostics are not ready.',
+        );
+        if (!_disposed) notifyListeners();
+      }
+      return false;
+    }
     final generation = _deviceOpeningGeneration;
     final request = ++_diagnosticsLoadGeneration;
     int? epoch;

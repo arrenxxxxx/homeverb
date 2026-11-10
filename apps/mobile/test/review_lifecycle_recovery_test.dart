@@ -1,8 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 import 'package:homeverb_mobile/controller.dart';
 import 'package:homeverb_mobile/native_client.dart';
+import 'package:homeverb_mobile/main.dart';
+import 'package:homeverb_mobile/screens.dart' hide Json;
 
 import 'accounts_test.dart' show AccountPreferences;
 import 'device_opening_test.dart' show OrderedPermissionCore;
@@ -39,6 +43,19 @@ class RecoveryCore extends PermissionCore {
         'status': 'unknown',
       };
     }
+    final result = await super.call(method, fields);
+    return method == 'describe_device'
+        ? jsonDecode(jsonEncode(result))
+        : result;
+  }
+}
+
+class HeldRecoveryCore extends RecoveryCore {
+  HeldRecoveryCore(super.inspected);
+  final gate = Completer<void>();
+  @override
+  Future<dynamic> call(String method, [Json fields = const {}]) async {
+    if (method == 'read_state' && fields['cached'] == false) await gate.future;
     return super.call(method, fields);
   }
 }
@@ -48,6 +65,48 @@ Future<void> frames(WidgetTester tester, [int count = 12]) async {
 }
 
 void main() {
+  testWidgets('failed foreground control recovery offers an explicit retry', (
+    tester,
+  ) async {
+    final options = inspection();
+    final old = HeldRecoveryCore(options);
+    var opens = 0;
+    final c = HomeController(
+      old,
+      AccountPreferences(),
+      reopen: (_) async {
+        opens++;
+        if (opens == 1)
+          throw NativeFailure('STATE_UNAVAILABLE', 'Fictional reopen failure.');
+        return RecoveryCore(options);
+      },
+    );
+    final app = GlobalKey<NativeAppState>();
+    final catalog = (await tester.runAsync(ScreenCatalog.load))!;
+    await tester.pumpWidget(
+      NativeApp(key: app, catalog: catalog, controller: c),
+    );
+    await tester.pumpAndSettle();
+    await app.currentState!.go('C01');
+    final work = c.selectDevice(options['device_id']);
+    await frames(tester);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    old.gate.complete();
+    await work;
+    await frames(tester, 40);
+    final retry = find.byKey(const ValueKey('device-control-retry'));
+    expect(retry, findsOneWidget);
+    expect(
+      find.text('No controls are allowed for this device on this connection.'),
+      findsNothing,
+    );
+    await tester.tap(retry);
+    await frames(tester, 80);
+    expect(c.capability('power')?['actions'], contains('set'));
+    expect(find.byKey(const ValueKey('device-control-retry')), findsNothing);
+    await tester.pumpWidget(const SizedBox());
+  });
   testWidgets('interrupted opening restores controls once on foreground', (
     tester,
   ) async {
@@ -78,6 +137,30 @@ void main() {
   });
 
   for (final history in [true, false]) {
+    testWidgets(
+      '${history ? 'history' : 'diagnostics'} remains retryable when prior work drains',
+      (tester) async {
+        final core = SecondaryFixture();
+        final c = HomeController(core, AccountPreferences());
+        final gate = Completer<void>();
+        final previous = c.perform(() => gate.future);
+        await frames(tester);
+        c.cancelPending();
+        expect(await (history ? c.loadHistory() : c.loadDiagnostics()), false);
+        expect(
+          history ? c.historyState : c.diagnosticsState,
+          LocalLoadState.failed,
+        );
+        gate.complete();
+        await previous;
+        expect(await (history ? c.loadHistory() : c.loadDiagnostics()), true);
+        expect(
+          history ? c.historyState : c.diagnosticsState,
+          LocalLoadState.ready,
+        );
+        c.dispose();
+      },
+    );
     testWidgets(
       '${history ? 'history' : 'diagnostics'} reports session reopen failure',
       (tester) async {

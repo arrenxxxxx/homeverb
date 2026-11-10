@@ -51,6 +51,15 @@ with request and lifecycle generations preventing stale publication. The focused
 recovery selection passed 45 tests (`review-5-reopen-failure-after.log`), and
 Flutter analysis passed after this follow-up.
 
+The automatic foreground recovery has an explicit device-page Retry if session
+preparation fails again; the retry test first failed because that control was
+absent (`review-3-retry-before.log`). While recovery is pending, the UI does not
+claim that controls were denied. If another cancelled operation is still
+draining when history or diagnostics opens, each page now enters its existing
+retryable state instead of remaining idle/loading. Both cases were reproduced
+before the fix (`review-busy-history-before.log`); the lifecycle selection then
+passed 46 tests (`review-busy-history-after.log`).
+
 ## 6. Preserve other zone controls
 
 `review_compartment_mode_test.dart` first failed because the supported normal
@@ -61,6 +70,12 @@ passes Core planning. Other supported action shapes retain their existing form.
 The focused compartment and expanded-device selection passed 11 tests
 (`review-6-after.log`), followed by a targeted rerun after duplicate-selection
 guarding.
+
+Production screenshot review exposed a separate template-label collision for
+the inline mode (`review-6-label-before.log`). The two reviewed mode names and
+the field title now use canonical localized messages, while unknown values stay
+literal. A native-session fixture additionally verifies that a target-only grant
+cannot enable a mode command (`review-final-security.log`).
 
 ## 7. Keep supported refrigerator readings after failure
 
@@ -79,3 +94,39 @@ both locales at 320 by 844 logical pixels and 200% text
 (`review-8-before.log`). The existing dialog now scrolls its title and content
 while keeping Close accessible. The bilingual layout, settings and accessibility
 selection passed 16 tests (`review-8-after.log`).
+
+## Integrated captures and compatibility
+
+The opt-in `review_capture_test.dart` renders actual `NativeApp` routes with
+fictional clients. It captures the new command error, opening during refresh,
+foreground recovery and retry, zone modes in both languages, refrigerator read
+failure, history and diagnostics retry, and the privacy dialog at the top and
+bottom of its content. Captures use 320 by 844 logical pixels; privacy uses 200%
+text. The CJK test fallback was the local Hiragino Sans GB font. They do not
+prove physical-phone font, keyboard, provider or appliance behavior.
+
+```sh
+cd apps/mobile
+fvm flutter test --no-pub test/review_capture_test.dart \
+  --dart-define=HOMEVERB_REVIEW_CAPTURE=true \
+  '--dart-define=HOMEVERB_CJK_FONT=/System/Library/Fonts/Hiragino Sans GB.ttc' \
+  --reporter expanded
+```
+
+The screenshots are in `apps/mobile/build/verification/interaction-review/`;
+they are local build artifacts and not versioned. No provider capability, native
+API, Core schema, storage format, write retry, or background scheduling authority
+was added. Existing physical-phone and provider acceptance remain open.
+
+The opt-in capture selection and the card-tap regression passed 12 tests
+(`review-capture-final.log`). The integrated review selection passed 73 tests
+(`review-integrated-focused.log`); subsequent session and exact-grant tests passed
+separately (`review-busy-history-after.log`, `review-final-security.log`).
+Final `fvm flutter analyze` passed. The final full
+`fvm flutter test --no-pub --reporter expanded` run on macOS had 369 passes,
+51 skips and four failures (`review-full-suite-final.log`): the same four strict
+macOS glyph-pixel cases recorded before this review in `docs/testing.md`.
+Those failures and the skipped tests are not counted as passes. The 11 review
+capture scenes among the skips were run explicitly as described above. The
+Linux result from the earlier interaction phase predates these review changes;
+no final Linux or physical-phone run is claimed for this review.

@@ -432,8 +432,12 @@ class CompartmentControls extends StatelessWidget {
               ? 'Current'
               : isTarget
               ? 'Target'
-              : controlLabel(entry.key),
-          propertyValue(observed?['value'], entry.value as Json),
+              : sourceForKey(propertyId) ?? controlLabel(entry.key),
+          propertyValue(
+            observed?['value'],
+            entry.value as Json,
+            propertyId: propertyId,
+          ),
           null,
           if (observed == null && controller.readingLoading(id))
             const ReadingValue('—', loading: true),
@@ -562,14 +566,23 @@ class CompartmentControls extends StatelessWidget {
           _receiptFeedback(),
         if (extraRows.isNotEmpty) Rows(extraRows, onAction: onAction),
         for (final entry in inlineOptions.entries) ...[
-          Copy(controlLabel(entry.key), bold: true),
+          Copy(
+            sourceForKey('climate.${entry.key}') ?? controlLabel(entry.key),
+            bold: true,
+          ),
           Wrap(
             spacing: 8,
             children: [
               for (final value in entry.value['enum'] as List)
                 ChoiceChip(
                   key: ValueKey('component-option:$id:${entry.key}:$value'),
-                  label: Text(localize(context, controlLabel('$value'))),
+                  label: Text(
+                    localize(
+                      context,
+                      sourceForKey('climate.${entry.key}.$value') ??
+                          LiteralText('$value'),
+                    ),
+                  ),
                   selected:
                       observation('climate.${entry.key}')?['value'] == value,
                   onSelected:
