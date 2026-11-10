@@ -2199,6 +2199,8 @@ String? validateValue(dynamic value, Json schema) {
   if (schema['enum'] is List && !(schema['enum'] as List).contains(value))
     return 'Choose a supported value.';
   if (schema['type'] == 'boolean' && value is! bool) return 'Choose On or Off.';
+  if (schema['type'] == 'string' && value is! String)
+    return 'Choose a supported value.';
   if (schema['type'] == 'number' || schema['type'] == 'integer') {
     if (value is! num || !value.isFinite) return 'Enter a number.';
     if (schema['type'] == 'integer' && value != value.roundToDouble())

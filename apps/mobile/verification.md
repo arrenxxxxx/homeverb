@@ -3622,3 +3622,13 @@ The final macOS Flutter suite reported 369 passes, 51 skips and the four existin
 glyph-pixel failures; it did not pass as a whole. The opt-in production-route
 review captures and their command are recorded separately. These results do not
 establish physical-phone, live provider or real appliance-write acceptance.
+
+### November 10: second interaction review
+
+The `505a6a5` review reproductions and resulting foreground, navigation and
+zone-control fixes are recorded in
+[interaction-second-review.md](../../docs/development/interaction-second-review.md).
+The focused integration and explicit production-widget screenshot runs passed;
+the macOS complete Flutter suite still has the four recorded glyph-pixel
+failures and default opt-in skips. The evidence uses fictional clients and does
+not establish physical-phone, provider or appliance behavior.

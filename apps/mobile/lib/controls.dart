@@ -198,6 +198,8 @@ class _CapabilityActionFormState extends State<CapabilityActionForm> {
   Json get descriptor => widget.capability['actions'][widget.action] as Json;
   Json get parameters => descriptor['parameters'] as Json;
   Json get properties => parameters['properties'] as Json? ?? {};
+  String parameterLabel(String name) =>
+      sourceForKey('${widget.capability['id']}.$name') ?? controlLabel(name);
   @override
   void initState() {
     super.initState();
@@ -240,7 +242,9 @@ class _CapabilityActionFormState extends State<CapabilityActionForm> {
       if (!args.containsKey(name)) {
         error ??= localize(
           context,
-          UiMessage('Choose {name}.', {'name': UiMessage(controlLabel(name))}),
+          UiMessage('Choose {name}.', {
+            'name': UiMessage(parameterLabel(name)),
+          }),
         );
       }
     }
@@ -256,7 +260,7 @@ class _CapabilityActionFormState extends State<CapabilityActionForm> {
       final problem = validateValue(entry.value, properties[entry.key] as Json);
       if (problem != null)
         error ??=
-            '${localize(context, controlLabel(entry.key))}: ${localize(context, problem)}';
+            '${localize(context, parameterLabel(entry.key))}: ${localize(context, problem)}';
     }
     if (error != null) {
       setState(() => message = error);
@@ -364,7 +368,7 @@ class _CapabilityActionFormState extends State<CapabilityActionForm> {
           children: [
             Copy(
               UiMessage('{name} · {requirement}', {
-                'name': UiMessage(controlLabel(name)),
+                'name': UiMessage(parameterLabel(name)),
                 'requirement': UiMessage(required ? 'Required' : 'Optional'),
               }),
               bold: true,
@@ -448,7 +452,7 @@ class _CapabilityActionFormState extends State<CapabilityActionForm> {
               )
             else
               Semantics(
-                label: localize(context, controlLabel(name)),
+                label: localize(context, parameterLabel(name)),
                 child: ValueListenableBuilder<TextEditingValue>(
                   valueListenable: controller!,
                   builder: (context, value, _) => TextField(
@@ -476,7 +480,7 @@ class _CapabilityActionFormState extends State<CapabilityActionForm> {
                             ? localize(
                                 context,
                                 UiMessage('Enter {name}', {
-                                  'name': UiMessage(controlLabel(name)),
+                                  'name': UiMessage(parameterLabel(name)),
                                 }),
                               )
                             : value.text,
@@ -484,7 +488,7 @@ class _CapabilityActionFormState extends State<CapabilityActionForm> {
                       hintText: localize(
                         context,
                         UiMessage('Enter {name}', {
-                          'name': UiMessage(controlLabel(name)),
+                          'name': UiMessage(parameterLabel(name)),
                         }),
                       ),
                       suffixText: controlUnit(property['unit']),
@@ -514,7 +518,7 @@ class _CapabilityActionFormState extends State<CapabilityActionForm> {
                   min: lower.toDouble(),
                   max: upper.toDouble(),
                   semanticFormatterCallback: (v) =>
-                      '${localize(context, controlLabel(name))} $v ${controlUnit(property['unit'])}',
+                      '${localize(context, parameterLabel(name))} $v ${controlUnit(property['unit'])}',
                   onChanged: saving
                       ? null
                       : (value) => setState(() {

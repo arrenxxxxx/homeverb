@@ -1,6 +1,10 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:homeverb_mobile/main.dart';
+import 'package:homeverb_mobile/refresh_feedback.dart';
+import 'package:homeverb_mobile/screens.dart';
 import 'package:homeverb_mobile/controller.dart';
 import 'package:homeverb_mobile/native_client.dart';
 import 'package:homeverb_mobile/preferences.dart';
@@ -79,4 +83,33 @@ void main() {
       },
     );
   }
+  testWidgets('home refresh shows one feedback after session reopen fails', (
+    tester,
+  ) async {
+    final options = inspection();
+    final c = HomeController(
+      RecoveryCore(options),
+      LocalPreferences.memory(),
+      reopen: (_) async {
+        throw NativeFailure(
+          'CREDENTIAL_STORE_UNAVAILABLE',
+          'Fictional vault failure.',
+        );
+      },
+    );
+    final app = GlobalKey<NativeAppState>();
+    final catalog = (await tester.runAsync(ScreenCatalog.load))!;
+    await tester.pumpWidget(
+      NativeApp(key: app, catalog: catalog, controller: c),
+    );
+    await tester.pumpAndSettle();
+    expect(await c.selectDevice(options['device_id']), false);
+    await app.currentState!.go('D01');
+    await tester.pump();
+    await app.currentState!.action('Refresh State');
+    await tester.pump();
+    expect(find.byType(RefreshFeedback), findsOneWidget);
+    expect(c.error, isA<NativeFailure>());
+    await tester.pumpWidget(const SizedBox());
+  });
 }

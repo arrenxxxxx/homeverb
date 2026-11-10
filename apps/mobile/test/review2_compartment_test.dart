@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:homeverb_mobile/controller.dart';
-import 'package:homeverb_mobile/controls.dart';
 import 'package:homeverb_mobile/main.dart';
 import 'package:homeverb_mobile/native_client.dart';
 import 'package:homeverb_mobile/preferences.dart';
@@ -9,6 +8,10 @@ import 'package:homeverb_mobile/screens.dart' hide Json;
 import 'review_compartment_mode_test.dart' show ModeCompartment;
 
 class CombinedGrant extends ModeCompartment implements NativeSessionClient {
+  CombinedGrant({
+    this.arguments = const {'target_temperature': 4.5, 'mode': 'eco'},
+  });
+  final Json arguments;
   @override
   Set<String> get methods => {'inspect_session_grants'};
   @override
@@ -30,9 +33,7 @@ class CombinedGrant extends ModeCompartment implements NativeSessionClient {
             'component_id': 'fridge',
             'capability': 'climate',
             'action': 'set',
-            'argument_schema': {
-              'const': {'target_temperature': 4.5, 'mode': 'eco'},
-            },
+            'argument_schema': {'const': arguments},
           },
         ],
       };
@@ -83,6 +84,8 @@ void main() {
     await tester.tap(form);
     await tester.pumpAndSettle();
     expect(app.currentState!.id, 'C10');
+    expect(find.textContaining('{mode}'), findsNothing);
+    expect(find.textContaining('Mode · Optional'), findsOneWidget);
     await tester.enterText(find.byType(TextField).first, '4.5');
     final eco = find.byKey(const ValueKey('parameter:mode:eco'));
     await tester.ensureVisible(eco);
@@ -101,6 +104,46 @@ void main() {
     });
     await tester.pumpWidget(const SizedBox());
   });
+  testWidgets('mode-only grant keeps the authorized independent option', (
+    tester,
+  ) async {
+    final core = CombinedGrant(arguments: {'mode': 'eco'});
+    final c = HomeController(core, LocalPreferences.memory());
+    final app = GlobalKey<NativeAppState>();
+    final catalog = (await tester.runAsync(ScreenCatalog.load))!;
+    await tester.pumpWidget(
+      NativeApp(key: app, catalog: catalog, controller: c),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Example refrigerator').first);
+    await tester.pumpAndSettle();
+    final eco = find.byKey(const ValueKey('component-option:fridge:mode:eco'));
+    expect(tester.widget<ChoiceChip>(eco).onSelected, isNotNull);
+    expect(
+      c.canControlValue(
+        'climate',
+        'set',
+        'target_temperature',
+        4.5,
+        componentId: 'fridge',
+      ),
+      false,
+    );
+    expect(
+      find.byKey(const ValueKey('component-control:fridge:climate:set')),
+      findsNothing,
+    );
+    await tester.ensureVisible(eco);
+    await tester.tap(eco);
+    await tester.pumpAndSettle();
+    final writes = core.calls
+        .where((call) => call['method'] == 'execute')
+        .toList();
+    expect(writes, hasLength(1));
+    expect(writes.single['command']['arguments'], {'mode': 'eco'});
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets('review: inline enum respects parameter bounds', (tester) async {
     final core = ModeCompartment();
     final climate = core.capabilities.first;
@@ -117,6 +160,13 @@ void main() {
       'maximum': 65,
       'multipleOf': 10,
     };
+    expect(
+      validateValue(50, {
+        'type': 'string',
+        'enum': [50],
+      }),
+      isNotNull,
+    );
     expect(
       validateValue(
         40,

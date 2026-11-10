@@ -19,6 +19,9 @@ import 'device_opening_test.dart'
     show OpeningClient, OrderedPermissionCore, deviceA;
 import 'interaction_fixture.dart';
 import 'review_compartment_mode_test.dart' show ModeCompartment;
+import 'review2_compartment_test.dart' show CombinedGrant;
+import 'review_lifecycle_recovery_test.dart' show RecoveryCore;
+import 'package:homeverb_mobile/native_client.dart' show NativeFailure;
 import 'review_refrigerator_failure_test.dart' show FailedRefrigerator;
 import 'secondary_journeys_test.dart' show SecondaryFixture;
 import 'session_permissions_test.dart' show PermissionCore, inspection;
@@ -72,6 +75,10 @@ void main() {
   });
 
   for (final scene in [
+    'review2-reopen-feedback',
+    'review2-quick-opening',
+    'review2-combined-form',
+    'review2-enum-bounds',
     'command-error',
     'refresh-opening',
     'opening-resume',
@@ -102,14 +109,33 @@ void main() {
       final climate = ClimateFixture();
       final mode = ModeCompartment();
       final fridge = FailedRefrigerator();
+      final combined = CombinedGrant();
+      if (scene == 'review2-enum-bounds') {
+        final capability = mode.capabilities.first;
+        capability['properties']['humidity'] = {
+          'type': 'integer',
+          'enum': [40, 50, 60],
+          'readable': true,
+          'writable': true,
+        };
+        capability['actions']['set']['parameters']['properties']['humidity'] = {
+          'type': 'integer',
+          'enum': [40, 50, 60],
+          'minimum': 50,
+        };
+      }
       final secondary = SecondaryFixture();
       final inner = await InteractionFixture.open();
       final opening = OpeningClient(inner);
       final options = inspection();
+      final recovery = RecoveryCore(options);
       final interrupted = JsonOrderedPermission(options);
       final recovered = JsonPermission(options);
       final core = switch (scene) {
-        'command-error' => climate,
+        'command-error' || 'review2-quick-opening' => climate,
+        'review2-reopen-feedback' => recovery,
+        'review2-combined-form' => combined,
+        'review2-enum-bounds' => mode,
         'zone-mode' || 'zone-mode-zh' => mode,
         'fridge-failure' => fridge,
         'refresh-opening' => opening,
@@ -120,7 +146,12 @@ void main() {
       final c = HomeController(
         core,
         AccountPreferences(),
-        reopen: scene == 'opening-resume' || scene == 'opening-retry'
+        reopen: scene == 'review2-reopen-feedback'
+            ? (_) async => throw NativeFailure(
+                'CREDENTIAL_STORE_UNAVAILABLE',
+                'Fictional vault failure.',
+              )
+            : scene == 'opening-resume' || scene == 'opening-retry'
             ? (_) async {
                 if (scene == 'opening-retry' && ++reopenCount == 1) {
                   throw StateError('Fictional session reopen failed.');
@@ -133,7 +164,10 @@ void main() {
         RepaintBoundary(
           key: boundary,
           child: TranslationProvider(
-            child: NativeApp(key: app, catalog: catalog, controller: c),
+            child: ColoredBox(
+              color: const Color(0xfff8f5ee),
+              child: NativeApp(key: app, catalog: catalog, controller: c),
+            ),
           ),
         ),
       );
@@ -159,6 +193,41 @@ void main() {
       Completer<void>? gate;
       Future<void>? pending;
       switch (scene) {
+        case 'review2-reopen-feedback':
+          expect(await c.selectDevice(options['device_id']), false);
+          await app.currentState!.go('D01');
+          await app.currentState!.action('Refresh State');
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 300));
+          expect(c.error, isA<NativeFailure>());
+        case 'review2-quick-opening':
+          gate = Completer<void>();
+          climate.executionGate = gate;
+          pending = app.currentState!.action('power:${climate.device['id']}');
+          for (var i = 0; i < 12; i++) await tester.pump();
+          await tester.tap(find.text('Controls fixture').first);
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 300));
+          expect(app.currentState!.id, 'C01');
+        case 'review2-combined-form':
+          await tester.tap(find.text('Example refrigerator').first);
+          await tester.pumpAndSettle();
+          final form = find.byKey(
+            const ValueKey('component-control:fridge:climate:set'),
+          );
+          await tester.ensureVisible(form);
+          await tester.tap(form);
+          await tester.pumpAndSettle();
+          expect(app.currentState!.id, 'C10');
+        case 'review2-enum-bounds':
+          await tester.tap(find.text('Example refrigerator').first);
+          await tester.pumpAndSettle();
+          final option = find.byKey(
+            const ValueKey('component-option:fridge:humidity:40'),
+          );
+          await tester.ensureVisible(option);
+          await tester.pumpAndSettle();
+          expect(tester.widget<ChoiceChip>(option).onSelected, isNull);
         case 'command-error':
           await c.selectDevice(climate.device['id']);
           await app.currentState!.go('C01');
