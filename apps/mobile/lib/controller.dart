@@ -537,6 +537,7 @@ class HomeController extends ChangeNotifier {
   List<Json> rooms = [], cards = [], history = [];
   LocalLoadState historyState = LocalLoadState.idle;
   LocalLoadState diagnosticsState = LocalLoadState.idle;
+  int _historyLoadGeneration = 0, _diagnosticsLoadGeneration = 0;
   Object? historyLoadError, diagnosticsLoadError;
   Json? description, snapshot, receipt, diagnostics, batchResult;
   Json? accountConflicts, routeInspection;
@@ -630,6 +631,7 @@ class HomeController extends ChangeNotifier {
   Future<bool> perform(
     Future<void> Function() work, {
     bool Function()? publishError,
+    void Function(Object)? onError,
   }) async {
     if (busy) return false;
     busy = true;
@@ -653,6 +655,7 @@ class HomeController extends ChangeNotifier {
       await work();
       return true;
     } catch (e) {
+      onError?.call(e);
       if (publishError?.call() ?? true) error = e;
       return false;
     } finally {
@@ -1903,38 +1906,45 @@ class HomeController extends ChangeNotifier {
   Future<bool> loadHistory({bool deviceOnly = false}) async {
     if (busy || !_foreground) return false;
     final device = selectedDevice;
+    final generation = _deviceOpeningGeneration;
+    final request = ++_historyLoadGeneration;
     int? epoch;
     CoreClient? client;
     Object? failure;
     historyState = LocalLoadState.loading;
     historyLoadError = null;
     notifyListeners();
-    final success = await perform(() async {
-      epoch = _readEpoch;
-      client = core;
-      try {
-        final result =
-            await client!.call(
-                  deviceOnly ? 'device_executions' : 'recent_executions',
-                  deviceOnly ? {'device_id': device} : {},
-                )
-                as List;
-        if (!_foreground ||
-            epoch != _readEpoch ||
-            client != core ||
-            (deviceOnly && selectedDevice != device)) {
-          throw NativeFailure('CANCELLED', 'History loading was cancelled.');
+    final success = await perform(
+      () async {
+        epoch = _readEpoch;
+        client = core;
+        try {
+          final result =
+              await client!.call(
+                    deviceOnly ? 'device_executions' : 'recent_executions',
+                    deviceOnly ? {'device_id': device} : {},
+                  )
+                  as List;
+          if (!_foreground ||
+              epoch != _readEpoch ||
+              client != core ||
+              (deviceOnly && selectedDevice != device)) {
+            throw NativeFailure('CANCELLED', 'History loading was cancelled.');
+          }
+          history = result.cast<Json>();
+        } catch (error) {
+          failure = error;
+          rethrow;
         }
-        history = result.cast<Json>();
-      } catch (error) {
-        failure = error;
-        rethrow;
-      }
-    }, publishError: () => false);
+      },
+      publishError: () => false,
+      onError: (error) => failure = error,
+    );
     if (!_disposed &&
         _foreground &&
-        epoch == _readEpoch &&
-        client == core &&
+        request == _historyLoadGeneration &&
+        generation == _deviceOpeningGeneration &&
+        (epoch == null || (epoch == _readEpoch && client == core)) &&
         (!deviceOnly || selectedDevice == device)) {
       historyState = success ? LocalLoadState.ready : LocalLoadState.failed;
       historyLoadError = failure;
@@ -2055,6 +2065,8 @@ class HomeController extends ChangeNotifier {
 
   Future<bool> loadDiagnostics() async {
     if (busy || !_foreground) return false;
+    final generation = _deviceOpeningGeneration;
+    final request = ++_diagnosticsLoadGeneration;
     int? epoch;
     CoreClient? client;
     Object? failure;
@@ -2062,24 +2074,32 @@ class HomeController extends ChangeNotifier {
     diagnosticsState = LocalLoadState.loading;
     diagnosticsLoadError = null;
     notifyListeners();
-    final success = await perform(() async {
-      epoch = _readEpoch;
-      client = core;
-      try {
-        final report = await client!.call('diagnostics') as Json;
-        if (!_foreground || epoch != _readEpoch || client != core) {
-          throw NativeFailure(
-            'CANCELLED',
-            'Diagnostics loading was cancelled.',
-          );
+    final success = await perform(
+      () async {
+        epoch = _readEpoch;
+        client = core;
+        try {
+          final report = await client!.call('diagnostics') as Json;
+          if (!_foreground || epoch != _readEpoch || client != core) {
+            throw NativeFailure(
+              'CANCELLED',
+              'Diagnostics loading was cancelled.',
+            );
+          }
+          diagnostics = report;
+        } catch (error) {
+          failure = error;
+          rethrow;
         }
-        diagnostics = report;
-      } catch (error) {
-        failure = error;
-        rethrow;
-      }
-    }, publishError: () => false);
-    if (!_disposed && _foreground && epoch == _readEpoch && client == core) {
+      },
+      publishError: () => false,
+      onError: (error) => failure = error,
+    );
+    if (!_disposed &&
+        _foreground &&
+        request == _diagnosticsLoadGeneration &&
+        generation == _deviceOpeningGeneration &&
+        (epoch == null || (epoch == _readEpoch && client == core))) {
       diagnosticsState = success ? LocalLoadState.ready : LocalLoadState.failed;
       diagnosticsLoadError = failure;
       notifyListeners();

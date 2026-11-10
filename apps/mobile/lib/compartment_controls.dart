@@ -372,7 +372,7 @@ class CompartmentControls extends StatelessWidget {
     final inlineOptions = <String, Json>{};
     if (standalone) {
       for (final entry in (parameters?['properties'] as Json? ?? {}).entries) {
-        final property = climate?['properties']?[entry.key] as Json?;
+        final property = climate['properties']?[entry.key] as Json?;
         if (entry.key != 'target_temperature' &&
             entry.value is Json &&
             (entry.value as Json)['enum'] is List &&

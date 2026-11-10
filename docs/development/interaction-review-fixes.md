@@ -44,6 +44,13 @@ well. The combined focused lifecycle, session, history, diagnostics, refresh
 and receipt selection passed 54 tests (`review-3-5-after-final.log`). No write
 is replayed by these recovery paths.
 
+Additional tests found that a failed session reopen could itself leave history
+or diagnostics loading forever (`review-5-reopen-failure-before.log`). The
+failure is now retained as retryable even when no work callback was entered,
+with request and lifecycle generations preventing stale publication. The focused
+recovery selection passed 45 tests (`review-5-reopen-failure-after.log`), and
+Flutter analysis passed after this follow-up.
+
 ## 6. Preserve other zone controls
 
 `review_compartment_mode_test.dart` first failed because the supported normal

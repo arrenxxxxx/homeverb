@@ -79,6 +79,32 @@ void main() {
 
   for (final history in [true, false]) {
     testWidgets(
+      '${history ? 'history' : 'diagnostics'} reports session reopen failure',
+      (tester) async {
+        final options = inspection();
+        final old = RecoveryCore(options);
+        final c = HomeController(
+          old,
+          AccountPreferences(),
+          reopen: (_) async => throw NativeFailure(
+            'STATE_UNAVAILABLE',
+            'Fictional reopen failure.',
+          ),
+        );
+        expect(await c.selectDevice(options['device_id']), false);
+        expect(await (history ? c.loadHistory() : c.loadDiagnostics()), false);
+        expect(
+          history ? c.historyState : c.diagnosticsState,
+          LocalLoadState.failed,
+        );
+        expect(
+          history ? c.historyLoadError : c.diagnosticsLoadError,
+          isA<NativeFailure>(),
+        );
+        c.dispose();
+      },
+    );
+    testWidgets(
       '${history ? 'history' : 'diagnostics'} becomes retryable after background',
       (tester) async {
         final core = SecondaryFixture();
