@@ -380,7 +380,9 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-  testWidgets('unreported refrigerator groups remain absent', (tester) async {
+  testWidgets('supported unreported refrigerator readings remain missing', (
+    tester,
+  ) async {
     final core = ModeFixture()..omitModeReadings = true;
     final c = HomeController(
       core,
@@ -391,19 +393,19 @@ void main() {
     await c.selectDevice(core.device['id']);
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(body: RefrigeratorModes(controller: c)),
+        home: Scaffold(
+          body: SingleChildScrollView(child: RefrigeratorModes(controller: c)),
+        ),
       ),
     );
+    expect(find.text('No mode readings have been returned yet.'), findsNothing);
+    expect(find.text('—'), findsWidgets);
     expect(
-      find.text('No mode readings have been returned yet.'),
+      find.byKey(const ValueKey('refrigerator-group:functions')),
       findsOneWidget,
     );
-    expect(find.byType(ApplianceReading), findsNothing);
     expect(
-      find.byWidgetPredicate(
-        (widget) =>
-            widget.key?.toString().contains('refrigerator-group:') == true,
-      ),
+      find.byKey(const ValueKey('refrigerator-group:status')),
       findsNothing,
     );
   });
@@ -496,10 +498,18 @@ void main() {
       expect(find.text('Off'), findsOneWidget);
       expect(find.text('-2°C'), findsOneWidget);
       expect(find.text('Stale'), findsNothing);
-      expect(find.text('Holiday mode'), findsNothing);
+      final holiday = find.byKey(
+        const ValueKey(
+          'refrigerator-reading:vendor.midea.refrigerator.holiday_mode',
+        ),
+      );
+      expect(
+        find.descendant(of: holiday, matching: find.text('—')),
+        findsOneWidget,
+      );
       expect(
         find.byKey(const ValueKey('refrigerator-group:smart')),
-        findsNothing,
+        findsOneWidget,
       );
       expect(
         find.byKey(const ValueKey('refrigerator-group:status')),

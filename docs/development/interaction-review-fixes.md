@@ -54,3 +54,13 @@ passes Core planning. Other supported action shapes retain their existing form.
 The focused compartment and expanded-device selection passed 11 tests
 (`review-6-after.log`), followed by a targeted rerun after duplicate-selection
 guarding.
+
+## 7. Keep supported refrigerator readings after failure
+
+`review_refrigerator_failure_test.dart` reproduced 15 loading rows disappearing
+after the initial read failed (`review-7-before.log`). Readable properties in the
+current descriptor now retain their rows and render a dash when absent or failed;
+undeclared and unreadable properties are not added. The old assertion that hid
+declared but unreported features was updated to require the truthful missing value
+and to keep undeclared groups absent. The focused refrigerator and reading-state
+selection passed 19 tests (`review-7-after.log`).

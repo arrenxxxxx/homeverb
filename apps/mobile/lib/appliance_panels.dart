@@ -221,9 +221,7 @@ class RefrigeratorModes extends StatelessWidget {
     final entries = <String, Json>{
       for (final cap in caps)
         for (final entry in (cap['properties'] as Json).entries)
-          if (entry.value['readable'] == true &&
-              (readings['${cap['id']}.${entry.key}']?['value'] != null ||
-                  controller.readingLoading('fridge')))
+          if (entry.value['readable'] == true)
             '${cap['id']}.${entry.key}': entry.value as Json,
     };
     Widget section(
