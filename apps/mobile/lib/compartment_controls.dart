@@ -72,23 +72,23 @@ bool _inlineValueAllowed(Object? value, Json schema) {
 
 // JSON numbers are decimal values. Compare their represented decimal strings
 // using integer arithmetic instead of accepting nearby out-of-step values.
-bool _decimalMultiple(num value, num step) {
-  (BigInt, int) decimal(num number) {
-    final parts = number.toString().toLowerCase().split('e');
-    final exponent = parts.length == 2 ? int.parse(parts[1]) : 0;
-    final point = parts[0].indexOf('.');
-    final fraction = point < 0 ? 0 : parts[0].length - point - 1;
-    var digits = BigInt.parse(parts[0].replaceAll('.', ''));
-    final scale = fraction - exponent;
-    if (scale < 0) {
-      digits *= BigInt.from(10).pow(-scale);
-      return (digits, 0);
-    }
-    return (digits, scale);
+(BigInt, int) _decimalParts(num number) {
+  final parts = number.toString().toLowerCase().split('e');
+  final exponent = parts.length == 2 ? int.parse(parts[1]) : 0;
+  final point = parts[0].indexOf('.');
+  final fraction = point < 0 ? 0 : parts[0].length - point - 1;
+  var digits = BigInt.parse(parts[0].replaceAll('.', ''));
+  final scale = fraction - exponent;
+  if (scale < 0) {
+    digits *= BigInt.from(10).pow(-scale);
+    return (digits, 0);
   }
+  return (digits, scale);
+}
 
-  final (numerator, numeratorScale) = decimal(value);
-  final (denominator, denominatorScale) = decimal(step);
+bool _decimalMultiple(num value, num step) {
+  final (numerator, numeratorScale) = _decimalParts(value);
+  final (denominator, denominatorScale) = _decimalParts(step);
   final scale = numeratorScale > denominatorScale
       ? numeratorScale
       : denominatorScale;
@@ -97,6 +97,26 @@ bool _decimalMultiple(num value, num step) {
       denominator * BigInt.from(10).pow(scale - denominatorScale);
   return adjustedStep != BigInt.zero &&
       adjustedValue % adjustedStep == BigInt.zero;
+}
+
+num? _decimalStep(num value, num step, int direction) {
+  if (!value.isFinite || !step.isFinite || step <= 0) return null;
+  final (digits, valueScale) = _decimalParts(value);
+  final (increment, stepScale) = _decimalParts(step);
+  final scale = valueScale > stepScale ? valueScale : stepScale;
+  final sum =
+      digits * BigInt.from(10).pow(scale - valueScale) +
+      BigInt.from(direction) *
+          increment *
+          BigInt.from(10).pow(scale - stepScale);
+  final candidate = num.tryParse(scale == 0 ? '$sum' : '${sum}e-$scale');
+  if (candidate == null || !candidate.isFinite) return null;
+  final (actual, actualScale) = _decimalParts(candidate);
+  final commonScale = scale > actualScale ? scale : actualScale;
+  if (sum * BigInt.from(10).pow(commonScale - scale) !=
+      actual * BigInt.from(10).pow(commonScale - actualScale))
+    return null;
+  return candidate;
 }
 
 bool _inlineSingleArgumentAllowed(Json parameters, String name) {
@@ -519,19 +539,31 @@ class CompartmentControls extends StatelessWidget {
         final isTarget =
             capability['id'] == 'climate' && entry.key == 'target_temperature';
         if (isTarget && direct && step != null) {
-          bool canStep(int direction) =>
-              !controller.busy &&
-              target is num &&
-              _inlineSingleArgumentAllowed(parameters!, 'target_temperature') &&
-              _inlineValueAllowed(target, schema) &&
-              _inlineValueAllowed(target + direction * step, schema) &&
-              controller.canControlValue(
-                'climate',
-                'set',
-                'target_temperature',
-                target + direction * step,
-                componentId: id,
-              );
+          num? stepCandidate(int direction) {
+            if (controller.busy ||
+                target is! num ||
+                !_inlineSingleArgumentAllowed(
+                  parameters!,
+                  'target_temperature',
+                ) ||
+                !_inlineValueAllowed(target, schema))
+              return null;
+            final next = _decimalStep(target, step, direction);
+            if (next == null ||
+                !_inlineValueAllowed(next, schema) ||
+                !controller.canControlValue(
+                  'climate',
+                  'set',
+                  'target_temperature',
+                  next,
+                  componentId: id,
+                ))
+              return null;
+            return next;
+          }
+
+          final increase = stepCandidate(1);
+          final decrease = stepCandidate(-1);
           trailing[rows.length] = InlineStepper(
             key: ValueKey('component-stepper:$id'),
             label: localize(
@@ -539,12 +571,8 @@ class CompartmentControls extends StatelessWidget {
               UiMessage('{component} target', {'component': UiMessage(label)}),
             ),
             value: propertyValue(target, entry.value as Json),
-            onIncrease: canStep(1)
-                ? () => onTarget(id, (target as num) + step)
-                : null,
-            onDecrease: canStep(-1)
-                ? () => onTarget(id, (target as num) - step)
-                : null,
+            onIncrease: increase == null ? null : () => onTarget(id, increase),
+            onDecrease: decrease == null ? null : () => onTarget(id, decrease),
           );
         }
         rows.add([
