@@ -459,6 +459,11 @@ class CompartmentControls extends StatelessWidget {
         if (capability['id'] == 'climate' &&
             entry.key == 'set' &&
             editable &&
+            !controller.hasCombinedControlGrant(
+              'climate',
+              'set',
+              componentId: id,
+            ) &&
             ((action['parameters']?['properties'] as Map?) ?? {}).keys.every(
               (name) =>
                   name == 'target_temperature' ||
@@ -592,6 +597,7 @@ class CompartmentControls extends StatelessWidget {
                           onComponentAction == null ||
                           observation('climate.${entry.key}')?['value'] ==
                               value ||
+                          validateValue(value, entry.value) != null ||
                           !controller.canControlValue(
                             'climate',
                             'set',

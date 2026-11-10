@@ -357,6 +357,20 @@ class HomeController extends ChangeNotifier {
     return _matchesDisplayGrant(schema, {});
   });
 
+  bool hasCombinedControlGrant(
+    String capability,
+    String action, {
+    String? componentId,
+  }) => _controlRules(capability, action, componentId: componentId).any((rule) {
+    final schema = rule['argument_schema'];
+    if (schema is! Map) return false;
+    final exact = schema['const'];
+    return (exact is Map && exact.length > 1) ||
+        (schema['required'] is List &&
+            (schema['required'] as List).length > 1) ||
+        (schema['minProperties'] is num && schema['minProperties'] > 1);
+  });
+
   Iterable<Json> _controlRules(
     String capability,
     String action, {
