@@ -1927,6 +1927,13 @@ String? translateSource(
   "Last device list refresh completed" => t.feedbackLastRefreshCompleted,
   "Something interrupted this operation. Check its result before taking further action." =>
     t.feedbackOperationInterrupted,
+  "Loading device-specific functions\u2026" => t.deviceFunctionsLoading,
+  "Displayed devices" => t.deviceDisplayed,
+  "Choose devices to show. Removed cards can be restored here." =>
+    t.deviceDisplayHelp,
+  "Show {name}" => t.deviceShowNamed(name: args["name"] ?? "{name}"),
+  "Remove card" => t.deviceRemoveCard,
+  "Choose displayed devices in Platforms" => t.deviceDisplayEmpty,
   _ => null,
 };
 
@@ -3781,5 +3788,12 @@ String? sourceForKey(String key) => switch (key) {
   "feedback.lastRefreshCompleted" => "Last device list refresh completed",
   "feedback.operationInterrupted" =>
     "Something interrupted this operation. Check its result before taking further action.",
+  "device.functionsLoading" => "Loading device-specific functions\u2026",
+  "device.displayed" => "Displayed devices",
+  "device.displayHelp" =>
+    "Choose devices to show. Removed cards can be restored here.",
+  "device.showNamed" => "Show {name}",
+  "device.removeCard" => "Remove card",
+  "device.displayEmpty" => "Choose displayed devices in Platforms",
   _ => null,
 };

@@ -1436,5 +1436,11 @@
   "feedback.refreshFailed": "Could not refresh. Your last readings are kept.",
   "feedback.readingsUpdated": "Readings updated",
   "feedback.lastRefreshCompleted": "Last device list refresh completed",
-  "feedback.operationInterrupted": "Something interrupted this operation. Check its result before taking further action."
+  "feedback.operationInterrupted": "Something interrupted this operation. Check its result before taking further action.",
+  "device.functionsLoading": "Loading device-specific functions…",
+  "device.displayed": "Displayed devices",
+  "device.displayHelp": "Choose devices to show. Removed cards can be restored here.",
+  "device.showNamed": "Show {name}",
+  "device.removeCard": "Remove card",
+  "device.displayEmpty": "Choose displayed devices in Platforms"
 }

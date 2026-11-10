@@ -4349,4 +4349,22 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Something interrupted this operation. Check its result before taking further action.'
 	String get feedbackOperationInterrupted => 'Something interrupted this operation. Check its result before taking further action.';
+
+	/// en-US: 'Loading device-specific functions\u2026'
+	String get deviceFunctionsLoading => 'Loading device-specific functions\u2026';
+
+	/// en-US: 'Displayed devices'
+	String get deviceDisplayed => 'Displayed devices';
+
+	/// en-US: 'Choose devices to show. Removed cards can be restored here.'
+	String get deviceDisplayHelp => 'Choose devices to show. Removed cards can be restored here.';
+
+	/// en-US: 'Show {name}'
+	String deviceShowNamed({required Object name}) => 'Show ${name}';
+
+	/// en-US: 'Remove card'
+	String get deviceRemoveCard => 'Remove card';
+
+	/// en-US: 'Choose displayed devices in Platforms'
+	String get deviceDisplayEmpty => 'Choose displayed devices in Platforms';
 }

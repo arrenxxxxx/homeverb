@@ -1436,5 +1436,11 @@
   "feedback.refreshFailed": "暂时无法刷新，已保留上次状态。",
   "feedback.readingsUpdated": "设备状态已刷新",
   "feedback.lastRefreshCompleted": "上次设备列表同步已完成",
-  "feedback.operationInterrupted": "操作未能正常结束，请先确认执行结果，再进行下一步。"
+  "feedback.operationInterrupted": "操作未能正常结束，请先确认执行结果，再进行下一步。",
+  "device.functionsLoading": "正在加载设备专属功能…",
+  "device.displayed": "显示的设备",
+  "device.displayHelp": "勾选需要显示的设备，移除的卡片可在此重新勾选。",
+  "device.showNamed": "显示{name}",
+  "device.removeCard": "移除卡片",
+  "device.displayEmpty": "请到平台账号中勾选要显示的设备"
 }

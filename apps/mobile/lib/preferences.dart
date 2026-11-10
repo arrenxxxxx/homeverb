@@ -51,6 +51,35 @@ class LocalPreferences {
     });
   }
 
+  /// Local presentation only; keys are Core-local references, never provider IDs.
+  bool deviceVisible(String id) =>
+      (values['hidden_devices'] is List ? values['hidden_devices'] as List : [])
+          .contains(id) ==
+      false;
+
+  Future<void> setDeviceVisible(String id, bool visible) {
+    final operation = _saveTail.then((_) async {
+      final hidden = <String>{
+        for (final value
+            in (values['hidden_devices'] is List
+                ? values['hidden_devices'] as List
+                : []))
+          if (value is String) value,
+      };
+      if (visible) {
+        hidden.remove(id);
+      } else {
+        hidden.add(id);
+      }
+      await _save({'hidden_devices': hidden.toList()});
+    });
+    _saveTail = operation.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace __) {},
+    );
+    return operation;
+  }
+
   String route([String? device]) =>
       (values['device_routes'] as Map?)?[device] as String? ??
       values['route'] as String? ??

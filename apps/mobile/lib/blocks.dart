@@ -1419,6 +1419,7 @@ class DeviceGrid extends StatelessWidget {
   const DeviceGrid({
     required this.keys,
     required this.onAction,
+    this.allowRemoval = false,
     this.cached = false,
     this.large = false,
     this.data,
@@ -1430,6 +1431,7 @@ class DeviceGrid extends StatelessWidget {
   final Map<String, DevicePresentation> presentations;
   final ActionHandler onAction;
   final bool cached, large;
+  final bool allowRemoval;
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, c) {
@@ -1454,6 +1456,7 @@ class DeviceGrid extends StatelessWidget {
                 data: data?[i],
                 presentation: presentations[keys[i]],
                 cached: cached,
+                allowRemoval: allowRemoval,
                 onAction: onAction,
                 large: columns == 1,
               ),
@@ -1469,6 +1472,7 @@ class DeviceTile extends StatelessWidget {
   const DeviceTile(
     this.deviceKey, {
     required this.onAction,
+    this.allowRemoval = false,
     this.cached = false,
     this.large = false,
     this.compactHeight = 233,
@@ -1482,12 +1486,25 @@ class DeviceTile extends StatelessWidget {
   final DevicePresentation? presentation;
   final ActionHandler onAction;
   final bool cached, large;
+  final bool allowRemoval;
   @override
   Widget build(BuildContext context) {
     final kind =
             presentation?.artwork ??
             (sampleNames.containsKey(deviceKey) ? deviceKey : 'ac'),
         d = data ?? sampleNames[kind] ?? sampleNames['ac']!;
+    Widget removalMenu() => PopupMenuButton<String>(
+      key: ValueKey('card-menu:$deviceKey'),
+      tooltip: localize(context, UiMessage('Menu {name}', {'name': d[0]})),
+      icon: const Icon(Icons.more_horiz_rounded, size: 22),
+      onSelected: (value) => onAction('$value:$deviceKey'),
+      itemBuilder: (_) => [
+        PopupMenuItem(
+          value: 'hide-device',
+          child: Text(localize(context, 'Remove card')),
+        ),
+      ],
+    );
     final hasCaption = d[3].toString().isNotEmpty;
     final skin = skinOf(context);
     final compact = skin.compactDeviceCards;
@@ -1651,6 +1668,7 @@ class DeviceTile extends StatelessWidget {
                             ],
                           ),
                         ),
+                        if (allowRemoval) removalMenu(),
                       ],
                     ),
                   ],
@@ -1823,23 +1841,25 @@ class DeviceTile extends StatelessWidget {
           Positioned(
             right: 0,
             top: 0,
-            child: Semantics(
-              label: localize(
-                context,
-                UiMessage('Menu {name}', {'name': d[0]}),
-              ),
-              button: true,
-              child: Tooltip(
-                message: localize(
-                  context,
-                  UiMessage('Menu {name}', {'name': d[0]}),
-                ),
-                child: InkWell(
-                  onTap: () => onAction('menu:$deviceKey'),
-                  child: const SizedBox(width: 48, height: 48),
-                ),
-              ),
-            ),
+            child: allowRemoval
+                ? removalMenu()
+                : Semantics(
+                    label: localize(
+                      context,
+                      UiMessage('Menu {name}', {'name': d[0]}),
+                    ),
+                    button: true,
+                    child: Tooltip(
+                      message: localize(
+                        context,
+                        UiMessage('Menu {name}', {'name': d[0]}),
+                      ),
+                      child: InkWell(
+                        onTap: () => onAction('menu:$deviceKey'),
+                        child: const SizedBox(width: 48, height: 48),
+                      ),
+                    ),
+                  ),
           ),
         ],
       ),

@@ -255,7 +255,14 @@ class AccountDetails extends StatelessWidget {
         const SizedBox(height: 16),
         _AccountPanel(
           children: [
-            const Copy('Devices', size: 18, bold: true),
+            const Copy('Displayed devices', size: 18, bold: true),
+            const SizedBox(height: 8),
+            const Copy(
+              'Choose devices to show. Removed cards can be restored here.',
+              size: 12,
+              color: muted,
+              paragraph: true,
+            ),
             const SizedBox(height: 4),
             Copy(
               UiMessage('{count} devices associated locally', {
@@ -275,32 +282,55 @@ class AccountDetails extends StatelessWidget {
             for (final id in c.accountDeviceIds)
               Padding(
                 padding: const EdgeInsets.only(top: 14),
-                child: TextButton(
-                  key: ValueKey('account-device:$id'),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    foregroundColor: ink,
-                  ),
-                  onPressed:
-                      !c.busy &&
-                          c.cards.any((card) => card['device']['id'] == id)
-                      ? () => onAction('open:$id')
-                      : null,
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.devices_other_rounded,
-                        size: 24,
-                        color: skinAccent(context),
+                child: Row(
+                  children: [
+                    Checkbox(
+                      key: ValueKey('device-visible:$id'),
+                      value: c.preferences.deviceVisible(id),
+                      semanticLabel: localize(
+                        context,
+                        UiMessage('Show {name}', {
+                          'name': savedCardName(c, id),
+                        }),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Copy(savedCardName(c, id), size: 16, bold: true),
+                      onChanged:
+                          c.busy ||
+                              !c.cards.any((card) => card['device']['id'] == id)
+                          ? null
+                          : (value) => onAction(
+                              '${value == true ? 'show-device' : 'hide-device'}:$id',
+                            ),
+                    ),
+                    Expanded(
+                      child: TextButton(
+                        key: ValueKey('account-device:$id'),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          foregroundColor: ink,
+                        ),
+                        onPressed:
+                            !c.busy &&
+                                c.cards.any(
+                                  (card) => card['device']['id'] == id,
+                                )
+                            ? () => onAction('open:$id')
+                            : null,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Copy(
+                                savedCardName(c, id),
+                                size: 16,
+                                bold: true,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Icon(Icons.chevron_right_rounded, size: 22),
+                          ],
+                        ),
                       ),
-                      const SizedBox(width: 8),
-                      const Icon(Icons.chevron_right_rounded, size: 22),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
           ],

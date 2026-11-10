@@ -2187,3 +2187,16 @@ use one line at normal text size. Dishwasher readings and supply warnings are
 separate, and unrecognized programs display Unknown. This does not add dishwasher
 command mappings or establish physical appliance support. Executed checks and
 local emulator evidence are recorded in the [App verification log](../apps/mobile/verification.md).
+
+## Local device visibility and bottom opening progress (November 10, 2026)
+
+Flutter schema-1 preferences add an optional `hidden_devices` list of Core-local
+references. Missing entries default to visible; account refresh and App restart
+do not reset choices. Older App versions ignore the list and display all cards.
+Removal hides the local card only; platform checkboxes restore it. Core card
+ordering, descriptors, credentials, readings, history and permissions remain intact.
+No provider unbind, appliance write, native API change or SQLite migration occurs.
+Hidden cards are excluded from visible-card refresh and search. Device-detail
+opening adds a reserved bottom progress bar; retained controls remain disabled
+while current-session preparation runs. This is App presentation evidence, not
+new physical-device compatibility.

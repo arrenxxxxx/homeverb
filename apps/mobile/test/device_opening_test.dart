@@ -426,6 +426,11 @@ void main() {
         -18,
       );
       expect(find.byType(DeviceLoading), findsOneWidget);
+      expect(find.text('Loading device-specific functions…'), findsOneWidget);
+      final loadingTop = tester
+          .getTopLeft(find.byType(LinearProgressIndicator))
+          .dy;
+      expect(loadingTop, greaterThan(500));
       expect(find.text('4°C'), findsNothing);
       expect(tester.takeException(), isNull);
       gate.complete();
@@ -438,6 +443,10 @@ void main() {
       await pumps(tester, 12);
       expect(find.byType(DeviceLoading), findsNothing);
       expect(find.text('4°C'), findsWidgets);
+      expect(
+        tester.widget<DevicePage>(find.byType(DevicePage)).loadingFeatures,
+        false,
+      );
       await tester.tap(find.byTooltip('Back'));
       await pumps(tester);
       final repeatGate = inner.hold(deviceA, 'fridge');
@@ -445,6 +454,11 @@ void main() {
       await pumps(tester, 12);
       expect(find.byType(DeviceLoading), findsNothing);
       expect(find.text('4°C'), findsWidgets);
+      expect(find.text('Loading device-specific functions…'), findsOneWidget);
+      expect(
+        tester.getTopLeft(find.byType(LinearProgressIndicator)).dy,
+        loadingTop,
+      );
       repeatGate.complete();
       for (var i = 0; i < 100 && controller.openingDevice; i++) {
         await tester.pump();

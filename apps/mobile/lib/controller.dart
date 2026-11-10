@@ -748,15 +748,31 @@ class HomeController extends ChangeNotifier {
           .map((r) => r['name'] as String)
           .firstOrNull ??
       'Unassigned';
+  bool get allDevicesHidden =>
+      cards.isNotEmpty &&
+      cards.every((card) => !preferences.deviceVisible(card['device']['id']));
   List<Json> get visibleCards => cards.where((c) {
     final device = c['device'] as Json, prefs = c['preferences'] as Json;
-    return (filter == 'All' ||
+    return preferences.deviceVisible(device['id'] as String) &&
+        (filter == 'All' ||
             prefs['room_id'] == filter ||
             (filter == 'Unassigned' && prefs['room_id'] == null)) &&
         '${device['alias']} ${device['model']} ${roomName(prefs['room_id'])}'
             .toLowerCase()
             .contains(search.toLowerCase());
   }).toList();
+  Future<bool> setDeviceVisible(String id, bool visible) => perform(() async {
+    if (!cards.any((card) => card['device']['id'] == id)) {
+      throw NativeFailure(
+        'INVALID_ARGUMENT',
+        'The saved device is unavailable.',
+      );
+    }
+    await preferences.setDeviceVisible(id, visible);
+    if (!visible) selection.remove(id);
+    visibleCardsChanged();
+  });
+
   Json? get currentCard =>
       cards.where((c) => c['device']['id'] == selectedDevice).firstOrNull;
   dynamic observed(String property) =>

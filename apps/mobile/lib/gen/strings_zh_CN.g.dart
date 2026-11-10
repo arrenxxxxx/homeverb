@@ -1471,4 +1471,10 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String get feedbackReadingsUpdated => '\u8bbe\u5907\u72b6\u6001\u5df2\u5237\u65b0';
 	@override String get feedbackLastRefreshCompleted => '\u4e0a\u6b21\u8bbe\u5907\u5217\u8868\u540c\u6b65\u5df2\u5b8c\u6210';
 	@override String get feedbackOperationInterrupted => '\u64cd\u4f5c\u672a\u80fd\u6b63\u5e38\u7ed3\u675f\uff0c\u8bf7\u5148\u786e\u8ba4\u6267\u884c\u7ed3\u679c\uff0c\u518d\u8fdb\u884c\u4e0b\u4e00\u6b65\u3002';
+	@override String get deviceFunctionsLoading => '\u6b63\u5728\u52a0\u8f7d\u8bbe\u5907\u4e13\u5c5e\u529f\u80fd\u2026';
+	@override String get deviceDisplayed => '\u663e\u793a\u7684\u8bbe\u5907';
+	@override String get deviceDisplayHelp => '\u52fe\u9009\u9700\u8981\u663e\u793a\u7684\u8bbe\u5907\uff0c\u79fb\u9664\u7684\u5361\u7247\u53ef\u5728\u6b64\u91cd\u65b0\u52fe\u9009\u3002';
+	@override String deviceShowNamed({required Object name}) => '\u663e\u793a${name}';
+	@override String get deviceRemoveCard => '\u79fb\u9664\u5361\u7247';
+	@override String get deviceDisplayEmpty => '\u8bf7\u5230\u5e73\u53f0\u8d26\u53f7\u4e2d\u52fe\u9009\u8981\u663e\u793a\u7684\u8bbe\u5907';
 }

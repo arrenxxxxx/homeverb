@@ -3748,3 +3748,72 @@ identifiers or credentials are copied into maintained evidence.
 No remote CI, push/publication or diagnostic upload was performed. Physical-phone
 policy, real expired-session automatic login and dishwasher command support remain
 unverified. The emulator remains available for the owner.
+
+## Device display selection and bottom loading progress -- November 10, 2026
+
+Changed implementation files: `lib/device_page.dart` (loading shell),
+`lib/account_surfaces.dart` (account checkboxes), `lib/blocks.dart` (card menu),
+`lib/controller.dart` and `lib/preferences.dart` (visibility/persistence), and
+`lib/main.dart` (navigation/filter integration). Shared locale catalogs and their
+Flutter output, visibility/opening/compact-card tests, native UI contract,
+compatibility and task records were updated with this presentation-only change.
+
+The App now persists hidden Core-local device references in its private schema-1
+preferences. Account checkboxes and card removal share this preference. Selection
+survives account inventory refresh and process restart; failed writes leave the
+prior selection intact. Hidden cards are omitted from home/search/bulk selection
+and visible-card state reads. Account details retain every locally associated
+device for explicit restoration. Core records, organization, credentials, grants,
+observations and execution history are not deleted or changed by visibility.
+
+Device detail reserves a bottom loading area with a localized device-specific
+function message and indeterminate progress bar during explicit opening. Initial
+opening retains the stable pulse body. Repeat opening retains the prior layout
+and disabled preparation controls. Completion removes the progress widget without
+moving the body; silent timer reads do not expose this opening indicator.
+
+Executed on this macOS workstation:
+
+- `fvm flutter analyze` passed. The initial focused opening/visibility/account/
+  compact-card/organization/foreground-refresh suite passed 40 tests, with four
+  screenshot skips. The final climate/compact-card/opening/visibility focus passed
+  43 tests, with four screenshot skips, including narrow cards in both themes at
+  ordinary and double text scale.
+- `fvm flutter test --reporter expanded` finished with 418 passed, 58 skipped and
+  four failed: the previously recorded native-button ink, editable-field ink,
+  control-glyph center and body-glyph pixel-top checks on macOS. No whole-suite
+  pass is claimed. The initial complete run exposed an inactive retained progress
+  widget; it was removed and that regression passed in both focused and final
+  complete runs. The final run also passed account-checkbox hide/show, hide-all
+  recovery entry, exact-ID duplicate-name isolation, failed persistence,
+  concurrent preference saves, disk reload and account inventory refresh.
+- Documentation, contracts (21 schemas, 52 positive and 341 negative fixtures),
+  repository language/hygiene and `git diff --check` passed. No Rust code or native
+  API changed; the existing verified native AAR was reused.
+- The explicit Meiju release APK built for arm64/x64 in 28.5 seconds. Verification
+  passed both current-AAR libraries, native exports, v2 signature and ELF/ZIP
+  alignment. APK SHA-256:
+  `0a8714ab291acdb153911bf4cc32f3aeb1816caf65ff22be75299993b76d7b32`.
+  Report: `/private/tmp/homeverb-visibility-apk-report.json`.
+
+`adb install -r` succeeded on the existing Android 15 arm64 emulator. Its installed
+APK checksum matched the verified artifact. The initial emulator boot was black
+and remained credential-locked, making the launcher unavailable. At the owner's
+request the same AVD was restarted with software graphics, without resetting data.
+After waking the lock screen and completing owner-authorized keypad unlock, the
+App cold launch returned `Status: ok` (6007 ms). Existing sign-in and all six
+associated devices remained available; no new account login was required.
+
+Real-account UI checks removed the dishwasher through its card menu, restarted
+only the App and confirmed five cards remained. Account details still listed all
+six devices with the dishwasher checkbox unchecked. Checking it restored the sixth
+card. First opening displayed the bottom loading label/bar; a later opening kept
+the complete prior dishwasher layout visible while the bottom indicator ran.
+Completion removed the indicator. Compact refrigerator/dishwasher card heights
+remained aligned. All six cards were restored at the end of this check. Local
+screenshots remain outside the repository and contain no credential inputs.
+
+No appliance control, provider unbind, diagnostic upload, remote CI, push or
+publication was performed. These checks establish local/emulator UI behavior;
+physical-device control support and actual expired-session automatic sign-in
+remain outside this acceptance scope. The emulator is left running for the owner.

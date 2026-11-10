@@ -858,6 +858,15 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       changed();
       return;
     }
+    if (label.startsWith('hide-device:') || label.startsWith('show-device:')) {
+      final deviceId = label.substring(label.indexOf(':') + 1);
+      await c.setDeviceVisible(deviceId, label.startsWith('show-device:'));
+      return;
+    }
+    if (label == 'Remove card' && c.selectedDevice != null) {
+      if (await c.setDeviceVisible(c.selectedDevice!, false)) await go('D01');
+      return;
+    }
     if (label.startsWith('open:') ||
         label.startsWith('power:') ||
         label.startsWith('menu:')) {
@@ -1479,6 +1488,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
               ['Reorder Devices', '›'],
               ['Select Devices', '›'],
               ['Device Information', '›'],
+              if (!c.isMock) ['Remove card', '›'],
             ],
           ],
           ['button', 'Close', 'secondary'],
@@ -2094,6 +2104,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   }
 
   Widget deviceCards() => DeviceGrid(
+    allowRemoval: !c.isMock,
     keys: c.visibleCards.map((v) => v['device']['id'] as String).toList(),
     data: c.visibleCards.map((v) {
       final d = v['device'] as Json, p = v['preferences'] as Json;
@@ -2141,7 +2152,11 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   Widget? special() => specialFor(id);
   Object roomDeviceCount(String? room) {
     final count = c.cards
-        .where((card) => card['preferences']['room_id'] == room)
+        .where(
+          (card) =>
+              card['preferences']['room_id'] == room &&
+              c.preferences.deviceVisible(card['device']['id']),
+        )
         .length;
     return UiMessage(count == 1 ? '{count} device' : '{count} devices', {
       'count': count,
@@ -2357,10 +2372,16 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         cards: c.visibleCards.isEmpty
             ? Column(
                 children: [
-                  const Copy('No devices in this room'),
+                  Copy(
+                    c.allDevicesHidden
+                        ? 'Choose displayed devices in Platforms'
+                        : 'No devices in this room',
+                  ),
                   ActionButton(
-                    'View all devices',
-                    onPressed: () => action('View all devices'),
+                    c.allDevicesHidden ? 'Platforms' : 'View all devices',
+                    onPressed: () => action(
+                      c.allDevicesHidden ? 'Platforms' : 'View all devices',
+                    ),
                   ),
                 ],
               )
@@ -2661,7 +2682,9 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     if (id == 'R03' || (id == 'C12' && c.batchResult == null))
       return Column(
         children: [
-          for (final card in c.cards)
+          for (final card in c.cards.where(
+            (card) => c.preferences.deviceVisible(card['device']['id']),
+          ))
             ChoiceTile(
               key: ValueKey('select-device:${card['device']['id']}'),
               label: LiteralText(card['device']['alias']),
@@ -2893,12 +2916,12 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
               content is DeviceLoading ||
                   content is ClimateControls ||
                   content is CompartmentControls ||
-                  (content is DeviceDetailControls &&
-                      c.capability('vendor.midea.dishwasher') != null)
+                  content is DeviceDetailControls
               ? DevicePage(
                   title: screen['header'] as Object,
                   onAction: action,
                   busy: false,
+                  loadingFeatures: c.openingDevice,
                   error:
                       identical(c.error, hiddenTransientError) ||
                           (c.receipt?['device_id'] == c.selectedDevice &&

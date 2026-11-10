@@ -109,6 +109,7 @@ void main() {
     String skin = 'sky_blue',
     bool updating = false,
     bool caption = false,
+    bool allowRemoval = false,
     void Function(String)? action,
   }) async {
     tester.view.physicalSize = Size(width, 1000);
@@ -130,6 +131,7 @@ void main() {
                 padding: const EdgeInsets.all(14),
                 child: DeviceGrid(
                   keys: _ids,
+                  allowRemoval: allowRemoval,
                   data: _data(caption: caption),
                   presentations: _presentations(updating: updating),
                   onAction: action ?? (_) {},
@@ -142,6 +144,38 @@ void main() {
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
+  }
+
+  for (final skin in ['sky_blue', 'window_light']) {
+    for (final scale in [1.0, 2.0]) {
+      testWidgets('removal menu fits narrow $skin cards at $scale text', (
+        tester,
+      ) async {
+        final actions = <String>[];
+        await grid(
+          tester,
+          width: 320,
+          scale: scale,
+          skin: skin,
+          caption: true,
+          allowRemoval: true,
+          action: actions.add,
+        );
+        if (scale == 1 && skin == 'sky_blue') {
+          final tiles = find.byType(DeviceTile);
+          expect(
+            tester.getSize(tiles.at(4)).height,
+            tester.getSize(tiles.first).height,
+          );
+        }
+        await tester.tap(find.byKey(const ValueKey('card-menu:ac-on')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Remove card'));
+        await tester.pumpAndSettle();
+        expect(actions, ['hide-device:ac-on']);
+        expect(tester.takeException(), isNull);
+      });
+    }
   }
 
   testWidgets(

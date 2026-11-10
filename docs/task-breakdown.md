@@ -1,5 +1,15 @@
 # Implementation status and next tasks
 
+## November 10 device display selection and opening progress
+
+The App implements persistent local device visibility shared by account-detail
+checkboxes and the card removal menu. Hidden devices remain available in account
+details for explicit restoration, retain Core data and are excluded from visible
+card reads. Device opening now includes a fixed bottom progress bar describing
+device-specific function loading while preserving the existing stable layout.
+Native APIs, adapter mappings and write authority are unchanged. Executed checks
+and emulator evidence are recorded in the [App verification log](../apps/mobile/verification.md).
+
 ## November 9 interaction experience handoff
 
 The owner approved an interaction preview and requested a development handoff

@@ -125,6 +125,24 @@ Prefer exact device IDs even where lookup accepts an alias. Resolve a capability
 | S07/S08/S12: diagnostics, export and About | `diagnostics`, API metadata, repository compatibility/licenses | Flutter OS export/chooser, cancel/failure handling, accurate build labels. Export the previewed allowlist only |
 | W01/W02 and all screens | Same contract at all sizes | Flutter navigation, text scaling, semantics, focus, system permissions and lifecycle binding |
 
+Device visibility is an App-only presentation preference. `hidden_devices` stores
+Core-local device references in the private schema-1 preferences file; absent
+entries remain visible. Card removal and account-device checkboxes update the
+same serialized, atomically replaced preference. Failed saves keep the prior
+selection. Account refresh and App restart retain hidden choices. Account details
+include hidden devices so the owner can restore them there. This does not unbind,
+remove Core metadata, alter grants, clear observations or change provider state.
+Hidden cards are excluded from visible-card reads, search and bulk selection;
+reordering still submits a complete Core permutation including hidden devices.
+Mock preview cards do not expose removal because they have no account selector.
+
+The device-detail shell reserves a bottom status area for explicit opening work.
+It displays a localized device-specific-function label and indeterminate progress
+bar while opening, including repeated openings with retained layout. The area is
+not announced or animated when hidden; silent timer reads do not show it. Initial
+loading retains the existing stable body and cached repeat openings retain controls
+in their disabled preparation state.
+
 Flutter-owned preferences contain no credentials and grant no authority. Room/card organization remains owned by Core. Route controls must reflect actual connections and action capabilities, not brand labels. Localization uses the shared `en-US`/`zh-CN` catalogs; IDs, arguments and outcomes stay English. Preserve unknown error codes and use a generic localized fallback instead of mapping them to success.
 
 ## Clear local cache or history
