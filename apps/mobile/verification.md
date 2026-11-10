@@ -3649,3 +3649,11 @@ fixes, 44 focused Flutter checks and actual Flutter captures are recorded in
 [interaction-second-review.md](../../docs/development/interaction-second-review.md#fourth-review-decimal-steps-and-fallback-forms).
 Flutter analysis passed; the complete Flutter suite and physical-device checks
 were not rerun in this focused phase.
+
+### November 10: fifth interaction review
+
+The two object-level fallback reproductions, 48 focused Flutter checks, the
+actual Core argument-validator test, analysis and a production Flutter capture
+are recorded in
+[interaction-second-review.md](../../docs/development/interaction-second-review.md#fifth-review-object-level-inline-eligibility).
+The complete Flutter suite and physical-device acceptance were not rerun.

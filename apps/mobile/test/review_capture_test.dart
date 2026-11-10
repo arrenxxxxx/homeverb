@@ -21,6 +21,7 @@ import 'interaction_fixture.dart';
 import 'review_compartment_mode_test.dart' show ModeCompartment;
 import 'review2_compartment_test.dart' show CombinedGrant;
 import 'review4_fallback_test.dart' show PatternFixture;
+import 'review5_root_fallback_test.dart' show RootConstraintFixture;
 import 'component_test.dart' show CompartmentFixture;
 import 'review_lifecycle_recovery_test.dart' show RecoveryCore;
 import 'package:homeverb_mobile/native_client.dart' show NativeFailure;
@@ -77,6 +78,7 @@ void main() {
   });
 
   for (final scene in [
+    'review5-root-form',
     'review4-decimal-step',
     'review4-pattern-form',
     'review2-reopen-feedback',
@@ -115,6 +117,10 @@ void main() {
       final fridge = FailedRefrigerator();
       final combined = CombinedGrant();
       final pattern = PatternFixture();
+      final root = RootConstraintFixture(
+        'additionalProperties',
+        <String, dynamic>{},
+      );
       final decimal = CompartmentFixture();
       decimal.targets['fridge'] = 4.1;
       decimal
@@ -147,6 +153,7 @@ void main() {
       final interrupted = JsonOrderedPermission(options);
       final recovered = JsonPermission(options);
       final core = switch (scene) {
+        'review5-root-form' => root,
         'review4-pattern-form' => pattern,
         'review4-decimal-step' => decimal,
         'command-error' || 'review2-quick-opening' => climate,
@@ -210,6 +217,16 @@ void main() {
       Completer<void>? gate;
       Future<void>? pending;
       switch (scene) {
+        case 'review5-root-form':
+          await tester.tap(find.text('Example refrigerator').first);
+          await tester.pumpAndSettle();
+          final form = find.byKey(
+            const ValueKey('component-control:fridge:climate:set'),
+          );
+          await tester.ensureVisible(form);
+          await tester.tap(form);
+          await tester.pumpAndSettle();
+          expect(app.currentState!.id, 'C10');
         case 'review4-decimal-step':
           await tester.tap(find.text('Example refrigerator').first);
           await tester.pumpAndSettle();

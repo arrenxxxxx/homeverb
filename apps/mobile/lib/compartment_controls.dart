@@ -638,7 +638,7 @@ class CompartmentControls extends StatelessWidget {
             ) &&
             ((action['parameters']?['properties'] as Map?) ?? {}).keys.every(
               (name) => name == 'target_temperature'
-                  ? _inlineArgumentSupported(parameters!, name, schema!)
+                  ? _inlineArgumentSupported(parameters!, name, schema)
                   : inlineOptions.containsKey(name) &&
                         _inlineArgumentSupported(
                           parameters!,

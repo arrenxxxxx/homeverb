@@ -111,3 +111,35 @@ and `review4-pattern-form.png`. They do not establish physical-device behavior.
 The full Flutter suite was not rerun for this focused change; the preceding
 macOS full-suite failures and skips are recorded above. No real appliance,
 provider account or device write was used.
+
+## Fifth review: object-level inline eligibility
+
+At baseline `03c6b5d`, both `additionalProperties: {}` and
+`minProperties: 1.0` left an authorized mode disabled inline while hiding its
+full editor. The two positive cases in `review5_root_fallback_test.dart` failed
+before the fix (`review5-before.log`). The inline temperature and enum controls
+and the decision to suppress the full action now share one eligibility predicate
+covering both the parameter object and the field schema. Unsupported object
+shapes remain conservative: the inline option is disabled and the existing
+full editor remains available, with current grants, observation requirements,
+and Core planning unchanged.
+
+The focused Flutter selection passed 48 tests (`review5-regression-final.log`).
+For each object schema it opens the full form, submits exactly one fictional
+`eco` command, and verifies that a fictional plan rejection does not execute an
+invalid `dry` command. The same selection covers decimal stepping, exact and
+combined grants, pattern fallback, observation preconditions and component
+routing. A separate offline Rust test,
+`cargo test --offline -p homeverb-domain --test review5_schema`, passed: the
+actual validator used by Core accepts `eco` and rejects invalid or missing
+arguments under both schemas. This is argument validation evidence, not a
+physical command or end-to-end native execution test.
+
+`fvm flutter analyze` passed (`review5-analyze-final.log`); its initial run
+reported one unnecessary non-null assertion, which was removed. The opt-in
+production Flutter capture selection passed 18 tests (`review5-capture.log`)
+using fictional clients, including
+`apps/mobile/build/verification/interaction-review/review5-root-form.png`.
+The full Flutter suite was not rerun in this focused phase; its earlier macOS
+failures and skips are recorded above. No real accounts, devices, writes or
+physical-phone acceptance were used.
