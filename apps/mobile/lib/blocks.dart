@@ -1500,8 +1500,12 @@ class DeviceTile extends StatelessWidget {
       onSelected: (value) => onAction('$value:$deviceKey'),
       itemBuilder: (_) => [
         PopupMenuItem(
+          value: 'assign-room',
+          child: Text(localize(context, 'Assign room')),
+        ),
+        PopupMenuItem(
           value: 'hide-device',
-          child: Text(localize(context, 'Remove card')),
+          child: Text(localize(context, 'Remove device')),
         ),
       ],
     );

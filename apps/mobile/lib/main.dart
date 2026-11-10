@@ -858,6 +858,20 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       changed();
       return;
     }
+    if (label.startsWith('assign-room:')) {
+      if (c.busy) return;
+      final deviceId = label.substring('assign-room:'.length);
+      final card = c.cards
+          .where((card) => card['device']['id'] == deviceId)
+          .firstOrNull;
+      if (card == null) return;
+      c.selectedRoom = card['preferences']['room_id'];
+      c.selection
+        ..clear()
+        ..add(deviceId);
+      await go('R03');
+      return;
+    }
     if (label.startsWith('hide-device:') || label.startsWith('show-device:')) {
       final deviceId = label.substring(label.indexOf(':') + 1);
       await c.setDeviceVisible(deviceId, label.startsWith('show-device:'));
@@ -2921,7 +2935,6 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                   title: screen['header'] as Object,
                   onAction: action,
                   busy: false,
-                  loadingFeatures: c.openingDevice,
                   error:
                       identical(c.error, hiddenTransientError) ||
                           (c.receipt?['device_id'] == c.selectedDevice &&

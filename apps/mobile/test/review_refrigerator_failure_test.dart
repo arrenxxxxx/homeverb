@@ -40,12 +40,19 @@ void main() {
       (widget) =>
           widget.key?.toString().contains('refrigerator-reading:') == true,
     );
-    expect(readings(), findsNothing);
-    expect(find.byType(DeviceLoading), findsOneWidget);
+    final before = readings().evaluate().map((e) => e.widget.key).toSet();
+    expect(before.length, greaterThan(10));
+    expect(find.byType(DeviceLoading), findsNothing);
+    expect(
+      find.byKey(const ValueKey('device-feature-loading')),
+      findsOneWidget,
+    );
+    expect(find.text('Device information'), findsNothing);
     core.gate.complete();
     await tester.pumpAndSettle();
     final after = readings().evaluate().map((e) => e.widget.key).toSet();
-    expect(after.length, greaterThan(10));
+    expect(after, before);
+    expect(find.text('Device information'), findsOneWidget);
     expect(find.byType(DeviceLoading), findsNothing);
     expect(
       find.descendant(of: readings(), matching: find.text('—')),

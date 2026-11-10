@@ -7,7 +7,8 @@ import 'skin.dart';
 
 String controlLabel(String id) {
   final shared = sourceForKey(id) ?? sourceForKey('mobile.$id');
-  if (shared != null) return shared;
+  if (shared != null && !RegExp(r'\{[a-zA-Z]+\}').hasMatch(shared))
+    return shared;
   final words = id.replaceAll('_', ' ');
   return words.isEmpty ? id : '${words[0].toUpperCase()}${words.substring(1)}';
 }
@@ -128,7 +129,7 @@ List<dynamic> describedControls(
         for (final entry in visibleProperties)
           if (entry.value['readable'] == true)
             [
-              controlLabel(entry.key),
+              sourceForKey('$id.${entry.key}') ?? controlLabel(entry.key),
               UiMessage(
                 propertyValue(
                   c.observed('$id.${entry.key}'),

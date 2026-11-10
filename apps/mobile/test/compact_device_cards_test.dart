@@ -170,7 +170,7 @@ void main() {
         }
         await tester.tap(find.byKey(const ValueKey('card-menu:ac-on')));
         await tester.pumpAndSettle();
-        await tester.tap(find.text('Remove card'));
+        await tester.tap(find.text('Remove device'));
         await tester.pumpAndSettle();
         expect(actions, ['hide-device:ac-on']);
         expect(tester.takeException(), isNull);

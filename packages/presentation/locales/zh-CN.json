@@ -1442,5 +1442,7 @@
   "device.displayHelp": "勾选需要显示的设备，移除的卡片可在此重新勾选。",
   "device.showNamed": "显示{name}",
   "device.removeCard": "移除卡片",
-  "device.displayEmpty": "请到平台账号中勾选要显示的设备"
+  "device.displayEmpty": "请到平台账号中勾选要显示的设备",
+  "device.assignRoom": "分配房间",
+  "device.remove": "移除设备"
 }

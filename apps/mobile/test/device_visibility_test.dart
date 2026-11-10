@@ -3,13 +3,37 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:homeverb_mobile/controller.dart';
+import 'package:homeverb_mobile/client_contract.dart';
 import 'package:homeverb_mobile/main.dart';
 import 'package:homeverb_mobile/preferences.dart';
-import 'package:homeverb_mobile/screens.dart';
+import 'package:homeverb_mobile/screens.dart' hide Json;
 
 import 'accounts_test.dart'
     show AccountFixture, firstAccount, firstDevice, secondDevice;
 import 'state_refresh_test.dart' show RefreshFixture;
+
+class RoomAccountFixture extends AccountFixture {
+  RoomAccountFixture() {
+    for (final card in cards) {
+      card['preferences'] = Map<String, dynamic>.from(card['preferences']);
+    }
+  }
+
+  @override
+  Future<dynamic> call(String method, [Json fields = const {}]) async {
+    if (method == 'assign_devices_to_room') {
+      requests.add({'method': method, ...fields});
+      final assignment = fields['assignment'];
+      for (final card in cards) {
+        if ((assignment['device_ids'] as List).contains(card['device']['id'])) {
+          card['preferences']['room_id'] = assignment['room_id'];
+        }
+      }
+      return [];
+    }
+    return super.call(method, fields);
+  }
+}
 
 void main() {
   test(
@@ -97,6 +121,55 @@ void main() {
   });
 
   testWidgets(
+    'card menu assigns only its device to a room without opening reads',
+    (tester) async {
+      final core = RoomAccountFixture();
+      final c = HomeController(core, LocalPreferences.memory());
+      final app = GlobalKey<NativeAppState>();
+      final catalog = (await tester.runAsync(ScreenCatalog.load))!;
+      await tester.pumpWidget(
+        NativeApp(key: app, catalog: catalog, controller: c),
+      );
+      await tester.pumpAndSettle();
+      core.requests.clear();
+      await tester.tap(find.byKey(const ValueKey('card-menu:$firstDevice')));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getTopLeft(find.text('Assign room')).dy,
+        lessThan(tester.getTopLeft(find.text('Remove device')).dy),
+      );
+      await tester.tap(find.text('Assign room'));
+      await tester.pumpAndSettle();
+      expect(app.currentState!.id, 'R03');
+      expect(c.selection, {firstDevice});
+      expect(c.selectedRoom, 'study');
+      expect(core.requests, isEmpty);
+      await tester.ensureVisible(find.text('Unassigned'));
+      await tester.tap(find.text('Unassigned'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Move Devices'));
+      await tester.tap(find.text('Move Devices'));
+      await tester.pumpAndSettle();
+      expect(app.currentState!.id, 'D01');
+      expect(
+        core.requests
+            .where((r) => r['method'] == 'assign_devices_to_room')
+            .single['assignment'],
+        {
+          'device_ids': [firstDevice],
+          'room_id': null,
+        },
+      );
+      expect(core.cards.first['preferences']['room_id'], isNull);
+      expect(core.cards.last['preferences']['room_id'], 'study');
+      expect(c.preferences.deviceVisible(firstDevice), true);
+      expect(core.requests.any((r) => r['method'] == 'execute'), false);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
+  testWidgets(
     'card removal and account selection share exact device visibility',
     (tester) async {
       final core = AccountFixture();
@@ -109,7 +182,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('card-menu:$firstDevice')));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Remove card'));
+      await tester.tap(find.text('Remove device'));
       await tester.pumpAndSettle();
       expect(
         find.byKey(const ValueKey('card-menu:$firstDevice')),
@@ -152,7 +225,7 @@ void main() {
       for (final device in [firstDevice, secondDevice]) {
         await tester.tap(find.byKey(ValueKey('card-menu:$device')));
         await tester.pumpAndSettle();
-        await tester.tap(find.text('Remove card'));
+        await tester.tap(find.text('Remove device'));
         await tester.pumpAndSettle();
       }
       expect(

@@ -1442,5 +1442,7 @@
   "device.displayHelp": "Choose devices to show. Removed cards can be restored here.",
   "device.showNamed": "Show {name}",
   "device.removeCard": "Remove card",
-  "device.displayEmpty": "Choose displayed devices in Platforms"
+  "device.displayEmpty": "Choose displayed devices in Platforms",
+  "device.assignRoom": "Assign room",
+  "device.remove": "Remove device"
 }

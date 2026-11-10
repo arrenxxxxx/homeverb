@@ -517,46 +517,50 @@ class _ClimateControlsState extends State<ClimateControls>
       Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              const Icon(Icons.power_settings_new, size: 20),
-              const SizedBox(width: 8),
-              const Copy(
-                'Power',
-                bold: true,
-                size: DeviceTypography.body,
-                lineHeight: DeviceTypography.lineHeight,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: ReadingValue(
-                  updating(powerChoice)
-                      ? (pending!.$2 == true ? 'Turning on…' : 'Turning off…')
-                      : power == true
-                      ? 'Powered on'
-                      : power == false
-                      ? 'Powered off'
-                      : '—',
-                  loading: power == null && c.readingLoading(c.component),
-                  size: DeviceTypography.secondary,
-                  color: soft,
+          ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48),
+            child: Row(
+              children: [
+                const Icon(Icons.power_settings_new, size: 20),
+                const SizedBox(width: 8),
+                const Copy(
+                  'Power',
+                  bold: true,
+                  size: DeviceTypography.body,
+                  lineHeight: DeviceTypography.lineHeight,
                 ),
-              ),
-              if (updating(powerChoice)) const OperationPulse(size: 20),
-              if (power is bool &&
-                  powerChoice != null &&
-                  powerChoice.permits(c, !power))
-                Semantics(
-                  label: localize(context, 'Power'),
-                  child: Switch(
-                    key: const ValueKey('climate-power'),
-                    value: power,
-                    onChanged: enabled
-                        ? (value) => send(powerChoice, value, epoch, lifecycle)
-                        : null,
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ReadingValue(
+                    updating(powerChoice)
+                        ? (pending!.$2 == true ? 'Turning on…' : 'Turning off…')
+                        : power == true
+                        ? 'Powered on'
+                        : power == false
+                        ? 'Powered off'
+                        : '—',
+                    loading: power == null && c.readingLoading(c.component),
+                    size: DeviceTypography.secondary,
+                    color: soft,
                   ),
                 ),
-            ],
+                if (updating(powerChoice)) const OperationPulse(size: 20),
+                if (power is bool &&
+                    powerChoice != null &&
+                    powerChoice.permits(c, !power))
+                  Semantics(
+                    label: localize(context, 'Power'),
+                    child: Switch(
+                      key: const ValueKey('climate-power'),
+                      value: power,
+                      onChanged: enabled
+                          ? (value) =>
+                                send(powerChoice, value, epoch, lifecycle)
+                          : null,
+                    ),
+                  ),
+              ],
+            ),
           ),
           const SizedBox(height: 4),
           if (MediaQuery.textScalerOf(context).scale(14) > 20) ...[
@@ -853,7 +857,7 @@ class _ClimateControlsState extends State<ClimateControls>
           ),
         ],
         const SizedBox(height: 16),
-        if (remaining.isNotEmpty) ...[
+        if (remaining.isNotEmpty && !c.deviceControlsPreparing) ...[
           const SizedBox(height: 16),
           Blocks(
             remaining,

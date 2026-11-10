@@ -27,6 +27,27 @@ class InlineDeviceInformation extends StatelessWidget {
     final device = controller.currentCard?['device'] as Json?;
     final preferences = controller.currentCard?['preferences'] as Json?;
     if (device == null) return const SizedBox.shrink();
+    if (controller.openingDevice) {
+      return Padding(
+        key: const ValueKey('device-feature-loading'),
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: Center(
+          child: SizedBox.square(
+            dimension: 24,
+            child: CircularProgressIndicator(
+              strokeWidth: 2.5,
+              color: MediaQuery.highContrastOf(context)
+                  ? ink
+                  : skinOf(context).onBackground,
+              semanticsLabel: localize(
+                context,
+                'Loading device-specific functions…',
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

@@ -281,6 +281,7 @@ void main() {
     old.liveGate.complete();
     await pumps(tester);
     expect(controller.observed('power.state'), true);
+    expect(controller.deviceLayoutLoading, false);
     expect(
       old.requests.where((r) => r['method'] == 'inspect_control_options'),
       hasLength(1),
@@ -291,6 +292,7 @@ void main() {
     old.inspectionGate!.complete(options);
     await pumps(tester);
     expect(replacementStarted, true);
+    expect(controller.deviceLayoutLoading, false);
     expect(activeAtReopen, 0);
     expect(closedAtReopen, true);
     expect(old.activeAtClose, 0);
@@ -369,7 +371,7 @@ void main() {
   });
 
   testWidgets(
-    'first opening keeps restored readings behind a stable loading view',
+    'cached readings appear before live reads finish and information waits',
     (tester) async {
       final directory = await tester.runAsync(
         () => Directory.systemTemp.createTemp('opening-cache-'),
@@ -425,13 +427,14 @@ void main() {
         )?['observations']?['climate.target_temperature']?['value'],
         -18,
       );
-      expect(find.byType(DeviceLoading), findsOneWidget);
-      expect(find.text('Loading device-specific functions…'), findsOneWidget);
-      final loadingTop = tester
-          .getTopLeft(find.byType(LinearProgressIndicator))
-          .dy;
-      expect(loadingTop, greaterThan(500));
-      expect(find.text('4°C'), findsNothing);
+      expect(find.byType(DeviceLoading), findsNothing);
+      expect(find.text('4°C'), findsWidgets);
+      expect(find.text('Device information'), findsNothing);
+      expect(
+        find.byKey(const ValueKey('device-feature-loading')),
+        findsOneWidget,
+      );
+      expect(find.byType(LinearProgressIndicator), findsNothing);
       expect(tester.takeException(), isNull);
       gate.complete();
       for (var i = 0; i < 100 && controller.openingDevice; i++) {
@@ -444,9 +447,10 @@ void main() {
       expect(find.byType(DeviceLoading), findsNothing);
       expect(find.text('4°C'), findsWidgets);
       expect(
-        tester.widget<DevicePage>(find.byType(DevicePage)).loadingFeatures,
-        false,
+        find.byKey(const ValueKey('device-feature-loading')),
+        findsNothing,
       );
+      expect(find.text('Device information'), findsOneWidget);
       await tester.tap(find.byTooltip('Back'));
       await pumps(tester);
       final repeatGate = inner.hold(deviceA, 'fridge');
@@ -454,11 +458,11 @@ void main() {
       await pumps(tester, 12);
       expect(find.byType(DeviceLoading), findsNothing);
       expect(find.text('4°C'), findsWidgets);
-      expect(find.text('Loading device-specific functions…'), findsOneWidget);
       expect(
-        tester.getTopLeft(find.byType(LinearProgressIndicator)).dy,
-        loadingTop,
+        find.byKey(const ValueKey('device-feature-loading')),
+        findsOneWidget,
       );
+      expect(find.text('Device information'), findsNothing);
       repeatGate.complete();
       for (var i = 0; i < 100 && controller.openingDevice; i++) {
         await tester.pump();
@@ -477,6 +481,52 @@ void main() {
       expect(controller.componentSnapshot('freezer'), isNull);
       otherGate.complete();
       await pumps(tester);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
+  testWidgets(
+    'first live component replaces global loading while the rest continues below',
+    (tester) async {
+      final core = await InteractionFixture.open();
+      final device = core.device['id'] as String;
+      final first = core.hold(device, 'fridge');
+      final remaining = core.hold(device, 'freezer');
+      core.failures.add((device, 'freezer'));
+      final c = HomeController(core, AccountPreferences());
+      final catalog = (await tester.runAsync(ScreenCatalog.load))!;
+      await tester.pumpWidget(NativeApp(catalog: catalog, controller: c));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Example refrigerator').first);
+      await pumps(tester, 12);
+      expect(find.byType(DeviceLoading), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('device-feature-loading')),
+        findsNothing,
+      );
+      first.complete();
+      await pumps(tester, 12);
+      expect(find.byType(DeviceLoading), findsNothing);
+      expect(find.text('4°C'), findsWidgets);
+      expect(
+        find.byKey(const ValueKey('device-feature-loading')),
+        findsOneWidget,
+      );
+      expect(find.text('Device information'), findsNothing);
+      expect(find.byType(LinearProgressIndicator), findsNothing);
+      final readingPosition = tester.getTopLeft(find.text('4°C').first);
+      await tester.pump(const Duration(seconds: 3));
+      expect(tester.getTopLeft(find.text('4°C').first), readingPosition);
+      remaining.complete();
+      await pumps(tester, 12);
+      expect(
+        find.byKey(const ValueKey('device-feature-loading')),
+        findsNothing,
+      );
+      expect(find.text('Device information'), findsOneWidget);
+      expect(tester.getTopLeft(find.text('4°C').first), readingPosition);
+      expect(c.componentReadError('freezer'), isNotNull);
+      expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
     },
   );

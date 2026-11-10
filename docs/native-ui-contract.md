@@ -136,12 +136,25 @@ Hidden cards are excluded from visible-card reads, search and bulk selection;
 reordering still submits a complete Core permutation including hidden devices.
 Mock preview cards do not expose removal because they have no account selector.
 
-The device-detail shell reserves a bottom status area for explicit opening work.
-It displays a localized device-specific-function label and indeterminate progress
-bar while opening, including repeated openings with retained layout. The area is
-not announced or animated when hidden; silent timer reads do not show it. Initial
-loading retains the existing stable body and cached repeat openings retain controls
-in their disabled preparation state.
+The card overflow menu orders Assign room before Remove device. Assign room
+opens the existing local room flow with only that exact card selected and its
+current room preselected; it does not describe/read the appliance or prepare
+control authority. Removing still hides the card until an account checkbox
+restores it.
+
+Device opening uses two presentation stages. A global loader remains until the
+first cached or live observation is available. That content is then displayed
+immediately while remaining component reads and control preparation continue.
+A small inline circular indicator replaces Device information and Recent
+Operations during the remainder; those sections appear only after opening ends.
+Read failures also terminate loading and retain the applicable fallback/error.
+Control-session replacement does not restore the global loader after content is
+visible. Current-session preparation still disables controls and clears invalid
+authority. The climate primary card retains its power-row height before switches appear,
+and temporary generic fallback rows wait for preparation to finish. Property
+labels prefer their scoped catalog entry and never reuse a parameterized navigation
+message without arguments. There is no fixed footer, horizontal progress bar or extra read timer;
+silent foreground timer reads do not display the opening indicator.
 
 Flutter-owned preferences contain no credentials and grant no authority. Room/card organization remains owned by Core. Route controls must reflect actual connections and action capabilities, not brand labels. Localization uses the shared `en-US`/`zh-CN` catalogs; IDs, arguments and outcomes stay English. Preserve unknown error codes and use a generic localized fallback instead of mapping them to success.
 

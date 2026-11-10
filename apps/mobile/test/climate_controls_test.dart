@@ -75,7 +75,48 @@ class ClimateFixture extends ControlsFixture {
   }
 }
 
+class StagedClimateFixture extends ClimateFixture {
+  final liveGate = Completer<void>();
+  @override
+  Future<dynamic> call(String method, [Json fields = const {}]) async {
+    if (method == 'read_state' && fields['cached'] == false)
+      await liveGate.future;
+    return super.call(method, fields);
+  }
+}
+
 void main() {
+  testWidgets(
+    'partial climate shows its primary card without temporary fallback rows',
+    (tester) async {
+      final core = StagedClimateFixture();
+      for (final cap in core.capabilities) {
+        cap['actions'] = <String, dynamic>{};
+      }
+      final c = HomeController(core, LocalPreferences.memory());
+      final catalog = (await tester.runAsync(ScreenCatalog.load))!;
+      await tester.pumpWidget(NativeApp(catalog: catalog, controller: c));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Controls fixture').first);
+      for (var i = 0; i < 12; i++) await tester.pump();
+      expect(find.text('Target temperature'), findsOneWidget);
+      expect(find.text('AC-specific functions'), findsNothing);
+      expect(find.textContaining('{mode}'), findsNothing);
+      expect(find.text('Device information'), findsNothing);
+      expect(
+        find.byKey(const ValueKey('device-feature-loading')),
+        findsOneWidget,
+      );
+      core.liveGate.complete();
+      await tester.pumpAndSettle();
+      expect(find.text('Mode'), findsOneWidget);
+      expect(find.textContaining('{mode}'), findsNothing);
+      expect(find.text('Device information'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
   TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() => LocaleSettings.setLocale(AppLocale.enUs));
   tearDown(() => LocaleSettings.setLocale(AppLocale.enUs));

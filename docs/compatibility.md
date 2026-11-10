@@ -2200,3 +2200,11 @@ Hidden cards are excluded from visible-card refresh and search. Device-detail
 opening adds a reserved bottom progress bar; retained controls remain disabled
 while current-session preparation runs. This is App presentation evidence, not
 new physical-device compatibility.
+
+The subsequent November 10 owner review replaces the fixed bottom bar with staged
+opening: global loading until the first available observation, then immediate
+partial content and an inline spinner. Device information and history entry wait
+for completion. Session replacement preserves visible content without restoring
+the global loader. The card menu now orders local room assignment before removal,
+using the existing Core room-assignment contract and no opening reads. This adds
+no native methods, authority, device writes or preference migration.

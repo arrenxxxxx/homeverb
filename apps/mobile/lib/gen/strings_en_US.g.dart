@@ -4367,4 +4367,10 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Choose displayed devices in Platforms'
 	String get deviceDisplayEmpty => 'Choose displayed devices in Platforms';
+
+	/// en-US: 'Assign room'
+	String get deviceAssignRoom => 'Assign room';
+
+	/// en-US: 'Remove device'
+	String get deviceRemove => 'Remove device';
 }

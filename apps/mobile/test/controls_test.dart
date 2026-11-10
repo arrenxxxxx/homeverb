@@ -228,6 +228,12 @@ class ControlsFixture implements CoreClient {
 }
 
 void main() {
+  test('property labels do not reuse parameterized navigation templates', () {
+    expect(controlLabel('mode'), 'Mode');
+    expect(controlLabel('model'), 'Model');
+    expect(controlLabel('vendor.midea.ac.mode'), 'Mode');
+  });
+
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(() async {
     await (FontLoader('Inter')

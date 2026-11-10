@@ -35,7 +35,6 @@ class DevicePage extends StatelessWidget {
     required this.child,
     required this.onAction,
     this.busy = false,
-    this.loadingFeatures = false,
     this.error,
     super.key,
   });
@@ -43,7 +42,6 @@ class DevicePage extends StatelessWidget {
   final Widget child;
   final ActionHandler onAction;
   final bool busy;
-  final bool loadingFeatures;
   final Object? error;
 
   @override
@@ -126,37 +124,6 @@ class DevicePage extends StatelessWidget {
                             ],
                           ),
                         ),
-                ),
-                Visibility(
-                  visible: loadingFeatures,
-                  maintainState: true,
-                  maintainAnimation: true,
-                  maintainSize: true,
-                  child: Padding(
-                    key: const ValueKey('device-feature-loading'),
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Copy(
-                          'Loading device-specific functions…',
-                          size: 12,
-                          color: muted,
-                          center: true,
-                        ),
-                        const SizedBox(height: 8),
-                        if (loadingFeatures)
-                          LinearProgressIndicator(
-                            semanticsLabel: localize(
-                              context,
-                              'Loading device-specific functions…',
-                            ),
-                          )
-                        else
-                          const SizedBox(height: 4),
-                      ],
-                    ),
-                  ),
                 ),
               ],
             ),

@@ -5,8 +5,10 @@
 The App implements persistent local device visibility shared by account-detail
 checkboxes and the card removal menu. Hidden devices remain available in account
 details for explicit restoration, retain Core data and are excluded from visible
-card reads. Device opening now includes a fixed bottom progress bar describing
-device-specific function loading while preserving the existing stable layout.
+card reads. Device opening now reveals the first available readings immediately,
+then uses an inline spinner while remaining reads/control setup finish. Device
+information is withheld until completion. The card menu puts exact-device local
+room assignment before removal. The former fixed bottom progress bar is removed.
 Native APIs, adapter mappings and write authority are unchanged. Executed checks
 and emulator evidence are recorded in the [App verification log](../apps/mobile/verification.md).
 

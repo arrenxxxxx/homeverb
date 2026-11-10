@@ -1477,4 +1477,6 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 	@override String deviceShowNamed({required Object name}) => '\u663e\u793a${name}';
 	@override String get deviceRemoveCard => '\u79fb\u9664\u5361\u7247';
 	@override String get deviceDisplayEmpty => '\u8bf7\u5230\u5e73\u53f0\u8d26\u53f7\u4e2d\u52fe\u9009\u8981\u663e\u793a\u7684\u8bbe\u5907';
+	@override String get deviceAssignRoom => '\u5206\u914d\u623f\u95f4';
+	@override String get deviceRemove => '\u79fb\u9664\u8bbe\u5907';
 }

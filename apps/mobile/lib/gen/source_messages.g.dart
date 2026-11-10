@@ -1934,6 +1934,8 @@ String? translateSource(
   "Show {name}" => t.deviceShowNamed(name: args["name"] ?? "{name}"),
   "Remove card" => t.deviceRemoveCard,
   "Choose displayed devices in Platforms" => t.deviceDisplayEmpty,
+  "Assign room" => t.deviceAssignRoom,
+  "Remove device" => t.deviceRemove,
   _ => null,
 };
 
@@ -3795,5 +3797,7 @@ String? sourceForKey(String key) => switch (key) {
   "device.showNamed" => "Show {name}",
   "device.removeCard" => "Remove card",
   "device.displayEmpty" => "Choose displayed devices in Platforms",
+  "device.assignRoom" => "Assign room",
+  "device.remove" => "Remove device",
   _ => null,
 };

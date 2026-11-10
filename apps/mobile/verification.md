@@ -3817,3 +3817,71 @@ No appliance control, provider unbind, diagnostic upload, remote CI, push or
 publication was performed. These checks establish local/emulator UI behavior;
 physical-device control support and actual expired-session automatic sign-in
 remain outside this acceptance scope. The emulator is left running for the owner.
+
+## Staged device opening and ordered card actions -- November 10, 2026
+
+This owner review supersedes the fixed bottom loading bar described above.
+`lib/controller.dart` releases global loading as soon as the selected device has
+cached or live observations, and preserves that visible body during control-session
+replacement. `lib/appliance_panels.dart` replaces inline device information/history
+with a small circular spinner until opening finishes. `lib/device_page.dart` no
+longer reserves a fixed progress footer. Successful, failed and cancelled reads
+retain existing freshness, lifecycle and permission rules.
+
+`lib/climate_controls.dart` holds the power-row height before switches appear and
+withholds temporary generic fallback rows until preparation finishes. The first
+emulator review exposed a raw mode navigation template in those fallback rows;
+`lib/controls.dart` now prefers scoped property labels and rejects parameterized
+messages as standalone labels. This is a presentation correction, not a change to
+capability admission, grants or commands.
+
+`lib/blocks.dart` orders Assign room before Remove device. `lib/main.dart` opens
+the existing room-assignment flow with only that exact card selected and its
+current room preselected, without opening reads. Removal/restore persistence is
+unchanged. Shared English/Chinese catalogs and generated Flutter messages,
+opening/visibility/climate/label/compact-card/failure tests and contract/task/
+compatibility records were updated. Native API, SQLite and secret-store formats
+are unchanged; the existing native AAR is reused.
+
+Executed checks:
+
+- `fvm flutter analyze` passed. The staged opening, visibility, compact-card,
+  reading/failure, card-policy and descriptor-invalidation focus passed 58 tests,
+  with four screenshot skips. The final climate/controls/opening/visibility focus
+  passed all 34 tests, including the newly exposed mode-template regression.
+- Final `fvm flutter test --reporter expanded`: 422 passed, 58 skipped and four
+  established macOS font/pixel checks failed (native-button ink, editable-field
+  ink, control-glyph centers and body-glyph pixel tops). No whole-suite pass is
+  claimed. Partial-read tests hold the second component, check visible first
+  readings and hidden metadata, then verify failure stops the spinner without
+  moving those readings. Session-replacement checks retain visible content.
+  Exact-device room assignment and menu ordering pass with fictional accounts.
+- The final Meiju arm64/x64 release APK built in 40.8 seconds. Verification passed
+  both current-AAR libraries, native exports, v2 signing and ELF/ZIP alignment.
+  SHA-256: `28d6ebfed5d4dcca2c37fda9d9f89a44ce13cb2a73d5cd4588bb1f4217a670db`.
+  Report: `/private/tmp/homeverb-staged-final-apk-report.json`.
+
+The existing signed-in Android 15 emulator displayed the menu in the requested
+order and opened room assignment with only the chosen dishwasher selected. No
+room change was submitted; existing hidden-card choices were preserved. Read-only
+climate opening displayed its first readings with an inline circular spinner and
+without device information; the horizontal bar was absent. Initial observation
+of the raw mode label prompted the additional correction above. No appliance
+control, provider unbind, remote publication or diagnostic upload was performed.
+
+Final `adb install -r` succeeded without resetting App data. Its first launch
+wait timed out; retrying the same activity returned `Status: ok`. The installed
+APK checksum matched the final artifact above. The final App retained the signed-in
+account and the owner's five visible cards. Read-only opening showed the global
+pulse and completed climate controls with the correct Mode label; another climate
+view showed Device information after completion. Documentation, contract and
+repository validators and `git diff --check` passed. These are emulator UI checks,
+not physical-appliance control acceptance; native API and storage compatibility
+are unchanged.
+
+A final App-only restart captured the intermediate stage with a stable temperature
+card, an inline circular spinner, no temporary mode rows and no Device information.
+Subsequent frames showed controls and Device information appended below the same
+primary card bounds. Screenshots are retained outside the repository at
+`/private/tmp/homeverb-staged-final-cold-1.png` through
+`/private/tmp/homeverb-staged-final-cold-3.png`. No appliance command was sent.

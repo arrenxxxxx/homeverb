@@ -537,7 +537,7 @@ class HomeController extends ChangeNotifier {
     _controlPolicies = null;
     _deviceControlPolicies.clear();
     _readyDeviceLayouts.clear();
-    deviceLayoutLoading = true;
+    if (!openingDevice) deviceLayoutLoading = true;
     await core.close();
     if (!_foreground || epoch != _readEpoch) {
       throw NativeFailure('CANCELLED', 'Device setup was cancelled.');
@@ -842,6 +842,17 @@ class HomeController extends ChangeNotifier {
     error = null;
     if (!_disposed) notifyListeners();
 
+    void revealAvailableReadings() {
+      if (components.any(
+        (part) =>
+            (componentSnapshot(part['id'])?['observations'] as Map?)
+                ?.isNotEmpty ==
+            true,
+      )) {
+        deviceLayoutLoading = false;
+      }
+    }
+
     Future<bool> open() async {
       if (previous != null) await previous;
       if (waitFor != null) await waitFor;
@@ -863,6 +874,7 @@ class HomeController extends ChangeNotifier {
           if (components.isEmpty) return;
           component = components.first['id'] as String;
           snapshot = _componentSnapshots[(id, component)];
+          revealAvailableReadings();
           openingComponents.addAll(
             components
                 .where(
@@ -882,6 +894,7 @@ class HomeController extends ChangeNotifier {
               }
             }
             _requireCurrentDevice(id, operationEpoch);
+            revealAvailableReadings();
             notifyListeners();
           }
           // Opening is explicit foreground work. Read before any control-session
@@ -907,6 +920,7 @@ class HomeController extends ChangeNotifier {
             }
             _requireCurrentDevice(id, operationEpoch);
             openingComponents.remove(part['id']);
+            revealAvailableReadings();
             notifyListeners();
           }
           if (firstFailure != null) {
@@ -914,6 +928,9 @@ class HomeController extends ChangeNotifier {
             openingReadFailureSerial++;
             notifyListeners();
           }
+          // Terminal read failures also reveal their fallback before setup.
+          deviceLayoutLoading = false;
+          notifyListeners();
           await _prepareDeviceControls(id);
           _deviceDescriptions[id] = description!;
           await _inspectControlPolicies();
