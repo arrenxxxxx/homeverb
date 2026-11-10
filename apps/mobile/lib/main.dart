@@ -159,6 +159,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       id == 'P04' || (onAccountDetails && accountEditor == 'signin');
   bool exporting = false;
   String? quickPowerDevice;
+  Completer<void>? quickPowerDrain;
   String? pendingComponent;
   String? outcomeComponent, outcomeDevice, outcomeRequest;
   String connectionLabel = '';
@@ -265,12 +266,16 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     });
   }
 
-  Future<void> go(String target, {bool back = false}) async {
+  Future<void> go(
+    String target, {
+    bool back = false,
+    bool preservePending = false,
+  }) async {
     if (!mounted) return;
     feedback.clear();
     final deviceHistory = ['C01', 'C08', 'D06'].contains(id);
     if (id == 'D03') savedSearch = c.search;
-    c.cancelPending();
+    if (!preservePending) c.cancelPending();
     setState(() {
       navigation++;
       receiptParents.clear();
@@ -857,10 +862,16 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         label.startsWith('power:') ||
         label.startsWith('menu:')) {
       final openingDuringRefresh = label.startsWith('open:') && homeRefreshing;
-      if ((c.busy && !c.openingDevice && !openingDuringRefresh) ||
-          quickPowerDevice != null)
+      final openingDuringPower =
+          label.startsWith('open:') && quickPowerDrain != null;
+      if ((c.busy &&
+              !c.openingDevice &&
+              !openingDuringRefresh &&
+              !openingDuringPower) ||
+          (quickPowerDevice != null && !openingDuringPower))
         return;
       final refreshToDrain = openingDuringRefresh ? homeRefreshWork : null;
+      final powerToDrain = openingDuringPower ? quickPowerDrain!.future : null;
       final epoch = navigation,
           foreground = activityEpoch,
           device = label.substring(label.indexOf(':') + 1),
@@ -870,6 +881,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             c.snapshots[device]?['observations']?['power.state']?['value'];
         if (state is! bool || !c.cardPowerChoices(device).contains(!state))
           return;
+        quickPowerDrain = Completer<void>();
         setState(() => quickPowerDevice = device);
       }
       if (!power) {
@@ -889,11 +901,12 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
               : climateParts > 1
               ? 'C08'
               : 'C01',
+          preservePending: openingDuringPower,
         );
         if (!mounted || !c.isForeground) return;
         await c.selectDevice(
           device,
-          waitFor: refreshToDrain?.then<void>((_) {}),
+          waitFor: powerToDrain ?? refreshToDrain?.then<void>((_) {}),
         );
         return;
       }
@@ -916,7 +929,12 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         if (!c.canControlValue('power', 'set', 'state', !state)) return;
         await executeOnDevice('power', 'set', {'state': !state});
       } finally {
-        if (power && mounted) setState(() => quickPowerDevice = null);
+        if (power) {
+          final drain = quickPowerDrain;
+          quickPowerDrain = null;
+          if (drain != null && !drain.isCompleted) drain.complete();
+          if (mounted) setState(() => quickPowerDevice = null);
+        }
       }
       return;
     }

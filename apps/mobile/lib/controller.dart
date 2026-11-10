@@ -1472,7 +1472,10 @@ class HomeController extends ChangeNotifier {
         );
       }
       final result = await client.call('execute', {'command': command}) as Json;
-      if (!current())
+      if (_disposed ||
+          !_foreground ||
+          operationEpoch != _readEpoch ||
+          operationClient != core)
         throw NativeFailure('CANCELLED', 'Command result was interrupted.');
       if (result['request_id'] != command['request_id'] ||
           result['device_id'] != operationDevice) {
