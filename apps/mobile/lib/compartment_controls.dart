@@ -12,7 +12,7 @@ import 'device_typography.dart';
 
 // Inline controls interpret only this bounded JSON Schema subset. Unknown or
 // malformed keywords fail closed; Core still validates every planned command.
-bool _inlineValueAllowed(Object? value, Json schema) {
+bool _inlineSchemaSupported(Json schema) {
   const keywords = {
     'type',
     'enum',
@@ -32,12 +32,31 @@ bool _inlineValueAllowed(Object? value, Json schema) {
     r'$comment',
   };
   if (schema.keys.any((key) => !keywords.contains(key))) return false;
-  if (value is! String && value is! bool && value is! num) return false;
-  if (value is num && !value.isFinite) return false;
   final type = schema['type'];
   if (type != null &&
       !const ['number', 'integer', 'boolean', 'string'].contains(type))
     return false;
+  if (schema.containsKey('enum') && schema['enum'] is! List) return false;
+  for (final key in [
+    'minimum',
+    'maximum',
+    'exclusiveMinimum',
+    'exclusiveMaximum',
+    'multipleOf',
+  ]) {
+    if (!schema.containsKey(key)) continue;
+    final bound = schema[key];
+    if (bound is! num || !bound.isFinite || (key == 'multipleOf' && bound <= 0))
+      return false;
+  }
+  return true;
+}
+
+bool _inlineValueAllowed(Object? value, Json schema) {
+  if (!_inlineSchemaSupported(schema)) return false;
+  if (value is! String && value is! bool && value is! num) return false;
+  if (value is num && !value.isFinite) return false;
+  final type = schema['type'];
   if (type == 'number' && value is! num ||
       type == 'integer' && (value is! num || value != value.roundToDouble()) ||
       type == 'boolean' && value is! bool ||
@@ -615,7 +634,8 @@ class CompartmentControls extends StatelessWidget {
             ((action['parameters']?['properties'] as Map?) ?? {}).keys.every(
               (name) =>
                   name == 'target_temperature' ||
-                  inlineOptions.containsKey(name),
+                  (inlineOptions.containsKey(name) &&
+                      _inlineSchemaSupported(inlineOptions[name]!)),
             ))
           continue;
         if (!controller.hasControlAction(
