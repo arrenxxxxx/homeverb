@@ -20,6 +20,8 @@ import 'device_opening_test.dart'
 import 'interaction_fixture.dart';
 import 'review_compartment_mode_test.dart' show ModeCompartment;
 import 'review2_compartment_test.dart' show CombinedGrant;
+import 'review4_fallback_test.dart' show PatternFixture;
+import 'component_test.dart' show CompartmentFixture;
 import 'review_lifecycle_recovery_test.dart' show RecoveryCore;
 import 'package:homeverb_mobile/native_client.dart' show NativeFailure;
 import 'review_refrigerator_failure_test.dart' show FailedRefrigerator;
@@ -75,6 +77,8 @@ void main() {
   });
 
   for (final scene in [
+    'review4-decimal-step',
+    'review4-pattern-form',
     'review2-reopen-feedback',
     'review2-quick-opening',
     'review2-combined-form',
@@ -110,6 +114,17 @@ void main() {
       final mode = ModeCompartment();
       final fridge = FailedRefrigerator();
       final combined = CombinedGrant();
+      final pattern = PatternFixture();
+      final decimal = CompartmentFixture();
+      decimal.targets['fridge'] = 4.1;
+      decimal
+              .capabilities
+              .first['properties']['target_temperature']['multipleOf'] =
+          0.1;
+      decimal
+              .capabilities
+              .first['actions']['set']['parameters']['properties']['target_temperature']['multipleOf'] =
+          0.1;
       if (scene == 'review2-enum-bounds') {
         final capability = mode.capabilities.first;
         capability['properties']['humidity'] = {
@@ -132,6 +147,8 @@ void main() {
       final interrupted = JsonOrderedPermission(options);
       final recovered = JsonPermission(options);
       final core = switch (scene) {
+        'review4-pattern-form' => pattern,
+        'review4-decimal-step' => decimal,
         'command-error' || 'review2-quick-opening' => climate,
         'review2-reopen-feedback' => recovery,
         'review2-combined-form' => combined,
@@ -193,6 +210,23 @@ void main() {
       Completer<void>? gate;
       Future<void>? pending;
       switch (scene) {
+        case 'review4-decimal-step':
+          await tester.tap(find.text('Example refrigerator').first);
+          await tester.pumpAndSettle();
+          expect(
+            find.byKey(const ValueKey('component-stepper:fridge')),
+            findsOneWidget,
+          );
+        case 'review4-pattern-form':
+          await tester.tap(find.text('Example refrigerator').first);
+          await tester.pumpAndSettle();
+          final form = find.byKey(
+            const ValueKey('component-control:fridge:climate:set'),
+          );
+          await tester.ensureVisible(form);
+          await tester.tap(form);
+          await tester.pumpAndSettle();
+          expect(app.currentState!.id, 'C10');
         case 'review2-reopen-feedback':
           expect(await c.selectDevice(options['device_id']), false);
           await app.currentState!.go('D01');

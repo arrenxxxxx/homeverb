@@ -9,10 +9,10 @@ import 'package:homeverb_mobile/screens.dart' hide Json;
 import 'review_compartment_mode_test.dart' show ModeCompartment;
 
 class PatternFixture extends ModeCompartment {
-  PatternFixture() {
+  PatternFixture({bool includeInvalid = false}) {
     capabilities.first['actions']['set']['parameters']['properties']['mode'] = {
       'type': 'string',
-      'enum': ['normal', 'eco', 'dry'],
+      'enum': ['normal', 'eco', if (includeInvalid) 'dry'],
       'pattern': r'^(normal|eco)$',
     };
   }
@@ -46,7 +46,7 @@ void main() {
     testWidgets('patterned mode $mode is handled through the capability form', (
       tester,
     ) async {
-      final core = PatternFixture();
+      final core = PatternFixture(includeInvalid: mode == 'dry');
       final c = HomeController(core, LocalPreferences.memory());
       final app = GlobalKey<NativeAppState>();
       await open(tester, c, app: app);

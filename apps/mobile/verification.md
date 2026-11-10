@@ -3641,3 +3641,11 @@ regression are recorded in
 [interaction-second-review.md](../../docs/development/interaction-second-review.md#third-review-inline-parameter-schemas).
 Flutter analysis passed. This focused run did not rerun the complete Flutter
 suite or establish physical-device or provider behavior.
+
+### November 10: fourth interaction review
+
+The two failing baseline reproductions, decimal candidate and capability-form
+fixes, 44 focused Flutter checks and actual Flutter captures are recorded in
+[interaction-second-review.md](../../docs/development/interaction-second-review.md#fourth-review-decimal-steps-and-fallback-forms).
+Flutter analysis passed; the complete Flutter suite and physical-device checks
+were not rerun in this focused phase.

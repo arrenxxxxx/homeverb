@@ -82,3 +82,32 @@ grants, and component routing. `fvm flutter analyze` passed
 (`review3-analyze.log`). The full Flutter suite was not rerun for this focused
 change; its preceding macOS failures and skips are recorded above. No physical
 appliance, provider account or real device write was used.
+
+## Fourth review: decimal steps and fallback forms
+
+The `99be2ca` baseline failed four decimal direction cases and two patterned-mode
+form cases (`review4-before.log`). Temperature stepping now adds represented
+JSON decimal values using scaled integers. A candidate must remain exactly
+representable as the value sent to Core. The same candidate is used for the
+inline schema check, the exact grant check and the command; off-step and
+out-of-range values remain unavailable.
+
+When an inline enum's schema contains unsupported or malformed constraints,
+the inline chips remain disabled and the capability action remains available
+through its existing full form. That form submits to Core planning, which still
+validates the complete JSON Schema and authorization before any write. The
+fictional pattern fixture exercises an allowed `eco` and a rejected `dry` value;
+no UI-side pattern implementation or grant expansion was added.
+
+The focused Flutter selection passed 44 tests (`review4-regression-final.log`),
+covering positive and negative 0.1 steps, 0.25, both boundaries, an off-step
+observation, exact session grants, supported inline mode, combined grants,
+prior schema constraints and observed-state gating. `fvm flutter analyze`
+passed (`review4-analyze.log`). The explicit production `NativeApp` capture
+selection passed 17 tests (`review4-capture.log`) using fictional clients and
+local CJK fallback fonts. It produced unversioned local images
+`apps/mobile/build/verification/interaction-review/review4-decimal-step.png`
+and `review4-pattern-form.png`. They do not establish physical-device behavior.
+The full Flutter suite was not rerun for this focused change; the preceding
+macOS full-suite failures and skips are recorded above. No real appliance,
+provider account or device write was used.
