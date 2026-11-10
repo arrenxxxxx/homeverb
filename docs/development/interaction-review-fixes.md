@@ -64,3 +64,11 @@ undeclared and unreadable properties are not added. The old assertion that hid
 declared but unreported features was updated to require the truthful missing value
 and to keep undeclared groups absent. The focused refrigerator and reading-state
 selection passed 19 tests (`review-7-after.log`).
+
+## 8. Keep privacy content and Close accessible
+
+`review_privacy_dialog_test.dart` reproduced the missing scroll container in
+both locales at 320 by 844 logical pixels and 200% text
+(`review-8-before.log`). The existing dialog now scrolls its title and content
+while keeping Close accessible. The bilingual layout, settings and accessibility
+selection passed 16 tests (`review-8-after.log`).

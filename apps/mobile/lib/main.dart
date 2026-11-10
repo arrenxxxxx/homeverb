@@ -1206,6 +1206,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           context: navigator.currentContext!,
           builder: (context) => AlertDialog(
             title: Text(localize(context, 'Privacy')),
+            scrollable: true,
             content: Text(
               localize(
                 context,
