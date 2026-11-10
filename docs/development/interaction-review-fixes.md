@@ -119,9 +119,8 @@ API, Core schema, storage format, write retry, or background scheduling authorit
 was added. Existing physical-phone and provider acceptance remain open.
 
 The opt-in capture selection and the card-tap regression passed 12 tests
-(`review-capture-final.log`). The integrated review selection passed 73 tests
-(`review-integrated-focused.log`); subsequent session and exact-grant tests passed
-separately (`review-busy-history-after.log`, `review-final-security.log`).
+(`review-capture-final.log`). The final integrated review, session, permission
+and write-fencing selection passed 86 tests (`review-integrated-final.log`).
 Final `fvm flutter analyze` passed. The final full
 `fvm flutter test --no-pub --reporter expanded` run on macOS had 369 passes,
 51 skips and four failures (`review-full-suite-final.log`): the same four strict
