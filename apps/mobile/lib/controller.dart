@@ -640,12 +640,15 @@ class HomeController extends ChangeNotifier {
   Future<bool> perform(
     Future<void> Function() work, {
     bool Function()? publishError,
+    bool Function()? publishPreparationError,
     void Function(Object)? onError,
   }) async {
     if (busy) return false;
     busy = true;
     error = null;
     final epoch = _readEpoch;
+    final generation = _deviceOpeningGeneration;
+    var workStarted = false;
     final automaticRead = _automaticRefreshWork;
     _pauseAutomaticRefresh();
     notifyListeners();
@@ -661,11 +664,20 @@ class HomeController extends ChangeNotifier {
         }
       }
       if (_coreNeedsReopen) await _replaceControlSession(const []);
+      workStarted = true;
       await work();
       return true;
     } catch (e) {
       onError?.call(e);
-      if (publishError?.call() ?? true) error = e;
+      final preparationCurrent =
+          !workStarted &&
+          publishPreparationError != null &&
+          !_disposed &&
+          _foreground &&
+          generation == _deviceOpeningGeneration &&
+          !(e is NativeFailure && e.code == 'CANCELLED') &&
+          publishPreparationError();
+      if (preparationCurrent || (publishError?.call() ?? true)) error = e;
       return false;
     } finally {
       busy = false;
@@ -954,6 +966,7 @@ class HomeController extends ChangeNotifier {
         client = core;
         await read();
       },
+      publishPreparationError: () => selectedDevice == device,
       publishError: () =>
           !_disposed &&
           _foreground &&
@@ -993,6 +1006,7 @@ class HomeController extends ChangeNotifier {
         }
         if (failure != null) throw failure;
       },
+      publishPreparationError: () => selectedDevice == device,
       publishError: () =>
           !_disposed &&
           _foreground &&
@@ -1068,6 +1082,7 @@ class HomeController extends ChangeNotifier {
           notifyListeners();
         }
       },
+      publishPreparationError: () => identical(receipt, original),
       publishError: () =>
           !_disposed &&
           _foreground &&
@@ -1147,6 +1162,7 @@ class HomeController extends ChangeNotifier {
         }
         if (failure != null) throw failure;
       },
+      publishPreparationError: () => true,
       publishError: () =>
           !_disposed && _foreground && epoch == _readEpoch && client == core,
     );
@@ -2076,17 +2092,21 @@ class HomeController extends ChangeNotifier {
     CoreClient? client;
     bool current() =>
         !_disposed && _foreground && epoch == _readEpoch && client == core;
-    return perform(() async {
-      epoch = _readEpoch;
-      client = core;
-      final result =
-          await client!.call('get_execution', {'request_id': id}) as Json;
-      if (!current())
-        throw NativeFailure('CANCELLED', 'Receipt loading was cancelled.');
-      if (result['request_id'] != id)
-        throw NativeFailure('STATE_UNAVAILABLE', 'Receipt did not match.');
-      receipt = result;
-    }, publishError: current);
+    return perform(
+      () async {
+        epoch = _readEpoch;
+        client = core;
+        final result =
+            await client!.call('get_execution', {'request_id': id}) as Json;
+        if (!current())
+          throw NativeFailure('CANCELLED', 'Receipt loading was cancelled.');
+        if (result['request_id'] != id)
+          throw NativeFailure('STATE_UNAVAILABLE', 'Receipt did not match.');
+        receipt = result;
+      },
+      publishError: current,
+      publishPreparationError: () => true,
+    );
   }
 
   Future<bool> loadDiagnostics() async {
