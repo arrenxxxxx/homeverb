@@ -717,7 +717,11 @@ class HomeController extends ChangeNotifier {
           .where((part) => componentCapability(part['id'], 'climate') != null)
           .length >
       1;
-  Future<bool> selectDevice(String id, {bool readOnOpen = true}) {
+  Future<bool> selectDevice(
+    String id, {
+    bool readOnOpen = true,
+    Future<void>? waitFor,
+  }) {
     final previous = _deviceOpeningWork;
     final epoch = _readEpoch;
     final generation = _deviceOpeningGeneration;
@@ -742,6 +746,7 @@ class HomeController extends ChangeNotifier {
 
     Future<bool> open() async {
       if (previous != null) await previous;
+      if (waitFor != null) await waitFor;
       if (!_foreground || epoch != _readEpoch || selectedDevice != id) {
         return false;
       }

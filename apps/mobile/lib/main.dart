@@ -149,6 +149,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
       c.isForeground;
   bool get onAccountDetails => id == 'P09' || id == 'P10';
   int? homeRefreshEpoch;
+  Future<bool>? homeRefreshWork;
   Object? homeRefreshFailure;
   final feedback = FeedbackQueue();
   Object? hiddenTransientError;
@@ -841,7 +842,11 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
     if (label.startsWith('open:') ||
         label.startsWith('power:') ||
         label.startsWith('menu:')) {
-      if ((c.busy && !c.openingDevice) || quickPowerDevice != null) return;
+      final openingDuringRefresh = label.startsWith('open:') && homeRefreshing;
+      if ((c.busy && !c.openingDevice && !openingDuringRefresh) ||
+          quickPowerDevice != null)
+        return;
+      final refreshToDrain = openingDuringRefresh ? homeRefreshWork : null;
       final epoch = navigation,
           foreground = activityEpoch,
           device = label.substring(label.indexOf(':') + 1),
@@ -872,7 +877,10 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
               : 'C01',
         );
         if (!mounted || !c.isForeground) return;
-        await c.selectDevice(device);
+        await c.selectDevice(
+          device,
+          waitFor: refreshToDrain?.then<void>((_) {}),
+        );
         return;
       }
       try {
@@ -907,7 +915,10 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
           homeRefreshEpoch = epoch;
           homeRefreshFailure = null;
         });
-        final success = await c.refreshCards();
+        final work = c.refreshCards();
+        homeRefreshWork = work;
+        final success = await work;
+        if (identical(homeRefreshWork, work)) homeRefreshWork = null;
         if (!mounted) return;
         final failure = c.error;
         final current =
