@@ -3632,3 +3632,12 @@ The focused integration and explicit production-widget screenshot runs passed;
 the macOS complete Flutter suite still has the four recorded glyph-pixel
 failures and default opt-in skips. The evidence uses fictional clients and does
 not establish physical-phone, provider or appliance behavior.
+
+### November 10: third interaction review
+
+Inline single-argument schema validation, its supported subset, conservative
+handling of unknown constraints, the failing baseline and the 49-test focused
+regression are recorded in
+[interaction-second-review.md](../../docs/development/interaction-second-review.md#third-review-inline-parameter-schemas).
+Flutter analysis passed. This focused run did not rerun the complete Flutter
+suite or establish physical-device or provider behavior.

@@ -10,6 +10,125 @@ import 'skin.dart';
 import 'device_readings.dart';
 import 'device_typography.dart';
 
+// Inline controls interpret only this bounded JSON Schema subset. Unknown or
+// malformed keywords fail closed; Core still validates every planned command.
+bool _inlineValueAllowed(Object? value, Json schema) {
+  const keywords = {
+    'type',
+    'enum',
+    'const',
+    'minimum',
+    'maximum',
+    'exclusiveMinimum',
+    'exclusiveMaximum',
+    'multipleOf',
+    'title',
+    'description',
+    'default',
+    'examples',
+    'deprecated',
+    'readOnly',
+    'writeOnly',
+    r'$comment',
+  };
+  if (schema.keys.any((key) => !keywords.contains(key))) return false;
+  if (value is! String && value is! bool && value is! num) return false;
+  if (value is num && !value.isFinite) return false;
+  final type = schema['type'];
+  if (type != null &&
+      !const ['number', 'integer', 'boolean', 'string'].contains(type))
+    return false;
+  if (type == 'number' && value is! num ||
+      type == 'integer' && (value is! num || value != value.roundToDouble()) ||
+      type == 'boolean' && value is! bool ||
+      type == 'string' && value is! String)
+    return false;
+  if (schema.containsKey('enum')) {
+    final choices = schema['enum'];
+    if (choices is! List || !choices.contains(value)) return false;
+  }
+  if (schema.containsKey('const') && schema['const'] != value) return false;
+  for (final key in [
+    'minimum',
+    'maximum',
+    'exclusiveMinimum',
+    'exclusiveMaximum',
+    'multipleOf',
+  ]) {
+    if (!schema.containsKey(key)) continue;
+    final bound = schema[key];
+    if (bound is! num || !bound.isFinite || (key == 'multipleOf' && bound <= 0))
+      return false;
+    if (value is! num) continue;
+    if (key == 'minimum' && value < bound ||
+        key == 'maximum' && value > bound ||
+        key == 'exclusiveMinimum' && value <= bound ||
+        key == 'exclusiveMaximum' && value >= bound ||
+        key == 'multipleOf' && !_decimalMultiple(value, bound))
+      return false;
+  }
+  return true;
+}
+
+// JSON numbers are decimal values. Compare their represented decimal strings
+// using integer arithmetic instead of accepting nearby out-of-step values.
+bool _decimalMultiple(num value, num step) {
+  (BigInt, int) decimal(num number) {
+    final parts = number.toString().toLowerCase().split('e');
+    final exponent = parts.length == 2 ? int.parse(parts[1]) : 0;
+    final point = parts[0].indexOf('.');
+    final fraction = point < 0 ? 0 : parts[0].length - point - 1;
+    var digits = BigInt.parse(parts[0].replaceAll('.', ''));
+    final scale = fraction - exponent;
+    if (scale < 0) {
+      digits *= BigInt.from(10).pow(-scale);
+      return (digits, 0);
+    }
+    return (digits, scale);
+  }
+
+  final (numerator, numeratorScale) = decimal(value);
+  final (denominator, denominatorScale) = decimal(step);
+  final scale = numeratorScale > denominatorScale
+      ? numeratorScale
+      : denominatorScale;
+  final adjustedValue = numerator * BigInt.from(10).pow(scale - numeratorScale);
+  final adjustedStep =
+      denominator * BigInt.from(10).pow(scale - denominatorScale);
+  return adjustedStep != BigInt.zero &&
+      adjustedValue % adjustedStep == BigInt.zero;
+}
+
+bool _inlineSingleArgumentAllowed(Json parameters, String name) {
+  const keys = {
+    'type',
+    'properties',
+    'required',
+    'minProperties',
+    'maxProperties',
+    'additionalProperties',
+    'description',
+    'title',
+  };
+  if (parameters.keys.any((key) => !keys.contains(key)) ||
+      parameters['type'] != 'object' ||
+      parameters['properties'] is! Map)
+    return false;
+  final required = parameters['required'];
+  if (required != null &&
+      (required is! List || required.any((item) => item != name)))
+    return false;
+  final min = parameters['minProperties'];
+  final max = parameters['maxProperties'];
+  if (min != null && (min is! int || min < 0 || min > 1) ||
+      max != null && (max is! int || max < 1))
+    return false;
+  if (parameters.containsKey('additionalProperties') &&
+      parameters['additionalProperties'] is! bool)
+    return false;
+  return true;
+}
+
 bool hasDirectTarget(Json action) {
   final parameters = action['parameters'] as Json;
   return action['idempotency'] == 'set_value' &&
@@ -403,8 +522,9 @@ class CompartmentControls extends StatelessWidget {
           bool canStep(int direction) =>
               !controller.busy &&
               target is num &&
-              validateValue(target, schema) == null &&
-              validateValue(target + direction * step, schema) == null &&
+              _inlineSingleArgumentAllowed(parameters!, 'target_temperature') &&
+              _inlineValueAllowed(target, schema) &&
+              _inlineValueAllowed(target + direction * step, schema) &&
               controller.canControlValue(
                 'climate',
                 'set',
@@ -597,7 +717,11 @@ class CompartmentControls extends StatelessWidget {
                           onComponentAction == null ||
                           observation('climate.${entry.key}')?['value'] ==
                               value ||
-                          validateValue(value, entry.value) != null ||
+                          !_inlineSingleArgumentAllowed(
+                            parameters!,
+                            entry.key,
+                          ) ||
+                          !_inlineValueAllowed(value, entry.value) ||
                           !controller.canControlValue(
                             'climate',
                             'set',

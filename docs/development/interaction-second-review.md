@@ -55,3 +55,30 @@ invalid because the generator has no such option; no locale catalogs changed.
 No physical phone, production provider session, native device write, Linux
 rerun, deployment, publication or push was performed. No native contract,
 provider authority, background polling or retry policy was changed.
+
+## Third review: inline parameter schemas
+
+The `4077c4a` baseline still allowed an inline enum member at an exclusive
+minimum. `review3_inline_schema_test.dart` first failed three scenarios
+(`review3-before.log`): exclusive minimum, the intersection of exclusive maximum
+and const, and an unknown `not` constraint. The new validator applies only to
+inline single-argument controls and accepts scalar string, boolean and finite
+number values. It interprets `type`, `enum`, `const`, `minimum`, `maximum`,
+`exclusiveMinimum`, `exclusiveMaximum` and `multipleOf`; step checks use the
+represented decimal values. Presentation annotations `title`, `description`,
+`default`, `examples`, `deprecated`, `readOnly`, `writeOnly` and `$comment`
+are ignored as non-validation annotations. Other keywords, malformed bounds,
+invalid steps and unsupported types disable direct selection. The enclosing
+argument object is checked for its supported object keywords and single-argument
+cardinality; unsupported constraints do not enable inline actions. This is not
+a general JSON Schema implementation. Existing authorization, observation and
+Core plan/execute validation are retained.
+
+The focused Flutter selection passed 49 tests (`review3-regression.log`),
+including 40 and 50 disabled and one planned and executed fictional command
+for 60, exclusive maximum, const, unknown and malformed constraints, decimal
+steps, previous bounds, observation prerequisites, exact single and combined
+grants, and component routing. `fvm flutter analyze` passed
+(`review3-analyze.log`). The full Flutter suite was not rerun for this focused
+change; its preceding macOS failures and skips are recorded above. No physical
+appliance, provider account or real device write was used.
