@@ -24,7 +24,9 @@ tap, a combined grant had no form, and an enum option violated its minimum.
    Core planning remains mandatory and the form does not create authority.
 4. Inline enum choices now intersect the action parameter schema with current
    authorization and existing observation and lifecycle conditions. Tests exercise
-   integer type, minimum, maximum, step and valid 50/60 choices. Core validation
+   integer type, minimum, maximum, step and valid 50/60 choices. A separate
+   regression verifies that a missing required observation prevents the option
+   from appearing and sends no command (`review2-observation.log`). Core validation
    remains in place.
 
 The focused integrated selection in `review2-integrated.log` passed 65 tests and
@@ -43,7 +45,7 @@ Flutter run (`review2-full.log`) had 379 passes, 54 skips and four failures:
 `button_labels_test.dart`, two cases in `control_labels_test.dart`, and
 `field_alignment_test.dart`. These are the previously recorded strict macOS
 glyph-pixel differences, not passing results. The explicit capture run above is
-separate from the default skipped captures. The final rerun (`review2-full-final.log`) had 380 passes, 55 skips and the same four failures.
+separate from the default skipped captures. The final rerun (`review2-full-final.log`) had 381 passes, 55 skips and the same four failures.
 
 The system Python initially could not run contract validation because its
 requirements were absent; `.venv/bin/python scripts/validate_contracts.py`

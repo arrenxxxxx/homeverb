@@ -206,4 +206,30 @@ void main() {
     }
     await tester.pumpWidget(const SizedBox());
   });
+  testWidgets('inline enum requires its observed prerequisite', (tester) async {
+    final core = ModeCompartment();
+    final climate = core.capabilities.first;
+    climate['properties']['humidity'] = {
+      'type': 'integer',
+      'readable': true,
+      'writable': true,
+      'control_requires_observation': true,
+    };
+    climate['actions']['set']['parameters']['properties']['humidity'] = {
+      'type': 'integer',
+      'enum': [50, 60],
+    };
+    final c = HomeController(core, LocalPreferences.memory());
+    final catalog = (await tester.runAsync(ScreenCatalog.load))!;
+    await tester.pumpWidget(NativeApp(catalog: catalog, controller: c));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Example refrigerator').first);
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('component-option:fridge:humidity:50')),
+      findsNothing,
+    );
+    expect(core.calls.where((call) => call['method'] == 'execute'), isEmpty);
+    await tester.pumpWidget(const SizedBox());
+  });
 }
