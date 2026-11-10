@@ -36,6 +36,7 @@ class CompartmentControls extends StatelessWidget {
     required this.controller,
     required this.onAction,
     required this.onTarget,
+    this.onComponentAction,
     this.pendingComponent,
     this.outcomeComponent,
     super.key,
@@ -43,6 +44,13 @@ class CompartmentControls extends StatelessWidget {
   final HomeController controller;
   final ActionHandler onAction;
   final void Function(String component, num target) onTarget;
+  final void Function(
+    String component,
+    String capability,
+    String action,
+    Json arguments,
+  )?
+  onComponentAction;
   final String? pendingComponent, outcomeComponent;
 
   bool get _showReceipt {
@@ -357,6 +365,24 @@ class CompartmentControls extends StatelessWidget {
         controller.hasControlAction('climate', 'set', componentId: id) &&
         actionUnavailable(climate!, action!) == null;
     final direct = editable && hasDirectTarget(action);
+    final standalone =
+        direct &&
+        (parameters?['required'] as List? ?? []).isEmpty &&
+        (parameters?['minProperties'] as num? ?? 0) <= 1;
+    final inlineOptions = <String, Json>{};
+    if (standalone) {
+      for (final entry in (parameters?['properties'] as Json? ?? {}).entries) {
+        final property = climate?['properties']?[entry.key] as Json?;
+        if (entry.key != 'target_temperature' &&
+            entry.value is Json &&
+            (entry.value as Json)['enum'] is List &&
+            property?['writable'] == true &&
+            (property?['control_requires_observation'] != true ||
+                observation('climate.${entry.key}') != null)) {
+          inlineOptions[entry.key] = entry.value as Json;
+        }
+      }
+    }
     final step =
         schema?['multipleOf'] as num? ??
         (schema?['type'] == 'integer' ? 1 : null);
@@ -412,7 +438,12 @@ class CompartmentControls extends StatelessWidget {
           if (observed == null && controller.readingLoading(id))
             const ReadingValue('—', loading: true),
         ]);
-        if (capability['id'] != 'climate' && capability['id'] != 'power') {
+        if ((capability['id'] != 'climate' && capability['id'] != 'power') ||
+            (capability['id'] == 'climate' &&
+                ![
+                  'target_temperature',
+                  'current_temperature',
+                ].contains(entry.key))) {
           extraRows.add(rows.last);
         }
       }
@@ -421,7 +452,14 @@ class CompartmentControls extends StatelessWidget {
     for (final capability in controller.capabilitiesFor(id)) {
       for (final entry in (capability['actions'] as Json).entries) {
         final action = entry.value as Json;
-        if (capability['id'] == 'climate' && entry.key == 'set' && editable)
+        if (capability['id'] == 'climate' &&
+            entry.key == 'set' &&
+            editable &&
+            ((action['parameters']?['properties'] as Map?) ?? {}).keys.every(
+              (name) =>
+                  name == 'target_temperature' ||
+                  inlineOptions.containsKey(name),
+            ))
           continue;
         if (!controller.hasControlAction(
               capability['id'] as String,
@@ -523,6 +561,39 @@ class CompartmentControls extends StatelessWidget {
         if (_showReceipt && (outcomeComponent ?? controller.component) == id)
           _receiptFeedback(),
         if (extraRows.isNotEmpty) Rows(extraRows, onAction: onAction),
+        for (final entry in inlineOptions.entries) ...[
+          Copy(controlLabel(entry.key), bold: true),
+          Wrap(
+            spacing: 8,
+            children: [
+              for (final value in entry.value['enum'] as List)
+                ChoiceChip(
+                  key: ValueKey('component-option:$id:${entry.key}:$value'),
+                  label: Text(localize(context, controlLabel('$value'))),
+                  selected:
+                      observation('climate.${entry.key}')?['value'] == value,
+                  onSelected:
+                      controller.busy ||
+                          !controller.isForeground ||
+                          pendingComponent != null ||
+                          onComponentAction == null ||
+                          observation('climate.${entry.key}')?['value'] ==
+                              value ||
+                          !controller.canControlValue(
+                            'climate',
+                            'set',
+                            entry.key,
+                            value,
+                            componentId: id,
+                          )
+                      ? null
+                      : (_) => onComponentAction!(id, 'climate', 'set', {
+                          entry.key: value,
+                        }),
+                ),
+            ],
+          ),
+        ],
         if (editable)
           ActionButton(
             localize(

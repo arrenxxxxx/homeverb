@@ -374,15 +374,29 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
   }
 
   Future<void> executeComponentTarget(String component, num target) async {
+    await executeComponentAction(component, 'climate', 'set', {
+      'target_temperature': target,
+    });
+  }
+
+  Future<void> executeComponentAction(
+    String component,
+    String capability,
+    String actionName,
+    Json arguments,
+  ) async {
     if (pendingComponent != null || c.busy || !c.isForeground) return;
     final epoch = navigation,
         activity = activityEpoch,
         device = c.selectedDevice;
     setState(() => pendingComponent = component);
     try {
-      final success = await c.execute('climate', 'set', {
-        'target_temperature': target,
-      }, componentId: component);
+      final success = await c.execute(
+        capability,
+        actionName,
+        arguments,
+        componentId: component,
+      );
       if (!success ||
           !mounted ||
           epoch != navigation ||
@@ -2355,6 +2369,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
         controller: c,
         onAction: action,
         onTarget: executeComponentTarget,
+        onComponentAction: executeComponentAction,
         pendingComponent: pendingComponent,
         outcomeComponent:
             outcomeDevice == c.selectedDevice &&

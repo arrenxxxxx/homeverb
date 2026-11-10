@@ -43,3 +43,14 @@ component, device and receipt refresh and receipt lookup
 well. The combined focused lifecycle, session, history, diagnostics, refresh
 and receipt selection passed 54 tests (`review-3-5-after-final.log`). No write
 is replayed by these recovery paths.
+
+## 6. Preserve other zone controls
+
+`review_compartment_mode_test.dart` first failed because the supported normal
+and eco options were absent (`review-6-before.log`). Standalone, authorized enum
+arguments now appear inline beside the existing target editor; a selection sends
+only its exact argument, retains the observed value until readback, and still
+passes Core planning. Other supported action shapes retain their existing form.
+The focused compartment and expanded-device selection passed 11 tests
+(`review-6-after.log`), followed by a targeted rerun after duplicate-selection
+guarding.
