@@ -161,7 +161,9 @@ available. Inner session version 3 also retains the returned login-ID alias for
 exact legacy-alias migration. Versions 1 and 2 remain readable; missing canonical
 identity retains legacy login-ID behavior. A saved canonical subject can never
 fall back to a changed or missing UID. Encoding is private credential persistence,
-not a public JSON DTO. SQLite and outer protected payload version 3 are unchanged.
+not a public JSON DTO. SQLite remains unchanged. Outer protected payload version
+4 now supports remembered sign-in under [ADR-0076](../adr/0076-protected-account-auto-login.md);
+the inner session format is unchanged.
 
 On October 18, an owner-operated diagnostic login emitted only these fixed markers:
 `selected_account`, `protected_binding_validated`, `login_succeeded`,

@@ -515,3 +515,17 @@ preserved, never invented. Prerequisite failures are proven not sent; a possibly
 sent failure remains unknown. Replay returns the original receipt without
 additional reads or writes. No transport, fallback, retry, verification or
 background behavior changes. The new refrigerator scopes contain reads only.
+
+## Read-triggered Meiju reauthentication
+
+[ADR-0076](adr/0076-protected-account-auto-login.md) permits one automatic login
+and one inventory/state read retry after a definite `AUTH_REQUIRED`, using
+remembered inputs in system storage. One inherited Operation and account lease
+cover the failed read, durable attempt guard, login, identity check, session save
+and retried read. No inventory call is added to a device read. Missing inputs,
+failed login or cooldown leaves explicit sign-in available. Automatic foreground
+reads follow the same bounded path; they never start a separate login worker.
+Command execution is unchanged: no write retry, new request ID, compensation or
+receipt rewrite follows reauthentication. A later explicit command can use the
+newly saved session. Public schemas are unchanged; fictional account and adapter
+fixtures cover successful recovery and refused/error paths.

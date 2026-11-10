@@ -82,7 +82,9 @@ provider challenges fail through the existing native flow.
 Human input is outside the network budget. A separate 10-second preflight checks
 secure storage; after input, `--timeout-ms` bounds the shared login/inventory work.
 Other account methods begin their budget at native dispatch after local host startup.
-No background worker, automatic login, refresh or retry is started. Ctrl+C propagates
+No background worker or periodic refresh is started. A definite authorization
+error during an explicit read may trigger one protected login and read retry
+under [ADR-0076](adr/0076-protected-account-auto-login.md). Ctrl+C propagates
 to the native session and waits for its result, preserving known/uncertain storage
 outcomes instead of discarding them. Successful connection automatically publishes
 supported and unsupported cards through the same Core validation as the app.

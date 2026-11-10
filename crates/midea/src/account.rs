@@ -83,6 +83,42 @@ struct Payload {
     subject: Vec<u8>,
     session: Vec<u8>,
     bindings: Vec<StoredBinding>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    saved_login: Option<SavedLogin>,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SavedLogin {
+    account: Vec<u8>,
+    password: Vec<u8>,
+    blocked: bool,
+    last_attempt_ms: i64,
+}
+
+impl Drop for SavedLogin {
+    fn drop(&mut self) {
+        self.account.zeroize();
+        self.password.zeroize();
+    }
+}
+
+impl SavedLogin {
+    fn new(credentials: &LoginCredentials) -> Self {
+        let (account, password) = credentials.protected_parts();
+        Self {
+            account,
+            password,
+            blocked: false,
+            last_attempt_ms: chrono::Utc::now().timestamp_millis(),
+        }
+    }
+    fn credentials(&self) -> Result<LoginCredentials> {
+        LoginCredentials::new(
+            SecretBytes::new(self.account.clone()),
+            SecretBytes::new(self.password.clone()),
+        )
+    }
 }
 
 impl Drop for Payload {
@@ -153,7 +189,7 @@ impl Payload {
             serde_json::from_slice(bytes.expose()).map_err(|_| unconfirmed())?;
         payload.validate(record)?;
         // Decode legacy identities without writing; the next explicit update uses version 3.
-        payload.version = 3;
+        payload.version = payload.version.max(3);
         Ok(payload)
     }
 
@@ -166,7 +202,7 @@ impl Payload {
     }
 
     fn validate(&self, record: &AccountRecord) -> Result<()> {
-        if !matches!(self.version, 1..=3)
+        if !matches!(self.version, 1..=4)
             || self.account_id != record.id
             || self.credential_ref != record.credential_ref
             || self.provider != PROVIDER
@@ -176,6 +212,12 @@ impl Payload {
             || self.bindings.len() > MAX_BINDINGS
         {
             return Err(unconfirmed());
+        }
+        if let Some(login) = &self.saved_login {
+            if self.version != 4 || login.last_attempt_ms < 0 {
+                return Err(unconfirmed());
+            }
+            login.credentials().map_err(|_| unconfirmed())?;
         }
         let mut appliances = HashSet::new();
         let mut locals = HashSet::new();
@@ -209,6 +251,55 @@ impl Payload {
 }
 
 impl MeijuAccount {
+    pub(crate) async fn can_renew_login(&self, operation: &Operation) -> Result<bool> {
+        let payload = self.load(operation).await?;
+        let now = chrono::Utc::now().timestamp_millis();
+        Ok(payload.saved_login.as_ref().is_some_and(|saved| {
+            !saved.blocked && now.saturating_sub(saved.last_attempt_ms) >= 300_000
+        }))
+    }
+
+    /// One leased recovery attempt for a definitely rejected read. Never call
+    /// from a command-send path or after an uncertain physical operation.
+    pub(crate) async fn renew_login(
+        &mut self,
+        transport: &dyn CloudTransport,
+        operation: &Operation,
+    ) -> Result<MeijuSession> {
+        let mut payload = self.load(operation).await?;
+        let now = chrono::Utc::now().timestamp_millis();
+        let saved = payload.saved_login.as_mut().ok_or_else(|| {
+            Error::new(
+                "AUTH_REQUIRED",
+                "Sign in to save protected login credentials.",
+            )
+        })?;
+        if saved.blocked || now.saturating_sub(saved.last_attempt_ms) < 300_000 {
+            return Err(Error::new(
+                "AUTH_REQUIRED",
+                "Automatic sign-in is unavailable; sign in explicitly.",
+            ));
+        }
+        let credentials = saved.credentials()?;
+        saved.blocked = true;
+        saved.last_attempt_ms = now;
+        self.save(&payload, operation).await?;
+        let original = self.reauthorization_material(operation).await?;
+        let session = login(transport, &credentials, operation).await?;
+        drop(credentials);
+        // The normal identity and unchanged-byte guards also apply to recovery.
+        self.reauthorize(&original, &session, None, operation)
+            .await?;
+        let mut current = self.load(operation).await?;
+        current
+            .saved_login
+            .as_mut()
+            .ok_or_else(unconfirmed)?
+            .blocked = false;
+        self.save(&current, operation).await?;
+        Ok(session)
+    }
+
     /// Load an admitted session and confirm its subject against the protected account binding.
     pub async fn cloud_session(&self, operation: &Operation) -> Result<MeijuSession> {
         if self.record().region != "CN" {
@@ -291,8 +382,21 @@ impl MeijuAccount {
     ) -> Result<BoundInventory> {
         let session = self.cloud_session(operation).await?;
         let reference = self.record().credential_ref;
-        let inventory =
-            retrieve_inventory(&session.reads(transport, reference), reference, operation).await?;
+        let result =
+            retrieve_inventory(&session.reads(transport, reference), reference, operation).await;
+        let auth_required = match &result {
+            Err(error) => error.code == "AUTH_REQUIRED",
+            Ok(inventory) => inventory
+                .failures
+                .iter()
+                .any(|f| f.error.code == "AUTH_REQUIRED"),
+        };
+        let inventory = if auth_required && self.can_renew_login(operation).await? {
+            let renewed = self.renew_login(transport, operation).await?;
+            retrieve_inventory(&renewed.reads(transport, reference), reference, operation).await?
+        } else {
+            result?
+        };
         let bindings = self.bind_inventory(&inventory, operation).await?;
         if inventory.is_complete() {
             self.lease.record_complete_inventory(operation).await?;
@@ -313,6 +417,18 @@ impl MeijuAccount {
         session: &SecretBytes,
         operation: &Operation,
     ) -> Result<Self> {
+        Self::create_with_login(vault, region, label, subject, session, None, operation).await
+    }
+
+    async fn create_with_login(
+        vault: &AccountVault,
+        region: &str,
+        label: &str,
+        subject: &SecretBytes,
+        session: &SecretBytes,
+        credentials: Option<&LoginCredentials>,
+        operation: &Operation,
+    ) -> Result<Self> {
         operation
             .run(async {
                 if !valid_material(subject.expose(), session.expose()) {
@@ -327,7 +443,7 @@ impl MeijuAccount {
             return Err(unconfirmed());
         }
         let payload = Payload {
-            version: 3,
+            version: if credentials.is_some() { 4 } else { 3 },
             account_id: account.record().id,
             credential_ref: account.record().credential_ref,
             provider: account.record().provider.clone(),
@@ -335,6 +451,7 @@ impl MeijuAccount {
             subject: subject.expose().to_vec(),
             session: session.expose().to_vec(),
             bindings: Vec::new(),
+            saved_login: credentials.map(SavedLogin::new),
         };
         account.save(&payload, operation).await?;
         Ok(account)
@@ -466,6 +583,7 @@ impl MeijuAccount {
         &mut self,
         original: &SecretBytes,
         session: &MeijuSession,
+        credentials: Option<&LoginCredentials>,
         operation: &Operation,
     ) -> Result<()> {
         let mut payload = operation
@@ -494,6 +612,10 @@ impl MeijuAccount {
         payload.session = session.encode()?.expose().to_vec();
         payload.subject.zeroize();
         payload.subject = session.subject().expose().to_vec();
+        if let Some(credentials) = credentials {
+            payload.version = 4;
+            payload.saved_login = Some(SavedLogin::new(credentials));
+        }
         self.save(&payload, operation).await
     }
 
@@ -871,7 +993,7 @@ pub struct ConnectReport {
 }
 
 /// Explicit mainland Meiju connection. Reuse an exact subject match; never merge by login spelling.
-/// Consumes credentials so they are dropped before persistence and inventory work.
+/// Saves login inputs only inside the system-protected account payload.
 pub async fn connect(
     vault: &AccountVault,
     transport: &dyn CloudTransport,
@@ -916,7 +1038,6 @@ pub async fn connect(
         }
     }
     let session = login(transport, &credentials, operation).await?;
-    drop(credentials);
     crate::auth_trace::emit(crate::auth_trace::Event::LoginSucceeded);
     if selected.is_none() {
         let matches: Vec<_> = subjects
@@ -947,15 +1068,26 @@ pub async fn connect(
                 )
                 .await?;
             }
-            account.reauthorize(&original, &session, operation).await?;
+            account
+                .reauthorize(&original, &session, Some(&credentials), operation)
+                .await?;
             account
         }
         None => {
             let encoded = session.encode()?;
-            MeijuAccount::create(vault, "CN", &label, session.subject(), &encoded, operation)
-                .await?
+            MeijuAccount::create_with_login(
+                vault,
+                "CN",
+                &label,
+                session.subject(),
+                &encoded,
+                Some(&credentials),
+                operation,
+            )
+            .await?
         }
     };
+    drop(credentials);
     crate::auth_trace::emit(crate::auth_trace::Event::SessionSaved);
     let retrieval = account.retrieve(transport, operation).await;
     crate::auth_trace::emit(if retrieval.is_ok() {

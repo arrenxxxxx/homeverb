@@ -699,13 +699,14 @@ impl Adapter for MeijuAdapter {
                     "The cloud connection has no valid local account binding.",
                 )
             })?;
-        let account = MeijuAccount::open(self.vault.lease(id, operation).await?, operation).await?;
+        let mut account =
+            MeijuAccount::open(self.vault.lease(id, operation).await?, operation).await?;
         account
             .validate_read_model(device, family, operation)
             .await?;
         let session = account.cloud_session(operation).await?;
         let reads = session.reads(self.transport.as_ref(), account.record().credential_ref);
-        account
+        let result = account
             .read_bound_state_with_features(
                 &reads,
                 device,
@@ -719,7 +720,32 @@ impl Adapter for MeijuAdapter {
                         .as_ref()
                         .is_none_or(|ids| ids.contains(&device.id)),
             )
-            .await
+            .await;
+        if result
+            .as_ref()
+            .is_err_and(|error| error.code == "AUTH_REQUIRED")
+            && account.can_renew_login(operation).await?
+        {
+            let renewed = account
+                .renew_login(self.transport.as_ref(), operation)
+                .await?;
+            return account
+                .read_bound_state_with_features(
+                    &renewed.reads(self.transport.as_ref(), account.record().credential_ref),
+                    device,
+                    component,
+                    connection,
+                    self.clock.as_ref(),
+                    operation,
+                    self.ac_features
+                        && self
+                            .ac_feature_devices
+                            .as_ref()
+                            .is_none_or(|ids| ids.contains(&device.id)),
+                )
+                .await;
+        }
+        result
     }
 
     async fn execute(

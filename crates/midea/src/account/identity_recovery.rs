@@ -12,6 +12,7 @@ pub struct PendingIdentityRecovery {
     record: AccountRecord,
     original: SecretBytes,
     session: MeijuSession,
+    credentials: LoginCredentials,
     inventory: Inventory,
     deadline: Instant,
 }
@@ -71,7 +72,6 @@ pub(crate) async fn prepare(
     }
     emit(Event::RecoveryLoginStarted);
     let session = login(transport, &credentials, operation).await?;
-    drop(credentials);
     emit(Event::LoginSucceeded);
     if !session.is_canonical() {
         emit(Event::RecoveryMissingCanonicalIdentity);
@@ -119,6 +119,7 @@ pub(crate) async fn prepare(
                 record: account.record().clone(),
                 original,
                 session,
+                credentials,
                 inventory,
                 deadline: Instant::now() + Duration::from_secs(60),
             })
@@ -192,6 +193,8 @@ async fn confirm_selected(
     payload.subject = preview.session.subject().expose().to_vec();
     payload.session.zeroize();
     payload.session = preview.session.encode()?.expose().to_vec();
+    payload.version = 4;
+    payload.saved_login = Some(SavedLogin::new(&preview.credentials));
     operation
         .run(async {
             if preview.is_expired() {

@@ -1,4 +1,4 @@
-//! Explicit native Meiju password login. No automatic renewal or challenge bypass.
+//! Native Meiju password login. No challenge bypass.
 //! Request shapes are modified from the source attributed in third-party/midea-auto-cloud/NOTICE.md.
 
 use crate::{
@@ -41,6 +41,13 @@ fn ascii(value: &[u8], limit: usize, spaces: bool) -> bool {
 }
 
 impl LoginCredentials {
+    pub(crate) fn protected_parts(&self) -> (Vec<u8>, Vec<u8>) {
+        (
+            self.account.expose().to_vec(),
+            self.password.expose().to_vec(),
+        )
+    }
+
     /// Only reviewed ASCII input is accepted. Consume protected native input, never public JSON.
     pub fn new(account: SecretBytes, password: SecretBytes) -> Result<Self> {
         if !ascii(account.expose(), 256, false) || !ascii(password.expose(), 256, true) {

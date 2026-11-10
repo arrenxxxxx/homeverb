@@ -141,7 +141,7 @@ async fn product_conflicts_and_corrupt_profiles_preserve_the_entire_saved_bindin
             "ACCOUNT_SESSION_UNCONFIRMED"
         );
     }
-    for version in [1, 2, 4] {
+    for version in [1, 2, 5] {
         let mut changed: Value = serde_json::from_slice(&original).unwrap();
         changed["version"] = json!(version);
         f.set_bytes(record.credential_ref, serde_json::to_vec(&changed).unwrap());

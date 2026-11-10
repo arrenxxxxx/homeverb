@@ -41,9 +41,11 @@ environment variables, shell scripts, ordinary files or public JSON requests.
 ./target/debug/examples/connect_meiju --data-dir "$HOME/.local/share/homeverb/meiju-pilot" connect
 ```
 
-Both account and password prompts disable terminal echo. Passwords are discarded
-after login; only the session, opaque account subject and appliance bindings enter
-the system secret store. SQLite contains random local references and metadata.
+Both account and password prompts disable terminal echo. Successful sign-in saves
+the login inputs, session, opaque account subject and appliance bindings in the
+system secret store under [ADR-0076](../adr/0076-protected-account-auto-login.md).
+Only definite authorization errors on reads permit bounded automatic sign-in;
+failed login requires explicit input again. SQLite contains random local references and metadata.
 The network operation has one 180-second budget after input; Ctrl+C cancels it.
 No control request is available in this binary.
 

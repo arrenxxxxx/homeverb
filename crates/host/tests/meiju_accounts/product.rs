@@ -56,7 +56,7 @@ async fn product_evidence_stays_protected_across_refresh_and_pending_reauthoriza
     assert_eq!(refreshed["data"]["retrieval"]["status"], "complete");
     assert_read_only_profile_enrichment(&f, &devices);
     let protected = saved(&f, &account);
-    assert_eq!(protected["version"], 3);
+    assert_eq!(protected["version"], 4);
     assert_eq!(
         protected["bindings"][0]["product_profile"]["sn8"],
         "TEST1234"

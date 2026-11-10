@@ -575,7 +575,7 @@ async fn malformed_or_missing_protected_state_never_creates_a_replacement_map() 
     for kind in 0..20 {
         let mut data: Value = serde_json::from_slice(&original).unwrap();
         match kind {
-            0 => data["version"] = json!(4),
+            0 => data["version"] = json!(5),
             1 => data["account_id"] = json!(Uuid::new_v4()),
             2 => data["credential_ref"] = json!(CredentialRef::new()),
             3 => data["provider"] = json!("another.provider"),
@@ -1188,3 +1188,6 @@ mod lan;
 
 #[path = "accounts/lan_reconciliation.rs"]
 mod lan_reconciliation;
+
+#[path = "accounts/auto_login.rs"]
+mod auto_login;

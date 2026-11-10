@@ -79,6 +79,7 @@ async fn inspection_preserves_legacy_and_unpublished_bindings_without_inventing_
         let mut values = f.secrets.values.lock().unwrap();
         let mut payload: Value = serde_json::from_slice(&values[&key]).unwrap();
         payload["version"] = json!(1);
+        payload.as_object_mut().unwrap().remove("saved_login");
         for binding in payload["bindings"].as_array_mut().unwrap() {
             binding.as_object_mut().unwrap().remove("listed");
         }

@@ -1097,3 +1097,6 @@ mod dishwasher;
 
 #[path = "adapter/dishwasher_cycle.rs"]
 mod dishwasher_cycle;
+
+#[path = "adapter/auto_login.rs"]
+mod auto_login;

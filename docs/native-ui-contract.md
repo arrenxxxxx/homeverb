@@ -1487,3 +1487,14 @@ unproven. No refrigerator writes or GX1200Max 760064BA controls are added.
 The 34 ordinary methods, 19 trusted/public C functions plus Android initializer,
 JSON envelope, SQLite 5 and protected payload 3 are unchanged. See the
 [integration and remaining-interface ledger](development/13-meiju-reference-integration.md).
+
+## Remembered sign-in without a new JSON method
+
+Successful protected Meiju connection now stores login inputs in system storage
+under [ADR-0076](adr/0076-protected-account-auto-login.md). Existing native API
+1.26 entry points and public schemas are unchanged; credentials still use separate
+protected buffers. Older accounts require one explicit sign-in to remember inputs.
+Definite read authorization failures permit a bounded same-account login/read retry,
+with a persistent failure guard and five-minute cooldown. No command replay follows.
+Outer protected payload 4 is incompatible with older binaries; inner session
+format and SQLite schema 5 are unchanged.
