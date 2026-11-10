@@ -1697,7 +1697,8 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                     'failed',
                     'partial',
                   ].contains(c.receipt?['status']) ||
-                  (c.receipt?['status'] == 'accepted' && c.error != null)))
+                  (c.receipt?['status'] == 'accepted' && c.error != null)) &&
+              !c.isCommandError)
             [
               'widget',
               FeedbackNotice(
@@ -2843,7 +2844,8 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                                 'accepted',
                                 'unknown',
                               ].contains(c.receipt?['status']) &&
-                              c.error != null)
+                              c.error != null &&
+                              !c.isCommandError)
                       ? null
                       : c.error,
                   child: content!,
@@ -2884,7 +2886,8 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
                                 'accepted',
                                 'unknown',
                               ].contains(c.receipt?['status']) &&
-                              c.error != null) ||
+                              c.error != null &&
+                              !c.isCommandError) ||
                           identical(c.error, hiddenTransientError)
                       ? null
                       : c.error,

@@ -816,7 +816,8 @@ class _ClimateControlsState extends State<ClimateControls>
             receipt['device_id'] == c.selectedDevice &&
             (['unknown', 'failed', 'partial'].contains(receipt['status']) ||
                 (receipt['status'] == 'accepted' && c.error != null)) &&
-            pending == null) ...[
+            pending == null &&
+            !c.isCommandError) ...[
           const SizedBox(height: 16),
           Semantics(
             liveRegion: true,

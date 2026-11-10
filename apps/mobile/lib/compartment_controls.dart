@@ -48,6 +48,7 @@ class CompartmentControls extends StatelessWidget {
   bool get _showReceipt {
     final receipt = controller.receipt;
     return pendingComponent == null &&
+        !controller.isCommandError &&
         receipt != null &&
         receipt['device_id'] == controller.selectedDevice &&
         (['unknown', 'failed', 'partial'].contains(receipt['status']) ||

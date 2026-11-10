@@ -74,6 +74,7 @@ class DeviceDetailControls extends StatelessWidget {
     final receipt = c.receipt;
     final showReceipt =
         receipt != null &&
+        !c.isCommandError &&
         receipt['device_id'] == c.selectedDevice &&
         (['unknown', 'failed', 'partial'].contains(receipt['status']) ||
             (receipt['status'] == 'accepted' && c.error != null));

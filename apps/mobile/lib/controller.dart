@@ -585,6 +585,8 @@ class HomeController extends ChangeNotifier {
 
   bool busy = false;
   Object? error;
+  Object? _commandError;
+  bool get isCommandError => error != null && identical(error, _commandError);
 
   Future<bool> perform(
     Future<void> Function() work, {
@@ -1171,7 +1173,10 @@ class HomeController extends ChangeNotifier {
     String route,
   ) {
     if (approvalNeedsReceipt) {
-      error = NativeFailure('STATE_UNAVAILABLE', 'Look up the interrupted confirmation first.');
+      error = NativeFailure(
+        'STATE_UNAVAILABLE',
+        'Look up the interrupted confirmation first.',
+      );
       notifyListeners();
       return Future.value(false);
     }
@@ -1293,7 +1298,9 @@ class HomeController extends ChangeNotifier {
     String action,
     Json arguments, {
     String? componentId,
-  }) {
+  }) async {
+    if (busy) return false;
+    _commandError = null;
     int? operationEpoch;
     CoreClient? operationClient;
     String? operationDevice;
@@ -1306,7 +1313,7 @@ class HomeController extends ChangeNotifier {
         operationClient == core &&
         operationDevice == selectedDevice &&
         operationPart == component;
-    return perform(() async {
+    final succeeded = await perform(() async {
       final target = componentId ?? component;
       operationEpoch = _readEpoch;
       operationClient = core;
@@ -1367,6 +1374,11 @@ class HomeController extends ChangeNotifier {
       receipt = result;
       // Observations only change after an explicit read, never from a requested value.
     }, publishError: current);
+    if (!succeeded && error != null) {
+      _commandError = error;
+      if (!_disposed) notifyListeners();
+    }
+    return succeeded;
   }
 
   List<Json> accounts = [];

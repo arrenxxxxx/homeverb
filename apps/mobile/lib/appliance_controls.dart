@@ -676,6 +676,7 @@ class _ApplianceControlsState extends State<ApplianceControls> {
         if (c.receipt case final Json receipt)
           if (receipt['device_id'] == c.selectedDevice &&
               pendingAction == null &&
+              !c.isCommandError &&
               (['unknown', 'failed', 'partial'].contains(receipt['status']) ||
                   (receipt['status'] == 'accepted' && c.error != null)))
             Column(
