@@ -168,6 +168,10 @@ bool _inlineSingleArgumentAllowed(Json parameters, String name) {
   return true;
 }
 
+bool _inlineArgumentSupported(Json parameters, String name, Json schema) =>
+    _inlineSingleArgumentAllowed(parameters, name) &&
+    _inlineSchemaSupported(schema);
+
 bool hasDirectTarget(Json action) {
   final parameters = action['parameters'] as Json;
   return action['idempotency'] == 'set_value' &&
@@ -561,9 +565,10 @@ class CompartmentControls extends StatelessWidget {
           num? stepCandidate(int direction) {
             if (controller.busy ||
                 target is! num ||
-                !_inlineSingleArgumentAllowed(
+                !_inlineArgumentSupported(
                   parameters!,
                   'target_temperature',
+                  schema,
                 ) ||
                 !_inlineValueAllowed(target, schema))
               return null;
@@ -632,10 +637,14 @@ class CompartmentControls extends StatelessWidget {
               componentId: id,
             ) &&
             ((action['parameters']?['properties'] as Map?) ?? {}).keys.every(
-              (name) =>
-                  name == 'target_temperature' ||
-                  (inlineOptions.containsKey(name) &&
-                      _inlineSchemaSupported(inlineOptions[name]!)),
+              (name) => name == 'target_temperature'
+                  ? _inlineArgumentSupported(parameters!, name, schema!)
+                  : inlineOptions.containsKey(name) &&
+                        _inlineArgumentSupported(
+                          parameters!,
+                          name,
+                          inlineOptions[name]!,
+                        ),
             ))
           continue;
         if (!controller.hasControlAction(
@@ -765,9 +774,10 @@ class CompartmentControls extends StatelessWidget {
                           onComponentAction == null ||
                           observation('climate.${entry.key}')?['value'] ==
                               value ||
-                          !_inlineSingleArgumentAllowed(
+                          !_inlineArgumentSupported(
                             parameters!,
                             entry.key,
+                            entry.value,
                           ) ||
                           !_inlineValueAllowed(value, entry.value) ||
                           !controller.canControlValue(
