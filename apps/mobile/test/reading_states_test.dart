@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:homeverb_mobile/blocks.dart' show Climate;
 import 'package:homeverb_mobile/controller.dart';
+import 'package:homeverb_mobile/device_page.dart';
 import 'package:homeverb_mobile/controls.dart';
 import 'package:homeverb_mobile/main.dart';
 import 'package:homeverb_mobile/native_client.dart';
@@ -54,7 +55,7 @@ void main() {
       await tester.pump();
     }
     expect(controller.readingLoading('main'), true);
-    expect(find.byType(CircularProgressIndicator), findsWidgets);
+    expect(find.byType(DeviceLoading), findsOneWidget);
     core.gate.complete();
     for (var i = 0; i < 8; i++) {
       await tester.pump();
@@ -96,14 +97,8 @@ void main() {
     expect(controller.capability('power'), isNull);
     expect(controller.readingLoading('main'), true);
     final target = find.byType(Climate);
-    expect(target, findsOneWidget);
-    expect(
-      find.descendant(
-        of: target,
-        matching: find.byType(CircularProgressIndicator),
-      ),
-      findsOneWidget,
-    );
+    expect(target, findsNothing);
+    expect(find.byType(DeviceLoading), findsOneWidget);
     expect(find.text('Refresh State'), findsNothing);
     core.gate.complete();
     for (var i = 0; i < 8; i++) {
@@ -154,42 +149,16 @@ void main() {
       }
       final fridge = find.byKey(const ValueKey('readonly-zone:fridge'));
       final freezer = find.byKey(const ValueKey('readonly-zone:freezer'));
-      expect(
-        find.descendant(
-          of: fridge,
-          matching: find.byType(CircularProgressIndicator),
-        ),
-        findsWidgets,
-      );
-      expect(
-        find.descendant(
-          of: freezer,
-          matching: find.byType(CircularProgressIndicator),
-        ),
-        findsWidgets,
-      );
+      expect(find.byType(DeviceLoading), findsOneWidget);
+      expect(fridge, findsNothing);
+      expect(freezer, findsNothing);
       first.complete();
       for (var i = 0; i < 8; i++) {
         await tester.pump();
       }
-      expect(
-        find.descendant(
-          of: fridge,
-          matching: find.byType(CircularProgressIndicator),
-        ),
-        findsNothing,
-      );
-      expect(
-        find.descendant(of: fridge, matching: find.text('—')),
-        findsWidgets,
-      );
-      expect(
-        find.descendant(
-          of: freezer,
-          matching: find.byType(CircularProgressIndicator),
-        ),
-        findsWidgets,
-      );
+      expect(controller.readingLoading('fridge'), false);
+      expect(controller.readingLoading('freezer'), true);
+      expect(find.byType(DeviceLoading), findsOneWidget);
       second.complete();
       for (var i = 0; i < 8; i++) {
         await tester.pump();
@@ -200,6 +169,11 @@ void main() {
           matching: find.byType(CircularProgressIndicator),
         ),
         findsNothing,
+      );
+      expect(find.byType(DeviceLoading), findsNothing);
+      expect(
+        find.descendant(of: fridge, matching: find.text('—')),
+        findsWidgets,
       );
       expect(
         find.descendant(of: freezer, matching: find.text('-18°C')),

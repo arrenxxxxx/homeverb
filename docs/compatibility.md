@@ -2162,3 +2162,28 @@ write, package installation or physical-device acceptance is claimed.
 The October 23 presentation revision omits routine refrigerator Stale badges and
 zone-caption suffixes. It retains Core freshness flags/timestamps and explicit
 read failures without changing API 1.26, schemas, authority or foreground scheduling.
+
+## Protected remembered sign-in and stable device views (November 10, 2026)
+
+[ADR-0076](adr/0076-protected-account-auto-login.md) adds saved Meiju login inputs
+inside system-secret-store payload version 4. Successful protected connection and
+trusted legacy identity recovery save credentials with their session. Existing
+versions 1–3 remain readable and require one explicit sign-in to remember inputs;
+older binaries cannot read version 4. Public native API 1.26, inner session format,
+SQLite schema 5, device identities, grants and command outcomes are unchanged.
+
+A definite auth error on an inventory/state read permits one same-subject login
+and one read retry within the original Operation. The durable attempt marker,
+account lease, cooldown, identity guards and cancellation prevent retry storms or
+account substitution. Failed login remains blocked until explicit sign-in. No
+background task or command replay is added. Fictional tests cover restart,
+identity mismatch, missing credentials, storage uncertainty, cooldown, cancellation
+and actual adapter reads without control or inventory calls during recovery.
+
+Flutter first opening uses a centered loading view; repeat openings reuse cached
+current-session control layout while disabling interaction during preparation.
+Failed policy inspection discards cached controls. Compact refrigerator captions
+use one line at normal text size. Dishwasher readings and supply warnings are
+separate, and unrecognized programs display Unknown. This does not add dishwasher
+command mappings or establish physical appliance support. Executed checks and
+local emulator evidence are recorded in the [App verification log](../apps/mobile/verification.md).

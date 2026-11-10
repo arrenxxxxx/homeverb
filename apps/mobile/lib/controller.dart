@@ -40,6 +40,8 @@ class HomeController extends ChangeNotifier {
   bool get isForeground => _foreground;
   int get controlEpoch => _readEpoch;
   List<Json>? _controlPolicies;
+  final Map<String, List<Json>> _deviceControlPolicies = {};
+  final Set<String> _readyDeviceLayouts = {};
   Timer? _automaticRefreshTimer;
   Future<void>? _automaticRefreshWork;
   StateRefreshView _automaticRefreshView = StateRefreshView.none;
@@ -417,7 +419,6 @@ class HomeController extends ChangeNotifier {
   }
 
   Future<void> _inspectControlPolicies() async {
-    _controlPolicies = null;
     if (core is! NativeSessionClient || !supports('inspect_session_grants'))
       return;
     final device = selectedDevice!, epoch = _readEpoch;
@@ -444,6 +445,7 @@ class HomeController extends ChangeNotifier {
       policies.add(policy);
     }
     _controlPolicies = policies;
+    _deviceControlPolicies[device] = policies;
   }
 
   bool _coreNeedsReopen = false;
@@ -533,6 +535,9 @@ class HomeController extends ChangeNotifier {
     _coreNeedsReopen = true;
     _controlPermissions = const [];
     _controlPolicies = null;
+    _deviceControlPolicies.clear();
+    _readyDeviceLayouts.clear();
+    deviceLayoutLoading = true;
     await core.close();
     if (!_foreground || epoch != _readEpoch) {
       throw NativeFailure('CANCELLED', 'Device setup was cancelled.');
@@ -805,7 +810,7 @@ class HomeController extends ChangeNotifier {
     selectedDevice = id;
     routeInspection = null;
     description = _deviceDescriptions[id];
-    _controlPolicies = null;
+    _controlPolicies = _deviceControlPolicies[id];
     final parts =
         (description?['device']?['components'] as List?) ??
         (currentCard?['device']?['components'] as List?) ??
@@ -814,7 +819,7 @@ class HomeController extends ChangeNotifier {
     _componentReadErrors.removeWhere((key, _) => key.$1 == id);
     component = parts.isEmpty ? 'main' : parts.first['id'] as String;
     snapshot = _componentSnapshots[(id, component)];
-    deviceLayoutLoading = description == null;
+    deviceLayoutLoading = !_readyDeviceLayouts.contains(id);
     deviceControlsPreparing = true;
     openingComponents.clear();
     openingReadFailure = null;
@@ -839,7 +844,6 @@ class HomeController extends ChangeNotifier {
           }
           description = local;
           _deviceDescriptions[id] = local;
-          deviceLayoutLoading = false;
           if (components.isEmpty) return;
           component = components.first['id'] as String;
           snapshot = _componentSnapshots[(id, component)];
@@ -897,6 +901,7 @@ class HomeController extends ChangeNotifier {
           await _prepareDeviceControls(id);
           _deviceDescriptions[id] = description!;
           await _inspectControlPolicies();
+          _readyDeviceLayouts.add(id);
         },
         publishError: () =>
             _foreground &&
@@ -908,6 +913,14 @@ class HomeController extends ChangeNotifier {
           generation == _deviceOpeningGeneration) {
         deviceControlsRecoveryNeeded = false;
         if (!_disposed) notifyListeners();
+      } else if (!succeeded &&
+          selectedDevice == id &&
+          generation == _deviceOpeningGeneration) {
+        // Retained buttons are presentation only while opening is busy. A
+        // failed current-policy check must never enable those retained controls.
+        _controlPolicies = null;
+        _deviceControlPolicies.remove(id);
+        _readyDeviceLayouts.remove(id);
       }
       return succeeded;
     }
@@ -1571,6 +1584,8 @@ class HomeController extends ChangeNotifier {
     final currentIds = cards.map((card) => card['device']['id']).toSet();
     snapshots.removeWhere((id, _) => !currentIds.contains(id));
     _deviceDescriptions.removeWhere((id, _) => !currentIds.contains(id));
+    _deviceControlPolicies.removeWhere((id, _) => !currentIds.contains(id));
+    _readyDeviceLayouts.removeWhere((id) => !currentIds.contains(id));
     _componentSnapshots.removeWhere((key, _) => !currentIds.contains(key.$1));
     _componentReadErrors.removeWhere((key, _) => !currentIds.contains(key.$1));
     selection.removeWhere((id) => !currentIds.contains(id));

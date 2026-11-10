@@ -1646,7 +1646,7 @@ class DeviceTile extends StatelessWidget {
                                   cached ? 'Cached · 2h ago' : d[3],
                                   size: 10,
                                   color: secondary,
-                                  maxLines: largeText ? null : 3,
+                                  maxLines: largeText ? null : 1,
                                 ),
                             ],
                           ),

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:homeverb_mobile/controller.dart';
+import 'package:homeverb_mobile/device_page.dart';
 import 'package:homeverb_mobile/main.dart';
 import 'package:homeverb_mobile/native_client.dart';
 import 'package:homeverb_mobile/preferences.dart';
@@ -39,13 +40,13 @@ void main() {
       (widget) =>
           widget.key?.toString().contains('refrigerator-reading:') == true,
     );
-    final before = readings().evaluate().map((e) => e.widget.key).toSet();
-    expect(before.length, greaterThan(10));
-    expect(find.byType(CircularProgressIndicator), findsWidgets);
+    expect(readings(), findsNothing);
+    expect(find.byType(DeviceLoading), findsOneWidget);
     core.gate.complete();
     await tester.pumpAndSettle();
     final after = readings().evaluate().map((e) => e.widget.key).toSet();
-    expect(after, before);
+    expect(after.length, greaterThan(10));
+    expect(find.byType(DeviceLoading), findsNothing);
     expect(
       find.descendant(of: readings(), matching: find.text('—')),
       findsWidgets,

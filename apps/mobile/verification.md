@@ -3657,3 +3657,94 @@ actual Core argument-validator test, analysis and a production Flutter capture
 are recorded in
 [interaction-second-review.md](../../docs/development/interaction-second-review.md#fifth-review-object-level-inline-eligibility).
 The complete Flutter suite and physical-device acceptance were not rerun.
+
+## Protected sign-in recovery and stable device opening -- November 10, 2026
+
+The owner requested remembered platform passwords, automatic recovery after
+authorization failure, stable repeated device entry, equal compact refrigerator
+card heights and a real signed-in inspection of the dishwasher page.
+
+Native Meiju sign-in now stores bounded login/password bytes with its session in
+system-secret-store payload version 4 (ADR-0076). One definite read auth failure
+can trigger one same-subject login and one read retry within the existing deadline.
+A durable pre-login block, account lease and five-minute cooldown bound attempts;
+failed login, identity mismatch, cancellation and uncertain persistence never
+replay a device write. Existing protected versions 1–3 remain readable and need
+one explicit login to remember inputs. Native API 1.26 and SQLite schema 5 are
+unchanged; older binaries refuse the new protected payload.
+
+Flutter first entry keeps the body behind a centered pulse until the initial
+read/control setup finishes. Same-session repeated entry retains metadata and
+button layout with controls disabled during preparation. Session replacement
+clears cached authority; failed policy inspection removes retained controls.
+Compact card captions are one line at ordinary text size, with accessibility
+expansion retained. Dishwasher idle cycle readings and supply reminders have
+separate cards; unknown programs do not expose raw protocol tokens, and absent
+operator data does not create a technical status row.
+
+Executed checks on this macOS workstation:
+
+- `cargo fmt --all -- --check` passed. Rust 1.96 workspace/all-target Clippy with
+  `-D warnings` passed. Default Rust 1.99 Clippy stopped on four existing
+  `chunks_exact_mut` lints outside this revision.
+- Workspace tests passed 544, with one ignored system-store test and exactly 14
+  explicitly excluded LAN tests whose required macOS loopback aliases are not
+  assigned. An initial unfiltered Meiju run confirmed those 14
+  `AddrNotAvailable` failures; they are blocked, not successful tests.
+- New fictional account tests cover protected persistence/restart, same identity,
+  mismatched identity, rejected login, cooldown/clock rollback, absent remembered
+  inputs, unavailable/uncertain storage and cancellation. The actual adapter test
+  checks one auth recovery/read retry without inventory or commands and no login
+  for an ordinary transport failure. Existing host legacy fixtures were updated
+  to omit new fields when constructing genuine old payloads.
+- `cargo build --workspace --offline --locked` passed. CLI runtime: 35 cases,
+  seven explicit platform skips. Native contract: 34 methods and 55 live fictional
+  examples plus approval, dishwasher, scan, link and identity-recovery boundaries
+  passed. Python tooling: 70 passed. Presentation catalog tests: seven passed.
+- Flutter analysis passed. The affected device-opening, card, permission, reading
+  failure, dishwasher, approval and foreground-refresh run passed 72 tests, with
+  four visual captures skipped. The final complete run passed 409, skipped 58 and
+  failed five: the four recorded macOS glyph/pixel checks and one native approval
+  case reporting `HOST_CLOSED`. All four approval tests passed in an isolated
+  rerun; the concurrent failure's cause is not established. The added retained-
+  policy failure regression passed in the full run. No whole-suite pass is claimed.
+- Documentation, 21 public schemas/52 positive/341 negative contract fixtures,
+  repository language/hygiene, commit conventions and `git diff --check` passed.
+  Python dependencies came from the existing local virtual environment; an
+  initial new-environment download was blocked by sandbox DNS.
+- The native Android builder passed both ABIs, 20 exports per ABI and 16 KiB ELF
+  alignment. The final explicit Meiju release APK build passed in 36.4 seconds.
+  APK verification passed v2 development signing, both current-AAR libraries,
+  exports and alignment. APK SHA-256:
+  `1acf6580bb9b78daff419511a37e97ddc7f3574f46ff17e372cd3b89149293db`
+  (72,882,378 bytes). The local report is
+  `/private/tmp/homeverb-recovery-apk-verification.json`; it records the dirty
+  source build before phase commits.
+
+The existing registered Android 15 arm64 AVD lacked `system.img`. The missing
+runtime was installed into a separate temporary SDK using already accepted local
+licenses, and the existing AVD was started visibly with that runtime, host graphics
+and no snapshot load/save. No existing AVD or application data was erased. The
+owner signed in directly in the baseline app and again after the update to save
+credentials through the new protected flow. Tooling did not enter, inspect or
+extract credentials. Account details retained six cards after reauthorization.
+
+`adb install -r` returned Success, the installed APK checksum matched the verified
+artifact, and cold launch returned `Status: ok` in 2590 ms. The real dishwasher
+page reproduced the mixed cycle/supply rows and raw unmapped program text before
+the update. Afterward, local screenshots confirmed the centered first-load pulse,
+separate cycle/supply cards and Unknown program display. A same-session reopening
+immediately retained the page with maintenance actions disabled during its read.
+The warm home grid retained six cards with aligned refrigerator/dishwasher tiles;
+the compact skin's long-caption height regression is covered by widget tests.
+A rapid scripted Back/root sequence displayed a generic interruption notice;
+it was dismissed, and the exact cause was not established. This observation is
+not treated as a clean navigation acceptance result. The exact owner model
+still has no admitted command profile; no start, power, pause or other appliance
+write was attempted. These are real-account/emulator UI observations, not
+physical-device control or actual expired-session recovery acceptance. No private
+identifiers or credentials are copied into maintained evidence.
+
+No remote CI, push/publication or diagnostic upload was performed. Physical-phone
+policy, real expired-session automatic login and dishwasher command support remain
+unverified. The emulator remains available for the owner.

@@ -21,7 +21,7 @@ class DeviceLoading extends StatelessWidget {
     padding: const EdgeInsets.all(32),
     child: Center(
       child: loading
-          ? const CircularProgressIndicator()
+          ? const OperationPulse(size: 48)
           : ActionButton('Retry', onPressed: onRetry),
     ),
   );
@@ -97,30 +97,33 @@ class DevicePage extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        if (busy)
-                          const Padding(
-                            padding: EdgeInsets.only(bottom: 10),
-                            child: OperationProgress(),
+                  child:
+                      child is DeviceLoading && (child as DeviceLoading).loading
+                      ? child
+                      : SingleChildScrollView(
+                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              if (busy)
+                                const Padding(
+                                  padding: EdgeInsets.only(bottom: 10),
+                                  child: OperationProgress(),
+                                ),
+                              if (error != null)
+                                FeedbackNotice(
+                                  title: 'Could not complete this operation',
+                                  message: LiteralText(
+                                    friendlyError(context, error!),
+                                  ),
+                                  warning: true,
+                                  actionLabel: 'Dismiss',
+                                  onAction: () => onAction('Dismiss error'),
+                                ),
+                              child,
+                            ],
                           ),
-                        if (error != null)
-                          FeedbackNotice(
-                            title: 'Could not complete this operation',
-                            message: LiteralText(
-                              friendlyError(context, error!),
-                            ),
-                            warning: true,
-                            actionLabel: 'Dismiss',
-                            onAction: () => onAction('Dismiss error'),
-                          ),
-                        child,
-                      ],
-                    ),
-                  ),
+                        ),
                 ),
               ],
             ),

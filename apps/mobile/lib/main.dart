@@ -2377,7 +2377,7 @@ class NativeAppState extends State<NativeApp> with WidgetsBindingObserver {
             : c.roomName(c.filter),
       );
     if (['C01', 'C08'].contains(id) &&
-        c.description == null &&
+        (c.description == null || c.deviceLayoutLoading) &&
         c.currentCard?['device']['support_status'] != 'unsupported') {
       return DeviceLoading(
         loading: c.busy || c.openingDevice,

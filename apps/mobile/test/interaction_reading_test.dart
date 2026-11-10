@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:homeverb_mobile/controller.dart';
-import 'package:homeverb_mobile/device_readings.dart';
+import 'package:homeverb_mobile/device_page.dart';
 import 'package:homeverb_mobile/feedback.dart';
 import 'package:homeverb_mobile/main.dart';
 import 'package:homeverb_mobile/screens.dart' hide Json;
@@ -47,14 +47,7 @@ void main() {
     expect(app.currentState!.id, 'C08');
     expect(c.readingLoading('fridge'), true);
     expect(c.readingLoading('freezer'), true);
-    expect(
-      tester
-          .widgetList<ReadingValue>(find.byType(ReadingValue))
-          .where((w) => w.loading),
-      isNotEmpty,
-      reason:
-          'Unresolved values must render a spinner in the real device page.',
-    );
+    expect(find.byType(DeviceLoading), findsOneWidget);
     expect(c.openingReadFailureSerial, 0);
     await tester.pump(const Duration(seconds: 5));
     expect(c.readingLoading('fridge'), true);

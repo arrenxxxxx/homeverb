@@ -417,6 +417,7 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
       final label = sourceForKey(
         '$id.${key == 'mode' ? 'program' : key}.$value',
       );
+      if (key == 'mode' && label == null) return 'Unknown';
       // Raw door and supply integers have no reviewed semantic mapping. Do not
       // guess that 0 means safe/normal or 1 means closed/needs replenishment.
       if ([
@@ -834,21 +835,34 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
           key: const ValueKey('cycle-readings'),
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            heading('Supplies and reminders'),
-            for (final key in [
-              if (!running && !paused) ...[
-                'mode',
-                'temperature',
-                'doorswitch',
-                'additional',
-                'remaining_minutes',
-              ],
-              'operator',
+            if (!running && !paused)
+              card([
+                heading('Cycle status'),
+                for (final key in [
+                  'mode',
+                  'temperature',
+                  'doorswitch',
+                  'additional',
+                  'remaining_minutes',
+                ])
+                  if (properties.containsKey(key)) reading(key),
+              ]),
+            if ([
               'water_lack',
               'softwater_lack',
               'bright_lack',
-            ])
-              if (properties.containsKey(key)) reading(key),
+            ].any(properties.containsKey))
+              card([
+                heading('Supplies and reminders'),
+                for (final key in [
+                  'water_lack',
+                  'softwater_lack',
+                  'bright_lack',
+                ])
+                  if (properties.containsKey(key)) reading(key),
+              ]),
+            if (observation('operator')?['value'] case final String value)
+              if (value.isNotEmpty) card([reading('operator')]),
             for (final entry in properties.entries)
               if (entry.value['readable'] == true &&
                   !{
@@ -866,8 +880,10 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
                 reading(entry.key),
           ],
         ),
-        if (widget.showInformation)
+        if (widget.showInformation) ...[
+          const SizedBox(height: 16),
           InlineDeviceInformation(controller: c, onAction: widget.onAction),
+        ],
       ],
     );
   }

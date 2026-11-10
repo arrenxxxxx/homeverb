@@ -30,6 +30,7 @@ class CardFixture extends ClimateFixture {
 
 class NativeCardFixture extends CardFixture implements NativeSessionClient {
   List<Json> grants = [];
+  bool failPolicy = false;
   @override
   Set<String> get methods => {'inspect_session_grants'};
   @override
@@ -37,6 +38,8 @@ class NativeCardFixture extends CardFixture implements NativeSessionClient {
   @override
   Future<dynamic> call(String method, [Json fields = const {}]) async {
     if (method == 'inspect_session_grants') {
+      if (failPolicy)
+        throw NativeFailure('POLICY_DENIED', 'Fictional policy failure.');
       calls.add({'method': method, ...fields});
       final connection = (device['connections'] as List).singleWhere(
         (c) => c['id'] == fields['connection_id'],
@@ -56,6 +59,54 @@ class NativeCardFixture extends CardFixture implements NativeSessionClient {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  testWidgets(
+    'repeat opening retains buttons until current policy is rechecked',
+    (tester) async {
+      final core = NativeCardFixture();
+      core.grants = [
+        {
+          'component_id': 'main',
+          'capability': 'power',
+          'action': 'set',
+          'argument_schema': {
+            'const': {'state': false},
+          },
+        },
+      ];
+      final c = HomeController(core, AccountPreferences());
+      addTearDown(c.dispose);
+      expect(await c.initialize(), true);
+      final id = core.device['id'] as String;
+      expect(await c.selectDevice(id), true);
+      expect(c.hasControlAction('power', 'set'), true);
+      c.cancelPending();
+      core.postReadGate = Completer<void>();
+      final reopening = c.selectDevice(id);
+      await tester.pump();
+      expect(c.deviceLayoutLoading, false);
+      expect(c.hasControlAction('power', 'set'), true);
+      expect(c.busy, true);
+      core.grants = [];
+      core.postReadGate!.complete();
+      expect(await reopening, true);
+      expect(c.hasControlAction('power', 'set'), false);
+      core.grants = [
+        {
+          'component_id': 'main',
+          'capability': 'power',
+          'action': 'set',
+          'argument_schema': {
+            'const': {'state': false},
+          },
+        },
+      ];
+      expect(await c.selectDevice(id), true);
+      expect(c.hasControlAction('power', 'set'), true);
+      core.failPolicy = true;
+      expect(await c.selectDevice(id), false);
+      expect(c.hasControlAction('power', 'set'), false);
+    },
+  );
   setUpAll(() async {
     await (FontLoader('Inter')
           ..addFont(rootBundle.load('assets/fonts/Inter-Regular.otf'))

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:homeverb_mobile/appliance_controls.dart';
 import 'package:homeverb_mobile/controller.dart';
+import 'package:homeverb_mobile/device_page.dart';
 import 'package:homeverb_mobile/main.dart';
 import 'package:homeverb_mobile/native_client.dart';
 import 'package:homeverb_mobile/screens.dart' hide Json;
@@ -119,53 +120,53 @@ void main() {
     controller.dispose();
   });
   for (final family in ['light', 'fan', 'media', 'sensor', 'appliance_cycle']) {
-    testWidgets('$family first read uses local loading then missing values', (
-      tester,
-    ) async {
-      final core = HeldAppliance();
-      core.capabilities.removeWhere((capability) => capability['id'] != family);
-      final controller = HomeController(core, AccountPreferences());
-      final app = GlobalKey<NativeAppState>();
-      final catalog = (await tester.runAsync(ScreenCatalog.load))!;
-      await tester.pumpWidget(
-        NativeApp(key: app, catalog: catalog, controller: controller),
-      );
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Controls fixture').first);
-      for (var i = 0; i < 8; i++) {
-        await tester.pump();
-      }
-      expect(app.currentState!.id, 'C01');
-      expect(find.byType(ApplianceControls), findsOneWidget);
-      expect(controller.readingLoading('main'), true);
-      expect(
-        find.descendant(
-          of: find.byType(ApplianceControls),
-          matching: find.byType(CircularProgressIndicator),
-        ),
-        findsWidgets,
-      );
-      core.gate.complete();
-      for (var i = 0; i < 8; i++) {
-        await tester.pump();
-      }
-      expect(controller.readingLoading('main'), false);
-      expect(
-        find.descendant(
-          of: find.byType(ApplianceControls),
-          matching: find.byType(CircularProgressIndicator),
-        ),
-        findsNothing,
-      );
-      expect(find.text('—'), findsWidgets);
-      expect(find.text('Unknown'), findsNothing);
-      expect(find.text('Refresh State'), findsNothing);
-      expect(find.textContaining('Latest read'), findsNothing);
-      expect(find.textContaining('out of date'), findsNothing);
-      expect(core.calls.where((call) => call['method'] == 'execute'), isEmpty);
-      expect(tester.takeException(), isNull);
-      await tester.pumpWidget(const SizedBox());
-    });
+    testWidgets(
+      '$family first read uses a stable loading view then missing values',
+      (tester) async {
+        final core = HeldAppliance();
+        core.capabilities.removeWhere(
+          (capability) => capability['id'] != family,
+        );
+        final controller = HomeController(core, AccountPreferences());
+        final app = GlobalKey<NativeAppState>();
+        final catalog = (await tester.runAsync(ScreenCatalog.load))!;
+        await tester.pumpWidget(
+          NativeApp(key: app, catalog: catalog, controller: controller),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Controls fixture').first);
+        for (var i = 0; i < 8; i++) {
+          await tester.pump();
+        }
+        expect(app.currentState!.id, 'C01');
+        expect(find.byType(ApplianceControls), findsNothing);
+        expect(controller.readingLoading('main'), true);
+        expect(find.byType(DeviceLoading), findsOneWidget);
+        core.gate.complete();
+        for (var i = 0; i < 8; i++) {
+          await tester.pump();
+        }
+        expect(controller.readingLoading('main'), false);
+        expect(
+          find.descendant(
+            of: find.byType(ApplianceControls),
+            matching: find.byType(CircularProgressIndicator),
+          ),
+          findsNothing,
+        );
+        expect(find.text('—'), findsWidgets);
+        expect(find.text('Unknown'), findsNothing);
+        expect(find.text('Refresh State'), findsNothing);
+        expect(find.textContaining('Latest read'), findsNothing);
+        expect(find.textContaining('out of date'), findsNothing);
+        expect(
+          core.calls.where((call) => call['method'] == 'execute'),
+          isEmpty,
+        );
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox());
+      },
+    );
   }
 
   testWidgets('specialized controls do not enable without current grants', (

@@ -522,3 +522,22 @@ defines floating explicit-operation feedback and persistent account notices.
 Consumers see actionable explanations rather than raw provider errors. Automatic
 foreground reads remain silent; uncertain writes never gain a retry shortcut.
 See the isolated [verification results](../../docs/development/feedback-surface-verification.md).
+
+## Stable device opening and remembered sign-in
+
+First device opening shows a centered activity pulse until metadata, initial reads
+and control inspection finish. Subsequent openings reuse prepared metadata and
+current-session button policy while updating readings; controls remain disabled
+during preparation. Session replacement clears cached policy, and every command
+still validates through Core. Compact card captions use one line at normal text
+size, keeping multi-zone refrigerators aligned with other cards; large text may
+expand for accessibility. Dishwasher cycle readings and supply reminders have
+separate groups, and unmapped program values display Unknown.
+
+Successful protected sign-in now remembers login inputs in the system secret store.
+A definite authorization error on an inventory/state read can trigger one login
+and one read retry with the same deadline. Failed login stops automatic attempts
+until explicit sign-in; successful attempts have a five-minute cooldown. Existing
+accounts need one explicit sign-in to save the password. No password is returned
+to Flutter, stored in preferences or used to replay an appliance command.
+See [ADR-0076](../../docs/adr/0076-protected-account-auto-login.md).

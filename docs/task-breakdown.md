@@ -399,3 +399,16 @@ home/device association and categorical-versus-ratio display. The public
 [consumables evidence](development/12-appliance-command-evidence.md#current-apk-consumables-service-trace).
 Current-model association, authenticated service responses and maintenance-reset
 semantics are still required; no new production endpoint or control is enabled.
+
+### November 10 account recovery and device-opening revision
+
+Remembered native Meiju sign-in and bounded read-triggered automatic login are
+implemented under [ADR-0076](adr/0076-protected-account-auto-login.md), with protected
+payload version 4 and no new public API. Legacy accounts require explicit sign-in
+once to save credentials. Fictional recovery tests preserve identity and prevent
+write replay. Stable first-opening animation, same-session control-layout reuse,
+aligned compact refrigerator cards and separated dishwasher reading groups are
+implemented in Flutter. Local emulator inspection used the owner's sign-in and
+read-only pages; this does not close the current dishwasher control-profile or
+physical-phone acceptance gaps. See the [verification record](../apps/mobile/verification.md)
+for executed checks and remaining real reauthentication acceptance.

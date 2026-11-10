@@ -60,7 +60,7 @@ List<List<Object>> _data({bool chinese = false, bool caption = false}) {
       chinese ? t.mobilePreviewKitchenRefrigerator : 'Kitchen refrigerator',
       'Kitchen',
       '4.0°C',
-      '',
+      'Fridge target · Freezer target −18°C · Variable zone target 2°C',
     ],
     [
       chinese ? t.mobilePreviewKitchenDishwasher : 'Kitchen dishwasher',
@@ -152,6 +152,7 @@ void main() {
       final rects = [for (var i = 0; i < 6; i++) tester.getRect(cards.at(i))];
       expect(rects[0].height, inInclusiveRange(150, 180));
       expect(rects[0].top, rects[1].top);
+      expect(rects[4].height, rects[0].height);
       expect(rects[2].left, rects[0].left);
       expect(rects[2].top - rects[0].bottom, closeTo(10, .01));
       expect(rects[1].left - rects[0].right, closeTo(10, .01));

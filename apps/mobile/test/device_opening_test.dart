@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:homeverb_mobile/controller.dart';
+import 'package:homeverb_mobile/device_page.dart';
 import 'package:homeverb_mobile/main.dart';
 import 'package:homeverb_mobile/native_client.dart';
 import 'package:homeverb_mobile/screens.dart' hide Json;
@@ -368,7 +369,7 @@ void main() {
   });
 
   testWidgets(
-    'restart restores cached component readings before live replies',
+    'first opening keeps restored readings behind a stable loading view',
     (tester) async {
       final directory = await tester.runAsync(
         () => Directory.systemTemp.createTemp('opening-cache-'),
@@ -424,10 +425,34 @@ void main() {
         )?['observations']?['climate.target_temperature']?['value'],
         -18,
       );
-      expect(find.text('4°C'), findsWidgets);
+      expect(find.byType(DeviceLoading), findsOneWidget);
+      expect(find.text('4°C'), findsNothing);
       expect(tester.takeException(), isNull);
       gate.complete();
+      for (var i = 0; i < 100 && controller.openingDevice; i++) {
+        await tester.pump();
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 10)),
+        );
+      }
+      await pumps(tester, 12);
+      expect(find.byType(DeviceLoading), findsNothing);
+      expect(find.text('4°C'), findsWidgets);
+      await tester.tap(find.byTooltip('Back'));
       await pumps(tester);
+      final repeatGate = inner.hold(deviceA, 'fridge');
+      await tester.tap(find.text('Opening fridge A').first);
+      await pumps(tester, 12);
+      expect(find.byType(DeviceLoading), findsNothing);
+      expect(find.text('4°C'), findsWidgets);
+      repeatGate.complete();
+      for (var i = 0; i < 100 && controller.openingDevice; i++) {
+        await tester.pump();
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 10)),
+        );
+      }
+      await pumps(tester, 12);
       final otherGate = inner.hold(deviceB, 'fridge');
       await tester.tap(find.byTooltip('Back'));
       await pumps(tester);

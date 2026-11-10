@@ -11,6 +11,37 @@ import 'package:homeverb_mobile/skin.dart';
 import 'device_detail_controls_test.dart' show DishwasherFixture, dishwasher;
 
 void main() {
+  testWidgets(
+    'idle readings and supplies are separate and unknown programs are readable',
+    (tester) async {
+      final core = DishwasherFixture();
+      core.capabilities.single['actions'] = <String, dynamic>{};
+      core.observations['$dishwasher.mode'] = 'neutral_gear';
+      final controller = HomeController(core, LocalPreferences.memory());
+      addTearDown(controller.dispose);
+      await controller.selectDevice(core.device['id']);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: DishwasherPanel(controller: controller, onAction: (_) {}),
+            ),
+          ),
+        ),
+      );
+      expect(find.text('neutral_gear'), findsNothing);
+      expect(find.text('Unknown'), findsWidgets);
+      expect(find.text('Cycle status'), findsOneWidget);
+      expect(find.text('Supplies and reminders'), findsOneWidget);
+      expect(find.text('Reported cycle operator'), findsNothing);
+      expect(
+        tester.getTopLeft(find.text('Cycle status')).dy,
+        lessThan(tester.getTopLeft(find.text('Supplies and reminders')).dy),
+      );
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
   testWidgets('expanded cycle choices remain usable at large text', (
     tester,
   ) async {

@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:homeverb_mobile/controller.dart';
+import 'package:homeverb_mobile/skin.dart';
 import 'package:homeverb_mobile/device_detail_controls.dart';
 import 'package:homeverb_mobile/native_client.dart';
 import 'package:homeverb_mobile/preferences.dart';
@@ -87,8 +88,10 @@ void main() {
     final opening = c.selectDevice(device);
     await flush(tester);
     expect(c.componentCapability('upper', 'vendor.fixture.zone'), isNotNull);
-    expect(c.hasControlAction('vendor.fixture.zone', 'set_value'), false);
-    expect(find.byKey(control), findsNothing);
+    expect(c.hasControlAction('vendor.fixture.zone', 'set_value'), true);
+    expect(find.byKey(control), findsOneWidget);
+    expect(tester.widget<ActionButton>(find.byKey(control)).onPressed, isNull);
+    expect(c.busy, true);
 
     core.descriptionGate!.complete();
     await flush(tester);
