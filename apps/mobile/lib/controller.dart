@@ -556,11 +556,15 @@ class HomeController extends ChangeNotifier {
   String component = 'main', filter = 'All', search = '';
   final Set<String> selection = {};
   int _readEpoch = 0;
+  String? _interruptedOpeningDevice;
   void cancelPending({bool preserveDeviceOpening = false}) {
     _pauseAutomaticRefresh(cancelRead: false);
     discardApproval();
     _readEpoch++;
-    if (!preserveDeviceOpening) _deviceOpeningGeneration++;
+    if (!preserveDeviceOpening) {
+      _deviceOpeningGeneration++;
+      _interruptedOpeningDevice = null;
+    }
     accountInventory = null;
     accountConflicts = null;
     routeInspection = null;
@@ -570,6 +574,22 @@ class HomeController extends ChangeNotifier {
   void setForeground(bool foreground) {
     _foreground = foreground;
     if (!foreground) {
+      if (_deviceOpeningWork != null)
+        _interruptedOpeningDevice = selectedDevice;
+      if (historyState == LocalLoadState.loading) {
+        historyState = LocalLoadState.failed;
+        historyLoadError = NativeFailure(
+          'CANCELLED',
+          'History loading was cancelled.',
+        );
+      }
+      if (diagnosticsState == LocalLoadState.loading) {
+        diagnosticsState = LocalLoadState.failed;
+        diagnosticsLoadError = NativeFailure(
+          'CANCELLED',
+          'Diagnostics loading was cancelled.',
+        );
+      }
       _pauseAutomaticRefresh(cancelRead: false);
       discardApproval();
       _readEpoch++;
@@ -579,7 +599,26 @@ class HomeController extends ChangeNotifier {
       routeInspection = null;
     }
     core.foreground(foreground);
-    if (foreground) _scheduleAutomaticRefresh();
+    if (foreground) {
+      _scheduleAutomaticRefresh();
+      final device = _interruptedOpeningDevice;
+      final pending = _deviceOpeningWork;
+      final epoch = _readEpoch;
+      if (device != null && _automaticRefreshView == StateRefreshView.device) {
+        unawaited(() async {
+          if (pending != null) await pending;
+          if (_disposed ||
+              !_foreground ||
+              epoch != _readEpoch ||
+              selectedDevice != device ||
+              _automaticRefreshView != StateRefreshView.device ||
+              _interruptedOpeningDevice != device)
+            return;
+          _interruptedOpeningDevice = null;
+          await selectDevice(device);
+        }());
+      }
+    }
     if (!foreground) notifyListeners();
   }
 
@@ -887,9 +926,15 @@ class HomeController extends ChangeNotifier {
   }
 
   Future<bool> refresh() {
-    final device = selectedDevice, epoch = _readEpoch, client = core;
+    final device = selectedDevice;
+    int? epoch;
+    CoreClient? client;
     return perform(
-      () => read(),
+      () async {
+        epoch = _readEpoch;
+        client = core;
+        await read();
+      },
       publishError: () =>
           !_disposed &&
           _foreground &&
@@ -900,9 +945,13 @@ class HomeController extends ChangeNotifier {
   }
 
   Future<bool> refreshComponents() {
-    final device = selectedDevice, epoch = _readEpoch, client = core;
+    final device = selectedDevice;
+    int? epoch;
+    CoreClient? client;
     return perform(
       () async {
+        epoch = _readEpoch;
+        client = core;
         if (device == null)
           throw NativeFailure('STATE_UNAVAILABLE', 'Select a device.');
         Object? failure;
@@ -935,7 +984,9 @@ class HomeController extends ChangeNotifier {
   }
 
   Future<bool> refreshReceipt() {
-    final original = receipt, epoch = _readEpoch, client = core;
+    final original = receipt;
+    int? epoch;
+    CoreClient? client;
     final device = original?['device_id'] as String?;
     bool current() =>
         !_disposed &&
@@ -952,6 +1003,8 @@ class HomeController extends ChangeNotifier {
 
     return perform(
       () async {
+        epoch = _readEpoch;
+        client = core;
         if (device == null) {
           throw NativeFailure(
             'STATE_UNAVAILABLE',
@@ -960,7 +1013,7 @@ class HomeController extends ChangeNotifier {
         }
         requireCurrent();
         final descriptor =
-            await client.call('describe_device', {'device': device}) as Json;
+            await client!.call('describe_device', {'device': device}) as Json;
         requireCurrent();
         if (descriptor['device']?['id'] != device) {
           throw NativeFailure(
@@ -973,7 +1026,7 @@ class HomeController extends ChangeNotifier {
           requireCurrent();
           final componentId = part['id'] as String;
           final result =
-              await client.call('read_state', {
+              await client!.call('read_state', {
                     'device': device,
                     'component': componentId,
                     'connection': preferences.route(device),
@@ -1008,7 +1061,8 @@ class HomeController extends ChangeNotifier {
   }
 
   Future<bool> refreshCards() {
-    final epoch = _readEpoch, client = core;
+    int? epoch;
+    CoreClient? client;
     void requireCurrent() {
       if (_disposed || !_foreground || epoch != _readEpoch || client != core) {
         throw NativeFailure('CANCELLED', 'Device refresh was cancelled.');
@@ -1017,6 +1071,8 @@ class HomeController extends ChangeNotifier {
 
     return perform(
       () async {
+        epoch = _readEpoch;
+        client = core;
         Object? failure;
         for (final c in visibleCards.toList()) {
           final d = c['device'] as Json;
@@ -1029,7 +1085,7 @@ class HomeController extends ChangeNotifier {
             try {
               requireCurrent();
               final result =
-                  await client.call('read_state', {
+                  await client!.call('read_state', {
                         'device': device,
                         'component': componentId,
                         'connection': preferences.route(device),
@@ -1845,15 +1901,20 @@ class HomeController extends ChangeNotifier {
   }
 
   Future<bool> loadHistory({bool deviceOnly = false}) async {
-    final epoch = _readEpoch, client = core, device = selectedDevice;
+    if (busy || !_foreground) return false;
+    final device = selectedDevice;
+    int? epoch;
+    CoreClient? client;
     Object? failure;
     historyState = LocalLoadState.loading;
     historyLoadError = null;
     notifyListeners();
     final success = await perform(() async {
+      epoch = _readEpoch;
+      client = core;
       try {
         final result =
-            await client.call(
+            await client!.call(
                   deviceOnly ? 'device_executions' : 'recent_executions',
                   deviceOnly ? {'device_id': device} : {},
                 )
@@ -1975,12 +2036,15 @@ class HomeController extends ChangeNotifier {
   }
 
   Future<bool> loadReceipt(String id) {
-    final epoch = _readEpoch, client = core;
+    int? epoch;
+    CoreClient? client;
     bool current() =>
         !_disposed && _foreground && epoch == _readEpoch && client == core;
     return perform(() async {
+      epoch = _readEpoch;
+      client = core;
       final result =
-          await client.call('get_execution', {'request_id': id}) as Json;
+          await client!.call('get_execution', {'request_id': id}) as Json;
       if (!current())
         throw NativeFailure('CANCELLED', 'Receipt loading was cancelled.');
       if (result['request_id'] != id)
@@ -1990,15 +2054,19 @@ class HomeController extends ChangeNotifier {
   }
 
   Future<bool> loadDiagnostics() async {
-    final epoch = _readEpoch, client = core;
+    if (busy || !_foreground) return false;
+    int? epoch;
+    CoreClient? client;
     Object? failure;
     diagnostics = null;
     diagnosticsState = LocalLoadState.loading;
     diagnosticsLoadError = null;
     notifyListeners();
     final success = await perform(() async {
+      epoch = _readEpoch;
+      client = core;
       try {
-        final report = await client.call('diagnostics') as Json;
+        final report = await client!.call('diagnostics') as Json;
         if (!_foreground || epoch != _readEpoch || client != core) {
           throw NativeFailure(
             'CANCELLED',

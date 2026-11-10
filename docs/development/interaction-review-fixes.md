@@ -25,3 +25,21 @@ metadata now appear immediately; its opening work waits for the cancelled refres
 to drain before using the native session. Generation checks still reject work
 after navigation or backgrounding. The focused navigation, refresh and lifecycle
 selection passed 29 tests (`review-2-after.log`).
+
+## 3–5. Foreground and session recovery
+
+`review_lifecycle_recovery_test.dart` first reproduced five independent
+failures: interrupted device opening, history and diagnostics interrupted by
+backgrounding, and history and diagnostics after replacing a closed session
+(`review-3-5-before.log`). The visible device view now retries its interrupted
+opening once after the prior operation drains; permission inspection is not
+part of the three-second timer. Interrupted history and diagnostics loads enter
+their existing retryable failure states. Their work binds the current client
+and epoch only after session restoration.
+
+Five additional tests reproduced the same stale-binding problem for card,
+component, device and receipt refresh and receipt lookup
+(`review-5-refresh-before.log`). Those operations now bind after restoration as
+well. The combined focused lifecycle, session, history, diagnostics, refresh
+and receipt selection passed 54 tests (`review-3-5-after-final.log`). No write
+is replayed by these recovery paths.
