@@ -285,6 +285,12 @@ fn decode(
         }
         ApplianceFamily::Dishwasher => {
             let readings = output.entry("main").or_default();
+            if appliance
+                .product_profile
+                .gx_dishwasher(appliance.model.as_deref())
+            {
+                crate::dishwasher_readings::decode(data, readings)?;
+            }
             if appliance.product_profile.dishwasher()
                 == Some(crate::dishwasher::DishwasherProfile::Additional)
             {

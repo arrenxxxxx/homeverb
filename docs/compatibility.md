@@ -1,5 +1,17 @@
 # Platform and device compatibility matrix
 
+## November 11 GX1200Max read presentation
+
+Product 760064BA, subtype 3 and the exact reviewed GX1200Max model now select a
+separate read-only details capability. Official program names, extended cycle
+states, the explicit open-door flag, phase-specific durations and reported
+settings have adapter mappings and localized App presentation. Existing Lua
+reads are reused; absent fields are not invented. Saved descriptors upgrade only
+on explicit inventory refresh. Native API, SQLite, protected payload and command
+authority are unchanged. Current-model controls, TSL transport and physical
+acceptance remain unavailable; this is not Meiju parity. See the
+[phase record](development/16-gx-dishwasher-parity.md).
+
 ## November 11 home-card power icon
 
 On and off card buttons share one power glyph and retain their existing state

@@ -65,7 +65,7 @@ class DishwasherFixture extends ControlsFixture
         'provider_authorization': 'not_checked',
         'grants': [
           if (allowed)
-            for (final action in (capabilities.single['actions'] as Json).keys)
+            for (final action in (capabilities.first['actions'] as Json).keys)
               {
                 'component_id': 'main',
                 'capability': dishwasher,

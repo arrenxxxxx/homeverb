@@ -1,5 +1,13 @@
 # Implementation status and next tasks
 
+## November 11 GX1200Max read presentation
+
+The [GX1200Max parity phase](development/16-gx-dishwasher-parity.md) implements
+an exact-profile read-only details capability and App labels for programs,
+extended phases and reported settings. It does not close current-model commands,
+provider reports or Meiju experience parity. Endpoint/firmware evidence and
+physical controls remain separate acceptance work.
+
 ## November 11 home-card power icon
 
 Home cards use the same power glyph for on and off while retaining the existing

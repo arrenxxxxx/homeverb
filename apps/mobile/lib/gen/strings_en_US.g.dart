@@ -4373,4 +4373,154 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	/// en-US: 'Remove device'
 	String get deviceRemove => 'Remove device';
+
+	/// en-US: 'Reported wash settings'
+	String get mobileReportedWashSettings => 'Reported wash settings';
+
+	/// en-US: 'Estimated program time'
+	String get vendorMideaDishwasherDetailsEstimatedMinutes => 'Estimated program time';
+
+	/// en-US: 'Antibacterial storage'
+	String get vendorMideaDishwasherDetailsStorageEnabled => 'Antibacterial storage';
+
+	/// en-US: 'Cyclic storage'
+	String get vendorMideaDishwasherDetailsCycleStorageEnabled => 'Cyclic storage';
+
+	/// en-US: 'Smart dosing'
+	String get vendorMideaDishwasherDetailsSmartDose => 'Smart dosing';
+
+	/// en-US: 'Lower-zone boost wash'
+	String get vendorMideaDishwasherDetailsLowerZoneBoost => 'Lower-zone boost wash';
+
+	/// en-US: 'Child lock'
+	String get vendorMideaDishwasherDetailsChildLock => 'Child lock';
+
+	/// en-US: 'Antibacterial storage'
+	String get vendorMideaDishwasherDetailsProgramKeep => 'Antibacterial storage';
+
+	/// en-US: 'Crystal-flame disinfection'
+	String get vendorMideaDishwasherDetailsProgramCrystalFlameDisinfect => 'Crystal-flame disinfection';
+
+	/// en-US: 'Fruit and vegetable wash'
+	String get vendorMideaDishwasherDetailsProgramFruit => 'Fruit and vegetable wash';
+
+	/// en-US: 'Quick wash'
+	String get vendorMideaDishwasherDetailsProgramRapid => 'Quick wash';
+
+	/// en-US: 'Heavy-duty wash'
+	String get vendorMideaDishwasherDetailsProgramStrong => 'Heavy-duty wash';
+
+	/// en-US: 'Standard wash'
+	String get vendorMideaDishwasherDetailsProgramNormal => 'Standard wash';
+
+	/// en-US: 'Wash and dry'
+	String get vendorMideaDishwasherDetailsProgramWashDry => 'Wash and dry';
+
+	/// en-US: 'Self-clean'
+	String get vendorMideaDishwasherDetailsProgramSelfClean => 'Self-clean';
+
+	/// en-US: 'Eco wash'
+	String get vendorMideaDishwasherDetailsProgramEco => 'Eco wash';
+
+	/// en-US: 'Disinfection wash'
+	String get vendorMideaDishwasherDetailsProgramGerm => 'Disinfection wash';
+
+	/// en-US: 'Quiet wash'
+	String get vendorMideaDishwasherDetailsProgramQuietNight => 'Quiet wash';
+
+	/// en-US: 'Delicate wash'
+	String get vendorMideaDishwasherDetailsProgramGlass => 'Delicate wash';
+
+	/// en-US: 'Hotpot wash'
+	String get vendorMideaDishwasherDetailsProgramHotpot => 'Hotpot wash';
+
+	/// en-US: 'Seafood wash'
+	String get vendorMideaDishwasherDetailsProgramSeafood => 'Seafood wash';
+
+	/// en-US: 'No program selected'
+	String get vendorMideaDishwasherDetailsProgramNone => 'No program selected';
+
+	/// en-US: 'Device offline'
+	String get vendorMideaDishwasherDetailsCycleStateOffline => 'Device offline';
+
+	/// en-US: 'Device fault'
+	String get vendorMideaDishwasherDetailsCycleStateError => 'Device fault';
+
+	/// en-US: 'Drying'
+	String get vendorMideaDishwasherDetailsCycleStateDry => 'Drying';
+
+	/// en-US: 'Storing'
+	String get vendorMideaDishwasherDetailsCycleStateKeep => 'Storing';
+
+	/// en-US: 'Washing'
+	String get vendorMideaDishwasherDetailsCycleStateWork => 'Washing';
+
+	/// en-US: 'Wash paused'
+	String get vendorMideaDishwasherDetailsCycleStateWorkPause => 'Wash paused';
+
+	/// en-US: 'Scheduled'
+	String get vendorMideaDishwasherDetailsCycleStateOrder => 'Scheduled';
+
+	/// en-US: 'Standby'
+	String get vendorMideaDishwasherDetailsCycleStatePowerOn => 'Standby';
+
+	/// en-US: 'Powered off'
+	String get vendorMideaDishwasherDetailsCycleStatePowerOff => 'Powered off';
+
+	/// en-US: 'Schedule paused'
+	String get vendorMideaDishwasherDetailsCycleStateOrderPause => 'Schedule paused';
+
+	/// en-US: 'Drying paused'
+	String get vendorMideaDishwasherDetailsCycleStateDryPause => 'Drying paused';
+
+	/// en-US: 'Storage paused'
+	String get vendorMideaDishwasherDetailsCycleStateKeepPause => 'Storage paused';
+
+	/// en-US: 'Updating firmware'
+	String get vendorMideaDishwasherDetailsCycleStateOta => 'Updating firmware';
+
+	/// en-US: 'Draining'
+	String get vendorMideaDishwasherDetailsCycleStateDrain => 'Draining';
+
+	/// en-US: 'Ventilating'
+	String get vendorMideaDishwasherDetailsCycleStateAiring => 'Ventilating';
+
+	/// en-US: 'Door open'
+	String get vendorMideaDishwasherDetailsDoorStateOpen => 'Door open';
+
+	/// en-US: 'Door closed'
+	String get vendorMideaDishwasherDetailsDoorStateClosed => 'Door closed';
+
+	/// en-US: 'Enabled'
+	String get vendorMideaDishwasherDetailsStorageEnabledTrue => 'Enabled';
+
+	/// en-US: 'Disabled'
+	String get vendorMideaDishwasherDetailsStorageEnabledFalse => 'Disabled';
+
+	/// en-US: 'Enabled'
+	String get vendorMideaDishwasherDetailsCycleStorageEnabledTrue => 'Enabled';
+
+	/// en-US: 'Disabled'
+	String get vendorMideaDishwasherDetailsCycleStorageEnabledFalse => 'Disabled';
+
+	/// en-US: 'Enabled'
+	String get vendorMideaDishwasherDetailsSmartDoseTrue => 'Enabled';
+
+	/// en-US: 'Disabled'
+	String get vendorMideaDishwasherDetailsSmartDoseFalse => 'Disabled';
+
+	/// en-US: 'Enabled'
+	String get vendorMideaDishwasherDetailsLowerZoneBoostTrue => 'Enabled';
+
+	/// en-US: 'Disabled'
+	String get vendorMideaDishwasherDetailsLowerZoneBoostFalse => 'Disabled';
+
+	/// en-US: 'Enabled'
+	String get vendorMideaDishwasherDetailsChildLockTrue => 'Enabled';
+
+	/// en-US: 'Disabled'
+	String get vendorMideaDishwasherDetailsChildLockFalse => 'Disabled';
+
+	/// en-US: 'Estimated {value} min'
+	String mobileEstimatedProgramMinutes({required Object value}) => 'Estimated ${value} min';
 }

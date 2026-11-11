@@ -221,6 +221,9 @@ fn descriptors(
                 }
             }
             capabilities.push(cycle);
+            if profile.is_some_and(|p| p.gx_dishwasher(appliance.model.as_deref())) {
+                capabilities.push(crate::dishwasher_readings::capability());
+            }
         }
         _ => capabilities.push(capability("main", "vendor.midea.inventory", &[])),
     }

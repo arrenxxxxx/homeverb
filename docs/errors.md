@@ -194,6 +194,12 @@ returns `DEVICE_IDENTITY_CONFLICT` before a request.
 
 The native read protocols use `MIDEA_RESPONSE_INVALID` for malformed/oversized, wrong-home/appliance responses or malformed recognized state fields, `MIDEA_REQUEST_REJECTED` for explicit nonzero provider codes other than recognized expired-session codes, and `MIDEA_REQUEST_FAILED` for transport failures. Provider messages, URLs and identifiers are never copied into these errors. The low-level protocol returns `AUTH_REQUIRED` for recognized session expiry and stops subsequent inventory requests. Under [ADR-0076](adr/0076-protected-account-auto-login.md), the account/adapter layer may attempt one protected same-account login and one read retry within the original deadline. Missing remembered credentials, a blocked attempt or the five-minute cooldown preserves the auth error. Password/challenge rejection, identity mismatch, cancellation and storage failure stop recovery; commands are never retried by this path. Individual home failures remain explicit in a partial inventory; a failed top-level listing never becomes an empty account. Unsupported state families, query combinations, components or explicit temperature units return `CAPABILITY_UNSUPPORTED`. Cancellation/deadline stop the read flow. These errors do not establish any device-write outcome or real-platform support.
 
+The exact GX1200Max read extension also rejects contradictory `work_status` and
+`base_status`, malformed recognized flags, non-finite temperatures and negative
+or fractional minute counts with `MIDEA_RESPONSE_INVALID`, preserving the whole
+previous snapshot. Missing/null fields and the reviewed option-unsupported
+sentinel remain absent. No new error code or command outcome is introduced.
+
 The pure [LAN discovery decoder](adr/0045-bounded-lan-discovery-decoding.md) also
 returns fixed `MIDEA_RESPONSE_INVALID` errors for unsupported envelopes, invalid
 source addresses, lengths, checksums, padding, IDs, ports or family fields. Errors

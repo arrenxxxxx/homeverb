@@ -17,6 +17,7 @@ import 'package:homeverb_mobile/skin.dart';
 import 'climate_controls_test.dart' show ClimateFixture;
 import 'controls_test.dart' show setter;
 import 'device_detail_controls_test.dart' show DishwasherFixture, dishwasher;
+import 'dishwasher_readings_test.dart' show GxDishwasherFixture;
 import 'refrigerator_modes_test.dart' show ReferenceFridgeFixture;
 
 void main() {
@@ -105,6 +106,8 @@ void main() {
     'fridge-readonly',
     'dishwasher-standby',
     'dishwasher-running',
+    'dishwasher-gx-drying',
+    'dishwasher-gx-standby',
   ]) {
     testWidgets('capture actual fictional device page: $scenario', (
       tester,
@@ -195,11 +198,17 @@ void main() {
         controller = HomeController(fridge, preferences);
         deviceId = fridge.device['id'];
       } else {
-        wash = DishwasherFixture();
+        wash = scenario.startsWith('dishwasher-gx-')
+            ? GxDishwasherFixture(
+                state: scenario == 'dishwasher-gx-drying' ? 'dry' : 'power_on',
+              )
+            : DishwasherFixture();
         wash.device['alias'] =
             AppLocale.zhCn.translations.mobilePreviewKitchenDishwasher;
-        wash.observations['$dishwasher.work_status'] =
-            scenario == 'dishwasher-running' ? 'work' : 'power_on';
+        if (!scenario.startsWith('dishwasher-gx-')) {
+          wash.observations['$dishwasher.work_status'] =
+              scenario == 'dishwasher-running' ? 'work' : 'power_on';
+        }
         controller = HomeController(wash, preferences);
         deviceId = wash.device['id'];
       }

@@ -67,19 +67,37 @@ import 'localization.dart';
         .where((cap) => cap.endsWith('.dishwasher'))
         .firstOrNull;
     if (dishwasher != null) {
-      final program = observed(id, '$dishwasher.mode');
-      final phase = observed(id, '$dishwasher.work_status');
-      final minutes = observed(id, '$dishwasher.remaining_minutes');
+      final hasDetails = capabilities.contains('$dishwasher.details');
+      dynamic detail(String key) =>
+          hasDetails ? observed(id, '$dishwasher.details.$key') : null;
+      final program = detail('program') ?? observed(id, '$dishwasher.mode');
+      final phase =
+          detail('cycle_state') ?? observed(id, '$dishwasher.work_status');
+      final minutes =
+          detail('remaining_minutes') ??
+          observed(id, '$dishwasher.remaining_minutes');
+      final estimate = detail('estimated_minutes');
       String known(String property, dynamic value) {
         if (value == null) return '—';
+        final detailKey = property == 'work_status' ? 'cycle_state' : property;
         return label(
-          UiMessage(sourceForKey('$dishwasher.$property.$value') ?? 'Unknown'),
+          UiMessage(
+            (detail(detailKey) != null
+                    ? sourceForKey('$dishwasher.details.$detailKey.$value')
+                    : sourceForKey('$dishwasher.$property.$value')) ??
+                'Unknown',
+          ),
         );
       }
 
       final details = <String>[
         if (phase != null) known('work_status', phase),
-        if (minutes is num && minutes.isFinite && minutes >= 0)
+        if (phase == 'power_on' &&
+            estimate is num &&
+            estimate.isFinite &&
+            estimate >= 0)
+          label(UiMessage('Estimated {value} min', {'value': estimate}))
+        else if (minutes is num && minutes.isFinite && minutes >= 0)
           label(UiMessage('{value} min', {'value': minutes})),
       ];
       return (

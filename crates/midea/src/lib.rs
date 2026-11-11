@@ -9,6 +9,7 @@ mod control;
 pub use ac_features::validate_ac_feature_value;
 pub use control::{AC_FAN_SPEEDS, AC_MODES, AcMode};
 mod dishwasher;
+mod dishwasher_readings;
 pub mod lan;
 mod material;
 mod product;

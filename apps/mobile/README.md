@@ -542,3 +542,12 @@ until explicit sign-in; successful attempts have a five-minute cooldown. Existin
 accounts need one explicit sign-in to save the password. No password is returned
 to Flutter, stored in preferences or used to replay an appliance command.
 See [ADR-0076](../../docs/adr/0076-protected-account-auto-login.md).
+
+## GX1200Max read presentation
+
+The exact product/subtype/model profile now supplies an additional read-only
+capability for official program names, extended phases, explicit door state,
+phase-specific duration and reported wash settings. Refresh account inventory
+once to publish it. Missing fields depend on the provider response and remain
+absent. Current-model commands, TSL transport and provider reports are still
+unavailable; see the [parity record](../../docs/development/16-gx-dishwasher-parity.md).

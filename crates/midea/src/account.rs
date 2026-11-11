@@ -872,6 +872,17 @@ impl MeijuAccount {
                 && part
                     .capabilities
                     .iter()
+                    .any(|id| id == crate::dishwasher_readings::ID)
+        }) {
+            snapshot
+                .observations
+                .retain(|name, _| !name.starts_with("vendor.midea.dishwasher.details."));
+        }
+        if !device.components.iter().any(|part| {
+            part.id == component
+                && part
+                    .capabilities
+                    .iter()
                     .any(|id| id == crate::refrigerator::DETAILS)
         }) {
             snapshot

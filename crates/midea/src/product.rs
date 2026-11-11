@@ -74,6 +74,12 @@ fn text(value: Option<&Value>) -> Result<Option<&str>> {
 }
 
 impl ProductProfile {
+    pub(crate) fn gx_dishwasher(&self, model: Option<&str>) -> bool {
+        self.0.sn8.as_deref() == Some("760064BA")
+            && self.0.subtype.as_deref() == Some("3")
+            && model == Some("GX1200Max \u{5c0a}\u{4eab}\u{7248}")
+    }
+
     pub(crate) fn three_zone_refrigerator(&self, model: Option<&str>) -> bool {
         self.0.sn8.as_deref() == Some("310A2111")
             && self.0.subtype.as_deref() == Some("56")

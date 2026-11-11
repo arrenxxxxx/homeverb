@@ -80,6 +80,14 @@ observable without becoming writable. Mode-dependent effects and physical suppor
 still require acceptance. See [ADR-0034](adr/0034-scoped-meiju-ac-fan-control.md).
 
 
+## Exact dishwasher readings
+
+The read-only `vendor.midea.dishwasher.details` extension has exact-profile
+program/phase/door readings, distinct estimated and remaining minutes, and
+reported setting flags. It carries no actions and cannot enable the current
+GX1200Max's controls. Existing raw dishwasher fields retain their contracts;
+see the [parity record](development/16-gx-dishwasher-parity.md).
+
 ## Optional controls requiring an observation
 
 `control_requires_observation` is an optional boolean property descriptor field

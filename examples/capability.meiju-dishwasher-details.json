@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "id": "vendor.midea.dishwasher.details",
+  "component_id": "main",
+  "revision": 1,
+  "properties": {
+    "program": {
+      "type": "string",
+      "readable": true,
+      "writable": false,
+      "enum": [
+        "keep",
+        "crystal_flame_disinfect",
+        "fruit",
+        "rapid",
+        "strong",
+        "normal",
+        "wash_dry",
+        "self_clean",
+        "eco",
+        "germ",
+        "quiet_night",
+        "glass",
+        "hotpot",
+        "seafood",
+        "none"
+      ]
+    },
+    "cycle_state": {
+      "type": "string",
+      "readable": true,
+      "writable": false,
+      "enum": [
+        "offline",
+        "error",
+        "dry",
+        "keep",
+        "work",
+        "work_pause",
+        "order",
+        "power_on",
+        "power_off",
+        "order_pause",
+        "dry_pause",
+        "keep_pause",
+        "ota",
+        "drain",
+        "airing"
+      ]
+    },
+    "door_state": {
+      "type": "string",
+      "readable": true,
+      "writable": false,
+      "enum": [
+        "open",
+        "closed"
+      ]
+    },
+    "temperature": {
+      "type": "number",
+      "readable": true,
+      "writable": false,
+      "unit": "celsius"
+    },
+    "remaining_minutes": {
+      "type": "integer",
+      "readable": true,
+      "writable": false,
+      "unit": "minutes",
+      "minimum": 0
+    },
+    "estimated_minutes": {
+      "type": "integer",
+      "readable": true,
+      "writable": false,
+      "unit": "minutes",
+      "minimum": 0
+    },
+    "storage_enabled": {
+      "type": "boolean",
+      "readable": true,
+      "writable": false
+    },
+    "cycle_storage_enabled": {
+      "type": "boolean",
+      "readable": true,
+      "writable": false
+    },
+    "smart_dose": {
+      "type": "boolean",
+      "readable": true,
+      "writable": false
+    },
+    "lower_zone_boost": {
+      "type": "boolean",
+      "readable": true,
+      "writable": false
+    },
+    "child_lock": {
+      "type": "boolean",
+      "readable": true,
+      "writable": false
+    }
+  },
+  "actions": {},
+  "events": {}
+}

@@ -385,11 +385,13 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
   Object? _program, _additional;
   (String?, String)? _view;
   static const id = DishwasherPanel.id;
+  static const detailsId = '$id.details';
   @override
   Widget build(BuildContext context) {
     final c = widget.controller;
     final component = widget.componentId ?? c.component;
     final cap = c.componentCapability(component, id)!;
+    final details = c.componentCapability(component, detailsId);
     final currentIdentity = (c.selectedDevice, component);
     if (_view != currentIdentity) {
       _view = currentIdentity;
@@ -428,13 +430,34 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
       };
     }
 
+    Json? detailObservation(String key) => details == null
+        ? null
+        : c.componentSnapshot(component)?['observations']?['$detailsId.$key']
+              as Json?;
+    String detailKey(String key) => switch (key) {
+      'mode' => 'program',
+      'work_status' => 'cycle_state',
+      'doorswitch' => 'door_state',
+      _ => key,
+    };
     Json? observation(String key) =>
+        detailObservation(detailKey(key)) ??
         c.componentSnapshot(component)?['observations']?['$id.$key'] as Json?;
     Object display(String key) {
       final value = observation(key)?['value'];
       if (value == null) return '—';
-      if (key == 'remaining_minutes' && value is num)
+      if (['remaining_minutes', 'estimated_minutes'].contains(key) &&
+          value is num)
         return UiMessage('{value} min', {'value': value});
+      if (detailObservation(detailKey(key)) != null) {
+        final property = detailKey(key);
+        return sourceForKey('$detailsId.$property.$value') ??
+            propertyValue(
+              value,
+              details!['properties'][property] as Json,
+              propertyId: '$detailsId.$property',
+            );
+      }
       final label = sourceForKey(
         '$id.${key == 'mode' ? 'program' : key}.$value',
       );
@@ -485,12 +508,33 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
 
     final status = observation('work_status')?['value'];
     final operator = observation('operator')?['value'];
-    final paused = status == 'work' && operator == 'pause';
+    final paused =
+        (detailObservation('cycle_state') != null && status == 'work_pause') ||
+        (status == 'work' && operator == 'pause');
     final running =
         status == 'work' &&
         (operator == null || operator == '' || operator == 'start');
     final idle = ['power_on', 'power_off', 'cancel'].contains(status);
-    final known = idle || running || paused;
+    final phaseLabel = sourceForKey('$detailsId.cycle_state.$status');
+    final known =
+        idle ||
+        running ||
+        paused ||
+        (detailObservation('cycle_state') != null && phaseLabel != null);
+    final active =
+        running ||
+        paused ||
+        (detailObservation('cycle_state') != null &&
+            [
+              'dry',
+              'dry_pause',
+              'keep',
+              'keep_pause',
+              'order',
+              'order_pause',
+              'drain',
+              'airing',
+            ].contains(status));
     final schema = actions['start_cycle']?['parameters'] as Json? ?? {};
     final programSchema = schema['properties']?['program'] as Json? ?? {};
     final additionalSchema = schema['properties']?['additional'] as Json?;
@@ -541,7 +585,9 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
           ],
           Expanded(
             child: Copy(
-              controlLabel('$id.$key'),
+              controlLabel(
+                '${details != null && !properties.containsKey(key) ? detailsId : id}.$key',
+              ),
               size: DeviceTypography.body,
               lineHeight: DeviceTypography.lineHeight,
               color: muted,
@@ -652,7 +698,7 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (running || paused)
+        if (active)
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -738,7 +784,7 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
               ],
             ),
           ),
-        if (running || paused)
+        if (active)
           card([
             for (var i = 0; i < mainReadings.length; i++) ...[
               if (i > 0)
@@ -798,9 +844,11 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
             ),
           ],
         ],
-        if (running && admitted('pause_cycle')) action('pause_cycle'),
-        if (paused && admitted('resume_cycle')) action('resume_cycle'),
-        if ((running || paused) && admitted('cancel_cycle')) ...[
+        if (currentStateAllows('pause_cycle') && admitted('pause_cycle'))
+          action('pause_cycle'),
+        if (currentStateAllows('resume_cycle') && admitted('resume_cycle'))
+          action('resume_cycle'),
+        if (currentStateAllows('cancel_cycle') && admitted('cancel_cycle')) ...[
           action('cancel_cycle', secondary: true),
           const Padding(
             padding: EdgeInsets.only(top: 6),
@@ -811,7 +859,7 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
             ),
           ),
         ],
-        if (running || paused) ...[
+        if (active && actions.isNotEmpty) ...[
           const SizedBox(height: 16),
           card([
             const Row(
@@ -856,7 +904,7 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
           key: const ValueKey('cycle-readings'),
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (!running && !paused)
+            if (!active)
               card([
                 heading('Cycle status'),
                 for (final key in [
@@ -867,6 +915,28 @@ class _DishwasherPanelState extends State<DishwasherPanel> {
                   'remaining_minutes',
                 ])
                   if (properties.containsKey(key)) reading(key),
+                if (status == 'power_on' &&
+                    detailObservation('estimated_minutes') != null)
+                  reading('estimated_minutes'),
+              ]),
+            if (details != null &&
+                [
+                  'storage_enabled',
+                  'cycle_storage_enabled',
+                  'smart_dose',
+                  'lower_zone_boost',
+                  'child_lock',
+                ].any((key) => detailObservation(key) != null))
+              card([
+                heading('Reported wash settings'),
+                for (final key in [
+                  'storage_enabled',
+                  'cycle_storage_enabled',
+                  'smart_dose',
+                  'lower_zone_boost',
+                  'child_lock',
+                ])
+                  if (detailObservation(key) != null) reading(key),
               ]),
             if ([
               'water_lack',

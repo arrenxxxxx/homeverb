@@ -3908,3 +3908,75 @@ Executed on macOS with the pinned Flutter 3.47.7 SDK:
 No APK build, emulator installation, physical-device test, appliance request or
 external publication was performed. Native API, storage and device compatibility
 are unchanged.
+
+## November 11 GX1200Max read presentation
+
+The owner's Meiju-parity request is tracked in the
+[GX1200Max phase record](../../docs/development/16-gx-dishwasher-parity.md).
+This phase implements exact product/subtype/model read admission and a separate
+read-only details capability. Program names, extended phases, explicit door
+state, phase-specific time and reported settings reach the actual App detail
+page and home summary. It leaves the current model's command admission closed.
+No raw archive statistics, historical firmware identity or missing readings are
+copied into live state. Existing Lua requests and observation timestamps remain
+unchanged; TSL and provider report integration are still open.
+
+Changed implementation: `crates/midea` product/state/descriptor/account filtering
+and the new dishwasher-readings module; the read-only contract fixture and its
+validator; `lib/appliance_panels.dart`, `device_detail_controls.dart` and
+`device_summary.dart`; shared catalogs and generated translations. Added adapter,
+parser, UI and pinned-source mutation regressions. The source comparator reads
+only archived text/data and performs no network access or code evaluation.
+
+Executed on this macOS workstation:
+
+- `cargo test -p homeverb-midea --offline --locked dishwasher_readings`: six
+  passed (four parser tests and two Core/SQLite/adapter tests).
+- `cargo test --workspace --offline --locked`: the unrestricted run stopped at
+  14 existing LAN cases requiring unavailable `127.0.0.2`/`127.0.1.1` aliases
+  (`AddrNotAvailable`). The initial sandbox run additionally blocked sockets.
+  A second workspace run excluded exactly those 14 named cases and passed 550
+  tests, with one ignored system-store test. Host networking was not changed;
+  excluded cases remain blocked, not passed.
+- `cargo build --workspace --offline --locked`, `cargo fmt --all -- --check`
+  and Rust 1.96 workspace/all-target Clippy with `-D warnings`: passed.
+- `.venv/bin/python scripts/verify_mvp.py`: 35 cases, seven platform skips.
+  `.venv/bin/python scripts/verify_native_contract.py`: 34 methods, 55 fictional
+  examples and the trusted native boundary suites passed. System Python and an
+  older temporary environment lacked `jsonschema`; the existing repository
+  environment supplied the required dependencies.
+- `.venv/bin/python -m unittest discover -s tests -v`: 74 passed, including four
+  new pinned-source/changed-program/changed-door/unreviewed-action checks.
+  `python3 scripts/verify_dishwasher_read_mapping.py` passed.
+- `node packages/presentation/test/i18n.test.mjs`: seven passed.
+- `fvm flutter analyze`: passed. The focused dishwasher readings, interaction,
+  detail controls, permissions and summary run passed 29 tests, including the
+  final old-cache/raw-token regression.
+- Full `fvm flutter test --reporter expanded`: 430 passed, 60 skipped and four
+  existing macOS font/pixel failures (`button_labels_test`, both
+  `control_labels_test` glyph cases and `field_alignment_test`). No complete-suite
+  pass is claimed.
+- Actual `NativeApp` Chinese GX standby/drying captures passed with separate
+  bundled Inter and local Noto CJK fonts. The fictional renders are under
+  `build/verification/device-design/window_light/dishwasher-gx-*.png` and were
+  visually inspected. They demonstrate production-page rendering, not official
+  screenshot equality, returned provider field coverage or physical acceptance.
+
+Native API 1.26, SQLite 5 and protected payload 4 are unchanged. New metadata
+requires explicit account inventory refresh; old descriptors omit the new scope.
+No account access, appliance write, emulator installation, push/publication or
+diagnostic upload was performed in this phase. Physical-phone behavior, live
+field coverage and complete Meiju parity remain unverified.
+
+Delivery checks: the two-ABI Android native build passed 20 exports per ABI and
+16 KiB alignment. The final explicit Meiju release APK build passed in 25.3
+seconds. `scripts/verify_flutter_apk.py` passed both complete ABIs, exact current
+AAR matching after normal stripping, v2 development signing, minimum API 28,
+disabled backup, no integration-test plugin and ZIP/ELF alignment. Artifact:
+`output/flutter-verification/android/homeverb-0.2.0-gx-dishwasher-20261111.apk`
+(73,034,054 bytes), SHA-256:
+`0e2bd3a4183bfa061f335fb1350254ed1e920ba32e39c775d48edd7a93040814`.
+The local report `/private/tmp/homeverb-gx-apk-verification.json` records the
+pre-commit dirty source build. No installation or real-account check followed.
+Final documentation, repository hygiene, 21 schemas/53 positive/347 negative
+contract cases, commit conventions and `git diff --check` passed.

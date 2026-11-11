@@ -54,6 +54,7 @@ def main() -> int:
         ("capability", "capability.meiju-temperature"), ("command", "command.meiju-temperature"),
         ("capability", "capability.meiju-dishwasher"), ("command", "command.meiju-dishwasher"),
         ("command", "command.meiju-dishwasher-power"),
+        ("capability", "capability.meiju-dishwasher-details"),
         ("capability", "capability.meiju-dishwasher-cycle-additional"), ("command", "command.meiju-dishwasher-cycle-additional"),
         ("capability", "capability.meiju-dishwasher-cycle"), ("command", "command.meiju-dishwasher-cycle"),
         ("capability", "capability.approved-cycle"), ("command", "command.approved-cycle"),
@@ -324,6 +325,19 @@ def main() -> int:
     bad = load("examples/diagnostics.json"); bad["recent_receipts"][0]["attempts"] *= 33
     negative.append(("unbounded diagnostic attempts", validators["diagnostics"], bad))
     cycle = Draft202012Validator(load("examples/capability.meiju-dishwasher.json")["actions"]["start_cycle"]["parameters"])
+    details = load("examples/capability.meiju-dishwasher-details.json")
+    assert not details["actions"] and all(not p["writable"] for p in details["properties"].values())
+    for key, valid, invalid in [
+        ("program", "wash_dry", "future_program"),
+        ("cycle_state", "dry_pause", "future_state"),
+        ("door_state", "open", 1),
+        ("smart_dose", False, 3),
+        ("remaining_minutes", 0, -1),
+        ("estimated_minutes", 90, "90"),
+    ]:
+        shape = Draft202012Validator(details["properties"][key])
+        shape.validate(valid)
+        negative.append((f"invalid exact dishwasher reading {key}", shape, invalid))
     cycle.validate(load("examples/command.meiju-dishwasher.json")["arguments"])
     for action in load("examples/capability.meiju-dishwasher-cycle-additional.json")["actions"].values():
         shape = Draft202012Validator(action["parameters"])

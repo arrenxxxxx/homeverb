@@ -27,6 +27,9 @@ mod mode;
 #[path = "adapter/membership.rs"]
 mod membership;
 
+#[path = "adapter/dishwasher_readings.rs"]
+mod dishwasher_readings;
+
 const MODELS: &[(&str, &str)] = &[
     ("KFR-35G/N8HE1\u{2161}Pro", "AC"),
     ("KFR-35G/WF2", "AC"),

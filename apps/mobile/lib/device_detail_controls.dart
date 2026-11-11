@@ -86,7 +86,12 @@ class DeviceDetailControls extends StatelessWidget {
         (capability) => capability['id'] == DishwasherPanel.id,
       );
       final genericCapabilities = capabilities
-          .where((capability) => capability['id'] != DishwasherPanel.id)
+          .where(
+            (capability) =>
+                capability['id'] != DishwasherPanel.id &&
+                (!dishwasher ||
+                    capability['id'] != '${DishwasherPanel.id}.details'),
+          )
           .toList();
       final snapshot = c.componentSnapshot(component);
       dynamic observed(String property) =>
