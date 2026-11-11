@@ -3885,3 +3885,26 @@ Subsequent frames showed controls and Device information appended below the same
 primary card bounds. Screenshots are retained outside the repository at
 `/private/tmp/homeverb-staged-final-cold-1.png` through
 `/private/tmp/homeverb-staged-final-cold-3.png`. No appliance command was sent.
+
+## Home-card power glyph consistency — November 11, 2026
+
+`lib/blocks.dart` now renders the existing power glyph for both on and off card
+states, replacing the slashed plug. Existing state colors, the Sky Blue pale
+blue-gray off background, pending pulse, semantics and command gates are retained.
+The existing disabled-card expectation in `test/compact_device_cards_test.dart`
+was synchronized; the App README, task status and compatibility record were updated.
+
+Executed on macOS with the pinned Flutter 3.47.7 SDK:
+
+- `fvm flutter analyze`: passed with no issues.
+- `fvm flutter test test/compact_device_cards_test.dart test/device_cards_test.dart
+  --reporter expanded`: 25 passed; four optional screenshot cases skipped.
+- The existing `capture compact home sky_blue 430x956` test passed separately
+  with `HOMEVERB_CJK_FONT` and `HOMEVERB_CJK_BOLD_FONT` pointing to local Noto CJK
+  fixtures. Visual inspection confirmed matching power shapes and distinct
+  green/on and blue-gray/off backgrounds. The fictional screenshot is at
+  `build/verification/compact-home/sky_blue-430x956.png` (untracked).
+
+No APK build, emulator installation, physical-device test, appliance request or
+external publication was performed. Native API, storage and device compatibility
+are unchanged.

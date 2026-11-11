@@ -71,12 +71,13 @@ disabled while the operation is pending.
 Device cards use white surfaces for observed power on and slightly gray-white
 surfaces for off or unknown power, with dark text and a subtle border. Pending
 operations retain the observed surface color. High contrast keeps white surfaces
-with black outlines and distinct power icons.
+with black outlines.
 Native home cards omit routine saved-observation/not-read captions and the
 Saved locally header. Missing readings use a dash; unsupported-model explanations
 remain visible. Core snapshots retain source timestamps and cache metadata without
 repeating storage explanations on every card.
-Home card power buttons share these observed colors and icons, with a pulse inside
+Home card power buttons use the same power glyph for on and off, retaining their
+state-specific colors (including the pale blue-gray Sky Blue off background), with a pulse inside
 the affected button during preparation, execution and the follow-up read. Local
 startup inspection uses reviewed control options or current session grants and
 cached observations only; it does not refresh every account or contact appliances.

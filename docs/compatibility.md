@@ -1,5 +1,11 @@
 # Platform and device compatibility matrix
 
+## November 11 home-card power icon
+
+On and off card buttons share one power glyph and retain their existing state
+colors. Native APIs, persistence, command eligibility and device support are
+unchanged. This UI revision adds no physical-device acceptance evidence.
+
 ## November 9 home-card power presentation
 
 Home cards display missing power observations as off at the owner's request,

@@ -349,7 +349,9 @@ void main() {
       expect(
         find.descendant(
           of: shortcut,
-          matching: find.byIcon(Icons.power_off_outlined),
+          matching: find.byWidgetPredicate(
+            (widget) => widget is Glyph && widget.name == 'power',
+          ),
         ),
         findsOneWidget,
       );

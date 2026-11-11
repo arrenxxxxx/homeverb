@@ -1580,12 +1580,6 @@ class DeviceTile extends StatelessWidget {
                 child: Center(
                   child: updating
                       ? OperationPulse(color: powerInk, size: large ? 24 : 22)
-                      : presentation != null && state != true
-                      ? Icon(
-                          Icons.power_off_outlined,
-                          size: large ? 24 : 22,
-                          color: powerInk,
-                        )
                       : Glyph('power', size: large ? 24 : 22, color: powerInk),
                 ),
               ),

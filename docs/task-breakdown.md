@@ -1,5 +1,12 @@
 # Implementation status and next tasks
 
+## November 11 home-card power icon
+
+Home cards use the same power glyph for on and off while retaining the existing
+state colors and pending pulse. The Sky Blue off background remains pale blue-gray.
+This presentation change leaves command eligibility and native contracts unchanged.
+See the [App verification log](../apps/mobile/verification.md).
+
 ## November 10 device display selection and opening progress
 
 The App implements persistent local device visibility shared by account-detail
