@@ -9,6 +9,10 @@ suspected vulnerabilities through [SECURITY.md](SECURITY.md), not a public PR.
 
 Select a task with acceptance criteria. Write a contract or regression test, implement the change, and update documentation, examples, and compatibility evidence. Adding a rebranded product using the same protocol does not prove heterogeneous-platform support. Changes to architectural boundaries require an ADR first.
 
+For App work, follow the [interaction baseline](docs/design/interaction-baseline.md)
+across providers and skins. Identify the affected rules and acceptance scenarios
+before implementation; reuse shared components and record actual verification.
+
 ## Language and commits
 
 Use English for documentation, comments, diagrams, examples, issue/PR text, and commit subjects/bodies. The only translated source exception is the owner-requested `zh-CN` UI catalog. Follow [Commit conventions](docs/commit-conventions.md): `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `ci`, `build`, `chore`, `style`, or `revert`. Use `docs` for documentation-only changes; do not mislabel a design as a delivered feature.

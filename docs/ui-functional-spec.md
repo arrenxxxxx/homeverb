@@ -1,5 +1,10 @@
 # UI functional handoff
 
+For new App work, the [interaction baseline](design/interaction-baseline.md)
+supersedes conflicting presentation, refresh and loading instructions in this
+historical handoff. Keep its route identities and native boundaries; do not
+restore obsolete buttons, folded content or artwork from the original atlas.
+
 Status: owner-approved design scope, October 15, 2026. The Window Light prototype is a visual specification with fictional data, not an implemented mobile application or evidence of real-platform support.
 
 Use the [complete atlas](../output/prototypes/homeverb-window-light-v1/index.html), [82-state inventory](ui-screen-inventory.md), [requirement coverage](../output/prototypes/homeverb-window-light-v1/coverage.md), and [Window Light implementation guide](ui-window-light.md) together. The atlas contains 21 boards, 82 states, 14 review journeys, and 201 action branches. A journey is a review sequence; its adjacent screens are not necessarily a direct application transition. Branch buttons simulate navigation between images, not device actions.

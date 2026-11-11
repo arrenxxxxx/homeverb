@@ -1,11 +1,11 @@
 # Device interaction design
 
-The owner's November 9 follow-up is specified in the
-[interaction implementation handoff](15-interaction-experience-handoff.md).
-Its approved pending requirements supersede the older folding, More choices,
-missing-reading and refresh presentation below. Implementation of that follow-up
-is not established by this document's historical verification record. The five
-visual roles, capability boundaries and execution safeguards remain applicable.
+The [interaction baseline](../design/interaction-baseline.md) is the current
+default for future UI development. It and the
+[November 9 handoff](15-interaction-experience-handoff.md) supersede the older
+folding, More choices, missing-reading captions and refresh presentation below.
+The five visual roles, capability boundaries and execution safeguards remain
+applicable. Historical verification records retain their original scope.
 
 This is the reusable interaction contract approved for the HomeVerb device pages
 on October 30, 2026. It applies to the current Meiju presentation and to future

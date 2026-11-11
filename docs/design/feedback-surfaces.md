@@ -1,5 +1,9 @@
 # Feedback surfaces
 
+Follow the [interaction baseline](interaction-baseline.md) for when feedback
+appears and its compact geometry. This component contract defines shared visual
+roles and lifecycle; it does not restore routine refresh notifications.
+
 ## Visual contract
 
 Feedback is not a selectable setting. Use `FeedbackToast` through the
@@ -17,8 +21,9 @@ Never replace a destructive or elevated-operation confirmation with a Toast.
 
 ## Semantics and lifetime
 
-- Successful explicit state reads may say readings updated; completed account
-  retrieval may say device list updated. Neither means a write was verified.
+- Routine home pull-to-refresh has no success Toast. Other purpose-specific
+  explicit reads may report completion when useful; completed account retrieval
+  may say device list updated. Neither means a write was verified.
 - Partial retrieval is partial, not success. Saved cards/readings remain intact.
 - Expired authorization has one persistent sign-in notice. Do not stack raw
   codes, duplicate warnings, reauthorize and refresh buttons in the same area.

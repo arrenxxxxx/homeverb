@@ -1,5 +1,10 @@
 # Window Light screen inventory
 
+These are historical atlas compositions. The current
+[interaction baseline](design/interaction-baseline.md) governs future App work,
+including icon cards, expanded content and loading/refresh behavior. Stable
+screen IDs do not require restoring superseded presentation or unsupported flows.
+
 Status: visual specification, October 15, 2026. All 82 states below are rendered in the [current atlas](../output/prototypes/homeverb-window-light-v1/index.html). Actions navigate review images; the atlas does not run appliance commands or authenticate accounts. See [functional requirements and acceptance](ui-functional-spec.md) and [Flutter/skin implementation](ui-window-light.md).
 
 Each entry preserves its stable screen ID, visible content and explicit branch targets. Static explanatory copy is included to make safety and recovery requirements reviewable. System dialogs, keyboard variants and generic loading/save-error variants reuse these components; they remain required acceptance cases even when no separate image ID exists. Unlisted Back/Cancel behavior returns to the actual caller, as defined by the functional handoff.

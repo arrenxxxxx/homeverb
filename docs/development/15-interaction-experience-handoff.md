@@ -1,9 +1,17 @@
 # Interaction experience implementation handoff
 
-Status: **design approved; implementation in progress**. Owner review: November 9,
-2026. Audited source baseline: `8cf791b`. Milestone evidence is tracked in the
-[implementation record](interaction-implementation-evidence.md); pending stages
-do not claim that the Flutter App already behaves like the approved preview.
+Status: **owner-approved implementation handoff**, November 9, 2026. Audited
+source baseline: `8cf791b`. The milestone table and
+[implementation record](interaction-implementation-evidence.md) track delivered
+work; the [review record](interaction-second-review.md) tracks subsequent fixes.
+
+Use the [interaction baseline](../design/interaction-baseline.md) for future
+development. It consolidates this handoff and the later owner-directed staged
+opening, device visibility and unified power glyph. In particular, initial body
+loading now ends on the first cached/live observation or terminal failure;
+Device information and Recent Operations wait behind an inline circular indicator
+until opening ends. This refines the original all-groups cache/loading wording
+below without reintroducing user-operated folds or blocking destination entry.
 
 ## Scope and source of truth
 

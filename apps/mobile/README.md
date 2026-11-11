@@ -1,13 +1,19 @@
 # HomeVerb Flutter application
 
+All new or changed UI follows the owner-approved
+[interaction baseline](../../docs/design/interaction-baseline.md). It defines
+the current navigation, staged loading, cache, refresh, icon, grouping and
+feedback rules, with acceptance gates across both skins and locales.
+
 The native application embeds Core using native UI contract 1.26.0. The separate visual preview contains fictional Window Light fixtures and never opens Core. The default build opens an isolated Mock profile. Explicit Meiju builds provide protected account connection, local metadata, retrieval/recovery and scoped local removal; Android startup wiring and Mock process journeys are emulator-tested; actual Keystore and physical acceptance remain pending. Cache and history clearing are connected with separate confirmations. Nearby sharing and full-profile deletion remain unavailable. Their preview states are not live features.
 
 ## Device controls
 
 Refrigerator and dishwasher details share the Window Light product header,
 observation cards and explicit action buttons. Refrigerator targets retain separate
-component limits and exact session permissions; target editing and More controls
-are buttons rather than clickable status rows. The descriptor-driven dishwasher
+component limits and exact session permissions; target editing and action forms
+are buttons rather than clickable status rows. Eligible information and options
+remain expanded. The descriptor-driven dishwasher
 panel places available actions above observations. Start, pause, resume and cancel
 appear only when the selected route has current authority and trusted confirmation
 is available. Program and additional-option choices remain explicit in the existing
@@ -263,7 +269,18 @@ build/linux/x64/release/bundle/homeverb_mobile
 
 The Linux CMake install step packages `target/debug/libhomeverb_ffi.so` in the bundle's `lib` directory. Set CMake `HOMEVERB_NATIVE_LIBRARY` to use another build. Keep the whole bundle together. A development override is available through `--dart-define=HOMEVERB_LIBRARY=/absolute/path/to/libhomeverb_ffi.so`. Linux builds require Flutter's standard CMake, Ninja, Clang and GTK development dependencies.
 
-The explicit Mock host permits fictional writes only. Native metadata and presentation preferences live in the OS application support directory. Opening a page does not discover or refresh devices. Local Data offers cache/history cleanup after reviewing each scope. History clearing also removes uncertain receipt details while retaining request-ID replay protection. Interrupted cleanup requires local reloading before an explicit retry; the UI never deletes database files. Use Add Device to discover the Mock appliance. Other control layouts retain Refresh State where available; the climate page omits that footer. Device menu > Select Devices offers explicit batch power actions; results remain per item. Unsupported or ambiguous capabilities fail admission before execution.
+The explicit Mock host permits fictional writes only. Native metadata and
+presentation preferences live in the OS application support directory. Opening
+a device restores local content and starts its bounded opening reads and control
+preparation; the separate foreground schedule follows the interaction baseline.
+Use Add Device to discover the Mock appliance. Home supports pull-to-refresh;
+device pages have no routine Refresh State button or read-time footer.
+Local Data offers cache/history cleanup after reviewing each scope. History
+clearing also removes uncertain receipt details while retaining request-ID replay
+protection. Interrupted cleanup requires local reloading before an explicit retry;
+the UI never deletes database files. Device menu > Select Devices offers explicit
+batch power actions; results remain per item. Unsupported or ambiguous
+capabilities fail admission before execution.
 
 The isolated visual preview runs independently:
 
@@ -311,7 +328,7 @@ approved atlas before claiming visual equivalence.
 - Execution envelopes retain errors, evidence and nested outcomes. Requested values never replace observations. Explicit refresh only reads.
 - Core owns metadata. Presentation preferences contain only skin, root, sharing display name and route choices. Save failures retain previous preferences.
 - Component selection uses exact IDs and each component's capability references. Observations are cached separately per device/component; a secondary compartment never replaces the primary card observation. Unsupported temperature actions remain read-only.
-- Components with separate climate scopes share a compact overview. Opening reads local caches only; explicit Refresh State reads the components. Targets always carry an exact component ID, and partial reads retain independent observations. Cancelling or backgrounding stops the read sequence.
+- Components with separate climate scopes share a compact overview. Opening restores local caches and starts bounded reads; eligible foreground views then use the existing silent schedule. Targets always carry an exact component ID, and partial reads retain independent observations. Cancelling or backgrounding stops the read sequence.
 - Described scalar actions use typed parameter forms, exact bounds/steps/enums and explicit submission. Read-only and unsupported actions remain unavailable. Admitted elevated actions use the separate trusted confirmation flow below; high-risk actions remain unavailable. Isolated non-climate fixtures do not register additional native adapters.
 - Single-family light/fan/media/sensor/cycle components use dedicated Window Light controls. Sliders and fan steppers use the described range and step; mixed or coupled actions retain explicit forms. Missing and stale observations remain labelled, and high-risk actions remain unavailable.
 - Diagnostics show the loaded report in summary cards. Select the review note to inspect the complete report, including all retained receipts. Export saves that same snapshot; failed or cancelled reloads cannot expose an old or late report. Android uses the system Create Document picker restricted to local providers; cancellation writes nothing. The picker grants access to the selected document without broad storage permissions. Desktop builds use the file selector. iOS document export remains unverified.
@@ -512,7 +529,11 @@ or physical-device support.
 
 ## Device interaction design
 
-Follow the [shared device interaction contract](../../docs/development/14-device-interaction-design.md) when adding or changing device pages, including future Hisense and Mijia/Xiaomi integrations. The design never grants device authority.
+Follow the [interaction baseline](../../docs/design/interaction-baseline.md) when
+adding or changing any App surface, including future provider integrations. The
+[device design](../../docs/development/14-device-interaction-design.md) supplies
+control roles and typography within that baseline. The design never grants device
+authority.
 
 The [current synthetic UI verification report](../../docs/development/device-interaction-verification.md) records tests and screenshot limits without modifying the existing historical verification record.
 
@@ -526,11 +547,14 @@ See the isolated [verification results](../../docs/development/feedback-surface-
 
 ## Stable device opening and remembered sign-in
 
-First device opening shows a centered activity pulse until metadata, initial reads
-and control inspection finish. Subsequent openings reuse prepared metadata and
-current-session button policy while updating readings; controls remain disabled
-during preparation. Session replacement clears cached policy, and every command
-still validates through Core. Compact card captions use one line at normal text
+Device opening enters the detail shell immediately. A centered body activity pulse
+ends when the first cached/live observations arrive or the opening fails. Display
+available reading groups immediately; keep them visible during remaining reads
+and control preparation. An inline circular indicator temporarily replaces Device
+information and Recent Operations, which append when opening ends. There is no
+fixed bottom progress bar. Controls remain disabled during preparation. Session
+replacement clears cached policy without hiding visible readings, and every
+command still validates through Core. Compact card captions use one line at normal text
 size, keeping multi-zone refrigerators aligned with other cards; large text may
 expand for accessibility. Dishwasher cycle readings and supply reminders have
 separate groups, and unmapped program values display Unknown.

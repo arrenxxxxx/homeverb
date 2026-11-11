@@ -1,5 +1,10 @@
 # Mobile app design
 
+For current interaction behavior and future development, follow the
+[interaction baseline](design/interaction-baseline.md). It supersedes conflicting
+presentation in the historical screen requirements below, including device
+refresh buttons, loading, artwork and information placement.
+
 Status: owner-approved product requirements, October 14, 2026; implementation
 status refreshed October 16. The [Flutter app](../apps/mobile/README.md) now
 implements the room/card/control/account UI and has Linux/Android emulator

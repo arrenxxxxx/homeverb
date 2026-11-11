@@ -1,5 +1,10 @@
 # Window Light visual system and Flutter handoff
 
+For interaction behavior, follow the current
+[App baseline](design/interaction-baseline.md). This guide supplies visual tokens
+and materials within that baseline. Older product-cutout examples do not apply to
+home cards, which use outlined appliance icons in both skins.
+
 Status: selected by the owner on October 15, 2026. This remains the default skin. The independently selectable Sky Blue skin was added on October 30; it uses the same capability-driven controls and local preference boundary. The complete [prototype](../output/prototypes/homeverb-window-light-v1/index.html) applies it to all 82 specified screen states. See the [functional handoff](ui-functional-spec.md) for behaviors and the [screen inventory](ui-screen-inventory.md) for branches.
 
 ## Approved visual character

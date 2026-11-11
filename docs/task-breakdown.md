@@ -1,5 +1,14 @@
 # Implementation status and next tasks
 
+## November 11 continuing interaction baseline
+
+The owner adopted the reviewed interaction style as the default for subsequent
+App development. The [interaction baseline](design/interaction-baseline.md)
+consolidates navigation, staged opening, caching, weak-network feedback, foreground
+refresh, icon cards, expanded device groups and acceptance gates. AGENTS.md,
+contributor/UI entry points and older design documents point to this precedence.
+This documentation phase changes no runtime behavior, API, storage or authority.
+
 ## November 11 GX1200Max read presentation
 
 The [GX1200Max parity phase](development/16-gx-dishwasher-parity.md) implements
@@ -32,18 +41,20 @@ and emulator evidence are recorded in the [App verification log](../apps/mobile/
 The owner approved an interaction preview and requested a development handoff
 for a separate implementation session. The
 [implementation specification](development/15-interaction-experience-handoff.md)
-defines pending milestones M0-M6 and measurable acceptance for immediate
+defines milestones M0-M6 and measurable acceptance for immediate
 navigation, local restoration, first-read loading/failure, the existing silent
 three-second schedule, pull-to-refresh, icon-only home cards, fully expanded
 device groups, centered sign-in cancellation and compact Toasts. Secondary
 account/organization/settings/history/diagnostics journeys are included.
 
-This phase supplies documentation only. Flutter implementation and production
-captures for this revision remain pending; the fictional HTML preview is not App
-or physical-device acceptance. Existing authority, lifecycle, write outcomes and
-compatibility are unchanged. The specification explicitly replaces conflicting
-older artwork, folding and refresh presentation requirements without rewriting
-their historical verification evidence.
+The initial handoff supplied documentation only. Subsequent implementation and
+captures are recorded in the
+[implementation evidence](development/interaction-implementation-evidence.md) and
+[review fixes](development/interaction-second-review.md); the continuing
+[baseline](design/interaction-baseline.md) includes later owner refinements.
+The fictional HTML preview is not App or physical-device acceptance. Existing
+authority, lifecycle, write outcomes and compatibility are unchanged. Historical
+verification retains the scope and results of its recorded revision.
 
 The October 23 refrigerator presentation removes repetitive Stale labels from
 feature cards and temperature-zone captions at the owner's request. Core freshness

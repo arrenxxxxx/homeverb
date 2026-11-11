@@ -18,6 +18,14 @@ Read `README.md`, `docs/product-requirements.md`, `docs/architecture.md`, `docs/
 
 ## Layering rules
 
+Before adding or changing App UI, read the owner-approved
+[interaction baseline](docs/design/interaction-baseline.md). It is the default
+for future development across all providers, device families and skins. Reuse
+the shared controls and apply its acceptance gates. Its current loading,
+refresh, icon and expanded-content rules supersede conflicting older prototypes
+and handoffs; historical verification remains evidence for its recorded revision.
+Keep this baseline synchronized with subsequent owner-directed design changes.
+
 Upper layers use Device, Component, Capability, Property, Action, and Event. They must not branch on brand to choose business semantics. Platform/protocol adapters own encoding, pairing, login flows, capability mapping, and protocol evidence, not UI.
 
 Unify only equivalent semantics. Use `vendor.<provider>.*` for vendor-specific features. Never hardcode universal temperature ranges, fan-speed enums, or brand-wide support. A device's LAN and cloud routes are connections to one physical device, not duplicate devices. Ambiguous identity matches require user confirmation.
