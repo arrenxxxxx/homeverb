@@ -132,16 +132,28 @@ icon downloads. Derive summaries from capabilities: AC target/mode, refrigerator
 zone temperatures, cycle program/phase/time, or a suitable generic reading.
 Keep setpoints distinct from measurements and provide a generic device icon.
 
+In compact cards at ordinary text size, keep the room, summary and supporting
+caption to one line each, with overflow ellipsis. A refrigerator's longer zone
+caption must not add a second footer line and make it taller than peer cards.
+Enlarged text may wrap and grow in the single-column layout; never cap text scale
+or clip essential readings to force equal heights.
+
 Card navigation, power and menu have separate hit targets. On and off use the
 same power glyph, with the existing state colors, labels, accessibility semantics
 and pending pulse. The approved missing-power appearance is off-looking; the
 underlying observation remains null and cannot enable an otherwise denied action.
 Do not restore a slashed-plug off icon or add an invented online badge.
 
-Keep Assign room before Remove device in the card menu. Room assignment selects
-only that exact device and its current room. Remove device hides the card locally;
-account-detail checkboxes restore it. Persist visibility across restart and
-inventory refresh, and exclude hidden devices from home/search/bulk selection and
+The lower-right three-dot card menu contains two items in this order:
+Assign room (`device.assignRoom`), then Remove device (`device.remove`).
+Room assignment opens the existing R03 form with only that exact device and its
+current room selected, without starting device reads or control preparation.
+Cancel leaves the assignment unchanged. Remove device hides the card locally;
+Platforms > account details lists associated devices with visibility checkboxes,
+including hidden devices. Unchecking hides a card; checking it restores the card.
+If every card is hidden, keep an entry to Platforms so restoration is reachable.
+Persist visibility across restart and inventory refresh, and exclude hidden
+devices from home/search/bulk selection and
 visible-card reads. Hiding does not delete Core data, unbind the appliance or
 change grants. Preserve filters, selection and scroll context through navigation.
 
@@ -160,6 +172,11 @@ may retain dedicated forms or sheets.
 | Refrigerator | Zone name with distinct set/current readings, supported function groups, operating/door/reminder details, then device information; show a necessary read-only limitation once |
 | Dishwasher and cycle devices | Observed program/phase/time, applicable actions and all supported program/options groups, supplies and reported settings, then device information; keep locked choices visible |
 | Other or future devices | Primary observation/control, semantically grouped supported features, remaining readings and device information; retain a generic capability fallback |
+
+For dishwasher presentation, keep program/phase/time readings separate from
+supply warnings and reported settings. An unrecognized program uses the localized
+Unknown fallback, without exposing raw codes or inventing a supported program.
+This grouping does not add command mappings or establish physical-model support.
 
 Read-only rows are plain label/value content. Single choices use radio/segmented
 selection; independent combinations use checkboxes only when the descriptor
@@ -202,6 +219,16 @@ near the relevant field, preserve recoverable nonsecret form input and prevent
 duplicate submit. Protected sign-in fields and buffers still follow the existing
 credential-clearing contract on dispatch, cancellation, navigation, backgrounding
 and disposal; do not retain passwords as form-recovery state.
+
+For the supported Meiju connection, successful sign-in remembers login inputs
+only in system secret storage. A definite authorization failure on an inventory
+or state read can trigger one bounded same-account automatic sign-in and one read
+retry under [ADR-0076](../adr/0076-protected-account-auto-login.md). Accounts without
+remembered inputs need one explicit sign-in through Manage account. Failed or
+blocked recovery keeps that explicit path available; no background sign-in or
+appliance-command replay follows. Remembered native credentials never repopulate
+the password field or enter presentation preferences.
+
 Account, organization and settings flows distinguish loading, empty, failed and
 ready states. Retained settings entries must lead to a real supported action or
 destination, with no decorative dead ends.
@@ -224,6 +251,7 @@ then run the broader checks required by [testing](../testing.md) for the change.
 | Loading, failure and cache | Terminal failures stop spinners; missing values are `—`; one initial failure Toast; correct cached groups survive reopen, partial failure and restart | `interaction_reading_test.dart`, `reading_states_test.dart`, `appliance_reading_states_test.dart` |
 | Quiet scheduling | No periodic call at 2,999 ms and one eligible cycle at 3,000 ms; slow cycles do not overlap; ten failed cycles produce zero notices; background/navigation cancels | `state_refresh_test.dart`, `refresh_feedback_test.dart` |
 | Cards and expanded controls | No product images or reveal taps; exact open/power/menu targets; all eligible descriptor choices reachable; hidden cards restore through account details | `device_cards_test.dart`, `compact_device_cards_test.dart`, `device_visibility_test.dart`, `dishwasher_interaction_test.dart` |
+| Card organization and density | Assign room precedes Remove device; R03 preselects only the chosen card/current room without reads; account checkboxes restore hidden cards after restart; ordinary compact captions do not add a footer line | `device_visibility_test.dart`, `compact_device_cards_test.dart`, `organization_test.dart` |
 | Safe editing and outcomes | Exact decimal candidate and grant; fallback form for unsupported inline schemas; invalid plan causes no execute; no duplicate or uncertain replay | `review4_decimal_test.dart`, `review4_fallback_test.dart`, `review5_root_fallback_test.dart`, `component_action_routing_test.dart`, `approval_test.dart` |
 | Geometry and secondary flows | Cancel and short Toast center error at most one logical pixel; long Toast wraps; real empty/error/recovery routes work | `feedback_test.dart`, `auth_experience_test.dart`, `account_feedback_test.dart`, `organization_test.dart` |
 

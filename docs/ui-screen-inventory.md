@@ -11,6 +11,26 @@ Each entry preserves its stable screen ID, visible content and explicit branch t
 
 The legacy S11 dark-appearance study is superseded by the one-option Window Light preview. There is no alternate skin in this release.
 
+## Current interaction amendments — November 10, 2026
+
+The following production behavior supersedes the corresponding historical image
+and branch descriptions below. Screen IDs remain stable; these amendments do not
+claim regenerated atlas images or physical-device acceptance.
+
+| Existing surface | Current behavior |
+| --- | --- |
+| D01/D02/D03 home, room and search cards | Hidden cards are excluded. Compact refrigerator captions stay on one line at ordinary text size; enlarged text can grow in one column. Card navigation, power and the lower-right menu have separate targets. |
+| D05 card menu | The three-dot popup lists Assign room first, Remove device second. Removal hides only this local card and preserves account association and device data. |
+| R03 from a card | Preselect only the chosen device and its current room. Opening this form does not read the device or prepare controls. Cancelling does not change its room. The existing multi-device entry remains separate. |
+| C01–C09/C13 device detail families | Open the shell and working Back immediately. Show global body loading until readings are available, then visible content with a circular indicator below while remaining work finishes. Hide Device information and Recent Operations during that second stage; append them after opening ends. Preserve the primary card and never use the superseded fixed bottom bar. |
+| D06 inline device information | Its inline counterpart follows staged opening; a separate information destination retains its existing navigation purpose. |
+| P09 account details | Associated devices have visibility checkboxes, including hidden devices. Uncheck to hide; check to restore. Persist choices across restart and Refresh Devices. An all-hidden home keeps access to Platforms. |
+| P04–P08/P10 authentication | Supported Meiju sign-in saves remembered inputs only in system secret storage. Definite read authorization failure permits bounded same-account recovery under ADR-0076; failed or unavailable recovery retains explicit sign-in in Manage account. No password is restored into the form. |
+
+See the [interaction baseline](design/interaction-baseline.md),
+[layout rules](ui-window-light.md#staged-device-layout-and-compact-cards--november-10-2026)
+and [executed App evidence](../apps/mobile/verification.md#staged-device-opening-and-ordered-card-actions--november-10-2026).
+
 ## Everyday devices
 
 ### D01 — All devices

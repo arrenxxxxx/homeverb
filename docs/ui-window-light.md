@@ -74,6 +74,28 @@ implementation gaps and the exact-model reference still needed.
 
 The raster prototype uses logical 390 × 844 phone layouts and 1024 × 768 wide layouts rendered at 2×. These dimensions are reference compositions, not fixed Flutter canvas sizes. Do not render the screenshots as the production interface: all text, controls, focus and accessibility semantics must be native widgets. Product cutouts and the decorative background can be image assets.
 
+### Staged device layout and compact cards — November 10, 2026
+
+Both skins use the same opening composition. Keep the detail title and Back
+available while a centered body-loading animation runs. As soon as cached or
+live readings are available, show them and place a small circular indicator below
+the content. Device information and Recent Operations appear only when opening
+ends. There is no fixed loading footer, horizontal bar or reserved bottom strip.
+
+The current inline indicator is 24 logical pixels with a 2.5-pixel stroke and
+24 pixels of vertical padding. Use the theme foreground color and accessible
+loading label. Keep the primary card in place while further controls append;
+the climate power row reserves at least 48 logical pixels before its switch is
+available. Do not flash raw message templates or temporary generic control rows.
+
+Compact home-card room, summary and caption lines truncate at ordinary text size.
+In particular, the refrigerator caption must not wrap into an extra footer line.
+Enlarged text retains natural wrapping and single-column growth. The lower-right
+three-dot menu remains independent of card navigation and power, with Assign room
+first and Remove device second. See the [interaction baseline](design/interaction-baseline.md)
+for visibility, failure and restoration rules. These rules supersede older atlas
+compositions; the raster references were not regenerated for this change.
+
 Button backgrounds may use the small generated Window Light corner assets with
 nine-slice stretching. These contain only fill/border pixels, never labels or
 page content. Keep the native FilledButton, focus, semantics, state feedback and

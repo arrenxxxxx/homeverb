@@ -96,11 +96,12 @@ for concurrent session replacement or unbounded Core calls.
 
 | Situation | Display | Feedback and work |
 | --- | --- | --- |
-| No descriptor loaded yet | Immediate detail shell, stable title/Back, section placeholder | Load local metadata inside the destination; no invented controls |
-| Descriptor ready, no reading yet | Real groups; spinner in each unresolved value position | Start one bounded opening read promptly; do not wait for the first periodic tick |
+| No descriptor loaded yet | Immediate detail shell, stable title/Back, centered body loader | Load local metadata inside the destination; no invented controls |
+| Descriptor ready, no reading yet | Keep body loader until the first cached/live observation; then render available groups and value-local spinners for unresolved fields | Start one bounded opening read promptly; do not wait for the first periodic tick |
+| First readings visible, opening still pending | Preserve primary content; inline circular indicator below; withhold Device information and Recent Operations | Continue remaining reads/control preparation; append metadata on completion or terminal failure; no fixed footer or return to global loading |
 | Successful read with absent property | `—` only in the absent field | No error Toast for a legitimately missing optional field; do not borrow a setpoint as a measured value |
 | First read fails for a component with no prior completed snapshot | Failed values become `—`; successful values remain | At most one short Toast across such failures in that opening attempt; the next regular silent cycle may recover |
-| Cached component on re-entry | Saved layout and readings immediately; previously confirmed absent fields remain `—` | Refresh silently; no full-page skeleton or disappearing groups |
+| Cached component on re-entry | Saved layout and readings immediately; previously confirmed absent fields remain `—`; metadata waits behind the inline opening indicator | Preserve cached controls disabled during current-session preparation; no full-page skeleton or disappearing primary groups |
 | Automatic refresh fails | Keep prior values; unresolved fields stay `—` | No Toast, banner, spinner, receipt change or retry burst |
 | Manual pull refresh | Keep cards; show the pull indicator | Publish completed items promptly, continue after per-item failure; one combined failure Toast; no routine success Toast |
 | Command pending | Old observation plus local pending indicator | Disable duplicate/conflicting actions; keep navigation usable; no optimistic verified state |

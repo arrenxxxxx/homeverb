@@ -34,6 +34,24 @@ Inactive cards use the skin's cool translucent surface instead of the old
 hard-coded warm gray. The background uses code-rendered overlapping blue light
 fields; no vendor screenshot or private account content is embedded.
 
+## November 10 caption and menu correction
+
+At ordinary text size, compact cards keep the room, main summary and supporting
+caption to one line each with ellipsis. Long refrigerator zone captions no longer
+wrap into a second footer line or increase that card's height relative to peers.
+At enlarged text sizes the single-column cards may wrap and grow; do not impose
+a fixed height or reduce the user's text scale.
+
+The lower-right three-dot menu lists Assign room, then Remove device. Assignment
+opens the existing room form with this exact card and its current room selected.
+Removal hides the card locally; Platforms > account details retains its checkbox
+for restoration. Visibility survives restart and inventory refresh, while hidden
+cards are excluded from home/search/bulk selection and visible-card reads. No
+account removal, provider unbind or permission change follows. The
+[interaction baseline](../design/interaction-baseline.md#home-cards-and-organization)
+and [App evidence](../../apps/mobile/verification.md) define current behavior and
+verification; October 31 checks below remain historical.
+
 ## Preview and verification boundary
 
 Comparison images render production `ScreenView`, `DeviceHome` and `DeviceGrid`
